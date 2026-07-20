@@ -44,21 +44,21 @@
  * caso.
  */
 
-const VOGAIS = new Set(["a", "e", "i", "o", "u", "á", "à", "â", "ã", "é", "ê", "í", "ó", "ô", "õ", "ú", "y"]);
+const VOWELS = new Set(["a", "e", "i", "o", "u", "á", "à", "â", "ã", "é", "ê", "í", "ó", "ô", "õ", "ú", "y"]);
 
 /** Vogais cuja marca gráfica de acento indica hiato explícito quando seguem outra vogal. */
-const VOGAIS_QUE_FORCAM_HIATO = new Set(["í", "ú"]);
+const VOWELS_FORCING_HIATUS = new Set(["í", "ú"]);
 
 /** Vogais "fortes" — nunca funcionam como semivogal/glide em português. */
-const VOGAIS_FORTES = new Set(["a", "á", "à", "â", "ã", "e", "é", "ê", "o", "ó", "ô", "õ"]);
+const STRONG_VOWELS = new Set(["a", "á", "à", "â", "ã", "e", "é", "ê", "o", "ó", "ô", "õ"]);
 
 /** Ditongos nasais grudados — nunca hiato, mesmo sendo tecnicamente "duas vogais fortes". */
-const PARES_NASAIS_GRUDADOS = new Set(["ão", "ãe", "õe"]);
+const GLUED_NASAL_PAIRS = new Set(["ão", "ãe", "õe"]);
 
-const RE_NAO_LETRA = /[^\p{L}]+/u;
+const RE_NON_LETTER = /[^\p{L}]+/u;
 
 /** Sequência inteira de letras maiúsculas (usada para detectar sigla soletrada). */
-const RE_TUDO_MAIUSCULO = /^\p{Lu}+$/u;
+const RE_ALL_UPPERCASE = /^\p{Lu}+$/u;
 
 /**
  * Pequeno léxico de exceções pedagogicamente documentadas: hiato entre vogal fraca
@@ -70,56 +70,56 @@ const RE_TUDO_MAIUSCULO = /^\p{Lu}+$/u;
  * docs/DECISOES.md (ADR-004) para a lista completa de ambiguidades aceitas sem léxico.
  * Deliberadamente pequeno: não é para crescer em uma lista arbitrária de exceções.
  */
-const EXCECOES_HIATO_SEM_ACENTO: ReadonlyMap<string, number> = new Map([
+const UNACCENTED_HIATUS_EXCEPTIONS: ReadonlyMap<string, number> = new Map([
   ["ruim", 2],
   ["ruins", 2],
   ["cruel", 2],
   ["cruéis", 2],
 ]);
 
-function contarSilabasSegmento(segmentoOriginal: string): number {
-  const segmento = segmentoOriginal.toLowerCase();
+function countSegmentSyllables(originalSegment: string): number {
+  const segment = originalSegment.toLowerCase();
 
-  const excecao = EXCECOES_HIATO_SEM_ACENTO.get(segmento);
-  if (excecao !== undefined) return excecao;
+  const exception = UNACCENTED_HIATUS_EXCEPTIONS.get(segment);
+  if (exception !== undefined) return exception;
 
-  let silabas = 0;
-  let emGrupoVocalico = false;
-  let vogalAnterior: string | null = null;
+  let syllables = 0;
+  let inVowelGroup = false;
+  let previousVowel: string | null = null;
 
-  for (let i = 0; i < segmento.length; i++) {
-    const caractere = segmento[i];
+  for (let i = 0; i < segment.length; i++) {
+    const character = segment[i];
 
-    if (!VOGAIS.has(caractere)) {
-      emGrupoVocalico = false;
-      vogalAnterior = null;
+    if (!VOWELS.has(character)) {
+      inVowelGroup = false;
+      previousVowel = null;
       continue;
     }
 
-    let iniciaNovoGrupo: boolean;
+    let startsNewGroup: boolean;
 
-    if (!emGrupoVocalico || vogalAnterior === null) {
-      iniciaNovoGrupo = true;
-    } else if (PARES_NASAIS_GRUDADOS.has(vogalAnterior + caractere)) {
-      iniciaNovoGrupo = false;
-    } else if (VOGAIS_QUE_FORCAM_HIATO.has(caractere)) {
-      iniciaNovoGrupo = true;
-    } else if ((caractere === "i" || caractere === "u") && segmento[i + 1] === "n" && segmento[i + 2] === "h") {
-      iniciaNovoGrupo = true;
-    } else if (VOGAIS_FORTES.has(vogalAnterior) && VOGAIS_FORTES.has(caractere)) {
-      iniciaNovoGrupo = true;
-    } else if (caractere === vogalAnterior) {
-      iniciaNovoGrupo = true;
+    if (!inVowelGroup || previousVowel === null) {
+      startsNewGroup = true;
+    } else if (GLUED_NASAL_PAIRS.has(previousVowel + character)) {
+      startsNewGroup = false;
+    } else if (VOWELS_FORCING_HIATUS.has(character)) {
+      startsNewGroup = true;
+    } else if ((character === "i" || character === "u") && segment[i + 1] === "n" && segment[i + 2] === "h") {
+      startsNewGroup = true;
+    } else if (STRONG_VOWELS.has(previousVowel) && STRONG_VOWELS.has(character)) {
+      startsNewGroup = true;
+    } else if (character === previousVowel) {
+      startsNewGroup = true;
     } else {
-      iniciaNovoGrupo = false;
+      startsNewGroup = false;
     }
 
-    if (iniciaNovoGrupo) silabas++;
-    emGrupoVocalico = true;
-    vogalAnterior = caractere;
+    if (startsNewGroup) syllables++;
+    inVowelGroup = true;
+    previousVowel = character;
   }
 
-  return silabas;
+  return syllables;
 }
 
 /**
@@ -134,13 +134,13 @@ export function countSyllables(tokenText: string): number {
   // (leitura letra a letra). Siglas com pelo menos uma vogal (ONU, PIB) seguem o
   // caminho normal abaixo — ver limitação conhecida sobre siglas ambíguas (ex.: INSS)
   // no comentário de topo deste arquivo.
-  if (RE_TUDO_MAIUSCULO.test(tokenText)) {
-    const temVogal = Array.from(tokenText.toLowerCase()).some((c) => VOGAIS.has(c));
-    if (!temVogal) return tokenText.length;
+  if (RE_ALL_UPPERCASE.test(tokenText)) {
+    const hasVowel = Array.from(tokenText.toLowerCase()).some((c) => VOWELS.has(c));
+    if (!hasVowel) return tokenText.length;
   }
 
-  const segmentos = tokenText.split(RE_NAO_LETRA).filter((s) => s.length > 0);
-  const total = segmentos.reduce((soma, segmento) => soma + contarSilabasSegmento(segmento), 0);
+  const segments = tokenText.split(RE_NON_LETTER).filter((s) => s.length > 0);
+  const total = segments.reduce((sum, segment) => sum + countSegmentSyllables(segment), 0);
 
   // Piso de 1 sílaba quando o token inteiro não tem nenhum grupo vocálico (ex.: o
   // fragmento consonantal "d" de "d'água" isolado, ou uma palavra totalmente

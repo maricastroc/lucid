@@ -15,33 +15,33 @@
  * dois campos com dados reais — ver `model.ts` e docs/ARQUITETURA.md §7.
  */
 import type { Sentence } from "../types";
-import abreviacoesData from "../../data/abreviacoes.pt.json";
+import abbreviationsData from "../../data/abreviacoes.pt.json";
 
-const ABREVIACOES: ReadonlySet<string> = new Set(abreviacoesData.abreviacoes);
+const ABBREVIATIONS: ReadonlySet<string> = new Set(abbreviationsData.abbreviations);
 
 /** `.`, `!`, `?`, `…` — pontuação capaz de fechar uma frase. */
-const MARCAS_TERMINAIS = new Set([".", "!", "?", "…"]);
+const TERMINAL_MARKS = new Set([".", "!", "?", "…"]);
 
 /** Aspas/parênteses de fechamento que podem vir logo após a pontuação terminal. */
-const MARCAS_FECHAMENTO = new Set(['"', "'", "”", "’", "»", ")", "]"]);
+const CLOSING_MARKS = new Set(['"', "'", "”", "’", "»", ")", "]"]);
 
-const RE_LETRA = /\p{L}/u;
-const RE_MAIUSCULA = /\p{Lu}/u;
-const RE_DIGITO = /\p{Nd}/u;
-const RE_ESPACO = /\s/u;
+const RE_LETTER = /\p{L}/u;
+const RE_UPPERCASE = /\p{Lu}/u;
+const RE_DIGIT = /\p{Nd}/u;
+const RE_SPACE = /\s/u;
 
 /** Aberturas de aspas/parênteses — sinal de que uma nova frase (ex.: diálogo) começa. */
-const MARCAS_ABERTURA_SEGUINTE = new Set(['"', "'", "“", "«", "(", "["]);
+const NEXT_OPENING_MARKS = new Set(['"', "'", "“", "«", "(", "["]);
 
-interface ResultadoFechamento {
+interface ClosingResult {
   /** true quando os sinais são inequívocos o bastante para confirmar a fronteira. */
-  confirmado: boolean;
+  confirmed: boolean;
   /** offset (exclusivo) logo após a pontuação/fechamentos absorvidos — sempre calculado. */
-  fimAbsorvido: number;
+  absorbedEnd: number;
 }
 
 /**
- * A partir de `inicioAbsorcao` (posição logo após a marca terminal inicial), absorve
+ * A partir de `absorptionStart` (posição logo após a marca terminal inicial), absorve
  * qualquer sequência adicional de pontuação terminal e marcas de fechamento (cobre
  * combinações como `?!`, `!"`, `."` etc.), e então decide se a fronteira é confirmada:
  *
@@ -52,55 +52,55 @@ interface ResultadoFechamento {
  * - espaço seguido de maiúscula, dígito, ou abertura de aspas/parênteses → confirmado;
  * - qualquer outro caso → NÃO confirmado (juntar).
  */
-function tentarFecharFrase(source: string, inicioAbsorcao: number): ResultadoFechamento {
-  let j = inicioAbsorcao;
-  while (j < source.length && (MARCAS_TERMINAIS.has(source[j]) || MARCAS_FECHAMENTO.has(source[j]))) {
+function tryCloseSentence(source: string, absorptionStart: number): ClosingResult {
+  let j = absorptionStart;
+  while (j < source.length && (TERMINAL_MARKS.has(source[j]) || CLOSING_MARKS.has(source[j]))) {
     j++;
   }
 
   if (j >= source.length) {
-    return { confirmado: true, fimAbsorvido: j };
+    return { confirmed: true, absorbedEnd: j };
   }
 
   let k = j;
-  while (k < source.length && RE_ESPACO.test(source[k])) {
+  while (k < source.length && RE_SPACE.test(source[k])) {
     k++;
   }
 
   if (k === j) {
     // pontuação colada no próximo caractere, sem separação — ambíguo, não confirma.
-    return { confirmado: false, fimAbsorvido: j };
+    return { confirmed: false, absorbedEnd: j };
   }
 
   if (k === source.length) {
-    return { confirmado: true, fimAbsorvido: j };
+    return { confirmed: true, absorbedEnd: j };
   }
 
-  const proximo = source[k];
-  const confirmado = RE_MAIUSCULA.test(proximo) || RE_DIGITO.test(proximo) || MARCAS_ABERTURA_SEGUINTE.has(proximo);
+  const next = source[k];
+  const confirmed = RE_UPPERCASE.test(next) || RE_DIGIT.test(next) || NEXT_OPENING_MARKS.has(next);
 
-  return { confirmado, fimAbsorvido: j };
+  return { confirmed, absorbedEnd: j };
 }
 
-/** Extrai a maior sequência de letras imediatamente antes de `posicao` (exclusive). */
-function palavraAnterior(source: string, posicao: number): string {
-  let inicio = posicao;
-  while (inicio > 0 && RE_LETRA.test(source[inicio - 1])) {
-    inicio--;
+/** Extrai a maior sequência de letras imediatamente antes de `position` (exclusive). */
+function precedingWord(source: string, position: number): string {
+  let start = position;
+  while (start > 0 && RE_LETTER.test(source[start - 1])) {
+    start--;
   }
-  return source.slice(inicio, posicao);
+  return source.slice(start, position);
 }
 
 /**
  * Varre `source` (já normalizado) e retorna os offsets (exclusivos) onde uma frase
  * termina de fato — só os que passaram pela confirmação conservadora acima.
  */
-function encontrarFronteiras(source: string): number[] {
-  const fronteiras: number[] = [];
-  const tamanho = source.length;
+function findBoundaries(source: string): number[] {
+  const boundaries: number[] = [];
+  const length = source.length;
   let i = 0;
 
-  while (i < tamanho) {
+  while (i < length) {
     const ch = source[i];
 
     if (ch === ".") {
@@ -108,27 +108,27 @@ function encontrarFronteiras(source: string): number[] {
         // corrida de 2+ pontos: reticências digitadas como "..", "...", "....".
         let j = i;
         while (source[j] === ".") j++;
-        const resultado = tentarFecharFrase(source, j);
-        if (resultado.confirmado) fronteiras.push(resultado.fimAbsorvido);
-        i = resultado.fimAbsorvido;
+        const result = tryCloseSentence(source, j);
+        if (result.confirmed) boundaries.push(result.absorbedEnd);
+        i = result.absorbedEnd;
         continue;
       }
 
-      const digitoAntes = i > 0 && RE_DIGITO.test(source[i - 1]);
-      const digitoDepois = i + 1 < tamanho && RE_DIGITO.test(source[i + 1]);
-      if (digitoAntes && digitoDepois) {
+      const digitBefore = i > 0 && RE_DIGIT.test(source[i - 1]);
+      const digitAfter = i + 1 < length && RE_DIGIT.test(source[i + 1]);
+      if (digitBefore && digitAfter) {
         // separador decimal ou de milhar (ex.: "1.234,56") — nunca é candidato.
         i++;
         continue;
       }
 
-      const palavra = palavraAnterior(source, i);
-      if (palavra.length > 0 && ABREVIACOES.has(palavra.toLowerCase())) {
+      const word = precedingWord(source, i);
+      if (word.length > 0 && ABBREVIATIONS.has(word.toLowerCase())) {
         // abreviação conhecida (ex.: "Sr.", "art.", "p.ex.") — nunca fecha frase.
         i++;
         continue;
       }
-      if (palavra.length === 1 && RE_MAIUSCULA.test(palavra)) {
+      if (word.length === 1 && RE_UPPERCASE.test(word)) {
         // letra maiúscula isolada antes do ponto — sigla ou iniciais (ex.: "E.U.A.",
         // "J. K. Rowling"). Política conservadora: nunca fecha frase aqui, mesmo que
         // isso una com a frase seguinte em casos raros de sigla no fim do parágrafo.
@@ -136,23 +136,23 @@ function encontrarFronteiras(source: string): number[] {
         continue;
       }
 
-      const resultado = tentarFecharFrase(source, i + 1);
-      if (resultado.confirmado) fronteiras.push(resultado.fimAbsorvido);
-      i = resultado.fimAbsorvido;
+      const result = tryCloseSentence(source, i + 1);
+      if (result.confirmed) boundaries.push(result.absorbedEnd);
+      i = result.absorbedEnd;
       continue;
     }
 
     if (ch === "!" || ch === "?" || ch === "…") {
-      const resultado = tentarFecharFrase(source, i + 1);
-      if (resultado.confirmado) fronteiras.push(resultado.fimAbsorvido);
-      i = resultado.fimAbsorvido;
+      const result = tryCloseSentence(source, i + 1);
+      if (result.confirmed) boundaries.push(result.absorbedEnd);
+      i = result.absorbedEnd;
       continue;
     }
 
     i++;
   }
 
-  return fronteiras;
+  return boundaries;
 }
 
 /**
@@ -162,32 +162,32 @@ function encontrarFronteiras(source: string): number[] {
  * (ordem de leitura, que já é a ordem de offsets crescentes).
  */
 export function segmentSentences(source: string): Sentence[] {
-  const fronteiras = encontrarFronteiras(source);
-  const cortes = [0, ...fronteiras, source.length];
+  const boundaries = findBoundaries(source);
+  const cuts = [0, ...boundaries, source.length];
 
-  const sentencas: Sentence[] = [];
-  for (let idx = 0; idx < cortes.length - 1; idx++) {
-    const brutoInicio = cortes[idx];
-    const brutoFim = cortes[idx + 1];
-    if (brutoInicio >= brutoFim) continue;
+  const sentences: Sentence[] = [];
+  for (let idx = 0; idx < cuts.length - 1; idx++) {
+    const rawStart = cuts[idx];
+    const rawEnd = cuts[idx + 1];
+    if (rawStart >= rawEnd) continue;
 
-    let inicio = brutoInicio;
-    while (inicio < brutoFim && RE_ESPACO.test(source[inicio])) inicio++;
+    let start = rawStart;
+    while (start < rawEnd && RE_SPACE.test(source[start])) start++;
 
-    let fim = brutoFim;
-    while (fim > inicio && RE_ESPACO.test(source[fim - 1])) fim--;
+    let end = rawEnd;
+    while (end > start && RE_SPACE.test(source[end - 1])) end--;
 
-    if (inicio >= fim) continue; // segmento inteiramente em branco (ex.: linhas vazias)
+    if (start >= end) continue; // segmento inteiramente em branco (ex.: linhas vazias)
 
-    sentencas.push({
-      text: source.slice(inicio, fim),
-      start: inicio,
-      end: fim,
+    sentences.push({
+      text: source.slice(start, end),
+      start,
+      end,
       // placeholders intencionais — ver comentário de topo do arquivo.
       tokens: [],
       wordCount: 0,
     });
   }
 
-  return sentencas;
+  return sentences;
 }

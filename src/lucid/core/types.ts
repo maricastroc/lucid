@@ -3,30 +3,30 @@
  * Contrato definido em docs/ARQUITETURA.md §3. Não importar nada de `src/lucid/probe/**`.
  */
 
-export type Severity = "info" | "alerta" | "erro";
+export type Severity = "info" | "warning" | "error";
 
-export type Categoria = "lexical" | "sintatico" | "estrutural" | "metrico";
+export type Category = "lexical" | "syntactic" | "structural" | "metric";
 
 /** Offset sempre no `Document.source` normalizado (NFC). `end` é exclusivo. */
 export interface Span {
   start: number;
   end: number;
-  texto: string;
+  text: string;
 }
 
 export interface Finding {
-  /** id estável do critério, ex.: "frase_longa" */
-  criterio: string;
-  categoria: Categoria;
+  /** id estável do critério, ex.: "long_sentence" */
+  criterion: string;
+  category: Category;
   /** subseção da ABNT NBR ISO 24495-1:2024, ex. "5.3.4" — nunca inventada */
-  principio: string;
-  trecho: Span;
-  severidade: Severity;
+  principle: string;
+  span: Span;
+  severity: Severity;
   /** presente só quando o mapeamento é mecanicamente único e seguro (I7) */
-  sugestao?: string;
+  suggestion?: string;
   /** true = a ferramenta se recusa a resolver; exige julgamento humano */
   requiresHuman: boolean;
-  justificativa: string;
+  justification: string;
   /** proveniência opcional para debug/telemetria; não entra no snapshot canônico */
   meta?: Record<string, string | number | boolean>;
 }
@@ -71,37 +71,37 @@ export interface PassContext {
 }
 
 export interface Pass {
-  readonly criterio: string;
-  readonly categoria: Categoria;
-  /** subseção-âncora do pass; um finding individual pode refinar via `principio` próprio */
-  readonly principio: string;
+  readonly criterion: string;
+  readonly category: Category;
+  /** subseção-âncora do pass; um finding individual pode refinar via `principle` próprio */
+  readonly principle: string;
   run(ctx: PassContext): Finding[];
 }
 
-// --- Metricas e Placar ---------------------------------------------------------------
+// --- Metrics e Score ---------------------------------------------------------------
 
-export interface Metricas {
+export interface Metrics {
   fleschPt: number;
-  palavras: number;
-  frases: number;
+  words: number;
+  sentences: number;
   /** total de sílabas do documento (soma sobre todos os tokens `isWord`) */
-  silabas: number;
-  palavrasPorFrase: number;
-  silabasPorPalavra: number;
+  syllables: number;
+  wordsPerSentence: number;
+  syllablesPerWord: number;
 }
 
-export interface PlacarCriterio {
-  criterio: string;
-  principio: string;
-  contagem: { info: number; alerta: number; erro: number };
-  densidadePor100Palavras: number;
+export interface CriterionScore {
+  criterion: string;
+  principle: string;
+  count: { info: number; warning: number; error: number };
+  densityPer100Words: number;
 }
 
 /**
  * Deliberadamente sem "nota geral" nem "aprovado". O placar mede, não aprova.
  */
-export interface Placar {
-  porCriterio: PlacarCriterio[];
+export interface Score {
+  byCriterion: CriterionScore[];
   totalFindings: number;
 }
 
@@ -111,15 +111,15 @@ export interface DiagnosticMeta {
   lucidVersion: string;
   /** hash estável da Config efetiva, para integridade do snapshot */
   configHash: string;
-  normativaVersion: "ABNT NBR ISO 24495-1:2024";
+  standardVersion: "ABNT NBR ISO 24495-1:2024";
 }
 
 export interface Diagnostic {
   /** === Document.source (original normalizado, intacto) */
-  texto: string;
-  /** ordenados por (start, end, criterio, principio) */
+  text: string;
+  /** ordenados por (start, end, criterion, principle) */
   findings: Finding[];
-  placar: Placar;
-  metricas: Metricas;
+  score: Score;
+  metrics: Metrics;
   meta: DiagnosticMeta;
 }

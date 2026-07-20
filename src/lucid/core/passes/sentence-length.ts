@@ -4,12 +4,13 @@
  *
  * Determinístico e mecânico até onde é seguro: mede `Sentence.wordCount` (JÁ calculado
  * por `tokenize.ts`/`attachTokens` — este pass NUNCA retokeniza nem recalcula) contra os
- * limiares de `Config.frase`, e produz um `Finding` por frase acima do limiar de alerta.
+ * limiares de `Config.sentenceLength`, e produz um `Finding` por frase acima do limiar
+ * de alerta.
  *
  * O que ele NÃO faz, de propósito: não decide o que cortar, não reordena a frase, não
  * propõe uma versão mais curta. Encurtar uma frase exige decidir o que é supérfluo — é
- * trabalho de autor (Princípio 1, Relevante), não uma transformação mecânica seguem
- * (I7). Por isso `sugestao` nunca é preenchida e `requiresHuman` é sempre `true` — é
+ * trabalho de autor (Princípio 1, Relevante), não uma transformação mecânica segura
+ * (I7). Por isso `suggestion` nunca é preenchida e `requiresHuman` é sempre `true` — é
  * literalmente o exemplo de `requiresHuman` citado em CLAUDE.md ("corte do supérfluo").
  *
  * Frases que a segmentação uniu pela política conservadora (abreviação/sigla — ver
@@ -17,56 +18,61 @@
  * especial aqui: este pass só lê o `wordCount` que já veio pronto na `Sentence`. Se a
  * união produziu uma frase mais longa, ela é avaliada como qualquer outra — corrigir a
  * segmentação não é responsabilidade deste pass.
+ *
+ * `justification` é texto final exibido ao usuário — permanece em português, conforme
+ * a regra do produto (mensagens para o usuário final ficam em PT-BR; só a nomenclatura
+ * interna do código foi padronizada para inglês).
  */
 import type { Config } from "../config";
 import type { Finding, Pass, Severity } from "../types";
 
-const CRITERIO = "frase_longa";
-const PRINCIPIO = "5.3.4";
+const CRITERION = "long_sentence";
+const PRINCIPLE = "5.3.4";
 
-interface LimiarExcedido {
-  severidade: Severity;
-  limite: number;
+interface ExceededThreshold {
+  severity: Severity;
+  threshold: number;
 }
 
-function avaliarLimiar(wordCount: number, config: Config): LimiarExcedido | null {
-  const { alertaAcimaDe, erroAcimaDe } = config.frase;
+function evaluateThreshold(wordCount: number, config: Config): ExceededThreshold | null {
+  const { warnAbove, errorAbove } = config.sentenceLength;
 
-  if (wordCount > erroAcimaDe) {
-    return { severidade: "erro", limite: erroAcimaDe };
+  if (wordCount > errorAbove) {
+    return { severity: "error", threshold: errorAbove };
   }
-  if (wordCount > alertaAcimaDe) {
-    return { severidade: "alerta", limite: alertaAcimaDe };
+  if (wordCount > warnAbove) {
+    return { severity: "warning", threshold: warnAbove };
   }
   return null;
 }
 
 export const sentenceLengthPass: Pass = {
-  criterio: CRITERIO,
-  categoria: "sintatico",
-  principio: PRINCIPIO,
+  criterion: CRITERION,
+  category: "syntactic",
+  principle: PRINCIPLE,
 
   run(ctx) {
     const findings: Finding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
-      const excedido = avaliarLimiar(sentence.wordCount, ctx.config);
-      if (!excedido) continue;
+      const exceeded = evaluateThreshold(sentence.wordCount, ctx.config);
+      if (!exceeded) continue;
 
-      const { severidade, limite } = excedido;
+      const { severity, threshold } = exceeded;
 
       findings.push({
-        criterio: CRITERIO,
-        categoria: "sintatico",
-        principio: PRINCIPIO,
-        trecho: { start: sentence.start, end: sentence.end, texto: sentence.text },
-        severidade,
+        criterion: CRITERION,
+        category: "syntactic",
+        principle: PRINCIPLE,
+        span: { start: sentence.start, end: sentence.end, text: sentence.text },
+        severity,
         requiresHuman: true,
-        justificativa:
-          `Frase com ${sentence.wordCount} palavras — acima do limite de ${limite} ` +
-          `(${severidade}). Considere dividir em frases menores ou cortar informação ` +
-          "supérflua; a ferramenta não reescreve automaticamente.",
-        meta: { palavras: sentence.wordCount, limite },
+        justification:
+          `Frase com ${sentence.wordCount} palavras — acima do limite de ${threshold} ` +
+          `(${severity === "error" ? "erro" : "alerta"}). Considere dividir em frases ` +
+          "menores ou cortar informação supérflua; a ferramenta não reescreve " +
+          "automaticamente.",
+        meta: { words: sentence.wordCount, threshold },
       });
     }
 

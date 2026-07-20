@@ -40,16 +40,16 @@ Estes valem como testes, não como intenção. Cada um tem um mecanismo de garan
 | I3 | O texto de entrada nunca é mutado; todo offset aponta pro `source` original | `Document.source` é `readonly`; findings carregam `{start,end}` no original; teste que reconstrói o trecho por slice |
 | I4 | Nenhuma fonte de não-determinismo (`Date.now`, `Math.random`, ordem de `Set`/`Map` dependente de inserção não-controlada, `toLocaleLowerCase`) em `core` | Regra de lint (`no-restricted-syntax`/`no-restricted-properties`) + revisão |
 | I5 | A sonda nunca emite aprovação; "passou no piso" = neutro | O tipo de saída da sonda **não tem** estado `aprovado`; só `flag` \| `neutro` |
-| I6 | Todo `Finding` cita `principio` (subseção da norma) e traz `justificativa` | Campos obrigatórios no tipo; nenhum pass pode emitir sem eles |
-| I7 | Sugestão mecânica só quando o mapeamento é **único e seguro** | Cada pass decide `sugestao?`; ausência é o default; multi-sentido nunca gera `sugestao` |
+| I6 | Todo `Finding` cita `principle` (subseção da norma) e traz `justification` | Campos obrigatórios no tipo; nenhum pass pode emitir sem eles |
+| I7 | Sugestão mecânica só quando o mapeamento é **único e seguro** | Cada pass decide `suggestion?`; ausência é o default; multi-sentido nunca gera `suggestion` |
 
 **Nota sobre I2 (determinismo é a espinha dorsal).** Três armadilhas concretas em PT/TS:
 1. **Ponto flutuante:** métricas (Flesch-PT) devem ser arredondadas a casas fixas na
-   fronteira de saída (`config.metrics.decimais`). O número bruto nunca vaza pro snapshot.
+   fronteira de saída (`config.metrics.decimalPlaces`). O número bruto nunca vaza pro snapshot.
 2. **Normalização Unicode:** normalizar `source` para **NFC** uma vez, na entrada, e
    comparar/baixar-caixa com um `toLowerCase()` invariante (não `toLocaleLowerCase`).
    Guardar o `source` normalizado como base de todos os offsets.
-3. **Ordenação de findings:** ordenar sempre por `(start, end, criterio, principio)`
+3. **Ordenação de findings:** ordenar sempre por `(start, end, criterion, principle)`
    antes de retornar. Nunca confiar na ordem de execução dos passes.
 
 ---
@@ -64,7 +64,7 @@ src/
   lucid/                      # ← a biblioteca. PURA. sem react/next/rede.
     index.ts                 # API pública da Camada 1 (barrel): analyze, tipos, config
     core/
-      types.ts               # Finding, Diagnostic, Span, Severity, Categoria, Placar…
+      types.ts               # Finding, Diagnostic, Span, Severity, Category, Score…
       config.ts              # Config + DEFAULT_CONFIG + hashConfig()
       analyzer.ts            # orquestra: string -> Diagnostic
       document/
@@ -81,11 +81,11 @@ src/
         nominalization.ts    # critério 3  · 5.3.3 / 5.3.4
         jargon.ts            # critério 4  · 5.3.2
       metrics/
-        types.ts             # Metricas
+        types.ts             # Metrics
         flesch-pt.ts         # Martins et al. (1996)
-        index.ts             # runMetrics(doc) -> Metricas
+        index.ts             # runMetrics(doc) -> Metrics
       score/
-        placar.ts            # agrega findings -> Placar (contagens + densidade)
+        index.ts             # agrega findings -> Score (contagens + densidade)
     data/                    # dados versionados (JSON), carregados estaticamente
       abreviacoes.pt.json
       participios-irregulares.pt.json
@@ -133,21 +133,21 @@ trivial de checar: "nada dentro de `lucid/core/**` importa de `lucid/probe/**`".
 ### 3.1 Primitivos e Finding
 
 ```ts
-type Severity  = "info" | "alerta" | "erro";
-type Categoria = "lexical" | "sintatico" | "estrutural" | "metrico";
+type Severity = "info" | "warning" | "error";
+type Category = "lexical" | "syntactic" | "structural" | "metric";
 
 // offset SEMPRE no source normalizado (NFC). end exclusivo.
-interface Span { start: number; end: number; texto: string }
+interface Span { start: number; end: number; text: string }
 
 interface Finding {
-  criterio: string;          // id estável: "frase_longa", "voz_passiva", …
-  categoria: Categoria;
-  principio: string;         // subseção ABNT, ex. "5.3.4"  (nunca inventado)
-  trecho: Span;
-  severidade: Severity;
-  sugestao?: string;         // presente SÓ quando mecanicamente segura (I7)
+  criterion: string;         // id estável: "long_sentence", "passive_voice", …
+  category: Category;
+  principle: string;         // subseção ABNT, ex. "5.3.4"  (nunca inventado)
+  span: Span;
+  severity: Severity;
+  suggestion?: string;       // presente SÓ quando mecanicamente segura (I7)
   requiresHuman: boolean;    // true = a ferramenta se recusa a resolver
-  justificativa: string;     // por que este trecho viola este critério
+  justification: string;     // por que este trecho viola este critério (texto em PT-BR)
   // proveniência opcional p/ debug/telemetria (não entra no snapshot canônico):
   meta?: Record<string, string | number | boolean>;
 }
@@ -193,45 +193,45 @@ interface PassContext {
 }
 
 interface Pass {
-  readonly criterio: string;   // id estável
-  readonly categoria: Categoria;
-  readonly principio: string;  // subseção-âncora do pass (finding pode refinar)
+  readonly criterion: string;  // id estável
+  readonly category: Category;
+  readonly principle: string;  // subseção-âncora do pass (finding pode refinar)
   run(ctx: PassContext): Finding[];   // PURO. sem efeitos. sem rede.
 }
 ```
 
 Decisão: **um pass = um critério**. Métricas não são passes (não emitem `Finding`);
-vivem em `metrics/` e produzem `Metricas`. Isso mantém `Finding[]` homogêneo e o
+vivem em `metrics/` e produzem `Metrics`. Isso mantém `Finding[]` homogêneo e o
 placar simples.
 
-### 3.4 Metricas e Placar
+### 3.4 Metrics e Score
 
 ```ts
-interface Metricas {
-  fleschPt: number;            // arredondado a config.metrics.decimais
-  palavras: number;
-  frases: number;
-  silabas: number;             // total de sílabas do documento — adicionado na
+interface Metrics {
+  fleschPt: number;            // arredondado a config.metrics.decimalPlaces
+  words: number;
+  sentences: number;
+  syllables: number;           // total de sílabas do documento — adicionado na
                                 // implementação da etapa de métricas (Fase 1); ausente
                                 // desta assinatura original, necessário para expor o
                                 // total de sílabas como métrica própria, não só como
-                                // intermediário de silabasPorPalavra
-  palavrasPorFrase: number;
-  silabasPorPalavra: number;
+                                // intermediário de syllablesPerWord
+  wordsPerSentence: number;
+  syllablesPerWord: number;
   // Fase 2: métricas NILC via adapter externo (fora do core determinístico)
 }
 
-interface PlacarCriterio {
-  criterio: string;
-  principio: string;
-  contagem: { info: number; alerta: number; erro: number };
-  densidadePor100Palavras: number;   // findings/100 palavras, arredondado
+interface CriterionScore {
+  criterion: string;
+  principle: string;
+  count: { info: number; warning: number; error: number };
+  densityPer100Words: number;   // findings a cada 100 palavras, arredondado
 }
 
-interface Placar {
-  porCriterio: PlacarCriterio[];
+interface Score {
+  byCriterion: CriterionScore[];
   totalFindings: number;
-  // deliberadamente SEM "nota geral" nem "aprovado". Placar mede, não aprova.
+  // deliberadamente SEM "nota geral" nem "aprovado". Score mede, não aprova.
 }
 ```
 
@@ -245,15 +245,15 @@ interface Placar {
 interface DiagnosticMeta {
   lucidVersion: string;        // versão da lib
   configHash: string;          // hash estável da Config efetiva (p/ integridade do snapshot)
-  normativaVersion: "ABNT NBR ISO 24495-1:2024";
+  standardVersion: "ABNT NBR ISO 24495-1:2024";
   // SEM timestamp aqui — timestamp é não-determinístico (I4)
 }
 
 interface Diagnostic {
-  texto: string;               // === Document.source (original normalizado, intacto)
-  findings: Finding[];         // ordenados por (start,end,criterio,principio)
-  placar: Placar;
-  metricas: Metricas;
+  text: string;                // === Document.source (original normalizado, intacto)
+  findings: Finding[];         // ordenados por (start,end,criterion,principle)
+  score: Score;
+  metrics: Metrics;
   meta: DiagnosticMeta;
 }
 ```
@@ -262,9 +262,9 @@ interface Diagnostic {
 
 ```ts
 // src/lucid/index.ts
-export function analyze(texto: string, config?: Partial<Config>): Diagnostic;
+export function analyze(text: string, config?: Partial<Config>): Diagnostic;
 export const DEFAULT_CONFIG: Config;
-export type { Finding, Diagnostic, Span, Severity, Categoria, Placar, Metricas, Config };
+export type { Finding, Diagnostic, Span, Severity, Category, Score, CriterionScore, Metrics, Config };
 // NÃO exporta nada de probe/ aqui. A sonda é import separado, explícito.
 ```
 
@@ -277,18 +277,18 @@ import; ver §5.)
 
 ```ts
 interface Config {
-  frase: { alertaAcimaDe: number; erroAcimaDe: number };   // default 20 / 30 palavras
-  vozPassiva: {
-    habilitado: boolean;              // default true
-    estarComoPassiva: boolean;        // default FALSE (ver §6.2 — estar é ruidoso)
+  sentenceLength: { warnAbove: number; errorAbove: number };   // default 20 / 30 palavras
+  passiveVoice: {
+    enabled: boolean;                 // default true
+    treatEstarAsPassive: boolean;     // default FALSE (ver §6.2 — estar é ruidoso)
   };
-  nominalizacao: { habilitado: boolean; sugerir: boolean }; // sugerir default true
-  jargao: {
-    habilitado: boolean;
-    ranqueFrequenciaCorte: number;    // palavras abaixo do ranque N -> flag
-    sugerirDoGlossario: boolean;      // default true (só mapeamento único)
+  nominalization: { enabled: boolean; suggest: boolean };  // suggest default true
+  jargon: {
+    enabled: boolean;
+    frequencyRankCutoff: number;      // palavras abaixo do ranque N -> flag
+    suggestFromGlossary: boolean;     // default true (só mapeamento único)
   };
-  metrics: { decimais: number };      // default 1
+  metrics: { decimalPlaces: number }; // default 1
 }
 ```
 
@@ -398,7 +398,7 @@ Regras de decisão:
   `participios-irregulares.pt.json`.
 - **`estar` + particípio** é frequentemente resultativo/adjetival ("a porta está
   fechada"), não passiva de ação. **Decisão:** `estar` fica **atrás da flag
-  `estarComoPassiva` (default false)**. No default, só `ser` dispara.
+  `treatEstarAsPassive` (default false)**. No default, só `ser` dispara.
 - **Passiva sintética/reflexa** ("vendem-se casas", `se` + verbo 3ª pessoa) →
   **Fase 2**. É outra construção e outro conjunto de falsos positivos.
 - **Predicativo adjetival** ("é importante", "é necessário") → **não** é passiva:
@@ -406,11 +406,11 @@ Regras de decisão:
   de alta frequência, ou quando não há concordância verbal plausível. Preferir não
   disparar (precisão > recall).
 
-`severidade` e `requiresHuman`:
-- Passiva **sempre é flag** (`alerta`).
+`severity` e `requiresHuman`:
+- Passiva **sempre é flag** (`warning`).
 - `requiresHuman = (agente ausente)`. Sem agente explícito, ativar a voz exigiria
   **inventar quem agiu** — proibido. Com agente, o ator é recuperável, mas…
-- **Decisão sobre `sugestao`:** o MVP **não** auto-sugere a forma ativa, nem com
+- **Decisão sobre `suggestion`:** o MVP **não** auto-sugere a forma ativa, nem com
   agente presente. Transformar passiva→ativa exige reordenar e reconjugar (concordância
   de número/pessoa/tempo) — mecanicamente frágil demais para caber em I7. A ferramenta
   **aponta** a passiva e diz *por quê*; a reescrita é do humano. (Reavaliar na Fase 2 só
@@ -427,7 +427,7 @@ Duas detecções, tratadas diferente:
    - Verbos leves em `verbos-leves.pt.json` (`fazer, realizar, proceder, efetuar,
      promover, dar, ter…`).
    - Nominalização→verbo em `nominalizacoes.pt.json`, **apenas mapeamentos 1:1 seguros**.
-   - **`sugestao` só quando:** (a) a nominalização está na tabela, (b) o verbo leve casa,
+   - **`suggestion` só quando:** (a) a nominalização está na tabela, (b) o verbo leve casa,
      (c) o mapeamento é único. Senão: flag sem sugestão.
 
 2. **Densidade de nominalizações** (sinal fraco): muitas palavras `-ção/-mento/-ância/
@@ -442,13 +442,13 @@ detecta a construção mas não tem mapeamento seguro (a decisão do verbo certo
 Dois mecanismos, saídas distintas:
 
 1. **Glossário jargão→comum** (`jargao.pt.json`): termo técnico com equivalente comum
-   **único**. → flag `alerta` **com `sugestao`**. 
+   **único**. → flag `warning` **com `suggestion`**. 
 2. **Raridade por frequência** (`frequencia.pt.json`): palavra abaixo do ranque de corte
    e **sem** mapeamento no glossário. → flag `info` "termo pouco comum", **sem sugestão**.
 
 Blindagens:
 - **Sentido múltiplo nunca troca** ("banco", "manga", "processo"): marcar a palavra como
-  `ambiguo: true` no dataset; para essas, **só flag, jamais `sugestao`** (I7).
+  `ambiguous: true` no dataset; para essas, **só flag, jamais `suggestion`** (I7).
 - **Nomes próprios / siglas:** heurística — token capitalizado no meio da frase, ou
   all-caps curto, é provável nome/sigla → **não flagar como raro** (evita afogar em
   falsos positivos). É heurística: manter `info` e documentar como fraca.
@@ -462,31 +462,31 @@ contrário.
 
 - **Flesch-PT de Martins et al. (1996)** — não o Flesch do inglês. Depende de
   **silabação PT-BR** determinística (`syllables.ts`, baseada em regras de divisão
-  silábica do PT). Saída arredondada a `config.metrics.decimais`.
+  silábica do PT). Saída arredondada a `config.metrics.decimalPlaces`.
 - **NILC-Metrix é Python** (~200 métricas). Embutir violaria zero-dep/zero-rede do
   `core`. **Decisão:** o `core` calcula um subconjunto nativo (Flesch-PT + médias). A
   integração NILC-Metrix vira um **adapter externo opcional na Fase 2**, fora da
   garantia determinística do core (subprocesso/serviço), claramente rotulado. Não bloqueia
   o MVP.
 - **Regra normativa:** métrica é sinal de apoio (`5.4`), **nunca aprovação**. O
-  `Metricas` reporta números; a UI mostra antes/depois; ninguém escreve "aprovado".
+  `Metrics` reporta números; a UI mostra antes/depois; ninguém escreve "aprovado".
 
 ---
 
 ## 7. Fluxo de execução (Camada 1)
 
 ```
-analyze(texto, config?)
+analyze(text, config?)
   │
-  ├─ 1. normalize(texto) ................ NFC + guarda como Document.source
+  ├─ 1. normalize(text) ................. NFC + guarda como Document.source
   ├─ 2. segmentSentences(source) ........ Sentence[] (offsets no source)
   ├─ 3. tokenize(source, sentences) ..... Token[] flat + por-frase
   │        └─ constrói Document (readonly)
-  ├─ 4. runMetrics(doc) ................. Metricas   (usa syllables)
+  ├─ 4. runMetrics(doc) ................. Metrics   (usa syllables)
   ├─ 5. para cada Pass em registry(fase): findings.push(...pass.run(ctx))
-  ├─ 6. sort(findings, (start,end,criterio,principio))
-  ├─ 7. buildPlacar(findings, doc) ...... Placar
-  └─ 8. return { texto, findings, placar, metricas, meta:{configHash,…} }
+  ├─ 6. sort(findings, (start,end,criterion,principle))
+  ├─ 7. buildScore(findings, doc) ....... Score
+  └─ 8. return { text, findings, score, metrics, meta:{configHash,…} }
 ```
 
 Tudo síncrono, puro, determinístico. A sonda (Camada 2) roda **depois e por fora**, na
@@ -498,7 +498,7 @@ camada `report`, consumindo `Diagnostic` + escolhendo trechos/perguntas.
 
 - **Snapshot byte-idêntico (I2):** cada fixture do golden set tem um snapshot de
   `analyze(fixture)`. `determinism.test.ts` roda `analyze` duas vezes e compara buffers.
-- **Reconstrução de span (I3):** para todo finding, `source.slice(start,end) === trecho.texto`.
+- **Reconstrução de span (I3):** para todo finding, `source.slice(start,end) === span.text`.
 - **Fronteira (I1):** `boundary.test.ts` + `dependency-cruiser` falham o build se
   `lucid/core/**` importar `lucid/probe/**`, `react`, `next`, ou módulo de rede.
 - **Golden set:** trechos rotulados (simples/não-simples) **+ a pergunta do leitor** de
@@ -541,7 +541,7 @@ Ordem obrigatória (dependências):
    + `verbos-leves.pt.json`.
 9. **Pass `jargon`** (`5.3.2`) + `jargao.pt.json` + `frequencia.pt.json` (+ tratamento de
    ambíguos/nomes próprios).
-10. **`score/placar.ts`** + integração no analyzer.
+10. **`score/index.ts`** + integração no analyzer.
 11. **Golden set inicial** (10–20 trechos) + snapshots + determinism/boundary suites.
 12. **`probe/`**: interface + `prompt.ts` (versionado) + `interpret.ts` + `stub-probe.ts`.
     `llm-probe.ts` fica como stub lançando "não implementado". Sonda **desligável** por
@@ -554,7 +554,7 @@ proveniência, tudo com snapshot byte-idêntico e as suites I1/I2/I3 verdes; son
 stub atrás de flag.
 
 ### Fase 2 — Ampliação
-- `estarComoPassiva`, passiva sintética (`se` + verbo), predicativo adjetival refinado.
+- `treatEstarAsPassive`, passiva sintética (`se` + verbo), predicativo adjetival refinado.
 - Densidade de subordinação (orações/frase); enumeração-em-prosa→lista;
   título-que-não-responde (flag fraca, nunca score); 2ª pessoa ausente.
 - Densidade de nominalizações (sinal fraco, `info`).
@@ -590,7 +590,7 @@ stub atrás de flag.
 1. **Fonte dos datasets** (`frequencia.pt.json`, `jargao.pt.json`): definir origem e
    licença de cada um em `data/README.md`. Frequência PT-BR pode vir de corpora abertos;
    glossário jargão→comum dos guias gov (LAB.mg, gov.br) — **só como exemplos/glossário,
-   nunca como princípios** (o `principio` vem sempre da norma).
+   nunca como princípios** (o `principle` vem sempre da norma).
 2. **CLI: formato de saída default** — JSON (máquina) vs. relatório colorido (humano).
    Sugestão: `--json` opt-in, humano por default.
 3. **Empacotamento** — **DECIDIDO:** lib como `src/lucid/**` dentro do app Next (import
@@ -605,14 +605,14 @@ stub atrás de flag.
 
 ---
 
-### Apêndice A — Mapa critério → norma (fonte do campo `principio`)
+### Apêndice A — Mapa critério → norma (fonte do campo `principle`)
 
-| criterio | principio | Nome (ABNT) |
+| criterion | principle | Nome (ABNT) |
 |---|---|---|
-| `frase_longa` | `5.3.4` | frases concisas |
-| `voz_passiva` | `5.3.3` | frases claras (quem faz o quê) |
-| `nominalizacao` | `5.3.3` / `5.3.4` | frases claras / concisas |
-| `jargao` / `termo_incomum` | `5.3.2` | palavras familiares |
+| `long_sentence` | `5.3.4` | frases concisas |
+| `passive_voice` | `5.3.3` | frases claras (quem faz o quê) |
+| `nominalization` | `5.3.3` / `5.3.4` | frases claras / concisas |
+| `jargon` / `uncommon_term` | `5.3.2` | palavras familiares |
 | (métricas) | `5.4` | usável (sinal de apoio, não selo) |
 | (`requiresHuman` de relevância) | `5.1` | relevante (trabalho de autor) |
 

@@ -1,6 +1,6 @@
 {
   "_comentario": "Léxico de abreviações PT-BR que NÃO terminam frase quando seguidas de ponto. Ver src/lucid/data/README.md para proveniência e critério de curadoria. Comparação em caixa invariante (toLowerCase) — não incluir variantes de caixa aqui.",
-  "abreviacoes": [
+  "abbreviations": [
     "sr",
     "sra",
     "srta",

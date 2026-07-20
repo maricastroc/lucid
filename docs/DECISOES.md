@@ -160,10 +160,69 @@ com justificativa, e entrada correspondente no golden set.
 
 ---
 
+## ADR-005 — Nomenclatura interna da Camada 1 padronizada em inglês
+
+**Status:** aceito · Fase 1 (refatoração transversal, sem mudança de comportamento)
+
+**Contexto.** Até este ponto, tipos/campos/ids internos da Camada 1 misturavam
+português (`criterio`, `principio`, `trecho`, `severidade`, `sugestao`,
+`justificativa`, `Metricas`, `Placar`, `palavrasPorFrase`, `vozPassiva`,
+`alertaAcimaDe` etc.) com inglês (`Sentence`, `Token`, `Document`, `wordCount`,
+`isWord`). A inconsistência dificultava previsibilidade de nomenclatura em código novo
+e destoava da convenção usual de bibliotecas TypeScript.
+
+**Decisão.** Toda a nomenclatura interna da Camada 1 — tipos, interfaces, campos,
+valores de enum/união, ids de critério, nomes de função e variáveis locais — passa a
+ser em inglês. Mapa principal:
+
+| Antes (PT) | Depois (EN) |
+|---|---|
+| `Categoria` | `Category` |
+| `Severity` valores `alerta`/`erro` | `warning`/`error` (`info` inalterado) |
+| `Finding.criterio/categoria/principio/trecho/severidade/sugestao/justificativa` | `criterion/category/principle/span/severity/suggestion/justification` |
+| `Metricas` (`palavras/frases/silabas/palavrasPorFrase/silabasPorPalavra`) | `Metrics` (`words/sentences/syllables/wordsPerSentence/syllablesPerWord`) |
+| `Placar`/`PlacarCriterio` | `Score`/`CriterionScore` |
+| `Diagnostic.texto/placar/metricas` | `Diagnostic.text/score/metrics` |
+| `Config.frase.{alertaAcimaDe,erroAcimaDe}` | `Config.sentenceLength.{warnAbove,errorAbove}` |
+| `Config.vozPassiva.{habilitado,estarComoPassiva}` | `Config.passiveVoice.{enabled,treatEstarAsPassive}` |
+| `Config.nominalizacao.{habilitado,sugerir}` | `Config.nominalization.{enabled,suggest}` |
+| `Config.jargao.{habilitado,ranqueFrequenciaCorte,sugerirDoGlossario}` | `Config.jargon.{enabled,frequencyRankCutoff,suggestFromGlossary}` |
+| `Config.metrics.decimais` | `Config.metrics.decimalPlaces` |
+| id `frase_longa` | `long_sentence` |
+
+**O que NÃO mudou (fronteira deliberada):**
+- **Mensagens para o usuário final continuam em português.** `Finding.justification`
+  (o texto que o pass produz) é a string em PT-BR de sempre — só o NOME do campo virou
+  inglês, o CONTEÚDO da mensagem não. `sentence-length.ts` traduz `severity` de volta
+  para "alerta"/"erro" só na hora de montar a frase final, especificamente para isso.
+- **Camada 2 (`src/lucid/probe/**`) não foi tocada** — fora do escopo ("nomenclatura
+  interna da Camada 1"); `ProbeInput.trecho`, `ProbeResult.podeResponder` etc.
+  permanecem em português até uma decisão equivalente for tomada para a Camada 2.
+- **Nomes de arquivo de dado (`abreviacoes.pt.json` etc.) não foram renomeados** — o
+  sufixo `.pt.` marca deliberadamente que o CONTEÚDO é um recurso linguístico PT-BR,
+  uma preocupação distinta de nomenclatura de código. Só a CHAVE JSON acessada pelo
+  código (`abreviacoes` → `abbreviations`) foi traduzida, por ser efetivamente um
+  "campo" lido programaticamente.
+- **Exemplos de palavras/frases em português dentro de comentários e testes** (ex.:
+  "guarda-chuva", "Sr.", "poesia") não foram traduzidos — são dados de domínio sendo
+  analisados pelo linter, não nomenclatura de software.
+- **Textos de `describe`/`it` nos arquivos de teste continuam em português** — são
+  documentação de teste, não a API pública nem nomenclatura interna do pacote.
+
+**Consequências.** Mudança puramente de nomenclatura — nenhuma regra de negócio, span,
+severidade calculada ou saída de `justification` mudou de valor. Toda a suíte de testes
+(192 testes) foi atualizada para os novos nomes e permanece verde sem alteração de
+comportamento; `npm run typecheck`/`lint`/`depcheck` continuam limpos.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
 ADR-001 ↔ §6.1, ADR-002 ↔ §8, ADR-003 ↔ §11. ADR-004 é uma revisão de implementação
 dentro do escopo já previsto em §6.5/§9 (Fase 1, item 4), não uma decisão arquitetural
-nova. Este arquivo não deve contradizer `ARQUITETURA.md`; se um conflito aparecer,
-`ARQUITETURA.md` é a fonte de verdade e este log deve ser corrigido para acompanhá-lo.
+nova. ADR-005 é uma refatoração transversal de nomenclatura, sem mudança de
+comportamento — os tipos/campos citados em §3/§4 de `ARQUITETURA.md` já refletem os
+nomes em inglês. Este arquivo não deve contradizer `ARQUITETURA.md`; se um conflito
+aparecer, `ARQUITETURA.md` é a fonte de verdade e este log deve ser corrigido para
+acompanhá-lo.

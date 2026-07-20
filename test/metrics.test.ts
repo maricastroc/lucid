@@ -6,51 +6,51 @@ import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 describe("runMetrics — documento vazio", () => {
   it("texto vazio devolve todas as métricas zeradas, sem NaN/Infinity", () => {
     const doc = buildDocument("");
-    const metricas = runMetrics(doc);
+    const metrics = runMetrics(doc);
 
-    expect(metricas).toEqual({
+    expect(metrics).toEqual({
       fleschPt: 0,
-      palavras: 0,
-      frases: 0,
-      silabas: 0,
-      palavrasPorFrase: 0,
-      silabasPorPalavra: 0,
+      words: 0,
+      sentences: 0,
+      syllables: 0,
+      wordsPerSentence: 0,
+      syllablesPerWord: 0,
     });
   });
 
   it("texto só com espaços/quebras de linha também zera (sem frases nem palavras)", () => {
     const doc = buildDocument("   \n\n  \t  ");
-    const metricas = runMetrics(doc);
-    expect(metricas.frases).toBe(0);
-    expect(metricas.palavras).toBe(0);
-    expect(metricas.fleschPt).toBe(0);
+    const metrics = runMetrics(doc);
+    expect(metrics.sentences).toBe(0);
+    expect(metrics.words).toBe(0);
+    expect(metrics.fleschPt).toBe(0);
   });
 
   it("texto só com pontuação (sem nenhuma palavra) zera palavras/sílabas sem quebrar", () => {
     const doc = buildDocument("!!! ??? ...");
-    const metricas = runMetrics(doc);
-    expect(metricas.palavras).toBe(0);
-    expect(metricas.silabas).toBe(0);
-    expect(metricas.fleschPt).toBe(0);
-    expect(Number.isFinite(metricas.fleschPt)).toBe(true);
+    const metrics = runMetrics(doc);
+    expect(metrics.words).toBe(0);
+    expect(metrics.syllables).toBe(0);
+    expect(metrics.fleschPt).toBe(0);
+    expect(Number.isFinite(metrics.fleschPt)).toBe(true);
   });
 });
 
 describe("runMetrics — texto com uma frase", () => {
   it("calcula totais e Flesch-PT para uma única frase", () => {
     const doc = buildDocument("O gato subiu no telhado.");
-    const metricas = runMetrics(doc);
+    const metrics = runMetrics(doc);
 
-    expect(metricas.frases).toBe(1);
-    expect(metricas.palavras).toBe(5);
-    expect(metricas.palavrasPorFrase).toBe(5);
-    expect(metricas.silabasPorPalavra).toBe(metricas.silabas / metricas.palavras);
+    expect(metrics.sentences).toBe(1);
+    expect(metrics.words).toBe(5);
+    expect(metrics.wordsPerSentence).toBe(5);
+    expect(metrics.syllablesPerWord).toBe(metrics.syllables / metrics.words);
 
-    // "esperado" usa as médias BRUTAS (não-arredondadas); metricas.fleschPt já vem
-    // arredondado a config.metrics.decimais (1 casa, default) — por isso a tolerância
-    // é de 1 casa decimal, não uma comparação exata.
-    const esperado = 248.835 - 1.015 * (metricas.palavras / metricas.frases) - 84.6 * (metricas.silabas / metricas.palavras);
-    expect(metricas.fleschPt).toBeCloseTo(esperado, 1);
+    // "esperado" usa as médias BRUTAS (não-arredondadas); metrics.fleschPt já vem
+    // arredondado a config.metrics.decimalPlaces (1 casa, default) — por isso a
+    // tolerância é de 1 casa decimal, não uma comparação exata.
+    const esperado = 248.835 - 1.015 * (metrics.words / metrics.sentences) - 84.6 * (metrics.syllables / metrics.words);
+    expect(metrics.fleschPt).toBeCloseTo(esperado, 1);
   });
 });
 
@@ -58,11 +58,11 @@ describe("runMetrics — texto com várias frases", () => {
   it("agrega totais do documento inteiro, não só da última frase", () => {
     const source = "O gato subiu no telhado. O cachorro correu muito rápido pelo jardim ontem.";
     const doc = buildDocument(source);
-    const metricas = runMetrics(doc);
+    const metrics = runMetrics(doc);
 
-    expect(metricas.frases).toBe(2);
-    expect(metricas.palavras).toBe(doc.tokens.filter((t) => t.isWord).length);
-    expect(metricas.palavrasPorFrase).toBe(metricas.palavras / metricas.frases);
+    expect(metrics.sentences).toBe(2);
+    expect(metrics.words).toBe(doc.tokens.filter((t) => t.isWord).length);
+    expect(metrics.wordsPerSentence).toBe(metrics.words / metrics.sentences);
   });
 
   it("frases mais longas em média reduzem o Flesch-PT em relação a frases curtas", () => {
@@ -78,30 +78,30 @@ describe("runMetrics — texto com várias frases", () => {
 });
 
 describe("runMetrics — arredondamento na fronteira de saída", () => {
-  it("respeita config.metrics.decimais para os três campos derivados", () => {
+  it("respeita config.metrics.decimalPlaces para os três campos derivados", () => {
     const doc = buildDocument("O gato subiu no telhado. O cachorro correu muito rápido pelo jardim.");
 
-    const comUmaCasa = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimais: 1 } });
-    const comZeroCasas = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimais: 0 } });
-    const comTresCasas = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimais: 3 } });
+    const comUmaCasa = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimalPlaces: 1 } });
+    const comZeroCasas = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimalPlaces: 0 } });
+    const comTresCasas = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimalPlaces: 3 } });
 
     for (const m of [comUmaCasa, comZeroCasas, comTresCasas]) {
-      expect(m.palavras).toBe(comUmaCasa.palavras);
-      expect(m.frases).toBe(comUmaCasa.frases);
-      expect(m.silabas).toBe(comUmaCasa.silabas);
+      expect(m.words).toBe(comUmaCasa.words);
+      expect(m.sentences).toBe(comUmaCasa.sentences);
+      expect(m.syllables).toBe(comUmaCasa.syllables);
     }
 
     expect(Number.isInteger(comZeroCasas.fleschPt)).toBe(true);
-    expect(Number.isInteger(comZeroCasas.palavrasPorFrase)).toBe(true);
-    expect(Number.isInteger(comZeroCasas.silabasPorPalavra)).toBe(true);
+    expect(Number.isInteger(comZeroCasas.wordsPerSentence)).toBe(true);
+    expect(Number.isInteger(comZeroCasas.syllablesPerWord)).toBe(true);
   });
 
   it("nenhum float bruto vaza para o JSON — casas decimais respeitam o limite configurado", () => {
     const doc = buildDocument("O gato subiu rapidamente pelo telhado da casa vizinha durante a tarde de domingo.");
-    const metricas = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimais: 2 } });
+    const metrics = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimalPlaces: 2 } });
 
-    for (const campo of ["fleschPt", "palavrasPorFrase", "silabasPorPalavra"] as const) {
-      const texto = String(metricas[campo]);
+    for (const campo of ["fleschPt", "wordsPerSentence", "syllablesPerWord"] as const) {
+      const texto = String(metrics[campo]);
       const casas = texto.includes(".") ? texto.split(".")[1].length : 0;
       expect(casas).toBeLessThanOrEqual(2);
     }
@@ -113,10 +113,10 @@ describe("runMetrics — Unicode NFC/NFD", () => {
     const nfc = "A política pública precisa ser clara e acessível para todos os cidadãos.";
     const nfd = nfc.normalize("NFD");
 
-    const metricasNfc = runMetrics(buildDocument(nfc));
-    const metricasNfd = runMetrics(buildDocument(nfd));
+    const metricsNfc = runMetrics(buildDocument(nfc));
+    const metricsNfd = runMetrics(buildDocument(nfd));
 
-    expect(metricasNfd).toEqual(metricasNfc);
+    expect(metricsNfd).toEqual(metricsNfc);
   });
 });
 

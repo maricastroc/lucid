@@ -12,11 +12,11 @@ import { attachTokens, tokenize } from "./tokenize";
  * pós-normalização — todo offset de qualquer `Sentence`/`Token`/`Finding` downstream é
  * relativo a ele, nunca ao texto bruto recebido aqui.
  */
-export function buildDocument(textoBruto: string): Document {
-  const source = normalize(textoBruto);
-  const sentencesSemTokens = segmentSentences(source);
+export function buildDocument(rawText: string): Document {
+  const source = normalize(rawText);
+  const sentencesWithoutTokens = segmentSentences(source);
   const tokens = tokenize(source);
-  const sentences = attachTokens(sentencesSemTokens, tokens);
+  const sentences = attachTokens(sentencesWithoutTokens, tokens);
 
   return { source, sentences, tokens };
 }

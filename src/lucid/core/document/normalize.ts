@@ -6,6 +6,6 @@
  * offset em qualquer `Finding`/`Span`/`Sentence` do resto do pipeline é relativo a
  * ESTE texto — nunca ao texto bruto de entrada do usuário.
  */
-export function normalize(texto: string): string {
-  return texto.normalize("NFC");
+export function normalize(text: string): string {
+  return text.normalize("NFC");
 }

@@ -17,6 +17,6 @@
  * sinal de apoio, nunca aprovação — não existe leitura de "aprovado"/"reprovado" aqui
  * nem em nenhum lugar que consome este valor.
  */
-export function calcularFleschPt(palavrasPorFrase: number, silabasPorPalavra: number): number {
-  return 248.835 - 1.015 * palavrasPorFrase - 84.6 * silabasPorPalavra;
+export function calculateFleschPt(wordsPerSentence: number, syllablesPerWord: number): number {
+  return 248.835 - 1.015 * wordsPerSentence - 84.6 * syllablesPerWord;
 }

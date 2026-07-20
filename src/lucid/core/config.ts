@@ -8,49 +8,49 @@
  */
 
 export interface Config {
-  frase: {
-    alertaAcimaDe: number;
-    erroAcimaDe: number;
+  sentenceLength: {
+    warnAbove: number;
+    errorAbove: number;
   };
-  vozPassiva: {
-    habilitado: boolean;
+  passiveVoice: {
+    enabled: boolean;
     /** default false — `estar` + particípio é frequentemente resultativo/adjetival */
-    estarComoPassiva: boolean;
+    treatEstarAsPassive: boolean;
   };
-  nominalizacao: {
-    habilitado: boolean;
-    sugerir: boolean;
+  nominalization: {
+    enabled: boolean;
+    suggest: boolean;
   };
-  jargao: {
-    habilitado: boolean;
-    ranqueFrequenciaCorte: number;
-    sugerirDoGlossario: boolean;
+  jargon: {
+    enabled: boolean;
+    frequencyRankCutoff: number;
+    suggestFromGlossary: boolean;
   };
   metrics: {
-    decimais: number;
+    decimalPlaces: number;
   };
 }
 
 export const DEFAULT_CONFIG: Config = {
-  frase: {
-    alertaAcimaDe: 20,
-    erroAcimaDe: 30,
+  sentenceLength: {
+    warnAbove: 20,
+    errorAbove: 30,
   },
-  vozPassiva: {
-    habilitado: true,
-    estarComoPassiva: false,
+  passiveVoice: {
+    enabled: true,
+    treatEstarAsPassive: false,
   },
-  nominalizacao: {
-    habilitado: true,
-    sugerir: true,
+  nominalization: {
+    enabled: true,
+    suggest: true,
   },
-  jargao: {
-    habilitado: true,
-    ranqueFrequenciaCorte: 5000,
-    sugerirDoGlossario: true,
+  jargon: {
+    enabled: true,
+    frequencyRankCutoff: 5000,
+    suggestFromGlossary: true,
   },
   metrics: {
-    decimais: 1,
+    decimalPlaces: 1,
   },
 };
 
@@ -61,10 +61,10 @@ export const DEFAULT_CONFIG: Config = {
  * dependem do algoritmo exato, só de que a mesma Config produza sempre o mesmo hash.
  */
 export function hashConfig(config: Config): string {
-  const ordenado = stableStringify(config);
+  const serialized = stableStringify(config);
   let hash = 0;
-  for (let i = 0; i < ordenado.length; i++) {
-    hash = (hash * 31 + ordenado.charCodeAt(i)) | 0;
+  for (let i = 0; i < serialized.length; i++) {
+    hash = (hash * 31 + serialized.charCodeAt(i)) | 0;
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
 }
@@ -76,9 +76,9 @@ function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map(stableStringify).join(",")}]`;
   }
-  const chaves = Object.keys(value as Record<string, unknown>).sort();
-  const pares = chaves.map(
-    (chave) => `${JSON.stringify(chave)}:${stableStringify((value as Record<string, unknown>)[chave])}`,
+  const keys = Object.keys(value as Record<string, unknown>).sort();
+  const pairs = keys.map(
+    (key) => `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
   );
-  return `{${pares.join(",")}}`;
+  return `{${pairs.join(",")}}`;
 }
