@@ -12,16 +12,18 @@
  * `probe` ao mesmo tempo. `core/**` nunca importa daqui.
  */
 import type { Span } from "../../lucid/core/types";
+import type { RewriteStrategy } from "./prompt";
 
 /**
  * Pedido ao proposer: o texto inteiro (normalizado, CONTEXTO) + o ALVO a reescrever (`Span`)
  * — a frase de um finding ou um parágrafo. `criterion` é dica opcional (do finding), quando
- * há um; na reescrita de parágrafo não há critério único.
+ * há um. `strategy` seleciona o prompt (corrigir vs reescrever); default no proposer.
  */
 export interface RewriteRequest {
   text: string;
   target: Span;
   criterion?: string;
+  strategy?: RewriteStrategy;
 }
 
 /**

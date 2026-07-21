@@ -9,7 +9,7 @@
  * `id = "<provider>:<model>+<prompt-version>"` — proveniência para eval/anti-drift e para o
  * benchmark ("qual modelo, sob qual prompt").
  */
-import { buildRewritePrompt, REWRITE_PROMPT_VERSION } from "./prompt";
+import { buildRewritePrompt, STRATEGY_VERSION, type RewriteStrategy } from "./prompt";
 import type { ChatProvider } from "@/llm";
 import type { RewriteProposal, RewriteProposer, RewriteRequest } from "./types";
 
@@ -43,16 +43,20 @@ export class LlmRewriteProposer implements RewriteProposer {
   readonly id: string;
   private readonly provider: ChatProvider;
   private readonly model: string;
+  private readonly strategy: RewriteStrategy;
 
-  constructor(provider: ChatProvider, model: string) {
+  constructor(provider: ChatProvider, model: string, strategy: RewriteStrategy = "rewrite") {
     this.provider = provider;
     this.model = model;
-    this.id = `${provider.id}:${model}+${REWRITE_PROMPT_VERSION}`;
+    this.strategy = strategy;
+    // id = provedor:modelo+estratégia@versão — o "sistema" que o benchmark compara.
+    this.id = `${provider.id}:${model}+${STRATEGY_VERSION[strategy]}`;
   }
 
   async propose(request: RewriteRequest): Promise<RewriteProposal> {
     const original = request.target.text;
-    const prompt = buildRewritePrompt(request.text, request.target, request.criterion);
+    const strategy = request.strategy ?? this.strategy;
+    const prompt = buildRewritePrompt(request.text, request.target, { strategy, criterion: request.criterion });
     const raw = await this.provider.complete(prompt, { model: this.model, temperature: 0, maxTokens: 2048 });
     const parsed = parseRewrite(raw);
     return { proposerId: this.id, original, proposed: parsed ?? original };

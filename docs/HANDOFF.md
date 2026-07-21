@@ -110,12 +110,36 @@ seduz por prosa. Duas limitações reais a atacar: (a) contagem crua de findings
 reescrita radical → **veredito ponderado por severidade**; (b) agente inventado em 1ª pessoa não
 é pego → **prova determinística de 1ª pessoa nova**.
 
+**Tier 3 · incremento 5 FEITO — estratégias de prompt + benchmark de SISTEMAS** (ADR-017).
+Eixo `RewriteStrategy = "correct" | "rewrite"` (ambas blindadas contra invenção);
+`LlmRewriteProposer(provider, model, strategy)`, id = `provider:model+estratégia@versão`.
+Benchmark gateado (`test/rewrite-benchmark.test.ts`, `BENCHMARK=1`, fora da CI) mede 6
+dimensões por sistema. `GroqProvider` ganhou retry em 429 (free tier) + `lastUsage` (tokens).
+
+**Resultado ao vivo (3 parágrafos/sistema, Groq):**
+
+| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade% | s/nome% | sem veto% | latência ms | tokens |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| llama-3.3-70b · correct | 100 | +2.0 | -0 | 3.0 | 100 | 100 | 100 | **100** | 654 | 478 |
+| llama-3.3-70b · rewrite | 100 | **+67.6** | -1 | 2.7 | 100 | 100 | 100 | **33** | 679 | 657 |
+| gpt-oss-120b · correct | 100 | +4.3 | -1 | 3.3 | 100 | 100 | 100 | **100** | 1225 | 785 |
+| gpt-oss-120b · rewrite | 100 | **+75.3** | -15 | 1.0 | 100 | 100 | 100 | **67** | 1033 | 829 |
+
+**Leitura:** (1) `rewrite` é MUITO mais claro (ΔFlesch +68/+75 vs +2/+4) — confirma a hipótese
+do usuário; (2) provas determinísticas (números/datas/jargão) preservadas 100% em todos —
+blindagem segurou; (3) **a tensão medida:** o `rewrite`, mais claro, é **vetado com muito mais
+frequência** (sem-veto 33–67% vs 100% do `correct`), porque a contagem crua de findings pune a
+reorganização radical → **confirma numericamente a necessidade do veredito ponderado por
+severidade (ADR-016 item a)**. Ressalva honesta (I5): fidelidade/nome 100% = "sem violação de
+piso detectada" nesse golden pequeno, NÃO "provado fiel" (a sonda não pegou o "nós" nos casos
+anteriores).
+
 **Falta no Tier 3 (próximos incrementos):**
-- **(a) veredito ponderado por severidade** e **(b) prova de 1ª pessoa nova** (acima).
-- **Harness de benchmark** — "% que passam todas as PROVAS" (NUNCA "aprovação"), manual, fora
-  da CI, tabela pro README.
+- **(a) veredito ponderado por severidade** (o benchmark agora mostra por que é prioritário) +
+  **(b) prova determinística de 1ª pessoa nova** (pega o "nós" que a sonda não pega).
 - **Outros providers** — OpenAI/Anthropic/Gemini/DeepSeek pela mesma interface `ChatProvider`
   (`src/llm`). `.env` tem `GEMINI_API_KEY`; `DEEPSEEK_AP_KEY` está com typo (falta o "I").
+- Golden de benchmark maior + casos que estressem a sonda; tabela no README.
 
 ---
 
