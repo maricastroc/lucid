@@ -79,12 +79,19 @@ determinístico + stubs**, sem rede, CI byte-idêntica.
 - `proposeAndVerify` (orquestrador; nunca aplica). Sonda religada: `interpret` (só flag|neutro)
   + `StubComprehensionProbe`. 23 testes novos; suíte **762 verde**; cerca intacta.
 
-**Falta no Tier 3 (próximos incrementos):**
-1. **Proposer LLM real** — `report/rewrite/llm-proposer.ts` atrás de flag (não é dependência do
-   build), `temperature 0`, modelo/prompt versionados, com **meta-eval** de anti-drift. Idem
-   `probe/llm-probe.ts` para a sonda real.
-2. **Fiação na UI** — cartão "reescrita gerada" que mostra PROVA (✓/✗) e SINAL separados, com
-   o caveat de sempre; nunca aplica sozinho. Vive na camada app, consumindo `report/rewrite`.
+**Tier 3 · incremento 2 FEITO — fiação na UI (stub).** Cartão "Reescrita gerada · experimental"
+na nota (`revision-note.tsx` → `GeneratedRewrite`, só para `long_sentence`): botão **Gerar e
+verificar** → `app/lib/rewrite.ts` (`StubRewriteProposer` + fixture do texto-exemplo) →
+`proposeAndVerify`. Mostra PROVA (✓/✗) e SINAL (○/⚠) separados, delta de métricas, caveat
+"passar não é aprovação", e **Usar como rascunho** (aplica no editor com undo; bloqueado se
+`hasBlockingFailure`). Verificado no browser: proposta do exemplo passa 5/5 PROVAS, total
+13→8 ao aplicar. Consome `@/report/rewrite` (app→report permitido; cerca intacta).
+
+**Falta no Tier 3 (próximo incremento):**
+- **Proposer LLM real** — `report/rewrite/llm-proposer.ts` atrás de flag (não é dependência do
+  build), `temperature 0`, modelo/prompt versionados, com **meta-eval** de anti-drift. Idem
+  `probe/llm-probe.ts` para a sonda real. Precisa de `@anthropic-ai/sdk` + API key + custo →
+  decisão do usuário. A UI e o verificador já estão prontos para recebê-lo (troca o proposer).
 
 ---
 

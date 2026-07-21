@@ -11,6 +11,7 @@
  */
 import { useState } from "react";
 import { passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
+import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import {
   buildConfidence,
@@ -18,6 +19,7 @@ import {
   detectionHeadline,
   longSentenceGuidance,
 } from "../lib/narrative";
+import { generateRewrite } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
 export interface RevisionNoteProps {
@@ -26,9 +28,10 @@ export interface RevisionNoteProps {
   source: string;
   onApply: (f: Finding) => void;
   onSplit: (point: SplitPoint) => void;
+  onApplyRewrite: (proposal: RewriteProposal) => void;
 }
 
-export function RevisionNote({ finding, source, onApply, onSplit }: RevisionNoteProps) {
+export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite }: RevisionNoteProps) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
@@ -83,7 +86,7 @@ export function RevisionNote({ finding, source, onApply, onSplit }: RevisionNote
         {safe ? (
           <SafeResolution finding={finding} onApply={() => onApply(finding)} />
         ) : (
-          <HumanDecision finding={finding} source={source} onSplit={onSplit} />
+          <HumanDecision finding={finding} source={source} onSplit={onSplit} onApplyRewrite={onApplyRewrite} />
         )}
       </div>
     </div>
@@ -184,10 +187,12 @@ function HumanDecision({
   finding,
   source,
   onSplit,
+  onApplyRewrite,
 }: {
   finding: Finding;
   source: string;
   onSplit: (point: SplitPoint) => void;
+  onApplyRewrite: (proposal: RewriteProposal) => void;
 }) {
   const rationale = buildConfidence(finding).rationale;
   return (
@@ -209,8 +214,162 @@ function HumanDecision({
           </p>
           <Guidance finding={finding} source={source} onSplit={onSplit} />
         </div>
+
+        {finding.criterion === "long_sentence" && (
+          <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
+        )}
       </div>
     </div>
+  );
+}
+
+/* ==================================================== Tier 3 · reescrita gerada e verificada */
+
+function GeneratedRewrite({
+  finding,
+  source,
+  onApplyRewrite,
+}: {
+  finding: Finding;
+  source: string;
+  onApplyRewrite: (proposal: RewriteProposal) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<VerifiedRewrite | null>(null);
+
+  const run = async () => {
+    setLoading(true);
+    setResult(await generateRewrite(source, finding));
+    setLoading(false);
+  };
+
+  const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
+
+  return (
+    <div className="mt-4 border-t border-human-line pt-4">
+      <div className="mb-1 flex items-center gap-2">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">Reescrita gerada</p>
+        <span className="rounded-[4px] bg-surface-2 px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+          experimental
+        </span>
+      </div>
+      <p className="text-[12px] leading-relaxed text-ink-2">
+        A geração propõe; a <span className="text-ink-1">engine determinística verifica</span>. A proposta é sempre
+        “gerada”, nunca aplicada sozinha — e passar nas provas é ausência de falha, <span className="text-ink-1">não
+        aprovação</span>.
+      </p>
+
+      {result === null ? (
+        <button
+          type="button"
+          onClick={run}
+          disabled={loading}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
+        >
+          {loading ? "Gerando e verificando…" : "Gerar reescrita e verificar"}
+        </button>
+      ) : !hasProposal ? (
+        <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
+          O proposer sintético (stub) não tem uma reescrita para este trecho. A geração real (LLM, verificada por esta
+          mesma engine) vem num incremento seguinte.
+        </p>
+      ) : (
+        <RewriteResult result={result} onApplyRewrite={onApplyRewrite} />
+      )}
+    </div>
+  );
+}
+
+function RewriteResult({
+  result,
+  onApplyRewrite,
+}: {
+  result: VerifiedRewrite;
+  onApplyRewrite: (proposal: RewriteProposal) => void;
+}) {
+  const { proposal, verification } = result;
+  const blocked = verification.hasBlockingFailure;
+  const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
+  const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
+      {/* proposta */}
+      <div className="border-b border-rule-1 px-3.5 py-3">
+        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Proposta · gerada</p>
+        <p className="font-serif text-[15px] leading-snug text-ink-0">{proposal.proposed}</p>
+      </div>
+
+      {/* PROVA */}
+      <div className="px-3.5 py-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+          Prova · determinística
+        </p>
+        <ul className="flex flex-col gap-1.5">
+          {verification.proofs.map((p) => (
+            <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
+          ))}
+        </ul>
+      </div>
+
+      {/* SINAL */}
+      {verification.signals.length > 0 && (
+        <div className="border-t border-rule-1 px-3.5 py-3">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+            Sinal · heurístico (não é prova)
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {verification.signals.map((s) => (
+              <CheckLine key={s.check} ok={!s.flagged} kind="signal" detail={s.detail} />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* métricas + ação */}
+      <div className="border-t border-rule-1 px-3.5 py-3">
+        <div className="flex items-center gap-3 text-[11.5px] text-ink-2">
+          <span>
+            Flesch-PT <span className="tabular-nums text-ink-1">{dFlesch >= 0 ? `+${dFlesch.toFixed(1)}` : dFlesch.toFixed(1)}</span>
+          </span>
+          <span className="text-ink-3">·</span>
+          <span>
+            palavras <span className="tabular-nums text-ink-1">{dWords >= 0 ? `+${dWords}` : dWords}</span>
+          </span>
+        </div>
+
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => onApplyRewrite(proposal)}
+            disabled={blocked}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ background: "var(--accent)" }}
+          >
+            Usar como rascunho
+          </button>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+            {blocked
+              ? "Uma prova falhou — a proposta é inaceitável mecanicamente e não pode ser usada como está."
+              : "Nenhuma falha de piso detectada. Isso não é um selo de qualidade — reveja antes de usar."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"; detail: string }) {
+  // Prova: ✓ verde / ✗ vermelho. Sinal: ✓ neutro / ⚠ atenção (nunca "aprovado").
+  const mark = ok ? (kind === "proof" ? "✓" : "○") : kind === "proof" ? "✗" : "⚠";
+  const tone = ok ? (kind === "proof" ? "text-safe" : "text-ink-3") : kind === "proof" ? "text-sev-error" : "text-human";
+  return (
+    <li className="flex items-baseline gap-2 text-[12px] leading-relaxed">
+      <span className={`shrink-0 font-semibold ${tone}`} aria-hidden>
+        {mark}
+      </span>
+      <span className="text-ink-2">{detail}</span>
+    </li>
   );
 }
 

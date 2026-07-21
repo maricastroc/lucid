@@ -13,6 +13,7 @@
  */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { analyze, applySplitAt, type Finding, type SplitPoint } from "@/lucid";
+import type { RewriteProposal } from "@/report/rewrite";
 import { findingId, isSafe } from "./lib/criteria";
 import { applySafeSuggestions } from "./lib/audit";
 import { SAMPLE_TEXT } from "./lib/sample";
@@ -148,6 +149,24 @@ export function Studio() {
     [text, pushUndo],
   );
 
+  // Tier 3 · usar uma reescrita GERADA como rascunho. O autor decide (nunca automático); a
+  // proposta substitui o trecho do finding selecionado no texto do diagnóstico (mesma base
+  // dos offsets), com undo. A reanálise roda sozinha e submete o rascunho à engine de novo.
+  const applyRewrite = useCallback(
+    (proposal: RewriteProposal) => {
+      const target = selectedFinding;
+      if (!target) return;
+      const base = diagnostic.text;
+      const next = base.slice(0, target.span.start) + proposal.proposed + base.slice(target.span.end);
+      if (next !== text) {
+        pushUndo(text);
+        setText(next);
+      }
+      setSelectedId(null);
+    },
+    [text, diagnostic, selectedFinding, pushUndo],
+  );
+
   const applyAllSafe = useCallback(() => {
     const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
     const next = applySafeSuggestions(text, applicable);
@@ -182,6 +201,7 @@ export function Studio() {
     onApplyAllSafe: applyAllSafe,
     onApply: applySuggestion,
     onSplit: applySplit,
+    onApplyRewrite: applyRewrite,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
     onClose: closeSelection,
@@ -256,6 +276,7 @@ export function Studio() {
                     source={diagnostic.text}
                     onApply={applySuggestion}
                     onSplit={applySplit}
+                    onApplyRewrite={applyRewrite}
                   />
                 </div>
               </>
