@@ -27,7 +27,9 @@ export type IntegratedCriterion =
   | "redundancia"
   | "perifrase_inflada"
   | "paragraph_length"
-  | "prose_enumeration";
+  | "prose_enumeration"
+  | "mesoclise"
+  | "dupla_negacao";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

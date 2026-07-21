@@ -66,10 +66,18 @@ export interface Paragraph {
   wordCount: number;
 }
 
+/**
+ * O modelo intermediário CANÔNICO da Camada 1 — o `AnnotatedDocument` do design (ver
+ * docs/DESIGN-modelo-independente-de-formato.md). **Independente do formato de origem:** os
+ * detectores dependem só deste tipo e nunca sabem se o texto veio de um editor, de um DOCX ou de
+ * um PDF. `source` é sempre texto normalizado (NFC); todo offset é relativo a ele. Um importador
+ * por formato é o único a produzi-lo (hoje só o de texto puro, `buildDocument`).
+ */
 export interface Document {
   readonly source: string;
   readonly sentences: readonly Sentence[];
   readonly tokens: readonly Token[];
+  /** blocos estruturais — hoje só parágrafos; cresce (heading/list/…) de forma ADITIVA por formato */
   readonly paragraphs: readonly Paragraph[];
 }
 

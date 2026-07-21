@@ -39,6 +39,7 @@ import maisQuePerfeitoData from "../../data/mais-que-perfeito.pt.json";
 import adverbiosMenteData from "../../data/adverbios-mente.pt.json";
 import redundanciasData from "../../data/redundancias.pt.json";
 import perifrasesData from "../../data/perifrases.pt.json";
+import duplasNegacoesData from "../../data/duplas-negacoes.pt.json";
 
 export type { DatasetId } from "./types";
 
@@ -125,6 +126,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: perifrasesData,
     prepare: preparePhrases,
     provenance: "perífrases infladas → forma enxuta (curadoria própria)",
+  },
+  "duplas-negacoes.pt": {
+    raw: duplasNegacoesData,
+    prepare: preparePhrases,
+    provenance: "dupla negação / litotes → forma direta (curadoria própria)",
   },
 };
 

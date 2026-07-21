@@ -192,8 +192,15 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   linha em branco) — primeira estrutura de documento. Detectores `paragraph_length` (>5 frases) +
   `prose_enumeration` (≥3 ordinais desde "primeiro"). Títulos/listas/seções ADIADOS (precisam de
   convenção de marcação — decidir o formato de entrada primeiro).
-- **13 critérios, 838 testes.** Verificado ao vivo no browser (todos os detectores marcam; sonda
-  trava e reporta sem selo; estruturais no painel sob "Fácil de localizar").
+- **Mais 2 de texto puro (ADR-028):** `mesoclise` (regex `far-se-á`/`dir-lhe-ia`, zero-FP) +
+  `dupla_negacao` (litotes "não é incomum", léxico via phrase-match; NÃO marca negação simples).
+- **13 critérios, 847 testes.** Verificado ao vivo no browser (todos os detectores marcam; sonda
+  trava e reporta sem selo; estruturais sob "Fácil de localizar"; mesóclise/dupla-negação sob
+  "Frases claras").
+- **Independência de formato (ADR-027):** `Document` é o `AnnotatedDocument` canônico; `buildDocument`
+  é o importador de texto puro (fronteira de formato). Contrato para DOCX/PDF/HTML futuros em
+  `DESIGN-modelo-independente-de-formato.md` — detectores já são cegos ao formato (auditado). SEM
+  importadores; extensões (blocos com `kind`, `analyzeDocument`, source-map) são aditivas e adiadas.
 - **Dívida:** `app/lib/criteria.ts` é um registro de critérios paralelo ao engine — adicionar
   detector toca engine + UI. Candidato a "UI deriva critérios do `Diagnostic`".
 - **Fonte de léxico (D1 fechado):** PortiLexicon-UD (CC-BY 4.0), HF `NILC-ICMC-USP/PortiLexicon-UD`,

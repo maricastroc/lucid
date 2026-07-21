@@ -20,7 +20,8 @@ export type DatasetId =
   | "mais-que-perfeito.pt"
   | "adverbios-mente.pt"
   | "redundancias.pt"
-  | "perifrases.pt";
+  | "perifrases.pt"
+  | "duplas-negacoes.pt";
 
 // --- jargão ------------------------------------------------------------------------
 export type JargonKind = "word" | "phrase";
@@ -89,6 +90,7 @@ export interface DataTypes {
   "adverbios-mente.pt": ReadonlySet<string>;
   "redundancias.pt": PhrasePrepared;
   "perifrases.pt": PhrasePrepared;
+  "duplas-negacoes.pt": PhrasePrepared;
 }
 
 // --- frases feitas (redundância, perífrase) ---------------------------------------

@@ -319,3 +319,19 @@ as locuções já cobertas por `jargao.pt.json` ("em sede de", "na hipótese de"
 **Formato:** `{ "entries": [{ "phrase": string, "plain": string | null }] }`, caixa invariante.
 
 **Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.
+
+## `duplas-negacoes.pt.json` — dupla negação (litotes)
+
+**Usado por:** `passes/dupla-negacao.ts` (`dupla_negacao`, 5.3.3). Matcher de frase compartilhado
+(`phrase-match.ts`), longest-match-first.
+
+**Propósito:** expressões que afirmam negando o negativo ("não é incomum" = "é comum") — o leitor
+tem de desfazer a negação aninhada (a operação `desfazer_negacao_aninhada` da sonda). `plain` = a
+forma direta, citada na justificativa (a ferramenta não troca sozinha → `requiresHuman`).
+
+**Fora de escopo deliberado:** negação simples e concordância negativa ("não vi ninguém") — normais
+e claras em PT, **não** entram. Sem colisão com o glossário de jargão.
+
+**Formato:** `{ "entries": [{ "phrase": string, "plain": string | null }] }`, caixa invariante.
+
+**Licença:** curadoria própria (fatos de língua).
