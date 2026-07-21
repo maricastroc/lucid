@@ -847,6 +847,50 @@ pela cerca. Suíte completa verde (739).
 
 ---
 
+## ADR-014 — Tier 3 · reescrita proposta e VERIFICADA: o verificador determinístico primeiro, LLM atrás da interface
+
+**Status:** aceito · Tier 3, incremento 1 (contrato + verificador + stub; sem rede)
+
+**Contexto.** O diferencial do Lucid (handoff §3): a geração (LLM) **nunca recebe confiança
+cega — a engine determinística é o VERIFICADOR**. Antes de qualquer chamada de modelo, o
+valor está no PIPELINE que julga uma proposta. Este incremento constrói exatamente isso, em
+`report/**` (a única camada que conhece `core` e `probe`), 100% determinístico e **sem tocar
+em rede** — a CI segue byte-idêntica.
+
+**Decisão.**
+1. **Seam `RewriteProposer`** (`report/rewrite/proposer.ts`): `propose(request) → RewriteProposal`.
+   Só o **stub determinístico** (guiado por fixtures) entra no build; o proposer real (LLM,
+   `temperature 0`, modelo/prompt versionados) fica atrás de flag e **não** é dependência —
+   mesma disciplina da sonda (ARQUITETURA §5).
+2. **Verificador `verifyRewrite`** (`report/rewrite/verify.ts`): reaplica `analyze()` ao texto
+   reescrito e separa, POR CONSTRUÇÃO:
+   - **PROVA** (determinística): `target_resolved` (a violação-alvo não reaparece no trecho),
+     `no_new_findings` (`totalFindings` não aumenta), `numbers_preserved` e `dates_preserved`
+     (multiconjuntos idênticos), `no_new_jargon` (nenhum termo do glossário introduzido).
+   - **SINAL** (heurístico, nunca prova): `entities_preserved` (heurística de maiúscula/sigla)
+     e `meaning_preserved` — a **SONDA como teste NEGATIVO** (se o leitor de piso extraía o
+     fato do original e trava na proposta → bandeira). A sonda é opcional; sem ela o sinal é
+     **omitido**, não inventado.
+3. **Sonda religada** (`probe/interpret.ts` + `probe/stub-probe.ts`): `interpret` é puro e só
+   emite `flag` ou `neutro` — **nunca `aprovado`** (I5). O stub é determinístico.
+4. **Orquestrador `proposeAndVerify`**: Detecção (o `finding` da Camada 1) → Proposta → Verificação
+   → `VerifiedRewrite` rotulado "gerada". **Nunca aplica** — a decisão é do autor.
+
+**Honestidade (I5) codificada no TIPO.** `RewriteVerification` **não tem** campo
+`approved`/`ok`/`passed` — um teste trava isso (`Object.keys` == `[hasBlockingFailure, metrics,
+proofs, signals]`). `hasBlockingFailure` é um **veto mecânico** (alguma prova falhou), jamais o
+oposto de aprovação: tudo passar = "nenhuma falha de piso detectada". A métrica dura vira
+**0 conteúdo fabricado**: números/datas/entidades comparados literalmente; sonda só como piso.
+
+**Consequências.** Nada em `core/**` mudou; a cerca segue intacta (`report/rewrite` importa
+`core` + `probe`, permitido; depcheck ✔, 57 módulos). Novos: `report/rewrite/{types,proposer,
+verify,index}.ts`, `probe/{interpret,stub-probe}.ts`. 23 testes novos (`rewrite-verify` +
+`probe-interpret`), determinismo incluído; suíte 762 verde. **Fora deste incremento** (próximos):
+o proposer LLM real (atrás de flag, com meta-eval de prompt/modelo) e a fiação na UI (cartão
+"reescrita gerada" com PROVA/SINAL). O contrato e o juiz já estão prontos e testados.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

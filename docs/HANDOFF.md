@@ -67,15 +67,24 @@ cega — a engine determinística é o VERIFICADOR.**
 
 ---
 
-## 4. PRÓXIMO PASSO — Tier 3 (a fase seguinte, ainda não iniciada)
+## 4. ESTADO DO TIER 3 (incremento 1 FEITO — falta LLM real + UI)
 
-**Migração editorial + Tier 2 CONCLUÍDOS.** UI migrada (commit 7b13232); Tier 2 split (ADR-012)
-e andaime de passiva (ADR-013) implementados, verificados no browser e commitados.
+**Migração editorial + Tier 2 CONCLUÍDOS** (ADR-012/013). **Tier 3 · incremento 1 FEITO**
+(ADR-014, `src/report/rewrite/` + `src/lucid/probe/`): o **contrato + o verificador
+determinístico + stubs**, sem rede, CI byte-idêntica.
+- `RewriteProposer` (interface) + `StubRewriteProposer` (fixtures, determinístico).
+- `verifyRewrite` — PROVA (target_resolved, no_new_findings, numbers/dates_preserved,
+  no_new_jargon, delta de métricas) × SINAL (entities_preserved; meaning_preserved via sonda
+  como teste NEGATIVO). **Sem campo "aprovado" — travado no tipo e por teste.**
+- `proposeAndVerify` (orquestrador; nunca aplica). Sonda religada: `interpret` (só flag|neutro)
+  + `StubComprehensionProbe`. 23 testes novos; suíte **762 verde**; cerca intacta.
 
-Resta o **Tier 3 · `RewriteProposer`** — a Camada 2 (LLM) atrás da cerca, opt-in, com stub
-determinístico nos testes, vivendo em `report/` (nunca em `core/`). Contrato de verificação
-detalhado na §3 acima (separar PROVA determinística de SINAL heurístico; nunca selo verde).
-Independe do visual; é a próxima fase desenhada.
+**Falta no Tier 3 (próximos incrementos):**
+1. **Proposer LLM real** — `report/rewrite/llm-proposer.ts` atrás de flag (não é dependência do
+   build), `temperature 0`, modelo/prompt versionados, com **meta-eval** de anti-drift. Idem
+   `probe/llm-probe.ts` para a sonda real.
+2. **Fiação na UI** — cartão "reescrita gerada" que mostra PROVA (✓/✗) e SINAL separados, com
+   o caveat de sempre; nunca aplica sozinho. Vive na camada app, consumindo `report/rewrite`.
 
 ---
 
