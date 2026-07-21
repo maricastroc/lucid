@@ -10,7 +10,7 @@
  * Toda a copy vem de `lib/narrative` — derivada do Finding real, nada inventado.
  */
 import { useState } from "react";
-import type { Finding } from "@/lucid";
+import type { Finding, SplitPoint } from "@/lucid";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import {
   buildConfidence,
@@ -20,7 +20,15 @@ import {
 } from "../lib/narrative";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
-export function RevisionNote({ finding, onApply }: { finding: Finding; onApply: (f: Finding) => void }) {
+export interface RevisionNoteProps {
+  finding: Finding;
+  /** texto normalizado do diagnóstico — base dos offsets dos pontos de divisão. */
+  source: string;
+  onApply: (f: Finding) => void;
+  onSplit: (point: SplitPoint) => void;
+}
+
+export function RevisionNote({ finding, source, onApply, onSplit }: RevisionNoteProps) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
@@ -75,7 +83,7 @@ export function RevisionNote({ finding, onApply }: { finding: Finding; onApply: 
         {safe ? (
           <SafeResolution finding={finding} onApply={() => onApply(finding)} />
         ) : (
-          <HumanDecision finding={finding} />
+          <HumanDecision finding={finding} source={source} onSplit={onSplit} />
         )}
       </div>
     </div>
@@ -172,7 +180,15 @@ function DiffRow({
 
 /* ============================================================ humana */
 
-function HumanDecision({ finding }: { finding: Finding }) {
+function HumanDecision({
+  finding,
+  source,
+  onSplit,
+}: {
+  finding: Finding;
+  source: string;
+  onSplit: (point: SplitPoint) => void;
+}) {
   const rationale = buildConfidence(finding).rationale;
   return (
     <div className="overflow-hidden rounded-xl border border-human-line bg-human-weak">
@@ -191,26 +207,44 @@ function HumanDecision({ finding }: { finding: Finding }) {
           <p className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">
             Como seguir
           </p>
-          <Guidance finding={finding} />
+          <Guidance finding={finding} source={source} onSplit={onSplit} />
         </div>
       </div>
     </div>
   );
 }
 
-function Guidance({ finding }: { finding: Finding }) {
-  if (finding.criterion === "long_sentence") return <LongSentenceGuide finding={finding} />;
+function Guidance({
+  finding,
+  source,
+  onSplit,
+}: {
+  finding: Finding;
+  source: string;
+  onSplit: (point: SplitPoint) => void;
+}) {
+  if (finding.criterion === "long_sentence")
+    return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
   if (finding.criterion === "passive_voice") return <PassiveGuide finding={finding} />;
   if (finding.criterion === "nominalization") return <NominalizationGuide finding={finding} />;
   return <JargonGuide />;
 }
 
-function LongSentenceGuide({ finding }: { finding: Finding }) {
-  const g = longSentenceGuidance(finding);
+function LongSentenceGuide({
+  finding,
+  source,
+  onSplit,
+}: {
+  finding: Finding;
+  source: string;
+  onSplit: (point: SplitPoint) => void;
+}) {
+  const g = longSentenceGuidance(finding, source);
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        A ferramenta não reescreve — mas mede o esforço e localiza onde a frase pode se dividir. Você decide o corte.
+        A ferramenta não reescreve — mas mede o esforço e localiza onde a frase pode se dividir. Escolha um ponto e ela
+        insere a quebra, devolvendo um <span className="text-ink-0">rascunho</span> para você revisar e reanalisar.
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         <Stat label="palavras" value={g.words != null ? String(g.words) : "—"} />
@@ -221,22 +255,33 @@ function LongSentenceGuide({ finding }: { finding: Finding }) {
       {g.candidates.length > 0 && (
         <div className="mt-4">
           <p className="mb-2 text-[10.5px] uppercase tracking-[0.12em] text-ink-3">
-            pontos de divisão sugeridos
+            pontos de divisão possíveis · confira
           </p>
           <ul className="flex flex-col gap-1.5">
             {g.candidates.map((c) => (
-              <li
-                key={c.offset}
-                className="rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[13px] leading-snug"
-              >
-                <span className="text-ink-2">…{c.before}</span>
-                <span className="mx-1.5 text-human" aria-hidden>
-                  ⁝
-                </span>
-                <span className="text-ink-0">{c.after}…</span>
+              <li key={c.offset}>
+                <button
+                  type="button"
+                  onClick={() => onSplit(c)}
+                  className="group flex w-full items-baseline gap-1.5 rounded-lg border border-rule-1 bg-sheet px-3 py-2 text-left font-serif text-[13px] leading-snug transition-colors duration-150 hover:border-human-line hover:bg-human-weak"
+                >
+                  <span className="min-w-0 flex-1 truncate">
+                    <span className="text-ink-2">…{c.before}</span>
+                    <span className="mx-1.5 text-human" aria-hidden>
+                      ⁝
+                    </span>
+                    <span className="text-ink-0">{c.after}…</span>
+                  </span>
+                  <span className="shrink-0 text-[10.5px] font-sans uppercase tracking-[0.1em] text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                    dividir
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+            Insere ponto final e maiúscula, sem apagar palavra. O resultado é um rascunho — a frase final é sua.
+          </p>
         </div>
       )}
     </div>

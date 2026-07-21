@@ -12,7 +12,7 @@
  * lista vivem num bottom sheet.
  */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { analyze, type Finding } from "@/lucid";
+import { analyze, applySplitAt, type Finding, type SplitPoint } from "@/lucid";
 import { findingId, isSafe } from "./lib/criteria";
 import { applySafeSuggestions } from "./lib/audit";
 import { SAMPLE_TEXT } from "./lib/sample";
@@ -132,6 +132,22 @@ export function Studio() {
     [text, pushUndo],
   );
 
+  // Tier 2 · divisão de cláusula. Insere a quebra escolhida (transform puro do core) e
+  // devolve o rascunho ao editor — mesmo registro de undo das sugestões seguras; a
+  // reanálise acontece sozinha porque `diagnostic` deriva de `text`. Fecha a nota para o
+  // autor ver o texto atualizado.
+  const applySplit = useCallback(
+    (point: SplitPoint) => {
+      const next = applySplitAt(text, point);
+      if (next !== text) {
+        pushUndo(text);
+        setText(next);
+      }
+      setSelectedId(null);
+    },
+    [text, pushUndo],
+  );
+
   const applyAllSafe = useCallback(() => {
     const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
     const next = applySafeSuggestions(text, applicable);
@@ -165,6 +181,7 @@ export function Studio() {
     onSelect: selectFinding,
     onApplyAllSafe: applyAllSafe,
     onApply: applySuggestion,
+    onSplit: applySplit,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
     onClose: closeSelection,
@@ -234,7 +251,12 @@ export function Studio() {
                   onClose={closeSelection}
                 />
                 <div key={selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
-                  <RevisionNote finding={selectedFinding} onApply={applySuggestion} />
+                  <RevisionNote
+                    finding={selectedFinding}
+                    source={diagnostic.text}
+                    onApply={applySuggestion}
+                    onSplit={applySplit}
+                  />
                 </div>
               </>
             ) : (

@@ -65,10 +65,15 @@ cega — a engine determinística é o VERIFICADOR.**
 
 ## 4. DECISÃO PENDENTE (o usuário ainda não respondeu)
 
-1. **Eu concluo a migração editorial**
-2. **contrato do Tier 3** (`RewriteProposer` + pipeline de verificação determinística no `report/` + stub) — independe do visual.
+**Migração editorial CONCLUÍDA** (commit 7b13232): `studio.tsx` monta os componentes novos,
+zero token antigo, app renderiza correto, tudo verde. Não é mais uma pendência.
 
-E confirmar: **Tier 2 agora, Tier 3 como fase desenhada em seguida.**
+Resta sequenciar a lógica de ação:
+1. **Tier 2 · Ação estrutural assistida** (determinístico, zero rede) — construir primeiro:
+   decompor frase longa em cláusulas + split interativo; extrair Agente/Ação/Objeto da passiva.
+2. **Tier 3 · contrato do `RewriteProposer`** + pipeline de verificação determinística no `report/` + stub.
+
+Plano endossado: **Tier 2 agora, Tier 3 como fase desenhada em seguida.**
 
 ---
 
