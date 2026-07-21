@@ -10,7 +10,16 @@
  */
 import type { Category, Finding, Severity } from "@/lucid";
 
-export type Criterion = "long_sentence" | "passive_voice" | "nominalization" | "jargon";
+export type Criterion =
+  | "long_sentence"
+  | "passive_voice"
+  | "nominalization"
+  | "jargon"
+  | "mais_que_perfeito_sintetico"
+  | "gerundismo"
+  | "adverbio_mente_denso"
+  | "redundancia"
+  | "perifrase_inflada";
 export type Channel = "inline" | "passage";
 
 export interface CriterionMeta {
@@ -33,7 +42,12 @@ export interface CriterionMeta {
 export const CRITERION_ORDER: readonly Criterion[] = [
   "passive_voice",
   "nominalization",
+  "mais_que_perfeito_sintetico",
+  "gerundismo",
   "jargon",
+  "adverbio_mente_denso",
+  "redundancia",
+  "perifrase_inflada",
   "long_sentence",
 ];
 
@@ -77,6 +91,56 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "",
     signal: "contagem de palavras da frase acima do limite configurado",
     why: "Frases longas sobrecarregam a memória de trabalho de quem lê.",
+  },
+  mais_que_perfeito_sintetico: {
+    label: "Mais-que-perfeito",
+    ruleId: "mais_que_perfeito_sintetico",
+    kind: "Tempo verbal",
+    principleName: "Frases claras",
+    channel: "inline",
+    markStyleClass: "mark-dotted",
+    signal: "forma num léxico de mais-que-perfeito sintético (derivado do PortiLexicon-UD), já sem formas ambíguas",
+    why: "Forma verbal pouco usada na fala (“fizera” = “tinha feito”) — de leitura mais difícil.",
+  },
+  gerundismo: {
+    label: "Gerundismo",
+    ruleId: "gerundismo",
+    kind: "Construção sintática",
+    principleName: "Frases concisas",
+    channel: "inline",
+    markStyleClass: "mark-dashed",
+    signal: "padrão “ir + estar + gerúndio” (ex.: “vai estar enviando”)",
+    why: "Alonga a frase sem necessidade — a forma simples (“vai enviar”) é mais direta.",
+  },
+  adverbio_mente_denso: {
+    label: "Advérbios em -mente",
+    ruleId: "adverbio_mente_denso",
+    kind: "Escolha lexical",
+    principleName: "Frases concisas",
+    channel: "inline",
+    markStyleClass: "mark-solid",
+    signal: "concentração de advérbios em -mente na mesma frase (allowlist do PortiLexicon-UD)",
+    why: "O empilhamento de advérbios em -mente pesa a leitura.",
+  },
+  redundancia: {
+    label: "Redundância",
+    ruleId: "redundancia",
+    kind: "Escolha lexical",
+    principleName: "Frases concisas",
+    channel: "inline",
+    markStyleClass: "mark-solid",
+    signal: "correspondência num léxico curado de pleonasmos e duplas redundantes",
+    why: "Um termo repete o sentido do outro sem acrescentar informação.",
+  },
+  perifrase_inflada: {
+    label: "Perífrase inflada",
+    ruleId: "perifrase_inflada",
+    kind: "Escolha lexical",
+    principleName: "Frases concisas",
+    channel: "inline",
+    markStyleClass: "mark-dashed",
+    signal: "locução cadastrada que ocupa o lugar de uma preposição/conjunção simples",
+    why: "Alonga a frase no lugar de uma palavra simples.",
   },
 };
 

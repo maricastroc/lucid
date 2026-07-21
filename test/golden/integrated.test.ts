@@ -27,6 +27,8 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "mais_que_perfeito_sintetico",
   "gerundismo",
   "adverbio_mente_denso",
+  "redundancia",
+  "perifrase_inflada",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -116,6 +118,8 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     mais_que_perfeito_sintetico: zero(),
     gerundismo: zero(),
     adverbio_mente_denso: zero(),
+    redundancia: zero(),
+    perifrase_inflada: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

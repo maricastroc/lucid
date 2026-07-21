@@ -18,7 +18,9 @@ export type DatasetId =
   | "nominalizacoes.pt"
   | "jargao.pt"
   | "mais-que-perfeito.pt"
-  | "adverbios-mente.pt";
+  | "adverbios-mente.pt"
+  | "redundancias.pt"
+  | "perifrases.pt";
 
 // --- jargão ------------------------------------------------------------------------
 export type JargonKind = "word" | "phrase";
@@ -85,7 +87,22 @@ export interface DataTypes {
   "jargao.pt": JargonPrepared;
   "mais-que-perfeito.pt": ReadonlySet<string>;
   "adverbios-mente.pt": ReadonlySet<string>;
+  "redundancias.pt": PhrasePrepared;
+  "perifrases.pt": PhrasePrepared;
 }
+
+// --- frases feitas (redundância, perífrase) ---------------------------------------
+export interface PhraseEntry {
+  phrase: string;
+  /** forma enxuta citada na justificativa; a ferramenta não aplica sozinha */
+  plain: string | null;
+}
+export interface CompiledPhrase {
+  words: readonly string[];
+  entry: PhraseEntry;
+}
+/** frases agrupadas pela primeira palavra, cada lista ordenada por comprimento decrescente */
+export type PhrasePrepared = ReadonlyMap<string, readonly CompiledPhrase[]>;
 
 /**
  * Visão ESCOPADA de dados injetada em `PassContext.data`. `get` lança se o `id` não foi

@@ -14,7 +14,7 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { analyze, applySplitAt, type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { findingId, isSafe } from "./lib/criteria";
+import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { applySafeSuggestions } from "./lib/audit";
 import { SAMPLE_TEXT } from "./lib/sample";
@@ -29,9 +29,7 @@ import { ArrowDownIcon } from "./components/icons";
 export function Studio() {
   const [text, setText] = useState(SAMPLE_TEXT);
   const [mode, setMode] = useState<Mode>("audit");
-  const [activeCriteria, setActiveCriteria] = useState<ReadonlySet<string>>(
-    new Set(["passive_voice", "nominalization", "jargon", "long_sentence"]),
-  );
+  const [activeCriteria, setActiveCriteria] = useState<ReadonlySet<string>>(new Set(CRITERION_ORDER));
   const [selectedIdRaw, setSelectedId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [bucket, setBucket] = useState<Bucket>("all");
@@ -196,6 +194,7 @@ export function Studio() {
 
   const railProps = {
     diagnostic,
+    text,
     findings,
     selectedFinding,
     selectedId,

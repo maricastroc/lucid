@@ -23,7 +23,9 @@ export type IntegratedCriterion =
   | "jargon"
   | "mais_que_perfeito_sintetico"
   | "gerundismo"
-  | "adverbio_mente_denso";
+  | "adverbio_mente_denso"
+  | "redundancia"
+  | "perifrase_inflada";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

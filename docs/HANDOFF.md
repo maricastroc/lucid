@@ -182,7 +182,16 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   Preparação (Set/Map) memoizada no registry; tipos/transforms em `core/data/{types,prepare}.ts`.
 - **3 detectores morfológicos (ADR-024) — FATIA VERTICAL entregue:** `mais_que_perfeito_sintetico`
   (léxico PortiLexicon, ambiguidade podada em build-time), `gerundismo` (padrão puro), 
-  `adverbio_mente_denso` (allowlist PortiLexicon, densidade ≥3/frase). **820 testes.**
+  `adverbio_mente_denso` (allowlist PortiLexicon, densidade ≥3/frase).
+- **Lote juridiquês (ADR-025):** `redundancia` + `perifrase_inflada` (léxicos próprios, matcher de
+  frase compartilhado `passes/phrase-match.ts`, flag+explica). Arcaísmos/anáfora já são cobertos
+  pelo glossário de jargão — não fazer pass próprio.
+- **Painel da sonda (ADR-025):** Camada 2 na UI (`ProbePanel` + `/api/probe`), opt-in, HONESTO
+  (nunca check verde). A UI passou a expor 3 dos 4 princípios (P4 via proxy-piso com caveat).
+- **11 critérios, 828 testes.** Verificado ao vivo no browser (detectores marcam; sonda trava e
+  reporta sem selo).
+- **Dívida:** `app/lib/criteria.ts` é um registro de critérios paralelo ao engine — adicionar
+  detector toca engine + UI. Candidato a "UI deriva critérios do `Diagnostic`".
 - **Fonte de léxico (D1 fechado):** PortiLexicon-UD (CC-BY 4.0), HF `NILC-ICMC-USP/PortiLexicon-UD`,
   TSV `forma⇥lema⇥FEATS`. Só fatias filtradas são bundladas (VERB.tsv 71 MB → derivado 850 KB).
   Atribuição obrigatória em `data/README.md`.

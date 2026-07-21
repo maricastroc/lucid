@@ -17,6 +17,8 @@ import { jargonPass } from "./jargon";
 import { maisQuePerfeitoPass } from "./mais-que-perfeito";
 import { gerundismoPass } from "./gerundismo";
 import { adverbioMenteDensoPass } from "./adverbio-mente-denso";
+import { redundanciaPass } from "./redundancia";
+import { perifraseInfladaPass } from "./perifrase-inflada";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -26,4 +28,6 @@ export const PASSES: readonly Pass[] = [
   maisQuePerfeitoPass,
   gerundismoPass,
   adverbioMenteDensoPass,
+  redundanciaPass,
+  perifraseInfladaPass,
 ];

@@ -35,6 +35,8 @@ describe("score — forma e limites", () => {
       "mais_que_perfeito_sintetico",
       "gerundismo",
       "adverbio_mente_denso",
+      "redundancia",
+      "perifrase_inflada",
     ]);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
@@ -137,7 +139,7 @@ describe("score — texto vazio e muito curto", () => {
   it("texto vazio: critérios zerados, densidade 0 (sem divisão por zero)", () => {
     const d = analyze("");
     expect(d.score.totalFindings).toBe(0);
-    expect(d.score.byCriterion).toHaveLength(7);
+    expect(d.score.byCriterion).toHaveLength(9);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);

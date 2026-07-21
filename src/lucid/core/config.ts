@@ -38,6 +38,12 @@ export interface Config {
     /** mínimo de advérbios em -mente na mesma frase para marcar (densidade) */
     minPorFrase: number;
   };
+  redundancia: {
+    enabled: boolean;
+  };
+  perifraseInflada: {
+    enabled: boolean;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -70,6 +76,12 @@ export const DEFAULT_CONFIG: Config = {
   adverbioMente: {
     enabled: true,
     minPorFrase: 3,
+  },
+  redundancia: {
+    enabled: true,
+  },
+  perifraseInflada: {
+    enabled: true,
   },
   metrics: {
     decimalPlaces: 1,

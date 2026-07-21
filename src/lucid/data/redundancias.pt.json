@@ -1,0 +1,29 @@
+{
+  "_comentario": "Pleonasmos e duplas redundantes do português (sobretudo burocrático/jurídico) — usado pelo pass 'redundancia' (5.3.4, frases concisas). Léxico CURADO e extensível: cada entrada é uma expressão em que um termo repete o sentido do outro sem acrescentar informação. `plain` é a forma enxuta sugerida na justificativa (a ferramenta NÃO aplica sozinha — cortar qual termo é decisão do autor). Curadoria própria (fatos de língua). Comparação em caixa invariante. Não colide com o glossário de jargão.",
+  "entries": [
+    { "phrase": "nula e sem efeito", "plain": "nula" },
+    { "phrase": "sem efeito e nula", "plain": "nula" },
+    { "phrase": "penas e sanções", "plain": "sanções" },
+    { "phrase": "elo de ligação", "plain": "elo" },
+    { "phrase": "planejar antecipadamente", "plain": "planejar" },
+    { "phrase": "planejamento antecipado", "plain": "planejamento" },
+    { "phrase": "certeza absoluta", "plain": "certeza" },
+    { "phrase": "acabamento final", "plain": "acabamento" },
+    { "phrase": "há anos atrás", "plain": "há anos" },
+    { "phrase": "há dias atrás", "plain": "há dias" },
+    { "phrase": "encarar de frente", "plain": "encarar" },
+    { "phrase": "surpresa inesperada", "plain": "surpresa" },
+    { "phrase": "todos unânimes", "plain": "unânimes" },
+    { "phrase": "monopólio exclusivo", "plain": "monopólio" },
+    { "phrase": "principal protagonista", "plain": "protagonista" },
+    { "phrase": "prévio aviso", "plain": "aviso" },
+    { "phrase": "repetir de novo", "plain": "repetir" },
+    { "phrase": "conviver junto", "plain": "conviver" },
+    { "phrase": "detalhes minuciosos", "plain": "detalhes" },
+    { "phrase": "comparecer pessoalmente em pessoa", "plain": "comparecer pessoalmente" },
+    { "phrase": "expressamente proibido", "plain": "proibido" },
+    { "phrase": "elo de união", "plain": "elo" },
+    { "phrase": "criar novos", "plain": "criar" },
+    { "phrase": "manter o mesmo", "plain": "manter" }
+  ]
+}

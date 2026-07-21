@@ -14,10 +14,13 @@ import type { RewriteProposal } from "@/report/rewrite";
 import { AuditOverview } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
+import { ProbePanel } from "./probe-panel";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "./icons";
 
 export interface RailProps {
   diagnostic: Diagnostic;
+  /** texto atual do documento — insumo da sonda de compreensão (Camada 2) */
+  text: string;
   findings: readonly Finding[];
   selectedFinding: Finding | null;
   selectedId: string | null;
@@ -82,6 +85,7 @@ export function AuditRail(props: RailProps) {
               onBucket={props.onBucket}
               onSelect={props.onSelect}
             />
+            <ProbePanel text={props.text} />
           </div>
         </>
       )}

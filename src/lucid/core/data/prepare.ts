@@ -7,11 +7,14 @@
  */
 import type {
   CompiledEntry,
+  CompiledPhrase,
   JargonEntry,
   JargonPrepared,
   LightVerbForm,
   NominalizationEntry,
   NominalizationPrepared,
+  PhraseEntry,
+  PhrasePrepared,
 } from "./types";
 
 /**
@@ -71,4 +74,23 @@ export function prepareNominalizations(raw: unknown): NominalizationPrepared {
 export function prepareJargon(raw: unknown): JargonPrepared {
   const entries = (raw as { entries: JargonEntry[] }).entries;
   return { entries, byFirstWord: compileJargonEntries(entries) };
+}
+
+/**
+ * `{ entries: PhraseEntry[] }` → mapa `primeira palavra → frases (mais longa primeiro)`. Mesma
+ * lógica de `compileJargonEntries` (longest-match determinístico, independente da ordem do JSON),
+ * para frases feitas genéricas (redundância, perífrase).
+ */
+export function preparePhrases(raw: unknown): PhrasePrepared {
+  const entries = (raw as { entries: PhraseEntry[] }).entries;
+  const map = new Map<string, CompiledPhrase[]>();
+  for (const entry of entries) {
+    const words = entry.phrase.split(" ");
+    const list = map.get(words[0]);
+    const compiled: CompiledPhrase = { words, entry };
+    if (list) list.push(compiled);
+    else map.set(words[0], [compiled]);
+  }
+  for (const list of map.values()) list.sort((a, b) => b.words.length - a.words.length);
+  return map;
 }
