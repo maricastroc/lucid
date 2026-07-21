@@ -25,12 +25,12 @@ function subscribe(onChange: () => void): () => void {
 
 /**
  * Tema como store externo (DOM + localStorage), lido via `useSyncExternalStore` — sem
- * setState em efeito, sem mismatch de hidratação (snapshot de servidor = "dark", o
- * dark-first do produto). O toggle grava `data-theme` + localStorage e notifica os
+ * setState em efeito, sem mismatch de hidratação (snapshot de servidor = "light", o
+ * light-first do produto). O toggle grava `data-theme` + localStorage e notifica os
  * assinantes; o script inline no layout evita flash na carga.
  */
 export function useTheme(): { theme: Theme; toggle: () => void } {
-  const theme = useSyncExternalStore<Theme>(subscribe, readTheme, () => "dark");
+  const theme = useSyncExternalStore<Theme>(subscribe, readTheme, () => "light");
 
   const toggle = useCallback(() => {
     const next: Theme = readTheme() === "dark" ? "light" : "dark";

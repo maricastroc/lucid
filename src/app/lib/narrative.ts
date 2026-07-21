@@ -6,7 +6,7 @@
  *
  * `longSentenceGuidance` implementa a orientação assistida (item 1): mede a frase e
  * localiza PONTOS DE DIVISÃO CANDIDATOS em fronteiras defensáveis (`;`, `—`, vírgula +
- * conjunção coordenativa). A engine não corta — só aponta; a decisão é do autor.
+ * conjunção coordenativa). A ferramenta não corta — só aponta; a decisão é do autor.
  */
 import type { Finding } from "@/lucid";
 
@@ -52,30 +52,30 @@ export function detectionHeadline(f: Finding): string {
   }
 }
 
-export function detectedProse(f: Finding, line: number): string {
+export function detectedProse(f: Finding): string {
   const s = flat(f.span.text);
   switch (f.criterion) {
     case "long_sentence": {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       const over = w != null && th != null ? w - th : null;
-      return `Na linha ${line}, uma única frase acumula ${w ?? "muitas"} palavras${
+      return `Uma única frase acumula ${w ?? "muitas"} palavras${
         over != null ? ` — ${over} acima do limite de ${th}` : ""
-      }. O detector não interpreta o conteúdo: conta as palavras da frase e compara com o limiar.`;
+      }. O detector não interpreta o conteúdo: conta as palavras da frase e compara com o limite.`;
     }
     case "passive_voice":
-      return `Na linha ${line}, «${s}» combina uma forma do verbo “ser” com um particípio. ${
+      return `«${s}» combina uma forma do verbo “ser” com um particípio. ${
         metaBool(f, "hasAgent")
           ? "O agente aparece no próprio trecho."
           : "O texto não diz quem praticou a ação."
       }`;
     case "nominalization": {
       const base = metaStr(f, "baseVerb");
-      return `Na linha ${line}, a ação${base ? ` do verbo “${base}”` : ""} aparece disfarçada de substantivo, presa a um verbo-suporte — o que alonga a frase e afasta o verbo do seu sentido.`;
+      return `A ação${base ? ` do verbo “${base}”` : ""} aparece disfarçada de substantivo, presa a um verbo-suporte — o que alonga a frase e afasta o verbo do seu sentido.`;
     }
     case "jargon": {
       const dom = DOMAIN_PT[metaStr(f, "domain") ?? ""] ?? "técnico";
-      return `Na linha ${line}, «${s}» é reconhecido no glossário curado como termo ${dom}, pouco familiar para leitores fora desse domínio.`;
+      return `«${s}» é reconhecido no glossário curado como termo ${dom}, pouco familiar para leitores fora desse domínio.`;
     }
     default:
       return f.justification;
@@ -92,11 +92,11 @@ export function buildConfidence(f: Finding): { level: ConfidenceLevel; rationale
     if (hasSug)
       return {
         level: "segura",
-        rationale: `“${s}” consta no glossário curado com um equivalente único e independente de contexto; trocar por “${f.suggestion}” preserva a regência e não pede reconjugação. É uma substituição 1:1 — por isso a engine assina embaixo.`,
+        rationale: `“${s}” consta no glossário curado com um equivalente único e independente de contexto; trocar por “${f.suggestion}” preserva a regência e não pede reconjugação. É uma substituição 1:1 — por isso a ferramenta assina embaixo.`,
       };
     return {
       level: "assistida",
-      rationale: `Há um equivalente mais simples, mas a troca depende do que vem depois na frase: aplicá-la às cegas poderia quebrar a concordância. A engine detecta e aponta o caminho, mas deixa a troca com você.`,
+      rationale: `Há um equivalente mais simples, mas a troca depende do que vem depois na frase: aplicá-la às cegas poderia quebrar a concordância. A ferramenta detecta e aponta o caminho, mas deixa a troca com você.`,
     };
   }
 
@@ -104,14 +104,14 @@ export function buildConfidence(f: Finding): { level: ConfidenceLevel; rationale
     if (hasSug)
       return {
         level: "segura",
-        rationale: `O verbo-base substitui a construção diretamente, no infinitivo e com o complemento num formato limpo — 1:1, sem flexionar nada. Segura para aplicar.`,
+        rationale: `O verbo-base substitui a construção diretamente e o complemento está num formato limpo. A forma verbal — infinitivo ou finita — vem de uma tabela fechada verificada à mão, sem conjugador produtivo, preservando tempo e pessoa. Troca 1:1, segura para aplicar.`,
       };
     const base = metaStr(f, "baseVerb");
     return {
       level: "assistida",
       rationale: `A construção foi detectada, mas gerar a troca exigiria reconjugar o verbo${
         base ? ` “${base}”` : ""
-      } ou o complemento não está num formato que a engine reconheça com segurança. Ela recusa flexionar automaticamente e devolve o verbo-base para você reescrever.`,
+      } ou o complemento não está num formato que a ferramenta reconheça com segurança. Ela recusa flexionar automaticamente e devolve o verbo-base para você reescrever.`,
     };
   }
 
@@ -119,8 +119,8 @@ export function buildConfidence(f: Finding): { level: ConfidenceLevel; rationale
     return {
       level: "assistida",
       rationale: metaBool(f, "hasAgent")
-        ? `O agente está no texto, então a informação existe — mas virar para a ativa exige reordenar sujeito e objeto e reconjugar o verbo. Isso está fora da garantia mecânica (ADR-006): a engine monta o andaime, a frase final é sua.`
-        : `Além de reordenar e reconjugar, aqui o agente não está no texto: reescrever na ativa exigiria inventar quem praticou a ação. A engine se recusa a fabricar e devolve a decisão a você.`,
+        ? `O agente está no texto, então a informação existe — mas virar para a ativa exige reordenar sujeito e objeto e reconjugar o verbo. Isso está fora da garantia mecânica: a ferramenta monta o andaime, a frase final é sua.`
+        : `Além de reordenar e reconjugar, aqui o agente não está no texto: reescrever na ativa exigiria inventar quem praticou a ação. A ferramenta se recusa a fabricar e devolve a decisão a você.`,
     };
   }
 
@@ -129,7 +129,7 @@ export function buildConfidence(f: Finding): { level: ConfidenceLevel; rationale
   const th = metaNum(f, "threshold");
   return {
     level: "assistida",
-    rationale: `A engine mede o comprimento com exatidão${
+    rationale: `A ferramenta mede o comprimento com exatidão${
       w != null && th != null ? ` (${w} palavras contra o limiar de ${th})` : ""
     }, mas não decide o que é supérfluo nem onde cortar — isso é trabalho de autor (Princípio 1). O que ela pode fazer é localizar onde a frase pode se dividir; a escolha é sua.`,
   };

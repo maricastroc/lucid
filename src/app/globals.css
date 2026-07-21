@@ -1,150 +1,212 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   Lucid — Design System · "Mesa de exame"
-   O documento é uma folha sobre uma mesa; a auditoria é uma investigação por
-   caso. Dark-first. Uma família cromática. Severidade por tinta; critério por
-   forma. Score é o elemento de MENOR peso — vive subordinado ao texto.
+   Lucid — Design System · "Mesa de revisão editorial"
+
+   O produto é um manuscrito sobre uma mesa de trabalho, marcado por um revisor
+   cuidadoso. O documento é uma PÁGINA real — serifada, arejada, com margens —
+   e os diagnósticos são NOTAS EDITORIAIS, não logs de erro.
+
+   Princípios visuais:
+     · Light-first. Papel morno, nunca branco puro em grandes áreas.
+     · Uma única cor de marca (índigo tinta). Semântica restrita: âmbar = atenção,
+       vermelho suave = grave, verde = seguro para aplicar.
+     · Profundidade por hierarquia, tipografia e espaço — não por empilhar caixas.
+     · Sombras mínimas, bordas suaves, superfícies discretamente separadas.
    ========================================================================== */
 
 :root {
-  /* mesa (fundo) e folha (documento) */
-  --table: #08090b;
-  --sheet: #101216;
-  --bg-1: #101216;
-  --bg-2: #14171c;
-  --bg-3: #191d24;
+  /* ---- Superfícies (mesa → papel) --------------------------------------- */
+  --desk: #ece7dd; /* fundo da aplicação — greige morno */
+  --sheet: #fdfcf9; /* a página do documento — flutua sobre a mesa */
+  --surface: #f8f5ef; /* trilho / painéis */
+  --surface-2: #f1ede4; /* insets: cartões de evidência, chips */
+  --surface-3: #e9e3d7; /* hover / pressionado */
 
-  --line-1: rgb(255 255 255 / 0.05);
-  --line-2: rgb(255 255 255 / 0.09);
-  --line-3: rgb(255 255 255 / 0.15);
+  /* ---- Tinta (texto) ---------------------------------------------------- */
+  --ink-0: #22201b; /* primário */
+  --ink-1: #55514a; /* secundário */
+  --ink-2: #655f55; /* terciário / metadados — AA em papel */
+  --ink-3: #6f6a5e; /* rótulos e dicas — AA em papel */
+  --ink-dim: #cbc5b7; /* prosa fora de foco (modo lupa) — de-ênfase deliberada */
 
-  --fg-0: #e9ebee;
-  --fg-1: #a9afb8;
-  --fg-2: #6b717a;
-  --fg-3: #464b53;
-  /* texto fora do foco (modo lupa) */
-  --fg-dim: #3b3f47;
+  /* ---- Fios / bordas ---------------------------------------------------- */
+  --rule-1: rgb(34 32 27 / 0.07);
+  --rule-2: rgb(34 32 27 / 0.12);
+  --rule-3: rgb(34 32 27 / 0.18);
 
-  --accent: #5ec2cf;
-  --accent-ink: #06181b;
-  --accent-weak: rgb(94 194 207 / 0.13);
-  --accent-flash: rgb(94 194 207 / 0.28);
-  --accent-line: rgb(94 194 207 / 0.4);
+  /* ---- Marca (índigo tinta) --------------------------------------------- */
+  --accent: #3a4691;
+  --accent-strong: #303a7c;
+  --accent-ink: #ffffff;
+  --accent-weak: rgb(58 70 145 / 0.09);
+  --accent-flash: rgb(58 70 145 / 0.2);
+  --accent-line: rgb(58 70 145 / 0.28);
 
-  --sev-info: var(--fg-2);
-  --sev-warn: #d6a44f;
-  --sev-error: #d17c63;
+  /* ---- Severidade (escala contida) -------------------------------------- */
+  --sev-info: #7c776c; /* neutro */
+  --sev-warn: #946614; /* âmbar — atenção */
+  --sev-error: #a8443a; /* vermelho suave — grave */
 
-  --radius-sm: 4px;
-  --radius-md: 7px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
+  /* ---- Estado de automação ---------------------------------------------- */
+  --safe: #2c7350; /* verde — pode aplicar com segurança */
+  --safe-weak: rgb(47 124 87 / 0.1);
+  --safe-line: rgb(47 124 87 / 0.28);
+  --safe-strong: #24694a; /* botão de ação — contraste AA com --on-safe */
+  --on-safe: #ffffff;
+  --human: #4a4f8a; /* índigo apagado — decisão do autor */
+  --human-weak: rgb(74 79 138 / 0.08);
+  --human-line: rgb(74 79 138 / 0.26);
 
-  --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 40px 80px -48px rgb(0 0 0 / 0.8);
-  --shadow-pop: 0 16px 40px -16px rgb(0 0 0 / 0.6);
+  /* ---- Marca d'água editorial das anotações ----------------------------- */
+  --mark-passage: rgb(154 106 22 / 0.09);
+
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-sheet: 0 1px 1px rgb(34 32 27 / 0.03), 0 24px 60px -34px rgb(34 32 27 / 0.24);
+  --shadow-pop: 0 20px 48px -18px rgb(34 32 27 / 0.28), 0 2px 6px rgb(34 32 27 / 0.06);
+  --shadow-rail: -1px 0 0 var(--rule-1);
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-settle: cubic-bezier(0.32, 0.72, 0, 1);
 
-  color-scheme: dark;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --table: #eeeeec;
-    --sheet: #ffffff;
-    --bg-1: #ffffff;
-    --bg-2: #f7f7f5;
-    --bg-3: #eeeeeb;
-    --line-1: rgb(20 22 26 / 0.06);
-    --line-2: rgb(20 22 26 / 0.1);
-    --line-3: rgb(20 22 26 / 0.16);
-    --fg-0: #15171a;
-    --fg-1: #494e56;
-    --fg-2: #70757d;
-    --fg-3: #a9aeb5;
-    --fg-dim: #c7cace;
-    --accent: #12768a;
-    --accent-ink: #ffffff;
-    --accent-weak: rgb(18 118 138 / 0.1);
-    --accent-flash: rgb(18 118 138 / 0.18);
-    --accent-line: rgb(18 118 138 / 0.35);
-    --sev-warn: #8a6410;
-    --sev-error: #a8462f;
-    --shadow-sheet: 0 1px 2px rgb(20 22 26 / 0.04), 0 40px 80px -48px rgb(20 22 26 / 0.22);
-    --shadow-pop: 0 16px 40px -16px rgb(20 22 26 / 0.2);
-    color-scheme: light;
-  }
-}
-
-:root[data-theme="dark"] {
-  --table: #08090b;
-  --sheet: #101216;
-  --bg-1: #101216;
-  --bg-2: #14171c;
-  --bg-3: #191d24;
-  --line-1: rgb(255 255 255 / 0.05);
-  --line-2: rgb(255 255 255 / 0.09);
-  --line-3: rgb(255 255 255 / 0.15);
-  --fg-0: #e9ebee;
-  --fg-1: #a9afb8;
-  --fg-2: #6b717a;
-  --fg-3: #464b53;
-  --fg-dim: #3b3f47;
-  --accent: #5ec2cf;
-  --accent-ink: #06181b;
-  --accent-weak: rgb(94 194 207 / 0.13);
-  --accent-flash: rgb(94 194 207 / 0.28);
-  --accent-line: rgb(94 194 207 / 0.4);
-  --sev-warn: #d6a44f;
-  --sev-error: #d17c63;
-  --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 40px 80px -48px rgb(0 0 0 / 0.8);
-  --shadow-pop: 0 16px 40px -16px rgb(0 0 0 / 0.6);
-  color-scheme: dark;
-}
-
-:root[data-theme="light"] {
-  --table: #eeeeec;
-  --sheet: #ffffff;
-  --bg-1: #ffffff;
-  --bg-2: #f7f7f5;
-  --bg-3: #eeeeeb;
-  --line-1: rgb(20 22 26 / 0.06);
-  --line-2: rgb(20 22 26 / 0.1);
-  --line-3: rgb(20 22 26 / 0.16);
-  --fg-0: #15171a;
-  --fg-1: #494e56;
-  --fg-2: #70757d;
-  --fg-3: #a9aeb5;
-  --fg-dim: #c7cace;
-  --accent: #12768a;
-  --accent-ink: #ffffff;
-  --accent-weak: rgb(18 118 138 / 0.1);
-  --accent-flash: rgb(18 118 138 / 0.18);
-  --accent-line: rgb(18 118 138 / 0.35);
-  --sev-warn: #8a6410;
-  --sev-error: #a8462f;
-  --shadow-sheet: 0 1px 2px rgb(20 22 26 / 0.04), 0 40px 80px -48px rgb(20 22 26 / 0.22);
-  --shadow-pop: 0 16px 40px -16px rgb(20 22 26 / 0.2);
   color-scheme: light;
 }
 
+/* ---- Dark: alternativa sofisticada, não a origem da identidade ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --desk: #14130f;
+    --sheet: #1e1c16;
+    --surface: #1a1813;
+    --surface-2: #232019;
+    --surface-3: #2c2820;
+    --ink-0: #ece9e1;
+    --ink-1: #b2ada2;
+    --ink-2: #989286;
+    --ink-3: #8b857a;
+    --ink-dim: #4a463d;
+    --rule-1: rgb(255 250 235 / 0.06);
+    --rule-2: rgb(255 250 235 / 0.1);
+    --rule-3: rgb(255 250 235 / 0.16);
+    --accent: #98a2ee;
+    --accent-strong: #aab2f2;
+    --accent-ink: #12142e;
+    --accent-weak: rgb(152 162 238 / 0.14);
+    --accent-flash: rgb(152 162 238 / 0.28);
+    --accent-line: rgb(152 162 238 / 0.4);
+    --sev-info: #948e82;
+    --sev-warn: #d9a94f;
+    --sev-error: #e08a72;
+    --safe: #5fca94;
+    --safe-weak: rgb(95 202 148 / 0.14);
+    --safe-line: rgb(95 202 148 / 0.32);
+    --safe-strong: #57c089;
+    --on-safe: #0e2018;
+    --human: #a6adef;
+    --human-weak: rgb(166 173 239 / 0.13);
+    --human-line: rgb(166 173 239 / 0.3);
+    --mark-passage: rgb(217 169 79 / 0.12);
+    --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
+    --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
+    color-scheme: dark;
+  }
+}
+
+/* Overrides explícitos do toggle (vencem o media query em ambas as direções). */
+:root[data-theme="light"] {
+  --desk: #ece7dd;
+  --sheet: #fdfcf9;
+  --surface: #f8f5ef;
+  --surface-2: #f1ede4;
+  --surface-3: #e9e3d7;
+  --ink-0: #22201b;
+  --ink-1: #55514a;
+  --ink-2: #655f55;
+  --ink-3: #6f6a5e;
+  --ink-dim: #cbc5b7;
+  --rule-1: rgb(34 32 27 / 0.07);
+  --rule-2: rgb(34 32 27 / 0.12);
+  --rule-3: rgb(34 32 27 / 0.18);
+  --accent: #3a4691;
+  --accent-strong: #303a7c;
+  --accent-ink: #ffffff;
+  --accent-weak: rgb(58 70 145 / 0.09);
+  --accent-flash: rgb(58 70 145 / 0.2);
+  --accent-line: rgb(58 70 145 / 0.28);
+  --sev-info: #7c776c;
+  --sev-warn: #946614;
+  --sev-error: #a8443a;
+  --safe: #2c7350;
+  --safe-weak: rgb(47 124 87 / 0.1);
+  --safe-line: rgb(47 124 87 / 0.28);
+  --safe-strong: #24694a;
+  --on-safe: #ffffff;
+  --human: #4a4f8a;
+  --human-weak: rgb(74 79 138 / 0.08);
+  --human-line: rgb(74 79 138 / 0.26);
+  --mark-passage: rgb(154 106 22 / 0.09);
+  --shadow-sheet: 0 1px 1px rgb(34 32 27 / 0.03), 0 24px 60px -34px rgb(34 32 27 / 0.24);
+  --shadow-pop: 0 20px 48px -18px rgb(34 32 27 / 0.28), 0 2px 6px rgb(34 32 27 / 0.06);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --desk: #14130f;
+  --sheet: #1e1c16;
+  --surface: #1a1813;
+  --surface-2: #232019;
+  --surface-3: #2c2820;
+  --ink-0: #ece9e1;
+  --ink-1: #b2ada2;
+  --ink-2: #989286;
+  --ink-3: #8b857a;
+  --ink-dim: #4a463d;
+  --rule-1: rgb(255 250 235 / 0.06);
+  --rule-2: rgb(255 250 235 / 0.1);
+  --rule-3: rgb(255 250 235 / 0.16);
+  --accent: #98a2ee;
+  --accent-strong: #aab2f2;
+  --accent-ink: #12142e;
+  --accent-weak: rgb(152 162 238 / 0.14);
+  --accent-flash: rgb(152 162 238 / 0.28);
+  --accent-line: rgb(152 162 238 / 0.4);
+  --sev-info: #948e82;
+  --sev-warn: #d9a94f;
+  --sev-error: #e08a72;
+  --safe: #5fca94;
+  --safe-weak: rgb(95 202 148 / 0.14);
+  --safe-line: rgb(95 202 148 / 0.32);
+  --safe-strong: #57c089;
+  --on-safe: #0e2018;
+  --human: #a6adef;
+  --human-weak: rgb(166 173 239 / 0.13);
+  --human-line: rgb(166 173 239 / 0.3);
+  --mark-passage: rgb(217 169 79 / 0.12);
+  --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
+  --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
+  color-scheme: dark;
+}
+
 @theme inline {
-  --color-table: var(--table);
+  --color-desk: var(--desk);
   --color-sheet: var(--sheet);
-  --color-bg-1: var(--bg-1);
-  --color-bg-2: var(--bg-2);
-  --color-bg-3: var(--bg-3);
-  --color-line-1: var(--line-1);
-  --color-line-2: var(--line-2);
-  --color-line-3: var(--line-3);
-  --color-fg-0: var(--fg-0);
-  --color-fg-1: var(--fg-1);
-  --color-fg-2: var(--fg-2);
-  --color-fg-3: var(--fg-3);
-  --color-fg-dim: var(--fg-dim);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-rule-1: var(--rule-1);
+  --color-rule-2: var(--rule-2);
+  --color-rule-3: var(--rule-3);
+  --color-ink-0: var(--ink-0);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-dim: var(--ink-dim);
   --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
   --color-accent-weak: var(--accent-weak);
   --color-accent-flash: var(--accent-flash);
@@ -152,6 +214,12 @@
   --color-sev-info: var(--sev-info);
   --color-sev-warn: var(--sev-warn);
   --color-sev-error: var(--sev-error);
+  --color-safe: var(--safe);
+  --color-safe-weak: var(--safe-weak);
+  --color-safe-line: var(--safe-line);
+  --color-human: var(--human);
+  --color-human-weak: var(--human-weak);
+  --color-human-line: var(--human-line);
 
   --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -164,7 +232,7 @@
 }
 
 * {
-  border-color: var(--line-2);
+  border-color: var(--rule-2);
 }
 
 html {
@@ -173,11 +241,12 @@ html {
 
 body {
   min-height: 100%;
-  background: var(--table);
-  color: var(--fg-0);
+  background: var(--desk);
+  color: var(--ink-0);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
 }
 
 ::selection {
@@ -187,117 +256,142 @@ body {
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
+/* Scrollbars discretas */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--line-3) transparent;
+  scrollbar-color: var(--rule-3) transparent;
 }
 *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 11px;
+  height: 11px;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--line-2);
+  background: var(--rule-2);
   border: 3px solid transparent;
   background-clip: padding-box;
   border-radius: 999px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--line-3);
+  background: var(--rule-3);
   background-clip: padding-box;
 }
 
-/* ---- Superfície de leitura (o documento) ------------------------------ */
-.reading-surface {
+/* ============================================================================
+   A PÁGINA — o documento como superfície de leitura editorial
+   ========================================================================== */
+.prose-doc {
   font-family: var(--font-serif);
-  font-size: 19px;
-  line-height: 1.9;
-  letter-spacing: 0.002em;
-  color: var(--fg-0);
+  font-size: 1.28rem; /* ~20.5px */
+  line-height: 1.85;
+  letter-spacing: 0.001em;
+  color: var(--ink-0);
+  font-feature-settings: "onum" 1, "liga" 1;
 }
-.reading-surface :is(.seg, .mark) {
-  transition: color 0.26s var(--ease-standard);
+.prose-doc p {
+  margin: 0;
+}
+.prose-doc p + p {
+  margin-top: 1.55em;
+}
+.prose-doc .seg,
+.prose-doc .mark {
+  transition:
+    color 0.32s var(--ease-standard),
+    text-decoration-color 0.24s var(--ease-standard),
+    background-color 0.24s var(--ease-standard);
 }
 
-/* modo lupa: fora do foco esmaece; a frase do caso permanece acesa */
-.reading-surface.focus-mode {
-  color: var(--fg-dim);
+/* Modo lupa: a página inteira recua; a passagem do caso permanece acesa. */
+.prose-doc.is-focused {
+  color: var(--ink-dim);
 }
-.reading-surface.focus-mode .lit {
-  color: var(--fg-0);
+.prose-doc.is-focused .is-lit {
+  color: var(--ink-0);
 }
-.reading-surface.focus-mode .mark:not(.lit) {
-  text-decoration-color: var(--fg-dim);
+.prose-doc.is-focused .mark:not(.is-lit) {
+  text-decoration-color: var(--ink-dim);
+}
+/* passagens não selecionadas recuam por completo quando há um caso em foco */
+.prose-doc.is-focused .passage:not(.is-lit) {
+  background: transparent;
 }
 
-/* ---- Marcas de anotação ----------------------------------------------- */
+/* ---- Marcas de anotação (sublinhados delicados) ------------------------- */
 .mark {
   cursor: pointer;
   text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  text-decoration-color: var(--mark-ink, var(--fg-2));
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--mark-ink, var(--ink-2)) 62%, transparent);
+  border-radius: 3px;
   transition:
-    text-underline-offset 0.12s var(--ease-standard),
-    text-decoration-color 0.2s var(--ease-standard),
-    background-color 0.2s var(--ease-standard);
+    text-underline-offset 0.14s var(--ease-standard),
+    text-decoration-color 0.24s var(--ease-standard),
+    background-color 0.24s var(--ease-standard);
 }
 .mark:hover {
-  text-underline-offset: 5px;
+  text-underline-offset: 6px;
+  text-decoration-color: var(--mark-ink, var(--ink-1));
 }
 .mark-solid {
   text-decoration-style: solid;
 }
 .mark-dotted {
   text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
 }
 .mark-dashed {
   text-decoration-style: dashed;
 }
 
+/* Passagem (frase longa) — tinta translúcida leve, sem retângulo pesado. */
 .passage {
-  background: color-mix(in srgb, var(--sev-warn) 8%, transparent);
+  background: var(--mark-passage);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  border-radius: 2px;
+  border-radius: 4px;
+  padding: 0.06em 0.1em;
+  cursor: pointer;
 }
 
+/* Trecho selecionado — foco suave em cor de marca. */
 .seg-selected {
   background: var(--accent-weak);
+  box-shadow: 0 0 0 1px var(--accent-line) inset;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  border-radius: 2px;
+  border-radius: 4px;
+  padding: 0.06em 0.14em;
 }
 @keyframes finding-flash {
-  from {
+  0% {
     background: var(--accent-flash);
   }
-  to {
+  100% {
     background: var(--accent-weak);
   }
 }
 .seg-flash {
-  animation: finding-flash 0.62s var(--ease-settle);
+  animation: finding-flash 0.66s var(--ease-settle);
 }
 
-/* ---- Espinha de evidências (margem) ----------------------------------- */
-.spine-tick {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  cursor: pointer;
+/* Marcador de margem por parágrafo (change-bar discreto) */
+.margin-tick {
   transition:
-    width 0.16s var(--ease-standard),
-    opacity 0.16s var(--ease-standard);
+    opacity 0.2s var(--ease-standard),
+    transform 0.2s var(--ease-standard);
 }
 
-/* ---- Movimento --------------------------------------------------------- */
+/* ============================================================================
+   MOVIMENTO
+   ========================================================================== */
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -305,36 +399,54 @@ body {
   }
 }
 .rise {
-  animation: rise 0.22s var(--ease-standard) both;
+  animation: rise 0.26s var(--ease-standard) both;
 }
-@keyframes case-in {
+
+@keyframes note-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.995);
+    transform: translateX(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0);
   }
 }
-.case-in {
-  animation: case-in 0.28s var(--ease-settle) both;
+.note-in {
+  animation: note-in 0.3s var(--ease-settle) both;
 }
 
-/* ---- Editor (IDE) ------------------------------------------------------ */
-.line-row {
-  transition: background-color 0.18s var(--ease-standard);
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
-.line-active {
-  background: color-mix(in srgb, var(--fg-0) 4%, transparent);
-}
-.gutter-num {
-  transition: color 0.18s var(--ease-standard);
+.fade-in {
+  animation: fade-in 0.24s var(--ease-standard) both;
 }
 
-/* linha do problems / linhas de instrumentação */
-.kv-row {
-  transition: background-color 0.12s var(--ease-standard);
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.sheet-up {
+  animation: sheet-up 0.32s var(--ease-settle) both;
+}
+
+/* Linhas de lista / itens interativos */
+.row-hit {
+  transition:
+    background-color 0.14s var(--ease-standard),
+    box-shadow 0.14s var(--ease-standard);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -69,16 +69,3 @@ export function buildLines(text: string, findings: readonly Finding[]): DocLine[
 
   return lines;
 }
-
-export function offsetToLineCol(text: string, offset: number): { line: number; col: number } {
-  const clamped = Math.max(0, Math.min(text.length, offset));
-  let line = 1;
-  let lineStart = 0;
-  for (let i = 0; i < clamped; i++) {
-    if (text[i] === "\n") {
-      line++;
-      lineStart = i + 1;
-    }
-  }
-  return { line, col: clamped - lineStart + 1 };
-}

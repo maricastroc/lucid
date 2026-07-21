@@ -1,27 +1,28 @@
 "use client";
 
 /**
- * Studio — orquestrador do "IDE de linguagem". Único ponto que chama `analyze()`: a UI é
- * consumidora pura da Camada 1. Compõe as zonas: barra de título, editor (artefato sob
- * inspeção), inspetor (o centro — visão geral ⇄ investigação de um diagnóstico), painel
- * Problems (diagnósticos) e status bar (instrumentação).
+ * Studio — orquestrador da mesa de revisão. Único ponto que chama `analyze()`: a UI é
+ * consumidora pura da Camada 1. Compõe o masthead, o documento (protagonista) e o trilho
+ * editorial (visão geral ⇄ nota de um diagnóstico + lista de revisões).
  *
- * Selecionar um diagnóstico sincroniza tudo: acende a linha no editor, rola o trecho à
- * vista com flash, e o inspetor vira a investigação daquele caso. j/k (↑/↓) percorrem os
- * diagnósticos; Esc fecha. "aplicar N seguras" resolve num passo o que é mecanicamente
- * seguro; o resto, honestamente, fica para o autor.
+ * Selecionar um diagnóstico sincroniza tudo: acende o trecho na página, rola-o à vista
+ * com um flash curto, faz a página recuar (modo lupa) e abre a nota dedicada. j/k (↑/↓)
+ * percorrem as revisões; Esc fecha. "Aplicar as seguras" resolve num passo o que é
+ * mecanicamente seguro; o resto, honestamente, fica com o autor. No mobile, a nota e a
+ * lista vivem num bottom sheet.
  */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { analyze, type Finding } from "@/lucid";
-import { findingId } from "./lib/criteria";
+import { findingId, isSafe } from "./lib/criteria";
 import { applySafeSuggestions } from "./lib/audit";
-import { offsetToLineCol } from "./lib/editor-model";
 import { SAMPLE_TEXT } from "./lib/sample";
-import { TitleBar } from "./components/title-bar";
-import { Editor, type Mode } from "./components/editor";
-import { Inspector } from "./components/inspector";
-import { ProblemsPanel, type Bucket } from "./components/problems-panel";
-import { StatusBar } from "./components/status-bar";
+import { Masthead } from "./components/masthead";
+import { DocumentView, type Mode } from "./components/document-view";
+import { AuditRail, NoteNav, RailFooter } from "./components/audit-rail";
+import { AuditOverview } from "./components/audit-overview";
+import { RevisionList, type Bucket } from "./components/revision-list";
+import { RevisionNote } from "./components/revision-note";
+import { ArrowDownIcon } from "./components/icons";
 
 export function Studio() {
   const [text, setText] = useState(SAMPLE_TEXT);
@@ -32,6 +33,7 @@ export function Studio() {
   const [selectedIdRaw, setSelectedId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const [bucket, setBucket] = useState<Bucket>("all");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const undoStack = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
@@ -45,8 +47,8 @@ export function Studio() {
     [diagnostic, activeCriteria],
   );
 
-  const resolvableCount = useMemo(() => findings.filter((f) => f.suggestion !== undefined).length, [findings]);
-  const humanCount = findings.length - resolvableCount;
+  const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
+  const humanCount = findings.length - safeCount;
 
   const selectedId = useMemo(
     () => (selectedIdRaw && findings.some((f) => findingId(f) === selectedIdRaw) ? selectedIdRaw : null),
@@ -55,30 +57,24 @@ export function Studio() {
   const selectedIndex = selectedId ? findings.findIndex((f) => findingId(f) === selectedId) : -1;
   const selectedFinding = selectedIndex >= 0 ? findings[selectedIndex] : null;
 
-  const activeLines = useMemo(() => {
-    if (!selectedFinding) return new Set<number>();
-    const from = offsetToLineCol(diagnostic.text, selectedFinding.span.start).line;
-    const to = offsetToLineCol(diagnostic.text, Math.max(selectedFinding.span.start, selectedFinding.span.end - 1)).line;
-    const set = new Set<number>();
-    for (let l = from; l <= to; l++) set.add(l);
-    return set;
-  }, [selectedFinding, diagnostic.text]);
-
-  // Sincroniza editor com a seleção: rola o trecho à vista + flash curto.
+  // Sincroniza a página com a seleção: rola o trecho à vista + flash curto.
   useEffect(() => {
     if (!selectedId || mode !== "audit") return;
     const el = scrollRef.current?.querySelector<HTMLElement>(`[data-finding-id="${cssEscape(selectedId)}"]`);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "center" });
     setFlashId(selectedId);
-    const t = window.setTimeout(() => setFlashId(null), 640);
+    const t = window.setTimeout(() => setFlashId(null), 660);
     return () => window.clearTimeout(t);
   }, [selectedId, mode, diagnostic]);
 
   const selectFinding = useCallback((finding: Finding) => {
     setMode("audit");
     setSelectedId(findingId(finding));
+    setSheetOpen(true);
   }, []);
+
+  const closeSelection = useCallback(() => setSelectedId(null), []);
 
   const goTo = useCallback(
     (delta: number) => {
@@ -86,6 +82,7 @@ export function Studio() {
       const from = selectedIndex < 0 ? (delta > 0 ? -1 : 0) : selectedIndex;
       const next = (from + delta + findings.length) % findings.length;
       setSelectedId(findingId(findings[next]));
+      setSheetOpen(true);
     },
     [findings, selectedIndex],
   );
@@ -122,27 +119,28 @@ export function Studio() {
     setCanUndo(true);
   }, []);
 
+  // As sugestões são aplicadas sobre `text` (o estado atual no clique), com o registro do
+  // undo FORA do updater de `setText` — um updater tem de ser puro, e mutar o histórico lá
+  // dentro duplicaria o registro sob o double-invoke do Strict Mode.
   const applySuggestion = useCallback(
     (finding: Finding) => {
       if (finding.suggestion === undefined) return;
-      setText((current) => {
-        pushUndo(current);
-        return current.slice(0, finding.span.start) + finding.suggestion + current.slice(finding.span.end);
-      });
+      pushUndo(text);
+      setText(text.slice(0, finding.span.start) + finding.suggestion + text.slice(finding.span.end));
       setSelectedId(null);
     },
-    [pushUndo],
+    [text, pushUndo],
   );
 
   const applyAllSafe = useCallback(() => {
-    setText((current) => {
-      const applicable = analyze(current).findings.filter((f) => activeCriteria.has(f.criterion));
-      const next = applySafeSuggestions(current, applicable);
-      if (next !== current) pushUndo(current);
-      return next;
-    });
+    const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
+    const next = applySafeSuggestions(text, applicable);
+    if (next !== text) {
+      pushUndo(text);
+      setText(next);
+    }
     setSelectedId(null);
-  }, [pushUndo, activeCriteria]);
+  }, [text, pushUndo, activeCriteria]);
 
   const undo = useCallback(() => {
     const previous = undoStack.current.pop();
@@ -151,62 +149,135 @@ export function Studio() {
     setCanUndo(undoStack.current.length > 0);
   }, []);
 
+  const railProps = {
+    diagnostic,
+    findings,
+    selectedFinding,
+    selectedId,
+    index: selectedIndex + 1,
+    total: findings.length,
+    safeCount,
+    humanCount,
+    activeCriteria,
+    bucket,
+    onToggleCriterion: toggleCriterion,
+    onBucket: setBucket,
+    onSelect: selectFinding,
+    onApplyAllSafe: applyAllSafe,
+    onApply: applySuggestion,
+    onPrev: () => goTo(-1),
+    onNext: () => goTo(1),
+    onClose: closeSelection,
+  };
+
   return (
-    <div className="flex h-dvh flex-col overflow-hidden">
-      <TitleBar />
+    <div className="flex h-dvh flex-col overflow-hidden bg-desk">
+      <Masthead mode={mode} onChangeMode={setMode} />
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <Editor
+        <DocumentView
           ref={scrollRef}
           mode={mode}
           text={text}
           diagnostic={diagnostic}
           selectedId={selectedId}
           flashId={flashId}
-          activeLines={activeLines}
           activeCriteria={activeCriteria}
           onChangeText={setText}
-          onChangeMode={setMode}
           onSelectFinding={selectFinding}
         />
-        <Inspector
-          diagnostic={diagnostic}
-          selectedFinding={selectedFinding}
-          index={selectedIndex + 1}
-          total={findings.length}
-          activeCriteria={activeCriteria}
-          onToggleCriterion={toggleCriterion}
-          onPrev={() => goTo(-1)}
-          onNext={() => goTo(1)}
-          onClose={() => setSelectedId(null)}
-          onApply={applySuggestion}
-        />
+
+        {/* Desktop: coluna editorial fixa */}
+        <AuditRail {...railProps} />
       </div>
 
-      <ProblemsPanel
-        diagnostic={diagnostic}
-        findings={findings}
-        selectedId={selectedId}
-        bucket={bucket}
-        resolvableCount={resolvableCount}
-        humanCount={humanCount}
-        onBucket={setBucket}
-        onSelect={selectFinding}
-        onApplyAllSafe={applyAllSafe}
-      />
+      {/* Mobile: botão flutuante que abre o bottom sheet de revisões */}
+      {mode === "audit" && findings.length > 0 && !sheetOpen && (
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-[var(--shadow-pop)] lg:hidden"
+        >
+          {findings.length} {findings.length === 1 ? "revisão" : "revisões"}
+        </button>
+      )}
 
-      <StatusBar diagnostic={diagnostic} selectedFinding={selectedFinding} />
+      {/* Mobile: bottom sheet (nota ou visão geral + lista) */}
+      {mode === "audit" && sheetOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Revisões">
+          <button
+            type="button"
+            aria-label="Fechar"
+            onClick={() => {
+              setSheetOpen(false);
+              setSelectedId(null);
+            }}
+            className="absolute inset-0 bg-ink-0/25 backdrop-blur-[2px]"
+          />
+          <div className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col overflow-hidden rounded-t-[20px] border-t border-rule-2 bg-surface shadow-[var(--shadow-pop)]">
+            <button
+              type="button"
+              aria-label="Recolher"
+              onClick={() => {
+                setSheetOpen(false);
+                setSelectedId(null);
+              }}
+              className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-rule-3"
+            />
+            {selectedFinding ? (
+              <>
+                <NoteNav
+                  index={selectedIndex + 1}
+                  total={findings.length}
+                  onPrev={() => goTo(-1)}
+                  onNext={() => goTo(1)}
+                  onClose={closeSelection}
+                />
+                <div key={selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
+                  <RevisionNote finding={selectedFinding} onApply={applySuggestion} />
+                </div>
+              </>
+            ) : (
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <AuditOverview
+                  diagnostic={diagnostic}
+                  findings={findings}
+                  safeCount={safeCount}
+                  humanCount={humanCount}
+                  activeCriteria={activeCriteria}
+                  onToggleCriterion={toggleCriterion}
+                  onApplyAllSafe={applyAllSafe}
+                />
+                <RevisionList
+                  findings={findings}
+                  selectedId={selectedId}
+                  bucket={bucket}
+                  safeCount={safeCount}
+                  humanCount={humanCount}
+                  onBucket={setBucket}
+                  onSelect={selectFinding}
+                />
+              </div>
+            )}
+            <RailFooter diagnostic={diagnostic} />
+          </div>
+        </div>
+      )}
 
+      {/* Desfazer */}
       {canUndo && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-9 flex justify-center">
-          <div className="rise pointer-events-auto flex items-center gap-3 rounded-lg border border-line-2 bg-bg-1 px-3 py-2 shadow-[var(--shadow-pop)]">
-            <span className="text-[12.5px] text-fg-1">Texto alterado pela sugestão.</span>
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-4">
+          <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-[var(--shadow-pop)]">
+            <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
+              <ArrowDownIcon className="size-4 text-safe" aria-hidden />
+              Sugestão aplicada ao texto.
+            </span>
             <button
               type="button"
               onClick={undo}
-              className="rounded-[4px] px-2 py-1 font-mono text-[11px] text-accent transition-colors duration-[120ms] hover:bg-accent-weak"
+              className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
             >
-              desfazer
+              Desfazer
             </button>
           </div>
         </div>
