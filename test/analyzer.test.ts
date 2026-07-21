@@ -25,6 +25,8 @@ describe("analyze — documento vazio", () => {
         { criterion: "adverbio_mente_denso", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "redundancia", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "perifrase_inflada", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "paragraph_length", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "prose_enumeration", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
       ],
       totalFindings: 0,
     });
@@ -45,7 +47,7 @@ describe("analyze — documento sem findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(9);
+    expect(diagnostic.score.byCriterion).toHaveLength(11);
     for (const entry of diagnostic.score.byCriterion) {
       expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(entry.densityPer100Words).toBe(0);
@@ -79,7 +81,8 @@ describe("analyze — documento com um finding", () => {
 describe("analyze — múltiplos findings", () => {
   it("várias frases longas geram um finding por frase, todos contabilizados no placar", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
-    const text = "Primeira frase bem longa para o teste. Segunda frase também bem longa aqui. Terceira frase igualmente longa.";
+    // texto sem ordinais (para não acionar prose_enumeration) — o foco é a contagem de long_sentence
+    const text = "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
 
     const diagnostic = analyze(text, config);
 

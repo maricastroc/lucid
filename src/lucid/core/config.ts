@@ -44,6 +44,16 @@ export interface Config {
   perifraseInflada: {
     enabled: boolean;
   };
+  paragraphLength: {
+    enabled: boolean;
+    /** marca o parágrafo acima deste número de frases */
+    maxSentences: number;
+  };
+  proseEnumeration: {
+    enabled: boolean;
+    /** mínimo de ordinais distintos (a partir de "primeiro") para marcar */
+    minMarkers: number;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -82,6 +92,14 @@ export const DEFAULT_CONFIG: Config = {
   },
   perifraseInflada: {
     enabled: true,
+  },
+  paragraphLength: {
+    enabled: true,
+    maxSentences: 5,
+  },
+  proseEnumeration: {
+    enabled: true,
+    minMarkers: 3,
   },
   metrics: {
     decimalPlaces: 1,

@@ -19,6 +19,8 @@ import { gerundismoPass } from "./gerundismo";
 import { adverbioMenteDensoPass } from "./adverbio-mente-denso";
 import { redundanciaPass } from "./redundancia";
 import { perifraseInfladaPass } from "./perifrase-inflada";
+import { paragraphLengthPass } from "./paragraph-length";
+import { proseEnumerationPass } from "./prose-enumeration";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -30,4 +32,6 @@ export const PASSES: readonly Pass[] = [
   adverbioMenteDensoPass,
   redundanciaPass,
   perifraseInfladaPass,
+  paragraphLengthPass,
+  proseEnumerationPass,
 ];
