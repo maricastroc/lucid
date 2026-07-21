@@ -1,42 +1,60 @@
 /**
- * Tier 3 · prompt VERSIONADO da reescrita (ADR-015).
+ * Tier 3 · prompt VERSIONADO da reescrita (ADR-016).
  *
- * O modelo só PROPÕE uma reescrita fiel do trecho — quem julga é o verificador
- * determinístico. O prompt é blindado contra o risco fatal do LLM (inventar/adicionar
- * informação): manda reescrever SÓ o que está no trecho, preservar números/datas/nomes, e
- * responder apenas o JSON. `temperature 0` + modelo fixado + esta versão = reprodutibilidade
- * suficiente para eval (mesma disciplina da sonda, ARQUITETURA §5).
+ * `rewrite@2`: o modelo lê o DOCUMENTO INTEIRO como contexto e reescreve SOMENTE o trecho-alvo
+ * — mas com liberdade real: pode reorganizar as frases do trecho, condensar e mudar a
+ * estrutura, para um cidadão comum entender na primeira leitura. É esse salto (reorganizar o
+ * discurso, não trocar palavra a palavra) que faltava.
  *
- * Trocar QUALQUER palavra deste prompt exige subir `REWRITE_PROMPT_VERSION` — o id do
- * proposer carrega a versão, então uma mudança é rastreável no benchmark.
+ * A liberdade é contrabalançada pela BLINDAGEM contra o risco fatal do LLM: inventar. O prompt
+ * proíbe acrescentar informação e — o ponto crítico — proíbe **inventar quem praticou a ação**
+ * (o erro clássico de "humanizar" texto impessoal criando um "nós"). Quem julga a saída é o
+ * verificador determinístico + a sonda de compreensão; o prompt só propõe.
+ *
+ * Trocar QUALQUER palavra deste prompt exige subir `REWRITE_PROMPT_VERSION` — o id do proposer
+ * carrega a versão, então a mudança é rastreável no benchmark.
  */
+import type { Span } from "../../lucid/core/types";
 
-export const REWRITE_PROMPT_VERSION = "rewrite@1";
+export const REWRITE_PROMPT_VERSION = "rewrite@2";
 
-/** Dica específica do que a reescrita precisa resolver, por critério do finding. */
+/** Dica específica do que a reescrita precisa resolver, quando há um critério (caminho finding). */
 const CRITERION_HINT: Record<string, string> = {
-  long_sentence: "Divida em frases curtas, uma ideia por frase.",
-  passive_voice: "Prefira a voz ativa: diga quem faz a ação.",
-  nominalization: "Troque o substantivo de ação pelo verbo correspondente.",
-  jargon: "Troque o termo técnico por uma palavra comum equivalente.",
+  long_sentence: "O trecho é longo demais: divida em frases curtas, uma ideia por frase.",
+  passive_voice: "Prefira a voz ativa: diga quem faz a ação (sem inventar, se o texto disser).",
+  nominalization: "Troque substantivos de ação pelos verbos correspondentes.",
+  jargon: "Troque termos técnicos por palavras comuns equivalentes.",
 };
 
-export function buildRewritePrompt(trecho: string, criterion: string): string {
-  const hint = CRITERION_HINT[criterion] ?? "Reescreva de forma mais clara e direta.";
-  return `Você reescreve trechos em Linguagem Simples, sem NUNCA inventar.
+export function buildRewritePrompt(fullText: string, target: Span, criterion?: string): string {
+  const hint = criterion ? (CRITERION_HINT[criterion] ?? "") : "";
+  return `Você reescreve textos em Linguagem Simples para um cidadão comum, sem NUNCA inventar.
 
-Regras absolutas:
-- Reescreva SOMENTE o trecho abaixo, usando apenas a informação que ele já contém.
-- NÃO acrescente fatos, exemplos, opiniões ou explicações que não estejam no trecho.
-- PRESERVE exatamente todos os números, datas, valores e nomes próprios.
-- Se não for possível reescrever sem inventar, devolva o trecho original inalterado.
-- ${hint}
-
-TRECHO:
+Contexto: abaixo está o DOCUMENTO INTEIRO, apenas para você entender o assunto.
 """
-${trecho}
+${fullText}
+"""
+
+Sua tarefa: reescreva SOMENTE o TRECHO-ALVO abaixo para que um cidadão comum o entenda na
+primeira leitura.
+
+Você PODE, dentro do trecho-alvo:
+- reorganizar a ordem das ideias e das frases;
+- dividir uma frase longa em várias curtas (uma ideia por frase);
+- condensar expressões e trocar palavras difíceis por comuns;
+- mudar a estrutura do trecho.
+
+Você NÃO PODE:
+- acrescentar fato, exemplo, número, data ou explicação que não esteja no trecho;
+- inventar quem praticou a ação — se o texto não diz o agente, NÃO diga (não crie "nós", "a
+  equipe", "o governo" etc.);
+- mudar ou remover números, datas, valores ou nomes próprios.
+${hint ? `\nObservação: ${hint}\n` : ""}
+TRECHO-ALVO (reescreva só isto):
+"""
+${target.text}
 """
 
 Responda SOMENTE com este JSON, sem texto fora dele:
-{"reescrita": "sua reescrita aqui"}`;
+{"reescrita": "sua reescrita do trecho-alvo aqui"}`;
 }

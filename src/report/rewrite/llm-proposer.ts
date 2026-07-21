@@ -10,7 +10,7 @@
  * benchmark ("qual modelo, sob qual prompt").
  */
 import { buildRewritePrompt, REWRITE_PROMPT_VERSION } from "./prompt";
-import type { ChatProvider } from "./providers/types";
+import type { ChatProvider } from "@/llm";
 import type { RewriteProposal, RewriteProposer, RewriteRequest } from "./types";
 
 /**
@@ -51,9 +51,9 @@ export class LlmRewriteProposer implements RewriteProposer {
   }
 
   async propose(request: RewriteRequest): Promise<RewriteProposal> {
-    const original = request.finding.span.text;
-    const prompt = buildRewritePrompt(original, request.finding.criterion);
-    const raw = await this.provider.complete(prompt, { model: this.model, temperature: 0 });
+    const original = request.target.text;
+    const prompt = buildRewritePrompt(request.text, request.target, request.criterion);
+    const raw = await this.provider.complete(prompt, { model: this.model, temperature: 0, maxTokens: 2048 });
     const parsed = parseRewrite(raw);
     return { proposerId: this.id, original, proposed: parsed ?? original };
   }

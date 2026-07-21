@@ -12,7 +12,7 @@
  * lista vivem num bottom sheet.
  */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { analyze, applySplitAt, type Finding, type SplitPoint } from "@/lucid";
+import { analyze, applySplitAt, type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { findingId, isSafe } from "./lib/criteria";
 import { applySafeSuggestions } from "./lib/audit";
@@ -150,21 +150,19 @@ export function Studio() {
   );
 
   // Tier 3 · usar uma reescrita GERADA como rascunho. O autor decide (nunca automático); a
-  // proposta substitui o trecho do finding selecionado no texto do diagnóstico (mesma base
-  // dos offsets), com undo. A reanálise roda sozinha e submete o rascunho à engine de novo.
+  // proposta substitui o TRECHO-ALVO (o parágrafo) no texto do diagnóstico — mesma base dos
+  // offsets —, com undo. A reanálise roda sozinha e submete o rascunho à engine de novo.
   const applyRewrite = useCallback(
-    (proposal: RewriteProposal) => {
-      const target = selectedFinding;
-      if (!target) return;
+    (target: Span, proposal: RewriteProposal) => {
       const base = diagnostic.text;
-      const next = base.slice(0, target.span.start) + proposal.proposed + base.slice(target.span.end);
+      const next = base.slice(0, target.start) + proposal.proposed + base.slice(target.end);
       if (next !== text) {
         pushUndo(text);
         setText(next);
       }
       setSelectedId(null);
     },
-    [text, diagnostic, selectedFinding, pushUndo],
+    [text, diagnostic, pushUndo],
   );
 
   const applyAllSafe = useCallback(() => {

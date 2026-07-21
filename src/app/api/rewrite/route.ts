@@ -1,44 +1,40 @@
 /**
- * Tier 3 · rota server-side da reescrita (ADR-015).
+ * Tier 3 · rota server-side da reescrita (ADR-015/016).
  *
  * A chamada de LLM roda AQUI, nunca no browser — a `GROQ_API_KEY` fica no servidor e jamais
- * é devolvida ao cliente. Recebe o texto + o finding-alvo + o modelo escolhido, roda
- * `proposeAndVerify` (o proposer real + o verificador determinístico) e devolve o
- * `VerifiedRewrite`. O verificador é o mesmo de sempre: a proposta chega julgada, nunca
- * como selo verde.
+ * é devolvida ao cliente. Recebe o texto inteiro (contexto) + o ALVO (um `Span`: a frase de um
+ * finding ou um parágrafo) + o modelo, roda `proposeAndVerify` (o proposer real + o
+ * verificador determinístico + a sonda de compreensão como guard de sentido) e devolve o
+ * `VerifiedRewrite`. A proposta chega julgada, nunca como selo verde.
  */
 import { NextResponse } from "next/server";
-import type { Finding } from "@/lucid";
-import {
-  ChatProviderError,
-  GroqProvider,
-  GROQ_MODELS,
-  LlmRewriteProposer,
-  proposeAndVerify,
-  type RewriteProposer,
-} from "@/report/rewrite";
+import type { Span } from "@/lucid";
+import { ChatProviderError, GroqProvider, GROQ_MODELS } from "@/llm";
+import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer } from "@/report/rewrite";
+import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
+import type { ComprehensionProbe } from "@/lucid/probe/types";
 
 export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 20_000;
 
+/** Pergunta de piso genérica para o teste NEGATIVO de sentido (a camada de app não tem uma específica). */
+const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
+
 interface RewriteRequestBody {
   text?: unknown;
-  finding?: unknown;
+  target?: unknown;
+  criterion?: unknown;
   providerId?: unknown;
   model?: unknown;
 }
 
-/** Valida o mínimo do finding que o proposer/verificador usam, sem confiar no cliente. */
-function isValidFinding(value: unknown, textLength: number): value is Finding {
+/** Valida o `Span`-alvo sem confiar no cliente: offsets dentro do texto e não-vazio. */
+function isValidSpan(value: unknown, textLength: number): value is Span {
   if (typeof value !== "object" || value === null) return false;
-  const f = value as Record<string, unknown>;
-  if (typeof f.criterion !== "string") return false;
-  const span = f.span as Record<string, unknown> | undefined;
-  if (!span || typeof span.start !== "number" || typeof span.end !== "number" || typeof span.text !== "string") {
-    return false;
-  }
-  return span.start >= 0 && span.end <= textLength && span.start < span.end;
+  const s = value as Record<string, unknown>;
+  if (typeof s.start !== "number" || typeof s.end !== "number" || typeof s.text !== "string") return false;
+  return s.start >= 0 && s.end <= textLength && s.start < s.end;
 }
 
 /** Monta o proposer server-side para o provedor pedido, lendo a chave do ambiente. */
@@ -54,6 +50,15 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
+/** Sonda de sentido no mesmo provedor, se a chave existir. Sem ela, o SINAL fica omitido. */
+function buildProbe(providerId: string): ComprehensionProbe | null {
+  if (providerId === "groq" && process.env.GROQ_API_KEY) {
+    // Modelo pequeno e barato para o piso; a sonda só precisa ler literalmente.
+    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.1-8b-instant");
+  }
+  return null;
+}
+
 export async function POST(request: Request): Promise<Response> {
   let body: RewriteRequestBody;
   try {
@@ -62,15 +67,15 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
   }
 
-  const { text, finding, providerId, model } = body;
+  const { text, target, criterion, providerId, model } = body;
   if (typeof text !== "string" || text.length === 0 || text.length > MAX_TEXT_LENGTH) {
     return NextResponse.json({ error: "texto ausente ou longo demais" }, { status: 400 });
   }
   if (typeof providerId !== "string" || typeof model !== "string") {
     return NextResponse.json({ error: "providerId e model são obrigatórios" }, { status: 400 });
   }
-  if (!isValidFinding(finding, text.length)) {
-    return NextResponse.json({ error: "finding inválido" }, { status: 400 });
+  if (!isValidSpan(target, text.length)) {
+    return NextResponse.json({ error: "alvo (span) inválido" }, { status: 400 });
   }
 
   const proposer = buildProposer(providerId, model);
@@ -78,11 +83,16 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: proposer.error }, { status: proposer.status });
   }
 
+  const probe = buildProbe(providerId);
+
   try {
-    const result = await proposeAndVerify(text, finding, proposer);
+    const result = await proposeAndVerify(text, target, proposer, {
+      criterion: typeof criterion === "string" ? criterion : undefined,
+      probe: probe ?? undefined,
+      question: probe ? FLOOR_QUESTION : undefined,
+    });
     return NextResponse.json(result);
   } catch (cause) {
-    // Erro de provedor (rede/HTTP/chave inválida) → 502; mensagem segura, sem a chave.
     if (cause instanceof ChatProviderError) {
       return NextResponse.json({ error: cause.message }, { status: 502 });
     }

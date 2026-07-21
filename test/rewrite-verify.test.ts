@@ -7,6 +7,7 @@ import {
   StubRewriteProposer,
   verifyRewrite,
   type RewriteProposal,
+  type VerifyOptions,
 } from "../src/report/rewrite";
 import { StubComprehensionProbe } from "../src/lucid/probe/stub-probe";
 import type { ProbeResult } from "../src/lucid/probe/types";
@@ -37,6 +38,15 @@ function signalFlagged(v: { signals: { check: string; flagged: boolean }[] }, ch
   return v.signals.find((s) => s.check === check)?.flagged;
 }
 
+// Adaptadores: os testes usam `Finding` por conveniência; a API agora recebe `Span` + criterion
+// (o critério habilita `target_resolved`; o alvo é o `finding.span`).
+function verify(text: string, finding: Finding, p: RewriteProposal, opts: VerifyOptions = {}) {
+  return verifyRewrite(text, finding.span, p, { criterion: finding.criterion, ...opts });
+}
+function propose(text: string, finding: Finding, proposer: StubRewriteProposer) {
+  return proposeAndVerify(text, finding.span, proposer, { criterion: finding.criterion });
+}
+
 describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
   it("dividir uma frase longa resolve o alvo e não aumenta o total de findings", async () => {
     const text =
@@ -48,7 +58,7 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
       "O documento apresentado foi analisado pela comissão. O resultado foi comunicado ao interessado no prazo.",
     );
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
 
     expect(proofPassed(v, "target_resolved")).toBe(true);
     expect(proofPassed(v, "no_new_findings")).toBe(true);
@@ -64,7 +74,7 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
     // "reescrita" que continua sendo uma única frase longa: o alvo persiste.
     const p = proposal(finding, finding.span.text + " Ainda mais palavras foram acrescentadas sem necessidade alguma aqui.");
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
 
     expect(proofPassed(v, "target_resolved")).toBe(false);
     expect(v.hasBlockingFailure).toBe(true);
@@ -77,7 +87,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "O pagamento de R$ 1.500,00 deve ocorrer em alguns dias"); // perdeu "30"
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(proofPassed(v, "numbers_preserved")).toBe(false);
     expect(v.hasBlockingFailure).toBe(true);
   });
@@ -87,7 +97,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "Pague R$ 1.500,00 em 30 dias");
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(proofPassed(v, "numbers_preserved")).toBe(true);
   });
 
@@ -96,7 +106,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     const finding = spanFinding(text, "A audiência foi marcada para 17/11/2025 no fórum central");
     const p = proposal(finding, "A audiência foi marcada para 18/11/2025 no fórum central"); // data trocada
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(proofPassed(v, "dates_preserved")).toBe(false);
   });
 
@@ -105,7 +115,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     const finding = spanFinding(text, "As regras foram aplicadas ao caso concreto");
     const p = proposal(finding, "As regras supracitadas foram aplicadas ao caso concreto"); // "supracitadas" = jargão
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(proofPassed(v, "no_new_jargon")).toBe(false);
     expect(v.proofs.find((pr) => pr.check === "no_new_jargon")!.detail).toContain("supracitadas");
   });
@@ -117,7 +127,7 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
     const finding = spanFinding(text, "O parecer foi assinado pela Comissão de Ética");
     const p = proposal(finding, "O parecer foi assinado pela comissão"); // perdeu "Comissão"/"Ética"
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(signalFlagged(v, "entities_preserved")).toBe(true);
     // é SINAL, não PROVA: nunca aparece na lista de provas (nem vira veto mecânico sozinho)
     expect(v.proofs.map((pr) => pr.check as string)).not.toContain("entities_preserved");
@@ -128,7 +138,7 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
     const finding = spanFinding(text, "O parecer foi assinado pela Comissão de Ética");
     const p = proposal(finding, "A Comissão de Ética assinou o parecer");
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(signalFlagged(v, "entities_preserved")).toBe(false);
   });
 });
@@ -155,7 +165,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     const p = proposal(finding, "O prazo começa depois");
     const probe = new StubComprehensionProbe({ [p.original]: readable, [p.proposed]: stuck });
 
-    const v = await verifyRewrite(text, finding, p, { probe, question: "quando o prazo começa?" });
+    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
     expect(signalFlagged(v, "meaning_preserved")).toBe(true);
   });
 
@@ -165,7 +175,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     const p = proposal(finding, "O prazo começa depois");
     const probe = new StubComprehensionProbe({ [p.original]: stuck, [p.proposed]: stuck });
 
-    const v = await verifyRewrite(text, finding, p, { probe, question: "quando o prazo começa?" });
+    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
     expect(signalFlagged(v, "meaning_preserved")).toBe(false);
   });
 
@@ -174,7 +184,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
   });
 });
@@ -185,7 +195,7 @@ describe("honestidade (I5): sem selo verde", () => {
     const finding = spanFinding(text, "As contas do setor foram conferidas");
     const p = proposal(finding, "A equipe conferiu as contas do setor");
 
-    const v = await verifyRewrite(text, finding, p);
+    const v = await verify(text, finding, p);
     const keys = Object.keys(v);
     expect(keys).not.toContain("approved");
     expect(keys).not.toContain("ok");
@@ -198,8 +208,8 @@ describe("honestidade (I5): sem selo verde", () => {
     const finding = spanFinding(text, "O documento foi arquivado pelo setor competente");
     const p = proposal(finding, "O setor arquivou o documento");
 
-    const a = JSON.stringify(await verifyRewrite(text, finding, p));
-    const b = JSON.stringify(await verifyRewrite(text, finding, p));
+    const a = JSON.stringify(await verify(text, finding, p));
+    const b = JSON.stringify(await verify(text, finding, p));
     expect(b).toBe(a);
   });
 });
@@ -215,7 +225,7 @@ describe("proposeAndVerify — orquestrador com stub proposer", () => {
         "O documento foi analisado pela comissão. O resultado foi comunicado ao interessado no prazo.",
     });
 
-    const result = await proposeAndVerify(text, finding, proposer);
+    const result = await propose(text, finding, proposer);
 
     expect(result.proposal.proposerId).toBe("stub@1+fixtures@1");
     expect(result.verification.hasBlockingFailure).toBe(false);
@@ -228,7 +238,7 @@ describe("proposeAndVerify — orquestrador com stub proposer", () => {
     const finding = analyze(text).findings.find((f) => f.criterion === "passive_voice" && f.meta?.hasAgent)!;
     const proposer = new StubRewriteProposer({}); // sem fixture → devolve o original
 
-    const result = await proposeAndVerify(text, finding, proposer);
+    const result = await propose(text, finding, proposer);
     expect(result.proposal.proposed).toBe(finding.span.text);
     expect(proofPassed(result.verification, "target_resolved")).toBe(false);
   });
@@ -238,7 +248,7 @@ describe("applyProposal — substituição pura do trecho", () => {
   it("troca só o span do finding, preservando o resto do texto", () => {
     const text = "Início. O documento foi arquivado pelo setor. Fim.";
     const finding = spanFinding(text, "O documento foi arquivado pelo setor", "passive_voice");
-    expect(applyProposal(text, finding, proposal(finding, "O setor arquivou o documento"))).toBe(
+    expect(applyProposal(text, finding.span, proposal(finding, "O setor arquivou o documento"))).toBe(
       "Início. O setor arquivou o documento. Fim.",
     );
   });

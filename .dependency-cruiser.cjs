@@ -34,6 +34,15 @@ module.exports = {
       to: { path: "^(node:)?(https?)$" },
     },
     {
+      name: "core-nao-importa-llm",
+      severity: "error",
+      comment:
+        "Camada 1 é zero-rede: não pode importar a infra de LLM (src/llm faz fetch). " +
+        "src/llm é a única casa de rede compartilhada; só report e probe a usam.",
+      from: { path: "^src/lucid/core" },
+      to: { path: "^src/llm" },
+    },
+    {
       name: "core-nao-importa-report-ou-app",
       severity: "error",
       comment: "A dependência é sempre report/app -> lucid, nunca o contrário.",

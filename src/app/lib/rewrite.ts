@@ -10,8 +10,9 @@
  * A ideia (do usuário): o mesmo juiz determinístico avalia modelos diferentes — o que abre
  * um benchmark honesto depois. Ver ADR-014/015.
  */
-import type { Finding } from "@/lucid";
-import { GROQ_MODELS, proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
+import type { Span } from "@/lucid";
+import { GROQ_MODELS } from "@/llm";
+import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
 
 export interface RewriteModel {
   providerId: "stub" | "groq";
@@ -40,22 +41,24 @@ const SAMPLE_FIXTURES: Record<string, string> = {
 const stubProposer = new StubRewriteProposer(SAMPLE_FIXTURES, "stub-demo@1");
 
 /**
- * Gera uma proposta e a verifica num passo. `stub` roda no cliente; Groq roda no servidor.
- * Nunca aplica — a decisão é do autor. Lança `Error` com mensagem legível em falha de rede.
+ * Gera uma proposta para o ALVO (`target`, um parágrafo ou a frase de um finding) com o texto
+ * inteiro como contexto, e a verifica num passo. `stub` roda no cliente; Groq roda no servidor
+ * (com a sonda de sentido). Nunca aplica — a decisão é do autor. Lança `Error` legível em falha.
  */
 export async function generateRewrite(
   text: string,
-  finding: Finding,
+  target: Span,
   choice: RewriteModel,
+  criterion?: string,
 ): Promise<VerifiedRewrite> {
   if (choice.providerId === "stub") {
-    return proposeAndVerify(text, finding, stubProposer);
+    return proposeAndVerify(text, target, stubProposer, { criterion });
   }
 
   const response = await fetch("/api/rewrite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, finding, providerId: choice.providerId, model: choice.model }),
+    body: JSON.stringify({ text, target, criterion, providerId: choice.providerId, model: choice.model }),
   });
 
   const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;

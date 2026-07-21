@@ -1,22 +1,17 @@
 /**
- * Tier 3 · `GroqProvider` — provedor de chat via API do Groq (compatível-OpenAI).
- *
- * Só rede + parse; nenhuma lógica de reescrita. A chave chega pelo construtor (o servidor
- * passa `process.env.GROQ_API_KEY` — nunca o cliente). `temperature 0` para reprodutibilidade.
- * `fetch` puro, sem SDK. Ver ADR-015.
+ * `GroqProvider` — provedor de chat via API do Groq (compatível-OpenAI). Infra neutra
+ * (`src/llm/**`): só rede + parse, nenhuma lógica de reescrita/compreensão. A chave chega
+ * pelo construtor (o servidor passa `process.env.GROQ_API_KEY` — nunca o cliente).
+ * `temperature 0`, `fetch` puro (sem SDK). Ver ADR-015/016.
  */
 import { ChatProviderError, type ChatCompletionOptions, type ChatProvider } from "./types";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
- * Modelos GRATUITOS do Groq habilitados agora (allow-list). IDs conforme o catálogo do Groq
- * desta conta (`GET /models`); ajustar aqui se o provedor renomear/retirar um modelo. Todos
- * confirmados retornando JSON válido com `response_format: json_object` + `temperature 0`.
- *
- * Nota: DeepSeek não está no catálogo desta conta Groq, e `qwen/qwen3.6-27b` (modelo de
- * raciocínio) falha no modo JSON — ambos ficam de fora até via API própria. O spread atual
- * (Llama 70B/8B × GPT-OSS 120B/20B) já dá um benchmark honesto sob o mesmo verificador.
+ * Modelos GRATUITOS do Groq habilitados (allow-list), confirmados retornando JSON válido com
+ * `response_format: json_object` + `temperature 0`. DeepSeek não está no catálogo desta conta
+ * e `qwen/qwen3.6-27b` (raciocínio) falha no modo JSON — ambos ficam de fora por ora.
  */
 export const GROQ_MODELS = [
   "llama-3.3-70b-versatile",
@@ -56,7 +51,6 @@ export class GroqProvider implements ChatProvider {
           model: options.model,
           temperature: options.temperature,
           max_tokens: options.maxTokens ?? 1024,
-          // Força a saída em JSON — o proposer espera { "reescrita": "..." }.
           response_format: { type: "json_object" },
           messages: [{ role: "user", content: prompt }],
         }),

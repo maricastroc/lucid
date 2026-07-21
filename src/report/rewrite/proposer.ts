@@ -28,7 +28,7 @@ export class StubRewriteProposer implements RewriteProposer {
   }
 
   async propose(request: RewriteRequest): Promise<RewriteProposal> {
-    const original = request.finding.span.text;
+    const original = request.target.text;
     const proposed = this.fixtures.get(original) ?? original;
     return { proposerId: this.id, original, proposed };
   }
