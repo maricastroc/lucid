@@ -5,6 +5,16 @@ rede e sem I/O assíncrono. Este README documenta proveniência e critério de c
 por arquivo — obrigatório por `docs/ARQUITETURA.md` §2 e §11.1 ("`principio` nunca é
 inventado"; aqui, análogo: nenhum dado entra sem origem registrada).
 
+## Data registry e `dataHash` (ADR-022)
+
+Além do consumo direto, cada dataset é registrado em `core/data/registry.ts` com um
+`fingerprint` estável do conteúdo. O `analyze` estampa um `meta.dataHash` derivado dos
+datasets em jogo (dados de estágio de documento + `dataDeps` dos passes), de modo que a
+reprodutibilidade de um `Diagnostic` seja `(lucidVersion, configHash, dataHash)`. **Mexer
+em qualquer JSON aqui muda o `fingerprint` → muda o `dataHash` → quebra o snapshot de
+propósito** (governança automática, ver `docs/DESIGN-data-registry.md`). Adicionar um
+dataset novo = novo id em `DatasetId` + entrada no registry + este README + golden.
+
 ## `abreviacoes.pt.json`
 
 **Usado por:** `src/lucid/core/document/segment-sentences.ts` (etapa de segmentação de

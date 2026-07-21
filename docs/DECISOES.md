@@ -1117,7 +1117,7 @@ alvo = 1ª frase destacada, não o texto todo; cartão diz "esta frase". 787 tes
 
 ---
 
-## ADR-019 — Gerador FORTE (Gemini) + prova determinística de 1ª pessoa fabricada
+## ADR-021 — Gerador FORTE (Gemini) + prova determinística de 1ª pessoa fabricada
 
 **Contexto.** Comparação externa (Gemini-juiz) apontou a reescrita da ferramenta perdendo
 para o GPT: prolixa, abstrata. Diagnóstico: o Tier 3 estava sendo medido como REESCRITOR —
@@ -1148,6 +1148,37 @@ gerador forte propõe; o diferencial é o VERIFICADOR determinístico. Isso já 
 **Consequências.** 794 testes verdes (novos: prova de 1ª pessoa 3×, `GeminiProvider` mockado
 4×). Verificado ao vivo via `/api/rewrite` (Flesch −12,0→48,6; 6/6 provas; sem veto; sem
 truncar). Cerca/depcheck intactos. O gerador barato da Groq segue como comparação no mesmo juiz.
+
+---
+
+## ADR-022 — Data registry: dado como entrada versionada + `dataHash` (incremento 1)
+
+**Contexto.** Início da frente "Camada 1 extensível" (design docs `DESIGN-camada1-teto-deterministico.md`,
+`DESIGN-camada-anotacao.md`, `DESIGN-d1-lexico-morfologico.md`, `DESIGN-data-registry.md`). Estado
+anterior: 9 datasets importados direto por cada consumidor; `PassContext.data` ocioso; **mudar um
+léxico mudava a saída mas NÃO o `configHash`** (só o golden pegava). Dado não era entrada versionada
+e o `Diagnostic` não declarava com que dados foi produzido.
+
+**Decisão (incremento 1 do plano de migração do registry).**
+1. **`src/lucid/core/data/registry.ts`** — fonte única de proveniência: importa os 9 datasets,
+   calcula `fingerprint = stableHash(raw)` por dataset (hash de conteúdo → governança automática).
+   `stableStringify`/`stableHash` extraídos para `core/hash.ts` (mesmo algoritmo do `configHash`).
+2. **`meta.dataHash`** (novo campo em `DiagnosticMeta`) = hash sobre os `(id, fingerprint)`
+   ordenados dos datasets em jogo = dados de estágio de documento (`abreviacoes.pt`, sempre) +
+   `dataDeps` dos passes. Reprodutibilidade completa = `(lucidVersion, configHash, dataHash)`.
+3. **`Pass.dataDeps`** (declarativo) — cada pass declara seus datasets; alimenta o `dataHash` e,
+   no incremento 2, a visão escopada de `ctx.data`.
+4. **Escopo do incremento 1:** só registry + `dataHash` + `dataDeps`. Passes ainda importam seus
+   JSONs direto (a preparação Set/Map e o roteamento por `ctx.data` migram no incremento 2,
+   output-neutral). `participios-infinitivo.pt` (action Tier 2) está no registry mas NÃO entra no
+   `dataHash` de `analyze` (não influencia a saída).
+
+**Consequências.** Saída de `analyze` **idêntica exceto o novo `meta.dataHash`** (diff de snapshot
+verificado: uma única linha por caso; snapshots atualizados de propósito). **801 testes verdes**
+(+7: `data-registry.test.ts` + âncora de meta). Typecheck/lint/depcheck limpos (72 módulos, cerca
+intacta). Fundação única para o lote juridiquês (novos léxicos = novos datasets) e para a camada de
+anotação (o léxico morfológico entra com `hashStrategy: "pinned"`, ver DESIGN-data-registry.md §2.3).
+Numeração: o ADR-019 duplicado (Gemini) foi renumerado para ADR-021 nesta sessão.
 
 ---
 

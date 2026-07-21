@@ -2,6 +2,7 @@
  * Tipos centrais da Camada 1 (linter determinístico).
  * Contrato definido em docs/ARQUITETURA.md §3. Não importar nada de `src/lucid/probe/**`.
  */
+import type { DatasetId } from "./data/registry";
 
 export type Severity = "info" | "warning" | "error";
 
@@ -75,6 +76,11 @@ export interface Pass {
   readonly category: Category;
   /** subseção-âncora do pass; um finding individual pode refinar via `principle` próprio */
   readonly principle: string;
+  /**
+   * Datasets (do data registry) de que este pass depende — declarativo. Alimenta o `dataHash`
+   * (proveniência) e, no incremento 2, a visão escopada de `ctx.data`. Omitido = não usa dado.
+   */
+  readonly dataDeps?: readonly DatasetId[];
   run(ctx: PassContext): Finding[];
 }
 
@@ -111,6 +117,11 @@ export interface DiagnosticMeta {
   lucidVersion: string;
   /** hash estável da Config efetiva, para integridade do snapshot */
   configHash: string;
+  /**
+   * hash estável dos datasets que influenciaram esta análise (proveniência de dados).
+   * Reprodutibilidade completa = (lucidVersion, configHash, dataHash). Ver data registry.
+   */
+  dataHash: string;
   standardVersion: "ABNT NBR ISO 24495-1:2024";
 }
 
