@@ -27,3 +27,11 @@ export type { Config } from "./core/config";
 export { DEFAULT_CONFIG, hashConfig } from "./core/config";
 
 export { analyze } from "./core/analyzer";
+
+/**
+ * Tier 2 — ação estrutural assistida (determinística, zero rede). Funções PURAS que a UI
+ * consome para oferecer andaimes sobre findings que exigem decisão humana; nunca aplicam
+ * nada sozinhas nem inventam conteúdo. Ver ADR-012/013.
+ */
+export { clauseSplitPoints, applySplitAt } from "./core/actions/split-sentence";
+export type { SplitPoint, SplitKind } from "./core/actions/split-sentence";

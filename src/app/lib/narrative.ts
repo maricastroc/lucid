@@ -4,11 +4,12 @@
  * critério; nada é inventado. A "confiança" NÃO é uma probabilidade: é a explicação
  * determinística de por que a engine assina (ou não) uma sugestão.
  *
- * `longSentenceGuidance` implementa a orientação assistida (item 1): mede a frase e
- * localiza PONTOS DE DIVISÃO CANDIDATOS em fronteiras defensáveis (`;`, `—`, vírgula +
- * conjunção coordenativa). A ferramenta não corta — só aponta; a decisão é do autor.
+ * `longSentenceGuidance` implementa a orientação assistida (Tier 2, item 1): mede a frase
+ * e DELEGA a localização dos pontos de divisão ao core determinístico (`clauseSplitPoints`,
+ * ADR-012) — a detecção não é reimplementada aqui. A ferramenta não corta; ela aponta e,
+ * quando o autor escolhe, o core insere a quebra. A decisão é do autor.
  */
-import type { Finding } from "@/lucid";
+import { clauseSplitPoints, type Finding, type SplitPoint } from "@/lucid";
 
 function metaNum(f: Finding, k: string): number | null {
   const v = f.meta?.[k];
@@ -135,27 +136,27 @@ export function buildConfidence(f: Finding): { level: ConfidenceLevel; rationale
   };
 }
 
-/* ------------------------------------------------- orientação (item 1) --- */
+/* ------------------------------------------------- orientação (Tier 2, item 1) --- */
 
-export interface SplitCandidate {
-  offset: number;
-  before: string;
-  after: string;
-}
 export interface LongSentenceGuidance {
   words: number | null;
   threshold: number | null;
   over: number | null;
   subordination: number;
   targetSentences: number | null;
-  candidates: SplitCandidate[];
+  /** pontos de divisão candidatos — vêm do core determinístico (`clauseSplitPoints`). */
+  candidates: SplitPoint[];
 }
 
 const SUBORD_RE = /\b(que|quando|porque|embora|cuj[ao]s?|onde|caso|conforme|porquanto|ainda que|de modo que)\b/gi;
-const COORD = "(?:e|mas|porém|ou|contudo|todavia|entretanto|porque|pois|portanto|logo)";
 
-export function longSentenceGuidance(f: Finding): LongSentenceGuidance {
-  const start = f.span.start;
+/**
+ * `source` é o texto normalizado do diagnóstico (`Diagnostic.text`) — necessário para que
+ * os offsets dos pontos de divisão sejam absolutos no documento e sirvam direto ao
+ * `applySplitAt`. A subordinação (medida de esforço, só exibição) continua sendo uma
+ * contagem simples sobre o span.
+ */
+export function longSentenceGuidance(f: Finding, source: string): LongSentenceGuidance {
   const span = f.span.text;
   const words = metaNum(f, "words");
   const threshold = metaNum(f, "threshold");
@@ -166,24 +167,6 @@ export function longSentenceGuidance(f: Finding): LongSentenceGuidance {
   const subs = (span.match(SUBORD_RE) ?? []).length;
   const subordination = commas + subs;
 
-  const candidates: SplitCandidate[] = [];
-  const seen = new Set<number>();
-  const push = (localIdx: number) => {
-    if (localIdx <= 0 || localIdx >= span.length - 1) return;
-    const g = start + localIdx;
-    if (seen.has(g)) return;
-    seen.add(g);
-    const before = flat(span.slice(Math.max(0, localIdx - 32), localIdx));
-    const after = flat(span.slice(localIdx, localIdx + 32));
-    if (before && after) candidates.push({ offset: g, before, after });
-  };
-
-  let m: RegExpExecArray | null;
-  const punct = /[;—]/g;
-  while ((m = punct.exec(span))) push(m.index);
-  const coord = new RegExp(`,\\s+${COORD}\\b`, "gi");
-  while ((m = coord.exec(span))) push(m.index);
-
-  candidates.sort((a, b) => a.offset - b.offset);
-  return { words, threshold, over, subordination, targetSentences, candidates: candidates.slice(0, 6) };
+  const candidates = clauseSplitPoints(source, f.span);
+  return { words, threshold, over, subordination, targetSentences, candidates };
 }

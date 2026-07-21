@@ -755,6 +755,50 @@ condicional/gerúndio da nominalização) é honestamente autoral ou explicitame
 
 ---
 
+## ADR-012 — Tier 2 · divisão de cláusula interativa: detecção por tokens no core + transform puro, sem apagar palavra
+
+**Status:** aceito · Tier 2 (ação estrutural assistida — plano do handoff §3)
+
+**Contexto.** O critério `long_sentence` é, por decisão (ADR original + `sentence-length.ts`),
+sempre `requiresHuman`: encurtar exige decidir o supérfluo, trabalho de autor. Mas *localizar
+onde a frase pode se dividir* é mecânico e não exige adivinhar intenção. Existia já uma
+metade de exibição — `app/lib/narrative.ts` calculava pontos de divisão por **regex sobre a
+string do span** — porém **display-only**: nada aplicava a quebra, e a lógica vivia na camada
+de view, sem teste nem snapshot.
+
+**Decisão. Mover a detecção para o core determinístico e torná-la acionável**, em
+`src/lucid/core/actions/split-sentence.ts` (puro, zero rede, coberto pela cerca do depcheck):
+1. `clauseSplitPoints(text, span)` — detecção **por tokens** (reusa `tokenize` do pipeline,
+   nunca uma segmentação própria), normalizando internamente (NFC) para que os offsets
+   coincidam com os do `Diagnostic`. Fronteiras: `;`, `—`, e **vírgula + conjunção
+   coordenativa** (léxico fechado: e, mas, porém, ou, contudo, todavia, entretanto, pois,
+   portanto, logo). Guardas de borda: exige palavra antes; para `comma_conjunction`, exige
+   conteúdo **depois da conjunção** (senão sobraria um "E." solto).
+2. `applySplitAt(text, point)` — transform **puro e byte-determinístico**: apara o espaço à
+   esquerda, insere `". "` e capitaliza a 1ª letra da 2ª cláusula. **Nunca apaga palavra** —
+   a conjunção é preservada como início da nova frase ("É preciso X, e Y" → "É preciso X. E
+   Y"; iniciar frase com conjunção é gramatical em PT e não exige inventar nada). A única
+   coisa descartada é a pontuação de fronteira (`;`/`—`/vírgula).
+
+**Por que isto é honesto (e não reescrita).** A ferramenta não decide o corte — só oferece
+fronteiras defensáveis, rotuladas "pontos de divisão possíveis · confira", e o resultado é
+explicitamente um **rascunho** ("a frase final é sua"). O autor escolhe, aplica (com undo) e
+**reanalisa**. A métrica dura "0 sugestões inseguras" se traduz aqui como **0 conteúdo
+fabricado**: o split só remove pontuação e ajusta caixa; jamais insere ou apaga palavra.
+
+**Fiação.** `narrative.ts` passou a **delegar** a `clauseSplitPoints` (removido o regex
+duplicado); a nota (`revision-note.tsx`) transforma os candidatos em **botões** que chamam
+`onSplit`, e `studio.tsx` aplica via `applySplitAt` + o mesmo `undo` das sugestões seguras. A
+reanálise é automática (o `diagnostic` deriva de `text`).
+
+**Consequências.** `Diagnostic`/`Finding`/`analyze()` inalterados — nenhum pass mudou, nenhum
+snapshot do engine afetado (19 testes novos em `test/split-sentence.test.ts`, determinismo
+byte-idêntico incluído). Novas funções puras reexportadas pelo barrel (`clauseSplitPoints`,
+`applySplitAt`, `SplitPoint`). A camada `report/`/LLM continua fora de cena — Tier 2 é 100%
+determinístico.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

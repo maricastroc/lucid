@@ -9,7 +9,7 @@
  * Esta é a versão de desktop (coluna fixa). No mobile o Studio recompõe as mesmas peças
  * em fluxo vertical + bottom sheet.
  */
-import type { Diagnostic, Finding } from "@/lucid";
+import type { Diagnostic, Finding, SplitPoint } from "@/lucid";
 import { AuditOverview } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
@@ -31,6 +31,7 @@ export interface RailProps {
   onSelect: (finding: Finding) => void;
   onApplyAllSafe: () => void;
   onApply: (finding: Finding) => void;
+  onSplit: (point: SplitPoint) => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -46,7 +47,12 @@ export function AuditRail(props: RailProps) {
         <>
           <NoteNav index={props.index} total={props.total} onPrev={props.onPrev} onNext={props.onNext} onClose={props.onClose} />
           <div key={props.selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
-            <RevisionNote finding={props.selectedFinding} onApply={props.onApply} />
+            <RevisionNote
+              finding={props.selectedFinding}
+              source={props.diagnostic.text}
+              onApply={props.onApply}
+              onSplit={props.onSplit}
+            />
           </div>
         </>
       ) : (
