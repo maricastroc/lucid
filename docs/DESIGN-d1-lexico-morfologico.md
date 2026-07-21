@@ -90,16 +90,27 @@ honesta de "auditável" já aceita, agora com nome e número.
 
 ---
 
-## 5. Pendências de integração (confirmar ao puxar o dado)
+## 5. Integração CONFIRMADA (levantada ao vivo)
 
-- **Formato exato do arquivo** (delimitador, colunas, codificação): a página de download
-  (`portilexicon.icmc.usp.br`) não renderizou no levantamento; o paper confirma licença (CC-BY 4.0),
-  tamanho (1.221.218 entradas), modelo UD e lema por entrada. O *layout de bytes* se confirma na
-  ingestão — não muda a decisão, só o parser.
-- **Cobertura de traços UD** realmente presentes (nem todo feature UD pode estar preenchido);
-  medir com o golden.
-- **Atribuição CC-BY:** obrigatória — creditar PortiLexicon-UD (e MorphoBr/Apache) em `NOTICE`/
-  README de dados. Item de conformidade, não opcional.
+- **Fonte:** Hugging Face `NILC-ICMC-USP/PortiLexicon-UD` (Space). Arquivos por classe:
+  `VERB.tsv` (71 MB), `ADJ.tsv` (6,3 MB), `NOUN.tsv` (3,3 MB), `ADV.tsv` (160 KB), `AUX.tsv` (28 KB),
+  `PRON.tsv`, `DET.tsv`, `NUM.tsv`, `ADP.tsv`, `CCONJ.tsv`, `SCONJ.tsv`, `INTJ.tsv` (todos ≤ alguns KB).
+- **Formato REAL: 3 colunas TSV** `forma ⇥ lema ⇥ FEATS` — **sem coluna UPOS** (a classe é o nome do
+  arquivo). FEATS é UD padrão pipe-separado (ex.: `Mood=Ind|Number=Sing|Person=3|Tense=Pqp|VerbForm=Fin`).
+  Ambiguidade = múltiplas linhas com a mesma forma. Confirma o modelo `readings[]` (§5 da anotação).
+- **Confirmação do "não dá sem léxico":** filtrando `VERB.tsv` por `Tense=Pqp` → 71.830 formas únicas de
+  mais-que-perfeito sintético, **incluindo irregulares opacos** (`fizera, dissera, coubera, fora,
+  houvera, tivera, trouxera, viera, quisera, pusera, soubera, dera, vira`) — nenhum reconhecível por
+  regex. Compactado: **884 KB** (uma forma por linha) — bundleável, e o caso-modelo da estratégia
+  `pinned`/artefato compacto (§4).
+- **A armadilha da fatia filtrada (importante):** ingerir só as linhas `Tense=Pqp` faz a forma parecer
+  **certamente** pluperfect, mas `fora`/`vira`/`dera` são AMBÍGUAS (também "fora"=advérbio, "vira"=verbo
+  virar/substantivo). Ingestão honesta = puxar **todas as readings** de qualquer forma que tenha uma
+  reading `Pqp` (varrer as outras classes por essas formas), para o detector **abster-se** quando a
+  forma é ambígua (`precisão > recall`). É exatamente o que a escada `certain`/`ambiguous` (§6 da
+  anotação) resolve — não é burocracia, é o que evita marcar "ele ficou fora" como pluperfect.
+- **Atribuição CC-BY:** obrigatória — creditar PortiLexicon-UD em `NOTICE`/README de dados ao commitar
+  qualquer artefato derivado.
 
 ---
 

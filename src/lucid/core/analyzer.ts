@@ -28,7 +28,7 @@ import { runMetrics } from "./metrics";
 import { PASSES } from "./passes/registry";
 import { buildScore } from "./score";
 import { DEFAULT_CONFIG, hashConfig } from "./config";
-import { DOCUMENT_DATASETS, dataHashFor, type DatasetId } from "./data/registry";
+import { DOCUMENT_DATASETS, dataHashFor, createDataView, type DatasetId } from "./data/registry";
 import type { Config } from "./config";
 import type { Diagnostic, Finding, Pass, PassContext } from "./types";
 
@@ -84,9 +84,13 @@ export function analyzeWithPasses(
   const doc = buildDocument(text);
   const metrics = runMetrics(doc, config);
 
-  const context: PassContext = Object.freeze({ doc, config, data: {} });
-
-  const rawFindings = passes.flatMap((pass) => pass.run(context));
+  // Cada pass recebe uma visão de dados ESCOPADA aos seus `dataDeps` (mesmo doc/config
+  // congelados). Scoping custa nada (closure sobre um Set) e mantém o `dataHash` honesto: um pass
+  // não consegue ler dado que não declarou.
+  const rawFindings = passes.flatMap((pass) => {
+    const context: PassContext = Object.freeze({ doc, config, data: createDataView(pass.dataDeps ?? []) });
+    return pass.run(context);
+  });
   const findings = sortFindings(rawFindings);
 
   const score = buildScore(findings, passes, metrics.words, config);

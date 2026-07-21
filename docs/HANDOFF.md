@@ -170,6 +170,32 @@ determinístico é o diferencial (arquitetura já pronta em `verify.ts`). Entreg
 
 ---
 
+## 4.5. Camada 1 — frente de EXTENSIBILIDADE (registry + morfologia)
+
+Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministico.md`,
+`DESIGN-camada-anotacao.md`, `DESIGN-d1-lexico-morfologico.md`, `DESIGN-data-registry.md`,
+`DESIGN-adr-modelo-anotacao.md`.
+
+- **Data registry (ADR-022/023):** `core/data/registry.ts` é a **única porta de dados**; cada
+  dataset tem `fingerprint`; `analyze` estampa `meta.dataHash` → reprodutibilidade =
+  `(lucidVersion, configHash, dataHash)`. `PassContext.data` = `DataView` escopada aos `dataDeps`.
+  Preparação (Set/Map) memoizada no registry; tipos/transforms em `core/data/{types,prepare}.ts`.
+- **3 detectores morfológicos (ADR-024) — FATIA VERTICAL entregue:** `mais_que_perfeito_sintetico`
+  (léxico PortiLexicon, ambiguidade podada em build-time), `gerundismo` (padrão puro), 
+  `adverbio_mente_denso` (allowlist PortiLexicon, densidade ≥3/frase). **820 testes.**
+- **Fonte de léxico (D1 fechado):** PortiLexicon-UD (CC-BY 4.0), HF `NILC-ICMC-USP/PortiLexicon-UD`,
+  TSV `forma⇥lema⇥FEATS`. Só fatias filtradas são bundladas (VERB.tsv 71 MB → derivado 850 KB).
+  Atribuição obrigatória em `data/README.md`.
+- **ADIADO por disciplina (YAGNI):** a camada de anotação de RUNTIME (readings/certainty/
+  disambiguation/query) NÃO foi construída — nenhum dos 3 detectores precisa dela em runtime (a
+  ambiguidade se resolve no build). Construir só quando um detector exigir contexto em runtime
+  (ex.: pronome ambíguo, sujeito longo → precisam de POS/chunking). Também adiado: pruning por
+  frequência do léxico; MorphoBr como suplemento de cobertura.
+- **Fatias baixadas** ficam no scratchpad da sessão (AUX/ADV/NOUN/ADJ.tsv + derivados) — não
+  re-baixar se continuar na mesma sessão.
+
+---
+
 ## 5. Guardrails (não violar)
 
 - Camada 1: zero LLM, zero rede, saída byte-idêntica. Não importar nada de `probe/`/`report/` no `core/`.

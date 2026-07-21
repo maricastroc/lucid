@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createDataView } from "../src/lucid/core/data/registry";
 import { nominalizationPass } from "../src/lucid/core/passes/nominalization";
 import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
 import { passiveVoicePass } from "../src/lucid/core/passes/passive-voice";
@@ -10,7 +11,7 @@ import type { Config } from "../src/lucid/core/config";
 import type { PassContext } from "../src/lucid/core/types";
 
 function ctxFor(text: string, config: Config = DEFAULT_CONFIG): PassContext {
-  return { doc: buildDocument(text), config, data: {} };
+  return { doc: buildDocument(text), config, data: createDataView([]) };
 }
 
 function nomFindings(text: string, config: Config = DEFAULT_CONFIG) {
@@ -288,7 +289,7 @@ describe("nominalizationPass — offsets exatos", () => {
   it("span reconstrói exatamente o trecho via slice do texto original", () => {
     const text = "É preciso fazer a análise de documentos.";
     const doc = buildDocument(text);
-    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(doc.source.slice(findings[0].span.start, findings[0].span.end)).toBe(findings[0].span.text);
@@ -299,7 +300,7 @@ describe("nominalizationPass — offsets exatos", () => {
   it("span sem sugestão cobre só o núcleo de 3 tokens", () => {
     const text = "O comitê fez a análise ontem.";
     const doc = buildDocument(text);
-    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("fez a análise");

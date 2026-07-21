@@ -12,7 +12,6 @@ export type {
   DiagnosticMeta,
   Document,
   Finding,
-  LoadedData,
   Metrics,
   Pass,
   PassContext,

@@ -268,3 +268,31 @@ precede a palavra (`"foi o resultado"`) — esses já são barrados pelo própri
 **Formato:** `{ "forms": string[] }`, comparação em caixa invariante.
 
 **Licença:** julgamento linguístico próprio, curadoria própria.
+
+## `mais-que-perfeito.pt.json` e `adverbios-mente.pt.json` — DERIVADOS de PortiLexicon-UD
+
+**Usados por:** `passes/mais-que-perfeito.ts` (`mais_que_perfeito_sintetico`, 5.3.3) e
+`passes/adverbio-mente-denso.ts` (`adverbio_mente_denso`, 5.3.4). Primeiros datasets derivados
+de um léxico externo reusado (fatia vertical da Camada 1; ver ADR-024 e docs/DESIGN-d1-*).
+
+**Fonte:** **PortiLexicon-UD** (Lopes, Duran, Fernandes, Pardo — ICMC-USP/NILC), TSV por classe
+`forma ⇥ lema ⇥ FEATS` (Universal Dependencies), em
+huggingface.co/spaces/NILC-ICMC-USP/PortiLexicon-UD.
+
+**Derivação (determinística, build-time):**
+- `mais-que-perfeito.pt.json`: de `VERB.tsv`, formas com `Tense=Pqp`, **menos** toda forma que
+  também apareça com qualquer outra leitura em qualquer classe (`VERB` não-Pqp, `NOUN`, `ADJ`,
+  `ADV`, …). Essa poda em build-time é o que garante precisão sem camada de anotação em runtime:
+  `fora` (advérbio), `vira` (verbo virar), `foram` (pretérito) são removidos; irregulares opacos
+  (`fizera`, `dissera`, `coubera`, `requerera`) permanecem. 57.384 formas.
+- `adverbios-mente.pt.json`: de `ADV.tsv`, formas terminadas em `mente` (allowlist para não
+  marcar `semente`/`mente`). 2.403 formas.
+
+**Formato:** `{ "forms": string[] }`, membership em caixa invariante. Não são conjugadores.
+
+**Licença / atribuição (OBRIGATÓRIA):** PortiLexicon-UD é distribuído sob **CC-BY 4.0**. Estes
+arquivos são obras derivadas e devem creditar a fonte:
+
+> Contém dados derivados de **PortiLexicon-UD** (Lucelene Lopes, Magali Duran, Paulo Fernandes,
+> Thiago Pardo), licenciado sob Creative Commons Attribution 4.0 International (CC-BY 4.0).
+> https://portilexicon.icmc.usp.br/ · https://aclanthology.org/2022.lrec-1.715/
