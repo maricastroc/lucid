@@ -49,6 +49,32 @@ describe("jargonPass — expressão multipalavra", () => {
   });
 });
 
+describe("jargonPass — lote 2 (ADR-010): novas entradas seguras", () => {
+  it.each([
+    ["Destarte, o pedido foi indeferido.", "Destarte", "assim"],
+    ["Conquanto tardio, o recurso foi conhecido.", "Conquanto", "embora"],
+    ["Aplica-se a regra, mormente em casos urgentes.", "mormente", "principalmente"],
+    ["Tão logo seja publicado, produz efeitos.", "Tão logo", "assim que"],
+    ["Via de regra, o prazo é de dez dias.", "Via de regra", "em geral"],
+    ["A decisão tem fundamento com fulcro na jurisprudência.", "com fulcro na", "com base na"],
+    ["Indeferiu-se o pedido com fulcro no artigo quinto.", "com fulcro no", "com base no"],
+  ])("detecta e sugere em '%s'", (texto, esperadoSpan, esperadaSugestao) => {
+    const findings = jargonFindings(texto);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe(esperadoSpan);
+    expect(findings[0].suggestion).toBe(esperadaSugestao);
+    expect(findings[0].requiresHuman).toBe(false);
+  });
+
+  it("'por quanto' (dois tokens) NÃO casa com o unigrama 'porquanto'", () => {
+    expect(jargonFindings("Por quanto tempo o prazo permanece válido?")).toEqual([]);
+  });
+
+  it("'via de acesso' NÃO casa com 'via de regra' (difere no 3º token)", () => {
+    expect(jargonFindings("A via de acesso estava interditada.")).toEqual([]);
+  });
+});
+
 describe("jargonPass — longest-match-first", () => {
   it("'em sede de' vence sobre qualquer entrada isolada de 'sede' (que nem está cadastrada)", () => {
     const findings = jargonFindings("Em sede de recurso, o pedido foi negado.");

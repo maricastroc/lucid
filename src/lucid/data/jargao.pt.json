@@ -30,6 +30,22 @@
     { "term": "fará jus a", "kind": "phrase", "domain": "administrative", "plain": "terá direito a", "safeForSuggestion": true, "reason": null },
     { "term": "farão jus a", "kind": "phrase", "domain": "administrative", "plain": "terão direito a", "safeForSuggestion": true, "reason": null },
     { "term": "fazia jus a", "kind": "phrase", "domain": "administrative", "plain": "tinha direito a", "safeForSuggestion": true, "reason": null },
-    { "term": "faziam jus a", "kind": "phrase", "domain": "administrative", "plain": "tinham direito a", "safeForSuggestion": true, "reason": null }
+    { "term": "faziam jus a", "kind": "phrase", "domain": "administrative", "plain": "tinham direito a", "safeForSuggestion": true, "reason": null },
+
+    { "term": "destarte", "kind": "word", "domain": "legal", "plain": "assim", "safeForSuggestion": true, "reason": null },
+    { "term": "conquanto", "kind": "word", "domain": "legal", "plain": "embora", "safeForSuggestion": true, "reason": null },
+    { "term": "porquanto", "kind": "word", "domain": "legal", "plain": "porque", "safeForSuggestion": true, "reason": null },
+    { "term": "mormente", "kind": "word", "domain": "legal", "plain": "principalmente", "safeForSuggestion": true, "reason": null },
+
+    { "term": "tão logo", "kind": "phrase", "domain": "legal", "plain": "assim que", "safeForSuggestion": true, "reason": null },
+    { "term": "via de regra", "kind": "phrase", "domain": "administrative", "plain": "em geral", "safeForSuggestion": true, "reason": null },
+    { "term": "por derradeiro", "kind": "phrase", "domain": "legal", "plain": "por fim", "safeForSuggestion": true, "reason": null },
+    { "term": "de per si", "kind": "phrase", "domain": "legal", "plain": "por si só", "safeForSuggestion": true, "reason": null },
+
+    { "term": "com fulcro em", "kind": "phrase", "domain": "legal", "plain": "com base em", "safeForSuggestion": true, "reason": null },
+    { "term": "com fulcro no", "kind": "phrase", "domain": "legal", "plain": "com base no", "safeForSuggestion": true, "reason": null },
+    { "term": "com fulcro na", "kind": "phrase", "domain": "legal", "plain": "com base na", "safeForSuggestion": true, "reason": null },
+    { "term": "com fulcro nos", "kind": "phrase", "domain": "legal", "plain": "com base nos", "safeForSuggestion": true, "reason": null },
+    { "term": "com fulcro nas", "kind": "phrase", "domain": "legal", "plain": "com base nas", "safeForSuggestion": true, "reason": null }
   ]
 }

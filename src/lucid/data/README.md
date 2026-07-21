@@ -188,6 +188,18 @@ vem depois na frase (sintagma nominal vs. oração com "que", ou regência da pr
 seguinte) — risco de regência quebrada, não de sentido incerto. `plain` continua
 preenchido nesses casos para alimentar a `justification`, nunca a `suggestion`.
 
+**Lote 2 (ADR-010) — expansão curada para subir a taxa de auto-fix no domínio.** 13
+entradas novas, todas `safeForSuggestion:true` (troca 1:1 invariante), em três famílias:
+(a) conectores/advérbios formais invariantes e monossêmicos (`destarte`→"assim",
+`conquanto`→"embora", `porquanto`→"porque", `mormente`→"principalmente"); (b) MWEs fixas
+desambiguadas pela própria expressão (`tão logo`→"assim que", `via de regra`→"em geral",
+`por derradeiro`→"por fim", `de per si`→"por si só"); (c) família `com fulcro …`→`com
+base …`, cadastrando as contrações (`em/no/na/nos/nas`) explicitamente porque elas fazem
+parte do span casado e são preservadas 1:1 na troca. Nenhuma exige reconjugação nem muda
+regência. Candidatos `context_dependent` (`nos termos de`, `à luz de`, `em que pese`)
+foram deliberadamente adiados: o equivalente muda regência/estrutura, então entrariam só
+como detecção-sem-sugestão — sem ganho de auto-fix.
+
 **Fora de escopo deliberado (ver ADR-008 para o raciocínio completo):**
 - `consoante` — substantivo comum (letra do alfabeto) tão frequente quanto o uso
   conjuntivo formal; nenhum contexto sintático barato o bastante para desambiguar sem

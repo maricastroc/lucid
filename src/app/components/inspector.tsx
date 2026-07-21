@@ -3,15 +3,22 @@
 /**
  * O INSPECTOR — o centro da experiência. Dois estados:
  *   • repouso  → visão geral da auditoria (severidade, regras, métricas, engine);
- *   • seleção  → a INVESTIGAÇÃO de um diagnóstico: evidência, análise, por que importa,
- *                sinal (como a regra disparou), diagnóstico (instrumentação chave/valor) e
- *                resolução (sugestão segura ou requer decisão humana).
- * Estilo de instrumentação (rótulos mono, linhas chave/valor tipo DevTools), não de card.
+ *   • seleção  → um RELATÓRIO TÉCNICO NARRATIVO do diagnóstico: o que foi detectado, por
+ *     que importa, a evidência e como a regra disparou, por que a engine confia (ou não)
+ *     em sugerir, e o limite da automação — que vira orientação assistida, nunca um beco.
+ * É um relatório, não uma tabela de propriedades.
  */
 import { useState } from "react";
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CATEGORY_LABEL, CRITERION_ORDER, metaFor, severityInkVar, SEVERITY_LABEL } from "../lib/criteria";
 import { offsetToLineCol } from "../lib/editor-model";
+import {
+  buildConfidence,
+  detectedProse,
+  detectionHeadline,
+  longSentenceGuidance,
+  type ConfidenceLevel,
+} from "../lib/narrative";
 
 interface Props {
   diagnostic: Diagnostic;
@@ -41,7 +48,7 @@ export function Inspector(props: Props) {
         )}
       </div>
       {props.selectedFinding ? (
-        <Detail key={`${props.selectedFinding.criterion}:${props.selectedFinding.span.start}`} {...props} finding={props.selectedFinding} />
+        <Report key={`${props.selectedFinding.criterion}:${props.selectedFinding.span.start}`} {...props} finding={props.selectedFinding} />
       ) : (
         <Overview {...props} />
       )}
@@ -49,17 +56,17 @@ export function Inspector(props: Props) {
   );
 }
 
-/* ------------------------------------------------------------------ detail */
+/* ------------------------------------------------------------ o relatório */
 
-function Detail({ diagnostic, finding, onPrev, onNext, onClose, onApply }: Props & { finding: Finding }) {
+function Report({ diagnostic, finding, onPrev, onNext, onClose, onApply }: Props & { finding: Finding }) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const pos = offsetToLineCol(diagnostic.text, finding.span.start);
+  const confidence = buildConfidence(finding);
   const canSuggest = finding.suggestion !== undefined && !finding.requiresHuman;
 
   return (
     <div className="case-in flex min-h-0 flex-1 flex-col">
-      {/* nav */}
       <div className="flex h-9 shrink-0 items-center justify-between border-b border-line-1 px-2">
         <span className="flex items-center gap-2 pl-2">
           <span className="size-2 rounded-[2px]" style={{ background: ink }} aria-hidden />
@@ -72,54 +79,70 @@ function Detail({ diagnostic, finding, onPrev, onNext, onClose, onApply }: Props
         </span>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        <div className="flex items-baseline justify-between">
-          <span className="font-mono text-[12px] text-accent">ABNT {finding.principle}</span>
-          <span className="font-mono text-[10.5px] text-fg-3">Ln {pos.line}:{pos.col}</span>
-        </div>
-        <p className="mt-0.5 text-[12px] text-fg-2">{meta.principleName}</p>
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <p className="font-mono text-[11px] text-accent">
+          ABNT {finding.principle} <span className="text-fg-3">·</span> <span className="text-fg-2">{meta.principleName}</span>
+        </p>
+        <h3 className="mt-1.5 font-serif text-[20px] leading-tight text-fg-0">{detectionHeadline(finding)}</h3>
 
-        <Field label="evidência">
+        <Block label="o que foi detectado">
+          <Prose>{detectedProse(finding, pos.line)}</Prose>
+        </Block>
+
+        <Block label="evidência">
           <blockquote className="border-l-2 pl-3" style={{ borderColor: ink }}>
-            <span className="font-serif text-[17px] leading-snug text-fg-0">
+            <span className="font-serif text-[16px] leading-snug text-fg-0">
               <span className={meta.channel === "inline" ? `mark ${meta.markStyleClass}` : "passage"} style={{ "--mark-ink": ink } as React.CSSProperties}>
                 {finding.span.text.replace(/\s+/g, " ").trim()}
               </span>
             </span>
           </blockquote>
-        </Field>
+          <p className="mt-2 font-mono text-[10.5px] leading-relaxed text-fg-3">
+            {meta.signal} · offsets [{finding.span.start}, {finding.span.end})
+          </p>
+        </Block>
 
-        <Field label="análise">
-          <p className="text-[13px] leading-relaxed text-fg-1">{finding.justification}</p>
-        </Field>
+        <Block label="por que importa">
+          <Prose>{meta.why}</Prose>
+        </Block>
 
-        <Field label="por que importa">
-          <p className="text-[13px] leading-relaxed text-fg-1">{meta.why}</p>
-        </Field>
+        <Block label="análise">
+          <Prose>{finding.justification}</Prose>
+        </Block>
 
-        <Field label="sinal · como a regra disparou">
-          <p className="font-mono text-[11.5px] leading-relaxed text-fg-2">{meta.signal}</p>
-        </Field>
+        <Block label="confiança da engine">
+          <ConfidenceBadge level={confidence.level} />
+          <Prose className="mt-2">{confidence.rationale}</Prose>
+        </Block>
 
-        <Field label="diagnóstico">
-          <dl className="rounded-md border border-line-1 bg-bg-2">
-            <KV k="criterion" v={finding.criterion} />
-            <KV k="principle" v={finding.principle} />
-            <KV k="category" v={CATEGORY_LABEL[finding.category]} />
-            <KV k="severity" v={SEVERITY_LABEL[finding.severity]} ink={ink} />
-            <KV k="offsets" v={`[${finding.span.start}, ${finding.span.end}) utf-16`} />
-            <KV k="automatic" v={canSuggest ? "sim" : "não"} />
-            <KV k="requiresHuman" v={finding.requiresHuman ? "sim" : "não"} last />
-          </dl>
-        </Field>
+        <Block label={canSuggest ? "resolução" : "limite da automação · próximo passo"}>
+          {canSuggest ? <SafeResolution suggestion={finding.suggestion!} onApply={() => onApply(finding)} /> : <Guidance finding={finding} />}
+        </Block>
 
-        <Field label="resolução">
-          {canSuggest ? <SafeResolution suggestion={finding.suggestion!} onApply={() => onApply(finding)} /> : <HumanResolution />}
-        </Field>
+        <p className="mt-7 border-t border-line-1 pt-3 font-mono text-[10px] leading-relaxed text-fg-3">
+          regra determinística · {finding.criterion} · {CATEGORY_LABEL[finding.category]} · severidade {SEVERITY_LABEL[finding.severity]}
+        </p>
       </div>
     </div>
   );
 }
+
+function ConfidenceBadge({ level }: { level: ConfidenceLevel }) {
+  if (level === "segura") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md border border-accent-line bg-accent-weak px-2 py-1 font-mono text-[11px] text-accent">
+        <span aria-hidden>✓</span> segura para sugerir
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-line-2 px-2 py-1 font-mono text-[11px] text-fg-1">
+      <span aria-hidden>◐</span> assistida · a decisão é sua
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------- resolução */
 
 function SafeResolution({ suggestion, onApply }: { suggestion: string; onApply: () => void }) {
   const [copied, setCopied] = useState(false);
@@ -134,8 +157,7 @@ function SafeResolution({ suggestion, onApply }: { suggestion: string; onApply: 
   };
   return (
     <div>
-      <p className="text-[12px] text-fg-2">Substituição mecanicamente segura:</p>
-      <div className="mt-2 flex items-center justify-between gap-3 rounded-md border border-line-2 bg-bg-2 px-3 py-2.5">
+      <div className="flex items-center justify-between gap-3 rounded-md border border-line-2 bg-bg-2 px-3 py-2.5">
         <span className="flex min-w-0 items-baseline gap-2">
           <span className="font-mono text-[12px] text-accent" aria-hidden>→</span>
           <span className="truncate font-serif text-[15px] text-fg-0">{suggestion}</span>
@@ -145,18 +167,113 @@ function SafeResolution({ suggestion, onApply }: { suggestion: string; onApply: 
           <Act onClick={onApply} accent>aplicar</Act>
         </span>
       </div>
+      <p className="mt-2 text-[12px] leading-relaxed text-fg-2">
+        Substituição 1:1, sem reconjugação e com a regência preservada — por isso pode ser aplicada com segurança.
+      </p>
     </div>
   );
 }
 
-function HumanResolution() {
+/* ------------------------------------------------------------ orientação */
+
+function Guidance({ finding }: { finding: Finding }) {
+  if (finding.criterion === "long_sentence") return <LongSentenceGuide finding={finding} />;
+  if (finding.criterion === "passive_voice") return <PassiveGuide finding={finding} />;
+  if (finding.criterion === "nominalization") return <NominalizationGuide finding={finding} />;
+  return <JargonGuide />;
+}
+
+function LongSentenceGuide({ finding }: { finding: Finding }) {
+  const g = longSentenceGuidance(finding);
   return (
-    <div className="flex items-start gap-2.5 rounded-md border border-dashed border-line-3 px-3 py-2.5">
-      <span className="mt-px font-mono text-[13px] text-fg-2" aria-hidden>⌾</span>
-      <p className="text-[12px] leading-relaxed text-fg-1">
-        <span className="font-medium text-fg-0">Requer decisão humana.</span> A ferramenta marca, mas não
-        resolve — nenhuma reescrita automática seria segura sem inventar conteúdo ou decidir pelo autor.
+    <div>
+      <p className="text-[12.5px] leading-relaxed text-fg-2">
+        A ferramenta não reescreve — mas localiza o trabalho e mede o esforço:
       </p>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <Stat label="palavras" value={g.words != null ? String(g.words) : "—"} />
+        <Stat label="acima de" value={g.over != null ? `+${g.over}` : "—"} />
+        <Stat label="meta" value={g.targetSentences != null ? `~${g.targetSentences} frases` : "—"} />
+      </div>
+      <p className="mt-3 text-[12px] leading-relaxed text-fg-2">
+        Carga de subordinação: <span className="font-mono text-fg-1">{g.subordination}</span> marcadores (vírgulas e conjunções encadeadas).
+      </p>
+
+      {g.candidates.length > 0 && (
+        <div className="mt-4">
+          <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.16em] text-fg-3">
+            pontos de divisão sugeridos · você decide onde cortar
+          </p>
+          <ul className="flex flex-col gap-1.5">
+            {g.candidates.map((c) => (
+              <li key={c.offset} className="rounded-md border border-line-1 bg-bg-2 px-2.5 py-1.5 font-serif text-[12.5px] leading-snug">
+                <span className="text-fg-2">…{c.before}</span>
+                <span className="mx-1 font-mono text-accent" aria-hidden>▸</span>
+                <span className="text-fg-1">{c.after}…</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PassiveGuide({ finding }: { finding: Finding }) {
+  const hasAgent = finding.meta?.hasAgent === true;
+  return (
+    <div className="rounded-md border border-line-2 bg-bg-2 px-3 py-2.5">
+      <p className="text-[12.5px] leading-relaxed text-fg-1">
+        {hasAgent ? (
+          <>
+            <span className="font-medium text-fg-0">Andaime para a voz ativa.</span> O agente já está no trecho: ele vira o
+            sujeito, e o particípio vira o verbo. Monte a frase e confira a concordância — a versão final é sua.
+          </>
+        ) : (
+          <>
+            <span className="font-medium text-fg-0">Falta o agente.</span> Para reescrever na ativa, responda:{" "}
+            <span className="text-fg-0">quem praticou a ação?</span> Só com essa informação a frase ativa é possível — e a
+            resposta é sua, não da ferramenta.
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
+
+function NominalizationGuide({ finding }: { finding: Finding }) {
+  const base = typeof finding.meta?.baseVerb === "string" ? finding.meta.baseVerb : null;
+  return (
+    <div className="rounded-md border border-line-2 bg-bg-2 px-3 py-2.5">
+      <p className="text-[12.5px] leading-relaxed text-fg-1">
+        {base && (
+          <>
+            <span className="font-medium text-fg-0">Verbo-base: “{base}”.</span>{" "}
+          </>
+        )}
+        Reescreva com o verbo direto (ex.: “fazer a análise” → “analisar”). A engine não gera a troca automática porque
+        exigiria reconjugar o verbo ou ajustar o complemento — passos que só você deve decidir.
+      </p>
+    </div>
+  );
+}
+
+function JargonGuide() {
+  return (
+    <div className="rounded-md border border-line-2 bg-bg-2 px-3 py-2.5">
+      <p className="text-[12.5px] leading-relaxed text-fg-1">
+        Há um equivalente mais simples no glossário, mas a troca depende do que vem a seguir na frase. Confirme que o
+        contexto é um sintagma nominal (não uma oração) antes de substituir.
+      </p>
+    </div>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-line-1 bg-bg-2 px-2 py-2 text-center">
+      <div className="font-mono text-[14px] tabular-nums text-fg-0">{value}</div>
+      <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-[0.1em] text-fg-3">{label}</div>
     </div>
   );
 }
@@ -192,9 +309,7 @@ function Overview({ diagnostic, activeCriteria, onToggleCriterion }: Props) {
                   className={`kv-row flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-bg-3 ${active ? "opacity-100" : "opacity-40"}`}
                 >
                   <MarkSample criterion={criterion} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-mono text-[12px] text-fg-0">{criterion}</span>
-                  </span>
+                  <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-fg-0">{criterion}</span>
                   <span className="font-mono text-[10.5px] text-fg-3">{score?.principle}</span>
                   <span className="w-4 text-right font-mono text-[12px] tabular-nums text-fg-1">{count}</span>
                 </button>
@@ -230,8 +345,6 @@ function Overview({ diagnostic, activeCriteria, onToggleCriterion }: Props) {
     </div>
   );
 }
-
-/* ---------------------------------------------------------------- helpers */
 
 function SeverityBar({ diagnostic }: { diagnostic: Diagnostic }) {
   const total = diagnostic.findings.length;
@@ -290,25 +403,17 @@ function Section({ label, border, children }: { label: string; border?: boolean;
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="mt-5">
-      <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-fg-3">{label}</p>
+    <div className="mt-6">
+      <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-fg-3">{label}</p>
       {children}
     </div>
   );
 }
 
-function KV({ k, v, ink, last }: { k: string; v: string; ink?: string; last?: boolean }) {
-  return (
-    <div className={`flex items-center justify-between px-2.5 py-1.5 ${last ? "" : "border-b border-line-1"}`}>
-      <dt className="font-mono text-[11px] text-fg-3">{k}</dt>
-      <dd className="flex items-center gap-1.5 font-mono text-[11.5px] text-fg-1">
-        {ink && <span className="size-1.5 rounded-[1px]" style={{ background: ink }} aria-hidden />}
-        {v}
-      </dd>
-    </div>
-  );
+function Prose({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <p className={`text-[13px] leading-relaxed text-fg-1 ${className ?? ""}`}>{children}</p>;
 }
 
 function EngineRow({ k, v, dot }: { k: string; v: string; dot?: boolean }) {

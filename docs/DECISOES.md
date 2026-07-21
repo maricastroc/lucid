@@ -632,6 +632,65 @@ barrel. `probe/`, `report/`, CLI e UI não foram tocados. Suíte: 676 testes, 9 
 
 ---
 
+## ADR-010 — Jargão lote 2: expansão curada do glossário para encolher o resíduo (auto-fix), com o mesmo eval gate
+
+**Status:** aceito · Fase 1 (curadoria de `jargao.pt.json`, dentro do processo do ADR-008)
+
+**Contexto.** Num texto do domínio, o valor do Lucid depende da fração de achados que ele
+resolve com segurança (o balde "resolvíveis automaticamente"). O primeiro passo do plano
+de encolher o resíduo (registrado ao fim do ADR-008) é o de maior retorno e menor risco:
+**crescer o glossário curado** — pura curadoria, sem novo mecanismo no matcher, sob o
+mesmo portão de avaliação (métrica dura: **0 sugestões inseguras**).
+
+**Decisão.** 13 entradas novas, todas `safeForSuggestion:true`, em três famílias, cada uma
+justificada individualmente contra os 4 critérios do ADR-008 (familiaridade real,
+estabilidade de sentido, preservação de significado, ausência de reorganização sintática):
+
+1. **Conectores/advérbios formais invariantes e monossêmicos** — `destarte`→"assim",
+   `conquanto`→"embora", `porquanto`→"porque", `mormente`→"principalmente". Cada um tem um
+   único sentido no domínio e um sinônimo familiar que preserva a estrutura seguinte; a
+   troca é invariante (não flexiona).
+2. **Expressões multipalavra fixas** — `tão logo`→"assim que", `via de regra`→"em geral",
+   `por derradeiro`→"por fim", `de per si`→"por si só". A própria expressão desambigua
+   (mesma lição do ADR-008: "em sede de" não compete com o sentido comum de "sede"), então
+   palavras que isoladas seriam ambíguas (`via`) são seguras dentro da MWE.
+3. **Família `com fulcro …`→`com base …`** — muito frequente em texto jurídico. As
+   contrações (`em/no/na/nos/nas`) são cadastradas explicitamente porque fazem parte do
+   span casado e são preservadas 1:1 na troca ("com fulcro no" → "com base no"). Sem essa
+   enumeração, a forma usual (contraída) não casaria — mesma disciplina de "sem regra de
+   flexão produtiva" já usada em `fazer jus a`.
+
+**Por que estas e não outras.** A segurança de cada troca foi verificada como **1:1 sem
+reconjugação e sem mudança de regência**: conectores/advérbios são invariantes; nas MWEs a
+preposição/contração viaja dentro do span. Verbos formais isolados (`obstar`, `perquirir`,
+`carecer de`) foram **deixados de fora** justamente por exigirem casar e devolver formas
+conjugadas — o tipo de morfologia produtiva vetado pelo ADR-001.
+
+**Por que os `context_dependent` foram adiados.** `nos termos de`, `à luz de`, `em que
+pese` têm equivalente, mas a troca muda a regência ou a estrutura da oração seguinte —
+entrariam só como detecção-sem-sugestão, sem ganho de auto-fix (o objetivo deste lote).
+Ficam como candidatos de um passo futuro (contexto-direito limitado, extensão do matcher).
+
+**Processo (não é decorar o golden).** Cada entrada entrou por mérito de domínio; o golden
+(`test/eval/jargon-golden.ts`) e os testes unitários ganharam exemplos correspondentes,
+incluindo **guardas de fronteira** que provam a ausência de falso positivo por
+tokenização: `por quanto` (dois tokens) não casa o unigrama `porquanto`; `via de acesso`
+não casa `via de regra` (difere no 3º token).
+
+**Resultado da avaliação** (39 exemplos no golden de jargão): precisão de detecção 100%,
+recall 96,3% (o único FN é a limitação conhecida pré-existente `fizer jus a`), e a métrica
+prioritária mantida: **23/23 sugestões esperadas corretas, 0 sugestões inseguras, 0
+findings sobre termos não cadastrados**. Suíte completa verde (698 testes).
+
+**Consequências.** Nenhuma mudança em código do matcher, em `Diagnostic`/`Finding`/`Pass`/
+`analyze()` nem na forma pública — só dados. Nenhum snapshot/golden integrado foi afetado
+(os textos daquelas suítes não contêm os novos termos). A porta de saída do plano de
+resíduo continua: **Tier 2** (transforms mecânicos de passiva-com-agente e de nominalização
+finita, via léxico fechado de formas) é maior e mais arriscado, e terá seu próprio ADR e
+eval antes de qualquer implementação — nunca um "conjugador genérico".
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
