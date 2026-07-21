@@ -31,6 +31,8 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "perifrase_inflada",
   "paragraph_length",
   "prose_enumeration",
+  "mesoclise",
+  "dupla_negacao",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -124,6 +126,8 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     perifrase_inflada: zero(),
     paragraph_length: zero(),
     prose_enumeration: zero(),
+    mesoclise: zero(),
+    dupla_negacao: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

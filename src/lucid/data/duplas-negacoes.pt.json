@@ -1,0 +1,22 @@
+{
+  "_comentario": "Dupla negação / litotes — afirmar negando o negativo ('não é incomum' = 'é comum') — usado pelo pass 'dupla_negacao' (5.3.3, frases claras). Obriga o leitor a desfazer a negação aninhada (é a operação 'desfazer_negacao_aninhada' da sonda). Léxico CURADO e extensível de expressões cujo sentido só se resolve invertendo a negação; `plain` é a forma direta citada na justificativa (a ferramenta NÃO troca sozinha — o encaixe depende do contexto). NÃO inclui negação simples/concordância negativa ('não vi ninguém'), que é normal e clara em PT. Curadoria própria. Caixa invariante. Sem colisão com o glossário de jargão.",
+  "entries": [
+    { "phrase": "não é incomum", "plain": "é comum" },
+    { "phrase": "não são incomuns", "plain": "são comuns" },
+    { "phrase": "não é improvável", "plain": "é provável" },
+    { "phrase": "não é impossível", "plain": "é possível" },
+    { "phrase": "não é raro", "plain": "é frequente" },
+    { "phrase": "não é desconhecido", "plain": "é conhecido" },
+    { "phrase": "não é desconhecida", "plain": "é conhecida" },
+    { "phrase": "não é insignificante", "plain": "é significativo" },
+    { "phrase": "não é desprezível", "plain": "é considerável" },
+    { "phrase": "não é de todo", "plain": "não é totalmente" },
+    { "phrase": "não deixa de ser", "plain": "é" },
+    { "phrase": "não deixa de", "plain": null },
+    { "phrase": "não posso deixar de", "plain": "devo" },
+    { "phrase": "não podemos deixar de", "plain": "devemos" },
+    { "phrase": "não poucas vezes", "plain": "muitas vezes" },
+    { "phrase": "não sem antes", "plain": "antes de" },
+    { "phrase": "não sem razão", "plain": "com razão" }
+  ]
+}

@@ -21,7 +21,9 @@ export type Criterion =
   | "redundancia"
   | "perifrase_inflada"
   | "paragraph_length"
-  | "prose_enumeration";
+  | "prose_enumeration"
+  | "mesoclise"
+  | "dupla_negacao";
 export type Channel = "inline" | "passage";
 
 export interface CriterionMeta {
@@ -50,6 +52,8 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "adverbio_mente_denso",
   "redundancia",
   "perifrase_inflada",
+  "mesoclise",
+  "dupla_negacao",
   "long_sentence",
   "paragraph_length",
   "prose_enumeration",
@@ -165,6 +169,26 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "",
     signal: "≥3 ordinais distintos (a partir de “primeiro”) no mesmo parágrafo",
     why: "Itens embutidos no texto corrido são mais difíceis de localizar que uma lista.",
+  },
+  mesoclise: {
+    label: "Mesóclise",
+    ruleId: "mesoclise",
+    kind: "Forma verbal",
+    principleName: "Frases claras",
+    channel: "inline",
+    markStyleClass: "mark-dotted",
+    signal: "pronome encaixado no meio do verbo + terminação de futuro/condicional",
+    why: "Forma arcaica (“far-se-á”) de leitura difícil — a forma comum é mais direta.",
+  },
+  dupla_negacao: {
+    label: "Dupla negação",
+    ruleId: "dupla_negacao",
+    kind: "Construção sintática",
+    principleName: "Frases claras",
+    channel: "inline",
+    markStyleClass: "mark-dashed",
+    signal: "expressão cadastrada que afirma negando o negativo (litotes)",
+    why: "O leitor precisa desfazer a negação para chegar ao sentido afirmativo.",
   },
 };
 

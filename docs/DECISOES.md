@@ -1299,6 +1299,61 @@ o 4 via sonda. Cerca/depcheck intactos. Único `Document` manual dos testes atua
 
 ---
 
+## ADR-027 — `AnnotatedDocument` canônico e independente de formato (só contrato, sem importadores)
+
+**Contexto.** Objetivo declarado: o Lucid deve auditar principalmente texto puro, DOCX e PDF no
+futuro, mas a Camada 1 deve trabalhar sobre um **modelo intermediário canônico** independente do
+formato — para que qualquer importador produza o mesmo modelo e os detectores nunca saibam a
+origem. **Não** implementar importadores agora; só manter a arquitetura pronta.
+
+**Decisão.** Documentar e fixar a fronteira `formato → IMPORTADOR → AnnotatedDocument → detectores`
+(design doc `DESIGN-modelo-independente-de-formato.md`). Sem código novo de importador; sem tipos de
+bloco que nenhum detector usa; sem API não consumida — disciplina YAGNI mantida.
+- **Já está pronto (auditado):** `buildDocument` é o ÚNICO produtor do `Document` e é o importador
+  de texto puro; os passes são puros sobre `ctx.doc` (sem `fs`/DOM/ambiente); zero ramificação por
+  formato em `core`; offsets sempre no `source` normalizado (nunca no "arquivo original"). Logo a
+  independência de formato **no nível dos detectores já é fato**.
+- **Contrato do importador:** produz `source` (texto NFC) + blocos que o formato oferecer, offsets
+  consistentes, determinístico; **não analisa** e **não vaza** estilo/byte/tag do formato. O
+  **source-map** (offset↔posição no original) é do importador, FORA do modelo canônico.
+- **Extensões futuras, todas ADITIVAS:** `paragraphs` generaliza para `blocks` com `kind`
+  (heading/list/table) quando um importador estruturado chegar; `analyze(text)` ganha irmão
+  `analyzeDocument(doc)`; source-map como saída do importador. Nenhuma toca detector ou cerca.
+- **Cerca:** nova seta a valer quando houver importadores — `importadores → core` permitido,
+  `core → importadores` proibido (como `core ⊄ probe`).
+
+**Consequências.** Só documentação + 2 clarificações de comentário no código (marca `buildDocument`
+como a fronteira/importador de texto puro; marca `Document` como o `AnnotatedDocument` canônico
+independente de formato). **Zero mudança de comportamento** (838 testes seguem verdes). A
+arquitetura fica explicitamente pronta para DOCX/PDF/HTML slotarem sem reescrita. **Adiado:**
+importadores, `kind`s de bloco, `analyzeDocument`, infra de source-map.
+
+---
+
+## ADR-028 — Mais 2 detectores de texto puro: mesóclise + dupla negação
+
+**Contexto.** Continuar evoluindo o que faz sentido para texto puro (Princípio 3), sem depender de
+formato estruturado nem da camada de anotação de runtime. Dois fenômenos de alto valor e baixo FP,
+com mecanismos distintos.
+
+**Decisão.**
+- **`mesoclise`** (5.3.3): regex pura sobre tokens-palavra — `radical-clítico-terminação` de
+  futuro/condicional (`far-se-á`, `dir-lhe-ia`, `recolher-se-ão`). Zero léxico, zero FP: exigir a
+  terminação verbal exclui nomes homógrafos (`bem-te-vi`, que termina em `vi`); a ênclise normal
+  (`diz-se`, `fazê-lo`, clítico no FIM) não casa (falta a 2ª parte). O tokenizador já junta a forma
+  num token só.
+- **`dupla_negacao`** (5.3.3): léxico curado (`duplas-negacoes.pt`) de litotes ("não é incomum" =
+  "é comum"), via o matcher de frase compartilhado. Liga à operação `desfazer_negacao_aninhada` da
+  sonda. **NÃO** marca negação simples/concordância negativa ("não vi ninguém") — normal e clara em
+  PT.
+
+**Consequências.** 11→13 critérios. **847 testes verdes** (novos: os 2 passes + guardas: ênclise
+não-mesóclise, `bem-te-vi` não marca, negação simples não marca). UI: os 2 critérios sob "Frases
+claras", verificado ao vivo. Cerca/depcheck intactos. Ambos nascem já format-agnostic (rodam sobre
+o `AnnotatedDocument`, ADR-027).
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

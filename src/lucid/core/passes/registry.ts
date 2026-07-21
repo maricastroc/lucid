@@ -21,6 +21,8 @@ import { redundanciaPass } from "./redundancia";
 import { perifraseInfladaPass } from "./perifrase-inflada";
 import { paragraphLengthPass } from "./paragraph-length";
 import { proseEnumerationPass } from "./prose-enumeration";
+import { mesoclisePass } from "./mesoclise";
+import { duplaNegacaoPass } from "./dupla-negacao";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -34,4 +36,6 @@ export const PASSES: readonly Pass[] = [
   perifraseInfladaPass,
   paragraphLengthPass,
   proseEnumerationPass,
+  mesoclisePass,
+  duplaNegacaoPass,
 ];

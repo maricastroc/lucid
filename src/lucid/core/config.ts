@@ -54,6 +54,12 @@ export interface Config {
     /** mínimo de ordinais distintos (a partir de "primeiro") para marcar */
     minMarkers: number;
   };
+  mesoclise: {
+    enabled: boolean;
+  };
+  duplaNegacao: {
+    enabled: boolean;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -100,6 +106,12 @@ export const DEFAULT_CONFIG: Config = {
   proseEnumeration: {
     enabled: true,
     minMarkers: 3,
+  },
+  mesoclise: {
+    enabled: true,
+  },
+  duplaNegacao: {
+    enabled: true,
   },
   metrics: {
     decimalPlaces: 1,

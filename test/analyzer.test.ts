@@ -27,6 +27,8 @@ describe("analyze — documento vazio", () => {
         { criterion: "perifrase_inflada", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "paragraph_length", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "prose_enumeration", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "mesoclise", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "dupla_negacao", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
       ],
       totalFindings: 0,
     });
@@ -47,7 +49,7 @@ describe("analyze — documento sem findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(11);
+    expect(diagnostic.score.byCriterion).toHaveLength(13);
     for (const entry of diagnostic.score.byCriterion) {
       expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(entry.densityPer100Words).toBe(0);
