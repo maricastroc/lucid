@@ -41,20 +41,35 @@ describe("nominalizationPass — formas infinitivas", () => {
   });
 });
 
-describe("nominalizationPass — formas finitas", () => {
+describe("nominalizationPass — formas finitas sem sugestão (complemento inseguro ou traço não cadastrado)", () => {
   it.each([
-    "O comitê fez a análise ontem.",
-    "A equipe realizou o pagamento da taxa.",
-    "A equipe efetuará a solicitação amanhã.",
-    "Eles procederam à verificação dos dados.",
-    "Eles fazem a análise semanalmente.",
+    "O comitê fez a análise ontem.", // complemento "ontem" não é formato limpo
+    "A equipe efetuará a solicitação amanhã.", // complemento "amanhã"
+    "Eles fazem a análise semanalmente.", // complemento "semanalmente"
     "Eles faziam a análise semanalmente.",
-    "É bom que façam a análise.",
-  ])("'%s' é detectada, mas nunca recebe sugestão", (text) => {
+    "É bom que façam a análise.", // subjuntivo — fora da tabela fechada (ADR-011)
+  ])("'%s' é detectada, mas não recebe sugestão", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].suggestion).toBeUndefined();
     expect(findings[0].requiresHuman).toBe(true);
+  });
+});
+
+describe("nominalizationPass — formas finitas COM conjugação segura (ADR-011)", () => {
+  it.each([
+    ["O comitê fez a análise de documentos.", "analisou documentos"], // pret.3s
+    ["A equipe realizou o pagamento da taxa.", "pagou a taxa"], // pret.3s + contração da→a
+    ["Eles procederam à verificação dos dados.", "verificaram os dados"], // pret.3p + dos→os
+    ["Eles fazem a aprovação do projeto.", "aprovam o projeto"], // pres.3p + do→o
+    ["A diretoria fará a avaliação dos riscos.", "avaliará os riscos"], // fut.3s + dos→os
+    ["O órgão realizava a publicação do edital.", "publicava o edital"], // impf.3s + do→o
+    ["O comitê fez a análise.", "analisou"], // sem complemento
+  ])("'%s' → '%s' (traço preservado, sem conjugador produtivo)", (text, esperada) => {
+    const findings = nomFindings(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].suggestion).toBe(esperada);
+    expect(findings[0].requiresHuman).toBe(false);
   });
 });
 
@@ -232,9 +247,13 @@ describe("nominalizationPass — sugestão segura no infinitivo", () => {
   });
 });
 
-describe("nominalizationPass — ausência de sugestão em forma finita", () => {
-  it("forma finita nunca recebe suggestion, mesmo com complemento limpo", () => {
-    const findings = nomFindings("O comitê fez a análise de documentos.");
+describe("nominalizationPass — traços fora da tabela fechada continuam sem sugestão (ADR-011)", () => {
+  it.each([
+    "O comitê faria a análise dos dados.", // futuro do pretérito (condicional)
+    "É bom que façam a análise de riscos.", // presente do subjuntivo
+    "Fazendo a análise dos autos, o comitê seguiu.", // gerúndio
+  ])("'%s' é detectada, mas não recebe sugestão (condicional/subjuntivo/gerúndio não cobertos)", (text) => {
+    const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].suggestion).toBeUndefined();
     expect(findings[0].requiresHuman).toBe(true);

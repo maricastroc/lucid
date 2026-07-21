@@ -691,6 +691,70 @@ eval antes de qualquer implementação — nunca um "conjugador genérico".
 
 ---
 
+## ADR-011 — Nominalização finita: sugestão via tabela de conjugação FECHADA (não conjugador). Passiva→ativa fica de fora
+
+**Status:** aceito · Fase 1 (Tier 2 do plano de resíduo — revê o ADR-007)
+
+**Contexto.** O maior resíduo do critério de nominalização eram as **formas finitas**: o
+ADR-007 deu sugestão só ao infinitivo ("fazer a análise" → "analisar") e marcou toda
+forma finita como `requiresHuman`, porque reconjugar o verbo-base para o tempo/pessoa da
+forma finita ("fez a análise" → "analisou") seria morfologia produtiva — o "conjugador
+genérico" vetado pelo ADR-001. O Tier 2 do plano pede atacar esse resíduo **sem** abrir
+essa porta.
+
+**Decisão. Reescrever a forma finita por uma TABELA DE CONJUGAÇÃO FECHADA**, não por um
+conjugador. Três peças:
+1. Cada forma de verbo leve (`verbos-leves.pt.json`) ganhou um **traço morfológico**
+   (`feature`: `pret.3s`, `pres.3p`, `fut.3s`, `impf.3p`, …).
+2. `nominalizacoes.pt.json` ganhou um bloco `conjugations`: verbo-base → traço → forma
+   finita, **cada forma escrita e verificada à mão** (11 verbos-base × 8 traços).
+3. O matcher escolhe a forma da sugestão pelo traço do verbo leve: infinitivo → verbo-base
+   direto; finita → `conjugations[verbo][feature]`. **Se o par não está na tabela, não há
+   sugestão** (`requiresHuman`) — nunca um palpite.
+
+**Por que isto é seguro (e não um conjugador).** A concordância é preservada por
+CONSTRUÇÃO: o traço vem do verbo leve (que concorda com o sujeito) e seleciona a forma do
+verbo-base com o MESMO traço — "fizeram a análise" (`pret.3p`) → "analisaram" (`pret.3p`),
+o sujeito "Eles" concorda com ambos. Não há regra produtiva: um par não cadastrado
+simplesmente não gera sugestão. A tabela é finita, auditável linha a linha e testada.
+
+**Escopo deliberadamente estreito.** Só os **8 traços indicativos comuns** (presente,
+pretérito perfeito, futuro do presente, imperfeito × 3ª pessoa singular e plural). **Futuro
+do pretérito (condicional), presente do subjuntivo e gerúndio ficam de fora** — continuam
+`requiresHuman`, limitação documentada e testada (`"o comitê faria a análise"`, `"que
+façam a análise"`, `"fazendo a análise"`). Todas as travas de complemento do ADR-007
+continuam valendo por cima: "fez a análise ontem" segue sem sugestão (complemento não é o
+formato limpo), agora por `unsafeComplement`, não por ser finita.
+
+**Por que PASSIVA→ATIVA NÃO entrou.** O outro grande resíduo — reescrever "o pedido foi
+aprovado pela comissão" como "a comissão aprovou o pedido" — foi **avaliado e recusado**
+para auto-sugestão. Diferente da nominalização (uma substituição local de um núcleo
+adjacente), a ativa exige **identificar sujeito e objeto e reordená-los** — reorganização
+sintática que o ADR-006 já classificou como fora da garantia mecânica, e que não é
+resolvível sem parser. Fingir segurança aqui seria exatamente o tipo de reescrita
+"plausível mas possivelmente errada" que o produto recusa. A passiva continua com a
+**orientação assistida** (o andaime "agente → sujeito, particípio → verbo" do item 1),
+nunca uma sugestão aplicável. Uma fatia mínima e rígida (padrão fixo, agente explícito,
+sujeito simples) poderia virar um ADR futuro, mas só com seu próprio golden e prova.
+
+**Processo e resultado.** Os testes que o ADR-007 fixava ("forma finita nunca recebe
+sugestão") foram **atualizados para o novo comportamento correto**, não contornados — e
+ganharam contraparte: as formas finitas com traço cadastrado e complemento limpo agora
+têm sugestão exata; as com traço não-cadastrado seguem sem. Avaliação (45 exemplos no
+golden de nominalização): precisão de detecção 100%, recall 94,3% (os 2 FN são as
+limitações pré-existentes `dar continuidade`/`proceder com`), e a métrica prioritária
+mantida: **20/20 sugestões esperadas corretas, 0 sugestões inseguras**. Suíte completa
+verde (711 testes); nenhum snapshot/golden integrado afetado (aqueles textos não têm
+construção verbo-leve-finito + complemento limpo).
+
+**Consequências.** `Diagnostic`/`Finding`/`Pass`/`analyze()` inalterados na forma. Dado
+novo (`feature` nas formas de verbo leve, bloco `conjugations`) + uma função pura de
+seleção no matcher. `Config.nominalization.suggest` continua sendo o kill-switch. O
+resíduo do domínio encolhe mais um degrau; o que sobra (passiva, frase longa, subjuntivo/
+condicional/gerúndio da nominalização) é honestamente autoral ou explicitamente adiado.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

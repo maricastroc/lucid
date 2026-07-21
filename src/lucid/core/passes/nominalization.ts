@@ -30,6 +30,8 @@ interface LightVerbForm {
   form: string;
   lemma: string;
   infinitive: boolean;
+  /** traço morfológico (ex.: "pret.3s"); casa com a tabela `conjugations` (ADR-011) */
+  feature: string;
   pattern: "direct" | "a";
 }
 
@@ -48,6 +50,19 @@ const LIGHT_VERB_FORMS: ReadonlyMap<string, LightVerbForm> = new Map(
 const NOMINALIZATIONS: ReadonlyMap<string, NominalizationEntry> = new Map(
   (nominalizationsData.entries as NominalizationEntry[]).map((entry) => [entry.noun, entry]),
 );
+
+/**
+ * Tabela FECHADA verbo-base → traço morfológico → forma finita (ADR-011). Não é um
+ * conjugador: é dado curado, cada forma verificada à mão, só os 8 traços indicativos
+ * comuns. `undefined` para qualquer par não cadastrado — nunca gera palpite.
+ */
+const CONJUGATIONS = nominalizationsData.conjugations as Record<string, Record<string, string>>;
+
+/** Forma verbal a usar na sugestão: infinitivo direto, ou a conjugação do traço; senão nada. */
+function conjugatedVerb(nominalization: NominalizationEntry, verbForm: LightVerbForm): string | undefined {
+  if (verbForm.infinitive) return nominalization.verb;
+  return CONJUGATIONS[nominalization.verb]?.[verbForm.feature];
+}
 
 const DIRECT_DETERMINERS = new Set(["o", "a", "os", "as", "um", "uma"]);
 const A_CONTRACTIONS = new Set(["à", "ao", "às", "aos"]);
@@ -77,8 +92,10 @@ interface SuggestionResult {
 /**
  * Decide se uma sugestão mecânica é segura e, se for, o texto exato e até qual índice
  * de token o span deve se estender. Retorna `null` sempre que qualquer condição de
- * segurança falhar — nunca um palpite. As 6 condições (ver plano/ADR-007):
- *   1. forma do verbo leve é infinitiva;
+ * segurança falhar — nunca um palpite. As 6 condições (ver plano/ADR-007, revisto por
+ * ADR-011):
+ *   1. há forma verbal segura: infinitivo (verbo-base direto) OU forma finita com
+ *      conjugação cadastrada na tabela fechada para o traço do verbo leve;
  *   2. mapeamento marcado `safeForSuggestion`;
  *   3. adjacência estrita (já garantida pelo chamador antes de invocar esta função);
  *   4. complemento em formato reconhecido (ausente, ou "de"-forma + 1 palavra, seguido
@@ -92,7 +109,8 @@ function buildSuggestion(
   verbForm: LightVerbForm,
   nominalization: NominalizationEntry,
 ): SuggestionResult | null {
-  if (!verbForm.infinitive) return null;
+  const verbText = conjugatedVerb(nominalization, verbForm);
+  if (!verbText) return null;
   if (!nominalization.safeForSuggestion) return null;
   if (nominalization.targetPreposition !== null) return null;
 
@@ -100,7 +118,7 @@ function buildSuggestion(
 
   // complemento ausente: fim da frase, ou pontuação final logo em seguida.
   if (!afterNominalization || (!afterNominalization.isWord && SENTENCE_FINAL_PUNCTUATION.has(afterNominalization.text))) {
-    return { text: nominalization.verb, spanEndIndex: nominalizationIndex };
+    return { text: verbText, spanEndIndex: nominalizationIndex };
   }
 
   // complemento com preposição "de"-forma: exige exatamente 1 palavra depois, e então
@@ -118,7 +136,7 @@ function buildSuggestion(
     const complementText = expandedArticle ? `${expandedArticle} ${complementWord.text}` : complementWord.text;
 
     return {
-      text: `${nominalization.verb} ${complementText}`,
+      text: `${verbText} ${complementText}`,
       spanEndIndex: nominalizationIndex + 2,
     };
   }
@@ -139,7 +157,7 @@ function buildJustification(hasSuggestion: boolean, baseVerb: string, reason: "f
 
   const motivo =
     reason === "finite"
-      ? "a forma verbal aqui não é o infinitivo, e reconjugar automaticamente não é seguro"
+      ? "esta forma verbal não está na tabela fechada de conjugações seguras (só presente, pretérito, futuro e imperfeito do indicativo, na 3ª pessoa, são cobertos)"
       : reason === "unsafeMapping"
         ? "o mapeamento desta palavra para um único verbo não é seguro o bastante"
         : "o complemento da frase não está em um formato reconhecido com segurança";
@@ -182,9 +200,10 @@ export const nominalizationPass: Pass = {
         const suggestionAllowed = ctx.config.nominalization.suggest;
         const suggestionResult = suggestionAllowed ? buildSuggestion(tokens, i + 2, verbForm, nominalization) : null;
 
+        const hasVerbText = conjugatedVerb(nominalization, verbForm) !== undefined;
         const reason: "finite" | "unsafeMapping" | "unsafeComplement" | null = suggestionResult
           ? null
-          : !verbForm.infinitive
+          : !hasVerbText
             ? "finite"
             : !nominalization.safeForSuggestion
               ? "unsafeMapping"

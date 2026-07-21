@@ -119,12 +119,19 @@ presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo e
 gerúndio — 14 formas por verbo. Deliberadamente **não** cobre 1ª/2ª pessoa,
 imperativo nem pretérito mais-que-perfeito simples.
 
+**`feature` (ADR-011):** cada forma carrega o traço morfológico (`inf`, `pres.3s/3p`,
+`pret.3s/3p`, `fut.3s/3p`, `impf.3s/3p`, `cond.3s/3p`, `subj.3s/3p`, `ger`). É a chave que
+casa com a tabela `conjugations` de `nominalizacoes.pt.json` para reescrever a
+nominalização quando o verbo leve é finito — preservando tempo/pessoa/número, sem
+conjugador produtivo.
+
 **Fora de escopo deliberado:** `dar`/`ter` como verbos-suporte de nominalização
 ("dar continuidade a") — regência e ambiguidade lexical próprias, não demonstradas
 como seguras nesta etapa (ver `docs/DECISOES.md`, ADR-007). Regências alternativas de
 `proceder` (`proceder com`) — só o padrão `à/ao/às/aos` foi implementado.
 
-**Formato:** `{ "forms": LightVerbForm[] }`, comparação em caixa invariante.
+**Formato:** `{ "forms": LightVerbForm[] }` (cada forma com `feature`), comparação em
+caixa invariante.
 
 **Licença:** fatos de flexão verbal, curadoria própria.
 
@@ -149,7 +156,17 @@ completamente omitidas, não incluídas com `safeForSuggestion:false`. `revisão
 exceção: cadastrada (aparece nos exemplos de detecção do pedido) mas com
 `safeForSuggestion:false` (mapeamento genuinamente não-único — "revisar" ou "rever").
 
-**Formato:** `{ "entries": NominalizationEntry[] }`, comparação em caixa invariante.
+**Tabela `conjugations` (ADR-011) — reescrita de forma FINITA sem conjugador.** Bloco
+`conjugations`: verbo-base → traço morfológico → forma finita, **cada forma verificada à
+mão** (11 verbos-base seguros × 8 traços indicativos comuns). Quando o verbo leve é finito
+("fez a análise"), o matcher escolhe a forma da sugestão por `conjugations[verbo][feature]`
+("analisou"), preservando tempo/pessoa/número. Não é morfologia produtiva: um par
+não cadastrado não gera sugestão. Só presente/pretérito/futuro/imperfeito do indicativo
+(3ª pessoa sing/plural) estão cobertos; **condicional, subjuntivo e gerúndio ficam de
+fora** (seguem `requiresHuman`). `revisar` não aparece na tabela (`safeForSuggestion:false`).
+
+**Formato:** `{ "entries": NominalizationEntry[], "conjugations": Record<verbo, Record<feature, forma>> }`,
+comparação em caixa invariante.
 
 **Licença:** julgamento linguístico próprio, curadoria própria.
 
