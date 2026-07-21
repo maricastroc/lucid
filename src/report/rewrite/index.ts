@@ -26,7 +26,8 @@ export async function proposeAndVerify(
 
 export { StubRewriteProposer } from "./proposer";
 export { LlmRewriteProposer, parseRewrite } from "./llm-proposer";
-export { buildRewritePrompt, REWRITE_PROMPT_VERSION } from "./prompt";
+export { buildRewritePrompt, REWRITE_PROMPT_VERSION, STRATEGY_VERSION } from "./prompt";
+export type { RewriteStrategy } from "./prompt";
 export { applyProposal, verifyRewrite } from "./verify";
 export type { VerifyOptions } from "./verify";
 export type {

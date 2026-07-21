@@ -984,6 +984,42 @@ mecânico reprova, passar ≠ aprovação.
 
 ---
 
+## ADR-017 — Tier 3 · duas estratégias de prompt (corrigir × reescrever) + benchmark de SISTEMAS
+
+**Status:** aceito · Tier 3, incremento 5 (testar a hipótese certa antes de generalizar)
+
+**Contexto.** A pergunta não é "qual texto ficou mais fácil", e sim "**qual SISTEMA** — modelo
++ estratégia de prompt + o que a engine consegue provar/sinalizar — entrega melhor reescrita
+COM melhor garantia". Para isso é preciso comparar, sob o mesmo verificador, duas hipóteses de
+prompt: (1) **corrigir** o finding com mínima alteração; (2) **reescrever do zero** para o
+cidadão, com liberdade de reorganizar.
+
+**Decisão.**
+1. **Eixo de estratégia** (`prompt.ts`): `RewriteStrategy = "correct" | "rewrite"`, cada uma
+   versionada (`correct@1`, `rewrite@2`). `correct` mantém estrutura/ordem e troca o mínimo;
+   `rewrite` reorganiza/condensa livremente. **As duas são igualmente blindadas** contra
+   invenção (fato, agente/"nós", número, data, nome). `LlmRewriteProposer(provider, model,
+   strategy)` — o "sistema" é `provider:model+estratégia@versão`, que vira o id/proveniência.
+2. **Benchmark de sistemas** (`test/rewrite-benchmark.test.ts`, `describe.runIf(BENCHMARK)` —
+   fora da CI, rede real). Para cada (modelo × estratégia) sobre um golden de parágrafos,
+   agrega as **6 dimensões pedidas**: clareza (ΔFlesch/Δpalavras), fidelidade semântica (sonda
+   como teste negativo), findings restantes, provas determinísticas preservadas
+   (números/datas/jargão), sinais de deriva (sentido + nome perdido), custo/latência (ms +
+   tokens reais do Groq). Compara SISTEMAS COMPLETOS: reescrita + o que cada um prova/sinaliza.
+3. **Resiliência** (`GroqProvider`): retry limitado só em 429 (rate limit), respeitando o
+   `retry-after`/"try again in Xs" — necessário no free tier (6000 TPM) e útil na rota real.
+   `lastUsage` (tokens) exposto para o benchmark medir custo.
+
+**Honestidade.** A agregação é "**% sem veto mecânico**" e "**% com provas preservadas**",
+NUNCA "taxa de aprovação" — o benchmark mede o que a engine PROVA/SINALIZA, coerente com o I5.
+
+**Consequências.** `core/**` intacto; UI inalterada (a estratégia é do proposer/benchmark; sem
+mudança de UI nem revisão por bloco, conforme pedido). Default `rewrite` mantém o comportamento
+atual. Suíte offline 783 verdes + 1 benchmark skipado; benchmark roda manual com
+`BENCHMARK=1`. Resultados da execução ao vivo: ver docs/HANDOFF.md.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

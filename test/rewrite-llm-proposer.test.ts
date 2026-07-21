@@ -60,6 +60,20 @@ describe("LlmRewriteProposer", () => {
     const proposal = await proposer.propose({ text: target.text, target });
     expect(proposal.proposed).toBe(target.text);
   });
+
+  it("a estratégia entra no id e escolhe o prompt (correct minimiza, rewrite reorganiza)", async () => {
+    const t = span("Um trecho.");
+    const correct = new MockChatProvider('{"reescrita":"x"}');
+    const rewrite = new MockChatProvider('{"reescrita":"x"}');
+    await new LlmRewriteProposer(correct, "m1", "correct").propose({ text: t.text, target: t });
+    await new LlmRewriteProposer(rewrite, "m1", "rewrite").propose({ text: t.text, target: t });
+
+    expect(new LlmRewriteProposer(correct, "m1", "correct").id).toBe("mock:m1+correct@1");
+    expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@2");
+    // o prompt "correct" pede mudança mínima; o "rewrite" oferece contexto do documento
+    expect(correct.lastPrompt).toMatch(/MENOR alteração/);
+    expect(rewrite.lastPrompt).toMatch(/DOCUMENTO INTEIRO/);
+  });
 });
 
 describe("GroqProvider — allow-list (sem rede)", () => {
