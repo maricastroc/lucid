@@ -30,7 +30,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="Lucid — the review studio" width="800" />
+<img width="3118" height="1950" alt="Macbook-Air-1559x975 34" src="https://github.com/user-attachments/assets/6ff3d23a-5922-442b-9f2b-522b88699444" />
 </p>
 
 <br/>
