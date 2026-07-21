@@ -32,9 +32,36 @@ const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
 const RE_DATE = /\b\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gu;
 /** Palavra Capitalizada (nome próprio) ou sigla em CAIXA-ALTA — heurística de entidade. */
 const RE_ENTITY = /\b(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})\b/gu;
+const RE_ACRONYM = /^\p{Lu}{2,}$/u;
+const RE_SPACE = /\s/u;
+const SENTENCE_TERMINATORS = ".!?…";
 
 function extractSorted(text: string, re: RegExp): string[] {
   return (text.match(re) ?? []).slice().sort();
+}
+
+/**
+ * Entidades heurísticas: nomes próprios (Capitalizados) e siglas em caixa-alta. Palavra
+ * Capitalizada em INÍCIO DE FRASE é ignorada (é só a maiúscula obrigatória, não um nome) —
+ * senão "Foi"/"A" contariam como entidade e a comparação daria falso positivo. Siglas são
+ * sempre mantidas (raramente são só início de frase). É SINAL, não prova.
+ */
+function extractEntities(text: string): string[] {
+  const out: string[] = [];
+  const re = new RegExp(RE_ENTITY.source, "gu");
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const token = m[0];
+    if (RE_ACRONYM.test(token)) {
+      out.push(token);
+      continue;
+    }
+    let i = m.index - 1;
+    while (i >= 0 && RE_SPACE.test(text[i])) i--;
+    const sentenceInitial = i < 0 || SENTENCE_TERMINATORS.includes(text[i]);
+    if (!sentenceInitial) out.push(token);
+  }
+  return out.sort();
 }
 
 /** Igualdade de multiconjunto (ordem irrelevante, repetição importa). */
@@ -135,8 +162,8 @@ export async function verifyRewrite(
   // --- SINAL (heurístico, nunca prova) ----------------------------------------
   const signals: VerificationSignal[] = [];
 
-  const entitiesBefore = extractSorted(proposal.original, RE_ENTITY);
-  const entitiesAfter = new Set(proposal.proposed.match(RE_ENTITY) ?? []);
+  const entitiesBefore = extractEntities(proposal.original);
+  const entitiesAfter = new Set(extractEntities(proposal.proposed));
   const missingEntities = entitiesBefore.filter((e) => !entitiesAfter.has(e));
   signals.push({
     check: "entities_preserved",

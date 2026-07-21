@@ -10,6 +10,7 @@
  * em fluxo vertical + bottom sheet.
  */
 import type { Diagnostic, Finding, SplitPoint } from "@/lucid";
+import type { RewriteProposal } from "@/report/rewrite";
 import { AuditOverview } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
@@ -32,6 +33,7 @@ export interface RailProps {
   onApplyAllSafe: () => void;
   onApply: (finding: Finding) => void;
   onSplit: (point: SplitPoint) => void;
+  onApplyRewrite: (proposal: RewriteProposal) => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -52,6 +54,7 @@ export function AuditRail(props: RailProps) {
               source={props.diagnostic.text}
               onApply={props.onApply}
               onSplit={props.onSplit}
+              onApplyRewrite={props.onApplyRewrite}
             />
           </div>
         </>
