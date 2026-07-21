@@ -799,6 +799,54 @@ determinístico.
 
 ---
 
+## ADR-013 — Tier 2 · andaime da voz passiva: papéis extraídos do texto (Agente/Ação/Objeto), nunca a reescrita
+
+**Status:** aceito · Tier 2 (ação estrutural assistida — plano do handoff §3; cumpre a
+"orientação assistida" prometida no ADR-011)
+
+**Contexto.** A passiva **com agente** deixa de ser `requiresHuman` cega: o ADR-006 já
+recusa a auto-conversão para ativa (reordenar sujeito/objeto + reconjugar = fora da garantia
+mecânica) e o ADR-011 reafirmou isso, prometendo em troca um **andaime** ("agente → sujeito,
+particípio → verbo"). Este ADR entrega esse andaime — como SINAL, jamais como reescrita.
+
+**Decisão. Extrair os três papéis do texto e exibi-los rotulados "estrutura identificada,
+confira"**, sem nunca montar a frase:
+1. `passive-voice.ts` passou a gravar **offsets de papel** em `finding.meta`
+   (`participleStart/End`; e, quando há agente, `agentMarkerStart/End`, `agentEnd`,
+   `subjectStart`). Os offsets **já eram conhecidos** pelo matcher — só são registrados. A
+   detecção (span/severidade/requiresHuman/justificativa) **não muda**.
+2. `core/actions/passive-scaffold.ts` (puro) monta `{ agent, action:{participle, baseVerb},
+   object }` a partir desses offsets + o texto:
+   - **agente** = o sintagma após "pela/pelo…" (literal; vira o sujeito da ativa);
+   - **ação** = o particípio literal + o verbo-base, quando ele está numa **tabela fechada**
+     (`participios-infinitivo.pt.json`, chave = particípio masc. sing., normalização só de
+     concordância regular de gênero/número — sem conjugador produtivo, disciplina ADR-011).
+     Fora da tabela → `baseVerb: null` (mostra só o particípio; o verbo fica com o autor);
+   - **objeto** = o **sujeito da passiva**, sintagma **antes de "ser"** ("O pedido foi
+     aprovado…" → "O pedido"). Bounded (início da frase → âncora), mas **aproximado** (pode
+     arrastar um adjunto inicial, ex. "Doravante,…") — por isso rotulado "confira"; `null`
+     quando a frase começa no próprio verbo. Correção sobre o rascunho do plano ("entre ser
+     e o particípio"): naquela região só cabem advérbios — o objeto real da ativa é o sujeito
+     que precede "ser", e é ele que o andaime devolve.
+
+**Por que é honesto (0 conteúdo fabricado).** Todo campo não-nulo é **substring literal** do
+texto; nada é inventado. O verbo-base vem de tabela verificada à mão, nunca de flexão
+produtiva. A ferramenta **não vira a frase** (segue o ADR-006), diz por quê, e o objeto
+aproximado é explicitamente marcado "confira". Passiva **sem** agente não gera andaime —
+retorna `null`, e a UI mantém a pergunta "quem praticou a ação?".
+
+**Consequências.** `Finding.criterion/span/...` inalterados; só `meta` cresceu (proveniência
+aditiva). Isso **alterou 4 snapshots** do `diagnostic-snapshot` (casos com passiva) — a
+diferença é **exclusivamente as novas chaves de `meta`**, verificada linha a linha e
+regenerada com justificativa (política ADR-009: mudança observável exige revisão explícita).
+`integrated.test.ts` (semântica) e todos os demais testes seguem intactos. 9 testes novos em
+`test/passive-scaffold.test.ts` (determinismo + "todo campo é substring literal"); os 3
+`toEqual({hasAgent})` do `passive-voice.test.ts` viraram `toMatchObject` (a asserção-chave
+`hasAgent` permanece; os offsets são aditivos). Zero rede/LLM — `core/actions/**`, coberto
+pela cerca. Suíte completa verde (739).
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

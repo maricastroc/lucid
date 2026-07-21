@@ -211,6 +211,27 @@ export const passiveVoicePass: Pass = {
         const start = anchor.start;
         const end = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : participle.end;
 
+        // Proveniência dos PAPÉIS para o andaime do Tier 2 (ADR-013). Offsets já conhecidos
+        // aqui — só registrados. `meta` fica fora do snapshot canônico (ver types.ts), então
+        // nenhum Diagnostic muda de forma. O andaime (passive-scaffold.ts) lê esses offsets;
+        // nunca reconstrói a análise.
+        const marker = hasAgent ? tokens[agentMatch.markerIndex] : null;
+        const meta: Record<string, string | number | boolean> = {
+          hasAgent,
+          participleStart: participle.start,
+          participleEnd: participle.end,
+        };
+        if (hasAgent && marker) {
+          meta.agentMarkerStart = marker.start;
+          meta.agentMarkerEnd = marker.end;
+          meta.agentEnd = end;
+          // O objeto da ativa é o SUJEITO da passiva — o sintagma antes de "ser". Como só
+          // reconhecemos agente na ordem canônica ([sujeito] ser particípio pela agente), o
+          // sujeito fica entre o início da frase e a âncora. Região limpa (sem parser), que
+          // o andaime devolve rotulada "confira".
+          meta.subjectStart = sentence.start;
+        }
+
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
@@ -219,7 +240,7 @@ export const passiveVoicePass: Pass = {
           severity: "warning",
           requiresHuman: !hasAgent,
           justification: buildJustification(hasAgent),
-          meta: { hasAgent },
+          meta,
         });
       }
     }

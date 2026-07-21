@@ -35,3 +35,5 @@ export { analyze } from "./core/analyzer";
  */
 export { clauseSplitPoints, applySplitAt } from "./core/actions/split-sentence";
 export type { SplitPoint, SplitKind } from "./core/actions/split-sentence";
+export { passiveScaffold } from "./core/actions/passive-scaffold";
+export type { PassiveScaffold } from "./core/actions/passive-scaffold";

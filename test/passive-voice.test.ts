@@ -113,14 +113,15 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
   ])("reconhece agente introduzido por '%s' em '%s'", (text) => {
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(1);
-    expect(findings[0].meta).toEqual({ hasAgent: true });
+    // meta ganhou offsets de papel (ADR-013); hasAgent continua a asserção-chave.
+    expect(findings[0].meta).toMatchObject({ hasAgent: true });
     expect(findings[0].requiresHuman).toBe(false);
   });
 
   it("'por' isolado (sem contração) NÃO conta como evidência de agente", () => {
     const findings = passiveFindings("O pedido foi aprovado por conveniência.");
     expect(findings).toHaveLength(1);
-    expect(findings[0].meta).toEqual({ hasAgent: false });
+    expect(findings[0].meta).toMatchObject({ hasAgent: false });
     expect(findings[0].requiresHuman).toBe(true);
   });
 
@@ -132,7 +133,7 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
     ]) {
       const findings = passiveFindings(texto);
       expect(findings.length).toBeGreaterThanOrEqual(1);
-      expect(findings[0].meta).toEqual({ hasAgent: false });
+      expect(findings[0].meta).toMatchObject({ hasAgent: false });
     }
   });
 });
