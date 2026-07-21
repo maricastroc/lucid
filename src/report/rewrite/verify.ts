@@ -16,7 +16,7 @@
  *
  * Fronteira: `report/**` pode importar `core` e `probe`. `core` nunca importa daqui.
  */
-import { analyze, type Finding, type Span } from "../../lucid";
+import { analyze, type Finding, type Severity, type Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
 import type { MetricsDelta, Proof, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
@@ -77,6 +77,24 @@ function overlaps(f: Finding, start: number, end: number): boolean {
   return f.span.start < end && f.span.end > start;
 }
 
+/**
+ * Peso por severidade (ADR-018). A CONTAGEM crua de findings pune injustamente a reescrita
+ * radical: trocar UMA frase-monstro (`error`) por três frases boas (`warning`s) "aumenta" a
+ * contagem, mas melhora a leitura. O que veta a proposta é o PESO subir — um `error` custa
+ * muito mais que um `warning`. Ratio defensável (não afinado ao benchmark): `error` ≈ 3
+ * `warning`; `info` é quase-ruído. Assim 1 erro → 3 avisos empata (não piora), 1 erro → 4
+ * avisos piora.
+ */
+const SEVERITY_WEIGHT: Record<Severity, number> = { error: 3, warning: 1, info: 0.3 };
+const BURDEN_EPSILON = 1e-9;
+
+function regionBurden(findings: readonly Finding[], start: number, end: number): number {
+  return findings.reduce((sum, f) => (overlaps(f, start, end) ? sum + SEVERITY_WEIGHT[f.severity] : sum), 0);
+}
+function totalBurden(findings: readonly Finding[]): number {
+  return findings.reduce((sum, f) => sum + SEVERITY_WEIGHT[f.severity], 0);
+}
+
 function jargonTextsOverlapping(findings: readonly Finding[], start: number, end: number): Set<string> {
   const set = new Set<string>();
   for (const f of findings) {
@@ -127,19 +145,22 @@ export async function verifyRewrite(
     });
   }
 
-  // `region_improved`: os findings sobrepondo o trecho não podem AUMENTAR (idealmente caem).
-  const findingsInBefore = before.findings.filter((f) => overlaps(f, originalStart, originalEnd)).length;
-  const findingsInAfter = after.findings.filter((f) => overlaps(f, newStart, newEnd)).length;
+  // `region_improved`: o PESO por severidade dos findings no trecho não pode aumentar (ADR-018)
+  // — trocar 1 `error` por alguns `warning`s deixa de ser vetado; criar problema grave, não.
+  const burdenBefore = regionBurden(before.findings, originalStart, originalEnd);
+  const burdenAfter = regionBurden(after.findings, newStart, newEnd);
   proofs.push({
     check: "region_improved",
-    passed: findingsInAfter <= findingsInBefore,
-    detail: `findings no trecho: ${findingsInBefore} → ${findingsInAfter}`,
+    passed: burdenAfter <= burdenBefore + BURDEN_EPSILON,
+    detail: `peso (severidade) dos findings no trecho: ${burdenBefore.toFixed(1)} → ${burdenAfter.toFixed(1)}`,
   });
 
+  const totalBefore = totalBurden(before.findings);
+  const totalAfter = totalBurden(after.findings);
   const noNewFindings: Proof = {
     check: "no_new_findings",
-    passed: after.score.totalFindings <= before.score.totalFindings,
-    detail: `total de findings: ${before.score.totalFindings} → ${after.score.totalFindings}`,
+    passed: totalAfter <= totalBefore + BURDEN_EPSILON,
+    detail: `peso (severidade) total: ${totalBefore.toFixed(1)} → ${totalAfter.toFixed(1)}`,
   };
 
   const numsBefore = extractSorted(proposal.original, RE_NUMBER);

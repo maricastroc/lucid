@@ -1020,6 +1020,40 @@ atual. Suíte offline 783 verdes + 1 benchmark skipado; benchmark roda manual co
 
 ---
 
+## ADR-018 — Tier 3 · veredito PONDERADO POR SEVERIDADE (não por contagem crua de findings)
+
+**Status:** aceito · Tier 3, incremento 6 (destrava a reescrita radical boa)
+
+**Contexto.** O benchmark do ADR-017 mediu a tensão: a estratégia `rewrite` é MUITO mais clara
+(ΔFlesch +68/+75 vs +2/+4) mas era **vetada 33–67%** das vezes, contra 100% sem-veto do
+`correct`. A causa é mecânica: `region_improved`/`no_new_findings` usavam **contagem crua** de
+findings — e dividir uma frase-monstro (1 `error`) em três frases boas (3 `warning`s) "aumenta"
+a contagem, disparando o veto, mesmo sendo uma melhora clara de leitura.
+
+**Decisão. Trocar contagem por PESO POR SEVERIDADE** (`verify.ts`): cada finding vale
+`error: 3`, `warning: 1`, `info: 0,3`. `region_improved` e `no_new_findings` passam quando o
+**peso** não aumenta (com epsilon de ponto flutuante). Assim:
+- 1 `error` → 3 `warning`s: peso 3 → 3, **empata (passa)** — a reescrita radical deixa de ser
+  vetada só por partir uma frase.
+- 1 `error` → 4 `warning`s, ou 1 `warning` → 3 `warning`s: peso sobe, **veta** — criar mais
+  problema continua inaceitável.
+
+O ratio (`error ≈ 3 warning`) é **defensável, não afinado ao benchmark**: `error` = "prioritário"
+(o leitor provavelmente falha), `warning` = "atenção" (mais difícil, mas gerenciável), `info` =
+quase-ruído. Documentado no código.
+
+**Honestidade (I5) intacta.** Continua um VETO MECÂNICO (peso subiu → inaceitável), não um selo:
+peso não-subir = "sem falha de piso", jamais "aprovado". As provas de corrupção
+(números/datas/jargão) seguem intactas e independentes.
+
+**Consequências.** `core/**` inalterado; só `verify.ts` (helper de peso + duas provas) e um teste
+novo travando "1 erro → 2 avisos passa region_improved" (a contagem subiria 1→2, o peso cai
+3→2). O caminho finding-específico ainda usa `target_resolved` (a violação exata deve sumir);
+o peso rege o caminho de PARÁGRAFO (o da UI e do benchmark). Efeito medido: ver ADR-017 §
+re-execução no HANDOFF. Próximo: prova determinística de 1ª pessoa nova (pega o "nós").
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
