@@ -66,6 +66,26 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
     expect(v.metrics.wordsAfter).toBeLessThan(v.metrics.wordsBefore);
   });
 
+  it("peso por severidade: trocar 1 erro por 2 avisos PASSA region_improved (contagem subiria)", async () => {
+    // Uma frase-monstro (>30 palavras = error). Modo parágrafo (sem criterion).
+    const text =
+      "A equipe da secretaria revisou com muita atenção todos os documentos que chegaram durante a semana " +
+      "passada, para garantir que o relatório final destinado ao diretor ficasse realmente completo, bem claro e correto.";
+    const finding = analyze(text).findings.find((f) => f.criterion === "long_sentence")!;
+    expect(finding.severity).toBe("error"); // setup: 1 erro na região
+
+    // duas frases ~23 palavras cada = 2 avisos: a CONTAGEM sobe 1→2, mas o PESO cai 3→2.
+    const proposed =
+      "A equipe da secretaria revisou com bastante atenção todos os documentos que chegaram na semana passada para " +
+      "deixar o relatório final bem completo. Depois disso, o setor enviou uma cópia para cada pessoa que participou " +
+      "do processo e pediu que todos confirmassem o retorno até sexta.";
+    const v = await verifyRewrite(text, finding.span, { proposerId: "test", original: finding.span.text, proposed });
+
+    expect(proofPassed(v, "region_improved")).toBe(true);
+    expect(v.hasBlockingFailure).toBe(false);
+    expect(v.proofs.find((p) => p.check === "region_improved")!.detail).toMatch(/peso/);
+  });
+
   it("proposta que NÃO resolve o alvo falha em target_resolved (veto mecânico)", async () => {
     const text =
       "O documento apresentado foi analisado com muito cuidado pela comissão competente responsável, " +

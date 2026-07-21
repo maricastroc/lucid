@@ -127,16 +127,28 @@ dimensões por sistema. `GroqProvider` ganhou retry em 429 (free tier) + `lastUs
 
 **Leitura:** (1) `rewrite` é MUITO mais claro (ΔFlesch +68/+75 vs +2/+4) — confirma a hipótese
 do usuário; (2) provas determinísticas (números/datas/jargão) preservadas 100% em todos —
-blindagem segurou; (3) **a tensão medida:** o `rewrite`, mais claro, é **vetado com muito mais
-frequência** (sem-veto 33–67% vs 100% do `correct`), porque a contagem crua de findings pune a
-reorganização radical → **confirma numericamente a necessidade do veredito ponderado por
-severidade (ADR-016 item a)**. Ressalva honesta (I5): fidelidade/nome 100% = "sem violação de
-piso detectada" nesse golden pequeno, NÃO "provado fiel" (a sonda não pegou o "nós" nos casos
-anteriores).
+blindagem segurou; (3) **a tensão medida:** o `rewrite`, mais claro, era **vetado com muito mais
+frequência** (sem-veto 33–67% vs 100% do `correct`), porque a contagem crua de findings punia a
+reorganização radical. Ressalva honesta (I5): fidelidade/nome 100% = "sem violação de piso
+detectada" nesse golden pequeno, NÃO "provado fiel".
+
+**Após o veredito por severidade (ADR-018) — re-execução:** o veto deixou de punir trocar 1
+`error` por alguns `warning`s.
+
+| Sistema | ΔFlesch | findings(depois) | provas OK% | **sem veto% (antes → depois)** |
+|---|--:|--:|--:|--:|
+| llama-3.3-70b · rewrite | +72.5 | 1.7 | 100 | **33 → 100** |
+| gpt-oss-120b · rewrite | +72.8 | 1.0 | 100 | **67 → 67** |
+
+llama saltou **33→100%** (o gargalo era exatamente o punir a divisão de frase); gpt-oss ficou
+67% — 1 dos 3 trechos ainda aumentou o PESO (severidade) de verdade, então segue vetado, e é
+certo que siga. Clareza intacta (ΔFlesch ~+72). (`correct` varia um pouco run-a-run: o LLM às
+vezes devolve texto idêntico com temperature 0 → "reescreveu%" < 100; é não-determinismo do
+modelo, não bug.)
 
 **Falta no Tier 3 (próximos incrementos):**
-- **(a) veredito ponderado por severidade** (o benchmark agora mostra por que é prioritário) +
-  **(b) prova determinística de 1ª pessoa nova** (pega o "nós" que a sonda não pega).
+- ✅ **(a) veredito ponderado por severidade** — FEITO (ADR-018; llama-rewrite 33→100% sem-veto).
+  Falta **(b) prova determinística de 1ª pessoa nova** (pega o "nós" que a sonda não pega).
 - **Outros providers** — OpenAI/Anthropic/Gemini/DeepSeek pela mesma interface `ChatProvider`
   (`src/llm`). `.env` tem `GEMINI_API_KEY`; `DEEPSEEK_AP_KEY` está com typo (falta o "I").
 - Golden de benchmark maior + casos que estressem a sonda; tabela no README.
