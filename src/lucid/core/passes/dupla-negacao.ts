@@ -1,14 +1,3 @@
-/**
- * Pass "dupla negação" (litotes) — `5.3.3` (frases claras).
- *
- * Afirmar negando o negativo ("não é incomum" = "é comum") obriga o leitor a desfazer a negação
- * aninhada — é exatamente a operação `desfazer_negacao_aninhada` que a sonda de compreensão lista
- * como carga. Léxico fechado e curado (`duplas-negacoes.pt`) das expressões cujo sentido só se
- * resolve invertendo a negação; casamento de frase contígua (matcher compartilhado).
- *
- * NÃO marca negação simples / concordância negativa ("não vi ninguém") — isso é normal e claro em
- * PT. Não reescreve (→ `requiresHuman`); a forma direta vai na justificativa.
- */
 import type { Finding, Pass } from "../types";
 import { matchPhrasesInSentence } from "./phrase-match";
 

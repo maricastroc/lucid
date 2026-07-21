@@ -46,9 +46,6 @@ describe("runMetrics — texto com uma frase", () => {
     expect(metrics.wordsPerSentence).toBe(5);
     expect(metrics.syllablesPerWord).toBe(metrics.syllables / metrics.words);
 
-    // "esperado" usa as médias BRUTAS (não-arredondadas); metrics.fleschPt já vem
-    // arredondado a config.metrics.decimalPlaces (1 casa, default) — por isso a
-    // tolerância é de 1 casa decimal, não uma comparação exata.
     const esperado = 248.835 - 1.015 * (metrics.words / metrics.sentences) - 84.6 * (metrics.syllables / metrics.words);
     expect(metrics.fleschPt).toBeCloseTo(esperado, 1);
   });

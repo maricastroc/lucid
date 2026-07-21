@@ -44,11 +44,11 @@ describe("nominalizationPass — formas infinitivas", () => {
 
 describe("nominalizationPass — formas finitas sem sugestão (complemento inseguro ou traço não cadastrado)", () => {
   it.each([
-    "O comitê fez a análise ontem.", // complemento "ontem" não é formato limpo
-    "A equipe efetuará a solicitação amanhã.", // complemento "amanhã"
-    "Eles fazem a análise semanalmente.", // complemento "semanalmente"
+    "O comitê fez a análise ontem.",
+    "A equipe efetuará a solicitação amanhã.",
+    "Eles fazem a análise semanalmente.",
     "Eles faziam a análise semanalmente.",
-    "É bom que façam a análise.", // subjuntivo — fora da tabela fechada (ADR-011)
+    "É bom que façam a análise.",
   ])("'%s' é detectada, mas não recebe sugestão", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
@@ -59,12 +59,12 @@ describe("nominalizationPass — formas finitas sem sugestão (complemento inseg
 
 describe("nominalizationPass — formas finitas COM conjugação segura (ADR-011)", () => {
   it.each([
-    ["O comitê fez a análise de documentos.", "analisou documentos"], // pret.3s
-    ["A equipe realizou o pagamento da taxa.", "pagou a taxa"], // pret.3s + contração da→a
-    ["Eles procederam à verificação dos dados.", "verificaram os dados"], // pret.3p + dos→os
-    ["Eles fazem a aprovação do projeto.", "aprovam o projeto"], // pres.3p + do→o
-    ["A diretoria fará a avaliação dos riscos.", "avaliará os riscos"], // fut.3s + dos→os
-    ["O órgão realizava a publicação do edital.", "publicava o edital"], // impf.3s + do→o
+    ["O comitê fez a análise de documentos.", "analisou documentos"],
+    ["A equipe realizou o pagamento da taxa.", "pagou a taxa"],
+    ["Eles procederam à verificação dos dados.", "verificaram os dados"],
+    ["Eles fazem a aprovação do projeto.", "aprovam o projeto"],
+    ["A diretoria fará a avaliação dos riscos.", "avaliará os riscos"],
+    ["O órgão realizava a publicação do edital.", "publicava o edital"], 
     ["O comitê fez a análise.", "analisou"], // sem complemento
   ])("'%s' → '%s' (traço preservado, sem conjugador produtivo)", (text, esperada) => {
     const findings = nomFindings(text);

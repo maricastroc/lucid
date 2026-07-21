@@ -13,7 +13,6 @@ function ctxFor(text: string, config: Config = DEFAULT_CONFIG): PassContext {
   return { doc: buildDocument(text), config, data: createDataView([]) };
 }
 
-/** Findings de voz passiva para um texto, via chamada direta ao pass (sem passar por analyze). */
 function passiveFindings(text: string, config: Config = DEFAULT_CONFIG) {
   return passiveVoicePass.run(ctxFor(text, config));
 }

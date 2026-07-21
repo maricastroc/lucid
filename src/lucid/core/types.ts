@@ -122,32 +122,20 @@ export interface CriterionScore {
   densityPer100Words: number;
 }
 
-/**
- * Deliberadamente sem "nota geral" nem "aprovado". O placar mede, não aprova.
- */
 export interface Score {
   byCriterion: CriterionScore[];
   totalFindings: number;
 }
 
-// --- Diagnostic (saída da Camada 1) -------------------------------------------------
-
 export interface DiagnosticMeta {
   lucidVersion: string;
-  /** hash estável da Config efetiva, para integridade do snapshot */
   configHash: string;
-  /**
-   * hash estável dos datasets que influenciaram esta análise (proveniência de dados).
-   * Reprodutibilidade completa = (lucidVersion, configHash, dataHash). Ver data registry.
-   */
   dataHash: string;
   standardVersion: "ABNT NBR ISO 24495-1:2024";
 }
 
 export interface Diagnostic {
-  /** === Document.source (original normalizado, intacto) */
   text: string;
-  /** ordenados por (start, end, criterion, principle) */
   findings: Finding[];
   score: Score;
   metrics: Metrics;

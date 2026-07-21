@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * O TRILHO — a coluna editorial à direita. Em repouso mostra a VISÃO GERAL + a LISTA DE
- * REVISÕES; ao selecionar um diagnóstico, a NOTA dedicada substitui completamente esse
- * conteúdo (com navegação anterior/próximo e fechar). No rodapé, uma linha discreta de
- * proveniência — os metadados técnicos vivem num tooltip, nunca como barra de terminal.
- *
- * Esta é a versão de desktop (coluna fixa). No mobile o Studio recompõe as mesmas peças
- * em fluxo vertical + bottom sheet.
- */
 import type { Diagnostic, Finding, Span, SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { AuditOverview } from "./audit-overview";
@@ -19,7 +10,6 @@ import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "./icons";
 
 export interface RailProps {
   diagnostic: Diagnostic;
-  /** texto atual do documento — insumo da sonda de compreensão (Camada 2) */
   text: string;
   findings: readonly Finding[];
   selectedFinding: Finding | null;
@@ -46,7 +36,7 @@ export function AuditRail(props: RailProps) {
   return (
     <aside
       aria-label="Auditoria"
-      className="hidden w-[396px] shrink-0 flex-col border-l border-rule-1 bg-surface lg:flex xl:w-[440px]"
+      className="hidden w-99 shrink-0 flex-col border-l border-rule-1 bg-surface lg:flex xl:w-110"
     >
       {props.selectedFinding ? (
         <>
@@ -113,7 +103,7 @@ export function NoteNav({
         <IconBtn label="Anterior (k)" onClick={onPrev}>
           <ChevronLeftIcon className="size-4" />
         </IconBtn>
-        <span className="min-w-[3.5rem] text-center text-[12px] tabular-nums text-ink-2">
+        <span className="min-w-14 text-center text-[12px] tabular-nums text-ink-2">
           {index} <span className="text-ink-3">de</span> {total}
         </span>
         <IconBtn label="Próximo (j)" onClick={onNext}>

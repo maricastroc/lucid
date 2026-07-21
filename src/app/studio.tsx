@@ -57,9 +57,6 @@ export function Studio() {
   const selectedIndex = selectedId ? findings.findIndex((f) => findingId(f) === selectedId) : -1;
   const selectedFinding = selectedIndex >= 0 ? findings[selectedIndex] : null;
 
-  // Alvo da reescrita de IA (parágrafo, ou a frase quando é bloco contínuo) — destacado no
-  // documento só quando a nota de decisão humana está aberta, para o autor ver exatamente o
-  // que a IA tocaria antes de gerar. `null` some o destaque.
   const rewriteTarget = useMemo(
     () =>
       selectedFinding && !isSafe(selectedFinding)
@@ -68,7 +65,6 @@ export function Studio() {
     [selectedFinding, diagnostic],
   );
 
-  // Sincroniza a página com a seleção: rola o trecho à vista + flash curto.
   useEffect(() => {
     if (!selectedId || mode !== "audit") return;
     const el = scrollRef.current?.querySelector<HTMLElement>(`[data-finding-id="${cssEscape(selectedId)}"]`);
@@ -130,9 +126,6 @@ export function Studio() {
     setCanUndo(true);
   }, []);
 
-  // As sugestões são aplicadas sobre `text` (o estado atual no clique), com o registro do
-  // undo FORA do updater de `setText` — um updater tem de ser puro, e mutar o histórico lá
-  // dentro duplicaria o registro sob o double-invoke do Strict Mode.
   const applySuggestion = useCallback(
     (finding: Finding) => {
       if (finding.suggestion === undefined) return;
@@ -143,10 +136,6 @@ export function Studio() {
     [text, pushUndo],
   );
 
-  // Tier 2 · divisão de cláusula. Insere a quebra escolhida (transform puro do core) e
-  // devolve o rascunho ao editor — mesmo registro de undo das sugestões seguras; a
-  // reanálise acontece sozinha porque `diagnostic` deriva de `text`. Fecha a nota para o
-  // autor ver o texto atualizado.
   const applySplit = useCallback(
     (point: SplitPoint) => {
       const next = applySplitAt(text, point);
@@ -159,9 +148,6 @@ export function Studio() {
     [text, pushUndo],
   );
 
-  // Tier 3 · usar uma reescrita GERADA como rascunho. O autor decide (nunca automático); a
-  // proposta substitui o TRECHO-ALVO (o parágrafo) no texto do diagnóstico — mesma base dos
-  // offsets —, com undo. A reanálise roda sozinha e submete o rascunho à engine de novo.
   const applyRewrite = useCallback(
     (target: Span, proposal: RewriteProposal) => {
       const base = diagnostic.text;
@@ -234,22 +220,19 @@ export function Studio() {
           onSelectFinding={selectFinding}
         />
 
-        {/* Desktop: coluna editorial fixa */}
         <AuditRail {...railProps} />
       </div>
 
-      {/* Mobile: botão flutuante que abre o bottom sheet de revisões */}
       {mode === "audit" && findings.length > 0 && !sheetOpen && (
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-[var(--shadow-pop)] lg:hidden"
+          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-pop) lg:hidden"
         >
           {findings.length} {findings.length === 1 ? "revisão" : "revisões"}
         </button>
       )}
 
-      {/* Mobile: bottom sheet (nota ou visão geral + lista) */}
       {mode === "audit" && sheetOpen && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Revisões">
           <button
@@ -261,7 +244,7 @@ export function Studio() {
             }}
             className="absolute inset-0 bg-ink-0/25 backdrop-blur-[2px]"
           />
-          <div className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col overflow-hidden rounded-t-[20px] border-t border-rule-2 bg-surface shadow-[var(--shadow-pop)]">
+          <div className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col overflow-hidden rounded-t-[20px] border-t border-rule-2 bg-surface shadow-(--shadow-pop)">
             <button
               type="button"
               aria-label="Recolher"
@@ -317,10 +300,9 @@ export function Studio() {
         </div>
       )}
 
-      {/* Desfazer */}
       {canUndo && (
         <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-4">
-          <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-[var(--shadow-pop)]">
+          <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
             <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
               <ArrowDownIcon className="size-4 text-safe" aria-hidden />
               Sugestão aplicada ao texto.

@@ -1,19 +1,3 @@
-/**
- * Auditoria da ORDENAÇÃO FINAL — `sortFindings()` (docs/ARQUITETURA.md §7 passo 6).
- *
- * A ordenação canônica é por (span.start, span.end, criterion, principle), string por
- * code unit. Esta suíte demonstra que, para tudo que os quatro passes atuais podem
- * produzir, a ordem é TOTAL e determinística; e que o único empate residual possível
- * (findings idênticos em start/end/criterion/principle) é resolvido de forma estável
- * pela ordenação estável do JS (ES2019+), preservando a ordem determinística de
- * inserção. Ver ADR-009: a ordenação atual já é total e correta para o domínio real,
- * então é DOCUMENTADA e TESTADA, não alterada.
- *
- * `test/analyzer.test.ts` já cobre a robustez de `sortFindings` sob permutação de
- * entrada com 5 findings sintéticos; aqui focamos nos pares que a ordenação precisa
- * desempatar (mesmo start/fim diferente, mesmo span/critério diferente) e na
- * estabilidade sobre findings REAIS de `analyze()`.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, sortFindings } from "../src/lucid/core/analyzer";
 import type { Finding } from "../src/lucid/core/types";
@@ -64,7 +48,7 @@ describe("sortFindings — desempate por cada chave, na ordem certa", () => {
     const a = finding({ span: { ...base }, justification: "A" });
     const b = finding({ span: { ...base }, justification: "B" });
     const c = finding({ span: { ...base }, justification: "C" });
-    // ordem de inserção preservada, deterministicamente
+
     expect(sortFindings([a, b, c]).map((f) => f.justification)).toEqual(["A", "B", "C"]);
     expect(sortFindings([c, b, a]).map((f) => f.justification)).toEqual(["C", "B", "A"]);
   });
@@ -102,8 +86,6 @@ describe("sortFindings — estabilidade sobre findings reais de analyze()", () =
   });
 
   it("no domínio real, cada (criterion, start) é único → a ordem é totalmente determinada", () => {
-    // dentro de um mesmo critério, os spans começam em posições distintas (cada pass avança
-    // o cursor / ancora uma vez por posição), logo nunca há empate total real.
     const { findings } = analyze(texto);
     const chaves = findings.map((f) => `${f.criterion}@${f.span.start}`);
     expect(new Set(chaves).size).toBe(chaves.length);

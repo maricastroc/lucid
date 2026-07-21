@@ -3,7 +3,6 @@ import { analyze } from "../src/lucid";
 import { passiveScaffold } from "../src/lucid/core/actions/passive-scaffold";
 import type { Finding } from "../src/lucid/core/types";
 
-/** Pega o primeiro finding de passiva-com-agente de um texto analisado de verdade. */
 function agentPassive(text: string): { finding: Finding; source: string } {
   const d = analyze(text);
   const finding = d.findings.find((f) => f.criterion === "passive_voice" && f.meta?.hasAgent === true);
@@ -32,7 +31,6 @@ describe("passiveScaffold — papéis extraídos do texto", () => {
   });
 
   it("frase que começa no próprio verbo não tem sujeito antes → object null (não inventa)", () => {
-    // "Foi assinado…" — sem sujeito antes de "Foi": o andaime não fabrica um.
     const { finding, source } = agentPassive("Foi assinado pelo presidente.");
     const s = passiveScaffold(finding, source)!;
     expect(s.agent).toBe("presidente");

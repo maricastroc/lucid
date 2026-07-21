@@ -7,7 +7,6 @@ describe("calculateFleschPt — fórmula de Martins et al. (1996)", () => {
   });
 
   it("calcula corretamente para valores conhecidos", () => {
-    // 248.835 - 1.015*5 - 84.6*1.8 = 248.835 - 5.075 - 152.28 = 91.48
     expect(calculateFleschPt(5, 1.8)).toBeCloseTo(91.48, 10);
   });
 

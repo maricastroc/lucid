@@ -1,18 +1,3 @@
-/**
- * Avaliação INTEGRADA da Camada 1: cada caso do golden set integrado passa por
- * `analyze()` de ponta a ponta e é comparado ao `Diagnostic` esperado — findings,
- * proveniência, offsets, métricas e coerência do score.
- *
- * Asserções SEMÂNTICAS explícitas (não só snapshot): o snapshot cobre o retrato
- * byte-a-byte (`diagnostic-snapshot.test.ts`); aqui verificamos propriedades nomeadas,
- * que sobrevivem a uma reformatação de snapshot e explicam O QUE deve valer.
- *
- * O bloco final produz o RESUMO INTEGRADO pedido (TP/FP/FN global e por critério,
- * sugestões emitidas/corretas/inseguras, findings sobre termos não previstos = 0). Como
- * o golden é o juízo de referência, o objetivo é 100% de concordância; qualquer
- * divergência é regressão, e as métricas prioritárias (0 sugestões inseguras, precisão)
- * são asserções, não apenas relatório.
- */
 import { describe, expect, it } from "vitest";
 import { analyze } from "../../src/lucid/core/analyzer";
 import type { Diagnostic, Finding } from "../../src/lucid/core/types";
@@ -59,11 +44,9 @@ describe("golden integrado — asserções semânticas por caso", () => {
         expect(actual.severity).toBe(esperado.severity);
         expect(actual.requiresHuman).toBe(esperado.requiresHuman);
         expect(actual.suggestion).toBe(esperado.suggestion);
-        // proveniência obrigatória sempre presente e não-vazia
         expect(actual.principle).toMatch(/^5\.\d/);
         expect(actual.category).toBeDefined();
         expect(actual.justification.length).toBeGreaterThan(0);
-        // reconstrução de span (I3) sobre o texto do diagnóstico
         expect(diagnostic.text.slice(actual.span.start, actual.span.end)).toBe(actual.span.text);
       }
     });
@@ -94,7 +77,6 @@ describe("golden integrado — asserções semânticas por caso", () => {
         expect(somaContagem).toBe(esperadoNoCriterio.length);
       }
 
-      // o placar nunca carrega vocabulário de aprovação
       const json = JSON.stringify(diagnostic.score).toLowerCase();
       expect(json).not.toContain("aprovad");
       expect(json).not.toContain("approved");
@@ -136,7 +118,6 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     const diagnostic = analyze(caso.text);
     totalEsperado += caso.expected.findings.length;
 
-    // TP/FN: para cada finding esperado, existe o correspondente real?
     for (const esperado of caso.expected.findings) {
       const actual = findActual(diagnostic, esperado);
       const bucket = porCriterio[esperado.criterion];
@@ -147,9 +128,8 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
         global.fn++;
         bucket.fn++;
       }
-      // contabilidade de sugestões, sempre pelo esperado
+
       if (esperado.suggestion !== undefined) {
-        // esperamos sugestão: correta se o real emitiu exatamente a mesma
         if (actual?.suggestion === esperado.suggestion) {
           global.sugEmitidas++;
           global.sugCorretas++;
@@ -159,7 +139,6 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
       }
     }
 
-    // FP + sugestão insegura + finding sobre termo não previsto
     for (const actual of diagnostic.findings) {
       const criterion = actual.criterion as IntegratedCriterion;
       const esperado = caso.expected.findings.find(
@@ -175,7 +154,7 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
         }
         continue;
       }
-      // sugestão emitida onde não deveria, ou com texto divergente = insegura
+
       if (actual.suggestion !== undefined && actual.suggestion !== esperado.suggestion) {
         global.sugInseguras++;
         porCriterio[criterion].sugInseguras++;
@@ -203,19 +182,16 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     expect(GOLDEN_INTEGRADO.length).toBeGreaterThan(0);
   });
 
-  // Prioridade 1: zero sugestões inseguras.
   it("zero sugestões inseguras (prioridade 1)", () => {
     expect(global.sugInseguras).toBe(0);
   });
 
-  // Prioridade 2: precisão alta — aqui, com golden de referência, precisão total.
   it("precisão 100% e zero findings sobre termos não previstos (prioridade 2)", () => {
     expect(global.fp).toBe(0);
     expect(findingsSobreNaoPrevistos).toBe(0);
     expect(precisao).toBe(1);
   });
 
-  // Prioridade 4 (recall) — secundária, mas aqui também total por construção do golden.
   it("recall total sobre o golden de referência", () => {
     expect(global.fn).toBe(0);
     expect(recall).toBe(1);

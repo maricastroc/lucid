@@ -1,14 +1,3 @@
-/**
- * Pass "advérbios em -mente densos" — `5.3.4` (frases concisas).
- *
- * O empilhamento de advérbios em -mente ("efetivamente", "rigorosamente", "sistematicamente")
- * pesa a leitura. Sinal de DENSIDADE: só marca quando uma frase concentra ≥ `minPorFrase`
- * advérbios em -mente — um advérbio isolado é legítimo, o excesso é que atrapalha.
- *
- * MEMBERSHIP num allowlist derivado do PortiLexicon-UD (`adverbios-mente.pt`), para não marcar
- * palavras que terminam em -mente mas não são advérbio ("semente", "mente"). Nunca decide QUAIS
- * cortar (→ `requiresHuman`).
- */
 import type { Finding, Pass } from "../types";
 
 const CRITERION = "adverbio_mente_denso";

@@ -5,7 +5,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Resposta mínima no formato do endpoint `generateContent`. */
 function okResponse(text: string) {
   return {
     ok: true,
@@ -43,11 +42,9 @@ describe("GeminiProvider — parse da resposta (fetch mockado)", () => {
     expect(out).toBe('{"reescrita":"clara"}');
     expect(provider.lastUsage).toEqual({ promptTokens: 10, completionTokens: 5, totalTokens: 15 });
 
-    // chave vai no header, JAMAIS na URL (privacidade)
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).not.toContain("chave-fake");
     expect((init.headers as Record<string, string>)["x-goog-api-key"]).toBe("chave-fake");
-    // temperature 0 no corpo (anti-drift)
     expect(JSON.parse(init.body as string).generationConfig.temperature).toBe(0);
   });
 

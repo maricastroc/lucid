@@ -4,7 +4,6 @@ import { PROBE_PROMPT_VERSION } from "../src/lucid/probe/prompt";
 import { interpret } from "../src/lucid/probe/interpret";
 import type { ChatProvider } from "../src/llm";
 
-/** Provider mock — resposta fixa, sem rede. */
 class MockChatProvider implements ChatProvider {
   readonly id = "mock";
   readonly models = ["m1"] as const;
@@ -57,7 +56,6 @@ describe("LlmComprehensionProbe", () => {
 
     expect(provider.lastPrompt).toContain("trecho X");
     expect(provider.lastPrompt).toContain("quando começa?");
-    // e o resultado, passado ao interpret, nunca vira "aprovado" — só flag/neutro (I5)
     expect(interpret(result).tipo).toBe("flag");
   });
 });

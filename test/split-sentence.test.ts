@@ -4,7 +4,6 @@ import { applySplitAt, clauseSplitPoints, type SplitPoint } from "../src/lucid/c
 import { buildDocument } from "../src/lucid/core/document/model";
 import type { Span } from "../src/lucid/core/types";
 
-/** Span cobrindo o texto inteiro — o caso do finding `long_sentence` (span == frase). */
 function wholeSpan(source: string): Span {
   return { start: 0, end: source.length, text: source };
 }
@@ -141,7 +140,6 @@ describe("split — re-análise honesta (a frase alvo deixa de estourar o limiar
     const [p] = clauseSplitPoints(source, wholeSpan(source));
     const after = analyze(applySplitAt(source, p)).score.byCriterion.find((c) => c.criterion === "long_sentence")!;
 
-    // a violação-alvo some (ou encolhe) e nada de long_sentence aumenta
     const total = (c: typeof before) => c.count.info + c.count.warning + c.count.error;
     expect(total(after)).toBeLessThan(total(before));
   });

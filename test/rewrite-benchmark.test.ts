@@ -1,20 +1,3 @@
-/**
- * Tier 3 · BENCHMARK de sistemas de reescrita (ADR-017). NÃO roda na CI.
- *
- * Compara SISTEMAS COMPLETOS — (modelo × estratégia de prompt) + o que o verificador
- * determinístico e a sonda conseguem PROVAR/SINALIZAR — não só "qual texto ficou mais fácil".
- * Roda de verdade contra a API do Groq (rede + custo), então é gateado por `BENCHMARK=1` e
- * carrega a chave do ambiente ou do `.env`.
- *
- * Rodar:
- *   set -a; . ./.env; set +a; BENCHMARK=1 npx vitest run test/rewrite-benchmark.test.ts
- * Opcional: BENCHMARK_MODELS="llama-3.3-70b-versatile,openai/gpt-oss-120b"
- *
- * As 6 dimensões pedidas: clareza (ΔFlesch/Δpalavras), fidelidade semântica (sonda),
- * findings restantes, provas determinísticas preservadas, sinais de deriva, custo/latência.
- * Honestidade (I5): a coluna de agregação é "% sem veto mecânico" / "% com provas preservadas",
- * NUNCA "taxa de aprovação".
- */
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { analyze, type Span } from "../src/lucid";
@@ -36,7 +19,6 @@ function loadGroqKey(): string | null {
   }
 }
 
-/** Golden de parágrafos administrativos/jurídicos — inclui números, datas e nomes para exercer as provas. */
 const GOLDEN: { id: string; text: string }[] = [
   {
     id: "monstro-impessoal",
@@ -69,7 +51,7 @@ interface Sample {
   dFlesch: number;
   dWords: number;
   findingsAfter: number;
-  proofsPreserved: boolean; // números + datas + jargão preservados
+  proofsPreserved: boolean;
   blocked: boolean;
   meaningFlagged: boolean;
   entitiesFlagged: boolean;
@@ -162,7 +144,7 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
       }
 
       const table = rows.join("\n");
-      // process.stdout.write NÃO é interceptado pelo vitest (console.log seria engolido).
+
       process.stdout.write(`\n=== BENCHMARK (${GOLDEN.length} trechos por sistema) ===\n${table}\n\n`);
       if (process.env.BENCHMARK_OUT) fs.writeFileSync(process.env.BENCHMARK_OUT, `${table}\n`);
       expect(rows.length).toBeGreaterThan(2);

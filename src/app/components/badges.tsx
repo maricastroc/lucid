@@ -1,12 +1,5 @@
 "use client";
 
-/**
- * Selos compartilhados. O par SEGURA ⇄ DECISÃO HUMANA é o coração da identidade do
- * Lucid — por isso tem tratamento visual forte e consistente em toda a interface:
- *   · Segura  → verde, com um ✓: a ferramenta assina a troca.
- *   · Humana  → índigo apagado, com uma pena: o ofício é do autor, e a ferramenta
- *     recusa inventar. A ausência de um botão de ação reforça a diferença.
- */
 import type { Finding, Severity } from "@/lucid";
 import { actionStateOf, metaFor, severityInkVar } from "../lib/criteria";
 import { CheckIcon, PenNibIcon } from "./icons";
@@ -40,13 +33,12 @@ export function SeverityDot({ severity, className = "" }: { severity: Severity; 
   return (
     <span
       aria-hidden
-      className={`inline-block size-[7px] shrink-0 rounded-full ${className}`}
+      className={`inline-block size-1.75 shrink-0 rounded-full ${className}`}
       style={{ background: severityInkVar(severity) }}
     />
   );
 }
 
-/** Amostra da marca de anotação de um critério (para a lista de critérios). */
 export function CriterionMark({ criterion, className = "" }: { criterion: string; className?: string }) {
   const meta = metaFor(criterion);
   if (meta.channel === "passage") {

@@ -6,11 +6,6 @@ import { buildDocument } from "../src/lucid/core/document/model";
 import type { Config } from "../src/lucid/core/config";
 import type { Document, PassContext, Sentence } from "../src/lucid/core/types";
 
-/**
- * Constrói uma Sentence sintética com `wordCount` controlado diretamente — sem passar
- * por tokenização real. É exatamente o ponto: o pass só deve LER `wordCount`, nunca
- * recalculá-lo a partir de `tokens`.
- */
 function sentence(overrides: Partial<Sentence>): Sentence {
   const text = overrides.text ?? "x".repeat(10);
   return {

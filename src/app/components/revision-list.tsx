@@ -68,7 +68,7 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
         ))}
       </div>
 
-      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1 px-3 pb-4">
+      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-3 px-3 pb-4">
         {shown.length === 0 ? (
           <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">Nenhuma anotação neste filtro.</p>
         ) : (
@@ -83,7 +83,7 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
                 type="button"
                 aria-current={selected}
                 onClick={() => onSelect(f)}
-                className={`row-hit flex w-full flex-col gap-1.5 rounded-lg px-3 py-3 text-left ${
+                className={`row-hit flex w-full flex-col gap-1 rounded-lg px-3 py-2.5 text-left ${
                   selected ? "bg-accent-weak shadow-[inset_0_0_0_1px_var(--accent-line)]" : "hover:bg-surface-2"
                 }`}
               >

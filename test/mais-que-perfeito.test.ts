@@ -11,7 +11,6 @@ describe("mais_que_perfeito_sintetico — detecção", () => {
   it("marca formas regulares e irregulares de mais-que-perfeito sintético", () => {
     expect(spans("O órgão requerera o parecer.")).toEqual(["requerera"]);
     expect(spans("Ele já dissera que aprovara tudo.")).toEqual(["dissera", "aprovara"]);
-    // irregulares opacos, impossíveis por regex
     expect(spans("Ela fizera o pedido e coubera a ela decidir.")).toEqual(["fizera", "coubera"]);
   });
 
