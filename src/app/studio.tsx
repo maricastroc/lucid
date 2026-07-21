@@ -15,6 +15,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import { analyze, applySplitAt, type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { findingId, isSafe } from "./lib/criteria";
+import { rewriteTargetAt } from "./lib/paragraphs";
 import { applySafeSuggestions } from "./lib/audit";
 import { SAMPLE_TEXT } from "./lib/sample";
 import { Masthead } from "./components/masthead";
@@ -57,6 +58,17 @@ export function Studio() {
   );
   const selectedIndex = selectedId ? findings.findIndex((f) => findingId(f) === selectedId) : -1;
   const selectedFinding = selectedIndex >= 0 ? findings[selectedIndex] : null;
+
+  // Alvo da reescrita de IA (parágrafo, ou a frase quando é bloco contínuo) — destacado no
+  // documento só quando a nota de decisão humana está aberta, para o autor ver exatamente o
+  // que a IA tocaria antes de gerar. `null` some o destaque.
+  const rewriteTarget = useMemo(
+    () =>
+      selectedFinding && !isSafe(selectedFinding)
+        ? rewriteTargetAt(diagnostic.text, selectedFinding.span.start).span
+        : null,
+    [selectedFinding, diagnostic],
+  );
 
   // Sincroniza a página com a seleção: rola o trecho à vista + flash curto.
   useEffect(() => {
@@ -218,6 +230,7 @@ export function Studio() {
           selectedId={selectedId}
           flashId={flashId}
           activeCriteria={activeCriteria}
+          rewriteTarget={rewriteTarget}
           onChangeText={setText}
           onSelectFinding={selectFinding}
         />

@@ -10,7 +10,7 @@
  * olho vá direto ao caso. Em ESCREVER, a mesma folha vira superfície de redação.
  */
 import { forwardRef, useMemo } from "react";
-import type { Diagnostic, Finding } from "@/lucid";
+import type { Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityRank, SEVERITY_LABEL } from "../lib/criteria";
 
@@ -23,12 +23,14 @@ interface Props {
   selectedId: string | null;
   flashId: string | null;
   activeCriteria: ReadonlySet<string>;
+  /** trecho que a reescrita de IA tocaria — recebe um leve destaque para não haver surpresa. */
+  rewriteTarget: Span | null;
   onChangeText: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
 }
 
 export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentView(
-  { mode, text, diagnostic, selectedId, flashId, activeCriteria, onChangeText, onSelectFinding },
+  { mode, text, diagnostic, selectedId, flashId, activeCriteria, rewriteTarget, onChangeText, onSelectFinding },
   scrollRef,
 ) {
   const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings), [diagnostic]);
@@ -92,9 +94,14 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                           const inline = seg.inline && activeCriteria.has(seg.inline.criterion) ? seg.inline : undefined;
                           const passage =
                             seg.passage && activeCriteria.has("long_sentence") ? seg.passage : undefined;
+                          const inTarget =
+                            rewriteTarget !== null &&
+                            seg.start >= rewriteTarget.start &&
+                            seg.end <= rewriteTarget.end;
+
                           if (!inline && !passage) {
                             return (
-                              <span key={i} className="seg">
+                              <span key={i} className={inTarget ? "seg rewrite-target" : "seg"}>
                                 {seg.text}
                               </span>
                             );
@@ -105,6 +112,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                           const selected = selectedId === id;
                           const meta = metaFor(target.criterion);
                           const classes = ["seg"];
+                          if (inTarget) classes.push("rewrite-target");
                           if (inline) classes.push("mark", meta.markStyleClass);
                           if (passage) classes.push("passage");
                           if (selected) classes.push("seg-selected", "is-lit");

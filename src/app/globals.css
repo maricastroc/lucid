@@ -357,6 +357,14 @@ body {
   cursor: pointer;
 }
 
+/* Alvo da reescrita de IA — faixa discreta mostrando exatamente o que a IA tocaria. */
+.rewrite-target {
+  background: var(--human-weak);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 3px;
+}
+
 /* Trecho selecionado — foco suave em cor de marca. */
 .seg-selected {
   background: var(--accent-weak);
