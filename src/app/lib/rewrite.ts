@@ -11,18 +11,24 @@
  * um benchmark honesto depois. Ver ADR-014/015.
  */
 import type { Span } from "@/lucid";
-import { GROQ_MODELS } from "@/llm";
+import { GEMINI_MODELS, GROQ_MODELS } from "@/llm";
 import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
 
 export interface RewriteModel {
-  providerId: "stub" | "groq";
+  providerId: "stub" | "groq" | "gemini";
   model: string;
   label: string;
 }
 
-/** Modelos oferecidos no seletor da UI. O stub é o default (offline, demonstração). */
+/**
+ * Modelos oferecidos no seletor da UI. O stub é o default (offline, demonstração). Gemini 2.5
+ * Pro é o GERADOR FORTE (a tese do Tier 3: gerador de qualidade + verificador determinístico);
+ * os Groq free ficam como comparação barata no mesmo juiz.
+ */
 export const REWRITE_MODELS: readonly RewriteModel[] = [
   { providerId: "stub", model: "demo", label: "Stub (demonstração, offline)" },
+  { providerId: "gemini", model: GEMINI_MODELS[0], label: "Gemini · 2.5 Flash (gerador forte)" },
+  { providerId: "gemini", model: GEMINI_MODELS[1], label: "Gemini · 2.5 Pro (requer tier pago)" },
   { providerId: "groq", model: GROQ_MODELS[0], label: "Groq · Llama 3.3 70B" },
   { providerId: "groq", model: GROQ_MODELS[1], label: "Groq · Llama 3.1 8B" },
   { providerId: "groq", model: GROQ_MODELS[2], label: "Groq · GPT-OSS 120B" },

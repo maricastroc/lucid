@@ -1117,6 +1117,40 @@ alvo = 1ª frase destacada, não o texto todo; cartão diz "esta frase". 787 tes
 
 ---
 
+## ADR-019 — Gerador FORTE (Gemini) + prova determinística de 1ª pessoa fabricada
+
+**Contexto.** Comparação externa (Gemini-juiz) apontou a reescrita da ferramenta perdendo
+para o GPT: prolixa, abstrata. Diagnóstico: o Tier 3 estava sendo medido como REESCRITOR —
+exatamente o eixo que o `CLAUDE.md` proíbe competir — e o gerador só tinha modelos free da
+Groq (llama/gpt-oss). A tese correta (endossada): **o Lucid não gera melhor; ele AUDITA.** Um
+gerador forte propõe; o diferencial é o VERIFICADOR determinístico. Isso já estava construído
+(verify.ts): faltavam (a) um gerador forte plugado e (b) a prova de 1ª pessoa inventada
+(pendência do ADR-016 — o `gpt-oss` fabricou "nós" e a sonda não pegou).
+
+**Decisão.**
+1. **`GeminiProvider`** (`src/llm/gemini.ts`) sobre a MESMA interface `ChatProvider` — cerca
+   intacta, `src/llm` continua neutro. Chave no header `x-goog-api-key`, NUNCA na URL. Wired em
+   `/api/rewrite` (`buildProposer`/`buildProbe`) e no seletor da UI. OpenAI/Anthropic entram
+   pela mesma porta quando houver chave.
+2. **Thinking desligado** (`thinkingConfig.thinkingBudget: 0`). Gemini 2.5 é modelo de
+   raciocínio: por padrão gasta thinking tokens que (a) consomem `maxOutputTokens` e TRUNCAM a
+   saída e (b) injetam não-determinismo. Desligar é duplo alinhamento: anti-drift (Camada 2
+   reprodutível) + "o modelo só PROPÕE, o verificador julga". Verificado ao vivo: com thinking,
+   `finishReason: MAX_TOKENS`; sem, `STOP`.
+3. **Modelo em uso: `gemini-2.5-flash`.** `gemini-2.5-pro` fica na allow-list do código mas
+   exige **tier pago** (chave free → `limit: 0`, 429). Rotulado como tal na UI.
+4. **Nova PROVA `no_invented_first_person`** (blocking). Lista FECHADA de pronomes/possessivos
+   inambíguos (`eu, nós, me, mim, comigo, conosco, meu/minha/…, nosso/nossa/…`); ZERO morfologia
+   produtiva (fiel ao ADR-011 — sem desinência "-mos", que colide com "mesmos"/"termos"). Fora:
+   "nos"/"no" (ambíguos com em+os). Diferencial contra o DOCUMENTO INTEIRO: só veta 1ª pessoa
+   ausente em TODO o fonte (se o doc já é 1ª pessoa, "nós" é fiel, não fabricado).
+
+**Consequências.** 794 testes verdes (novos: prova de 1ª pessoa 3×, `GeminiProvider` mockado
+4×). Verificado ao vivo via `/api/rewrite` (Flesch −12,0→48,6; 6/6 provas; sem veto; sem
+truncar). Cerca/depcheck intactos. O gerador barato da Groq segue como comparação no mesmo juiz.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

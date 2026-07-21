@@ -51,7 +51,8 @@ export interface Proof {
     | "no_new_findings" // totalFindings não aumentou
     | "numbers_preserved" // o conjunto de números do trecho é idêntico
     | "dates_preserved" // o conjunto de datas do trecho é idêntico
-    | "no_new_jargon"; // a proposta não introduziu termo de jargão novo
+    | "no_new_jargon" // a proposta não introduziu termo de jargão novo
+    | "no_invented_first_person"; // a proposta não fabricou um agente em 1ª pessoa ("nós"/"nossa")
   passed: boolean;
   detail: string;
 }
