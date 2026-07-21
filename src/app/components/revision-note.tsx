@@ -247,7 +247,9 @@ function GeneratedRewrite({
     setError(null);
     setResult(null);
     try {
-      setResult(await generateRewrite(source, target, choice, finding.criterion));
+      // Reescrita de PARÁGRAFO: julgada só pelo peso da região (region_improved) + provas de
+      // corrupção — NÃO pelo critério de um finding isolado (sem `criterion` → sem target_resolved).
+      setResult(await generateRewrite(source, target, choice));
     } catch (e) {
       setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
     } finally {
@@ -374,18 +376,24 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         </div>
 
         <div className="mt-3">
+          {/* O veto NUNCA autoaplica e NUNCA vira selo verde — mas não bloqueia o autor. Com
+              prova falhada, a ação vira um override deliberado (é só um rascunho, que a engine
+              re-audita). A decisão é do autor. */}
           <button
             type="button"
             onClick={onApplyRewrite}
-            disabled={blocked}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            style={{ background: "var(--accent)" }}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90"
+            style={
+              blocked
+                ? { background: "var(--human-weak)", color: "var(--human)", boxShadow: "inset 0 0 0 1px var(--human-line)" }
+                : { background: "var(--accent)", color: "var(--accent-ink)" }
+            }
           >
-            Usar como rascunho
+            {blocked ? "Usar mesmo assim como rascunho" : "Usar como rascunho"}
           </button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
             {blocked
-              ? "Uma prova falhou — a proposta é inaceitável mecanicamente e não pode ser usada como está."
+              ? "Uma prova falhou — a ferramenta não aplica sozinha e não atesta. Se você entende o motivo acima e ainda quer, aplique como rascunho e reanalise."
               : "Nenhuma falha de piso detectada. Isso não é um selo de qualidade — reveja antes de usar."}
           </p>
         </div>

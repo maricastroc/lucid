@@ -1054,6 +1054,39 @@ re-execução no HANDOFF. Próximo: prova determinística de 1ª pessoa nova (pe
 
 ---
 
+## ADR-019 — Tier 3 · o veto impede AUTOAPLICAÇÃO, não o autor; reescrita de parágrafo julgada só pelo peso da região
+
+**Status:** aceito · Tier 3, incremento 7 (correção de escopo do veto)
+
+**Contexto.** Uma dúvida do usuário expôs que eu havia **misturado três decisões** em uma. Os
+invariantes do produto são DOIS: (a) **nunca autoaplicar**; (b) **nunca dar selo verde**. Eu
+tinha acrescentado um terceiro, indevido: **bloquear a aplicação MANUAL** quando uma prova
+falha (`disabled={blocked}` no botão "Usar como rascunho"). Isso torna o verificador um porteiro
+absoluto sobre o humano — o oposto da identidade do produto ("marca, não decide por você; a
+decisão é do autor"), ainda por cima sobre um mero RASCUNHO que a engine re-audita.
+
+**Decisão.**
+1. **O veto não bloqueia o autor.** Removido o `disabled`. Com prova falhada, o botão vira
+   **"Usar mesmo assim como rascunho"** (estilo de alerta) — um **override deliberado**. A
+   ferramenta segue sem autoaplicar e sem atestar; só informa PROVA/SINAL. `hasBlockingFailure`
+   passa a significar "bloqueia AUTOAPLICAÇÃO e é bandeira vermelha", **não** "proíbe o humano".
+2. **Reescrita de PARÁGRAFO julgada só pelo peso da região.** A UI parou de passar
+   `finding.criterion` ao gerar/verificar um parágrafo — logo `target_resolved` (exigir que UM
+   critério específico suma) não roda no caminho de parágrafo; valem `region_improved` (peso por
+   severidade, ADR-018) + as provas de corrupção. Coerente: o autor reescreve o parágrafo, não
+   conserta um finding isolado. `target_resolved` continua disponível para um caminho
+   finding-específico (quando `criterion` é passado).
+
+**Honestidade (I5) intacta.** Nada aqui afrouxa a e (b): continua sem autoaplicação e sem selo.
+O que muda é NÃO usurpar a soberania do autor sobre um rascunho.
+
+**Consequências.** Só UI (`revision-note.tsx`): botão condicional + cópia honesta, e a chamada
+de geração sem `criterion`. Engine/verificador inalterados; provas idênticas sobre o MESMO
+trecho (o parágrafo) em gerar/verificar/aplicar. Sem mudança de teste (a suíte não fixava o
+`disabled`). Próximo: prova determinística de 1ª pessoa nova.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
