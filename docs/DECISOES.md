@@ -1087,6 +1087,36 @@ trecho (o parágrafo) em gerar/verificar/aplicar. Sem mudança de teste (a suít
 
 ---
 
+## ADR-020 — Tier 3 · alvo da reescrita: parágrafo com FALLBACK para a frase; alvo visível; camada de IA separada
+
+**Status:** aceito · Tier 3, incremento 8 (transparência do escopo)
+
+**Contexto.** Testando ao vivo, o usuário colou um bloco de texto **sem linhas em branco** e a
+IA reescreveu o **documento inteiro** — porque `paragraphSpanAt` separa por linha em branco e,
+sem elas, "o parágrafo" vira o texto todo. Pior: o editor destacava só a FRASE do finding
+(mais estreita), enquanto o alvo real era o texto inteiro — descasamento invisível. Além
+disso, o cartão de IA vivia embutido no diagnóstico determinístico, dando a impressão de que a
+auditoria depende do LLM.
+
+**Decisão.**
+1. **Unidade certa** (`app/lib/paragraphs.ts` `rewriteTargetAt` + core `sentenceSpanAt`):
+   há separação real por parágrafos (alguma linha em branco) → o **parágrafo**; bloco contínuo
+   sem linhas em branco → a **FRASE** do diagnóstico. **Nunca o documento inteiro.**
+2. **Alvo visível** — o trecho que a IA tocaria recebe um **destaque discreto no editor**
+   (`.rewrite-target`, faixa `--human-weak`, via prop `rewriteTarget` no `DocumentView`), e o
+   cartão diz explicitamente **"A IA vai reescrever esta frase / este parágrafo"**. Sem surpresa.
+3. **Camada de IA separada** — o cartão virou um container próprio ("Reescrita por IA ·
+   experimental", borda tracejada), com a linha "o diagnóstico acima é determinístico e **não
+   depende disto**". Reforça que a Camada 1 é o produto e o LLM é opcional.
+
+**Consequências.** Core ganhou `sentenceSpanAt` (puro, reusa `segmentSentences`); nada de rede
+em core. `vitest.config.ts` ganhou o alias `@ → src` (testes de `app/lib` que usam `@/lucid`
+como VALOR passaram a resolver). Verificado ao vivo no cenário exato do bug: bloco contínuo →
+alvo = 1ª frase destacada, não o texto todo; cartão diz "esta frase". 787 testes verdes
+(3 novos: `sentenceSpanAt`, `rewriteTargetAt` par./frase). Sem tocar no verificador/engine.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

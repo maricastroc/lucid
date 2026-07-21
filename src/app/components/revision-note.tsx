@@ -19,7 +19,7 @@ import {
   detectionHeadline,
   longSentenceGuidance,
 } from "../lib/narrative";
-import { paragraphSpanAt } from "../lib/paragraphs";
+import { rewriteTargetAt } from "../lib/paragraphs";
 import { generateRewrite, REWRITE_MODELS, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
@@ -239,16 +239,18 @@ function GeneratedRewrite({
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // O ALVO é o PARÁGRAFO que contém o finding; a geração recebe o documento inteiro de contexto.
-  const target = paragraphSpanAt(source, finding.span.start);
+  // O ALVO: o parágrafo que contém o finding, OU a frase quando o texto é um bloco contínuo
+  // (sem linhas em branco) — nunca o documento inteiro. A geração recebe o texto de contexto.
+  const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
+  const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
 
   const run = async () => {
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      // Reescrita de PARÁGRAFO: julgada só pelo peso da região (region_improved) + provas de
-      // corrupção — NÃO pelo critério de um finding isolado (sem `criterion` → sem target_resolved).
+      // Julgada só pelo peso da região (region_improved) + provas de corrupção — NÃO pelo
+      // critério de um finding isolado (sem `criterion` → sem target_resolved).
       setResult(await generateRewrite(source, target, choice));
     } catch (e) {
       setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
@@ -259,19 +261,25 @@ function GeneratedRewrite({
 
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
+  // Container próprio, visualmente SEPARADO do diagnóstico determinístico acima — deixa claro
+  // que é uma camada opcional de IA, e que a auditoria não depende dela.
   return (
-    <div className="mt-4 border-t border-human-line pt-4">
-      <div className="mb-1 flex items-center gap-2">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">Reescrita gerada</p>
+    <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2/40">
+      <div className="flex items-center gap-2 border-b border-rule-1 px-4 py-2.5">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-2">Reescrita por IA</span>
         <span className="rounded-[4px] bg-surface-2 px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
           experimental
         </span>
       </div>
-      <p className="text-[12px] leading-relaxed text-ink-2">
-        Reescreve o <span className="text-ink-1">parágrafo inteiro</span> (com o documento de contexto); a{" "}
-        <span className="text-ink-1">engine verifica</span>. A proposta é sempre “gerada”, nunca aplicada sozinha — e
-        passar nas provas é ausência de falha, <span className="text-ink-1">não aprovação</span>.
-      </p>
+      <div className="px-4 py-3">
+        <p className="text-[12px] leading-relaxed text-ink-2">
+          Camada opcional — o diagnóstico acima é <span className="text-ink-1">determinístico e não depende disto</span>.
+          A IA propõe; a <span className="text-ink-1">engine verifica</span>. Nunca aplica sozinha, e passar nas provas é
+          ausência de falha, <span className="text-ink-1">não aprovação</span>.
+        </p>
+        <p className="mt-2 rounded-lg bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
+          A IA vai reescrever <span className="font-semibold text-ink-0">{unitLabel}</span> (destacada no documento).
+        </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <select
@@ -314,6 +322,7 @@ function GeneratedRewrite({
             decisão continua sua.
           </p>
         ))}
+      </div>
     </div>
   );
 }
