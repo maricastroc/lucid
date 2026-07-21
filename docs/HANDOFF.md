@@ -41,12 +41,16 @@ cega — a engine determinística é o VERIFICADOR.**
 
 - **Tier 1 · Correção segura** — ✅ já existe (jargão/nominalização seguros, aplicação automática).
 
-- **Tier 2 · Ação estrutural assistida** — determinístico, **construir primeiro** (zero rede):
-  - Frase longa: **decompor em cláusulas** + o usuário escolhe um ponto e o Lucid **insere a
-    quebra** (ponto final + maiúscula) devolvendo um rascunho que o autor revisa e re-analisa.
-  - Passiva com agente: extrair **Agente / Ação / Objeto** (agente = "pela X"; ação =
-    particípio→verbo-base; objeto = sintagma entre "ser" e o particípio — **andaime aproximado**,
-    rotular como "estrutura identificada, confira", não como exato).
+- **Tier 2 · Ação estrutural assistida** — ✅ **FEITO** (determinístico, zero rede; ADR-012 + ADR-013):
+  - Frase longa: **decompor em cláusulas** (`clauseSplitPoints`) + o usuário escolhe um ponto e o
+    Lucid **insere a quebra** (`applySplitAt`: ponto final + maiúscula, conjunção preservada, sem
+    apagar palavra) devolvendo um rascunho que o autor revisa e re-analisa. UI: botões na nota +
+    undo + reanálise automática.
+  - Passiva com agente: **Agente / Ação / Objeto** extraídos do texto (`passiveScaffold`) —
+    agente = sintagma após "pela"; ação = particípio + verbo-base de **tabela fechada**
+    (`participios-infinitivo.pt.json`); objeto = sujeito **antes de "ser"** (aproximado, rotulado
+    "confira"). Nunca vira a frase; 0 conteúdo fabricado (todo campo é substring literal).
+  - Núcleo em `src/lucid/core/actions/`; reexportado pelo barrel. 28 testes novos; suíte 739 verde.
 
 - **Tier 3 · Reescrita proposta e verificada** — ⭐ o diferencial. Camada 2 (LLM) atrás da cerca,
   opt-in, com **stub determinístico** para os testes (CI segue byte-idêntica), `temperature 0`,
@@ -63,17 +67,15 @@ cega — a engine determinística é o VERIFICADOR.**
 
 ---
 
-## 4. DECISÃO PENDENTE (o usuário ainda não respondeu)
+## 4. PRÓXIMO PASSO — Tier 3 (a fase seguinte, ainda não iniciada)
 
-**Migração editorial CONCLUÍDA** (commit 7b13232): `studio.tsx` monta os componentes novos,
-zero token antigo, app renderiza correto, tudo verde. Não é mais uma pendência.
+**Migração editorial + Tier 2 CONCLUÍDOS.** UI migrada (commit 7b13232); Tier 2 split (ADR-012)
+e andaime de passiva (ADR-013) implementados, verificados no browser e commitados.
 
-Resta sequenciar a lógica de ação:
-1. **Tier 2 · Ação estrutural assistida** (determinístico, zero rede) — construir primeiro:
-   decompor frase longa em cláusulas + split interativo; extrair Agente/Ação/Objeto da passiva.
-2. **Tier 3 · contrato do `RewriteProposer`** + pipeline de verificação determinística no `report/` + stub.
-
-Plano endossado: **Tier 2 agora, Tier 3 como fase desenhada em seguida.**
+Resta o **Tier 3 · `RewriteProposer`** — a Camada 2 (LLM) atrás da cerca, opt-in, com stub
+determinístico nos testes, vivendo em `report/` (nunca em `core/`). Contrato de verificação
+detalhado na §3 acima (separar PROVA determinística de SINAL heurístico; nunca selo verde).
+Independe do visual; é a próxima fase desenhada.
 
 ---
 

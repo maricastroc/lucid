@@ -10,7 +10,7 @@
  * Toda a copy vem de `lib/narrative` — derivada do Finding real, nada inventado.
  */
 import { useState } from "react";
-import type { Finding, SplitPoint } from "@/lucid";
+import { passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import {
   buildConfidence,
@@ -225,7 +225,7 @@ function Guidance({
 }) {
   if (finding.criterion === "long_sentence")
     return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
-  if (finding.criterion === "passive_voice") return <PassiveGuide finding={finding} />;
+  if (finding.criterion === "passive_voice") return <PassiveGuide finding={finding} source={source} />;
   if (finding.criterion === "nominalization") return <NominalizationGuide finding={finding} />;
   return <JargonGuide />;
 }
@@ -288,23 +288,71 @@ function LongSentenceGuide({
   );
 }
 
-function PassiveGuide({ finding }: { finding: Finding }) {
-  const hasAgent = finding.meta?.hasAgent === true;
+function PassiveGuide({ finding, source }: { finding: Finding; source: string }) {
+  const scaffold = passiveScaffold(finding, source);
+
+  if (!scaffold) {
+    // Sem agente no texto: nenhum papel a montar — só a pergunta que o autor precisa responder.
+    return (
+      <p className="text-[12.5px] leading-relaxed text-ink-1">
+        <span className="font-medium text-ink-0">Falta o agente.</span> Para escrever na voz ativa, responda:{" "}
+        <span className="text-ink-0">quem praticou a ação?</span> Só com essa informação a frase ativa é possível — e a
+        resposta é sua, não da ferramenta.
+      </p>
+    );
+  }
+
   return (
-    <p className="text-[12.5px] leading-relaxed text-ink-1">
-      {hasAgent ? (
-        <>
-          <span className="font-medium text-ink-0">O agente já está no trecho.</span> Ele vira o sujeito; o particípio
-          vira o verbo. Monte a frase e confira a concordância — a versão final é sua.
-        </>
-      ) : (
-        <>
-          <span className="font-medium text-ink-0">Falta o agente.</span> Para escrever na voz ativa, responda:{" "}
-          <span className="text-ink-0">quem praticou a ação?</span> Só com essa informação a frase ativa é possível — e
-          a resposta é sua, não da ferramenta.
-        </>
-      )}
-    </p>
+    <div>
+      <p className="text-[12.5px] leading-relaxed text-ink-1">
+        A ferramenta identifica os papéis no texto para você montar a voz ativa. É um{" "}
+        <span className="text-ink-0">andaime, não a frase</span> — confira cada campo; a versão final é sua.
+      </p>
+
+      <div className="mt-3 flex flex-col gap-1.5">
+        <RoleRow label="Agente" hint="vira o sujeito" value={scaffold.agent} />
+        <RoleRow
+          label="Ação"
+          hint="vira o verbo"
+          value={scaffold.action.participle}
+          note={scaffold.action.baseVerb ? `→ ${scaffold.action.baseVerb}` : "→ escolha o verbo"}
+        />
+        <RoleRow label="Objeto" hint="o que sofreu a ação" value={scaffold.object} placeholder="você preenche" />
+      </div>
+
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+        Estrutura identificada · confira. A ferramenta não vira a frase: isso exige reordenar e reconjugar — decisão sua.
+      </p>
+    </div>
+  );
+}
+
+function RoleRow({
+  label,
+  hint,
+  value,
+  note,
+  placeholder,
+}: {
+  label: string;
+  hint: string;
+  value: string | null;
+  note?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div className="flex items-baseline gap-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2">
+      <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-human">{label}</span>
+      <span className="min-w-0 flex-1">
+        {value ? (
+          <span className="font-serif text-[14px] text-ink-0">{value}</span>
+        ) : (
+          <span className="text-[12.5px] italic text-ink-3">— {placeholder}</span>
+        )}
+        {note && value && <span className="ml-1.5 font-sans text-[11.5px] text-ink-2">{note}</span>}
+      </span>
+      <span className="shrink-0 text-[10.5px] text-ink-3">{hint}</span>
+    </div>
   );
 }
 
