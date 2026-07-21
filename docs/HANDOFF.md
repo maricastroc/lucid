@@ -96,13 +96,26 @@ proveniência. Modelos free habilitados: `llama-3.3-70b-versatile`, `llama-3.1-8
 qwen3.6 falha JSON mode). Verificado ao vivo (Llama 70B: PROVA 5/5, total 13→10). Testes com
 `MockChatProvider` (offline); rede nunca na CI.
 
+**Tier 3 · incremento 4 FEITO — reescrita LIVRE + sonda real** (ADR-016). Alvo generalizado
+`finding → Span` (`RewriteRequest={text,target,criterion?}`); prompt `rewrite@2` (contexto do
+documento inteiro, reescreve só o parágrafo-alvo, liberdade para reorganizar, blindado contra
+inventar agente/informação); verificação com `region_improved`; **sonda real** (`probe/llm-probe.ts`
++ `probe/prompt.ts`) ligada na rota → SINAL `meaning_preserved` populado. Infra de LLM movida
+para **`src/llm`** (neutro; cerca reforçada: `core ⊄ src/llm`). UI: cartão reescreve o parágrafo
+de QUALQUER finding, com contexto do documento. 782 testes verdes.
+
+**Achado ao vivo (registrado no ADR-016):** GPT-OSS 120B reescreveu um parágrafo-monstro
+(Flesch -106,8→20,4) mas foi **vetado** (findings 1→3) e **inventou o "nós"** — o juiz não se
+seduz por prosa. Duas limitações reais a atacar: (a) contagem crua de findings é blunt para
+reescrita radical → **veredito ponderado por severidade**; (b) agente inventado em 1ª pessoa não
+é pego → **prova determinística de 1ª pessoa nova**.
+
 **Falta no Tier 3 (próximos incrementos):**
-- **Harness de benchmark** — roda um golden de reescritas por cada modelo e agrega "% que
-  passam todas as PROVAS determinísticas" (NUNCA "taxa de aprovação"). Roda manual (rede/custo),
-  fora da CI. Tabela pro README.
-- **Outros providers** — OpenAI/Anthropic/Gemini pela mesma interface `ChatProvider`. (`.env`
-  já tem `GEMINI_API_KEY`; a linha `DEEPSEEK_AP_KEY` está com typo — falta o "I".)
-- **Sonda real** (`probe/llm-probe.ts`) para ligar o SINAL de sentido no verificador.
+- **(a) veredito ponderado por severidade** e **(b) prova de 1ª pessoa nova** (acima).
+- **Harness de benchmark** — "% que passam todas as PROVAS" (NUNCA "aprovação"), manual, fora
+  da CI, tabela pro README.
+- **Outros providers** — OpenAI/Anthropic/Gemini/DeepSeek pela mesma interface `ChatProvider`
+  (`src/llm`). `.env` tem `GEMINI_API_KEY`; `DEEPSEEK_AP_KEY` está com typo (falta o "I").
 
 ---
 

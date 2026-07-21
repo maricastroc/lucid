@@ -936,6 +936,54 @@ e outros providers (OpenAI/Anthropic/Gemini) pela mesma interface.
 
 ---
 
+## ADR-016 — Tier 3 · reescrita LIVRE (contexto do documento, alvo por parágrafo) + sonda de sentido real; infra de LLM em `src/llm`
+
+**Status:** aceito · Tier 3, incremento 4 (o salto de "corrigir" para "reescrever")
+
+**Contexto.** A reescrita span-local por finding, com prompt tímido, só trocava palavras e
+dividia frases — preservava a arquitetura do texto jurídico. O salto real (mostrado pelo
+usuário com um exemplo do GPT) é **reorganizar o discurso e condensar semanticamente**. Isso
+não contradiz o Lucid: a engine não precisa obrigar estrutura, só provar invariantes na saída.
+Mas as PROVAS determinísticas **não provam significado** — reescrita livre é onde o sentido
+escorrega (o exemplo do GPT inventou um "nós"). Logo: liberdade **sim**, com (1) prompt que
+proíbe inventar agente/informação, (2) **sonda real** como guard de sentido, (3) resultado
+sempre "gerada — passou nas provas, revise", nunca "aprovada".
+
+**Decisão.**
+1. **Alvo generalizado de `finding` → `Span`.** `RewriteRequest = { text, target, criterion? }`:
+   `text` é o documento inteiro (CONTEXTO), `target` é o trecho a reescrever (parágrafo ou a
+   frase de um finding). `proposeAndVerify`/`verifyRewrite` recebem `target: Span`.
+2. **`rewrite@2`** — o modelo lê o documento inteiro e reescreve **só o alvo**, com liberdade
+   para reorganizar/condensar/mudar estrutura; blindagem forte: **não inventar informação nem
+   quem praticou a ação** ("não crie 'nós'").
+3. **Verificação generalizada** — nova prova `region_improved` (findings sobrepondo o trecho
+   não aumentam); `target_resolved` só quando há `criterion` (caminho finding). Resto igual.
+4. **Sonda REAL** — `probe/prompt.ts` (leitor sintético do CLAUDE.md, versionado) +
+   `probe/llm-probe.ts` (`LlmComprehensionProbe` sobre `ChatProvider`; parse pessimista). A
+   rota a constrói (Groq) com uma pergunta de piso genérica; o SINAL `meaning_preserved` agora
+   é populado de verdade (teste NEGATIVO).
+5. **Infra de LLM em `src/llm` (neutro).** `ChatProvider`/`GroqProvider` saíram de
+   `report/rewrite/providers` para `src/llm` — assim `report` E `probe` importam a infra de
+   rede sem inverter a cerca. Nova regra no dependency-cruiser: `core/**` ⊄ `src/llm` (core
+   segue zero-rede; `src/llm` é a única casa de rede compartilhada).
+6. **UI** — o cartão reescreve o **parágrafo** que contém o finding (via `paragraphSpanAt`),
+   para **qualquer** finding; aplica o parágrafo (undo). Mostra PROVA/SINAL (agora com sentido).
+
+**Achado da verificação ao vivo (honesto).** GPT-OSS 120B reescreveu um parágrafo-monstro
+(Flesch **-106,8 → 20,4**) — mas o verificador **VETOU** (`region_improved`/`no_new_findings`:
+findings 1 → 3) e o modelo **inventou o "nós"** apesar do prompt proibir. Ou seja: o juiz
+determinístico não se deixa seduzir por prosa fluente. Duas limitações reais registradas para
+os próximos ADRs: (a) contagem crua de findings é BLUNT para reescrita radical (dividir uma
+mega-frase em 3 boas pode "piorar" a contagem) → avaliar **veredito ponderado por severidade**;
+(b) **agente inventado em 1ª pessoa** não é pego por entidade/sonda → avaliar uma prova
+determinística de "verbos/pronomes de 1ª pessoa novos".
+
+**Consequências.** `core/**` intacto e zero-rede (cerca reforçada). 782 testes verdes (mock
+provider + mock/real-parse probe; rede nunca na CI). O contrato honesto (I5) permanece: veto
+mecânico reprova, passar ≠ aprovação.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

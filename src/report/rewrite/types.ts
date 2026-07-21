@@ -11,12 +11,17 @@
  * Fronteira: estes tipos vivem em `report/**`, a única camada que pode conhecer `core` e
  * `probe` ao mesmo tempo. `core/**` nunca importa daqui.
  */
-import type { Finding } from "../../lucid/core/types";
+import type { Span } from "../../lucid/core/types";
 
-/** Pedido ao proposer: o texto inteiro (normalizado) + o finding-alvo a reescrever. */
+/**
+ * Pedido ao proposer: o texto inteiro (normalizado, CONTEXTO) + o ALVO a reescrever (`Span`)
+ * — a frase de um finding ou um parágrafo. `criterion` é dica opcional (do finding), quando
+ * há um; na reescrita de parágrafo não há critério único.
+ */
 export interface RewriteRequest {
   text: string;
-  finding: Finding;
+  target: Span;
+  criterion?: string;
 }
 
 /**
@@ -39,7 +44,8 @@ export interface RewriteProposal {
  */
 export interface Proof {
   check:
-    | "target_resolved" // a violação-alvo sumiu do trecho reescrito
+    | "target_resolved" // (só finding) a violação-alvo sumiu do trecho reescrito
+    | "region_improved" // os findings do trecho reescrito não aumentaram
     | "no_new_findings" // totalFindings não aumentou
     | "numbers_preserved" // o conjunto de números do trecho é idêntico
     | "dates_preserved" // o conjunto de datas do trecho é idêntico

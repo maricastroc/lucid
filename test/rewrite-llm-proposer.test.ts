@@ -1,14 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  ChatProviderError,
-  GroqProvider,
-  GROQ_MODELS,
-  LlmRewriteProposer,
-  parseRewrite,
-  REWRITE_PROMPT_VERSION,
-  type ChatProvider,
-} from "../src/report/rewrite";
-import type { Finding } from "../src/lucid/core/types";
+import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION } from "../src/report/rewrite";
+import { ChatProviderError, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
+import type { Span } from "../src/lucid/core/types";
 
 /** Provider mock determinístico — devolve uma resposta fixa; NUNCA toca a rede. */
 class MockChatProvider implements ChatProvider {
@@ -22,16 +15,8 @@ class MockChatProvider implements ChatProvider {
   }
 }
 
-function finding(text: string, criterion = "long_sentence"): Finding {
-  return {
-    criterion,
-    category: "syntactic",
-    principle: "5.3.4",
-    span: { start: 0, end: text.length, text },
-    severity: "warning",
-    requiresHuman: true,
-    justification: "",
-  };
+function span(text: string): Span {
+  return { start: 0, end: text.length, text };
 }
 
 describe("parseRewrite — robustez do parse", () => {
@@ -55,25 +40,25 @@ describe("LlmRewriteProposer", () => {
     expect(proposer.id).toBe(`mock:m1+${REWRITE_PROMPT_VERSION}`);
   });
 
-  it("usa o trecho do finding como original e a reescrita parseada como proposta", async () => {
+  it("usa o trecho-alvo como original e a reescrita parseada como proposta", async () => {
     const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
     const proposer = new LlmRewriteProposer(provider, "m1");
-    const f = finding("Um trecho longo e enrolado que precisa de ajuda.");
+    const target = span("Um trecho longo e enrolado que precisa de ajuda.");
 
-    const proposal = await proposer.propose({ text: f.span.text, finding: f });
+    const proposal = await proposer.propose({ text: target.text, target, criterion: "long_sentence" });
 
-    expect(proposal.original).toBe(f.span.text);
+    expect(proposal.original).toBe(target.text);
     expect(proposal.proposed).toBe("Versão curta e clara.");
     expect(proposal.proposerId).toBe(`mock:m1+${REWRITE_PROMPT_VERSION}`);
     // o trecho entra no prompt enviado ao modelo
-    expect(provider.lastPrompt).toContain(f.span.text);
+    expect(provider.lastPrompt).toContain(target.text);
   });
 
   it("resposta ilegível → proposta = original (honesto, não fabrica)", async () => {
     const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
-    const f = finding("Trecho original intacto.");
-    const proposal = await proposer.propose({ text: f.span.text, finding: f });
-    expect(proposal.proposed).toBe(f.span.text);
+    const target = span("Trecho original intacto.");
+    const proposal = await proposer.propose({ text: target.text, target });
+    expect(proposal.proposed).toBe(target.text);
   });
 });
 

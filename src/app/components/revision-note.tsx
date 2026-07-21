@@ -10,7 +10,7 @@
  * Toda a copy vem de `lib/narrative` — derivada do Finding real, nada inventado.
  */
 import { useState } from "react";
-import { passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
+import { passiveScaffold, type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import {
@@ -19,6 +19,7 @@ import {
   detectionHeadline,
   longSentenceGuidance,
 } from "../lib/narrative";
+import { paragraphSpanAt } from "../lib/paragraphs";
 import { generateRewrite, REWRITE_MODELS, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
@@ -28,7 +29,8 @@ export interface RevisionNoteProps {
   source: string;
   onApply: (f: Finding) => void;
   onSplit: (point: SplitPoint) => void;
-  onApplyRewrite: (proposal: RewriteProposal) => void;
+  /** aplica uma reescrita gerada substituindo o `target` (o parágrafo) no texto. */
+  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }
 
 export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite }: RevisionNoteProps) {
@@ -192,7 +194,7 @@ function HumanDecision({
   finding: Finding;
   source: string;
   onSplit: (point: SplitPoint) => void;
-  onApplyRewrite: (proposal: RewriteProposal) => void;
+  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const rationale = buildConfidence(finding).rationale;
   return (
@@ -215,9 +217,7 @@ function HumanDecision({
           <Guidance finding={finding} source={source} onSplit={onSplit} />
         </div>
 
-        {finding.criterion === "long_sentence" && (
-          <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
-        )}
+        <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
       </div>
     </div>
   );
@@ -232,19 +232,22 @@ function GeneratedRewrite({
 }: {
   finding: Finding;
   source: string;
-  onApplyRewrite: (proposal: RewriteProposal) => void;
+  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // O ALVO é o PARÁGRAFO que contém o finding; a geração recebe o documento inteiro de contexto.
+  const target = paragraphSpanAt(source, finding.span.start);
+
   const run = async () => {
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      setResult(await generateRewrite(source, finding, choice));
+      setResult(await generateRewrite(source, target, choice, finding.criterion));
     } catch (e) {
       setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
     } finally {
@@ -263,9 +266,9 @@ function GeneratedRewrite({
         </span>
       </div>
       <p className="text-[12px] leading-relaxed text-ink-2">
-        A geração propõe; a <span className="text-ink-1">engine determinística verifica</span>. A proposta é sempre
-        “gerada”, nunca aplicada sozinha — e passar nas provas é ausência de falha, <span className="text-ink-1">não
-        aprovação</span>.
+        Reescreve o <span className="text-ink-1">parágrafo inteiro</span> (com o documento de contexto); a{" "}
+        <span className="text-ink-1">engine verifica</span>. A proposta é sempre “gerada”, nunca aplicada sozinha — e
+        passar nas provas é ausência de falha, <span className="text-ink-1">não aprovação</span>.
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -302,7 +305,7 @@ function GeneratedRewrite({
 
       {result !== null &&
         (hasProposal ? (
-          <RewriteResult result={result} onApplyRewrite={onApplyRewrite} />
+          <RewriteResult result={result} onApplyRewrite={() => onApplyRewrite(target, result.proposal)} />
         ) : (
           <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
             O modelo não devolveu uma reescrita diferente do trecho — nada a propor. O verificador não fabrica uma; a
@@ -313,13 +316,7 @@ function GeneratedRewrite({
   );
 }
 
-function RewriteResult({
-  result,
-  onApplyRewrite,
-}: {
-  result: VerifiedRewrite;
-  onApplyRewrite: (proposal: RewriteProposal) => void;
-}) {
+function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; onApplyRewrite: () => void }) {
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
   const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
@@ -379,7 +376,7 @@ function RewriteResult({
         <div className="mt-3">
           <button
             type="button"
-            onClick={() => onApplyRewrite(proposal)}
+            onClick={onApplyRewrite}
             disabled={blocked}
             className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ background: "var(--accent)" }}

@@ -16,7 +16,7 @@
  *
  * Fronteira: `report/**` pode importar `core` e `probe`. `core` nunca importa daqui.
  */
-import { analyze, type Finding } from "../../lucid";
+import { analyze, type Finding, type Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
 import type { MetricsDelta, Proof, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
@@ -26,6 +26,8 @@ export interface VerifyOptions {
   probe?: ComprehensionProbe;
   /** a pergunta que o leitor veio fazer — exigida junto com `probe`. */
   question?: string;
+  /** critério do finding, quando o alvo é a frase de um finding — habilita `target_resolved`. */
+  criterion?: string;
 }
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
@@ -84,40 +86,55 @@ function jargonTextsOverlapping(findings: readonly Finding[], start: number, end
 }
 
 /**
- * Aplica a proposta ao texto inteiro (substitui o trecho do finding) e devolve o texto
- * reescrito. Puro: não normaliza (o `analyze` normaliza de novo, idempotente).
+ * Aplica a proposta ao texto inteiro (substitui o trecho-alvo) e devolve o texto reescrito.
+ * Puro: não normaliza (o `analyze` normaliza de novo, idempotente).
  */
-export function applyProposal(text: string, finding: Finding, proposal: RewriteProposal): string {
-  return text.slice(0, finding.span.start) + proposal.proposed + text.slice(finding.span.end);
+export function applyProposal(text: string, target: Span, proposal: RewriteProposal): string {
+  return text.slice(0, target.start) + proposal.proposed + text.slice(target.end);
 }
 
 export async function verifyRewrite(
   text: string,
-  finding: Finding,
+  target: Span,
   proposal: RewriteProposal,
   options: VerifyOptions = {},
 ): Promise<RewriteVerification> {
-  const rewritten = applyProposal(text, finding, proposal);
+  const rewritten = applyProposal(text, target, proposal);
   const before = analyze(text);
   const after = analyze(rewritten);
 
-  const originalStart = finding.span.start;
-  const originalEnd = finding.span.end;
-  const newStart = finding.span.start;
-  const newEnd = finding.span.start + proposal.proposed.length;
+  const originalStart = target.start;
+  const originalEnd = target.end;
+  const newStart = target.start;
+  const newEnd = target.start + proposal.proposed.length;
 
   // --- PROVA -------------------------------------------------------------------
-  const targetRemaining = after.findings.filter(
-    (f) => f.criterion === finding.criterion && overlaps(f, newStart, newEnd),
-  ).length;
-  const targetResolved: Proof = {
-    check: "target_resolved",
-    passed: targetRemaining === 0,
-    detail:
-      targetRemaining === 0
-        ? `a violação de '${finding.criterion}' não reaparece no trecho reescrito`
-        : `'${finding.criterion}' ainda é detectado ${targetRemaining}× no trecho reescrito`,
-  };
+  const proofs: Proof[] = [];
+
+  // `target_resolved` só quando há um critério de finding (caminho da frase-alvo). Na
+  // reescrita de parágrafo não há critério único — vale o `region_improved` abaixo.
+  if (options.criterion) {
+    const criterion = options.criterion;
+    const targetRemaining = after.findings.filter((f) => f.criterion === criterion && overlaps(f, newStart, newEnd))
+      .length;
+    proofs.push({
+      check: "target_resolved",
+      passed: targetRemaining === 0,
+      detail:
+        targetRemaining === 0
+          ? `a violação de '${criterion}' não reaparece no trecho reescrito`
+          : `'${criterion}' ainda é detectado ${targetRemaining}× no trecho reescrito`,
+    });
+  }
+
+  // `region_improved`: os findings sobrepondo o trecho não podem AUMENTAR (idealmente caem).
+  const findingsInBefore = before.findings.filter((f) => overlaps(f, originalStart, originalEnd)).length;
+  const findingsInAfter = after.findings.filter((f) => overlaps(f, newStart, newEnd)).length;
+  proofs.push({
+    check: "region_improved",
+    passed: findingsInAfter <= findingsInBefore,
+    detail: `findings no trecho: ${findingsInBefore} → ${findingsInAfter}`,
+  });
 
   const noNewFindings: Proof = {
     check: "no_new_findings",
@@ -157,7 +174,7 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  const proofs = [targetResolved, noNewFindings, numbersPreserved, datesPreserved, noNewJargon];
+  proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon);
 
   // --- SINAL (heurístico, nunca prova) ----------------------------------------
   const signals: VerificationSignal[] = [];

@@ -9,7 +9,7 @@
  * Esta é a versão de desktop (coluna fixa). No mobile o Studio recompõe as mesmas peças
  * em fluxo vertical + bottom sheet.
  */
-import type { Diagnostic, Finding, SplitPoint } from "@/lucid";
+import type { Diagnostic, Finding, Span, SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { AuditOverview } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
@@ -33,7 +33,7 @@ export interface RailProps {
   onApplyAllSafe: () => void;
   onApply: (finding: Finding) => void;
   onSplit: (point: SplitPoint) => void;
-  onApplyRewrite: (proposal: RewriteProposal) => void;
+  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
