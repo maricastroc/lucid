@@ -1,30 +1,67 @@
 /**
  * Tier 3 (fiação da UI) — fonte de propostas de reescrita para a interface.
  *
- * Por enquanto usa o `StubRewriteProposer` (determinístico, por fixtures) — a versão real
- * (LLM atrás de flag) é um incremento seguinte. O importante já está pronto e testado: o
- * **verificador determinístico** (`report/rewrite/verify`), que a UI apresenta separando
- * PROVA de SINAL, sempre com o caveat de que passar não é aprovação (ADR-014).
+ * Dois caminhos, o mesmo verificador determinístico julgando:
+ *   · `stub`  — `StubRewriteProposer` client-side (fixtures do texto-exemplo). Offline, sem
+ *     custo; demonstra o fluxo.
+ *   · Groq    — o proposer REAL roda no SERVIDOR (`/api/rewrite`), porque a chave nunca pode
+ *     ir ao browser. O cliente só faz `fetch` e recebe o `VerifiedRewrite`.
  *
- * As fixtures são casadas pelo texto exato do trecho do finding — logo só disparam no
- * texto-exemplo intacto. Se o autor edita, não há proposta sintética: honesto, é um stub.
+ * A ideia (do usuário): o mesmo juiz determinístico avalia modelos diferentes — o que abre
+ * um benchmark honesto depois. Ver ADR-014/015.
  */
 import type { Finding } from "@/lucid";
-import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
+import { GROQ_MODELS, proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
+
+export interface RewriteModel {
+  providerId: "stub" | "groq";
+  model: string;
+  label: string;
+}
+
+/** Modelos oferecidos no seletor da UI. O stub é o default (offline, demonstração). */
+export const REWRITE_MODELS: readonly RewriteModel[] = [
+  { providerId: "stub", model: "demo", label: "Stub (demonstração, offline)" },
+  { providerId: "groq", model: GROQ_MODELS[0], label: "Groq · Llama 3.3 70B" },
+  { providerId: "groq", model: GROQ_MODELS[1], label: "Groq · Llama 3.1 8B" },
+  { providerId: "groq", model: GROQ_MODELS[2], label: "Groq · GPT-OSS 120B" },
+  { providerId: "groq", model: GROQ_MODELS[3], label: "Groq · GPT-OSS 20B" },
+];
 
 /**
- * Reescrita curada para a frase longa do texto-exemplo: mais curta, na voz ativa onde é
- * seguro, sem o jargão ("supracitadas", "em sede de") — o tipo de proposta que o verificador
- * deve aprovar nas PROVAS. É demonstração do fluxo, não geração real.
+ * Reescrita curada para a frase longa do texto-exemplo (caminho stub): mais curta, voz ativa
+ * onde é seguro, sem o jargão — o tipo de proposta que o verificador deve aprovar nas PROVAS.
  */
 const SAMPLE_FIXTURES: Record<string, string> = {
   [`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo destinado à verificação das condições supracitadas exigidas para a concessão do benefício, e a decisão foi comunicada ao interessado no processo.`]:
     "A comissão competente analisou o documento em procedimento administrativo. O objetivo era verificar as condições exigidas para conceder o benefício. Depois, o órgão comunicou a decisão ao interessado.",
 };
 
-const proposer = new StubRewriteProposer(SAMPLE_FIXTURES, "stub-demo@1");
+const stubProposer = new StubRewriteProposer(SAMPLE_FIXTURES, "stub-demo@1");
 
-/** Gera uma proposta e a verifica num passo. Nunca aplica — a decisão é do autor. */
-export function generateRewrite(text: string, finding: Finding): Promise<VerifiedRewrite> {
-  return proposeAndVerify(text, finding, proposer);
+/**
+ * Gera uma proposta e a verifica num passo. `stub` roda no cliente; Groq roda no servidor.
+ * Nunca aplica — a decisão é do autor. Lança `Error` com mensagem legível em falha de rede.
+ */
+export async function generateRewrite(
+  text: string,
+  finding: Finding,
+  choice: RewriteModel,
+): Promise<VerifiedRewrite> {
+  if (choice.providerId === "stub") {
+    return proposeAndVerify(text, finding, stubProposer);
+  }
+
+  const response = await fetch("/api/rewrite", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, finding, providerId: choice.providerId, model: choice.model }),
+  });
+
+  const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;
+  if (!response.ok || data === null || !("verification" in data)) {
+    const message = (data && "error" in data && data.error) || `falha ao gerar (HTTP ${response.status})`;
+    throw new Error(message);
+  }
+  return data;
 }

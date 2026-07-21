@@ -23,6 +23,11 @@ export async function proposeAndVerify(
 }
 
 export { StubRewriteProposer } from "./proposer";
+export { LlmRewriteProposer, parseRewrite } from "./llm-proposer";
+export { buildRewritePrompt, REWRITE_PROMPT_VERSION } from "./prompt";
+export { GroqProvider, GROQ_MODELS } from "./providers/groq";
+export { ChatProviderError } from "./providers/types";
+export type { ChatProvider, ChatCompletionOptions } from "./providers/types";
 export { applyProposal, verifyRewrite } from "./verify";
 export type { VerifyOptions } from "./verify";
 export type {

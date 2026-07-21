@@ -19,7 +19,7 @@ import {
   detectionHeadline,
   longSentenceGuidance,
 } from "../lib/narrative";
-import { generateRewrite } from "../lib/rewrite";
+import { generateRewrite, REWRITE_MODELS, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
 export interface RevisionNoteProps {
@@ -234,13 +234,22 @@ function GeneratedRewrite({
   source: string;
   onApplyRewrite: (proposal: RewriteProposal) => void;
 }) {
+  const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const run = async () => {
     setLoading(true);
-    setResult(await generateRewrite(source, finding));
-    setLoading(false);
+    setError(null);
+    setResult(null);
+    try {
+      setResult(await generateRewrite(source, finding, choice));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
@@ -259,23 +268,47 @@ function GeneratedRewrite({
         aprovação</span>.
       </p>
 
-      {result === null ? (
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <select
+          aria-label="Modelo gerador"
+          value={`${choice.providerId}:${choice.model}`}
+          onChange={(e) => {
+            const next = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === e.target.value);
+            if (next) setChoice(next);
+          }}
+          className="rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[12.5px] text-ink-1"
+        >
+          {REWRITE_MODELS.map((m) => (
+            <option key={`${m.providerId}:${m.model}`} value={`${m.providerId}:${m.model}`}>
+              {m.label}
+            </option>
+          ))}
+        </select>
         <button
           type="button"
           onClick={run}
           disabled={loading}
-          className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
         >
-          {loading ? "Gerando e verificando…" : "Gerar reescrita e verificar"}
+          {loading ? "Gerando e verificando…" : "Gerar e verificar"}
         </button>
-      ) : !hasProposal ? (
-        <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
-          O proposer sintético (stub) não tem uma reescrita para este trecho. A geração real (LLM, verificada por esta
-          mesma engine) vem num incremento seguinte.
+      </div>
+
+      {error !== null && (
+        <p className="mt-3 rounded-lg border border-human-line bg-human-weak px-3 py-2.5 text-[12px] leading-relaxed text-ink-1">
+          Não deu para gerar: {error}
         </p>
-      ) : (
-        <RewriteResult result={result} onApplyRewrite={onApplyRewrite} />
       )}
+
+      {result !== null &&
+        (hasProposal ? (
+          <RewriteResult result={result} onApplyRewrite={onApplyRewrite} />
+        ) : (
+          <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
+            O modelo não devolveu uma reescrita diferente do trecho — nada a propor. O verificador não fabrica uma; a
+            decisão continua sua.
+          </p>
+        ))}
     </div>
   );
 }
@@ -296,7 +329,12 @@ function RewriteResult({
     <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
       {/* proposta */}
       <div className="border-b border-rule-1 px-3.5 py-3">
-        <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Proposta · gerada</p>
+        <div className="mb-1.5 flex items-baseline justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Proposta · gerada</p>
+          <span className="font-mono text-[10px] text-ink-3" title="modelo + versão do prompt">
+            {proposal.proposerId}
+          </span>
+        </div>
         <p className="font-serif text-[15px] leading-snug text-ink-0">{proposal.proposed}</p>
       </div>
 
