@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createDataView } from "../src/lucid/core/data/registry";
 import { passiveVoicePass } from "../src/lucid/core/passes/passive-voice";
 import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
 import { PASSES } from "../src/lucid/core/passes/registry";
@@ -9,7 +10,7 @@ import type { Config } from "../src/lucid/core/config";
 import type { PassContext } from "../src/lucid/core/types";
 
 function ctxFor(text: string, config: Config = DEFAULT_CONFIG): PassContext {
-  return { doc: buildDocument(text), config, data: {} };
+  return { doc: buildDocument(text), config, data: createDataView([]) };
 }
 
 /** Findings de voz passiva para um texto, via chamada direta ao pass (sem passar por analyze). */
@@ -152,7 +153,7 @@ describe("passiveVoicePass — offsets exatos", () => {
   it("span reconstrói exatamente o trecho via slice do texto original", () => {
     const text = "O texto foi aprovado, mas o outro foi rejeitado.";
     const doc = buildDocument(text);
-    const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(2);
     for (const finding of findings) {
@@ -165,7 +166,7 @@ describe("passiveVoicePass — offsets exatos", () => {
   it("span com agente inclui a frase agentiva até a próxima barreira", () => {
     const text = "Isso foi feito pelo comitê.";
     const doc = buildDocument(text);
-    const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("foi feito pelo comitê.");

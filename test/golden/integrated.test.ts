@@ -19,7 +19,15 @@ import type { Diagnostic, Finding } from "../../src/lucid/core/types";
 import { GOLDEN_INTEGRADO } from "./integrated-golden";
 import type { ExpectedFinding, GoldenCase, IntegratedCriterion } from "./integrated-golden";
 
-const CRITERIA: readonly IntegratedCriterion[] = ["long_sentence", "passive_voice", "nominalization", "jargon"];
+const CRITERIA: readonly IntegratedCriterion[] = [
+  "long_sentence",
+  "passive_voice",
+  "nominalization",
+  "jargon",
+  "mais_que_perfeito_sintetico",
+  "gerundismo",
+  "adverbio_mente_denso",
+];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
   return diagnostic.findings.find(
@@ -105,6 +113,9 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     passive_voice: zero(),
     nominalization: zero(),
     jargon: zero(),
+    mais_que_perfeito_sintetico: zero(),
+    gerundismo: zero(),
+    adverbio_mente_denso: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

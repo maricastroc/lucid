@@ -26,18 +26,16 @@
  * ver docs/DECISOES.md (ADR-006) e src/lucid/data/README.md.
  */
 import type { Finding, Pass, Token } from "../types";
-import serFormsData from "../../data/verbos-ser.pt.json";
-import irregularParticiplesData from "../../data/participios-irregulares.pt.json";
-import ambiguousParticiplesData from "../../data/participios-ambiguos.pt.json";
-import nominalFalsePositivesData from "../../data/participios-falsos-nominais.pt.json";
+import { getPrepared } from "../data/registry";
 
 const CRITERION = "passive_voice";
 const PRINCIPLE = "5.3.3";
 
-const SER_FORMS: ReadonlySet<string> = new Set(serFormsData.forms);
-const IRREGULAR_PARTICIPLES: ReadonlySet<string> = new Set(irregularParticiplesData.forms);
-const AMBIGUOUS_PARTICIPLES: ReadonlySet<string> = new Set(ambiguousParticiplesData.forms);
-const NOMINAL_FALSE_POSITIVES: ReadonlySet<string> = new Set(nominalFalsePositivesData.forms);
+// Dados vêm do registry (fonte única + fingerprint no dataHash). Preparados uma vez lá.
+const SER_FORMS = getPrepared("verbos-ser.pt");
+const IRREGULAR_PARTICIPLES = getPrepared("participios-irregulares.pt");
+const AMBIGUOUS_PARTICIPLES = getPrepared("participios-ambiguos.pt");
+const NOMINAL_FALSE_POSITIVES = getPrepared("participios-falsos-nominais.pt");
 
 /** Conectores permitidos entre auxiliar e particípio (e entre particípio e agente). */
 const CONNECTOR_ADVERBS = new Set(["não", "já", "ainda", "também", "sempre", "nunca", "apenas", "logo"]);

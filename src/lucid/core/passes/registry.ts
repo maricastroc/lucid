@@ -14,5 +14,16 @@ import { sentenceLengthPass } from "./sentence-length";
 import { passiveVoicePass } from "./passive-voice";
 import { nominalizationPass } from "./nominalization";
 import { jargonPass } from "./jargon";
+import { maisQuePerfeitoPass } from "./mais-que-perfeito";
+import { gerundismoPass } from "./gerundismo";
+import { adverbioMenteDensoPass } from "./adverbio-mente-denso";
 
-export const PASSES: readonly Pass[] = [sentenceLengthPass, passiveVoicePass, nominalizationPass, jargonPass];
+export const PASSES: readonly Pass[] = [
+  sentenceLengthPass,
+  passiveVoicePass,
+  nominalizationPass,
+  jargonPass,
+  maisQuePerfeitoPass,
+  gerundismoPass,
+  adverbioMenteDensoPass,
+];

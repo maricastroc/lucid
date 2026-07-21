@@ -20,6 +20,9 @@ describe("analyze — documento vazio", () => {
         { criterion: "passive_voice", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "nominalization", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "jargon", principle: "5.3.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "mais_que_perfeito_sintetico", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "gerundismo", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "adverbio_mente_denso", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
       ],
       totalFindings: 0,
     });
@@ -40,7 +43,7 @@ describe("analyze — documento sem findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(4);
+    expect(diagnostic.score.byCriterion).toHaveLength(7);
     for (const entry of diagnostic.score.byCriterion) {
       expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(entry.densityPer100Words).toBe(0);

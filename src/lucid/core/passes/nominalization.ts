@@ -20,43 +20,22 @@
  * seguro na dúvida.
  */
 import type { Finding, Pass, Token } from "../types";
-import lightVerbFormsData from "../../data/verbos-leves.pt.json";
-import nominalizationsData from "../../data/nominalizacoes.pt.json";
+import type { LightVerbForm, NominalizationEntry } from "../data/types";
+import { getPrepared } from "../data/registry";
 
 const CRITERION = "nominalization";
 const PRINCIPLE = "5.3.3";
 
-interface LightVerbForm {
-  form: string;
-  lemma: string;
-  infinitive: boolean;
-  /** traço morfológico (ex.: "pret.3s"); casa com a tabela `conjugations` (ADR-011) */
-  feature: string;
-  pattern: "direct" | "a";
-}
-
-interface NominalizationEntry {
-  noun: string;
-  verb: string;
-  sourcePreposition: "de" | null;
-  targetPreposition: "de" | null;
-  safeForSuggestion: boolean;
-}
-
-const LIGHT_VERB_FORMS: ReadonlyMap<string, LightVerbForm> = new Map(
-  (lightVerbFormsData.forms as LightVerbForm[]).map((entry) => [entry.form, entry]),
-);
-
-const NOMINALIZATIONS: ReadonlyMap<string, NominalizationEntry> = new Map(
-  (nominalizationsData.entries as NominalizationEntry[]).map((entry) => [entry.noun, entry]),
-);
+// Dados vêm do registry (fonte única + fingerprint no dataHash). Preparados uma vez lá.
+const LIGHT_VERB_FORMS: ReadonlyMap<string, LightVerbForm> = getPrepared("verbos-leves.pt");
+const NOMINALIZATIONS: ReadonlyMap<string, NominalizationEntry> = getPrepared("nominalizacoes.pt").entries;
 
 /**
  * Tabela FECHADA verbo-base → traço morfológico → forma finita (ADR-011). Não é um
  * conjugador: é dado curado, cada forma verificada à mão, só os 8 traços indicativos
  * comuns. `undefined` para qualquer par não cadastrado — nunca gera palpite.
  */
-const CONJUGATIONS = nominalizationsData.conjugations as Record<string, Record<string, string>>;
+const CONJUGATIONS = getPrepared("nominalizacoes.pt").conjugations;
 
 /** Forma verbal a usar na sugestão: infinitivo direto, ou a conjugação do traço; senão nada. */
 function conjugatedVerb(nominalization: NominalizationEntry, verbForm: LightVerbForm): string | undefined {

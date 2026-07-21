@@ -14,6 +14,7 @@
  * passivas esperadas, então o risco de coincidência é baixo.
  */
 import { describe, expect, it } from "vitest";
+import { createDataView } from "../../src/lucid/core/data/registry";
 import { passiveVoicePass } from "../../src/lucid/core/passes/passive-voice";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../../src/lucid/core/document/model";
@@ -32,7 +33,7 @@ interface ResultadoAvaliacao {
 function avaliar(): ResultadoAvaliacao[] {
   return GOLDEN_VOZ_PASSIVA.map((entrada) => {
     const doc = buildDocument(entrada.texto);
-    const actualCount = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: {} }).length;
+    const actualCount = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) }).length;
 
     return {
       texto: entrada.texto,
@@ -95,7 +96,7 @@ describe("avaliação de passiveVoicePass — golden set", () => {
   describe.each(GOLDEN_VOZ_PASSIVA.filter((e) => e.estado === "correto"))("entrada correta: '$texto'", (entrada) => {
     it(`produz exatamente ${entrada.expectedCount} finding(s)`, () => {
       const doc = buildDocument(entrada.texto);
-      const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+      const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
       expect(findings).toHaveLength(entrada.expectedCount);
     });
   });

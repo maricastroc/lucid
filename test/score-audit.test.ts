@@ -25,13 +25,16 @@ const TEXTO_4 =
   "responsável, doravante, antes do prazo final estabelecido no edital publicado.";
 
 describe("score — forma e limites", () => {
-  it("sempre expõe os 4 critérios registrados, mesmo sem findings", () => {
+  it("sempre expõe os critérios registrados, mesmo sem findings", () => {
     const d = analyze("O gato dorme.");
     expect(d.score.byCriterion.map((c) => c.criterion)).toEqual([
       "long_sentence",
       "passive_voice",
       "nominalization",
       "jargon",
+      "mais_que_perfeito_sintetico",
+      "gerundismo",
+      "adverbio_mente_denso",
     ]);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
@@ -131,10 +134,10 @@ describe("score — derivação: métricas vs findings", () => {
 });
 
 describe("score — texto vazio e muito curto", () => {
-  it("texto vazio: 4 critérios zerados, densidade 0 (sem divisão por zero)", () => {
+  it("texto vazio: critérios zerados, densidade 0 (sem divisão por zero)", () => {
     const d = analyze("");
     expect(d.score.totalFindings).toBe(0);
-    expect(d.score.byCriterion).toHaveLength(4);
+    expect(d.score.byCriterion).toHaveLength(7);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);

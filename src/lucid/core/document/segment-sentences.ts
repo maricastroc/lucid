@@ -15,9 +15,10 @@
  * dois campos com dados reais — ver `model.ts` e docs/ARQUITETURA.md §7.
  */
 import type { Sentence } from "../types";
-import abbreviationsData from "../../data/abreviacoes.pt.json";
+import { getPrepared } from "../data/registry";
 
-const ABBREVIATIONS: ReadonlySet<string> = new Set(abbreviationsData.abbreviations);
+// Estágio de documento (fora do pipeline de passes) → lê o preparado direto do registry.
+const ABBREVIATIONS: ReadonlySet<string> = getPrepared("abreviacoes.pt");
 
 /** `.`, `!`, `?`, `…` — pontuação capaz de fechar uma frase. */
 const TERMINAL_MARKS = new Set([".", "!", "?", "…"]);

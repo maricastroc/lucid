@@ -2,7 +2,7 @@
  * Tipos centrais da Camada 1 (linter determinístico).
  * Contrato definido em docs/ARQUITETURA.md §3. Não importar nada de `src/lucid/probe/**`.
  */
-import type { DatasetId } from "./data/registry";
+import type { DatasetId, DataView } from "./data/types";
 
 export type Severity = "info" | "warning" | "error";
 
@@ -61,14 +61,11 @@ export interface Document {
 
 // --- Pass (unidade do pipeline) ----------------------------------------------------
 
-export interface LoadedData {
-  readonly [dataset: string]: unknown;
-}
-
 export interface PassContext {
   readonly doc: Document;
   readonly config: import("./config").Config;
-  readonly data: LoadedData;
+  /** visão escopada de dados do registry — só os `dataDeps` declarados por este pass */
+  readonly data: DataView;
 }
 
 export interface Pass {

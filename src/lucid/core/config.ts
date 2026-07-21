@@ -27,6 +27,17 @@ export interface Config {
     frequencyRankCutoff: number;
     suggestFromGlossary: boolean;
   };
+  maisQuePerfeito: {
+    enabled: boolean;
+  };
+  gerundismo: {
+    enabled: boolean;
+  };
+  adverbioMente: {
+    enabled: boolean;
+    /** mínimo de advérbios em -mente na mesma frase para marcar (densidade) */
+    minPorFrase: number;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -49,6 +60,16 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
     frequencyRankCutoff: 5000,
     suggestFromGlossary: true,
+  },
+  maisQuePerfeito: {
+    enabled: true,
+  },
+  gerundismo: {
+    enabled: true,
+  },
+  adverbioMente: {
+    enabled: true,
+    minPorFrase: 3,
   },
   metrics: {
     decimalPlaces: 1,

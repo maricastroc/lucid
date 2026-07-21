@@ -27,64 +27,20 @@
  * documentado como no-op deliberado em ADR-006.
  */
 import type { Finding, Pass, Token } from "../types";
-import jargonData from "../../data/jargao.pt.json";
+import type { JargonEntry, CompiledEntry, JargonDomain } from "../data/types";
+import { getPrepared } from "../data/registry";
+
+// Reexports para compatibilidade dos consumidores/testes que importavam daqui (o transform e os
+// tipos vivem agora em core/data — seam de `test/determinism.test.ts`, ADR-009/023).
+export { compileJargonEntries } from "../data/prepare";
+export type { JargonEntry, CompiledEntry } from "../data/types";
 
 const CRITERION = "jargon";
 const PRINCIPLE = "5.3.2";
 
-type JargonKind = "word" | "phrase";
-type JargonDomain = "administrative" | "legal" | "general";
-type JargonReason = "polysemous" | "context_dependent" | "institutional" | null;
-
-export interface JargonEntry {
-  term: string;
-  kind: JargonKind;
-  domain: JargonDomain;
-  plain: string | null;
-  safeForSuggestion: boolean;
-  reason: JargonReason;
-}
-
-export interface CompiledEntry {
-  words: readonly string[];
-  entry: JargonEntry;
-}
-
-const ENTRIES: readonly JargonEntry[] = jargonData.entries as JargonEntry[];
-
-/**
- * Agrupa as entradas pela primeira palavra e ordena cada lista por comprimento (nº de
- * tokens) DECRESCENTE — a ordem que implementa "longest-match-first" sem reordenar em
- * runtime a cada busca. A ordenação por comprimento é o que torna o resultado
- * INDEPENDENTE da ordem das entradas no JSON de origem: entradas com a mesma primeira
- * palavra e comprimentos diferentes são sempre tentadas da mais longa para a mais curta,
- * qualquer que seja a ordem de entrada; entradas de mesmo comprimento e mesma primeira
- * palavra que diferem em algum token interno nunca casam a MESMA sequência de tokens, então
- * a ordem relativa entre elas não é observável. Exportada como seam de teste (ver
- * `test/determinism.test.ts`, ADR-009) — NÃO reexportada pelo barrel.
- */
-export function compileJargonEntries(entries: readonly JargonEntry[]): Map<string, CompiledEntry[]> {
-  const map = new Map<string, CompiledEntry[]>();
-
-  for (const entry of entries) {
-    const words = entry.term.split(" ");
-    const list = map.get(words[0]);
-    const compiled: CompiledEntry = { words, entry };
-    if (list) {
-      list.push(compiled);
-    } else {
-      map.set(words[0], [compiled]);
-    }
-  }
-
-  for (const list of map.values()) {
-    list.sort((a, b) => b.words.length - a.words.length);
-  }
-
-  return map;
-}
-
-const BY_FIRST_WORD: ReadonlyMap<string, readonly CompiledEntry[]> = compileJargonEntries(ENTRIES);
+// Dados vêm do registry (fonte única + fingerprint no dataHash). `byFirstWord` já ordenado por
+// comprimento decrescente (longest-match-first) na preparação — ver core/data/prepare.ts.
+const BY_FIRST_WORD: ReadonlyMap<string, readonly CompiledEntry[]> = getPrepared("jargao.pt").byFirstWord;
 
 const RE_UPPERCASE_START = /^\p{Lu}/u;
 

@@ -1182,6 +1182,58 @@ Numeração: o ADR-019 duplicado (Gemini) foi renumerado para ADR-021 nesta sess
 
 ---
 
+## ADR-023 — Data registry incremento 2: preparação memoizada + `ctx.data` escopado
+
+**Contexto.** ADR-022 criou o registry + `dataHash`, mas cada pass ainda importava seu JSON e
+preparava o Set/Map por conta própria; `PassContext.data` seguia ocioso.
+
+**Decisão.** (1) Tipos de dado e transformações movidos para `core/data/types.ts` + `core/data/
+prepare.ts`; o registry PREPARA cada dataset uma vez (memoizado) e é a **única porta de dados**
+(nenhum outro módulo importa JSON de `data/`). (2) `PassContext.data` virou uma `DataView`
+**escopada** aos `dataDeps` do pass (`get` de id não declarado lança) — dependência explícita,
+`dataHash` honesto por construção. (3) `getPrepared(id)` para consumidores fora do pipeline
+(montagem do documento, actions). Passes existentes leem o preparado via `getPrepared` (constantes
+de módulo mantidas); passes NOVOS usam `ctx.data.get` em run-time.
+
+**Consequências.** **Output-neutral** (801 testes byte-idênticos; nenhum snapshot mudou). Testes
+que montavam `PassContext` com `data: {}` passaram a `createDataView([])`. Fundação pronta para os
+detectores morfológicos consumirem dado escopado.
+
+---
+
+## ADR-024 — Fatia vertical: 3 detectores morfológicos sobre PortiLexicon-UD
+
+**Contexto.** Validar o desenho da Camada 1 com valor concreto de ponta a ponta, **sem** construir
+a camada de anotação genérica (readings/certainty/query) antes de um detector precisar dela em
+runtime. Três detectores que justificam morfologia (escolhidos com a usuária).
+
+**Decisão-chave (o que mantém a fatia mínima):** para estes três, a **ambiguidade se resolve em
+build-time**, não em runtime. Não há camada de anotação nova; o runtime são passes de
+membership/padrão, iguais aos existentes.
+- **`mais_que_perfeito_sintetico`** (5.3.3): membership em `mais-que-perfeito.pt` — formas `Tense=Pqp`
+  de `VERB.tsv` do PortiLexicon-UD, **podadas em build-time** de toda forma com outra leitura em
+  qualquer classe (`fora`, `vira`, `foram` saem; irregulares opacos `fizera/dissera/coubera/
+  requerera` ficam). 57.384 formas. É o caso que **prova** a necessidade de léxico (irregulares
+  opacos a regex).
+- **`gerundismo`** (5.3.4): padrão puro `[ir finito] [estar] [gerúndio]` — lista fechada de "ir",
+  "estar" literal, gerúndio por sufixo + stoplist curto. Sem dataset (morfologia como padrão, não
+  como léxico).
+- **`adverbio_mente_denso`** (5.3.4): densidade ≥3 por frase, allowlist `adverbios-mente.pt` (de
+  `ADV.tsv`) para não marcar `semente`/`mente`. 2.403 formas.
+
+**Ingestão.** PortiLexicon-UD (CC-BY 4.0, HF `NILC-ICMC-USP/PortiLexicon-UD`, TSV `forma⇥lema⇥FEATS`
+UD). Só as fatias necessárias foram baixadas em streaming e filtradas em build-time (o `VERB.tsv`
+de 71 MB nunca é bundlado — só o derivado de 850 KB). Atribuição CC-BY em `data/README.md`.
+
+**Consequências.** **820 testes verdes** (19 novos, incl. guardas de precisão: `fora`/`vira` não
+marcam, `estar`+adjetivo não marca, não-advérbio `-mente` não marca, densidade por frase).
+Verificado ao vivo (`requerera/dissera/aprovara`, `vamos estar enviando`, 3× `-mente`). Config +
+score + snapshots atualizados p/ 7 critérios; `dataHash` cobre os 2 datasets novos. **Adiado por
+disciplina:** camada de anotação de runtime (readings/certainty/disambiguation), pruning por
+frequência, e qualquer detector que precise de contexto — nenhum destes três precisa.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

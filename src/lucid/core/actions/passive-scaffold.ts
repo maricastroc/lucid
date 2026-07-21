@@ -13,9 +13,10 @@
  * (zero rede/LLM, coberto pela cerca).
  */
 import type { Finding } from "../types";
-import infinitiveData from "../../data/participios-infinitivo.pt.json";
+import { getPrepared } from "../data/registry";
 
-const PARTICIPLE_TO_INFINITIVE: Readonly<Record<string, string>> = infinitiveData.map;
+// Action (Tier 2, fora do pipeline de analyze) → lê o preparado direto do registry.
+const PARTICIPLE_TO_INFINITIVE: Readonly<Record<string, string>> = getPrepared("participios-infinitivo.pt");
 
 export interface PassiveScaffold {
   /** o agente literal (o sintagma após "pela/pelo…"), que vira o SUJEITO da ativa. */

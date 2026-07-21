@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createDataView } from "../src/lucid/core/data/registry";
 import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 import { buildDocument } from "../src/lucid/core/document/model";
@@ -26,7 +27,7 @@ function buildTestDocument(sentences: Sentence[]): Document {
 }
 
 function buildContext(sentences: Sentence[], config: Config = DEFAULT_CONFIG): PassContext {
-  return { doc: buildTestDocument(sentences), config, data: {} };
+  return { doc: buildTestDocument(sentences), config, data: createDataView([]) };
 }
 
 describe("sentenceLengthPass — abaixo do limite", () => {
@@ -100,7 +101,7 @@ describe("sentenceLengthPass — níveis diferentes de severidade", () => {
 describe("sentenceLengthPass — texto vazio", () => {
   it("documento sem frases não gera nenhum finding", () => {
     const doc = buildDocument("");
-    const findings = sentenceLengthPass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = sentenceLengthPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
     expect(findings).toEqual([]);
   });
 });
@@ -111,7 +112,7 @@ describe("sentenceLengthPass — offsets exatos", () => {
     const doc = buildDocument(source);
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5, errorAbove: 100 } };
 
-    const findings = sentenceLengthPass.run({ doc, config, data: {} });
+    const findings = sentenceLengthPass.run({ doc, config, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     const [finding] = findings;
@@ -143,11 +144,11 @@ describe("sentenceLengthPass — execução repetida byte-idêntica", () => {
       "Esta segunda frase também é bem longa e deve ultrapassar o limite de erro que foi definido para o teste.";
     const doc = buildDocument(source);
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5, errorAbove: 15 } };
-    const ctx: PassContext = { doc, config, data: {} };
+    const ctx: PassContext = { doc, config, data: createDataView([]) };
 
     const r1 = JSON.stringify(sentenceLengthPass.run(ctx));
     const r2 = JSON.stringify(sentenceLengthPass.run(ctx));
-    const r3 = JSON.stringify(sentenceLengthPass.run({ doc: buildDocument(source), config, data: {} }));
+    const r3 = JSON.stringify(sentenceLengthPass.run({ doc: buildDocument(source), config, data: createDataView([]) }));
 
     expect(r2).toBe(r1);
     expect(r3).toBe(r1);
@@ -166,7 +167,7 @@ describe("sentenceLengthPass — regressão: frases unidas pela política conser
 
     expect(doc.sentences).toHaveLength(1); // confirma a união (comportamento já documentado)
 
-    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: {} });
+    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe(source); // a frase unida inteira, sem split
@@ -179,7 +180,7 @@ describe("sentenceLengthPass — regressão: frases unidas pela política conser
 
     expect(doc.sentences).toHaveLength(1);
 
-    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: {} });
+    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe(source);

@@ -12,6 +12,7 @@
  * acerto — só são medidas e reportadas.
  */
 import { describe, expect, it } from "vitest";
+import { createDataView } from "../../src/lucid/core/data/registry";
 import { nominalizationPass } from "../../src/lucid/core/passes/nominalization";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../../src/lucid/core/document/model";
@@ -35,7 +36,7 @@ interface ResultadoAvaliacao {
 function avaliar(): ResultadoAvaliacao[] {
   return GOLDEN_NOMINALIZACAO.map((entrada) => {
     const doc = buildDocument(entrada.texto);
-    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
     const actualCount = findings.length;
     const actualSuggestion = actualCount === 1 ? findings[0].suggestion : undefined;
 
@@ -128,7 +129,7 @@ describe("avaliação de nominalizationPass — golden set", () => {
   describe.each(GOLDEN_NOMINALIZACAO.filter((e) => e.estado === "correto"))("entrada correta: '$texto'", (entrada) => {
     it(`produz exatamente ${entrada.expectedCount} finding(s) e sugestão consistente`, () => {
       const doc = buildDocument(entrada.texto);
-      const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: {} });
+      const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
       expect(findings).toHaveLength(entrada.expectedCount);
 
       if (entrada.expectedCount === 1 && entrada.expectSuggestion !== undefined) {

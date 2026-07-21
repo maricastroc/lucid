@@ -1,20 +1,24 @@
 /**
  * Data registry — dado como ENTRADA VERSIONADA de primeira classe (docs/DESIGN-data-registry.md).
  *
- * Hoje cada consumidor da Camada 1 importa seu JSON direto e mudar um léxico NÃO mexe no
- * `configHash` (só o golden pega). Este registry é a fonte única de PROVENIÊNCIA dos dados:
- * carrega cada dataset uma vez (import de compilação — zero I/O de runtime, I1/I4), calcula um
- * `fingerprint` estável do conteúdo, e permite ao `analyze` estampar um `dataHash` no
- * `Diagnostic` — fechando a lacuna de governança.
+ * Fonte única de dados da Camada 1: importa cada dataset uma vez (import de compilação — zero I/O
+ * de runtime, I1/I4), PREPARA a estrutura pronta (Set/Map) uma vez (memoização), e calcula um
+ * `fingerprint` estável do conteúdo. O `analyze` estampa um `dataHash` no `Diagnostic`
+ * (proveniência) — fechando a lacuna de governança (mudar léxico não mexia no `configHash`).
  *
- * INCREMENTO 1 (este arquivo): registry + fingerprints + `dataHash`. Os passes ainda importam
- * seus dados direto (saída idêntica exceto o novo `meta.dataHash`); a preparação (Set/Map) e o
- * roteamento por `ctx.data` migram no incremento 2 (output-neutral). Ver ADR na DECISOES.md.
+ * Dois acessos ao preparado:
+ *   · `getPrepared(id)` — direto (sem escopo), para consumidores FORA do pipeline de passes:
+ *     montagem do documento (`segment-sentences`) e actions. Também usado por passes que mantêm
+ *     constantes de módulo.
+ *   · `createDataView(allowed)` → `PassContext.data` — visão ESCOPADA (só os `dataDeps`
+ *     declarados), para passes NOVOS que consomem dado em run-time (ex.: anotação morfológica).
  *
- * Fronteira: vive em `core`; não importa `probe`/`report`/rede. `fingerprint` via `stableHash`
- * — o MESMO algoritmo do `configHash`.
+ * Fronteira: vive em `core`; não importa `probe`/`report`/rede/passe. `fingerprint` via
+ * `stableHash` — o MESMO algoritmo do `configHash`.
  */
 import { stableHash } from "../hash";
+import type { DataTypes, DatasetId, DataView } from "./types";
+import { prepareJargon, prepareLightVerbs, prepareNominalizations, prepareRecord, prepareStringSet } from "./prepare";
 import abreviacoesData from "../../data/abreviacoes.pt.json";
 import verbosSerData from "../../data/verbos-ser.pt.json";
 import participiosIrregularesData from "../../data/participios-irregulares.pt.json";
@@ -24,51 +28,97 @@ import participiosInfinitivoData from "../../data/participios-infinitivo.pt.json
 import verbosLevesData from "../../data/verbos-leves.pt.json";
 import nominalizacoesData from "../../data/nominalizacoes.pt.json";
 import jargaoData from "../../data/jargao.pt.json";
+import maisQuePerfeitoData from "../../data/mais-que-perfeito.pt.json";
+import adverbiosMenteData from "../../data/adverbios-mente.pt.json";
 
-/** União fechada dos ids de dataset conhecidos. Trocar id é evento de código, auditável. */
-export type DatasetId =
-  | "abreviacoes.pt"
-  | "verbos-ser.pt"
-  | "participios-irregulares.pt"
-  | "participios-ambiguos.pt"
-  | "participios-falsos-nominais.pt"
-  | "participios-infinitivo.pt"
-  | "verbos-leves.pt"
-  | "nominalizacoes.pt"
-  | "jargao.pt";
+export type { DatasetId } from "./types";
 
 export interface DatasetRecord {
   readonly id: DatasetId;
   /** conteúdo cru importado (fonte da verdade do fingerprint) */
   readonly raw: unknown;
+  /** estrutura pronta (Set/Map), construída UMA vez */
+  readonly prepared: unknown;
   /** hash estável do conteúdo — muda quando o JSON muda (governança automática) */
   readonly fingerprint: string;
   /** 1 linha de proveniência espelhando o README (auditabilidade inline) */
   readonly provenance: string;
 }
 
-const RAW: Record<DatasetId, { raw: unknown; provenance: string }> = {
-  "abreviacoes.pt": { raw: abreviacoesData, provenance: "abreviações PT-BR que não encerram frase (curadoria própria)" },
-  "verbos-ser.pt": { raw: verbosSerData, provenance: "paradigma completo de 'ser' — âncora da voz passiva (curadoria própria)" },
-  "participios-irregulares.pt": { raw: participiosIrregularesData, provenance: "particípios irregulares (curadoria própria)" },
-  "participios-ambiguos.pt": { raw: participiosAmbiguosData, provenance: "particípios de leitura adjetival/predicativa a excluir (curadoria própria)" },
-  "participios-falsos-nominais.pt": { raw: participiosFalsosNominaisData, provenance: "particípios lexicalizados como substantivo a excluir (curadoria própria)" },
-  "participios-infinitivo.pt": { raw: participiosInfinitivoData, provenance: "particípio→infinitivo do andaime de passiva (Tier 2; curadoria própria)" },
-  "verbos-leves.pt": { raw: verbosLevesData, provenance: "verbos-suporte da nominalização (curadoria própria)" },
-  "nominalizacoes.pt": { raw: nominalizacoesData, provenance: "nominalização→verbo + conjugação fechada (curadoria própria)" },
-  "jargao.pt": { raw: jargaoData, provenance: "glossário curado de jargão administrativo-jurídico (ADR-008)" },
+interface RawSpec {
+  raw: unknown;
+  prepare: (raw: unknown) => unknown;
+  provenance: string;
+}
+
+const SPECS: Record<DatasetId, RawSpec> = {
+  "abreviacoes.pt": {
+    raw: abreviacoesData,
+    prepare: (r) => prepareStringSet(r, "abbreviations"),
+    provenance: "abreviações PT-BR que não encerram frase (curadoria própria)",
+  },
+  "verbos-ser.pt": {
+    raw: verbosSerData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "paradigma completo de 'ser' — âncora da voz passiva (curadoria própria)",
+  },
+  "participios-irregulares.pt": {
+    raw: participiosIrregularesData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "particípios irregulares (curadoria própria)",
+  },
+  "participios-ambiguos.pt": {
+    raw: participiosAmbiguosData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "particípios de leitura adjetival/predicativa a excluir (curadoria própria)",
+  },
+  "participios-falsos-nominais.pt": {
+    raw: participiosFalsosNominaisData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "particípios lexicalizados como substantivo a excluir (curadoria própria)",
+  },
+  "participios-infinitivo.pt": {
+    raw: participiosInfinitivoData,
+    prepare: prepareRecord,
+    provenance: "particípio→infinitivo do andaime de passiva (Tier 2; curadoria própria)",
+  },
+  "verbos-leves.pt": {
+    raw: verbosLevesData,
+    prepare: prepareLightVerbs,
+    provenance: "verbos-suporte da nominalização (curadoria própria)",
+  },
+  "nominalizacoes.pt": {
+    raw: nominalizacoesData,
+    prepare: prepareNominalizations,
+    provenance: "nominalização→verbo + conjugação fechada (curadoria própria)",
+  },
+  "jargao.pt": {
+    raw: jargaoData,
+    prepare: prepareJargon,
+    provenance: "glossário curado de jargão administrativo-jurídico (ADR-008)",
+  },
+  "mais-que-perfeito.pt": {
+    raw: maisQuePerfeitoData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "mais-que-perfeito sintético inequívoco — derivado de PortiLexicon-UD (CC-BY 4.0)",
+  },
+  "adverbios-mente.pt": {
+    raw: adverbiosMenteData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0)",
+  },
 };
 
 /**
- * Registro construído UMA vez no load, congelado. `fingerprint` calculado em memória a partir do
- * `raw` — sem I/O de runtime. Datasets curados usam hash de conteúdo (estratégia "content"); o
- * futuro léxico morfológico grande usará versão pinada (ver DESIGN-data-registry.md §2.3).
+ * Registro construído UMA vez no load, congelado. `fingerprint` do `raw` (estratégia "content"
+ * para datasets curados); `prepared` memoizado. Sem I/O de runtime. O futuro léxico morfológico
+ * grande usará versão pinada (ver DESIGN-data-registry.md §2.3).
  */
 export const REGISTRY: Readonly<Record<DatasetId, DatasetRecord>> = Object.freeze(
   Object.fromEntries(
-    (Object.keys(RAW) as DatasetId[]).map((id) => {
-      const { raw, provenance } = RAW[id];
-      return [id, Object.freeze({ id, raw, fingerprint: stableHash(raw), provenance })];
+    (Object.keys(SPECS) as DatasetId[]).map((id) => {
+      const { raw, prepare, provenance } = SPECS[id];
+      return [id, Object.freeze({ id, raw, prepared: prepare(raw), fingerprint: stableHash(raw), provenance })];
     }),
   ) as Record<DatasetId, DatasetRecord>,
 );
@@ -80,9 +130,30 @@ export const REGISTRY: Readonly<Record<DatasetId, DatasetRecord>> = Object.freez
  */
 export const DOCUMENT_DATASETS: readonly DatasetId[] = ["abreviacoes.pt"];
 
+/** Estrutura preparada (memoizada) de um dataset, tipada. Acesso direto, sem escopo. */
+export function getPrepared<K extends DatasetId>(id: K): DataTypes[K] {
+  return REGISTRY[id].prepared as DataTypes[K];
+}
+
 /** Fingerprint de um dataset. */
 export function datasetFingerprint(id: DatasetId): string {
   return REGISTRY[id].fingerprint;
+}
+
+/**
+ * Visão ESCOPADA para `PassContext.data`: só os ids declarados em `dataDeps`. `get` de um id não
+ * declarado lança — impede dependência oculta e mantém o `dataHash` honesto por construção.
+ */
+export function createDataView(allowed: readonly DatasetId[]): DataView {
+  const allowedSet = new Set(allowed);
+  return {
+    get<K extends DatasetId>(id: K): DataTypes[K] {
+      if (!allowedSet.has(id)) {
+        throw new Error(`data.get("${id}") não declarado em dataDeps deste pass`);
+      }
+      return getPrepared(id);
+    },
+  };
 }
 
 /**

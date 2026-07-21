@@ -16,7 +16,14 @@
  * `end` é exclusivo. `Diagnostic.text.slice(start, end) === span.text` é invariante testado.
  */
 
-export type IntegratedCriterion = "long_sentence" | "passive_voice" | "nominalization" | "jargon";
+export type IntegratedCriterion =
+  | "long_sentence"
+  | "passive_voice"
+  | "nominalization"
+  | "jargon"
+  | "mais_que_perfeito_sintetico"
+  | "gerundismo"
+  | "adverbio_mente_denso";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;
