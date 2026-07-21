@@ -1,0 +1,38 @@
+/**
+ * Trava anti-drift entre o conjunto CANÔNICO de critérios (`CRITERION_IDS`), os passes
+ * realmente registrados (`PASSES`), e a apresentação editorial da UI (`CRITERION_META` /
+ * `CRITERION_ORDER`) — ADR-029.
+ *
+ * Objetivo: adicionar um pass no engine e esquecer de registrá-lo/apresentá-lo em algum dos
+ * três lugares deve FALHAR (aqui ou no typecheck), nunca cair em silêncio no meta de outro
+ * critério.
+ */
+import { describe, expect, it } from "vitest";
+import { CRITERION_IDS } from "../src/lucid";
+import { PASSES } from "../src/lucid/core/passes/registry";
+import { CRITERION_META, CRITERION_ORDER } from "../src/app/lib/criteria";
+
+function sorted(values: readonly string[]): string[] {
+  return [...values].sort();
+}
+
+describe("registro de critérios (ADR-029)", () => {
+  it("CRITERION_IDS não tem duplicatas", () => {
+    expect(sorted(CRITERION_IDS)).toEqual(sorted([...new Set(CRITERION_IDS)]));
+  });
+
+  it("PASSES e CRITERION_IDS descrevem EXATAMENTE o mesmo conjunto", () => {
+    const dosPasses = sorted(PASSES.map((p) => p.criterion));
+    // sem duplicatas entre passes (cada critério tem um pass)
+    expect(dosPasses).toEqual(sorted([...new Set(dosPasses)]));
+    expect(dosPasses).toEqual(sorted(CRITERION_IDS));
+  });
+
+  it("CRITERION_META cobre exatamente os CRITERION_IDS (completude da apresentação)", () => {
+    expect(sorted(Object.keys(CRITERION_META))).toEqual(sorted(CRITERION_IDS));
+  });
+
+  it("CRITERION_ORDER é uma permutação de CRITERION_IDS (todo critério é ordenado, sem sobra)", () => {
+    expect(sorted(CRITERION_ORDER)).toEqual(sorted(CRITERION_IDS));
+  });
+});

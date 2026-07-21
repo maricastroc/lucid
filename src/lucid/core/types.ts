@@ -3,6 +3,7 @@
  * Contrato definido em docs/ARQUITETURA.md §3. Não importar nada de `src/lucid/probe/**`.
  */
 import type { DatasetId, DataView } from "./data/types";
+import type { CriterionId } from "./criteria";
 
 export type Severity = "info" | "warning" | "error";
 
@@ -91,7 +92,7 @@ export interface PassContext {
 }
 
 export interface Pass {
-  readonly criterion: string;
+  readonly criterion: CriterionId;
   readonly category: Category;
   /** subseção-âncora do pass; um finding individual pode refinar via `principle` próprio */
   readonly principle: string;
