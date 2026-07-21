@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * SONDA DE COMPREENSÃO — o painel da Camada 2, opt-in e SEMPRE honesto.
- *
- * Regra inegociável (I5 / CLAUDE.md): a sonda NUNCA emite check verde. O melhor caso é "neutro"
- * = ausência de uma falha de piso, jamais prova de compreensão. Um `flag` mostra ONDE o leitor de
- * piso travou. É teste NEGATIVO, não selo. Camada 2 (LLM) → não determinística, por isso vive
- * num painel à parte, com o caveat sempre visível.
- */
 import { useState } from "react";
 import type { OperacaoLeitura, ProbeResult, ProbeSignal } from "@/lucid/probe/types";
 
@@ -65,7 +57,7 @@ export function ProbePanel({ text }: { text: string }) {
     <section className="border-t border-rule-1 px-6 py-5">
       <div className="flex items-baseline justify-between">
         <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">Sonda de compreensão</h3>
-        <span className="text-[10.5px] uppercase tracking-[0.1em] text-ink-3">Camada 2 · opt-in</span>
+        <span className="text-[10.5px] uppercase tracking-widest text-ink-3">Camada 2 · opt-in</span>
       </div>
 
       <p className="mt-2 text-[12px] leading-relaxed text-ink-3">
@@ -150,7 +142,7 @@ function Operacoes({ operacoes }: { operacoes: readonly OperacaoLeitura[] }) {
   if (operacoes.length === 0) return null;
   return (
     <div className="mt-3">
-      <p className="text-[11px] uppercase tracking-[0.1em] text-ink-3">Carga de leitura</p>
+      <p className="text-[11px] uppercase tracking-widest text-ink-3">Carga de leitura</p>
       <ul className="mt-1.5 space-y-1">
         {operacoes.map((op) => (
           <li key={op} className="text-[12px] text-ink-2">

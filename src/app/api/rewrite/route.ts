@@ -1,12 +1,3 @@
-/**
- * Tier 3 · rota server-side da reescrita (ADR-015/016).
- *
- * A chamada de LLM roda AQUI, nunca no browser — a `GROQ_API_KEY` fica no servidor e jamais
- * é devolvida ao cliente. Recebe o texto inteiro (contexto) + o ALVO (um `Span`: a frase de um
- * finding ou um parágrafo) + o modelo, roda `proposeAndVerify` (o proposer real + o
- * verificador determinístico + a sonda de compreensão como guard de sentido) e devolve o
- * `VerifiedRewrite`. A proposta chega julgada, nunca como selo verde.
- */
 import { NextResponse } from "next/server";
 import type { Span } from "@/lucid";
 import { ChatProviderError, GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS } from "@/llm";
@@ -18,7 +9,6 @@ export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 20_000;
 
-/** Pergunta de piso genérica para o teste NEGATIVO de sentido (a camada de app não tem uma específica). */
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
 
 interface RewriteRequestBody {
@@ -29,7 +19,6 @@ interface RewriteRequestBody {
   model?: unknown;
 }
 
-/** Valida o `Span`-alvo sem confiar no cliente: offsets dentro do texto e não-vazio. */
 function isValidSpan(value: unknown, textLength: number): value is Span {
   if (typeof value !== "object" || value === null) return false;
   const s = value as Record<string, unknown>;
@@ -37,7 +26,6 @@ function isValidSpan(value: unknown, textLength: number): value is Span {
   return s.start >= 0 && s.end <= textLength && s.start < s.end;
 }
 
-/** Monta o proposer server-side para o provedor pedido, lendo a chave do ambiente. */
 function buildProposer(providerId: string, model: string): RewriteProposer | { error: string; status: number } {
   if (providerId === "groq") {
     const apiKey = process.env.GROQ_API_KEY;
@@ -58,11 +46,6 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
-/**
- * Sonda de sentido (leitor de piso). Usa um modelo PEQUENO e barato — só precisa ler
- * literalmente, não gerar. Prefere Groq (mais barato); cai para Gemini flash se só houver
- * essa chave. Sem chave nenhuma, o SINAL de sentido fica omitido (nunca inventado).
- */
 function buildProbe(): ComprehensionProbe | null {
   if (process.env.GROQ_API_KEY) {
     return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.1-8b-instant");

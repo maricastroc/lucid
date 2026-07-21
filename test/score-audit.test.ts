@@ -1,17 +1,3 @@
-/**
- * Auditoria do SCORE (docs/ARQUITETURA.md §7 passo 7, §3.4). Confirma, sem redesenhar a
- * fórmula, que `Score` é:
- *   - derivado só de dados determinísticos (findings + registry + wordCount + config);
- *   - independente da ordem dos findings;
- *   - sem contagem dupla;
- *   - respeitoso a critérios desabilitados (o critério continua no placar, zerado);
- *   - estável com a mesma entrada;
- *   - com limites válidos (contagens ≥ 0, densidade ≥ 0);
- *   - sem vocabulário de aprovação/certificação;
- *   - correto em texto vazio e muito curto.
- *
- * O placar mede, não aprova — nenhuma nota global, nenhum "ok".
- */
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid/core/analyzer";
 import { buildScore } from "../src/lucid/core/score";
@@ -119,10 +105,9 @@ describe("score — derivação: métricas vs findings", () => {
     const comErro = analyze(TEXTO_4, { sentenceLength: { warnAbove: 5, errorAbove: 10 } });
     const longoBase = base.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
     const longoErro = comErro.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
-    // com limiar de erro em 10, a frase (23 palavras) vira 'error' em vez de 'warning'
     expect(longoBase.count).toEqual({ info: 0, warning: 1, error: 0 });
     expect(longoErro.count).toEqual({ info: 0, warning: 0, error: 1 });
-    // jargão/passiva/nominalização inalterados
+
     for (const criterion of ["passive_voice", "nominalization", "jargon"] as const) {
       const a = base.score.byCriterion.find((c) => c.criterion === criterion)!;
       const b = comErro.score.byCriterion.find((c) => c.criterion === criterion)!;
@@ -131,10 +116,9 @@ describe("score — derivação: métricas vs findings", () => {
   });
 
   it("densidade é findings-por-100-palavras, derivada de words das métricas", () => {
-    const d = analyze("O documento supracitado vale."); // 1 jargon, 4 palavras
+    const d = analyze("O documento supracitado vale.");
     const jargon = d.score.byCriterion.find((c) => c.criterion === "jargon")!;
     expect(jargon.count.warning).toBe(1);
-    // 1 finding / 4 palavras * 100 = 25.0, arredondado a 1 casa
     expect(jargon.densityPer100Words).toBe(25);
   });
 });

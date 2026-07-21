@@ -1,50 +1,17 @@
-/**
- * Pass "jargão / termo administrativo-jurídico pouco familiar" (docs/ARQUITETURA.md §6.4,
- * CLAUDE.md critério 4 do MVP) — `5.3.2` (palavras familiares).
- *
- * AUTORIDADE DE RUNTIME É EXCLUSIVAMENTE O GLOSSÁRIO CURADO (`jargao.pt.json`) — ver
- * ADR-008 em docs/DECISOES.md para o porquê. Nenhuma inferência de raridade por
- * frequência, nenhum stemming, nenhuma flexão automática: cada forma cadastrada é uma
- * entrada explícita, mesmo espírito de `verbos-leves.pt.json`/`nominalizacoes.pt.json`.
- *
- * MATCHER LOCAL POR TOKENS, LONGEST-MATCH-FIRST, SEM PARSER. Entradas são agrupadas por
- * primeira palavra e ordenadas por comprimento decrescente; no primeiro token de uma
- * frase candidata, tenta a entrada mais longa primeiro. Contiguidade estrita (token a
- * token, `isWord && lower === esperado`) é a única regra de "barreira" necessária —
- * qualquer pontuação ou palavra diferente no meio já quebra o match, sem precisar de
- * lista própria de conjunções/pontuação proibida (diferente de `passive-voice.ts`, que
- * lida com uma janela variável). Ao aceitar um match, o cursor pula para o token
- * seguinte ao fim do match — garante zero sobreposição por construção.
- *
- * Detecção e sugestão são decisões separadas (mesmo princípio de `nominalization.ts`).
- * Todo match aceito vira `Finding`; `suggestion` só aparece quando a entrada declara
- * `safeForSuggestion: true` E `config.jargon.suggestFromGlossary` está ligado E nenhuma
- * guarda de contexto suprimiu o match (nesse caso o match inteiro já não vira finding).
- *
- * `config.jargon.frequencyRankCutoff` existe na `Config` mas NÃO é consultado por este
- * pass — frequência lexical é ferramenta de curadoria offline, nunca autoridade de
- * runtime (ADR-008); mesmo padrão de `Config.passiveVoice.treatEstarAsPassive`
- * documentado como no-op deliberado em ADR-006.
- */
 import type { Finding, Pass, Token } from "../types";
 import type { JargonEntry, CompiledEntry, JargonDomain } from "../data/types";
 import { getPrepared } from "../data/registry";
 
-// Reexports para compatibilidade dos consumidores/testes que importavam daqui (o transform e os
-// tipos vivem agora em core/data — seam de `test/determinism.test.ts`, ADR-009/023).
 export { compileJargonEntries } from "../data/prepare";
 export type { JargonEntry, CompiledEntry } from "../data/types";
 
 const CRITERION = "jargon";
 const PRINCIPLE = "5.3.2";
 
-// Dados vêm do registry (fonte única + fingerprint no dataHash). `byFirstWord` já ordenado por
-// comprimento decrescente (longest-match-first) na preparação — ver core/data/prepare.ts.
 const BY_FIRST_WORD: ReadonlyMap<string, readonly CompiledEntry[]> = getPrepared("jargao.pt").byFirstWord;
 
 const RE_UPPERCASE_START = /^\p{Lu}/u;
 
-/** Pares de aspas reconhecidos: caractere de abertura -> caractere de fechamento esperado. */
 const QUOTE_OPENERS = new Set(['"', "“", "«"]);
 
 function matchingCloser(opener: string, candidate: string): boolean {
@@ -54,13 +21,6 @@ function matchingCloser(opener: string, candidate: string): boolean {
   return false;
 }
 
-/**
- * Encontra, dentro de uma frase, pares de aspas fechados (abre-fecha sem aninhamento).
- * Só reconhece os 3 pares acima; qualquer abertura sem fechamento correspondente na
- * mesma frase não gera par (limitação documentada — ver `src/lucid/data/README.md`).
- * Aspas simples retas (`'`) não são tratadas aqui: colidiriam com o apóstrofo de
- * elisão já absorvido dentro da palavra por `tokenize.ts`.
- */
 function computeQuoteRanges(tokens: readonly Token[]): Array<readonly [number, number]> {
   const ranges: Array<readonly [number, number]> = [];
   let openIndex: number | null = null;
@@ -83,8 +43,6 @@ function computeQuoteRanges(tokens: readonly Token[]): Array<readonly [number, n
       openIndex = null;
       openChar = null;
     }
-    // qualquer outra pontuação enquanto uma aspa está aberta é ignorada — sem suporte a
-    // aninhamento; um abridor sem fechador correspondente na frase não vira par.
   }
 
   return ranges;
@@ -94,18 +52,11 @@ function overlapsQuotes(ranges: readonly (readonly [number, number])[], start: n
   return ranges.some(([open, close]) => start <= close && end >= open);
 }
 
-/**
- * true se o token, EM MEIO À FRASE (não a primeira palavra), começa com maiúscula —
- * heurística conservadora de "provável nome próprio/institucional": suprime o match por
- * padrão em vez de afirmar que identificou um nome. Só se aplica a unigramas — uma
- * expressão multipalavra cadastrada não é suprimida por maiúscula interna, já que
- * nenhuma entrada atual espera capitalização própria (ver README).
- */
 function looksLikeProperNoun(token: Token, tokens: readonly Token[], index: number): boolean {
   if (!RE_UPPERCASE_START.test(token.text)) return false;
 
   for (let i = 0; i < index; i++) {
-    if (tokens[i].isWord) return true; // já existe palavra antes -> não é início de frase
+    if (tokens[i].isWord) return true;
   }
   return false;
 }

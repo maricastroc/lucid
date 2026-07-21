@@ -1,11 +1,3 @@
-/**
- * Config da Camada 1. Contrato: docs/ARQUITETURA.md §4.
- *
- * Regra de ouro: só entram campos que afetam a saída determinística de `analyze`.
- * Cada campo participa do `configHash` em `DiagnosticMeta`. Trocar um default é um
- * evento de versão (quebra snapshots de propósito). Flags de apresentação não moram
- * aqui — essas ficam na CLI/`report`.
- */
 import { stableHash } from "./hash";
 
 export interface Config {
@@ -15,7 +7,6 @@ export interface Config {
   };
   passiveVoice: {
     enabled: boolean;
-    /** default false — `estar` + particípio é frequentemente resultativo/adjetival */
     treatEstarAsPassive: boolean;
   };
   nominalization: {
@@ -35,7 +26,6 @@ export interface Config {
   };
   adverbioMente: {
     enabled: boolean;
-    /** mínimo de advérbios em -mente na mesma frase para marcar (densidade) */
     minPorFrase: number;
   };
   redundancia: {
@@ -46,12 +36,10 @@ export interface Config {
   };
   paragraphLength: {
     enabled: boolean;
-    /** marca o parágrafo acima deste número de frases */
     maxSentences: number;
   };
   proseEnumeration: {
     enabled: boolean;
-    /** mínimo de ordinais distintos (a partir de "primeiro") para marcar */
     minMarkers: number;
   };
   mesoclise: {
@@ -118,11 +106,6 @@ export const DEFAULT_CONFIG: Config = {
   },
 };
 
-/**
- * Hash estável (determinístico) da Config efetiva, usado em `DiagnosticMeta.configHash`.
- * Reusa o `stableHash` compartilhado (`./hash`) — mesmo algoritmo do `dataHash` do registry.
- * Os passes não dependem do algoritmo exato, só de que a mesma Config produza sempre o mesmo hash.
- */
 export function hashConfig(config: Config): string {
   return stableHash(config);
 }

@@ -101,14 +101,14 @@
     --sev-info: #948e82;
     --sev-warn: #d9a94f;
     --sev-error: #e08a72;
-    --safe: #5fca94;
-    --safe-weak: rgb(95 202 148 / 0.14);
-    --safe-line: rgb(95 202 148 / 0.32);
-    --safe-strong: #57c089;
+    --safe: #74b394;
+    --safe-weak: rgb(116 179 148 / 0.14);
+    --safe-line: rgb(116 179 148 / 0.32);
+    --safe-strong: #6aa888;
     --on-safe: #0e2018;
-    --human: #a6adef;
-    --human-weak: rgb(166 173 239 / 0.13);
-    --human-line: rgb(166 173 239 / 0.3);
+    --human: #9a9fd6;
+    --human-weak: rgb(154 159 214 / 0.13);
+    --human-line: rgb(154 159 214 / 0.3);
     --mark-passage: rgb(217 169 79 / 0.12);
     --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
     --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
@@ -177,14 +177,14 @@
   --sev-info: #948e82;
   --sev-warn: #d9a94f;
   --sev-error: #e08a72;
-  --safe: #5fca94;
-  --safe-weak: rgb(95 202 148 / 0.14);
-  --safe-line: rgb(95 202 148 / 0.32);
-  --safe-strong: #57c089;
+  --safe: #74b394;
+  --safe-weak: rgb(116 179 148 / 0.14);
+  --safe-line: rgb(116 179 148 / 0.32);
+  --safe-strong: #6aa888;
   --on-safe: #0e2018;
-  --human: #a6adef;
-  --human-weak: rgb(166 173 239 / 0.13);
-  --human-line: rgb(166 173 239 / 0.3);
+  --human: #9a9fd6;
+  --human-weak: rgb(154 159 214 / 0.13);
+  --human-line: rgb(154 159 214 / 0.3);
   --mark-passage: rgb(217 169 79 / 0.12);
   --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
   --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
@@ -257,6 +257,12 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* O editor é uma superfície ampla, já emoldurada pela folha; o cursor (na cor de
+   marca) indica o foco. Um anel de 2px em volta de toda a coluna pesa — dispensável. */
+textarea.prose-doc:focus-visible {
+  outline: none;
 }
 
 /* Scrollbars discretas */

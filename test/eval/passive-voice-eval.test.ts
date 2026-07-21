@@ -1,18 +1,3 @@
-/**
- * Avaliação de `passiveVoicePass` contra o golden set de `passive-voice-golden.ts` —
- * separado dos testes unitários de propósito (mesmo padrão de `silabas-eval.test.ts`).
- *
- * Regra de honestidade: entradas `limitacao_conhecida` NUNCA viram `expect(...).toBe`
- * de acerto — são só medidas e reportadas. Se o pass um dia passar a acertá-las, o
- * teste não quebra, só reporta uma taxa melhor. Só entradas `correto` viram asserção
- * dura (se falharem, é regressão real).
- *
- * Contagem de TP/FP/FN por exemplo (não por span individual): TP = min(atual,
- * esperado); FP = max(0, atual-esperado); FN = max(0, esperado-atual). Suficiente na
- * escala deste golden set — não valida QUAL construção específica foi capturada
- * quando as contagens batem por coincidência, mas todo exemplo tem no máximo 2
- * passivas esperadas, então o risco de coincidência é baixo.
- */
 import { describe, expect, it } from "vitest";
 import { createDataView } from "../../src/lucid/core/data/registry";
 import { passiveVoicePass } from "../../src/lucid/core/passes/passive-voice";
@@ -100,7 +85,4 @@ describe("avaliação de passiveVoicePass — golden set", () => {
       expect(findings).toHaveLength(entrada.expectedCount);
     });
   });
-
-  // Entradas "limitacao_conhecida" são deliberadamente NÃO verificadas com toHaveLength
-  // aqui — ver cabeçalho do arquivo. Ficam só no relatório acima.
 });

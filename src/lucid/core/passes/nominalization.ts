@@ -1,24 +1,3 @@
-/**
- * Pass "nominalização por construção com verbo leve" (docs/ARQUITETURA.md §6, critério 3
- * · CLAUDE.md, critério 3 do MVP) — âncora em `5.3.3` (frases claras); o critério
- * também se relaciona a `5.3.4` (frases concisas — "fazer a análise de" é mais longo
- * que "analisar"), mas `Finding.principle` é um campo único, então `5.3.3` é o
- * princípio reportado (ver docs/DECISOES.md, ADR-007).
- *
- * MATCHER LOCAL POR TOKENS, ADJACÊNCIA ESTRITA, SEM PARSER (ADR-007). Duas evidências
- * locais obrigatórias: uma forma cadastrada de verbo leve (`verbos-leves.pt.json`) e
- * uma nominalização cadastrada (`nominalizacoes.pt.json`) — nunca "qualquer palavra
- * terminada em -ção/-mento". As duas precisam estar a exatamente 3 tokens de distância
- * uma da outra: `[verbo leve][determinante][nominalização]`, sem nada entre elas — essa
- * única regra de adjacência já elimina adjetivo, possessivo, coordenação, oração
- * encaixada e pontuação intermediária entre determinante e nominalização, sem precisar
- * de uma checagem por categoria proibida.
- *
- * Detecção e sugestão são decisões separadas. Todo núcleo casado vira `Finding`; a
- * `suggestion` só é preenchida quando TODAS as condições de segurança valem (ver
- * `buildSuggestion`) — nunca se reconjuga o verbo-base, nunca se assume complemento
- * seguro na dúvida.
- */
 import type { Finding, Pass, Token } from "../types";
 import type { LightVerbForm, NominalizationEntry } from "../data/types";
 import { getPrepared } from "../data/registry";
@@ -26,18 +5,11 @@ import { getPrepared } from "../data/registry";
 const CRITERION = "nominalization";
 const PRINCIPLE = "5.3.3";
 
-// Dados vêm do registry (fonte única + fingerprint no dataHash). Preparados uma vez lá.
 const LIGHT_VERB_FORMS: ReadonlyMap<string, LightVerbForm> = getPrepared("verbos-leves.pt");
 const NOMINALIZATIONS: ReadonlyMap<string, NominalizationEntry> = getPrepared("nominalizacoes.pt").entries;
 
-/**
- * Tabela FECHADA verbo-base → traço morfológico → forma finita (ADR-011). Não é um
- * conjugador: é dado curado, cada forma verificada à mão, só os 8 traços indicativos
- * comuns. `undefined` para qualquer par não cadastrado — nunca gera palpite.
- */
 const CONJUGATIONS = getPrepared("nominalizacoes.pt").conjugations;
 
-/** Forma verbal a usar na sugestão: infinitivo direto, ou a conjugação do traço; senão nada. */
 function conjugatedVerb(nominalization: NominalizationEntry, verbForm: LightVerbForm): string | undefined {
   if (verbForm.infinitive) return nominalization.verb;
   return CONJUGATIONS[nominalization.verb]?.[verbForm.feature];
@@ -46,12 +18,10 @@ function conjugatedVerb(nominalization: NominalizationEntry, verbForm: LightVerb
 const DIRECT_DETERMINERS = new Set(["o", "a", "os", "as", "um", "uma"]);
 const A_CONTRACTIONS = new Set(["à", "ao", "às", "aos"]);
 
-/** Pontuação que fecha a frase — sinal de "nada mais segue", nunca "pule e continue". */
 const SENTENCE_FINAL_PUNCTUATION = new Set([".", "!", "?", "…"]);
 
 const SOURCE_DE_FORMS = new Set(["de", "do", "da", "dos", "das"]);
 
-/** Expansão determinística da contração — só os 4 pares cadastrados, nada genérico. */
 const CONTRACTION_EXPANSION: ReadonlyMap<string, string> = new Map([
   ["do", "o"],
   ["da", "a"],
@@ -68,20 +38,6 @@ interface SuggestionResult {
   spanEndIndex: number;
 }
 
-/**
- * Decide se uma sugestão mecânica é segura e, se for, o texto exato e até qual índice
- * de token o span deve se estender. Retorna `null` sempre que qualquer condição de
- * segurança falhar — nunca um palpite. As 6 condições (ver plano/ADR-007, revisto por
- * ADR-011):
- *   1. há forma verbal segura: infinitivo (verbo-base direto) OU forma finita com
- *      conjugação cadastrada na tabela fechada para o traço do verbo leve;
- *   2. mapeamento marcado `safeForSuggestion`;
- *   3. adjacência estrita (já garantida pelo chamador antes de invocar esta função);
- *   4. complemento em formato reconhecido (ausente, ou "de"-forma + 1 palavra, seguido
- *      de fim de frase/pontuação final — qualquer outra coisa é inseguro);
- *   5. `targetPreposition === null` (única transformação implementada);
- *   6. `config.nominalization.suggest` (checado pelo chamador, kill-switch global).
- */
 function buildSuggestion(
   tokens: readonly Token[],
   nominalizationIndex: number,
@@ -95,13 +51,10 @@ function buildSuggestion(
 
   const afterNominalization = tokens[nominalizationIndex + 1];
 
-  // complemento ausente: fim da frase, ou pontuação final logo em seguida.
   if (!afterNominalization || (!afterNominalization.isWord && SENTENCE_FINAL_PUNCTUATION.has(afterNominalization.text))) {
     return { text: verbText, spanEndIndex: nominalizationIndex };
   }
 
-  // complemento com preposição "de"-forma: exige exatamente 1 palavra depois, e então
-  // fim de frase ou pontuação final — qualquer coisa a mais é inseguro.
   if (afterNominalization.isWord && SOURCE_DE_FORMS.has(afterNominalization.lower)) {
     const complementWord = tokens[nominalizationIndex + 2];
     const afterComplement = tokens[nominalizationIndex + 3];
@@ -120,8 +73,6 @@ function buildSuggestion(
     };
   }
 
-  // qualquer outro token (vírgula, conjunção, complemento maior, material não
-  // reconhecido) — inseguro por design. Na dúvida, mantém o finding, remove a sugestão.
   return null;
 }
 

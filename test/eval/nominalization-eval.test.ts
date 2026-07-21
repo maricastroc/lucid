@@ -1,16 +1,3 @@
-/**
- * Avaliação de `nominalizationPass` contra o golden set de `nominalization-golden.ts` —
- * separado dos testes unitários de propósito (mesmo padrão de
- * `passive-voice-eval.test.ts`).
- *
- * Métrica prioritária: sugestão. Uma sugestão emitida quando `expectSuggestion` é
- * `false`/indefinido, OU com texto diferente do esperado, conta como "sugestão
- * insegura" — categoria separada de FP/FN de detecção, e a única que deve ser
- * zero para a avaliação ser considerada aprovada.
- *
- * Regra de honestidade: entradas `limitacao_conhecida` nunca viram asserção de
- * acerto — só são medidas e reportadas.
- */
 import { describe, expect, it } from "vitest";
 import { createDataView } from "../../src/lucid/core/data/registry";
 import { nominalizationPass } from "../../src/lucid/core/passes/nominalization";
@@ -143,7 +130,4 @@ describe("avaliação de nominalizationPass — golden set", () => {
       }
     });
   });
-
-  // Entradas "limitacao_conhecida" são deliberadamente NÃO verificadas com toHaveLength
-  // aqui — ver cabeçalho do arquivo. Ficam só no relatório acima.
 });

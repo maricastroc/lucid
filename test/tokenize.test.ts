@@ -4,7 +4,6 @@ import { segmentSentences } from "../src/lucid/core/document/segment-sentences";
 import { attachTokens, tokenize } from "../src/lucid/core/document/tokenize";
 import { buildDocument } from "../src/lucid/core/document/model";
 
-/** Ajuda a comparar apenas o texto + isWord de cada token, ignorando start/end/lower. */
 function resumo(source: string) {
   return tokenize(source).map((t) => [t.text, t.isWord] as const);
 }

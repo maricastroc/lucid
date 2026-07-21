@@ -1,15 +1,3 @@
-/**
- * Avaliação de `jargonPass` contra o golden set de `jargon-golden.ts` — separado dos
- * testes unitários de propósito (mesmo padrão de `nominalization-eval.test.ts`).
- *
- * Métricas prioritárias, na ordem do pedido: (1) zero sugestões semanticamente
- * inseguras; (2) precisão alta na detecção; (3) zero findings motivados apenas por
- * raridade — aqui verificado como "zero findings em texto sem termo cadastrado"
- * (`mustNotFire`), já que este pass não tem heurística de raridade nenhuma.
- *
- * Regra de honestidade: entradas `limitacao_conhecida` nunca viram asserção de
- * acerto — só são medidas e reportadas.
- */
 import { describe, expect, it } from "vitest";
 import { createDataView } from "../../src/lucid/core/data/registry";
 import { jargonPass } from "../../src/lucid/core/passes/jargon";
@@ -154,7 +142,4 @@ describe("avaliação de jargonPass — golden set", () => {
       }
     });
   });
-
-  // Entradas "limitacao_conhecida" são deliberadamente NÃO verificadas com toHaveLength
-  // aqui — ver cabeçalho do arquivo. Ficam só no relatório acima.
 });

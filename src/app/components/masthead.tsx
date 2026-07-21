@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * MASTHEAD — o cabeçalho editorial. Marca + descritor, o alternador entre REVISAR (ler o
- * documento com as anotações) e ESCREVER (redigir), e o tema. Sem chrome de "IDE": a
- * instrumentação técnica vive, discreta, no rodapé do trilho.
- */
 import type { Mode } from "./document-view";
 import { useTheme } from "../hooks/use-theme";
 import { MoonIcon, SunIcon } from "./icons";
@@ -47,7 +42,7 @@ export function Masthead({ mode, onChangeMode }: Props) {
               onClick={() => onChangeMode(m)}
               className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors duration-150 ${
                 mode === m
-                  ? "bg-sheet text-ink-0 shadow-[0_1px_2px_rgb(34_32_27_/_0.08)]"
+                  ? "bg-sheet text-ink-0 shadow-[0_1px_2px_rgb(34_32_27/0.08)]"
                   : "text-ink-2 hover:text-ink-0"
               }`}
             >
@@ -62,21 +57,20 @@ export function Masthead({ mode, onChangeMode }: Props) {
           aria-label={theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"}
           className="grid size-9 place-items-center rounded-full border border-rule-2 text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
         >
-          {theme === "light" ? <MoonIcon className="size-[17px]" /> : <SunIcon className="size-[17px]" />}
+          {theme === "light" ? <MoonIcon className="size-4.25" /> : <SunIcon className="size-4.25" />}
         </button>
       </div>
     </header>
   );
 }
 
-/** Monograma: uma página com uma marca de revisão embaixo — o gesto do produto. */
 function Logo() {
   return (
     <span
-      className="grid size-8 place-items-center rounded-[9px] bg-accent text-accent-ink shadow-[0_1px_2px_rgb(34_32_27_/_0.14)]"
+      className="grid size-8 place-items-center rounded-[9px] bg-accent text-accent-ink shadow-[0_1px_2px_rgb(34_32_27/0.14)]"
       aria-hidden
     >
-      <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <svg viewBox="0 0 24 24" className="size-4.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
         <path d="M7 4h7l4 4v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" opacity="0.55" />
         <path d="M8.5 15.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0" />
       </svg>

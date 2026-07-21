@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * A NOTA — o painel editorial dedicado que substitui a visão geral quando um diagnóstico
- * é selecionado. Conta a história do caso: o que encontramos, o trecho, por que afeta a
- * clareza — e então a parte central da identidade do Lucid: a diferença nítida entre
- *   · PODE APLICAR COM SEGURANÇA → um pequeno diff antes/depois e um botão de ação;
- *   · EXIGE DECISÃO HUMANA → a ferramenta explica por que não inventa e oferece
- *     orientação assistida, sem nunca resolver no lugar do autor.
- * Toda a copy vem de `lib/narrative` — derivada do Finding real, nada inventado.
- */
 import { useState } from "react";
 import { passiveScaffold, type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
@@ -25,11 +16,9 @@ import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
 export interface RevisionNoteProps {
   finding: Finding;
-  /** texto normalizado do diagnóstico — base dos offsets dos pontos de divisão. */
   source: string;
   onApply: (f: Finding) => void;
   onSplit: (point: SplitPoint) => void;
-  /** aplica uma reescrita gerada substituindo o `target` (o parágrafo) no texto. */
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }
 
@@ -41,12 +30,11 @@ export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite
 
   return (
     <div className="note-in flex flex-col px-6 py-6">
-      {/* eyebrow */}
       <div className="flex items-center gap-2 text-[11.5px]">
         <span className="font-medium uppercase tracking-[0.12em] text-ink-3">{meta.kind}</span>
         <span className="text-ink-3">·</span>
         <span className="inline-flex items-center gap-1.5 text-ink-2">
-          <span className="size-[7px] rounded-full" style={{ background: ink }} aria-hidden />
+          <span className="size-1.75 rounded-full" style={{ background: ink }} aria-hidden />
           {SEVERITY_LABEL[finding.severity]}
         </span>
       </div>
@@ -95,8 +83,6 @@ export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite
   );
 }
 
-/* ============================================================ segura */
-
 function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () => void }) {
   const [copied, setCopied] = useState(false);
   const before = finding.span.text.replace(/\s+/g, " ").trim();
@@ -120,7 +106,6 @@ function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () =>
         Pode aplicar com segurança
       </div>
 
-      {/* diff antes/depois */}
       <div className="px-4 py-3">
         <div className="rounded-lg border border-rule-1 bg-sheet">
           <DiffRow label="Antes">
@@ -182,8 +167,6 @@ function DiffRow({
     </div>
   );
 }
-
-/* ============================================================ humana */
 
 function HumanDecision({
   finding,
@@ -261,13 +244,11 @@ function GeneratedRewrite({
 
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
-  // Container próprio, visualmente SEPARADO do diagnóstico determinístico acima — deixa claro
-  // que é uma camada opcional de IA, e que a auditoria não depende dela.
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2/40">
       <div className="flex items-center gap-2 border-b border-rule-1 px-4 py-2.5">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-2">Reescrita por IA</span>
-        <span className="rounded-[4px] bg-surface-2 px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.1em] text-ink-3">
+        <span className="rounded-[4px] bg-surface-2 px-1.5 py-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">
           experimental
         </span>
       </div>
@@ -483,7 +464,7 @@ function LongSentenceGuide({
                     </span>
                     <span className="text-ink-0">{c.after}…</span>
                   </span>
-                  <span className="shrink-0 text-[10.5px] font-sans uppercase tracking-[0.1em] text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                  <span className="shrink-0 text-[10.5px] font-sans uppercase tracking-widest text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                     dividir
                   </span>
                 </button>
@@ -591,13 +572,11 @@ function JargonGuide() {
   );
 }
 
-/* ============================================================ átomos */
-
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-rule-1 bg-sheet px-2 py-2 text-center">
       <div className="text-[15px] tabular-nums text-ink-0">{value}</div>
-      <div className="mt-0.5 text-[9.5px] uppercase tracking-[0.1em] text-ink-3">{label}</div>
+      <div className="mt-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">{label}</div>
     </div>
   );
 }

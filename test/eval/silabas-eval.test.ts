@@ -1,15 +1,3 @@
-/**
- * Avaliação de `countSyllables()` contra o golden set de `silabas-golden.ts` — separado
- * dos testes unitários de propósito (docs/DECISOES.md, ADR-004).
- *
- * Regra de honestidade (pedida explicitamente pelo usuário): entradas marcadas
- * `limitacao_conhecida` NUNCA recebem `expect(...).toBe(real)` — isso registraria uma
- * contagem sabidamente errada como se fosse o comportamento correto esperado. Elas só
- * são medidas e reportadas (taxa de acerto, erro absoluto médio); se o algoritmo um dia
- * passar a acertá-las, o teste não quebra — ele só reporta uma taxa de acerto melhor.
- *
- * Só entradas `correto` viram asserção dura: se uma delas falhar, é uma regressão real.
- */
 import { describe, expect, it } from "vitest";
 import { countSyllables } from "../../src/lucid/core/document/syllables";
 import { GOLDEN_SILABAS } from "./silabas-golden";
@@ -86,7 +74,4 @@ describe("avaliação de countSyllables — golden set", () => {
       });
     },
   );
-
-  // Entradas "limitacao_conhecida" são deliberadamente NÃO verificadas com toBe(real)
-  // aqui — ver cabeçalho do arquivo. Ficam só no relatório acima.
 });

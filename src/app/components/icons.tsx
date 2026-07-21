@@ -1,8 +1,3 @@
-/**
- * Ícones de traço, inline e sem dependência — cristalinos em qualquer escala. Herdam
- * `currentColor`; tamanho por `className` (ex.: `size-4`). Puramente decorativos:
- * sempre acompanhados de rótulo textual, com `aria-hidden`.
- */
 type IconProps = { className?: string };
 
 function base(className?: string) {
@@ -26,7 +21,6 @@ export function CheckIcon({ className }: IconProps) {
   );
 }
 
-/** Pena de nanquim — a marca da "decisão humana": ofício de autor. */
 export function PenNibIcon({ className }: IconProps) {
   return (
     <svg {...base(className)}>
@@ -80,7 +74,6 @@ export function ArrowLeftIcon({ className }: IconProps) {
   );
 }
 
-/** Varinha de aplicação em lote — "aplicar as seguras". */
 export function WandIcon({ className }: IconProps) {
   return (
     <svg {...base(className)}>

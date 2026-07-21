@@ -3,7 +3,6 @@ import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION } from "../src
 import { ChatProviderError, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
 import type { Span } from "../src/lucid/core/types";
 
-/** Provider mock determinístico — devolve uma resposta fixa; NUNCA toca a rede. */
 class MockChatProvider implements ChatProvider {
   readonly id = "mock";
   readonly models = ["m1"] as const;
@@ -70,7 +69,7 @@ describe("LlmRewriteProposer", () => {
 
     expect(new LlmRewriteProposer(correct, "m1", "correct").id).toBe("mock:m1+correct@1");
     expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@2");
-    // o prompt "correct" pede mudança mínima; o "rewrite" oferece contexto do documento
+
     expect(correct.lastPrompt).toMatch(/MENOR alteração/);
     expect(rewrite.lastPrompt).toMatch(/DOCUMENTO INTEIRO/);
   });

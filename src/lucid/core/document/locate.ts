@@ -1,16 +1,7 @@
-/**
- * Localizadores determinísticos de `Span` por offset — puros, reusam a segmentação do
- * pipeline (nunca uma própria). Servem à UI para saber "qual frase contém este ponto"
- * sem reanalisar. Offsets são relativos ao texto normalizado (NFC), como todo o resto.
- */
 import type { Span } from "../types";
 import { normalize } from "./normalize";
 import { segmentSentences } from "./segment-sentences";
 
-/**
- * O `Span` da FRASE que contém `offset`. Se o offset cair fora de qualquer frase (borda),
- * devolve a última frase que começa antes dele; sem frases, o texto inteiro.
- */
 export function sentenceSpanAt(text: string, offset: number): Span {
   const source = normalize(text);
   const sentences = segmentSentences(source);

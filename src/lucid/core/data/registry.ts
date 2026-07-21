@@ -1,21 +1,3 @@
-/**
- * Data registry — dado como ENTRADA VERSIONADA de primeira classe (docs/DESIGN-data-registry.md).
- *
- * Fonte única de dados da Camada 1: importa cada dataset uma vez (import de compilação — zero I/O
- * de runtime, I1/I4), PREPARA a estrutura pronta (Set/Map) uma vez (memoização), e calcula um
- * `fingerprint` estável do conteúdo. O `analyze` estampa um `dataHash` no `Diagnostic`
- * (proveniência) — fechando a lacuna de governança (mudar léxico não mexia no `configHash`).
- *
- * Dois acessos ao preparado:
- *   · `getPrepared(id)` — direto (sem escopo), para consumidores FORA do pipeline de passes:
- *     montagem do documento (`segment-sentences`) e actions. Também usado por passes que mantêm
- *     constantes de módulo.
- *   · `createDataView(allowed)` → `PassContext.data` — visão ESCOPADA (só os `dataDeps`
- *     declarados), para passes NOVOS que consomem dado em run-time (ex.: anotação morfológica).
- *
- * Fronteira: vive em `core`; não importa `probe`/`report`/rede/passe. `fingerprint` via
- * `stableHash` — o MESMO algoritmo do `configHash`.
- */
 import { stableHash } from "../hash";
 import type { DataTypes, DatasetId, DataView } from "./types";
 import {
@@ -45,13 +27,9 @@ export type { DatasetId } from "./types";
 
 export interface DatasetRecord {
   readonly id: DatasetId;
-  /** conteúdo cru importado (fonte da verdade do fingerprint) */
   readonly raw: unknown;
-  /** estrutura pronta (Set/Map), construída UMA vez */
   readonly prepared: unknown;
-  /** hash estável do conteúdo — muda quando o JSON muda (governança automática) */
   readonly fingerprint: string;
-  /** 1 linha de proveniência espelhando o README (auditabilidade inline) */
   readonly provenance: string;
 }
 
@@ -134,11 +112,6 @@ const SPECS: Record<DatasetId, RawSpec> = {
   },
 };
 
-/**
- * Registro construído UMA vez no load, congelado. `fingerprint` do `raw` (estratégia "content"
- * para datasets curados); `prepared` memoizado. Sem I/O de runtime. O futuro léxico morfológico
- * grande usará versão pinada (ver DESIGN-data-registry.md §2.3).
- */
 export const REGISTRY: Readonly<Record<DatasetId, DatasetRecord>> = Object.freeze(
   Object.fromEntries(
     (Object.keys(SPECS) as DatasetId[]).map((id) => {
@@ -148,27 +121,16 @@ export const REGISTRY: Readonly<Record<DatasetId, DatasetRecord>> = Object.freez
   ) as Record<DatasetId, DatasetRecord>,
 );
 
-/**
- * Datasets consumidos no ESTÁGIO DE DOCUMENTO (`segment-sentences`, na montagem do `Document`),
- * fora do pipeline de passes. O documento é sempre construído → estes SEMPRE contam para o
- * `dataHash`. Ver DESIGN-data-registry.md §2.4.
- */
 export const DOCUMENT_DATASETS: readonly DatasetId[] = ["abreviacoes.pt"];
 
-/** Estrutura preparada (memoizada) de um dataset, tipada. Acesso direto, sem escopo. */
 export function getPrepared<K extends DatasetId>(id: K): DataTypes[K] {
   return REGISTRY[id].prepared as DataTypes[K];
 }
 
-/** Fingerprint de um dataset. */
 export function datasetFingerprint(id: DatasetId): string {
   return REGISTRY[id].fingerprint;
 }
 
-/**
- * Visão ESCOPADA para `PassContext.data`: só os ids declarados em `dataDeps`. `get` de um id não
- * declarado lança — impede dependência oculta e mantém o `dataHash` honesto por construção.
- */
 export function createDataView(allowed: readonly DatasetId[]): DataView {
   const allowedSet = new Set(allowed);
   return {
@@ -181,11 +143,6 @@ export function createDataView(allowed: readonly DatasetId[]): DataView {
   };
 }
 
-/**
- * `dataHash` de proveniência para um conjunto de datasets em jogo: hash estável sobre os pares
- * `(id, fingerprint)` ORDENADOS e deduplicados. Reprodutibilidade completa de um `Diagnostic`
- * passa a ser `(lucidVersion, configHash, dataHash)`.
- */
 export function dataHashFor(ids: Iterable<DatasetId>): string {
   const unique = [...new Set(ids)].sort();
   return stableHash(unique.map((id) => [id, REGISTRY[id].fingerprint]));

@@ -60,6 +60,6 @@ describe("rewriteTargetAt — unidade certa (nunca o documento inteiro)", () => 
     const r = rewriteTargetAt(t, t.indexOf("Segunda"));
     expect(r.unit).toBe("sentence");
     expect(r.span.text).toBe("Segunda frase, bem mais longa, do mesmo bloco sem quebras.");
-    expect(r.span.text).not.toBe(t); // NUNCA o documento inteiro
+    expect(r.span.text).not.toBe(t);
   });
 });

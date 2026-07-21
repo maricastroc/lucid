@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * O DOCUMENTO — o protagonista. Uma PÁGINA real (folha morna sobre a mesa), não um campo
- * de código: serifa editorial, medida confortável, margens amplas, ritmo vertical
- * generoso. As anotações são delicadas — sublinhados finos e um marcador discreto na
- * margem —, nunca blocos atrás das frases.
- *
- * Selecionar um diagnóstico acende o trecho e faz a página recuar (modo lupa), para que o
- * olho vá direto ao caso. Em ESCREVER, a mesma folha vira superfície de redação.
- */
 import { forwardRef, useMemo } from "react";
 import type { Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines } from "../lib/editor-model";
@@ -23,7 +14,6 @@ interface Props {
   selectedId: string | null;
   flashId: string | null;
   activeCriteria: ReadonlySet<string>;
-  /** trecho que a reescrita de IA tocaria — recebe um leve destaque para não haver surpresa. */
   rewriteTarget: Span | null;
   onChangeText: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
@@ -41,9 +31,8 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   return (
     <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label="Documento em revisão">
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-[840px] px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
-          <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-[var(--shadow-sheet)]">
-            {/* faixa superior da folha — identidade discreta, não uma aba de arquivo */}
+        <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
+          <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
             <div className="flex items-center justify-between border-b border-rule-1 px-8 py-3.5 sm:px-14">
               <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-3">
                 {mode === "edit" ? "Rascunho" : "Documento em revisão"}
@@ -79,7 +68,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                       {tick && (
                         <span
                           aria-hidden
-                          className="margin-tick absolute -left-4 top-[0.5em] hidden h-[1.1em] w-[3px] rounded-full sm:block"
+                          className="margin-tick absolute -left-4 top-[0.5em] hidden h-[1.1em] w-0.75 rounded-full sm:block"
                           style={{
                             background: holdsSelected ? "var(--accent)" : severityInkVar(tick.severity),
                             opacity: holdsSelected ? 1 : isFocused ? 0.18 : 0.4,

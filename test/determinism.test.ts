@@ -1,16 +1,3 @@
-/**
- * Teste dedicado de DETERMINISMO da Camada 1 (I2) — consolida garantias que antes
- * estavam dispersas em cada teste de pass. Cobre:
- *   1. repetição byte-idêntica de `analyze()`;
- *   2. independência da ordem de EXECUÇÃO dos passes (24 permutações);
- *   3. independência da ordem das ENTRADAS de dataset (seam do jargão);
- *   4. ausência de estado compartilhado entre chamadas (A, B, A);
- *   5. determinismo sob variações de Config.
- *
- * Usa o seam interno `analyzeWithPasses` (exportado de `analyzer.ts`, ausente do barrel
- * público — mesmo precedente de `sortFindings`) para injetar permutações de passes sem
- * ampliar a API pública. Ver ADR-009.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, analyzeWithPasses } from "../src/lucid/core/analyzer";
 import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
@@ -46,7 +33,6 @@ function permutations<T>(items: readonly T[]): T[][] {
   return result;
 }
 
-/** Projeção canônica, INDEPENDENTE da ordem de `byCriterion` (que segue a ordem dos passes). */
 function projecaoCanonica(text: string, passes: readonly Pass[]) {
   const d = analyzeWithPasses(text, passes);
   const byCriterionOrdenado = [...d.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1));
@@ -94,11 +80,9 @@ describe("determinismo — independência da ordem de execução dos passes (24 
     const d1 = analyzeWithPasses(TEXTO_RICO, TODOS);
     const d2 = analyzeWithPasses(TEXTO_RICO, invertido);
 
-    // substância idêntica
     expect(d2.findings).toEqual(d1.findings);
     expect(d2.metrics).toEqual(d1.metrics);
     expect(d2.score.totalFindings).toBe(d1.score.totalFindings);
-    // byCriterion tem o MESMO conteúdo, possivelmente em ordem diferente (documentado, ADR-009)
     expect([...d2.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1))).toEqual(
       [...d1.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1)),
     );
@@ -107,10 +91,6 @@ describe("determinismo — independência da ordem de execução dos passes (24 
 });
 
 describe("determinismo — independência da ordem das entradas de dataset (longest-match-first do jargão)", () => {
-  // A ordenação por comprimento decrescente em compileJargonEntries é o que torna o
-  // resultado observável independente da ordem do JSON. Provado estruturalmente aqui com
-  // dados sintéticos (o dataset real não tem, hoje, duas entradas com a mesma primeira
-  // palavra — a garantia é latente mas correta para quando existir; ver ADR-009).
   const sintetico = [
     { term: "em", kind: "word", domain: "legal", plain: "no", safeForSuggestion: true, reason: null },
     { term: "em sede de", kind: "phrase", domain: "legal", plain: "no âmbito de", safeForSuggestion: true, reason: null },
@@ -199,7 +179,7 @@ describe("determinismo — variações de Config", () => {
     const semJargao = analyze(TEXTO_RICO, { jargon: { enabled: false, frequencyRankCutoff: 5000, suggestFromGlossary: true } });
 
     expect(semJargao.findings.some((f) => f.criterion === "jargon")).toBe(false);
-    // os demais critérios permanecem idênticos aos da análise base
+    
     for (const criterion of ["long_sentence", "passive_voice", "nominalization"] as const) {
       expect(semJargao.findings.filter((f) => f.criterion === criterion)).toEqual(
         base.findings.filter((f) => f.criterion === criterion),

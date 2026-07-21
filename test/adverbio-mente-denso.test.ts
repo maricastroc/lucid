@@ -21,7 +21,6 @@ describe("adverbio_mente_denso — densidade", () => {
   });
 
   it("densidade é por frase, não pelo documento inteiro", () => {
-    // dois advérbios em cada frase → nenhuma frase atinge o limiar 3
     expect(spans("Ele agiu rapidamente e claramente. Depois falou calmamente e diretamente.")).toEqual([]);
   });
 
@@ -37,7 +36,6 @@ describe("adverbio_mente_denso — densidade", () => {
 
 describe("adverbio_mente_denso — precisão (não-advérbios em -mente)", () => {
   it("palavras terminadas em -mente que não são advérbio não marcam", () => {
-    // semente, mente, clemente não estão no allowlist de advérbios
     expect(spans("A semente na mente do juiz clemente permanece.")).toEqual([]);
   });
 });

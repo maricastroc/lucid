@@ -3,15 +3,14 @@ import { normalize } from "../src/lucid/core/document/normalize";
 import { segmentSentences } from "../src/lucid/core/document/segment-sentences";
 import { buildDocument } from "../src/lucid/core/document/model";
 
-/** Ajuda a comparar apenas o texto de cada frase, ignorando os placeholders de token. */
 function textos(source: string): string[] {
   return segmentSentences(source).map((s) => s.text);
 }
 
 describe("normalize", () => {
   it("normaliza para NFC", () => {
-    const decomposto = "café"; // "café" com acento combinante (NFD)
-    const composto = "café"; // já em NFC
+    const decomposto = "café"; 
+    const composto = "café";
     expect(normalize(decomposto)).toBe(composto);
     expect(normalize(decomposto)).toBe(normalize(composto));
   });
@@ -80,9 +79,6 @@ describe("segmentSentences — números decimais", () => {
 describe("segmentSentences — siglas e iniciais", () => {
   it("não quebra em cada ponto de uma sigla com pontos internos", () => {
     const source = "Nós moramos nos E.U.A. Eles moram na França.";
-    // Política conservadora: como o "A" antes do último ponto também é maiúscula
-    // isolada, o segmentador nunca fecha ali — junta as duas frases. Documentado como
-    // limitação conhecida (preferir juntar a quebrar errado).
     expect(textos(source)).toEqual(["Nós moramos nos E.U.A. Eles moram na França."]);
   });
 

@@ -1,12 +1,3 @@
-/**
- * Camada 2 · rota server-side da SONDA de compreensão (painel próprio, opt-in).
- *
- * Roda o leitor sintético de piso (prompt blindado) num modelo pequeno e barato — a sonda só
- * precisa LER literalmente, nunca gerar. A chave fica no servidor, jamais volta ao cliente.
- * Devolve o SINAL interpretado (`flag` | `neutro` — NUNCA aprovação) + o resultado bruto para a
- * UI mostrar onde travou e as operações de leitura. Honestidade (I5): passar no piso é ausência
- * de uma falha, não prova de compreensão.
- */
 import { NextResponse } from "next/server";
 import { ChatProviderError, GeminiProvider, GroqProvider } from "@/llm";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
@@ -17,7 +8,6 @@ export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 8000;
 
-/** Leitor de piso: Groq 8B (mais barato) e, na falta, Gemini flash. Só lê literalmente. */
 function buildFloorProbe(): ComprehensionProbe | { error: string } {
   if (process.env.GROQ_API_KEY) {
     return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.1-8b-instant");

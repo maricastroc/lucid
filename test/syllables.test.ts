@@ -97,23 +97,12 @@ describe("countSyllables — hiatos sem acento gráfico (regras novas)", () => {
 });
 
 describe("countSyllables — LIMITAÇÕES CONHECIDAS (não corrigidas, documentadas)", () => {
-  // Estes casos NÃO são a contagem correta — são o comportamento atual, documentado
-  // como gap conhecido (ver comentário de topo de syllables.ts). Não interpretar como
-  // "resultado esperado correto do algoritmo".
 
   it("'poesia' melhora com a regra de vogais fortes (2→3) mas ainda não chega a 4 (real: po-e-si-a)", () => {
-    // O par final "i-a" continua fundido como ditongo (mesma assinatura gráfica de
-    // "história", onde "ia" É ditongo) — depende de tonicidade, não recuperável da
-    // grafia sem dicionário.
     expect(countSyllables("poesia")).toBe(3);
   });
 
   it("'reunião' permanece incorreto (hiato de fronteira de prefixo/morfema, não detectável localmente)", () => {
-    // Real: re-u-ni-ão = 4 sílabas. O algoritmo funde "e"+"u" (nem forte-forte, nem
-    // í/ú acentuado) e "i"+"ão" (protegido pela regra do ditongo nasal ão, que aqui
-    // mascara um hiato real entre "ni" e "ão"). Testei uma regra de prefixo "re-" e
-    // descartei: quebra palavras não-prefixadas com a mesma grafia (ex.: "reino" =
-    // rei-no, ditongo genuíno).
     expect(countSyllables("reunião")).toBe(2);
   });
 });

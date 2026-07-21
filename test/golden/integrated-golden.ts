@@ -1,21 +1,3 @@
-/**
- * Golden set INTEGRADO da Camada 1 — documentos completos passados por `analyze()` de
- * ponta a ponta, distinto dos golden sets por-critério (`test/eval/*-golden.ts`, que
- * exercitam um pass isolado). Cada caso é um texto realista com a expectativa completa
- * do `Diagnostic` observável: findings (critério, severidade, span exato, requiresHuman,
- * sugestão) e as métricas principais.
- *
- * As expectativas são JUÍZO LINGUÍSTICO verificado à mão do que a Camada 1 deve produzir
- * — não uma cópia do que o algoritmo faz. Onde o comportamento atual é uma limitação
- * conhecida e deliberada (ex.: agente de passiva inalcançável por tokens intermediários),
- * o campo `notes` registra isso; a expectativa reflete o comportamento correto-por-design,
- * nunca um bug tolerado silenciosamente.
- *
- * Convenção de offset (ver docs/ARQUITETURA.md §3.2 e ADR-009): `start`/`end` são índices
- * de CODE UNIT UTF-16 sobre `Diagnostic.text`, que é a entrada normalizada em NFC. Todo
- * `end` é exclusivo. `Diagnostic.text.slice(start, end) === span.text` é invariante testado.
- */
-
 export type IntegratedCriterion =
   | "long_sentence"
   | "passive_voice"
@@ -38,7 +20,6 @@ export interface ExpectedFinding {
   end: number;
   spanText: string;
   requiresHuman: boolean;
-  /** ausente = nenhuma sugestão esperada (a asserção exige `suggestion === undefined`) */
   suggestion?: string;
 }
 

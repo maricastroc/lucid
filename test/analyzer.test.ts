@@ -83,9 +83,7 @@ describe("analyze — documento com um finding", () => {
 describe("analyze — múltiplos findings", () => {
   it("várias frases longas geram um finding por frase, todos contabilizados no placar", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
-    // texto sem ordinais (para não acionar prose_enumeration) — o foco é a contagem de long_sentence
     const text = "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
-
     const diagnostic = analyze(text, config);
 
     expect(diagnostic.findings).toHaveLength(3);
@@ -115,10 +113,6 @@ describe("sortFindings — ordenação canônica independente da ordem de entrad
     const d = finding({ span: { start: 0, end: 5, text: "d" }, criterion: "aaa_criterion" });
     const e = finding({ span: { start: 0, end: 5, text: "e" }, criterion: "aaa_criterion", principle: "5.1" });
 
-    // d e e empatam em start/end (0,5); "aaa_criterion" < "long_sentence" -> ambos vêm
-    // antes de b (start=0,end=5,criterion="long_sentence"). Entre d e e (mesmo
-    // criterion "aaa_criterion"), "5.1" < "5.3.4" -> e vem antes de d. c (0,10) vem
-    // depois de todos os (0,5) por end maior. a (10,20) vem por último por start maior.
     const esperado = [e.span.text, d.span.text, b.span.text, c.span.text, a.span.text];
 
     for (const entrada of permutations([a, b, c, d, e])) {

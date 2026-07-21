@@ -8,7 +8,7 @@ describe("data registry — fingerprints", () => {
     for (const id of Object.keys(REGISTRY) as DatasetId[]) {
       const fp = datasetFingerprint(id);
       expect(fp).toMatch(/^[0-9a-f]{8}$/);
-      expect(datasetFingerprint(id)).toBe(fp); // determinístico
+      expect(datasetFingerprint(id)).toBe(fp);
     }
   });
 

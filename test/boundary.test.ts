@@ -1,14 +1,3 @@
-/**
- * Guarda a cerca arquitetural (I1 — docs/ARQUITETURA.md §1 e §8).
- *
- * Roda o `dependency-cruiser` real (mesma config usada pelo script `npm run depcheck`)
- * contra `src/` e falha se qualquer regra "forbidden" de `.dependency-cruiser.cjs` for
- * violada — em particular, `src/lucid/core/**` importando de `src/lucid/probe/**`,
- * `react`/`next`, ou módulos de rede.
- *
- * Este teste passa mesmo sem nenhuma lógica implementada ainda (Fase 0): valida a
- * fronteira, não o conteúdo.
- */
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
