@@ -141,6 +141,34 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
   });
 });
 
+describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
+  it("texto impessoal reescrito com 'nós' inventado reprova (veto mecânico)", async () => {
+    const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
+    const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
+    const p = proposal(finding, "Nós analisamos o documento com a nossa comissão competente"); // "Nós"/"nossa" fabricados
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(false);
+    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")!.detail).toMatch(/nós|nossa/i);
+    expect(v.hasBlockingFailure).toBe(true);
+  });
+
+  it("proposta sem 1ª pessoa passa", async () => {
+    const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
+    const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
+    const p = proposal(finding, "A comissão competente analisou o documento");
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+  });
+
+  it("1ª pessoa que JÁ existe no documento não é considerada fabricada", async () => {
+    const text = "Nós recebemos o seu pedido. Foi realizada a análise do documento pela comissão antes da decisão.";
+    const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão");
+    const p = proposal(finding, "Nós analisamos o documento na comissão"); // "Nós" já aparece no doc
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+  });
+});
+
 describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
   it("nome próprio ausente na proposta levanta bandeira", async () => {
     const text = "O parecer foi assinado pela Comissão de Ética do órgão responsável pela decisão final.";

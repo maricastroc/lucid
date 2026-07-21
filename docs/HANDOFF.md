@@ -146,12 +146,27 @@ certo que siga. Clareza intacta (ΔFlesch ~+72). (`correct` varia um pouco run-a
 vezes devolve texto idêntico com temperature 0 → "reescreveu%" < 100; é não-determinismo do
 modelo, não bug.)
 
+**Tier 3 · incremento 6 FEITO — gerador FORTE (Gemini) + prova de 1ª pessoa** (ADR-019).
+Reenquadramento após comparação externa (Gemini-juiz) que via a reescrita perdendo para o GPT:
+o Tier 3 estava sendo medido como REESCRITOR (eixo proibido pelo CLAUDE.md) e só tinha geradores
+free da Groq. Tese reafirmada: **o Lucid AUDITA, não gera** — gerador forte propõe, o verificador
+determinístico é o diferencial (arquitetura já pronta em `verify.ts`). Entregue:
+- **`GeminiProvider`** (`src/llm/gemini.ts`) na mesma interface `ChatProvider` (cerca intacta);
+  chave no header, nunca na URL; wired em `/api/rewrite` + seletor da UI. Em uso: **`gemini-2.5-flash`**
+  (2.5-pro exige tier pago → `limit: 0` na chave free). **Thinking desligado** (`thinkingBudget: 0`):
+  evita truncagem por thinking tokens + reforça anti-drift.
+- **Nova PROVA `no_invented_first_person`** (blocking): pega o "nós"/"nossa" fabricado que a sonda
+  não pega. Lista fechada de pronomes/possessivos, zero morfologia produtiva; diferencial contra o
+  DOCUMENTO INTEIRO (não veta 1ª pessoa que já existe no fonte).
+- Verificado ao vivo (`/api/rewrite`, Flesch −12,0→48,6; 6/6 provas; sem truncar). **794 testes verdes.**
+
 **Falta no Tier 3 (próximos incrementos):**
-- ✅ **(a) veredito ponderado por severidade** — FEITO (ADR-018; llama-rewrite 33→100% sem-veto).
-  Falta **(b) prova determinística de 1ª pessoa nova** (pega o "nós" que a sonda não pega).
-- **Outros providers** — OpenAI/Anthropic/Gemini/DeepSeek pela mesma interface `ChatProvider`
-  (`src/llm`). `.env` tem `GEMINI_API_KEY`; `DEEPSEEK_AP_KEY` está com typo (falta o "I").
-- Golden de benchmark maior + casos que estressem a sonda; tabela no README.
+- ✅ (a) veredito por severidade (ADR-018); ✅ (b) prova de 1ª pessoa nova (ADR-019); ✅ gerador forte (ADR-019).
+- **Prova UI ao vivo com Gemini** (screenshot do cartão) — só validei via API até agora; a fiação da
+  UI (`revision-note.tsx` + `app/lib/rewrite.ts`) já oferece o modelo, mas não cliquei o fluxo no browser.
+- **Outros providers** — OpenAI/Anthropic pela mesma interface `ChatProvider`. `DEEPSEEK_AP_KEY`
+  no `.env` está com typo (falta o "I"). 2.5-pro quando houver billing.
+- Golden de benchmark maior + casos que estressem a sonda; incluir Gemini na tabela; README.
 
 ---
 

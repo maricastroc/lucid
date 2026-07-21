@@ -9,7 +9,7 @@
  */
 import { NextResponse } from "next/server";
 import type { Span } from "@/lucid";
-import { ChatProviderError, GroqProvider, GROQ_MODELS } from "@/llm";
+import { ChatProviderError, GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS } from "@/llm";
 import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer } from "@/report/rewrite";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
@@ -47,14 +47,28 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
     }
     return new LlmRewriteProposer(new GroqProvider(apiKey), model);
   }
+  if (providerId === "gemini") {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return { error: "GEMINI_API_KEY não configurada no servidor", status: 400 };
+    if (!GEMINI_MODELS.includes(model as (typeof GEMINI_MODELS)[number])) {
+      return { error: `modelo não permitido para o Gemini: ${model}`, status: 400 };
+    }
+    return new LlmRewriteProposer(new GeminiProvider(apiKey), model);
+  }
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
-/** Sonda de sentido no mesmo provedor, se a chave existir. Sem ela, o SINAL fica omitido. */
-function buildProbe(providerId: string): ComprehensionProbe | null {
-  if (providerId === "groq" && process.env.GROQ_API_KEY) {
-    // Modelo pequeno e barato para o piso; a sonda só precisa ler literalmente.
+/**
+ * Sonda de sentido (leitor de piso). Usa um modelo PEQUENO e barato — só precisa ler
+ * literalmente, não gerar. Prefere Groq (mais barato); cai para Gemini flash se só houver
+ * essa chave. Sem chave nenhuma, o SINAL de sentido fica omitido (nunca inventado).
+ */
+function buildProbe(): ComprehensionProbe | null {
+  if (process.env.GROQ_API_KEY) {
     return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.1-8b-instant");
+  }
+  if (process.env.GEMINI_API_KEY) {
+    return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
   }
   return null;
 }
@@ -83,7 +97,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: proposer.error }, { status: proposer.status });
   }
 
-  const probe = buildProbe(providerId);
+  const probe = buildProbe();
 
   try {
     const result = await proposeAndVerify(text, target, proposer, {

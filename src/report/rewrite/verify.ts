@@ -32,6 +32,19 @@ export interface VerifyOptions {
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
 const RE_DATE = /\b\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gu;
+/**
+ * Marcadores de 1ª pessoa — LISTA FECHADA de palavras funcionais, INAMBÍGUAS em PT-BR moderno
+ * (pronomes e possessivos). O risco fatal do LLM é fabricar o AGENTE: um texto impessoal
+ * ("foi realizada a análise") vira "nós analisamos", inventando quem agiu. Isso é o que o
+ * `gpt-oss` fez e a sonda não pegou (ADR-016/019).
+ *
+ * Fiel à disciplina do projeto (precisão > recall, ZERO morfologia produtiva — mesma filosofia
+ * do ADR-011): NÃO detectamos desinência verbal ("-mos"), que colide com "mesmos", "termos"
+ * etc. Só a classe fechada. Deliberadamente FORA: "nos"/"no" (ambíguos com a contração em+os).
+ * Assim uma falha só dispara com evidência dura de invenção de 1ª pessoa.
+ */
+const RE_FIRST_PERSON =
+  /\b(?:eu|nós|me|mim|comigo|conosco|meu|minha|meus|minhas|nosso|nossa|nossos|nossas)\b/giu;
 /** Palavra Capitalizada (nome próprio) ou sigla em CAIXA-ALTA — heurística de entidade. */
 const RE_ENTITY = /\b(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})\b/gu;
 const RE_ACRONYM = /^\p{Lu}{2,}$/u;
@@ -40,6 +53,11 @@ const SENTENCE_TERMINATORS = ".!?…";
 
 function extractSorted(text: string, re: RegExp): string[] {
   return (text.match(re) ?? []).slice().sort();
+}
+
+/** Conjunto (minúsculo) de marcadores de 1ª pessoa presentes no texto. */
+function firstPersonMarkers(text: string): Set<string> {
+  return new Set((text.match(RE_FIRST_PERSON) ?? []).map((m) => m.toLowerCase()));
 }
 
 /**
@@ -195,7 +213,22 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon);
+  // `no_invented_first_person`: a proposta não pode introduzir 1ª pessoa que NÃO existe em
+  // LUGAR NENHUM do documento-fonte. Comparar contra o documento inteiro (não só o alvo) evita
+  // falso veto quando o texto já é escrito em 1ª pessoa — aí "nós" é fiel, não fabricado. Se o
+  // marcador não aparece em parte alguma do original, o modelo inventou o agente → veto.
+  const sourceFirstPerson = firstPersonMarkers(text);
+  const inventedFirstPerson = [...firstPersonMarkers(proposal.proposed)].filter((m) => !sourceFirstPerson.has(m));
+  const noInventedFirstPerson: Proof = {
+    check: "no_invented_first_person",
+    passed: inventedFirstPerson.length === 0,
+    detail:
+      inventedFirstPerson.length === 0
+        ? "a proposta não fabricou agente em 1ª pessoa"
+        : `1ª pessoa inventada (ausente no original): ${inventedFirstPerson.sort().join(", ")}`,
+  };
+
+  proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon, noInventedFirstPerson);
 
   // --- SINAL (heurístico, nunca prova) ----------------------------------------
   const signals: VerificationSignal[] = [];
