@@ -162,10 +162,12 @@ determinístico é o diferencial (arquitetura já pronta em `verify.ts`). Entreg
 
 **Falta no Tier 3 (próximos incrementos):**
 - ✅ (a) veredito por severidade (ADR-018); ✅ (b) prova de 1ª pessoa nova (ADR-021); ✅ gerador forte (ADR-021).
-- **Prova UI ao vivo com Gemini** (screenshot do cartão) — só validei via API até agora; a fiação da
-  UI (`revision-note.tsx` + `app/lib/rewrite.ts`) já oferece o modelo, mas não cliquei o fluxo no browser.
-- **Outros providers** — OpenAI/Anthropic pela mesma interface `ChatProvider`. `DEEPSEEK_AP_KEY`
-  no `.env` está com typo (falta o "I"). 2.5-pro quando houver billing.
+- ✅ **Prova UI ao vivo com Gemini** (ADR-030) — fluxo exercido no browser com `gemini-2.5-flash`
+  sobre a frase-monstro do exemplo: **6/6 PROVAS**, SINAIS neutros, Flesch-PT +18.1, "Usar como
+  rascunho" habilitado, caveat honesto renderizado. `POST /api/rewrite → 200`.
+- ✅ **Typo do `.env`** corrigido → `DEEPSEEK_API_KEY` (ADR-030).
+- **Outros providers** — OpenAI/Anthropic pela mesma interface `ChatProvider` (ADIADO nesta sessão;
+  a interface já os acomoda). 2.5-pro quando houver billing (chave free = `limit: 0`).
 - Golden de benchmark maior + casos que estressem a sonda; incluir Gemini na tabela; README.
 
 ---
@@ -194,15 +196,18 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   convenção de marcação — decidir o formato de entrada primeiro).
 - **Mais 2 de texto puro (ADR-028):** `mesoclise` (regex `far-se-á`/`dir-lhe-ia`, zero-FP) +
   `dupla_negacao` (litotes "não é incomum", léxico via phrase-match; NÃO marca negação simples).
-- **13 critérios, 847 testes.** Verificado ao vivo no browser (todos os detectores marcam; sonda
+- **13 critérios, 851 testes** (ADR-029: +4 do registro de critérios). Verificado ao vivo no browser (todos os detectores marcam; sonda
   trava e reporta sem selo; estruturais sob "Fácil de localizar"; mesóclise/dupla-negação sob
   "Frases claras").
 - **Independência de formato (ADR-027):** `Document` é o `AnnotatedDocument` canônico; `buildDocument`
   é o importador de texto puro (fronteira de formato). Contrato para DOCX/PDF/HTML futuros em
   `DESIGN-modelo-independente-de-formato.md` — detectores já são cegos ao formato (auditado). SEM
   importadores; extensões (blocos com `kind`, `analyzeDocument`, source-map) são aditivas e adiadas.
-- **Dívida:** `app/lib/criteria.ts` é um registro de critérios paralelo ao engine — adicionar
-  detector toca engine + UI. Candidato a "UI deriva critérios do `Diagnostic`".
+- ✅ **Dívida RESOLVIDA (ADR-029):** `app/lib/criteria.ts` não é mais um registro paralelo. O
+  engine publica `CRITERION_IDS`/`CriterionId` (`core/criteria.ts`, reexportado por `@/lucid`);
+  `Pass.criterion: CriterionId` e `CRITERION_META: Record<CriterionId, …>` tornam a completude
+  checada em compile-time; `test/criteria-registry.test.ts` trava a igualdade de conjuntos. Adicionar
+  detector ainda pede a copy editorial — mas agora **falha alto** em vez de cair no meta de `jargon`.
 - **Fonte de léxico (D1 fechado):** PortiLexicon-UD (CC-BY 4.0), HF `NILC-ICMC-USP/PortiLexicon-UD`,
   TSV `forma⇥lema⇥FEATS`. Só fatias filtradas são bundladas (VERB.tsv 71 MB → derivado 850 KB).
   Atribuição obrigatória em `data/README.md`.

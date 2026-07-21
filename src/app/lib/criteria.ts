@@ -8,22 +8,16 @@
  * Nomes internos (`long_sentence`, `requiresHuman`, …) NUNCA vazam para o usuário — só
  * `label` e a copy em português aparecem na interface.
  */
-import type { Category, Finding, Severity } from "@/lucid";
+import type { Category, CriterionId, Finding, Severity } from "@/lucid";
+import { isCriterionId } from "@/lucid";
 
-export type Criterion =
-  | "long_sentence"
-  | "passive_voice"
-  | "nominalization"
-  | "jargon"
-  | "mais_que_perfeito_sintetico"
-  | "gerundismo"
-  | "adverbio_mente_denso"
-  | "redundancia"
-  | "perifrase_inflada"
-  | "paragraph_length"
-  | "prose_enumeration"
-  | "mesoclise"
-  | "dupla_negacao";
+/**
+ * Um critério de apresentação é, por construção, um critério do engine: `Criterion` é o
+ * `CriterionId` publicado por `@/lucid` (ADR-029). Assim, `CRITERION_META` abaixo é um
+ * `Record<CriterionId, …>` — se o engine ganha um pass novo, este módulo deixa de compilar
+ * até que a copy editorial dele seja escrita. Não há mais registro paralelo digitado à mão.
+ */
+export type Criterion = CriterionId;
 export type Channel = "inline" | "passage";
 
 export interface CriterionMeta {
@@ -193,7 +187,7 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
 };
 
 export function isCriterion(value: string): value is Criterion {
-  return value in CRITERION_META;
+  return isCriterionId(value);
 }
 export function metaFor(criterion: string): CriterionMeta {
   return isCriterion(criterion) ? CRITERION_META[criterion] : CRITERION_META.jargon;

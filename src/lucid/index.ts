@@ -22,6 +22,9 @@ export type {
   Token,
 } from "./core/types";
 
+export type { CriterionId } from "./core/criteria";
+export { CRITERION_IDS, isCriterionId } from "./core/criteria";
+
 export type { Config } from "./core/config";
 export { DEFAULT_CONFIG, hashConfig } from "./core/config";
 

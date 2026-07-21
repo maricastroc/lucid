@@ -1,41 +1,21 @@
 @import "tailwindcss";
 
-/* ============================================================================
-   Lucid — Design System · "Mesa de revisão editorial"
-
-   O produto é um manuscrito sobre uma mesa de trabalho, marcado por um revisor
-   cuidadoso. O documento é uma PÁGINA real — serifada, arejada, com margens —
-   e os diagnósticos são NOTAS EDITORIAIS, não logs de erro.
-
-   Princípios visuais:
-     · Light-first. Papel morno, nunca branco puro em grandes áreas.
-     · Uma única cor de marca (índigo tinta). Semântica restrita: âmbar = atenção,
-       vermelho suave = grave, verde = seguro para aplicar.
-     · Profundidade por hierarquia, tipografia e espaço — não por empilhar caixas.
-     · Sombras mínimas, bordas suaves, superfícies discretamente separadas.
-   ========================================================================== */
-
 :root {
-  /* ---- Superfícies (mesa → papel) --------------------------------------- */
-  --desk: #ece7dd; /* fundo da aplicação — greige morno */
-  --sheet: #fdfcf9; /* a página do documento — flutua sobre a mesa */
-  --surface: #f8f5ef; /* trilho / painéis */
-  --surface-2: #f1ede4; /* insets: cartões de evidência, chips */
-  --surface-3: #e9e3d7; /* hover / pressionado */
+  --desk: #ece7dd;
+  --sheet: #fdfcf9;
+  --surface: #f8f5ef;
+  --surface-2: #f1ede4;
+  --surface-3: #e9e3d7;
+  --ink-0: #22201b;
+  --ink-1: #55514a;
+  --ink-2: #655f55;
+  --ink-3: #6f6a5e;
+  --ink-dim: #cbc5b7;
 
-  /* ---- Tinta (texto) ---------------------------------------------------- */
-  --ink-0: #22201b; /* primário */
-  --ink-1: #55514a; /* secundário */
-  --ink-2: #655f55; /* terciário / metadados — AA em papel */
-  --ink-3: #6f6a5e; /* rótulos e dicas — AA em papel */
-  --ink-dim: #cbc5b7; /* prosa fora de foco (modo lupa) — de-ênfase deliberada */
-
-  /* ---- Fios / bordas ---------------------------------------------------- */
   --rule-1: rgb(34 32 27 / 0.07);
   --rule-2: rgb(34 32 27 / 0.12);
   --rule-3: rgb(34 32 27 / 0.18);
 
-  /* ---- Marca (índigo tinta) --------------------------------------------- */
   --accent: #3a4691;
   --accent-strong: #303a7c;
   --accent-ink: #ffffff;
@@ -43,22 +23,19 @@
   --accent-flash: rgb(58 70 145 / 0.2);
   --accent-line: rgb(58 70 145 / 0.28);
 
-  /* ---- Severidade (escala contida) -------------------------------------- */
-  --sev-info: #7c776c; /* neutro */
-  --sev-warn: #946614; /* âmbar — atenção */
-  --sev-error: #a8443a; /* vermelho suave — grave */
+  --sev-info: #7c776c;
+  --sev-warn: #946614;
+  --sev-error: #a8443a;
 
-  /* ---- Estado de automação ---------------------------------------------- */
-  --safe: #2c7350; /* verde — pode aplicar com segurança */
+  --safe: #2c7350;
   --safe-weak: rgb(47 124 87 / 0.1);
   --safe-line: rgb(47 124 87 / 0.28);
-  --safe-strong: #24694a; /* botão de ação — contraste AA com --on-safe */
+  --safe-strong: #24694a;
   --on-safe: #ffffff;
-  --human: #4a4f8a; /* índigo apagado — decisão do autor */
+  --human: #4a4f8a;
   --human-weak: rgb(74 79 138 / 0.08);
   --human-line: rgb(74 79 138 / 0.26);
 
-  /* ---- Marca d'água editorial das anotações ----------------------------- */
   --mark-passage: rgb(154 106 22 / 0.09);
 
   --radius-sm: 5px;
@@ -76,7 +53,6 @@
   color-scheme: light;
 }
 
-/* ---- Dark: alternativa sofisticada, não a origem da identidade ---------- */
 @media (prefers-color-scheme: dark) {
   :root {
     --desk: #14130f;
@@ -116,7 +92,6 @@
   }
 }
 
-/* Overrides explícitos do toggle (vencem o media query em ambas as direções). */
 :root[data-theme="light"] {
   --desk: #ece7dd;
   --sheet: #fdfcf9;
@@ -249,6 +224,10 @@ body {
   font-feature-settings: "cv11", "ss01";
 }
 
+button {
+  cursor: pointer;
+}
+
 ::selection {
   background: var(--accent-weak);
 }
@@ -259,13 +238,10 @@ body {
   border-radius: 4px;
 }
 
-/* O editor é uma superfície ampla, já emoldurada pela folha; o cursor (na cor de
-   marca) indica o foco. Um anel de 2px em volta de toda a coluna pesa — dispensável. */
 textarea.prose-doc:focus-visible {
   outline: none;
 }
 
-/* Scrollbars discretas */
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--rule-3) transparent;
@@ -285,9 +261,6 @@ textarea.prose-doc:focus-visible {
   background-clip: padding-box;
 }
 
-/* ============================================================================
-   A PÁGINA — o documento como superfície de leitura editorial
-   ========================================================================== */
 .prose-doc {
   font-family: var(--font-serif);
   font-size: 1.28rem; /* ~20.5px */
@@ -310,7 +283,6 @@ textarea.prose-doc:focus-visible {
     background-color 0.24s var(--ease-standard);
 }
 
-/* Modo lupa: a página inteira recua; a passagem do caso permanece acesa. */
 .prose-doc.is-focused {
   color: var(--ink-dim);
 }
@@ -320,12 +292,11 @@ textarea.prose-doc:focus-visible {
 .prose-doc.is-focused .mark:not(.is-lit) {
   text-decoration-color: var(--ink-dim);
 }
-/* passagens não selecionadas recuam por completo quando há um caso em foco */
+
 .prose-doc.is-focused .passage:not(.is-lit) {
   background: transparent;
 }
 
-/* ---- Marcas de anotação (sublinhados delicados) ------------------------- */
 .mark {
   cursor: pointer;
   text-decoration-line: underline;
@@ -353,7 +324,6 @@ textarea.prose-doc:focus-visible {
   text-decoration-style: dashed;
 }
 
-/* Passagem (frase longa) — tinta translúcida leve, sem retângulo pesado. */
 .passage {
   background: var(--mark-passage);
   box-decoration-break: clone;
@@ -363,7 +333,6 @@ textarea.prose-doc:focus-visible {
   cursor: pointer;
 }
 
-/* Alvo da reescrita de IA — faixa discreta mostrando exatamente o que a IA tocaria. */
 .rewrite-target {
   background: var(--human-weak);
   box-decoration-break: clone;
@@ -371,7 +340,6 @@ textarea.prose-doc:focus-visible {
   border-radius: 3px;
 }
 
-/* Trecho selecionado — foco suave em cor de marca. */
 .seg-selected {
   background: var(--accent-weak);
   box-shadow: 0 0 0 1px var(--accent-line) inset;
@@ -392,16 +360,12 @@ textarea.prose-doc:focus-visible {
   animation: finding-flash 0.66s var(--ease-settle);
 }
 
-/* Marcador de margem por parágrafo (change-bar discreto) */
 .margin-tick {
   transition:
     opacity 0.2s var(--ease-standard),
     transform 0.2s var(--ease-standard);
 }
 
-/* ============================================================================
-   MOVIMENTO
-   ========================================================================== */
 @keyframes rise {
   from {
     opacity: 0;
@@ -456,7 +420,6 @@ textarea.prose-doc:focus-visible {
   animation: sheet-up 0.32s var(--ease-settle) both;
 }
 
-/* Linhas de lista / itens interativos */
 .row-hit {
   transition:
     background-color 0.14s var(--ease-standard),

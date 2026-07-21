@@ -1354,6 +1354,49 @@ o `AnnotatedDocument`, ADR-027).
 
 ---
 
+## ADR-029 — Fim do registro paralelo de critérios: engine como fonte única
+
+**Contexto.** `app/lib/criteria.ts` mantinha uma união `Criterion` digitada à mão (13 ids),
+paralela ao `PASSES` do engine. Nada travava as duas: adicionar um pass no engine **não** quebrava
+a UI — `metaFor` caía silenciosamente no meta de `jargon`, e a apresentação de um critério novo
+ficava errada sem erro. Dívida registrada no HANDOFF §4.5 ("UI deriva critérios do `Diagnostic`").
+
+**Decisão.** O engine passa a **publicar o conjunto e o tipo** dos critérios; a UI só acrescenta a
+copy editorial, com completude checada em compile-time.
+- Novo `core/criteria.ts` (sem imports — base da cadeia de tipos, sem ciclo): `CRITERION_IDS`
+  (tupla `as const`) + `type CriterionId` derivado + `isCriterionId`. Reexportados por `@/lucid`.
+- `Pass.criterion` deixa de ser `string` e passa a `CriterionId` → um pass não pode declarar um id
+  fora do conjunto (erro de tipo).
+- `app/lib/criteria.ts`: `Criterion = CriterionId`; `CRITERION_META` vira `Record<CriterionId, …>`
+  → **um critério novo no engine obriga a escrever a apresentação antes de compilar.**
+- `test/criteria-registry.test.ts` trava a igualdade de conjuntos entre `PASSES`, `CRITERION_IDS`,
+  `CRITERION_META` e `CRITERION_ORDER` (permutação). A cadeia fica à prova de drift: pass novo →
+  teste vermelho até atualizar `CRITERION_IDS` → typecheck vermelho até escrever o meta.
+
+**Consequências.** Zero mudança de comportamento; a copy editorial e a marcação continuam na view
+(a cerca `core ⊄ app` fica intacta — a UI é que passou a depender do engine, nunca o contrário).
+**851 testes verdes** (4 novos), typecheck/lint/depcheck limpos, UI verificada ao vivo (lista de
+critérios e notas renderizam igual). **Não resolvido de propósito:** a copy (`label`, `why`,
+`signal`, `markStyleClass`) segue sendo trabalho editorial manual — o que este ADR mata é o
+*silêncio*, não a necessidade de escrever a apresentação.
+
+---
+
+## ADR-030 — Tier 3: prova de UI ao vivo (Gemini) + higiene de configuração
+
+**Contexto.** Itens pendentes do HANDOFF §4: a fiação da UI oferecia o Gemini, mas o fluxo só fora
+validado via API; e `.env` tinha `DEEPSEEK_AP_KEY` (typo, faltava o "I").
+
+**Decisão / verificação.** Corrigido o typo (`DEEPSEEK_API_KEY`). Fluxo de reescrita exercido no
+browser com **`gemini-2.5-flash`** sobre a frase-monstro do texto-exemplo (35 palavras): o
+verificador determinístico devolveu **6/6 PROVAS** (peso do trecho 7.0→2.0, peso total 15.0→10.0,
+números/datas preservados, sem jargão novo, sem 1ª pessoa fabricada), **SINAIS** ambos neutros,
+Flesch-PT +18.1, e "Usar como rascunho" habilitado (sem falha de piso) — com o caveat honesto
+renderizado ("não é um selo de qualidade"). **Escopo reduzido nesta sessão:** novos providers
+(OpenAI/Anthropic) e o benchmark ampliado ficam adiados; a interface `ChatProvider` já os acomoda.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
