@@ -891,6 +891,51 @@ o proposer LLM real (atrás de flag, com meta-eval de prompt/modelo) e a fiaçã
 
 ---
 
+## ADR-015 — Tier 3 · proposer LLM real: `Provider → modelos` server-side, o MESMO verificador julga todos
+
+**Status:** aceito · Tier 3, incremento 3 (proposer real via Groq; sem benchmark ainda)
+
+**Contexto.** O verificador determinístico (ADR-014) já julgava propostas, mas o único
+proposer era o stub. Ideia do usuário (endossada): estruturar como **`Provider → modelos`**
+para que o MESMO juiz determinístico avalie candidatos diferentes — melhor que "funciona com
+qualquer LLM", porque gera dado comparável (benchmark honesto, fase seguinte).
+
+**Decisão.**
+1. **Abstração `ChatProvider`** (`report/rewrite/providers/`): só `complete(prompt, opts) →
+   texto`, via `fetch` (sem SDK — não vira dependência do build). `GroqProvider` é a primeira
+   implementação (REST compatível-OpenAI, `temperature 0`, allow-list de modelos). OpenAI/
+   Anthropic/Gemini entram pela mesma interface depois.
+2. **`LlmRewriteProposer`** — monta o prompt versionado (`prompt.ts`, `REWRITE_PROMPT_VERSION`,
+   blindado contra invenção: reescreve só o trecho, preserva números/datas/nomes, responde só
+   JSON), chama o modelo e extrai a reescrita. `id = "<provider>:<model>+<prompt@ver>"`
+   (proveniência/anti-drift, e a coluna do futuro benchmark). Resposta ilegível → `proposed =
+   original` (honesto; o verificador mostra o alvo não resolvido, não fabrica).
+3. **Rota server-side** (`app/api/rewrite/route.ts`, `runtime nodejs`) — a chamada de LLM roda
+   AQUI, nunca no browser: a `GROQ_API_KEY` fica no servidor e **jamais** volta ao cliente.
+   Valida `model ∈ allow-list` (anti-injeção), cap de tamanho, chave ausente → 400. Roda
+   `proposeAndVerify` e devolve o `VerifiedRewrite` já julgado.
+4. **UI** — o cartão ganha um seletor de modelo (stub + modelos Groq) e mostra o `proposerId`
+   como proveniência. Stub segue client-side (offline/demo); Groq via a rota.
+
+**Modelos (free tier desta conta Groq).** DeepSeek **não** está no catálogo desta conta e
+`qwen/qwen3.6-27b` (raciocínio) falha no modo JSON — ambos ficam de fora por ora. Habilitados,
+todos confirmados retornando JSON válido com `temperature 0`: `llama-3.3-70b-versatile`,
+`llama-3.1-8b-instant`, `openai/gpt-oss-120b`, `openai/gpt-oss-20b`. Spread suficiente para o
+benchmark honesto.
+
+**Honestidade.** O verificador é o mesmo — nenhum modelo recebe "aprovação"; a métrica agregada
+do benchmark (fase seguinte) será "propostas sem veto mecânico"/"% que passam todas as PROVAS",
+**nunca "taxa de aprovação"**. O LLM só propõe; a engine determinística decide.
+
+**Consequências.** `core/**` intacto; a cerca segue (o depcheck só proíbe rede em `core` — `report`
+pode fazer rede; `app/api → report` permitido; 64 módulos, 0 violações). Chaves só server-side,
+`.env` (`GROQ_API_KEY`) gitignorado. 9 testes novos com `MockChatProvider` (offline, CI
+byte-idêntica); nenhum teste toca a rede. Verificado ao vivo no browser (Llama 3.3 70B: PROVA
+5/5, total 13→10, Flesch-PT +9.7). **Fora deste incremento:** o harness de benchmark (rede/custo),
+e outros providers (OpenAI/Anthropic/Gemini) pela mesma interface.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

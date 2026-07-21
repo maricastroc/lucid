@@ -87,11 +87,22 @@ verificar** → `app/lib/rewrite.ts` (`StubRewriteProposer` + fixture do texto-e
 `hasBlockingFailure`). Verificado no browser: proposta do exemplo passa 5/5 PROVAS, total
 13→8 ao aplicar. Consome `@/report/rewrite` (app→report permitido; cerca intacta).
 
-**Falta no Tier 3 (próximo incremento):**
-- **Proposer LLM real** — `report/rewrite/llm-proposer.ts` atrás de flag (não é dependência do
-  build), `temperature 0`, modelo/prompt versionados, com **meta-eval** de anti-drift. Idem
-  `probe/llm-probe.ts` para a sonda real. Precisa de `@anthropic-ai/sdk` + API key + custo →
-  decisão do usuário. A UI e o verificador já estão prontos para recebê-lo (troca o proposer).
+**Tier 3 · incremento 3 FEITO — proposer LLM real (Groq).** ADR-015. `Provider → modelos`
+server-side: `ChatProvider`/`GroqProvider` (fetch, sem SDK), `LlmRewriteProposer` (prompt
+versionado blindado, id = `provider:model+prompt@ver`), rota `app/api/rewrite` (chave só
+server-side, allow-list validada, nunca retorna a chave). UI ganhou seletor de modelo +
+proveniência. Modelos free habilitados: `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`,
+`openai/gpt-oss-120b`, `openai/gpt-oss-20b` (DeepSeek não está no catálogo desta conta;
+qwen3.6 falha JSON mode). Verificado ao vivo (Llama 70B: PROVA 5/5, total 13→10). Testes com
+`MockChatProvider` (offline); rede nunca na CI.
+
+**Falta no Tier 3 (próximos incrementos):**
+- **Harness de benchmark** — roda um golden de reescritas por cada modelo e agrega "% que
+  passam todas as PROVAS determinísticas" (NUNCA "taxa de aprovação"). Roda manual (rede/custo),
+  fora da CI. Tabela pro README.
+- **Outros providers** — OpenAI/Anthropic/Gemini pela mesma interface `ChatProvider`. (`.env`
+  já tem `GEMINI_API_KEY`; a linha `DEEPSEEK_AP_KEY` está com typo — falta o "I".)
+- **Sonda real** (`probe/llm-probe.ts`) para ligar o SINAL de sentido no verificador.
 
 ---
 
