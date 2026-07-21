@@ -1,0 +1,18 @@
+{
+  "_comentario": "Palavras com sufixo -ado/-ido (formato de particípio regular) que, na prática, são substantivos lexicalizados — funcionam como palavra independente (frequentemente com plural nominal próprio), não como o particípio de um verbo produtivo no registro em que aparecem. Usado pelo pass de voz passiva (src/lucid/core/passes/passive-voice.ts) para SUPRIMIR o finding quando a palavra aparece logo após 'ser' sem artigo (ex.: 'isso foi resultado de', não 'isso foi o resultado de' — este último já é barrado pelo conector não-reconhecido 'o'). Léxico CURADO e EXTENSÍVEL, não uma lista fechada de todos os substantivos deverbais do português. Comparação em caixa invariante (toLowerCase).",
+  "forms": [
+    "lado", "lados",
+    "sentido", "sentidos",
+    "partido", "partidos",
+    "pedido", "pedidos",
+    "resultado", "resultados",
+    "vestido", "vestidos",
+    "estado", "estados",
+    "cuidado", "cuidados",
+    "agrado", "agrados",
+    "teclado", "teclados",
+    "ditado", "ditados",
+    "feriado", "feriados",
+    "achado", "achados"
+  ]
+}

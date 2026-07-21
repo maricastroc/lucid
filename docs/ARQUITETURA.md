@@ -158,6 +158,15 @@ interface Finding {
 Construído **uma vez** por análise; todos os passes leem o mesmo Document. Isso evita
 recomputar segmentação e garante que todos os offsets são consistentes.
 
+**Convenção de offset (normativa — ver ADR-009, testada em `test/provenance.test.ts`).**
+Todo `start`/`end` (em `Token`, `Sentence`, `Span`) é um índice de **code unit UTF-16**
+sobre `Document.source`, que é a entrada **normalizada em NFC**. `end` é sempre
+**exclusivo**. `Diagnostic.text === Document.source`, então
+`Diagnostic.text.slice(start, end) === span.text` é invariante para todo finding.
+Caracteres fora do BMP (emoji) ocupam 2 code units e deslocam os offsets em 2 — porque
+`.length`/`.slice` do JS operam em code units UTF-16. Nenhum pass reconstrói texto com
+offsets próprios; todos fatiam o mesmo `source`. Essa convenção não muda em silêncio.
+
 ```ts
 interface Token {
   text: string;      // como aparece no source
@@ -439,12 +448,20 @@ detecta a construção mas não tem mapeamento seguro (a decisão do verbo certo
 
 ### 6.4 Jargão / termo incomum (`5.3.2`)
 
-Dois mecanismos, saídas distintas:
+**Decisão de escopo (MVP, ADR-008 em `docs/DECISOES.md`):** só o mecanismo 1 abaixo
+está implementado em `jargonPass`. O mecanismo 2 (raridade por frequência) fica fora do
+runtime nesta etapa inteira — `frequencia.pt.json` não existe ainda e, quando existir,
+serve só de ferramenta OFFLINE de curadoria (achar candidatos para um humano avaliar
+antes de entrarem no glossário), nunca de autoridade de diagnóstico. Ver ADR-008 para o
+raciocínio completo (por que frequência sozinha inverteria precisão⟷recall).
+
+Mecanismos previstos, saídas distintas:
 
 1. **Glossário jargão→comum** (`jargao.pt.json`): termo técnico com equivalente comum
-   **único**. → flag `warning` **com `suggestion`**. 
+   **único**. → flag `warning` **com `suggestion`**. **Implementado.**
 2. **Raridade por frequência** (`frequencia.pt.json`): palavra abaixo do ranque de corte
    e **sem** mapeamento no glossário. → flag `info` "termo pouco comum", **sem sugestão**.
+   **Não implementado nesta etapa** (ADR-008).
 
 Blindagens:
 - **Sentido múltiplo nunca troca** ("banco", "manga", "processo"): marcar a palavra como
@@ -508,6 +525,20 @@ camada `report`, consumindo `Diagnostic` + escolhendo trechos/perguntas.
   e modelo versionados; regressão quebra o build. Usa `stub-probe` no CI por default.
 - **Calibração de precisão:** para passiva/nominalização/jargão, manter um conjunto de
   **contra-exemplos** (frases que NÃO devem disparar) — o guardião contra falsos positivos.
+- **Golden set integrado + snapshots (consolidação, ADR-009):** `test/golden/` roda
+  documentos completos por `analyze()` de ponta a ponta, com asserções semânticas
+  nomeadas E snapshots do `Diagnostic` inteiro. Os snapshots são o **contrato observável**
+  da Camada 1. Suítes dedicadas: `test/determinism.test.ts` (repetição byte-idêntica,
+  24 permutações de ordem de passes, independência de ordem de dataset, estado
+  compartilhado A-B-A, variações de Config), `test/interaction.test.ts` (múltiplos
+  critérios por texto, sem dedup entre critérios distintos), `test/ordering.test.ts`
+  (auditoria de `sortFindings`), `test/provenance.test.ts` (offsets UTF-16/NFC/Unicode),
+  `test/score-audit.test.ts` (score derivado, sem contagem dupla, sem aprovação).
+- **Política de revisão de snapshot (ADR-009):** um snapshot que muda exige revisão
+  humana explícita e causa documentada; nunca se roda `vitest -u` às cegas; mudança
+  semântica relevante (severidade, span, sugestão, `LUCID_VERSION`) é registrada em ADR/
+  changelog antes de reescrever o retrato. Diferenciar mudança desejada de regressão é
+  parte do processo, não um detalhe.
 
 Tooling de teste: **Vitest** (rápido, snapshots nativos, TS direto). Registrar em
 `docs/DECISOES.md`.
@@ -527,6 +558,12 @@ Tooling de teste: **Vitest** (rápido, snapshots nativos, TS direto). Registrar 
 4. Testes de fronteira (I1) já passando (mesmo sem implementação).
 
 ### Fase 1 — MVP Camada 1 (núcleo do produto)
+> **Estado:** itens 1–11 concluídos — os quatro critérios linguísticos do MVP
+> (`long_sentence`, `passive_voice`, `nominalization`, `jargon`) estão implementados
+> (ADR-006/007/008) e a Camada 1 foi **consolidada** (golden set integrado, snapshots do
+> `Diagnostic`, suítes de determinismo/ordenação/proveniência/score — ADR-009). Itens
+> 12–13 (`probe/` real e CLI) permanecem abertos.
+
 Ordem obrigatória (dependências):
 1. **`normalize.ts`** (NFC + caixa invariante) + testes.
 2. **`segment-sentences.ts`** + `abreviacoes.pt.json` + snapshots. *(fundação)*
@@ -539,10 +576,12 @@ Ordem obrigatória (dependências):
    `verbos-ser-estar.pt.json` + contra-exemplos.
 8. **Pass `nominalization`** (`5.3.3/5.3.4`, caso verbo-leve) + `nominalizacoes.pt.json`
    + `verbos-leves.pt.json`.
-9. **Pass `jargon`** (`5.3.2`) + `jargao.pt.json` + `frequencia.pt.json` (+ tratamento de
-   ambíguos/nomes próprios).
-10. **`score/index.ts`** + integração no analyzer.
-11. **Golden set inicial** (10–20 trechos) + snapshots + determinism/boundary suites.
+9. **Pass `jargon`** (`5.3.2`) + `jargao.pt.json` (+ tratamento de nomes próprios e
+   aspas) — `frequencia.pt.json` fica fora do runtime desta etapa (ADR-008, §6.4).
+10. **`score/index.ts`** + integração no analyzer. ✅
+11. **Golden set integrado** (`test/golden/`, 17 documentos completos) + snapshots do
+    `Diagnostic` + suítes `determinism`/`ordering`/`interaction`/`provenance`/`score-audit`
+    (ADR-009). ✅ *(boundary suite já existente desde a Fase 0)*
 12. **`probe/`**: interface + `prompt.ts` (versionado) + `interpret.ts` + `stub-probe.ts`.
     `llm-probe.ts` fica como stub lançando "não implementado". Sonda **desligável** por
     flag e ausente do caminho do `core`.

@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 CLAUDE.md
-ARQUITETURA.md
+docs/ARQUITETURA.md
 DECISOES.md

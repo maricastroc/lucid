@@ -1,0 +1,35 @@
+{
+  "_comentario": "Glossário jargão/termo administrativo-jurídico -> equivalente comum, usado pelo pass de jargão (src/lucid/core/passes/jargon.ts). Léxico CURADO e EXTENSÍVEL, restrito a candidatos avaliados individualmente contra 4 critérios (familiaridade real para o leitor-alvo, estabilidade de sentido no domínio, preservação de significado pelo equivalente, ausência de reorganização sintática) -- não é uma lista de todo jargão jurídico/administrativo do português. 'kind' distingue unigrama ('word') de expressão multipalavra ('phrase', 'term' com palavras separadas por um único espaço, comparadas token a token e contíguas). 'domain' é metadado descritivo, não filtro de runtime. 'safeForSuggestion:false' marca termo detectável mas cuja troca automática não é mecanicamente segura (regência ou estrutura sintática dependem do resto da frase) -- 'plain' ainda é preenchido nesses casos para alimentar a 'justification', mas nunca vira 'suggestion'. 'reason' documenta o motivo do bloqueio ('polysemous' | 'context_dependent' | 'institutional' | null). Termos unigrama fortemente polissêmicos (ex.: 'consoante', que é tanto conjunção formal quanto substantivo comum -- letra do alfabeto) foram DELIBERADAMENTE OMITIDOS, não cadastrados com safeForSuggestion:false -- mesmo critério já usado em nominalizacoes.pt.json para 'formação'/'administração'/etc. Formas flexionadas de adjetivos/verbos são listadas explicitamente (mesmo espírito de verbos-leves.pt.json/nominalizacoes.pt.json) -- sem regra de flexão produtiva no matcher. Comparação em caixa invariante (toLowerCase).",
+  "entries": [
+    { "term": "supracitado", "kind": "word", "domain": "legal", "plain": "citado acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supracitada", "kind": "word", "domain": "legal", "plain": "citada acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supracitados", "kind": "word", "domain": "legal", "plain": "citados acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supracitadas", "kind": "word", "domain": "legal", "plain": "citadas acima", "safeForSuggestion": true, "reason": null },
+
+    { "term": "supramencionado", "kind": "word", "domain": "legal", "plain": "mencionado acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supramencionada", "kind": "word", "domain": "legal", "plain": "mencionada acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supramencionados", "kind": "word", "domain": "legal", "plain": "mencionados acima", "safeForSuggestion": true, "reason": null },
+    { "term": "supramencionadas", "kind": "word", "domain": "legal", "plain": "mencionadas acima", "safeForSuggestion": true, "reason": null },
+
+    { "term": "doravante", "kind": "word", "domain": "legal", "plain": "a partir de agora", "safeForSuggestion": true, "reason": null },
+    { "term": "outrossim", "kind": "word", "domain": "legal", "plain": "além disso", "safeForSuggestion": true, "reason": null },
+
+    { "term": "em sede de", "kind": "phrase", "domain": "legal", "plain": "no âmbito de", "safeForSuggestion": true, "reason": null },
+    { "term": "sem prejuízo de", "kind": "phrase", "domain": "legal", "plain": "além de", "safeForSuggestion": true, "reason": null },
+
+    { "term": "na hipótese de", "kind": "phrase", "domain": "legal", "plain": "em caso de", "safeForSuggestion": false, "reason": "context_dependent" },
+    { "term": "de acordo com o disposto", "kind": "phrase", "domain": "legal", "plain": "conforme", "safeForSuggestion": false, "reason": "context_dependent" },
+
+    { "term": "fazer jus a", "kind": "phrase", "domain": "administrative", "plain": "ter direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "faço jus a", "kind": "phrase", "domain": "administrative", "plain": "tenho direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "faz jus a", "kind": "phrase", "domain": "administrative", "plain": "tem direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fazem jus a", "kind": "phrase", "domain": "administrative", "plain": "têm direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fiz jus a", "kind": "phrase", "domain": "administrative", "plain": "tive direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fez jus a", "kind": "phrase", "domain": "administrative", "plain": "teve direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fizeram jus a", "kind": "phrase", "domain": "administrative", "plain": "tiveram direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fará jus a", "kind": "phrase", "domain": "administrative", "plain": "terá direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "farão jus a", "kind": "phrase", "domain": "administrative", "plain": "terão direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "fazia jus a", "kind": "phrase", "domain": "administrative", "plain": "tinha direito a", "safeForSuggestion": true, "reason": null },
+    { "term": "faziam jus a", "kind": "phrase", "domain": "administrative", "plain": "tinham direito a", "safeForSuggestion": true, "reason": null }
+  ]
+}

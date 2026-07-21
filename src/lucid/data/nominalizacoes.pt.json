@@ -1,0 +1,29 @@
+{
+  "_comentario": "Nominalização -> verbo-base, usada pelo pass de nominalização (src/lucid/core/passes/nominalization.ts) na construção '[verbo leve] + [determinante] + [nominalização]'. Léxico CURADO e EXTENSÍVEL, restrito a mapeamentos deliberadamente seguros e relevantes para o domínio administrativo (CLAUDE.md) — não é uma lista de todos os substantivos deverbais do português. Formas singular E plural são listadas explicitamente (mesmo espírito de verbos-ser.pt.json/participios-irregulares.pt.json) — sem regra de pluralização/singularização embutida no matcher, porque '-ção' -> '-ções' não é uma simples remoção de 's' (ao contrário de '-ão' -> '-ões' de outros paradigmas), e o projeto não introduz análise morfológica produtiva. 'sourcePreposition'/'targetPreposition' descrevem a regência: qual preposição a construção nominal usa para o complemento, e qual o verbo-base exige. Só 'targetPreposition: null' está implementado no matcher (a transformação 'solta a preposição de origem') — nenhuma entrada usa 'de' porque nenhuma transformação com preposição preservada foi demonstrada como segura; o campo existe para o dataset poder representar esse caso no futuro. 'safeForSuggestion: false' marca mapeamento genuinamente não-único (ex.: 'revisão' pode ser 'revisar' OU 'rever') — a palavra ainda é reconhecida e gera finding, só nunca gera sugestão. Nominalizações lexicalizadas/institucionais/ambíguas sem mapeamento defensável (formação, administração, operação, edição, condução) foram deliberadamente OMITIDAS do dataset, não incluídas com safeForSuggestion:false — nenhuma aparece nos exemplos-alvo desta etapa. Comparação em caixa invariante (toLowerCase).",
+  "entries": [
+    { "noun": "análise", "verb": "analisar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "análises", "verb": "analisar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "pagamento", "verb": "pagar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "pagamentos", "verb": "pagar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "solicitação", "verb": "solicitar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "solicitações", "verb": "solicitar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "verificação", "verb": "verificar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "verificações", "verb": "verificar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "avaliação", "verb": "avaliar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "avaliações", "verb": "avaliar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "aprovação", "verb": "aprovar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "aprovações", "verb": "aprovar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "correção", "verb": "corrigir", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "correções", "verb": "corrigir", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "atualização", "verb": "atualizar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "atualizações", "verb": "atualizar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "publicação", "verb": "publicar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "publicações", "verb": "publicar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "cancelamento", "verb": "cancelar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "cancelamentos", "verb": "cancelar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "agendamento", "verb": "agendar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "agendamentos", "verb": "agendar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": true },
+    { "noun": "revisão", "verb": "revisar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": false },
+    { "noun": "revisões", "verb": "revisar", "sourcePreposition": "de", "targetPreposition": null, "safeForSuggestion": false }
+  ]
+}

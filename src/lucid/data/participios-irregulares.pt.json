@@ -1,0 +1,30 @@
+{
+  "_comentario": "Particípios irregulares em PT-BR, formas flexionadas (gênero/número), usados pelo pass de voz passiva (src/lucid/core/passes/passive-voice.ts) para reconhecer particípios que não seguem o sufixo regular -ado/-ido. Léxico CURADO e EXTENSÍVEL, não uma lista morfologicamente completa da língua — cobre os verbos irregulares mais frequentes em textos administrativos/jurídicos (domínio-alvo do CLAUDE.md). Comparação em caixa invariante (toLowerCase). Adicionar entradas exige confirmar que a forma não colide com um substantivo/adjetivo lexicalizado mais comum (nesse caso, ela pertence a participios-falsos-nominais.pt.json ou participios-ambiguos.pt.json, não aqui).",
+  "forms": [
+    "feito", "feita", "feitos", "feitas",
+    "dito", "dita", "ditos", "ditas",
+    "visto", "vista", "vistos", "vistas",
+    "posto", "posta", "postos", "postas",
+    "escrito", "escrita", "escritos", "escritas",
+    "aberto", "aberta", "abertos", "abertas",
+    "coberto", "coberta", "cobertos", "cobertas",
+    "descoberto", "descoberta", "descobertos", "descobertas",
+    "ganho", "ganha", "ganhos", "ganhas",
+    "pago", "paga", "pagos", "pagas",
+    "gasto", "gasta", "gastos", "gastas",
+    "morto", "morta", "mortos", "mortas",
+    "aceito", "aceita", "aceitos", "aceitas",
+    "entregue", "entregues",
+    "expulso", "expulsa", "expulsos", "expulsas",
+    "preso", "presa", "presos", "presas",
+    "suspenso", "suspensa", "suspensos", "suspensas",
+    "impresso", "impressa", "impressos", "impressas",
+    "eleito", "eleita", "eleitos", "eleitas",
+    "frito", "frita", "fritos", "fritas",
+    "extinto", "extinta", "extintos", "extintas",
+    "incluso", "inclusa", "inclusos", "inclusas",
+    "expresso", "expressa", "expressos", "expressas",
+    "dado", "dada", "dados", "dadas",
+    "aceso", "acesa", "acesos", "acesas"
+  ]
+}

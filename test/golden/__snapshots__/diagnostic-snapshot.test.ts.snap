@@ -1,0 +1,842 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 85.8,
+    "sentences": 3,
+    "syllables": 28,
+    "syllablesPerWord": 1.9,
+    "words": 15,
+    "wordsPerSentence": 5,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "A prefeitura abriu as inscrições. O prazo termina em maio. Os documentos vão no site.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "long_sentence",
+      "justification": "Frase com 29 palavras — acima do limite de 20 (alerta). Considere dividir em frases menores ou cortar informação supérflua; a ferramenta não reescreve automaticamente.",
+      "meta": {
+        "threshold": 20,
+        "words": 29,
+      },
+      "principle": "5.3.4",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 215,
+        "start": 0,
+        "text": "A comissão responsável pela avaliação das propostas técnicas apresentadas pelos participantes do certame decidiu, após longa deliberação interna, prorrogar o prazo final de entrega dos documentos exigidos no edital.",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": -5.2,
+    "sentences": 1,
+    "syllables": 77,
+    "syllablesPerWord": 2.7,
+    "words": 29,
+    "wordsPerSentence": 29,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 3.4,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "A comissão responsável pela avaliação das propostas técnicas apresentadas pelos participantes do certame decidiu, após longa deliberação interna, prorrogar o prazo final de entrega dos documentos exigidos no edital.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Frase na voz passiva, sem agente explícito — não é possível saber, só pelo texto, quem praticou a ação. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "meta": {
+        "hasAgent": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 20,
+        "start": 10,
+        "text": "foi negado",
+      },
+    },
+    {
+      "category": "lexical",
+      "criterion": "jargon",
+      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "no âmbito de"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "meta": {
+        "domain": "legal",
+        "kind": "phrase",
+        "term": "em sede de",
+      },
+      "principle": "5.3.2",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 31,
+        "start": 21,
+        "text": "em sede de",
+      },
+      "suggestion": "no âmbito de",
+    },
+    {
+      "category": "lexical",
+      "criterion": "jargon",
+      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "citado acima"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "meta": {
+        "domain": "legal",
+        "kind": "word",
+        "term": "supracitado",
+      },
+      "principle": "5.3.2",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 65,
+        "start": 54,
+        "text": "supracitado",
+      },
+      "suggestion": "citado acima",
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 54.4,
+    "sentences": 2,
+    "syllables": 31,
+    "syllablesPerWord": 2.2,
+    "words": 14,
+    "wordsPerSentence": 7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 7.1,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 2,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 14.3,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 3,
+  },
+  "text": "O recurso foi negado em sede de apelação. O documento supracitado consta nos autos.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "nominalization",
+      "justification": "Nominalização com verbo-suporte — o verbo "analisar" poderia substituir a construção diretamente, deixando a frase mais direta. A ferramenta não reescreve automaticamente; veja a sugestão.",
+      "meta": {
+        "baseVerb": "analisar",
+        "hasSuggestion": true,
+        "lightVerb": "fazer",
+        "nominalization": "análise",
+      },
+      "principle": "5.3.3",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 39,
+        "start": 10,
+        "text": "fazer a análise de documentos",
+      },
+      "suggestion": "analisar documentos",
+    },
+    {
+      "category": "syntactic",
+      "criterion": "nominalization",
+      "justification": "Nominalização com verbo-suporte — o verbo "pagar" poderia substituir a construção diretamente, deixando a frase mais direta. A ferramenta não reescreve automaticamente; veja a sugestão.",
+      "meta": {
+        "baseVerb": "pagar",
+        "hasSuggestion": true,
+        "lightVerb": "realizar",
+        "nominalization": "pagamento",
+      },
+      "principle": "5.3.3",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 83,
+        "start": 55,
+        "text": "realizar o pagamento da taxa",
+      },
+      "suggestion": "pagar a taxa",
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 48.4,
+    "sentences": 2,
+    "syllables": 32,
+    "syllablesPerWord": 2.3,
+    "words": 14,
+    "wordsPerSentence": 7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 2,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 14.3,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 2,
+  },
+  "text": "É preciso fazer a análise de documentos. Também convém realizar o pagamento da taxa.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "long_sentence",
+      "justification": "Frase com 29 palavras — acima do limite de 20 (alerta). Considere dividir em frases menores ou cortar informação supérflua; a ferramenta não reescreve automaticamente.",
+      "meta": {
+        "threshold": 20,
+        "words": 29,
+      },
+      "principle": "5.3.4",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 208,
+        "start": 0,
+        "text": "O pedido foi analisado pela comissão, que decidiu fazer a verificação dos documentos supracitados antes de conceder, em sede de procedimento administrativo, o benefício pleiteado pelo interessado no processo.",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a ação. Considere reescrever na voz ativa para tornar a frase mais direta; a ferramenta não reescreve automaticamente.",
+      "meta": {
+        "hasAgent": true,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 36,
+        "start": 9,
+        "text": "foi analisado pela comissão",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "nominalization",
+      "justification": "Nominalização com verbo-suporte — o verbo "verificar" poderia substituir a construção diretamente, mas a ferramenta não gera uma sugestão automática porque o complemento da frase não está em um formato reconhecido com segurança.",
+      "meta": {
+        "baseVerb": "verificar",
+        "hasSuggestion": false,
+        "lightVerb": "fazer",
+        "nominalization": "verificação",
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 69,
+        "start": 50,
+        "text": "fazer a verificação",
+      },
+      "suggestion": undefined,
+    },
+    {
+      "category": "lexical",
+      "criterion": "jargon",
+      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "citados acima"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "meta": {
+        "domain": "legal",
+        "kind": "word",
+        "term": "supracitados",
+      },
+      "principle": "5.3.2",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 97,
+        "start": 85,
+        "text": "supracitados",
+      },
+      "suggestion": "citados acima",
+    },
+    {
+      "category": "lexical",
+      "criterion": "jargon",
+      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "no âmbito de"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "meta": {
+        "domain": "legal",
+        "kind": "phrase",
+        "term": "em sede de",
+      },
+      "principle": "5.3.2",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 127,
+        "start": 117,
+        "text": "em sede de",
+      },
+      "suggestion": "no âmbito de",
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": -8.1,
+    "sentences": 1,
+    "syllables": 78,
+    "syllablesPerWord": 2.7,
+    "words": 29,
+    "wordsPerSentence": 29,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 3.4,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 3.4,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 3.4,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 2,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 6.9,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 5,
+  },
+  "text": "O pedido foi analisado pela comissão, que decidiu fazer a verificação dos documentos supracitados antes de conceder, em sede de procedimento administrativo, o benefício pleiteado pelo interessado no processo.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 68.9,
+    "sentences": 3,
+    "syllables": 33,
+    "syllablesPerWord": 2.1,
+    "words": 16,
+    "wordsPerSentence": 5.3,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "O termo "supracitado" aparece. Ele disse que, Outrossim, viria. A empresa tem sede em São Paulo.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 0,
+    "sentences": 0,
+    "syllables": 0,
+    "syllablesPerWord": 0,
+    "words": 0,
+    "wordsPerSentence": 0,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Frase na voz passiva, sem agente explícito — não é possível saber, só pelo texto, quem praticou a ação. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "meta": {
+        "hasAgent": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 23,
+        "start": 10,
+        "text": "foi publicada",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 53.3,
+    "sentences": 1,
+    "syllables": 30,
+    "syllablesPerWord": 2.1,
+    "words": 14,
+    "wordsPerSentence": 14,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 7.1,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "A decisão foi publicada — “sem prejuízo de” eventual recurso — conforme o §2º do artigo.",
+}
+`;
+
+exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a ação. Considere reescrever na voz ativa para tornar a frase mais direta; a ferramenta não reescreve automaticamente.",
+      "meta": {
+        "hasAgent": true,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": false,
+      "severity": "warning",
+      "span": {
+        "end": 38,
+        "start": 12,
+        "text": "foi assinado pelo diretor.",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Frase na voz passiva, sem agente explícito — não é possível saber, só pelo texto, quem praticou a ação. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "meta": {
+        "hasAgent": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "warning",
+      "span": {
+        "end": 64,
+        "start": 49,
+        "text": "foram aprovadas",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "399cd3c1",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+  },
+  "metrics": {
+    "fleschPt": 40.7,
+    "sentences": 2,
+    "syllables": 24,
+    "syllablesPerWord": 2.4,
+    "words": 10,
+    "wordsPerSentence": 5,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 2,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 20,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "jargon",
+        "densityPer100Words": 0,
+        "principle": "5.3.2",
+      },
+    ],
+    "totalFindings": 2,
+  },
+  "text": "O relatório foi assinado pelo diretor. As contas foram aprovadas.",
+}
+`;

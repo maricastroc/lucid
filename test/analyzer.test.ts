@@ -15,7 +15,12 @@ describe("analyze — documento vazio", () => {
     expect(diagnostic.text).toBe("");
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score).toEqual({
-      byCriterion: [{ criterion: "long_sentence", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 }],
+      byCriterion: [
+        { criterion: "long_sentence", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "passive_voice", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "nominalization", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "jargon", principle: "5.3.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+      ],
       totalFindings: 0,
     });
     expect(diagnostic.metrics).toEqual({
@@ -35,9 +40,11 @@ describe("analyze — documento sem findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(1);
-    expect(diagnostic.score.byCriterion[0].count).toEqual({ info: 0, warning: 0, error: 0 });
-    expect(diagnostic.score.byCriterion[0].densityPer100Words).toBe(0);
+    expect(diagnostic.score.byCriterion).toHaveLength(4);
+    for (const entry of diagnostic.score.byCriterion) {
+      expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
+      expect(entry.densityPer100Words).toBe(0);
+    }
     expect(diagnostic.metrics.words).toBeGreaterThan(0);
     expect(diagnostic.metrics.sentences).toBe(2);
   });

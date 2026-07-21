@@ -29,7 +29,7 @@ import { PASSES } from "./passes/registry";
 import { buildScore } from "./score";
 import { DEFAULT_CONFIG, hashConfig } from "./config";
 import type { Config } from "./config";
-import type { Diagnostic, Finding, PassContext } from "./types";
+import type { Diagnostic, Finding, Pass, PassContext } from "./types";
 
 /**
  * Versão da lib exposta em `DiagnosticMeta.lucidVersion`. Constante de código, não lida
@@ -61,21 +61,34 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
 }
 
 /**
- * Analisa um texto e retorna o diagnóstico completo da Camada 1. Síncrona, pura,
- * determinística — mesma entrada (texto + config) sempre produz o mesmo `Diagnostic`,
- * byte a byte.
+ * Núcleo da análise, parametrizado pela LISTA DE PASSES. `analyze` (abaixo) é a API
+ * pública e sempre chama isto com o `PASSES` canônico do registry — este parâmetro
+ * existe como SEAM INTERNO DE TESTE (independência da ordem de execução dos passes,
+ * ver `test/determinism.test.ts`), no mesmo espírito de `sortFindings` já ser exportada
+ * daqui para teste. NÃO é reexportado pelo barrel `src/lucid/index.ts` — a API pública
+ * (docs/ARQUITETURA.md §3.6) continua sendo só `analyze`, então isto não amplia a
+ * superfície pública. Ver ADR-009 em docs/DECISOES.md.
+ *
+ * Nota: `buildScore` recebe o mesmo `passes` — logo a ORDEM do array `Score.byCriterion`
+ * acompanha a ordem dos passes recebidos aqui. Em produção isso é sempre `PASSES` (ordem
+ * fixa); só um teste que injeta uma permutação observa `byCriterion` reordenado, e as
+ * CONTAGENS por critério são idênticas em qualquer ordem (ver ADR-009).
  */
-export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
+export function analyzeWithPasses(
+  text: string,
+  passes: readonly Pass[],
+  configOverrides?: Partial<Config>,
+): Diagnostic {
   const config = mergeConfig(configOverrides);
   const doc = buildDocument(text);
   const metrics = runMetrics(doc, config);
 
   const context: PassContext = Object.freeze({ doc, config, data: {} });
 
-  const rawFindings = PASSES.flatMap((pass) => pass.run(context));
+  const rawFindings = passes.flatMap((pass) => pass.run(context));
   const findings = sortFindings(rawFindings);
 
-  const score = buildScore(findings, PASSES, metrics.words, config);
+  const score = buildScore(findings, passes, metrics.words, config);
 
   return {
     text: doc.source,
@@ -88,4 +101,13 @@ export function analyze(text: string, configOverrides?: Partial<Config>): Diagno
       standardVersion: STANDARD_VERSION,
     },
   };
+}
+
+/**
+ * Analisa um texto e retorna o diagnóstico completo da Camada 1. Síncrona, pura,
+ * determinística — mesma entrada (texto + config) sempre produz o mesmo `Diagnostic`,
+ * byte a byte.
+ */
+export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
+  return analyzeWithPasses(text, PASSES, configOverrides);
 }

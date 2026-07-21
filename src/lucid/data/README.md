@@ -37,3 +37,195 @@ grupo.
 
 **Licença:** lista de curadoria própria (fatos de língua, não copiáveis de terceiros);
 sem dependência de fonte externa com licença restritiva.
+
+## `verbos-ser.pt.json`
+
+**Usado por:** `src/lucid/core/passes/passive-voice.ts` (pass de voz passiva — Fase 1).
+
+**Propósito:** âncora do matcher — o pass só considera candidato a voz passiva o que
+vem logo depois de uma destas formas. Lista fechada, não um conjugador.
+
+**Critério de curadoria:** paradigma completo de `ser` (indicativo, subjuntivo,
+infinitivo pessoal/impessoal, gerúndio, particípio, imperativo). Deliberadamente
+**não** inclui formas de `estar`/`ficar` — fora de escopo nesta etapa (ver
+`docs/DECISOES.md`, ADR-006); `Config.passiveVoice.treatEstarAsPassive` existe mas
+ainda não é consultado por nenhum código.
+
+**Fora de escopo deliberado:** `estar`/`ficar` (Fase 2, se algum dia — exige separar
+leitura resultativa de leitura passiva genuína, uma heurística própria).
+
+**Formato:** `{ "forms": string[] }`, comparação em caixa invariante.
+
+**Licença:** fatos de flexão verbal, curadoria própria.
+
+## `participios-irregulares.pt.json`
+
+**Usado por:** `src/lucid/core/passes/passive-voice.ts`.
+
+**Propósito:** reconhece particípios que não seguem o sufixo regular `-ado/-ido` — ou
+cujo radical é curto demais para o padrão regular do matcher (`dado`, de "dar").
+
+**Critério de curadoria:** ~20 verbos de alta frequência em texto administrativo/
+jurídico (domínio-alvo do `CLAUDE.md`), formas flexionadas por gênero/número. Curado e
+extensível — **não** é uma lista morfologicamente completa da língua. Adicionar uma
+entrada exige confirmar que ela não colide com um substantivo/adjetivo lexicalizado
+mais comum (nesse caso pertence a um dos dois léxicos de exclusão abaixo).
+
+**Fora de escopo deliberado:** verbos irregulares raros ou regionais; formas com baixa
+probabilidade de aparecer em texto administrativo/jurídico.
+
+**Formato:** `{ "forms": string[] }`, comparação em caixa invariante.
+
+**Licença:** fatos de flexão verbal, curadoria própria.
+
+## `participios-ambiguos.pt.json`
+
+**Usado por:** `src/lucid/core/passes/passive-voice.ts` — para **suprimir** o finding,
+nunca para emitir.
+
+**Propósito:** particípios genuínos (têm verbo de origem real) que, na posição "ser +
+particípio", leem-se quase sempre como adjetivo predicativo de estado psicológico ou
+relacional ("ela é dedicada", "ele é casado", "ele está envolvido no caso") — não como
+voz passiva de uma ação praticada por um agente.
+
+**Critério de curadoria:** julgamento linguístico de que a leitura adjetival domina
+esmagadoramente sobre a leitura de ação passiva. Curado e extensível — cada entrada
+nova (ver `docs/DECISOES.md`, ADR-006, para o exemplo de `envolvido`) precisa da mesma
+justificativa: pertencer à mesma classe semântica das entradas já presentes
+(psicológico/relacional), não ser um ajuste pontual para um único exemplo.
+
+**Fora de escopo deliberado:** particípios dual-use onde a leitura passiva é tão
+plausível quanto a adjetival dependendo de contexto (ex.: "surpreendido") — entram na
+lista só quando o desequilíbrio a favor do adjetivo é claro.
+
+**Formato:** `{ "forms": string[] }`, comparação em caixa invariante.
+
+**Licença:** julgamento linguístico próprio, curadoria própria.
+
+## `verbos-leves.pt.json`
+
+**Usado por:** `src/lucid/core/passes/nominalization.ts` (pass de nominalização —
+Fase 1).
+
+**Propósito:** ancora o matcher da construção `[verbo leve] + [determinante] +
+[nominalização]`. Cada entrada associa a forma superficial ao lema e marca se é a
+forma infinitiva — a trava que decide se uma sugestão mecânica pode ser gerada
+(nunca se reconjuga o verbo-base para uma forma finita).
+
+**Critério de curadoria:** os 5 verbos-suporte demonstrados como seguros no pedido de
+implementação (`fazer, realizar, efetuar, promover, proceder`), com cobertura de
+infinitivo, presente do indicativo (3ª pessoa), pretérito perfeito, futuro do
+presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo e
+gerúndio — 14 formas por verbo. Deliberadamente **não** cobre 1ª/2ª pessoa,
+imperativo nem pretérito mais-que-perfeito simples.
+
+**Fora de escopo deliberado:** `dar`/`ter` como verbos-suporte de nominalização
+("dar continuidade a") — regência e ambiguidade lexical próprias, não demonstradas
+como seguras nesta etapa (ver `docs/DECISOES.md`, ADR-007). Regências alternativas de
+`proceder` (`proceder com`) — só o padrão `à/ao/às/aos` foi implementado.
+
+**Formato:** `{ "forms": LightVerbForm[] }`, comparação em caixa invariante.
+
+**Licença:** fatos de flexão verbal, curadoria própria.
+
+## `nominalizacoes.pt.json`
+
+**Usado por:** `src/lucid/core/passes/nominalization.ts`.
+
+**Propósito:** mapeia nominalização → verbo-base + regência, para decidir se uma
+construção `verbo-leve + determinante + nominalização` corresponde a um verbo único e
+seguro para sugestão mecânica.
+
+**Critério de curadoria:** só nominalizações com mapeamento verbo único e defensável,
+relevantes ao domínio administrativo (`CLAUDE.md`). Formas singular e plural são
+listadas explicitamente — sem regra de pluralização/singularização no matcher, porque
+"-ção" → "-ções" não é uma simples remoção de "s", e o projeto não introduz
+morfologia produtiva nem para desfazer flexão.
+
+**Fora de escopo deliberado:** `formação`, `administração`, `operação`, `edição`,
+`condução` — nenhuma tem mapeamento verbo único defensável (lexicalizaram para
+sentido institucional/concreto) e nenhuma aparece nos exemplos-alvo desta etapa;
+completamente omitidas, não incluídas com `safeForSuggestion:false`. `revisão` é a
+exceção: cadastrada (aparece nos exemplos de detecção do pedido) mas com
+`safeForSuggestion:false` (mapeamento genuinamente não-único — "revisar" ou "rever").
+
+**Formato:** `{ "entries": NominalizationEntry[] }`, comparação em caixa invariante.
+
+**Licença:** julgamento linguístico próprio, curadoria própria.
+
+## `jargao.pt.json`
+
+**Usado por:** `src/lucid/core/passes/jargon.ts` (pass de jargão — Fase 1, ver
+`docs/DECISOES.md`, ADR-008).
+
+**Propósito:** mapeia termo/expressão de linguagem administrativa e jurídica ao
+equivalente em linguagem simples, quando existe um equivalente único e defensável.
+É a **autoridade exclusiva de runtime** para este critério — nenhuma lista de
+frequência participa da decisão de emitir finding (ver ADR-008).
+
+**Critério de curadoria:** cada entrada passou por 4 perguntas antes de entrar — (1) é
+realmente pouco familiar para o leitor-alvo; (2) tem sentido estável no domínio
+administrativo/jurídico; (3) o equivalente preserva o significado; (4) a substituição
+local não quebra a gramática da frase. Unigramas fortemente polissêmicos (mais de um
+sentido comum, sem contexto que desambigue) são **excluídos por princípio** — nunca
+cadastrados como unigrama isolado, mesmo com `safeForSuggestion:false`. Expressões
+multipalavra são preferidas exatamente porque a própria expressão desambigua o sentido
+("em sede de" não compete com o sentido comum de "sede"), o que abre espaço para
+cadastrar termos que, isolados, seriam ambíguos demais.
+
+**Formas flexionadas são listadas explicitamente**, sem regra de flexão produtiva no
+matcher — mesma disciplina de `verbos-leves.pt.json`/`nominalizacoes.pt.json`.
+`fazer jus a` tem 11 formas cadastradas (infinitivo + 3ª pessoa singular/plural em
+presente/pretérito perfeito/futuro/imperfeito + 1ª pessoa singular presente/pretérito),
+recorte de frequência de uso em texto administrativo — não é conjugação completa do
+verbo "fazer".
+
+**`safeForSuggestion:false` não significa "não cadastrar".** Diferente da guarda de
+unigrama polissêmico (que impede o cadastro), aqui a expressão já está desambiguada por
+ser multipalavra — o bloqueio é sobre a TROCA, não sobre a detecção: `na hipótese de` e
+`de acordo com o disposto` são detectadas normalmente, mas a substituição depende do que
+vem depois na frase (sintagma nominal vs. oração com "que", ou regência da preposição
+seguinte) — risco de regência quebrada, não de sentido incerto. `plain` continua
+preenchido nesses casos para alimentar a `justification`, nunca a `suggestion`.
+
+**Fora de escopo deliberado (ver ADR-008 para o raciocínio completo):**
+- `consoante` — substantivo comum (letra do alfabeto) tão frequente quanto o uso
+  conjuntivo formal; nenhum contexto sintático barato o bastante para desambiguar sem
+  parser. Omitida, não cadastrada com `safeForSuggestion:false`.
+- Frequência lexical (`frequencia.pt.json`, previsto em `docs/ARQUITETURA.md` §2) —
+  vira ferramenta de curadoria offline (achar candidatos para humano avaliar antes de
+  entrar aqui), nunca dispara finding em runtime.
+- Siglas, nomes próprios, NER, aprendizado por corpus, embeddings, LLM — fora do MVP
+  deste critério inteiro.
+- "Termo definido localmente" (`"X (doravante 'Y')"`) — generalizar essa detecção com
+  segurança exigiria mais do que casamento local de tokens; deixada fora do matcher
+  inicial e registrada como limitação (ADR-008), não improvisada.
+
+**Formato:** `{ "entries": JargonEntry[] }` — `term` (minúsculo, palavras separadas por
+um único espaço para `kind:"phrase"`), `kind` (`"word" | "phrase"`), `domain`
+(`"administrative" | "legal" | "general"`, metadado descritivo), `plain` (string ou
+`null`), `safeForSuggestion` (boolean), `reason`
+(`"polysemous" | "context_dependent" | "institutional" | null`). Comparação em caixa
+invariante.
+
+**Licença:** julgamento linguístico próprio, curadoria própria.
+
+## `participios-falsos-nominais.pt.json`
+
+**Usado por:** `src/lucid/core/passes/passive-voice.ts` — para **suprimir** o finding,
+nunca para emitir.
+
+**Propósito:** palavras com sufixo `-ado/-ido` (formato de particípio regular) que, na
+prática, são substantivos lexicalizados — funcionam como palavra independente,
+frequentemente com plural nominal próprio ("foi resultado de", "foi pedido dela").
+
+**Critério de curadoria:** mesma lógica de `participios-ambiguos.pt.json`, mas para a
+leitura nominal em vez de adjetival. Curado e extensível.
+
+**Fora de escopo deliberado:** substantivos deverbais raros; casos em que o artigo já
+precede a palavra (`"foi o resultado"`) — esses já são barrados pelo próprio matcher
+(artigo não é conector reconhecido entre `ser` e o candidato), sem precisar do léxico.
+
+**Formato:** `{ "forms": string[] }`, comparação em caixa invariante.
+
+**Licença:** julgamento linguístico próprio, curadoria própria.

@@ -216,6 +216,422 @@ comportamento; `npm run typecheck`/`lint`/`depcheck` continuam limpos.
 
 ---
 
+## ADR-006 — Voz passiva: matcher local por tokens, sem parser, precisão sobre recall
+
+**Status:** aceito · Fase 1 (`passiveVoicePass`, critério `passive_voice`, `5.3.3`)
+
+**Contexto.** `5.3.3` (frases claras, quem faz o quê) exige detectar voz passiva
+analítica em PT-BR. O `core` não tem — e por ADR-001 não vai ter — um parser sintático
+ou POS tagger. A questão era se dava para detectar essa construção com precisão
+aceitável só com regras + léxico + varredura de tokens.
+
+**Decisão: matcher local ancorado em formas de `ser`, sem parser.** A passiva
+analítica em PT-BR é uma construção *local*: `ser` (léxico fechado, `verbos-ser.pt.json`)
+seguido de particípio dentro de uma janela curta de tokens. Ancorar no auxiliar — não
+"varrer atrás de qualquer -ado/-ido" — é o que torna o matcher preciso sem precisar de
+sujeito, concordância a distância ou fronteira de cláusula formal:
+
+- **Por que ancorar em `ser`:** classe fechada e pequena (~55 formas), teste de
+  pertinência a `Set` é 100% determinístico e não gera falso positivo por si só — todo
+  o trabalho de precisão fica concentrado no segundo gate (formato de particípio).
+- **`sido`/`ser` (infinitivo) já resolvem os casos compostos** ("tinha sido aprovado",
+  "vai ser analisado") **sem precisar reconhecer `tinha`/`vai` como auxiliar** — ambos
+  já são âncoras do léxico de `ser` por si só. Isso evita exatamente o "detector
+  genérico de segundo verbo" que dependeria de POS tagging.
+- **Barreiras (pontuação de oração + conjunções fechadas `que/mas/e/porque/quando`)
+  substituem fronteira de cláusula formal:** aproximação suficiente para uma
+  construção local, sem custo de parser.
+
+**Por que prioriza precisão sobre recall.** Um falso positivo sistemático (ex.:
+sinalizar "ele é interessado no assunto" como passiva, ou "isso foi resultado de" como
+voz passiva) corrói a confiança na ferramenta mais rápido do que um falso negativo
+pontual — mesmo raciocínio de `CLAUDE.md`/ADR-001. Por isso:
+- qualquer token não reconhecido entre âncora e particípio **aborta a busca** — o
+  matcher nunca "pula" tokens desconhecidos torcendo para achar um particípio mais à
+  frente;
+- vírgula entre auxiliar e particípio é tratada como barreira dura, mesmo sabendo que
+  isso descarta casos genuínos como "foi, segundo consta, aprovado" (falso negativo
+  aceito, medido no golden set — ver `test/eval/passive-voice-golden.ts`);
+- dois léxicos de exclusão (`participios-ambiguos.pt.json`,
+  `participios-falsos-nominais.pt.json`) suprimem candidatos previsivelmente não-passivos
+  em vez de deixar o matcher arriscar.
+
+**Por que não detecta passiva sintética (`se`).** "Vendem-se casas" é outra
+construção, com outro conjunto de falsos positivos (reflexivo, recíproco, `se`
+inerente ao verbo) — já registrado como Fase 2 em `docs/ARQUITETURA.md` §6.2. Detectar
+as duas construções no mesmo pass misturaria dois problemas de precisão diferentes.
+
+**Por que `estar`/`ficar` não são detectados nesta etapa**, apesar de `Config.passiveVoice.treatEstarAsPassive` já existir (default `false`, criado numa etapa anterior antecipando isso): `estar`/`ficar` + particípio é predominantemente resultativo/adjetival
+("a porta está fechada" ≠ alguém fechando a porta agora), não voz passiva de ação.
+Wiring esse flag exige uma heurística própria para separar leitura resultativa de
+leitura passiva genuína — não implementado aqui, o flag continua um no-op documentado.
+
+**Por que formas ambíguas são suprimidas, não sinalizadas com severidade menor.** Dois
+léxicos, propositalmente separados por proveniência:
+- `participios-ambiguos.pt.json` — particípios genuínos que, em "ser + particípio",
+  leem-se quase sempre como adjetivo de estado psicológico/relacional (dedicado,
+  interessado, casado, envolvido…);
+- `participios-falsos-nominais.pt.json` — sufixo de particípio coincidente com
+  substantivo lexicalizado (resultado, pedido, sentido, achado…).
+
+Ambos CURADOS e EXTENSÍVEIS, não exaustivos — documentado em `src/lucid/data/README.md`.
+Entradas só entram por julgamento linguístico de que a leitura não-passiva domina
+esmagadoramente; a avaliação (`test/eval/passive-voice-eval.test.ts`) é o mecanismo de
+detectar buracos reais, não um alvo para "decorar" (ver processo abaixo).
+
+**Por que não há sugestão automática.** Mesmo com agente explícito identificado,
+reconjugar para a ativa (reordenar sujeito/objeto, ajustar concordância de
+número/pessoa/tempo) não é uma transformação mecanicamente segura (I7) — a mesma
+decisão já tomada para `sentence-length` e antecipada em `docs/ARQUITETURA.md` §6.2.
+`suggestion` fica sempre ausente; `justification` (em PT-BR) descreve o achado e sugere
+que o humano considere reescrever, sem produzir o texto.
+
+**Processo de curadoria (não é "ajustar pra passar no teste").** Antes de fechar o
+golden set, a auditoria da própria regex encontrou 3 lacunas genuínas — corrigidas por
+mérito linguístico independente, não porque um exemplo do golden set falhava:
+1. `íd` (í acentuado) faltava no sufixo regular — sem ela, toda a classe de verbos em
+   vogal+ir (construir, incluir, concluir, distribuir…) ficava fora do reconhecimento;
+   generaliza para qualquer verbo dessa classe, não só um exemplo.
+2. `dado`/`aceso` (particípios com radical curto ou irregular) faltavam no léxico de
+   irregulares — verbos "dar"/"acender" são frequentes o bastante para justificar a
+   entrada por si só.
+3. `achado` (substantivo lexicalizado, mesma classe de `pedido`/`resultado`) faltava em
+   `participios-falsos-nominais.pt.json`.
+
+Depois dessas correções, a avaliação rodou contra as 46 entradas do golden set e achou
+mais uma lacuna genuína: `envolvido` (mesma classe psicológica/relacional de
+`dedicado`/`interessado`) produzia falso positivo. Foi adicionado a
+`participios-ambiguos.pt.json` pela MESMA regra de classe, não como entrada avulsa —
+generaliza para qualquer frase com esse particípio, não só a do golden set. As duas
+únicas lacunas que sobraram (vírgula entre auxiliar e particípio) são consequência
+direta da decisão de design "barreira de pontuação aborta a busca" — **não foram
+corrigidas de propósito**, porque corrigi-las significaria afrouxar exatamente a regra
+que garante a precisão de 100% medida.
+
+**Resultado da avaliação** (46 exemplos, `test/eval/passive-voice-golden.ts`):
+precisão 100%, recall 93,3% (28 TP, 0 FP, 2 FN — os 3 exemplos de "múltiplas passivas"
+contribuindo 2 TP cada elevam o total de TP acima do número de exemplos). As 2
+entradas que sobram como `limitacao_conhecida` são falsos negativos por barreira de
+vírgula, aceitos e documentados, não "corrigidos para fechar o teste".
+
+**Consequências.** `Config.passiveVoice.enabled` (já existente) passa a ser
+efetivamente consultado — pass inteiro desligável sem mudar forma pública. Nenhuma
+mudança em `Diagnostic`/`Finding`/`Pass`/`analyze()`.
+
+---
+
+## ADR-007 — Nominalização: construção com verbo leve, adjacência estrita, sugestão só na interseção de 6 condições de segurança
+
+**Status:** aceito · Fase 1 (`nominalizationPass`, critério `nominalization`, `5.3.3`
+— também relacionado a `5.3.4`, ver nota abaixo)
+
+**Contexto.** `5.3.3`/`5.3.4` pedem detectar "verbo pesado escondido em substantivo"
+("fazer a análise de" em vez de "analisar"). Mesma restrição de sempre: sem parser,
+sem POS tagger (ADR-001). A pergunta adicional aqui, que a voz passiva não tinha, é:
+quando é seguro **sugerir** a reescrita, não só apontá-la?
+
+**Por que a detecção exige verbo leve E nominalização cadastrados — nunca sufixo
+isolado.** Duas evidências fracas somadas (`fazer` sozinho é polissêmico — "fazer o
+bolo"; `-ção`/`-mento` sozinhos aparecem constantemente fora da construção — "a
+análise foi publicada") viram uma evidência forte só na sua interseção. Nenhuma das
+duas evidências, isoladamente, teria precisão aceitável.
+
+**Por que sufixos isolados não são usados nesta fase.** Densidade de nominalização
+("muitas palavras -ção/-mento numa frase") é um sinal genuinamente diferente — sempre
+`info`, nunca sugestão, nunca vinculado a um verbo-base específico — e já está
+registrado como Fase 2 em `docs/ARQUITETURA.md` §6.3. Implementá-lo junto misturaria
+dois problemas de precisão distintos no mesmo pass.
+
+**Por que a construção-núcleo exige adjacência estrita (3 tokens consecutivos, sem
+janela).** Diferente da voz passiva (que tem orçamento de conectores), aqui qualquer
+folga entre verbo/determinante/nominalização já é risco: adjetivo, possessivo,
+coordenação, oração encaixada e pontuação intermediária entre determinante e
+nominalização são TODOS, ao mesmo tempo, impedidos pela mesma regra única — não
+precisei de uma checagem por categoria proibida. Modificadores **depois** da
+nominalização não impedem a detecção (o núcleo "verbo+det+nom" já é uma evidência
+completa por si), mas nunca produzem sugestão (ver abaixo).
+
+**Por que formas finitas não recebem sugestão.** Reconjugar o verbo-base para o
+tempo/pessoa/número da forma finita do verbo leve ("fez" → "analisou") é morfologia
+produtiva — exatamente o tipo de "conjugador genérico" vetado por ADR-001. A trava é
+puramente ortográfica: só quando a forma cadastrada tem `infinitive: true` (e o
+verbo-base já está armazenado no infinitivo na tabela) a substituição é 1:1, sem
+flexionar nada. Formas finitas continuam gerando `Finding` — o critério foi violado,
+só a reescrita automática não é segura.
+
+**Por que a sugestão exige formato de complemento reconhecido.** Mesmo no infinitivo,
+"de X" → "X" só é seguro quando X é exatamente 1 palavra seguida do fim da frase (ou
+pontuação final) — nunca "pule e assuma". A auditoria dos próprios exemplos do pedido
+mostrou por que isso importa: em "fazer a análise e a revisão dos dados", o núcleo
+"fazer a análise" é sintaticamente completo por si, mas "a revisão dos dados" depende
+da MESMA regência de "fazer" — substituir só o núcleo por "analisar" deixaria "e a
+revisão dos dados" órfã, sem verbo. A regra "complemento limpo = 1 palavra + fim de
+frase" filtra esse caso (e coordenação de nominalizações, oração encaixada, e
+complemento com coordenação interna) pela mesma checagem, sem regra por categoria.
+
+**Por que os datasets são curados e extensíveis, não gerados.** `verbos-leves.pt.json`
+lista cada forma flexionada explicitamente (mesmo espírito de `verbos-ser.pt.json`);
+`nominalizacoes.pt.json` lista singular E plural explicitamente, porque
+"-ção"→"-ções" não é uma regra de pluralização simples (ao contrário de, por
+exemplo, remover um "s" final) e o projeto não introduz morfologia produtiva nem para
+desfazer flexão. `formação`, `administração`, `operação`, `edição`, `condução` foram
+deliberadamente OMITIDAS — nenhuma tem mapeamento defensavelmente único (todas
+lexicalizaram para sentido institucional/concreto) e nenhuma aparece nos exemplos-alvo
+desta etapa; "podem ser completamente ignoradas" foi a leitura adotada, não incluí-las
+com `safeForSuggestion:false`. `revisão` é o caso interessante: aparece nos exemplos
+positivos de DETECÇÃO do pedido ("promover a revisão") e na lista de "problemáticos
+para sugestão" ao mesmo tempo — a única leitura que satisfaz as duas coisas é
+cadastrá-la com `safeForSuggestion:false` (detectada, nunca sugerida).
+
+**Por que densidade de nominalização permanece para a Fase 2.** Mesmo raciocínio do
+"sufixos isolados": é um sinal de natureza diferente (frequência de padrão em vez de
+construção sintática pontual), com política de severidade diferente (`info`,
+nunca `warning`), e sem vínculo com um verbo-base — misturar os dois no mesmo pass
+prejudicaria a precisão de ambos.
+
+**Um princípio por finding.** `Finding.principle` é uma string única (não mudei essa
+forma). `5.3.3` é reportado como o princípio principal (frases claras); a relação com
+`5.3.4` (frases concisas — a construção é sempre mais longa que o verbo direto) fica
+só nesta nota, não no dado.
+
+**Processo de curadoria (achados pela própria auditoria, não pelo golden set).** Antes
+de escrever o golden set: (1) confirmei que `Config.nominalization.{enabled,suggest}`
+já existiam como campos mortos e passaram a ser efetivamente consultados; (2) ao
+testar determinantes plurais ("as análises", "os pagamentos"), descobri que o dataset
+só tinha formas singulares — corrigido adicionando as formas plurais explicitamente
+(mesma classe de curadoria já usada em outros datasets, não um hack pontual). Depois
+disso, a avaliação contra as 39 entradas do golden set achou 2 lacunas genuínas, que
+**não foram corrigidas**, por serem limite de escopo deliberado, não descuido: "dar"
+não está entre os 5 verbos leves cadastrados (o pedido só demonstra
+fazer/realizar/efetuar/promover/proceder como seguros), e "proceder com" é uma
+regência alternativa de "proceder" não implementada (só o padrão "a" — à/ao/às/aos —
+foi demonstrado no pedido). Ambas documentadas como `limitacao_conhecida`.
+
+**Resultado da avaliação** (39 exemplos, `test/eval/nominalization-golden.ts`):
+precisão de detecção 100%, recall 93,1% (27 TP, 0 FP, 2 FN). Métrica prioritária —
+sugestão: **15/15 sugestões esperadas saíram com o texto exato esperado; 0 sugestões
+inseguras emitidas** em todo o golden set.
+
+**Consequências.** `Config.nominalization.enabled`/`Config.nominalization.suggest`
+(já existentes) passam a ser efetivamente consultados. Nenhuma mudança em
+`Diagnostic`/`Finding`/`Pass`/`analyze()`.
+
+---
+
+## ADR-008 — Jargão: glossário curado como autoridade única de runtime, frequência fora do MVP, expressões multipalavra como desambiguação estrutural
+
+**Status:** aceito · Fase 1 (`jargonPass`, critério `jargon`, `5.3.2`)
+
+**Contexto.** `docs/ARQUITETURA.md` §6.4 previa dois mecanismos para este critério:
+glossário jargão→comum (`warning` com `suggestion`) e raridade por frequência
+(`frequencia.pt.json`, `info` sem sugestão). A pergunta desta etapa foi se dava para
+implementar o critério inteiro com precisão aceitável usando só o glossário — sem
+frequência, sem stemming, sem inferência de raridade — e ainda assim cobrir expressões
+frequentes do domínio administrativo/jurídico sem afogar o resultado em falsos
+positivos de palavra polissêmica.
+
+**Decisão: só o glossário curado dispara finding. Frequência fica fora do runtime
+inteiramente nesta etapa** — não só sem sugestão (como o §6.4 original previa para o
+mecanismo de raridade), mas sem gerar finding algum. `Config.jargon.frequencyRankCutoff`
+continua existindo na `Config` (não é API que se possa remover sem quebrar contrato),
+mas nenhum código o consulta — mesmo padrão já estabelecido para
+`Config.passiveVoice.treatEstarAsPassive` em ADR-006.
+
+**Por que frequência não é autoridade de runtime.** Uma lista de frequência sozinha
+otimiza recall às custas de precisão: sinaliza nome próprio, sigla, variante
+morfológica, neologismo legítimo e termo que o leitor-alvo já conhece, com a mesma
+confiança que sinaliza jargão genuíno — e nunca diz por qual palavra trocar, então não
+habilita sugestão de qualquer forma. Isso inverte a prioridade do produto
+(precisão > recall, `CLAUDE.md`). Frequência continua útil, mas só como ferramenta
+OFFLINE de curadoria — cruzar contra um corpus para achar candidatos que um humano
+avalia antes de entrarem no glossário — nunca como sinal de diagnóstico. `§6.4` de
+`docs/ARQUITETURA.md` foi atualizado com uma nota curta registrando essa decisão, para
+não contradizer este ADR.
+
+**Por que expressões multipalavra têm prioridade sobre unigramas.** A maior parte do
+jargão administrativo/jurídico alvo é frasal ("em sede de", "na hipótese de", "sem
+prejuízo de", "fazer jus a"). Isso não é só estilo de dataset — é a técnica de
+desambiguação mais barata disponível sem parser: a própria expressão fixa o sentido.
+"em sede de" nunca compete com o sentido comum de "sede" (residência de empresa, ou
+sede/vontade de beber) porque o match exige as 3 palavras contíguas — o problema de
+polissemia que um unigrama isolado teria simplesmente não existe na expressão. Isso
+generaliza a lição de ADR-007 (nominalização): duas evidências fracas somadas (aqui,
+"contiguidade de N palavras específicas") produzem uma evidência forte sem precisar de
+POS tagging.
+
+**Por que unigramas altamente polissêmicos são evitados, não cadastrados com
+`safeForSuggestion:false`.** Diferente da nominalização (onde `revisão` é cadastrada
+com mapeamento não-único, porque a CONSTRUÇÃO inteira — verbo leve + determinante +
+nominalização — já é evidência local suficiente para o finding, só não para a
+sugestão), um unigrama de jargão sem nenhuma evidência estrutural ao redor não tem
+esse colchão: sinalizar `consoante` (substantivo comum — letra do alfabeto — tão
+frequente quanto o uso conjuntivo formal) geraria falso positivo sistemático em texto
+qualquer que mencione "vogais e consoantes", não só em contra-exemplos artificiais.
+A decisão foi omitir a palavra inteiramente do dataset, mesmo critério já usado em
+`nominalizacoes.pt.json` para `formação`/`administração`/`operação`/`edição`/`condução`
+(ADR-007) — "pode ser completamente ignorada" é uma leitura válida quando o
+mapeamento nem chega a ser defensável.
+
+**Por que detecção e sugestão continuam decisões separadas.** Mesmo princípio de
+ADR-007: todo match aceito pelo matcher vira `Finding` (o critério foi violado —
+o termo é jargão, ponto); `suggestion` só aparece quando a ENTRADA declara
+`safeForSuggestion: true`. `na hipótese de` e `de acordo com o disposto` são exemplos
+de expressão desambiguada (sem risco de sentido incerto) mas com troca sintaticamente
+arriscada — a preposição/estrutura que segue muda a regência ou exige inserir um verbo
+("na hipótese de atraso" → substituir por "em caso de atraso" funciona; "na hipótese de
+que o prazo seja prorrogado" → a mesma troca produziria "em caso de que", agramatical).
+Sem uma checagem de complemento como a de `nominalization.ts` (que o pedido desta etapa
+explicitamente vetou — "substituição dependente de sintaxe" está fora de escopo), a
+única opção honesta é não gerar sugestão nunca para essas duas entradas, mesmo sabendo
+que uma fração dos usos reais seria segura de trocar.
+
+**Por que a guarda de nome próprio não se aplica a expressões multipalavra.** Nenhuma
+entrada cadastrada nesta etapa espera capitalização própria dentro da expressão — a
+guarda de maiúscula-em-meio-de-frase só existe para reduzir falso positivo de unigrama
+("Outrossim" como nome de pessoa é hipotético, mas a heurística é conservadora por
+padrão). Aplicá-la a frases multipalavra herdaria o mesmo risco sem o mesmo benefício
+(nenhuma frase cadastrada tem essa ambiguidade), então foi deliberadamente restrita a
+`kind: "word"`.
+
+**Por que "termo definido localmente" ficou fora do matcher inicial.** O padrão
+`"X (doravante 'Y')"`/`"X, denominado Y"` exigiria reconhecer uma estrutura sintática
+que não é adjacência simples de tokens — teria o mesmo risco de "detector genérico"
+que ADR-001 já vetou para análise morfológica. Registrado como limitação conhecida em
+vez de improvisado; candidato de fase futura se a curadoria mostrar que o volume de
+falso positivo evitável compensa a complexidade.
+
+**Por que siglas ficaram fora do escopo.** Sigla é uma classe de problema própria
+(expansão, ambiguidade entre domínios, decisão de quando expandir) que já tem tratamento
+parcial em outro lugar do sistema (regra genérica de sigla na segmentação de frases,
+`abreviacoes.pt.json`) — misturar os dois problemas de precisão no mesmo pass
+repetiria o erro que ADR-006/ADR-007 já evitaram (não misturar duas fontes de
+falso positivo distintas num único critério).
+
+**Aspas: pareamento simples, sem aninhamento.** Três pares reconhecidos
+(`"`↔`"` por paridade, `"`↔`"`, `«`↔`»`), escopo por frase, sem suporte a aninhamento
+nem a aspas simples retas (`'` colidiria com o apóstrofo de elisão já absorvido dentro
+da palavra por `tokenize.ts`) nem a pares que cruzam fronteira de frase. Um abridor sem
+fechador correspondente na mesma frase não suprime nada — falso negativo aceito e
+documentado, não um parser de citação completo (fora de escopo por instrução
+explícita).
+
+**Consequências.** `jargonPass` registrado em `PASSES`; `Diagnostic`/`Finding`/`Pass`/
+`analyze()` não mudaram de forma. `Config.jargon.{enabled,suggestFromGlossary}`
+(já existentes) passam a ser efetivamente consultados; `frequencyRankCutoff` continua
+declarado e não-consultado, documentado como decisão, não como pendência.
+
+---
+
+## ADR-009 — Consolidação e avaliação integrada da Camada 1: golden set integrado, snapshots do `Diagnostic`, seams de teste, convenção de offset e política de snapshot
+
+**Status:** aceito · Fase 1 (etapa de consolidação — sem novo critério linguístico)
+
+**Contexto.** Os quatro critérios do MVP (`long_sentence`, `passive_voice`,
+`nominalization`, `jargon`) estavam implementados e testados isoladamente, cada um com
+seu golden set por-critério (`test/eval/*-golden.ts`). Faltava demonstrar que a Camada 1
+executada de ponta a ponta por `analyze()` é determinística, estável, auditável, coerente
+entre critérios e independente da ordem de execução dos passes — e travar esse
+comportamento observável contra regressão. Nenhuma heurística linguística foi alterada
+nesta etapa; é consolidação e prova, não novo produto.
+
+**Decisão. Golden set INTEGRADO separado dos por-critério.** `test/golden/integrated-golden.ts`
+tem 17 documentos completos e realistas (administrativo, jurídico, os quatro critérios
+juntos, múltiplas ocorrências, spans sobrepostos, guardas ativas, fora-de-escopo,
+Unicode/aspas curvas/emoji, multi-parágrafo, vazio, só-espaços, curto, pontuação
+incomum), cada um declarando a expectativa completa do `Diagnostic` observável. As
+expectativas são juízo linguístico verificado à mão do que a Camada 1 DEVE produzir —
+`test/golden/integrated.test.ts` faz asserções semânticas nomeadas (não só snapshot) e
+emite o resumo integrado (TP/FP/FN global e por critério, sugestões
+emitidas/corretas/inseguras, findings sobre termos não previstos). Resultado desta etapa:
+26 findings esperados, precisão 100%, recall 100%, 14 sugestões emitidas/14 corretas, 0
+inseguras, 0 findings sobre termos não previstos.
+
+**Snapshots do `Diagnostic` completo como contrato observável.** `diagnostic-snapshot.test.ts`
+tira snapshot do `Diagnostic` inteiro de 9 casos representativos. São estáveis por
+construção: o `Diagnostic` não tem timestamp, id aleatório nem campo derivado de
+ambiente — `meta.lucidVersion`/`meta.standardVersion` são constantes de código e
+`meta.configHash` é função pura da Config. Um teste de âncora verifica esses campos
+ANTES dos snapshots, para que uma regressão em campo instável falhe com mensagem clara.
+Snapshot não é a única defesa: as asserções semânticas de `integrated.test.ts` cobrem o
+significado; os snapshots cobrem o retrato byte-a-byte.
+
+**Política de revisão de snapshot (registro formal).** Quando um snapshot mudar:
+(1) a mudança exige revisão humana explícita; (2) a causa precisa ser explicada;
+(3) NÃO se atualiza snapshot automaticamente só porque o teste falhou — diferencia-se
+mudança desejada de regressão; (4) mudança semântica relevante (nova severidade, novo
+span, nova sugestão, mudança de `LUCID_VERSION`) é registrada aqui ou no changelog antes
+de reescrever o snapshot. `vitest -u` nunca é rodado às cegas.
+
+**Seams internos de teste, sem ampliar a API pública.** Dois pontos de extensão foram
+extraídos, ambos exportados do seu módulo mas AUSENTES do barrel `src/lucid/index.ts` —
+mesmo precedente do `sortFindings`, que já era exportado de `analyzer.ts` só para teste:
+- `analyzeWithPasses(text, passes, config)` em `analyzer.ts` — `analyze` passou a delegar
+  a ele com o `PASSES` canônico. Permite injetar permutações de passes no teste de
+  independência de ordem sem tocar na assinatura pública de `analyze`.
+- `compileJargonEntries(entries)` em `jargon.ts` — a função que agrupa por primeira
+  palavra e ordena por comprimento decrescente (longest-match-first), testável com dados
+  sintéticos para provar independência da ordem do JSON.
+
+A superfície pública (o barrel, docs/ARQUITETURA.md §3.6) continua sendo só `analyze` +
+tipos + config. Nenhum contrato público mudou de forma.
+
+**Independência da ordem de execução dos passes — com uma exceção documentada.** O teste
+roda as 24 permutações dos 4 passes sobre vários textos e confirma que a PROJEÇÃO
+CANÔNICA (`findings`, `metrics`, `meta`, `totalFindings`, e `byCriterion` como conjunto)
+é idêntica em todas — 0 divergências. A única parte sensível à ordem é a ORDEM do array
+`Score.byCriterion`, que acompanha deliberadamente a ordem do registry (§ score em
+`ARQUITETURA.md`): em produção isso é sempre `PASSES` (ordem fixa), então o `Diagnostic`
+público é sempre idêntico; só um teste que injeta uma permutação observa `byCriterion`
+reordenado, e as CONTAGENS por critério são idênticas em qualquer ordem. `findings` é
+totalmente independente da ordem porque `sortFindings` recanoniza.
+
+**Ordenação final (`sortFindings`) — total e correta, documentada e testada, não
+alterada.** A ordem canônica por `(span.start, span.end, criterion, principle)` já é
+total para tudo que os quatro passes produzem: dentro de um mesmo critério os spans
+começam em posições distintas (cada pass ancora/avança o cursor uma vez por posição),
+então nunca há empate real de `(criterion, start)`; entre critérios distintos, a string
+`criterion` desempata. O único empate residual teórico (findings idênticos nas quatro
+chaves) é resolvido de forma estável e determinística pela ordenação estável do JS
+(ES2019+), preservando a ordem determinística de inserção (`PASSES` × ordem interna do
+pass). Por já ser total e correta, foi DOCUMENTADA e TESTADA (`test/ordering.test.ts`),
+não modificada — coerente com "não altere contratos sem necessidade objetiva". Severidade
+NÃO foi adicionada como chave de desempate porque não há par de findings reais que
+empate nas quatro chaves e difira em severidade (nos 3 passes lexicais/sintáticos a
+severidade é constante `warning`; em `long_sentence` os spans são a frase inteira, únicos).
+
+**Score auditado, não redesenhado.** `test/score-audit.test.ts` confirma que o placar é
+derivado só de dados determinísticos (findings + registry + `wordCount` + config), é
+independente da ordem dos findings (`buildScore` sobre findings invertidos dá resultado
+igual), não conta o mesmo finding duas vezes mesmo com spans sobrepostos, mantém o
+critério desabilitado listado com contagem zero, não tem vocabulário de aprovação, e
+trata texto vazio/curto sem divisão por zero. Nenhuma incoerência foi encontrada — a
+fórmula não foi tocada.
+
+**Convenção de offset (documentada explicitamente, nunca alterada em silêncio).**
+`span.start`/`span.end` são índices de CODE UNIT UTF-16 sobre `Diagnostic.text`, e
+`Diagnostic.text` é a entrada normalizada em NFC (`normalize.ts`). `end` é exclusivo.
+Consequências testadas em `test/provenance.test.ts`: caracteres fora do BMP (emoji, par
+surrogate) ocupam 2 code units e deslocam offsets em 2 — porque tudo em JS (`.length`,
+`.slice`) opera em code units UTF-16; entrada NFD é composta para NFC, e os offsets são
+relativos ao texto NFC exposto, não à entrada bruta; a invariante-mestra
+`Diagnostic.text.slice(start, end) === span.text` vale para todo finding, sob acentos,
+travessão, aspas curvas, quebras de linha e múltiplos parágrafos. Nenhum pass reconstrói
+texto com offsets próprios — todos fatiam o mesmo `source`.
+
+**Regressões consolidadas.** `test/ordering.test.ts`, `test/interaction.test.ts` e o
+golden integrado reúnem os casos-limite descobertos nos quatro passes (falso nominal de
+passiva, particípio ambíguo, forma finita sem sugestão, complemento complexo de
+nominalização, jargão em aspas, unigrama polissêmico não cadastrado, sobreposição
+longest-match-first, frase longa com múltiplos findings internos, pass desabilitado) —
+cada um agora exercido também no fluxo integrado de `analyze()`, não só no pass isolado.
+
+**Consequências.** Nenhuma mudança em `Diagnostic`/`Finding`/`Pass`/`analyze()` na forma
+pública. Dois seams internos novos (`analyzeWithPasses`, `compileJargonEntries`) e as
+interfaces `JargonEntry`/`CompiledEntry` exportadas de `jargon.ts` para teste, nenhum no
+barrel. `probe/`, `report/`, CLI e UI não foram tocados. Suíte: 676 testes, 9 snapshots.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
@@ -223,6 +639,16 @@ ADR-001 ↔ §6.1, ADR-002 ↔ §8, ADR-003 ↔ §11. ADR-004 é uma revisão de
 dentro do escopo já previsto em §6.5/§9 (Fase 1, item 4), não uma decisão arquitetural
 nova. ADR-005 é uma refatoração transversal de nomenclatura, sem mudança de
 comportamento — os tipos/campos citados em §3/§4 de `ARQUITETURA.md` já refletem os
-nomes em inglês. Este arquivo não deve contradizer `ARQUITETURA.md`; se um conflito
-aparecer, `ARQUITETURA.md` é a fonte de verdade e este log deve ser corrigido para
-acompanhá-lo.
+nomes em inglês. ADR-006 e ADR-007 são revisões de implementação dentro do escopo
+previsto em §6.2/§6.3/§9 (Fase 1, itens 7–8) — a decisão-mãe "regras + léxico, sem
+parser" já estava em ADR-001; ADR-006/ADR-007 detalham como ela se aplica a cada
+critério linguístico. ADR-009 é a etapa de consolidação prevista em §9 (Fase 1, itens
+10–11): golden set integrado + snapshots + suíte de determinismo/ordenação/proveniência;
+não altera nenhuma heurística nem a API pública, só trava o comportamento observável e
+documenta a convenção de offset (§3.2) e a política de snapshot (§8). ADR-008 restringe
+o escopo de §6.4/§9 (Fase 1, item 9): o
+mecanismo de raridade por frequência previsto ali fica fora do runtime desta etapa —
+`ARQUITETURA.md` já foi atualizado com uma nota curta em §6.4 registrando essa
+restrição, para as duas fontes não se contradizerem. Este arquivo não deve contradizer
+`ARQUITETURA.md`; se um conflito aparecer, `ARQUITETURA.md` é a fonte de verdade e este
+log deve ser corrigido para acompanhá-lo.

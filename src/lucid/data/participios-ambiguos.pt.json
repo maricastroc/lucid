@@ -1,0 +1,19 @@
+{
+  "_comentario": "Particípios GENUÍNOS (têm verbo de origem real, seguem o sufixo regular -ado/-ido) que, na posição 'ser + particípio', leem-se quase sempre como adjetivo predicativo de estado psicológico/relacional ('ela é dedicada', 'ele é casado', 'ele está envolvido no caso'), não como voz passiva de uma ação praticada por um agente. Usado pelo pass de voz passiva (src/lucid/core/passes/passive-voice.ts) para SUPRIMIR o finding, nunca para emitir. Léxico CURADO por julgamento linguístico e EXTENSÍVEL — não é uma lista fechada de todos os adjetivos deverbais do português. Prioriza precisão: um falso negativo aqui (deixar de suprimir) é preferível a um falso positivo sistemático em frases muito comuns como 'ele é interessado no assunto'. Comparação em caixa invariante (toLowerCase).",
+  "forms": [
+    "dedicado", "dedicada", "dedicados", "dedicadas",
+    "interessado", "interessada", "interessados", "interessadas",
+    "preocupado", "preocupada", "preocupados", "preocupadas",
+    "cansado", "cansada", "cansados", "cansadas",
+    "animado", "animada", "animados", "animadas",
+    "empolgado", "empolgada", "empolgados", "empolgadas",
+    "acostumado", "acostumada", "acostumados", "acostumadas",
+    "apaixonado", "apaixonada", "apaixonados", "apaixonadas",
+    "entediado", "entediada", "entediados", "entediadas",
+    "casado", "casada", "casados", "casadas",
+    "formado", "formada", "formados", "formadas",
+    "viciado", "viciada", "viciados", "viciadas",
+    "acomodado", "acomodada", "acomodados", "acomodadas",
+    "envolvido", "envolvida", "envolvidos", "envolvidas"
+  ]
+}
