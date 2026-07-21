@@ -28,6 +28,7 @@ import { runMetrics } from "./metrics";
 import { PASSES } from "./passes/registry";
 import { buildScore } from "./score";
 import { DEFAULT_CONFIG, hashConfig } from "./config";
+import { DOCUMENT_DATASETS, dataHashFor, type DatasetId } from "./data/registry";
 import type { Config } from "./config";
 import type { Diagnostic, Finding, Pass, PassContext } from "./types";
 
@@ -90,6 +91,12 @@ export function analyzeWithPasses(
 
   const score = buildScore(findings, passes, metrics.words, config);
 
+  // dataHash: proveniência dos dados em jogo = dados do estágio de documento (sempre) + os
+  // `dataDeps` declarados pelos passes recebidos. Em produção `passes` é o registry completo →
+  // cobre todos os datasets que podem influenciar a saída. Independe de `config.enabled` (isso é
+  // do `configHash`); reflete QUE dados estão compilados nesta análise.
+  const dataIds: DatasetId[] = [...DOCUMENT_DATASETS, ...passes.flatMap((pass) => pass.dataDeps ?? [])];
+
   return {
     text: doc.source,
     findings,
@@ -98,6 +105,7 @@ export function analyzeWithPasses(
     meta: {
       lucidVersion: LUCID_VERSION,
       configHash: hashConfig(config),
+      dataHash: dataHashFor(dataIds),
       standardVersion: STANDARD_VERSION,
     },
   };

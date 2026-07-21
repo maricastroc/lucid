@@ -6,6 +6,7 @@
  * evento de versão (quebra snapshots de propósito). Flags de apresentação não moram
  * aqui — essas ficam na CLI/`report`.
  */
+import { stableHash } from "./hash";
 
 export interface Config {
   sentenceLength: {
@@ -56,29 +57,9 @@ export const DEFAULT_CONFIG: Config = {
 
 /**
  * Hash estável (determinístico) da Config efetiva, usado em `DiagnosticMeta.configHash`.
- * Serialização por chave ordenada recursivamente — não depende da ordem de inserção do
- * objeto de entrada. Implementação mínima de andaime (Fase 0); os passes da Fase 1 não
- * dependem do algoritmo exato, só de que a mesma Config produza sempre o mesmo hash.
+ * Reusa o `stableHash` compartilhado (`./hash`) — mesmo algoritmo do `dataHash` do registry.
+ * Os passes não dependem do algoritmo exato, só de que a mesma Config produza sempre o mesmo hash.
  */
 export function hashConfig(config: Config): string {
-  const serialized = stableStringify(config);
-  let hash = 0;
-  for (let i = 0; i < serialized.length; i++) {
-    hash = (hash * 31 + serialized.charCodeAt(i)) | 0;
-  }
-  return (hash >>> 0).toString(16).padStart(8, "0");
-}
-
-function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) {
-    return `[${value.map(stableStringify).join(",")}]`;
-  }
-  const keys = Object.keys(value as Record<string, unknown>).sort();
-  const pairs = keys.map(
-    (key) => `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
-  );
-  return `{${pairs.join(",")}}`;
+  return stableHash(config);
 }

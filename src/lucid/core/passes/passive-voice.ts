@@ -184,6 +184,12 @@ export const passiveVoicePass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
   principle: PRINCIPLE,
+  dataDeps: [
+    "verbos-ser.pt",
+    "participios-irregulares.pt",
+    "participios-ambiguos.pt",
+    "participios-falsos-nominais.pt",
+  ],
 
   run(ctx) {
     if (!ctx.config.passiveVoice.enabled) return [];

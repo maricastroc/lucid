@@ -172,6 +172,7 @@ export const nominalizationPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
   principle: PRINCIPLE,
+  dataDeps: ["verbos-leves.pt", "nominalizacoes.pt"],
 
   run(ctx) {
     if (!ctx.config.nominalization.enabled) return [];

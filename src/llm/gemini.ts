@@ -1,5 +1,5 @@
 /**
- * `GeminiProvider` — provedor de chat via API do Google Gemini (ADR-019). Infra neutra
+ * `GeminiProvider` — provedor de chat via API do Google Gemini (ADR-021). Infra neutra
  * (`src/llm/**`): só rede + parse, nenhuma lógica de reescrita/compreensão. A chave chega
  * pelo construtor (o servidor passa `process.env.GEMINI_API_KEY` — nunca o cliente) e vai no
  * header `x-goog-api-key`, JAMAIS na URL (regra de privacidade: sem segredo em query string).

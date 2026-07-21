@@ -215,6 +215,7 @@ export const jargonPass: Pass = {
   criterion: CRITERION,
   category: "lexical",
   principle: PRINCIPLE,
+  dataDeps: ["jargao.pt"],
 
   run(ctx) {
     if (!ctx.config.jargon.enabled) return [];

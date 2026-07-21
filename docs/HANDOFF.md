@@ -146,7 +146,7 @@ certo que siga. Clareza intacta (ΔFlesch ~+72). (`correct` varia um pouco run-a
 vezes devolve texto idêntico com temperature 0 → "reescreveu%" < 100; é não-determinismo do
 modelo, não bug.)
 
-**Tier 3 · incremento 6 FEITO — gerador FORTE (Gemini) + prova de 1ª pessoa** (ADR-019).
+**Tier 3 · incremento 6 FEITO — gerador FORTE (Gemini) + prova de 1ª pessoa** (ADR-021).
 Reenquadramento após comparação externa (Gemini-juiz) que via a reescrita perdendo para o GPT:
 o Tier 3 estava sendo medido como REESCRITOR (eixo proibido pelo CLAUDE.md) e só tinha geradores
 free da Groq. Tese reafirmada: **o Lucid AUDITA, não gera** — gerador forte propõe, o verificador
@@ -161,7 +161,7 @@ determinístico é o diferencial (arquitetura já pronta em `verify.ts`). Entreg
 - Verificado ao vivo (`/api/rewrite`, Flesch −12,0→48,6; 6/6 provas; sem truncar). **794 testes verdes.**
 
 **Falta no Tier 3 (próximos incrementos):**
-- ✅ (a) veredito por severidade (ADR-018); ✅ (b) prova de 1ª pessoa nova (ADR-019); ✅ gerador forte (ADR-019).
+- ✅ (a) veredito por severidade (ADR-018); ✅ (b) prova de 1ª pessoa nova (ADR-021); ✅ gerador forte (ADR-021).
 - **Prova UI ao vivo com Gemini** (screenshot do cartão) — só validei via API até agora; a fiação da
   UI (`revision-note.tsx` + `app/lib/rewrite.ts`) já oferece o modelo, mas não cliquei o fluxo no browser.
 - **Outros providers** — OpenAI/Anthropic pela mesma interface `ChatProvider`. `DEEPSEEK_AP_KEY`

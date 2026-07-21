@@ -37,13 +37,14 @@ const casosSnapshot = IDS_SNAPSHOT.map((id) => {
 });
 
 describe("estabilidade das âncoras de snapshot (antes de comparar retratos)", () => {
-  it("meta é composto só de constantes estáveis e hash puro da Config", () => {
+  it("meta é composto só de constantes estáveis e hashes puros (Config + dados)", () => {
     const d = analyze("Um texto qualquer para checar o meta.");
     expect(d.meta.lucidVersion).toBe("0.1.0");
     expect(d.meta.standardVersion).toBe("ABNT NBR ISO 24495-1:2024");
     expect(d.meta.configHash).toMatch(/^[0-9a-f]{8}$/);
+    expect(d.meta.dataHash).toMatch(/^[0-9a-f]{8}$/);
     // nenhum campo de tempo/ambiente escapou para o Diagnostic
-    expect(Object.keys(d.meta).sort()).toEqual(["configHash", "lucidVersion", "standardVersion"]);
+    expect(Object.keys(d.meta).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
   });
 });
 
