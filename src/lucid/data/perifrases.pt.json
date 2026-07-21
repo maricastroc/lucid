@@ -1,0 +1,27 @@
+{
+  "_comentario": "Perífrases infladas — locuções que ocupam o lugar de uma preposição/conjunção simples — usado pelo pass 'perifrase_inflada' (5.3.4, frases concisas). Léxico CURADO e extensível; `plain` é a forma enxuta citada na justificativa (a ferramenta NÃO troca sozinha — o encaixe depende do contexto). Curadoria própria. Comparação em caixa invariante. DELIBERADAMENTE sem as locuções já cobertas pelo glossário de jargão ('em sede de', 'na hipótese de', 'sem prejuízo de', 'de acordo com o disposto') para não haver dupla marcação.",
+  "entries": [
+    { "phrase": "no sentido de", "plain": "para" },
+    { "phrase": "com relação a", "plain": "sobre" },
+    { "phrase": "em relação a", "plain": "sobre" },
+    { "phrase": "no âmbito de", "plain": "em" },
+    { "phrase": "no âmbito da", "plain": "na" },
+    { "phrase": "no âmbito do", "plain": "no" },
+    { "phrase": "em face de", "plain": "diante de" },
+    { "phrase": "em face da", "plain": "diante da" },
+    { "phrase": "em face do", "plain": "diante do" },
+    { "phrase": "de modo a", "plain": "para" },
+    { "phrase": "a fim de", "plain": "para" },
+    { "phrase": "no que diz respeito a", "plain": "sobre" },
+    { "phrase": "no que se refere a", "plain": "sobre" },
+    { "phrase": "com o objetivo de", "plain": "para" },
+    { "phrase": "com a finalidade de", "plain": "para" },
+    { "phrase": "em virtude de", "plain": "por" },
+    { "phrase": "por intermédio de", "plain": "por" },
+    { "phrase": "no tocante a", "plain": "sobre" },
+    { "phrase": "com vistas a", "plain": "para" },
+    { "phrase": "em decorrência de", "plain": "por" },
+    { "phrase": "por ocasião de", "plain": "quando" },
+    { "phrase": "na medida em que", "plain": "porque" }
+  ]
+}

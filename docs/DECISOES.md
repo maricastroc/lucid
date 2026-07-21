@@ -1234,6 +1234,39 @@ frequência, e qualquer detector que precise de contexto — nenhum destes três
 
 ---
 
+## ADR-025 — Lote juridiquês (2 detectores) + painel da sonda (Camada 2 na UI)
+
+**Contexto.** Duas lacunas funcionais: (a) faltavam detectores de frase-feita burocrática; (b) a
+sonda de compreensão (Camada 2) existia mas só era usada ESCONDIDA no verificador do Tier 3 — a UI
+expunha só o Princípio 3 da norma, com o Princípio 4 (compreensão) invisível.
+
+**Decisão A — lote juridiquês (determinístico).** Só **2 detectores novos**, os genuinamente NÃO
+cobertos pelo glossário de jargão (que já pega arcaísmos como "outrossim"/"destarte" e anáfora
+"supracitado"): **`redundancia`** (pleonasmo/duplas) e **`perifrase_inflada`** (locuções empoladas).
+Léxicos curados próprios (`redundancias.pt`, `perifrases.pt`), matcher de frase contígua
+compartilhado (`passes/phrase-match.ts`), flag+explica (a forma enxuta vai na justificativa; nunca
+aplica sozinho → `requiresHuman`). Curados SEM colisão com o jargão. **Descoberta registrada:** um
+pass `arcaismo` seria redundante — o glossário de jargão já é, na prática, o detector de arcaísmo.
+
+**Decisão B — painel da sonda (Camada 2).** Rota `/api/probe` (leitor de piso barato server-side:
+Groq 8B, senão Gemini flash; chave nunca ao cliente) → `interpret` (só `flag`|`neutro`). Componente
+`ProbePanel` no trilho de auditoria, opt-in: o autor escreve "a pergunta que o leitor veio fazer" e
+roda. Renderização HONESTA por construção — **nunca check verde**: `flag` mostra onde travou +
+resposta extraída + operações de leitura (carga); `neutro` diz "sem violação de piso (não é garantia
+de compreensão)". Caveat sempre visível: Camada 2 é não-determinística; passar no piso é ausência de
+falha, jamais prova de clareza (só teste com leitores reais — Princípio 4). Cerca intacta
+(`core ⊄ probe`; app→probe permitido).
+
+**Consequências.** **828 testes verdes** (7 novos: redundância/perífrase, incl. guarda de não-colisão
+com jargão). 9→11 critérios (config+score+snapshots atualizados; `dataHash` cobre os 2 léxicos).
+Verificado ao vivo na UI: os 2 detectores marcam no editor; a sonda travou em "O prazo começa a
+contar depois." e reportou honestamente, sem selo. A UI agora expõe **3 dos 4 princípios da norma**
+(o Princípio 4 via proxy-piso da Camada 2, com o caveat). **Dívida registrada** (não resolvida): a
+UI mantém um registro de critérios paralelo ao engine (`app/lib/criteria.ts`) — adicionar detector
+ainda toca 2 lugares.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

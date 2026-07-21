@@ -18,7 +18,14 @@
  */
 import { stableHash } from "../hash";
 import type { DataTypes, DatasetId, DataView } from "./types";
-import { prepareJargon, prepareLightVerbs, prepareNominalizations, prepareRecord, prepareStringSet } from "./prepare";
+import {
+  preparePhrases,
+  prepareJargon,
+  prepareLightVerbs,
+  prepareNominalizations,
+  prepareRecord,
+  prepareStringSet,
+} from "./prepare";
 import abreviacoesData from "../../data/abreviacoes.pt.json";
 import verbosSerData from "../../data/verbos-ser.pt.json";
 import participiosIrregularesData from "../../data/participios-irregulares.pt.json";
@@ -30,6 +37,8 @@ import nominalizacoesData from "../../data/nominalizacoes.pt.json";
 import jargaoData from "../../data/jargao.pt.json";
 import maisQuePerfeitoData from "../../data/mais-que-perfeito.pt.json";
 import adverbiosMenteData from "../../data/adverbios-mente.pt.json";
+import redundanciasData from "../../data/redundancias.pt.json";
+import perifrasesData from "../../data/perifrases.pt.json";
 
 export type { DatasetId } from "./types";
 
@@ -106,6 +115,16 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: adverbiosMenteData,
     prepare: (r) => prepareStringSet(r, "forms"),
     provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0)",
+  },
+  "redundancias.pt": {
+    raw: redundanciasData,
+    prepare: preparePhrases,
+    provenance: "pleonasmos e duplas redundantes (curadoria própria)",
+  },
+  "perifrases.pt": {
+    raw: perifrasesData,
+    prepare: preparePhrases,
+    provenance: "perífrases infladas → forma enxuta (curadoria própria)",
   },
 };
 

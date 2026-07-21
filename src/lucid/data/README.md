@@ -296,3 +296,26 @@ arquivos são obras derivadas e devem creditar a fonte:
 > Contém dados derivados de **PortiLexicon-UD** (Lucelene Lopes, Magali Duran, Paulo Fernandes,
 > Thiago Pardo), licenciado sob Creative Commons Attribution 4.0 International (CC-BY 4.0).
 > https://portilexicon.icmc.usp.br/ · https://aclanthology.org/2022.lrec-1.715/
+
+## `redundancias.pt.json` e `perifrases.pt.json` — lote juridiquês
+
+**Usados por:** `passes/redundancia.ts` (`redundancia`, 5.3.4) e `passes/perifrase-inflada.ts`
+(`perifrase_inflada`, 5.3.4). Casamento de frase contígua via matcher compartilhado
+(`passes/phrase-match.ts`), longest-match-first, sem sobreposição — mesma disciplina do jargão.
+
+**Propósito:**
+- `redundancias.pt.json`: pleonasmos e duplas em que um termo repete o sentido do outro sem
+  acrescentar informação ("nula e sem efeito", "planejar antecipadamente", "certeza absoluta").
+- `perifrases.pt.json`: locuções que ocupam o lugar de uma preposição/conjunção simples
+  ("no sentido de"→"para", "com relação a"→"sobre", "a fim de"→"para").
+
+**Critério de curadoria:** frases feitas de alta frequência em texto burocrático/jurídico. O campo
+`plain` é a forma enxuta **citada na justificativa** — a ferramenta NÃO aplica sozinha (cortar/trocar
+depende do contexto → `requiresHuman`). **Deliberadamente sem colisão com o glossário de jargão:**
+as locuções já cobertas por `jargao.pt.json` ("em sede de", "na hipótese de", "sem prejuízo de",
+"de acordo com o disposto") e os arcaísmos já cobertos ("outrossim", "destarte", "conquanto",
+"mormente", "porquanto") ficam FORA destes léxicos, para não haver dupla marcação.
+
+**Formato:** `{ "entries": [{ "phrase": string, "plain": string | null }] }`, caixa invariante.
+
+**Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.
