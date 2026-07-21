@@ -25,7 +25,9 @@ export type IntegratedCriterion =
   | "gerundismo"
   | "adverbio_mente_denso"
   | "redundancia"
-  | "perifrase_inflada";
+  | "perifrase_inflada"
+  | "paragraph_length"
+  | "prose_enumeration";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

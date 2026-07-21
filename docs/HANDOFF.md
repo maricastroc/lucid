@@ -188,8 +188,12 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   pelo glossário de jargão — não fazer pass próprio.
 - **Painel da sonda (ADR-025):** Camada 2 na UI (`ProbePanel` + `/api/probe`), opt-in, HONESTO
   (nunca check verde). A UI passou a expor 3 dos 4 princípios (P4 via proxy-piso com caveat).
-- **11 critérios, 828 testes.** Verificado ao vivo no browser (detectores marcam; sonda trava e
-  reporta sem selo).
+- **Princípio 2 / camada de blocos (ADR-026):** `Document.paragraphs` (`segment-paragraphs.ts`,
+  linha em branco) — primeira estrutura de documento. Detectores `paragraph_length` (>5 frases) +
+  `prose_enumeration` (≥3 ordinais desde "primeiro"). Títulos/listas/seções ADIADOS (precisam de
+  convenção de marcação — decidir o formato de entrada primeiro).
+- **13 critérios, 838 testes.** Verificado ao vivo no browser (todos os detectores marcam; sonda
+  trava e reporta sem selo; estruturais no painel sob "Fácil de localizar").
 - **Dívida:** `app/lib/criteria.ts` é um registro de critérios paralelo ao engine — adicionar
   detector toca engine + UI. Candidato a "UI deriva critérios do `Diagnostic`".
 - **Fonte de léxico (D1 fechado):** PortiLexicon-UD (CC-BY 4.0), HF `NILC-ICMC-USP/PortiLexicon-UD`,

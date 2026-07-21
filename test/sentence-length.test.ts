@@ -23,7 +23,7 @@ function sentence(overrides: Partial<Sentence>): Sentence {
 }
 
 function buildTestDocument(sentences: Sentence[]): Document {
-  return { source: sentences.map((s) => s.text).join(" "), sentences, tokens: [] };
+  return { source: sentences.map((s) => s.text).join(" "), sentences, tokens: [], paragraphs: [] };
 }
 
 function buildContext(sentences: Sentence[], config: Config = DEFAULT_CONFIG): PassContext {

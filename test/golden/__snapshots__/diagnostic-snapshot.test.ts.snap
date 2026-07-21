@@ -4,7 +4,7 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -109,6 +109,26 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 0,
   },
@@ -138,7 +158,7 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -243,6 +263,26 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 1,
   },
@@ -311,7 +351,7 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -416,6 +456,26 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 3,
   },
@@ -468,7 +528,7 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -572,6 +632,26 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
         "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
       },
     ],
     "totalFindings": 2,
@@ -682,7 +762,7 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -787,6 +867,26 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 5,
   },
@@ -798,7 +898,7 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
 {
   "findings": [],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -903,6 +1003,26 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 0,
   },
@@ -914,7 +1034,7 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1019,6 +1139,26 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 0,
   },
@@ -1049,7 +1189,7 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1154,6 +1294,26 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         "densityPer100Words": 0,
         "principle": "5.3.4",
       },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
     ],
     "totalFindings": 1,
   },
@@ -1206,7 +1366,7 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
     },
   ],
   "meta": {
-    "configHash": "7f0f575c",
+    "configHash": "ab4ca5f9",
     "dataHash": "ac767cf3",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1310,6 +1470,26 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
         "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+        "principle": "5.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+        "principle": "5.2",
       },
     ],
     "totalFindings": 2,

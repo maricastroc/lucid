@@ -19,7 +19,9 @@ export type Criterion =
   | "gerundismo"
   | "adverbio_mente_denso"
   | "redundancia"
-  | "perifrase_inflada";
+  | "perifrase_inflada"
+  | "paragraph_length"
+  | "prose_enumeration";
 export type Channel = "inline" | "passage";
 
 export interface CriterionMeta {
@@ -49,6 +51,8 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "redundancia",
   "perifrase_inflada",
   "long_sentence",
+  "paragraph_length",
+  "prose_enumeration",
 ];
 
 export const CRITERION_META: Record<Criterion, CriterionMeta> = {
@@ -141,6 +145,26 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "mark-dashed",
     signal: "locução cadastrada que ocupa o lugar de uma preposição/conjunção simples",
     why: "Alonga a frase no lugar de uma palavra simples.",
+  },
+  paragraph_length: {
+    label: "Parágrafo longo",
+    ruleId: "paragraph_length",
+    kind: "Estrutura do documento",
+    principleName: "Fácil de localizar",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "contagem de frases do parágrafo acima do limite configurado",
+    why: "Um paredão de frases dificulta varrer o texto e achar a informação.",
+  },
+  prose_enumeration: {
+    label: "Enumeração em prosa",
+    ruleId: "prose_enumeration",
+    kind: "Estrutura do documento",
+    principleName: "Fácil de localizar",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "≥3 ordinais distintos (a partir de “primeiro”) no mesmo parágrafo",
+    why: "Itens embutidos no texto corrido são mais difíceis de localizar que uma lista.",
   },
 };
 

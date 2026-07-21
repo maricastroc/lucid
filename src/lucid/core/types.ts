@@ -53,10 +53,24 @@ export interface Sentence {
   wordCount: number;
 }
 
+/**
+ * Bloco de texto entre linhas em branco — a camada estrutural MÍNIMA (Princípio 2). Só
+ * parágrafos por ora: títulos/listas exigem convenção de marcação e ficam adiados (ADR-026).
+ */
+export interface Paragraph {
+  text: string;
+  start: number;
+  end: number;
+  sentences: readonly Sentence[];
+  /** soma de `wordCount` das frases do parágrafo */
+  wordCount: number;
+}
+
 export interface Document {
   readonly source: string;
   readonly sentences: readonly Sentence[];
   readonly tokens: readonly Token[];
+  readonly paragraphs: readonly Paragraph[];
 }
 
 // --- Pass (unidade do pipeline) ----------------------------------------------------

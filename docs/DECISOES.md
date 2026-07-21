@@ -1267,6 +1267,38 @@ ainda toca 2 lugares.
 
 ---
 
+## ADR-026 — Princípio 2 (Localizável): camada de blocos mínima + 2 detectores estruturais
+
+**Contexto.** O Princípio 2 da norma (Localizável — estrutura, o leitor encontra a informação)
+tinha cobertura ZERO: todos os passes eram de frase/palavra (Princípio 3). A categoria
+`"structural"` existia no tipo mas sem nenhum uso. Faltava a peça que nunca existiu: uma **camada
+de blocos**.
+
+**Decisão (fatia vertical, mínima).** Só a camada de blocos que dá para aferir com ALTA confiança
+em prosa pura — **parágrafos** — mais 2 detectores concretos.
+- **Camada de blocos:** `Document.paragraphs` (`segment-paragraphs.ts`), agrupando frases por
+  linha em branco (mesma convenção do Tier 3). Determinístico, aditivo (não muda o `Diagnostic`).
+- **`paragraph_length`** (5.2, `structural`): marca o parágrafo acima de `maxSentences` frases
+  (default 5). Só CONTAGEM de frases — uma frase longa isolada é do `long_sentence` (sem
+  sobreposição).
+- **`prose_enumeration`** (5.2, `structural`): parágrafo com ≥3 ordinais DISTINTOS a partir de
+  "primeiro" → sugere lista. Conjunto fechado inline; a âncora "primeiro" evita FP com "segundo"
+  (preposição) solto.
+
+**ADIADO por disciplina (YAGNI):** títulos, listas, numeração, seções, referência cruzada —
+**todos exigem convenção de marcação** (Markdown/estrutura) que o editor de prosa pura não tem.
+Decidir o formato de entrada é pré-requisito; até lá, parágrafo é o que se afere honestamente.
+
+**Consequências.** 11→13 critérios. **838 testes verdes** (novos: camada de parágrafos, os 2
+detectores, incl. guardas: FP de "segundo" isolado, contagem por-parágrafo-não-por-documento).
+Um teste antigo teve o texto de amostra des-ordinalizado (continha "Primeira/Segunda/Terceira" e
+passou a acionar `prose_enumeration` — corretamente). UI: os 2 critérios no painel sob "Fácil de
+localizar", verificado ao vivo. A UI passou a expor **2 dos 4 princípios com detectores** (2 e 3) +
+o 4 via sonda. Cerca/depcheck intactos. Único `Document` manual dos testes atualizado com
+`paragraphs: []`.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
