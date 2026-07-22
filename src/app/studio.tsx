@@ -161,6 +161,19 @@ export function Studio() {
     [text, diagnostic, pushUndo],
   );
 
+  const applyPassiveActive = useCallback(
+    (target: Span, replacement: string) => {
+      const base = diagnostic.text;
+      const next = base.slice(0, target.start) + replacement + base.slice(target.end);
+      if (next !== text) {
+        pushUndo(text);
+        setText(next);
+      }
+      setSelectedId(null);
+    },
+    [text, diagnostic, pushUndo],
+  );
+
   const applyAllSafe = useCallback(() => {
     const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
     const next = applySafeSuggestions(text, applicable);
@@ -197,6 +210,7 @@ export function Studio() {
     onApply: applySuggestion,
     onSplit: applySplit,
     onApplyRewrite: applyRewrite,
+    onPassiveActive: applyPassiveActive,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
     onClose: closeSelection,
@@ -270,6 +284,7 @@ export function Studio() {
                     onApply={applySuggestion}
                     onSplit={applySplit}
                     onApplyRewrite={applyRewrite}
+                    onPassiveActive={applyPassiveActive}
                   />
                 </div>
               </>

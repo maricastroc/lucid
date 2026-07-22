@@ -13,9 +13,18 @@ import type { Finding, Span } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
 import type { PassiveTense } from "../datasets/types";
 import { extractPassiveRoles } from "./passive-roles";
+import { regularArConjugation } from "./regular-morphology";
 
 const SER_TENSES = getPrepared("ser-tempos.pt");
 const CONJUGATIONS = getPrepared("conjugacoes-ativas.pt");
+
+/**
+ * Formas de 3ª pessoa de um lema: tabela fechada PRIMEIRO (irregulares e `-er`/`-ir`), senão a
+ * regra determinística de `-ar` regular (ADR-032). `null` = fora do que a ferramenta prova.
+ */
+function formsFor(lemma: string): Readonly<Record<string, string>> | null {
+  return CONJUGATIONS.get(lemma) ?? regularArConjugation(lemma);
+}
 
 export type PassiveRewrite =
   | { kind: "automatic"; replacement: string; target: Span }
@@ -29,8 +38,17 @@ const SINGULAR_MARKERS = new Set(["pela", "pelo"]);
 /** artigos iniciais que indicam PLURAL — para o número do agente digitado na Classe B (lista fechada). */
 const PLURAL_ARTICLES = new Set(["os", "as", "uns", "umas"]);
 
-/** artigos que, iniciando o objeto (ex-sujeito), podem ser reminusculizados com segurança. */
-const LOWERCASE_HEAD_ARTICLES = new Set(["O", "A", "Os", "As", "Um", "Uma", "Uns", "Umas"]);
+/**
+ * Determinantes que, iniciando o objeto (ex-sujeito), podem ser reminusculizados com segurança ao
+ * ir para o meio da frase. Classe FECHADA de palavras gramaticais — nunca um nome próprio (esses
+ * ficam de fora e mantêm a maiúscula). Artigos + indefinidos + demonstrativos.
+ */
+const LOWERCASE_HEAD_ARTICLES = new Set([
+  "O", "A", "Os", "As", "Um", "Uma", "Uns", "Umas",
+  "Qualquer", "Quaisquer", "Nenhum", "Nenhuma", "Todo", "Toda", "Todos", "Todas", "Cada",
+  "Algum", "Alguma", "Alguns", "Algumas", "Este", "Esta", "Estes", "Estas", "Esse", "Essa",
+  "Esses", "Essas", "Aquele", "Aquela", "Aqueles", "Aquelas",
+]);
 
 /**
  * Preposições/palavras que, DENTRO do sintagma do agente, sinalizam que o pass (que estende o
@@ -64,7 +82,7 @@ function featureKey(tense: PassiveTense, number: "sg" | "pl"): string {
 }
 
 function conjugate(lemma: string, tense: PassiveTense, number: "sg" | "pl"): string | null {
-  return CONJUGATIONS.get(lemma)?.[featureKey(tense, number)] ?? null;
+  return formsFor(lemma)?.[featureKey(tense, number)] ?? null;
 }
 
 function capitalizeFirst(text: string): string {
@@ -96,7 +114,7 @@ export function passiveToActive(finding: Finding, source: string): PassiveRewrit
   const ser = SER_TENSES.get(roles.serForm);
   if (!ser) return unsupported("tempo verbal não conversível com segurança (composto, subjuntivo ou pessoa)");
   if (!roles.baseVerbLemma) return unsupported("verbo-base do particípio desconhecido");
-  if (!CONJUGATIONS.has(roles.baseVerbLemma)) return unsupported("verbo fora da tabela fechada de conjugação");
+  if (!formsFor(roles.baseVerbLemma)) return unsupported("verbo fora da tabela fechada e não regular em -ar");
   if (roles.objectRegion === null) return unsupported("sujeito posposto ou ausente (ordem não-SVO)");
   if (/[,;:]/u.test(roles.objectRegion)) return unsupported("sujeito com estrutura complexa");
 

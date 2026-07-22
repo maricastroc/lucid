@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>13 detectors</strong>, <strong>859 tests</strong>, and a hard fence between the two layers that the build enforces.
+  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>13 detectors</strong>, <strong>874 tests</strong>, and a hard fence between the two layers that the build enforces.
 </p>
 
 <p align="center">
@@ -54,11 +54,11 @@
 | **🧾 Reproducible to the data**    | Every diagnostic carries a `configHash` **and** a `dataHash`. Change a lexicon and the hash changes and the golden snapshot breaks on purpose. Reproducibility = `(version, config, data)`.                                                                  |
 | **🗂️ Format-independent by design** | Detectors run over a canonical `AnnotatedDocument`. Plain text today; DOCX / PDF / HTML importers later produce **the same model** — without a single detector changing.                                                                                    |
 | **📊 A score that measures**       | Per-criterion counts and density — deliberately **with no overall grade and no "OK."** The absence of findings is not a certificate of clarity, and the UI says so.                                                                                          |
-| **🧰 Assisted structural actions** | For findings that need judgment, Lucid offers deterministic scaffolds — split a long sentence at a real clause boundary; extract the agent/action/object of a passive — **never rewriting**, always author-approved.                                          |
+| **🧰 Assisted structural actions** | For findings that need judgment, Lucid offers **deterministic** scaffolds — split a long sentence at a real clause boundary; **turn a passive into the active voice** (it de-contracts the agent, conjugates from a closed table, reorders — and when only the agent is missing, asks you for *just that* and finishes the rest). Always a reviewable draft, never a free rewrite. |
 | **✍️ The review studio**           | A two-mode editor (**Write / Review**) with inline annotations, an audit rail that groups by criterion and severity, the safe-suggestion applier, and the probe panel — all fed by a single client-side `analyze()`.                                          |
 | **🔒 A fence the build enforces**  | Layer 1 never imports Layer 2 (or React, or the network). Checked by **dependency-cruiser** + boundary tests: if Layer 2 falls, the product stands whole.                                                                                                    |
 | **🌍 Language-pluggable core**     | The engine is **language-neutral**; Portuguese is the first explicit `Locale`. A `LocaleBundle` carries the passes, lexicons, syllable counter, readability metric and criteria; `core` never imports a locale (a fence enforces it), so a second locale slots in **without touching the pipeline**. A synthetic test locale proves the seam.                    |
-| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **859 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
+| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **874 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
 
 <br/>
 
@@ -101,7 +101,7 @@ analyze(text):
 
 The reading: `rewrite` buys far more clarity than `correct` (ΔFlesch ~+70 vs ~+10), and the verifier does its job — Gemini's bolder rewrites scored the biggest Flesch gains **but** its `proofs OK%` dropped to 67% (on the numbers-dates-names text the deterministic check caught an altered value or new jargon) and its veto rate rose. Stronger prose never buys a pass; the proof gate is what decides. Honest caveat: single run, `temperature 0` (LLM output still varies run-to-run — hence `rewrote% < 100` when `correct` returns identical text), 3 texts — a floor signal, not a leaderboard.
 
-The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 001–031) in [`docs/DECISOES.md`](docs/DECISOES.md).
+The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 001–032) in [`docs/DECISOES.md`](docs/DECISOES.md).
 
 <br/>
 
