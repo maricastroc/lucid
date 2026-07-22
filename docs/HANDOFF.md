@@ -217,6 +217,12 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
 - **Princípio 2 / camada de blocos (ADR-026):** `Document.paragraphs` (`segment-paragraphs.ts`,
   linha em branco) — primeira estrutura de documento. Detectores `paragraph_length` (>5 frases) +
   `prose_enumeration` (≥3 ordinais desde "primeiro").
+- **Meta-eval da sonda (ADR-043):** golden rotulado à mão (`test/eval/probe-golden.ts`, 12 trechos) +
+  harness de concordância (`probe-eval.test.ts`). CI offline prova golden+harness+ponte→`interpret`;
+  camada ao vivo (`PROBE_EVAL=1`, `PROBE_EVAL_MODEL` opcional) roda a sonda LLM real, imprime matriz de
+  confusão e trava piso de recall ≥0,6. **Fronteira honesta:** o piso é EXTRAÇÃO, não compreensão (carga
+  é sinal à parte). Corrida Groq 8B: **recall 100%, precisão 55%** (leitor de piso pessimista demais no
+  lado "claro"). Fecha a última lacuna da disciplina de eval do CLAUDE.md.
 - **DOCX-first → estrutura de verdade (ADR-038→042):** modelo de blocos (`heading`/`list` + `analyzeDocument`),
   importador DOCX (`src/importers/docx.ts`, mammoth, fora do core) + upload na UI, e **3 detectores de
   Princípio 2 sobre estrutura**: `salto_de_nivel_titulo` (ADR-041), `long_heading` (título longo/em-forma-de-frase)
@@ -225,7 +231,7 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   linhas × blocos. Todos só disparam em documento estruturado (texto puro não tem título/lista de verdade).
 - **Mais 2 de texto puro (ADR-028):** `mesoclise` (regex `far-se-á`/`dir-lhe-ia`, zero-FP) +
   `dupla_negacao` (litotes "não é incomum", léxico via phrase-match; NÃO marca negação simples).
-- **18 critérios, 939 testes** (ADR-029: registro de critérios; ADR-041/042: +3 estruturais). Verificado ao
+- **18 critérios, 944 testes** (ADR-029: registro de critérios; ADR-041/042: +3 estruturais; ADR-043: meta-eval da sonda). Verificado ao
   vivo no browser (todos os detectores marcam; sonda trava e reporta sem selo; estruturais sob "Fácil de
   localizar"; mesóclise/dupla-negação sob "Frases claras").
 - **Independência de formato (ADR-027):** `Document` é o `AnnotatedDocument` canônico; `buildDocument`

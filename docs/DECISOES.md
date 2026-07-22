@@ -1838,6 +1838,44 @@ com "ABNT 5.2"). Typecheck/lint/depcheck limpos; cerca intacta.
 
 ---
 
+## ADR-043 — Meta-eval da sonda de compreensão (concordância com rótulos humanos)
+
+**Contexto.** A disciplina do CLAUDE.md declara inegociável: "a sonda tem que travar onde os humanos
+travaram. Medir concordância com os rótulos." Era a única peça da disciplina de eval ainda sem cobertura
+— havia eval para jargão/nominalização/passiva/sílabas, nenhuma para a Camada 2.
+
+**Decisão — golden + harness em duas camadas** (`test/eval/probe-golden.ts`, `probe-eval.test.ts`).
+- **Golden rotulado à mão** (12 trechos, justificados um a um): trecho + PERGUNTA do leitor + rótulo
+  `humanoTrava`. O rótulo é definido EXATAMENTE pelo que o piso mede (`interpret`): o leitor de baixa
+  literacia extrai o fato SÓ do texto, sem inferir? Fronteira honesta explícita: **o piso é EXTRAÇÃO,
+  não COMPREENSÃO.** Trecho pesado mas com fato extraível (termo técnico, sujeito longo, coesão entre
+  frases) é `humanoTrava=false` + uma `operacaoLeitura` no eixo de CARGA (sinal), medido à parte —
+  confundir carga com travamento penalizaria a sonda por algo fora do contrato.
+- **Camada CI (offline, sempre roda):** prova o golden bem-formado (duas classes presentes), o HARNESS
+  de concordância (matriz TP/FN/FP/TN, recall, precisão) com sondas-oráculo controladas (oráculo perfeito
+  → 100%; sempre-neutro → recall 0; sempre-flag → recall 1, precisão = taxa-base), e a ponte
+  rótulo→`interpret`. Sem rede; não mede a sonda real (seria tautológico com stub).
+- **Camada ao vivo (`PROBE_EVAL=1`, fora da CI):** roda a sonda LLM REAL sobre o golden, imprime a
+  matriz de confusão + concordância, e **trava um piso de recall ≥ 0,6** nos travamentos (um FN = a
+  sonda falhando seu único trabalho). Modelo escolhível por `PROBE_EVAL_MODEL`; `id` da sonda
+  (modelo+prompt versionado) impresso = anti-drift. Espelha o `rewrite-benchmark` (gate por env).
+
+**Resultado ao vivo (Groq `llama-3.1-8b-instant`, 12 trechos):** **recall 100%** (TP=6, FN=0 — pegou
+TODOS os travamentos humanos: agente omitido, referente ambíguo, dupla negação, fato ausente, inferência
+exigida) mas **precisão 55%** (FP=5): o modelo grátis de 8B é um leitor de piso **pessimista demais** —
+deu flag em 5 dos 6 casos claros, inclusive os de carga extraível. **Leitura honesta:** o pessimismo é
+alinhado ao piso (melhor sobre-marcar que perder), mas a baixa precisão num modelo pequeno é um achado
+real a registrar; um modelo mais forte pode discriminar melhor o lado "claro" (não medido — o free tier
+do Gemini estourou a quota diária de 20 req no meio da corrida, e o `throw` do provider derruba o teste,
+que é o certo: não dá para medir se o provider não responde).
+
+**Consequências.** **944 testes verdes** (5 novos offline; o 6º é a corrida ao vivo, gateada). Cerca
+intacta (teste importa `probe/`; `core ⊄ probe` segue). **Ressalva (I5):** golden pequeno, 1 corrida,
+temperature 0 — concordância é sinal de piso, não placar; passar NUNCA é aprovação de compreensão.
+**Pendente futuro:** golden maior e mais adversarial; comparar modelos quando houver quota.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
