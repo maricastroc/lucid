@@ -355,14 +355,20 @@ não alteram nenhum `Diagnostic`. Runtime só CONSULTA — nunca conjuga produti
   também **só exceções** — irregulares (`eleito→eleger`, `aberto→abrir`) e `-ido`. Os `-ado`
   regulares são resolvidos por regra (`-ado → -ar`, exceto `-ear`).
 
-**Geração (build-time):** `scripts/derive-conjugacoes.mjs` — verbos regulares por regra de flexão de
-3ª pessoa (exata); irregulares verificados à mão. Chaves ordenadas → JSON estável (fingerprint
-reprodutível). Recomenda-se validação cruzada/expansão com **PortiLexicon-UD** (CC-BY 4.0) ao
-ampliar a lista, mesma fonte dos derivados do ADR-024.
+**Geração + validação (build-time, ADR-034):** `scripts/derive-conjugacoes.mjs`. A LISTA de lemas/
+particípios cobertos continua **curada por domínio** (decisão humana), mas as FORMAS vêm do
+**PortiLexicon-UD** (`VERB.tsv`, filtrado por `Mood/Tense/Person/Number` no padrão UD): o script
+extrai as 10 formas de cada lema, **cross-valida** os regulares `-er`/`-ir` contra a regra de flexão
+de 3ª pessoa, e **valida** cada par de `participios-infinitivo` contra o léxico (a autoridade da
+desambiguação `-ido`). Qualquer divergência → `exit≠0`, nada escrito (foi assim que a entrada-
+fantasma `escrevido→escrever` — o particípio de *escrever* é o irregular `escrito` — foi eliminada).
+O `VERB.tsv` (71 MB) nunca entra no repo; passa-se o caminho via `VERB_TSV`. Chaves ordenadas → JSON
+estável (fingerprint reprodutível). Mesma fonte dos derivados do ADR-024.
 
 **Formato:** `ser-tempos` = `{ "forms": { "<forma>": { "tense", "number" } } }`;
 `conjugacoes-ativas` = `{ "verbs": { "<lema>": { "pres.3s": …, …, "cond.3p": … } } }`. Caixa
 invariante.
 
-**Licença:** verbos regulares por regra determinística + irregulares de curadoria própria (fatos de
-flexão). Ao usar formas do PortiLexicon-UD na expansão, aplicar a atribuição CC-BY 4.0 acima.
+**Licença / atribuição (OBRIGATÓRIA):** as formas são derivadas de **PortiLexicon-UD** (CC-BY 4.0) —
+logo estes arquivos são obras derivadas e creditam a fonte (mesma nota do bloco mais-que-perfeito
+acima). A *lista* de lemas cobertos é curadoria própria (fatos de flexão); as *formas* vêm do léxico.

@@ -1,5 +1,5 @@
 {
-  "_comentario": "Particípio (masculino singular, caixa invariante) → verbo-base no infinitivo. Usado SOMENTE pelo andaime de voz passiva do Tier 2 (src/lucid/core/actions/passive-scaffold.ts, ADR-013) como SINAL 'estrutura identificada, confira' — nunca como sugestão aplicável. Tabela CURADA e FECHADA, cada par verificado à mão (disciplina do ADR-011: sem conjugador produtivo). A chave é o particípio na forma masculina singular; o andaime normaliza gênero/número (concordância regular) antes de consultar. Fora da tabela → o andaime devolve baseVerb=null e mostra só o particípio, deixando o verbo com o autor. Adicionar entrada exige que o particípio não seja um substantivo/adjetivo lexicalizado mais comum (mesma cautela dos léxicos de participios-*).",
+  "_comentario": "Particípio (masculino singular, caixa invariante) → verbo-base no infinitivo. Usado SOMENTE pelo andaime de voz passiva do Tier 2 (src/lucid/core/actions/passive-scaffold.ts, ADR-013) como SINAL 'estrutura identificada, confira' — nunca como sugestão aplicável. Tabela CURADA e FECHADA (lista de particípios cobertos é decisão humana); cada par é VALIDADO contra PortiLexicon-UD em build-time por scripts/derive-conjugacoes.mjs (ADR-034), que é a autoridade da desambiguação -ido (recebido→receber vs partido→partir) — sem conjugador produtivo (disciplina do ADR-011). A chave é o particípio na forma masculina singular; o andaime normaliza gênero/número (concordância regular) antes de consultar. Fora da tabela → o andaime devolve baseVerb=null e mostra só o particípio, deixando o verbo com o autor. Adicionar entrada exige que o particípio não seja um substantivo/adjetivo lexicalizado mais comum (mesma cautela dos léxicos de participios-*).",
   "map": {
     "aberto": "abrir",
     "aceso": "acender",
@@ -16,7 +16,6 @@
     "dito": "dizer",
     "emitido": "emitir",
     "entregue": "entregar",
-    "escrevido": "escrever",
     "escrito": "escrever",
     "estabelecido": "estabelecer",
     "exigido": "exigir",

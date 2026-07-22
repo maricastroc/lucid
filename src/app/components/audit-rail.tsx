@@ -28,6 +28,7 @@ export interface RailProps {
   onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onPassiveActive: (target: Span, replacement: string) => void;
+  onManualEdit: (target: Span, replacement: string) => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -50,6 +51,7 @@ export function AuditRail(props: RailProps) {
               onSplit={props.onSplit}
               onApplyRewrite={props.onApplyRewrite}
               onPassiveActive={props.onPassiveActive}
+              onManualEdit={props.onManualEdit}
             />
           </div>
         </>
