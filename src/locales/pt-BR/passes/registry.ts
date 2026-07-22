@@ -9,7 +9,7 @@
  * (`passive_voice`), `nominalizationPass` (`nominalization`) e `jargonPass` (`jargon`,
  * ver ADR-008 em docs/DECISOES.md).
  */
-import type { Pass } from "../types";
+import type { Pass } from "@/lucid/core/types";
 import { sentenceLengthPass } from "./sentence-length";
 import { passiveVoicePass } from "./passive-voice";
 import { nominalizationPass } from "./nominalization";

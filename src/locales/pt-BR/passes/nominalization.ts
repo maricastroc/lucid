@@ -1,6 +1,6 @@
-import type { Finding, Pass, Token } from "../types";
-import type { LightVerbForm, NominalizationEntry } from "../data/types";
-import { getPrepared } from "../data/registry";
+import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { LightVerbForm, NominalizationEntry } from "../datasets/types";
+import { getPrepared } from "../datasets/registry";
 
 const CRITERION = "nominalization";
 const PRINCIPLE = "5.3.3";

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createDataView } from "../src/lucid/core/data/registry";
-import { passiveVoicePass } from "../src/lucid/core/passes/passive-voice";
-import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
-import { PASSES } from "../src/lucid/core/passes/registry";
-import { analyze } from "../src/lucid/core/analyzer";
+import { createDataView } from "../src/locales/pt-BR/datasets/registry";
+import { passiveVoicePass } from "../src/locales/pt-BR/passes/passive-voice";
+import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
+import { PASSES } from "../src/locales/pt-BR/passes/registry";
+import { analyze } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { buildDocument } from "./support/pt";
 import type { Config } from "../src/lucid/core/config";
 import type { PassContext } from "../src/lucid/core/types";
 

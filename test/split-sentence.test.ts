@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
-import { applySplitAt, clauseSplitPoints, type SplitPoint } from "../src/lucid/core/actions/split-sentence";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { applySplitAt, clauseSplitPoints, type SplitPoint } from "../src/locales/pt-BR/actions/split-sentence";
+import { buildDocument } from "./support/pt";
 import type { Span } from "../src/lucid/core/types";
 
 function wholeSpan(source: string): Span {

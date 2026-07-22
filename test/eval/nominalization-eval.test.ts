@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDataView } from "../../src/lucid/core/data/registry";
-import { nominalizationPass } from "../../src/lucid/core/passes/nominalization";
+import { createDataView } from "../../src/locales/pt-BR/datasets/registry";
+import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalization";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
-import { buildDocument } from "../../src/lucid/core/document/model";
+import { buildDocument } from "../support/pt";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 
 interface ResultadoAvaliacao {

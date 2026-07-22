@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid/core/analyzer";
+import { analyze } from "../src/lucid";
 import { buildScore } from "../src/lucid/core/score";
-import { PASSES } from "../src/lucid/core/passes/registry";
+import { PASSES } from "../src/locales/pt-BR/passes/registry";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 import type { Config } from "../src/lucid/core/config";
 import type { Finding } from "../src/lucid/core/types";

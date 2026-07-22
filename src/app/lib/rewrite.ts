@@ -13,6 +13,10 @@
 import type { Span } from "@/lucid";
 import { GEMINI_MODELS, GROQ_MODELS } from "@/llm";
 import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
+import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
+
+/** Locale ativo da UI (ADR-031). pt-BR por ora — a fiação já passa o id ponta a ponta. */
+const ACTIVE_LOCALE_ID = "pt-BR";
 
 export interface RewriteModel {
   providerId: "stub" | "groq" | "gemini";
@@ -58,13 +62,20 @@ export async function generateRewrite(
   criterion?: string,
 ): Promise<VerifiedRewrite> {
   if (choice.providerId === "stub") {
-    return proposeAndVerify(text, target, stubProposer, { criterion });
+    return proposeAndVerify(text, target, stubProposer, { criterion, locale: rewriteLocalePtBR });
   }
 
   const response = await fetch("/api/rewrite", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text, target, criterion, providerId: choice.providerId, model: choice.model }),
+    body: JSON.stringify({
+      text,
+      target,
+      criterion,
+      providerId: choice.providerId,
+      model: choice.model,
+      localeId: ACTIVE_LOCALE_ID,
+    }),
   });
 
   const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;

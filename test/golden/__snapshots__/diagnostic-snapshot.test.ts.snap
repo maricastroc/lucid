@@ -6,6 +6,7 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -180,6 +181,7 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -393,6 +395,7 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -590,6 +593,7 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -844,6 +848,7 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -1000,6 +1005,7 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -1156,6 +1162,7 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -1331,6 +1338,7 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
@@ -1528,6 +1536,7 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
   "meta": {
     "configHash": "ff50c111",
     "dataHash": "724a46e4",
+    "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },

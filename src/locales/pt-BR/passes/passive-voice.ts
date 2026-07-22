@@ -25,8 +25,8 @@
  * lexicalizado, ex. "foi resultado de"). Ambos curados e extensíveis, não exaustivos —
  * ver docs/DECISOES.md (ADR-006) e src/lucid/data/README.md.
  */
-import type { Finding, Pass, Token } from "../types";
-import { getPrepared } from "../data/registry";
+import type { Finding, Pass, Token } from "@/lucid/core/types";
+import { getPrepared } from "../datasets/registry";
 
 const CRITERION = "passive_voice";
 const PRINCIPLE = "5.3.3";

@@ -6,7 +6,8 @@
  * casamento de frase contígua (matcher compartilhado). Não troca sozinha (o encaixe depende do
  * contexto → `requiresHuman`); a forma enxuta vai na justificativa.
  */
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
+import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";
 
 const CRITERION = "perifrase_inflada";
@@ -21,7 +22,7 @@ export const perifraseInfladaPass: Pass = {
   run(ctx) {
     if (!ctx.config.perifraseInflada.enabled) return [];
 
-    const byFirstWord = ctx.data.get("perifrases.pt");
+    const byFirstWord = ctx.data.get<PhrasePrepared>("perifrases.pt");
     const findings: Finding[] = [];
 
     for (const sentence of ctx.doc.sentences) {

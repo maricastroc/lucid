@@ -6,7 +6,7 @@
  * Divisão de trabalho: uma ÚNICA frase longa é assunto do `long_sentence` — este critério só olha
  * a CONTAGEM de frases do parágrafo, para não se sobrepor. Não junta/divide sozinho (→ `requiresHuman`).
  */
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "paragraph_length";
 const PRINCIPLE = "5.2";

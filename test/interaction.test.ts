@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid/core/analyzer";
+import { analyze } from "../src/lucid";
 
 const QUATRO_NUMA_FRASE =
   "É preciso fazer a verificação do relatório supramencionado, que foi assinado pelo gestor " +

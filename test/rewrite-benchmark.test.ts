@@ -1,22 +1,59 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { analyze, type Span } from "../src/lucid";
-import { GroqProvider } from "../src/llm";
+import { GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
 import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
 import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-const PROBE_MODEL = "llama-3.1-8b-instant";
+// A sonda roda sempre num modelo BARATO/GRÁTIS (não é o sistema sob teste) — Groq free por
+// padrão; cai no Gemini flash grátis se só houver chave do Gemini.
+const PROBE_GROQ_MODEL = "llama-3.1-8b-instant";
+const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
-function loadGroqKey(): string | null {
-  if (process.env.GROQ_API_KEY) return process.env.GROQ_API_KEY;
+interface Keys {
+  groq: string | null;
+  gemini: string | null;
+}
+
+function loadKey(name: string): string | null {
+  if (process.env[name]) return process.env[name] ?? null;
   try {
-    const m = fs.readFileSync(".env", "utf8").match(/^GROQ_API_KEY=(.+)$/m);
+    const m = fs.readFileSync(".env", "utf8").match(new RegExp(`^${name}=(.+)$`, "m"));
     return m ? m[1].trim() : null;
   } catch {
     return null;
   }
+}
+
+/**
+ * Escolhe o provider pelo id do modelo (Groq × Gemini), preservando a interface `ChatProvider`.
+ * Devolve também um leitor de tokens porque `lastUsage` não está no contrato `ChatProvider`.
+ */
+function providerFor(model: string, keys: Keys): { provider: ChatProvider; tokens: () => number } {
+  if ((GROQ_MODELS as readonly string[]).includes(model)) {
+    if (!keys.groq) throw new Error(`GROQ_API_KEY ausente para ${model}`);
+    const p = new GroqProvider(keys.groq);
+    return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
+  }
+  if ((GEMINI_MODELS as readonly string[]).includes(model)) {
+    if (!keys.gemini) throw new Error(`GEMINI_API_KEY ausente para ${model}`);
+    const p = new GeminiProvider(keys.gemini);
+    return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
+  }
+  throw new Error(`modelo sem provider conhecido: ${model}`);
+}
+
+function buildProbe(keys: Keys): LlmComprehensionProbe {
+  if (keys.groq) return new LlmComprehensionProbe(new GroqProvider(keys.groq), PROBE_GROQ_MODEL);
+  if (keys.gemini) return new LlmComprehensionProbe(new GeminiProvider(keys.gemini), PROBE_GEMINI_MODEL);
+  throw new Error("nenhuma chave disponível para a sonda");
+}
+
+/** Rótulo curto do sistema (provider implícito no nome do modelo). */
+function systemLabel(model: string, strategy: RewriteStrategy): string {
+  return `${model.replace("openai/", "")} · ${strategy}`;
 }
 
 const GOLDEN: { id: string; text: string }[] = [
@@ -63,10 +100,10 @@ function overlapsRegion(start: number, end: number, s: number, e: number): boole
   return s < end && e > start;
 }
 
-async function runSystem(key: string, model: string, strategy: RewriteStrategy): Promise<Sample[]> {
-  const genProvider = new GroqProvider(key);
-  const proposer = new LlmRewriteProposer(genProvider, model, strategy);
-  const probe = new LlmComprehensionProbe(new GroqProvider(key), PROBE_MODEL);
+async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): Promise<Sample[]> {
+  const { provider, tokens: readTokens } = providerFor(model, keys);
+  const proposer = new LlmRewriteProposer(provider, model, strategy);
+  const probe = buildProbe(keys);
   const samples: Sample[] = [];
 
   for (const item of GOLDEN) {
@@ -75,7 +112,7 @@ async function runSystem(key: string, model: string, strategy: RewriteStrategy):
     const t0 = Date.now();
     const proposal = await proposer.propose({ text: item.text, target });
     const latencyMs = Date.now() - t0;
-    const tokens = genProvider.lastUsage?.totalTokens ?? 0;
+    const tokens = readTokens();
 
     const verification = await verifyRewrite(item.text, target, proposal, { probe, question: FLOOR_QUESTION });
 
@@ -114,10 +151,14 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
   it(
     "compara (modelo × estratégia) nas 6 dimensões",
     async () => {
-      const key = loadGroqKey();
-      if (!key) throw new Error("GROQ_API_KEY ausente (exporte ou ponha no .env)");
+      const keys: Keys = { groq: loadKey("GROQ_API_KEY"), gemini: loadKey("GEMINI_API_KEY") };
+      if (!keys.groq && !keys.gemini) {
+        throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
+      }
 
-      const models = (process.env.BENCHMARK_MODELS ?? "llama-3.3-70b-versatile,openai/gpt-oss-120b")
+      // O provider de cada modelo é inferido do id (Groq × Gemini). Default inclui o gerador forte
+      // grátis do Gemini ao lado dos free da Groq, no mesmo juiz determinístico.
+      const models = (process.env.BENCHMARK_MODELS ?? "llama-3.3-70b-versatile,gemini-2.5-flash")
         .split(",")
         .map((m) => m.trim())
         .filter(Boolean);
@@ -129,8 +170,8 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
 
       for (const model of models) {
         for (const strategy of strategies) {
-          const s = await runSystem(key, model, strategy);
-          const label = `${model.replace("openai/", "")} · ${strategy}`;
+          const s = await runSystem(model, strategy, keys);
+          const label = systemLabel(model, strategy);
           rows.push(
             `| ${label} | ${pct(s.map((x) => x.changed)).toFixed(0)} | ${mean(s.map((x) => x.dFlesch)).toFixed(1)} | ${mean(
               s.map((x) => x.dWords),

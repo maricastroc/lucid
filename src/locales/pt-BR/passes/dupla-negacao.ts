@@ -1,4 +1,5 @@
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
+import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";
 
 const CRITERION = "dupla_negacao";
@@ -13,7 +14,7 @@ export const duplaNegacaoPass: Pass = {
   run(ctx) {
     if (!ctx.config.duplaNegacao.enabled) return [];
 
-    const byFirstWord = ctx.data.get("duplas-negacoes.pt");
+    const byFirstWord = ctx.data.get<PhrasePrepared>("duplas-negacoes.pt");
     const findings: Finding[] = [];
 
     for (const sentence of ctx.doc.sentences) {

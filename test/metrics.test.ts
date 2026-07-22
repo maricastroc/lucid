@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildDocument } from "../src/lucid/core/document/model";
-import { runMetrics } from "../src/lucid/core/metrics";
+import { buildDocument } from "./support/pt";
+import { runMetrics } from "./support/pt";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 
 describe("runMetrics — documento vazio", () => {

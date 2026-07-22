@@ -84,7 +84,18 @@ analyze(text):
 - **The comprehension probe** — the floor-reader prompt forces **literal, local reading** (no world knowledge, no filling gaps) and reports where it stalls. `interpret()` maps its output to `flag | neutral` — there is no third `approved` value, and the type forbids one. Passing the floor is the absence of a failure, never evidence of comprehension.
 - **Verified rewrites (Tier 3)** — the model proposes a paragraph rewrite; the deterministic engine re-analyzes it and separates **PROOF** (the target violation is gone, the finding weight didn't rise, numbers/dates preserved, no jargon and no first person fabricated) from **SIGNAL** (entities and meaning preserved, the latter via the probe as a negative test). Never a green check; the author applies it or not.
 
-The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 001–028) in [`docs/DECISOES.md`](docs/DECISOES.md).
+**Generator × verifier benchmark.** The same deterministic verifier judges any generator, which turns model choice into an honest measurement instead of a leap of faith. A gated harness ([`test/rewrite-benchmark.test.ts`](test/rewrite-benchmark.test.ts), `BENCHMARK=1`, off CI) infers the provider from the model id (Groq × Gemini) behind the one `ChatProvider` interface and scores each `model × strategy` over a small stress golden (impersonal monster / numbers-dates-names / passive-jargon):
+
+| System | rewrote% | ΔFlesch | findings after | proofs OK% | no-veto% | latency ms | tokens |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| llama-3.3-70b · correct | 67 | +0.5 | 4.0 | 100 | 100 | 556 | 479 |
+| llama-3.3-70b · rewrite | 100 | **+69.8** | 2.0 | 100 | 67 | 657 | 653 |
+| gemini-2.5-flash · correct | 100 | +16.6 | 3.3 | 67 | 67 | 1440 | 377 |
+| gemini-2.5-flash · rewrite | 100 | **+71.5** | 2.0 | 67 | 33 | 1263 | 537 |
+
+The reading: `rewrite` buys far more clarity than `correct` (ΔFlesch ~+70 vs ~+10), and the verifier does its job — Gemini's bolder rewrites scored the biggest Flesch gains **but** its `proofs OK%` dropped to 67% (on the numbers-dates-names text the deterministic check caught an altered value or new jargon) and its veto rate rose. Stronger prose never buys a pass; the proof gate is what decides. Honest caveat: single run, `temperature 0` (LLM output still varies run-to-run — hence `rewrote% < 100` when `correct` returns identical text), 3 texts — a floor signal, not a leaderboard.
+
+The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 001–031) in [`docs/DECISOES.md`](docs/DECISOES.md).
 
 <br/>
 

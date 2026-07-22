@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { buildDocument } from "./support/pt";
 
 const spans = (text: string, criterion: string): string[] =>
   analyze(text)

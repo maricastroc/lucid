@@ -11,8 +11,21 @@
  * Fronteira: estes tipos vivem em `report/**`, a única camada que pode conhecer `core` e
  * `probe` ao mesmo tempo. `core/**` nunca importa daqui.
  */
-import type { Span } from "../../lucid/core/types";
+import type { Diagnostic, Span } from "../../lucid/core/types";
 import type { RewriteStrategy } from "./prompt";
+
+/**
+ * Visão de LOCALE para o Tier 3 (ADR-031) — o que o verificador precisa saber sobre o idioma:
+ * como RE-ANALISAR (o `analyze` ligado ao locale), quais são os marcadores de 1ª pessoa e qual é
+ * o id do critério de jargão. Vive em `report/**`; um locale FORNECE um objeto com este shape (por
+ * tipagem estrutural), sem importar `report` — a cerca proíbe locale→report.
+ */
+export interface RewriteLocale {
+  readonly id: string;
+  analyze(text: string): Diagnostic;
+  readonly firstPersonMarkers: RegExp;
+  readonly jargonCriterionId: string;
+}
 
 /**
  * Pedido ao proposer: o texto inteiro (normalizado, CONTEXTO) + o ALVO a reescrever (`Span`)
@@ -24,6 +37,8 @@ export interface RewriteRequest {
   target: Span;
   criterion?: string;
   strategy?: RewriteStrategy;
+  /** locale para o qual a proposta é gerada — carimbado na proposta (anti-mistura, ADR-031). */
+  localeId?: string;
 }
 
 /**
@@ -37,6 +52,8 @@ export interface RewriteProposal {
   original: string;
   /** o texto proposto para substituir o trecho */
   proposed: string;
+  /** locale de origem da proposta — `verifyRewrite` recusa verificar sob outro (ADR-031). */
+  localeId?: string;
 }
 
 /**

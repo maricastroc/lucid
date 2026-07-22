@@ -16,12 +16,21 @@
  *
  * Fronteira: `report/**` pode importar `core` e `probe`. `core` nunca importa daqui.
  */
-import { analyze, type Finding, type Severity, type Span } from "../../lucid";
+import type { Finding, Severity, Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
-import type { MetricsDelta, Proof, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
+import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
+import type { MetricsDelta, Proof, RewriteLocale, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
+
+/** Locale default do Tier 3 — pt-BR. Preserva a compatibilidade dos chamadores existentes. */
+const DEFAULT_LOCALE: RewriteLocale = rewriteLocalePtBR;
 
 export interface VerifyOptions {
+  /**
+   * Locale que RE-ANALISA e fornece marcadores de 1ª pessoa + id de jargão (ADR-031). Default:
+   * pt-BR. Se a proposta declara um `localeId` diferente, `verifyRewrite` recusa (anti-mistura).
+   */
+  locale?: RewriteLocale;
   /** sonda opcional para o SINAL de sentido (teste negativo). Sem ela, esse sinal é omitido. */
   probe?: ComprehensionProbe;
   /** a pergunta que o leitor veio fazer — exigida junto com `probe`. */
@@ -32,19 +41,8 @@ export interface VerifyOptions {
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
 const RE_DATE = /\b\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gu;
-/**
- * Marcadores de 1ª pessoa — LISTA FECHADA de palavras funcionais, INAMBÍGUAS em PT-BR moderno
- * (pronomes e possessivos). O risco fatal do LLM é fabricar o AGENTE: um texto impessoal
- * ("foi realizada a análise") vira "nós analisamos", inventando quem agiu. Isso é o que o
- * `gpt-oss` fez e a sonda não pegou (ADR-016/019).
- *
- * Fiel à disciplina do projeto (precisão > recall, ZERO morfologia produtiva — mesma filosofia
- * do ADR-011): NÃO detectamos desinência verbal ("-mos"), que colide com "mesmos", "termos"
- * etc. Só a classe fechada. Deliberadamente FORA: "nos"/"no" (ambíguos com a contração em+os).
- * Assim uma falha só dispara com evidência dura de invenção de 1ª pessoa.
- */
-const RE_FIRST_PERSON =
-  /\b(?:eu|nós|me|mim|comigo|conosco|meu|minha|meus|minhas|nosso|nossa|nossos|nossas)\b/giu;
+// Os marcadores de 1ª pessoa são específicos do idioma e vêm do locale (`locale.firstPersonMarkers`,
+// ADR-031) — a lista fechada de pronomes/possessivos PT vive em `src/locales/pt-BR/tier3.ts`.
 /** Palavra Capitalizada (nome próprio) ou sigla em CAIXA-ALTA — heurística de entidade. */
 const RE_ENTITY = /\b(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})\b/gu;
 const RE_ACRONYM = /^\p{Lu}{2,}$/u;
@@ -55,9 +53,9 @@ function extractSorted(text: string, re: RegExp): string[] {
   return (text.match(re) ?? []).slice().sort();
 }
 
-/** Conjunto (minúsculo) de marcadores de 1ª pessoa presentes no texto. */
-function firstPersonMarkers(text: string): Set<string> {
-  return new Set((text.match(RE_FIRST_PERSON) ?? []).map((m) => m.toLowerCase()));
+/** Conjunto (minúsculo) de marcadores de 1ª pessoa presentes no texto, pelo padrão do locale. */
+function firstPersonMarkers(text: string, re: RegExp): Set<string> {
+  return new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
 }
 
 /**
@@ -113,10 +111,15 @@ function totalBurden(findings: readonly Finding[]): number {
   return findings.reduce((sum, f) => sum + SEVERITY_WEIGHT[f.severity], 0);
 }
 
-function jargonTextsOverlapping(findings: readonly Finding[], start: number, end: number): Set<string> {
+function jargonTextsOverlapping(
+  findings: readonly Finding[],
+  start: number,
+  end: number,
+  jargonCriterionId: string,
+): Set<string> {
   const set = new Set<string>();
   for (const f of findings) {
-    if (f.criterion === "jargon" && overlaps(f, start, end)) set.add(f.span.text);
+    if (f.criterion === jargonCriterionId && overlaps(f, start, end)) set.add(f.span.text);
   }
   return set;
 }
@@ -135,9 +138,17 @@ export async function verifyRewrite(
   proposal: RewriteProposal,
   options: VerifyOptions = {},
 ): Promise<RewriteVerification> {
+  const locale = options.locale ?? DEFAULT_LOCALE;
+  // Anti-mistura (ADR-031): uma proposta gerada para um locale não pode ser verificada sob outro.
+  if (proposal.localeId && proposal.localeId !== locale.id) {
+    throw new Error(
+      `proposta do locale '${proposal.localeId}' não pode ser verificada sob o locale '${locale.id}'`,
+    );
+  }
+
   const rewritten = applyProposal(text, target, proposal);
-  const before = analyze(text);
-  const after = analyze(rewritten);
+  const before = locale.analyze(text);
+  const after = locale.analyze(rewritten);
 
   const originalStart = target.start;
   const originalEnd = target.end;
@@ -201,8 +212,8 @@ export async function verifyRewrite(
       : `datas diferem: [${datesBefore.join(", ")}] → [${datesAfter.join(", ")}]`,
   };
 
-  const beforeSpanJargon = jargonTextsOverlapping(before.findings, originalStart, originalEnd);
-  const afterRegionJargon = jargonTextsOverlapping(after.findings, newStart, newEnd);
+  const beforeSpanJargon = jargonTextsOverlapping(before.findings, originalStart, originalEnd, locale.jargonCriterionId);
+  const afterRegionJargon = jargonTextsOverlapping(after.findings, newStart, newEnd, locale.jargonCriterionId);
   const introducedJargon = [...afterRegionJargon].filter((t) => !beforeSpanJargon.has(t));
   const noNewJargon: Proof = {
     check: "no_new_jargon",
@@ -217,8 +228,10 @@ export async function verifyRewrite(
   // LUGAR NENHUM do documento-fonte. Comparar contra o documento inteiro (não só o alvo) evita
   // falso veto quando o texto já é escrito em 1ª pessoa — aí "nós" é fiel, não fabricado. Se o
   // marcador não aparece em parte alguma do original, o modelo inventou o agente → veto.
-  const sourceFirstPerson = firstPersonMarkers(text);
-  const inventedFirstPerson = [...firstPersonMarkers(proposal.proposed)].filter((m) => !sourceFirstPerson.has(m));
+  const sourceFirstPerson = firstPersonMarkers(text, locale.firstPersonMarkers);
+  const inventedFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].filter(
+    (m) => !sourceFirstPerson.has(m),
+  );
   const noInventedFirstPerson: Proof = {
     check: "no_invented_first_person",
     passed: inventedFirstPerson.length === 0,

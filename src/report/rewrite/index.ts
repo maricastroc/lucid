@@ -19,7 +19,12 @@ export async function proposeAndVerify(
   proposer: RewriteProposer,
   options: VerifyOptions = {},
 ): Promise<VerifiedRewrite> {
-  const proposal = await proposer.propose({ text, target, criterion: options.criterion });
+  const proposal = await proposer.propose({
+    text,
+    target,
+    criterion: options.criterion,
+    localeId: options.locale?.id,
+  });
   const verification = await verifyRewrite(text, target, proposal, options);
   return { proposal, verification };
 }
@@ -33,6 +38,7 @@ export type { VerifyOptions } from "./verify";
 export type {
   MetricsDelta,
   Proof,
+  RewriteLocale,
   RewriteProposal,
   RewriteProposer,
   RewriteRequest,

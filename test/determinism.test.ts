@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { analyze, analyzeWithPasses } from "../src/lucid/core/analyzer";
-import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
-import { passiveVoicePass } from "../src/lucid/core/passes/passive-voice";
-import { nominalizationPass } from "../src/lucid/core/passes/nominalization";
-import { jargonPass, compileJargonEntries } from "../src/lucid/core/passes/jargon";
-import jargaoData from "../src/lucid/data/jargao.pt.json";
+import { analyze, analyzeWithPasses } from "../src/lucid";
+import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
+import { passiveVoicePass } from "../src/locales/pt-BR/passes/passive-voice";
+import { nominalizationPass } from "../src/locales/pt-BR/passes/nominalization";
+import { jargonPass, compileJargonEntries } from "../src/locales/pt-BR/passes/jargon";
+import jargaoData from "../src/locales/pt-BR/datasets/jargao.pt.json";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 import type { Config } from "../src/lucid/core/config";
 import type { Pass } from "../src/lucid/core/types";

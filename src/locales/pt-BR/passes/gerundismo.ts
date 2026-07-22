@@ -1,4 +1,4 @@
-import type { Finding, Pass, Token } from "../types";
+import type { Finding, Pass, Token } from "@/lucid/core/types";
 
 const CRITERION = "gerundismo";
 const PRINCIPLE = "5.3.4";

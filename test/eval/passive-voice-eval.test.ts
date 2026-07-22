@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDataView } from "../../src/lucid/core/data/registry";
-import { passiveVoicePass } from "../../src/lucid/core/passes/passive-voice";
+import { createDataView } from "../../src/locales/pt-BR/datasets/registry";
+import { passiveVoicePass } from "../../src/locales/pt-BR/passes/passive-voice";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
-import { buildDocument } from "../../src/lucid/core/document/model";
+import { buildDocument } from "../support/pt";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 
 interface ResultadoAvaliacao {
