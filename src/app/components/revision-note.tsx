@@ -20,7 +20,7 @@ import {
 } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
-import { generateRewrite, REWRITE_MODELS, type RewriteModel } from "../lib/rewrite";
+import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
 export interface RevisionNoteProps {
@@ -112,11 +112,12 @@ export function RevisionNote({
 }
 
 /**
- * Edição À MÃO do autor — a terceira opção ao lado da ação mecânica e da LLM. Abre a UNIDADE-alvo
- * (a frase ou o parágrafo do finding, o mesmo trecho que a LLM reescreveria e que fica destacado no
- * documento) num campo editável. Ao aplicar, chama a MESMA máquina de substituição das outras ações
- * (`onManualEdit` = `replaceSpan`): vira rascunho, a engine reanalisa, o placar se move. A ferramenta
- * não julga a versão do autor — só volta a medir. Sem selo.
+ * Edição À MÃO (ou COLAGEM) do autor — uma das TRÊS fontes de candidato, ao lado da ação mecânica e
+ * da LLM. Abre a UNIDADE-alvo (a frase ou o parágrafo do finding, o mesmo trecho que a LLM
+ * reescreveria e que fica destacado no documento) num campo editável. A decisão do ADR-000 (Etapa 2):
+ * a versão do autor passa pelo MESMO verificador determinístico que julga a IA — nenhuma fonte é
+ * privilegiada. O autor escreve/cola → `verifyManualEdit` (offline, sem LLM) → o MESMO veredito
+ * (`RewriteResult`) → aplicar vira rascunho (`onManualEdit` = `replaceSpan`) e a engine re-audita.
  */
 function ManualEdit({
   finding,
@@ -132,6 +133,8 @@ function ManualEdit({
   const original = target.text;
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(original);
+  const [result, setResult] = useState<VerifiedRewrite | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const dirty = isManualEditDirty(original, draft);
 
@@ -141,15 +144,26 @@ function ManualEdit({
         type="button"
         onClick={() => {
           setDraft(original);
+          setResult(null);
           setOpen(true);
         }}
         className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
       >
         <PenNibIcon className="size-3.5" />
-        Editar eu mesmo
+        Editar ou colar minha versão
       </button>
     );
   }
+
+  const check = async () => {
+    setChecking(true);
+    try {
+      // O MESMO verificador que julga a IA. Determinístico e offline — a fonte não muda o juiz.
+      setResult(await verifyManualEdit(source, target, draft));
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
@@ -168,7 +182,11 @@ function ManualEdit({
       <div className="px-3.5 py-3">
         <textarea
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value);
+            // O veredito tem que espelhar EXATAMENTE o texto aplicado: mexeu, invalida a prova.
+            setResult(null);
+          }}
           spellCheck={false}
           aria-label={`Editar ${unitLabel}`}
           className="block max-h-[46vh] min-h-[7rem] w-full resize-y rounded-lg border border-rule-1 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
@@ -177,24 +195,32 @@ function ManualEdit({
         <div className="mt-2.5 flex items-center gap-2">
           <button
             type="button"
-            disabled={!dirty}
-            onClick={() => onManualEdit(target, manualEditReplacement(draft))}
+            disabled={!dirty || checking}
+            onClick={check}
             className={APPLY_BUTTON_CLASS}
           >
-            Aplicar minha versão
+            {checking ? "Verificando…" : "Verificar minha versão"}
           </button>
           <button
             type="button"
             disabled={draft === original}
-            onClick={() => setDraft(original)}
+            onClick={() => {
+              setDraft(original);
+              setResult(null);
+            }}
             className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Restaurar
           </button>
         </div>
+
+        {result !== null && (
+          <RewriteResult result={result} onApplyRewrite={() => onManualEdit(target, manualEditReplacement(draft))} />
+        )}
+
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          Você escreve; a ferramenta apenas re-mede {unitLabel}. É um rascunho — a engine reanalisa e o placar se move.
-          Não é atestado de clareza.
+          Você escreve ou cola; a engine julga a sua versão com as mesmas provas da IA — nenhuma fonte é privilegiada.
+          Aplicar vira um rascunho e a engine re-audita.
         </p>
       </div>
     </div>
@@ -374,9 +400,9 @@ function GeneratedRewrite({
       </div>
       <div className="px-4 py-3">
         <p className="text-[12px] leading-relaxed text-ink-2">
-          Camada opcional — o diagnóstico acima é <span className="text-ink-1">determinístico e não depende disto</span>.
-          A IA propõe; a <span className="text-ink-1">engine verifica</span>. Nunca aplica sozinha, e passar nas provas é
-          ausência de falha, <span className="text-ink-1">não aprovação</span>.
+          Uma das formas de propor uma nova versão — a IA reescreve; você também pode{" "}
+          <span className="text-ink-1">editar ou colar a sua</span>. A engine julga qualquer uma delas do mesmo jeito.
+          Opcional: o <span className="text-ink-1">diagnóstico acima não depende disto</span>.
         </p>
         <p className="mt-2 rounded-lg bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
           A IA vai reescrever <span className="font-semibold text-ink-0">{unitLabel}</span> (destacada no documento).

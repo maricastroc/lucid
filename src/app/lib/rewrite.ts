@@ -12,8 +12,9 @@
  */
 import type { Span } from "@/lucid";
 import { GEMINI_MODELS, GROQ_MODELS } from "@/llm";
-import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
+import { proposeAndVerify, StubRewriteProposer, verifyRewrite, type VerifiedRewrite } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
+import { manualEditReplacement } from "./text-edit";
 
 /** Locale ativo da UI (ADR-031). pt-BR por ora — a fiação já passa o id ponta a ponta. */
 const ACTIVE_LOCALE_ID = "pt-BR";
@@ -84,4 +85,22 @@ export async function generateRewrite(
     throw new Error(message);
   }
   return data;
+}
+
+/**
+ * Verifica a versão DO AUTOR (edição à mão ou colagem) sob o MESMO verificador determinístico
+ * que julga a IA — a decisão estrutural do ADR-000 (Etapa 2): a fonte do candidato não privilegia
+ * ninguém. Sem proposer e sem rede: constrói o candidato a partir do rascunho e chama
+ * `verifyRewrite` direto. Totalmente offline e determinístico (a sonda de sentido não roda aqui —
+ * ela é o único passo que usaria LLM, e o texto do autor não precisa dela). O `VerifiedRewrite`
+ * resultante alimenta o MESMO componente de veredito da proposta da IA.
+ */
+export async function verifyManualEdit(text: string, target: Span, draft: string): Promise<VerifiedRewrite> {
+  const proposal = {
+    proposerId: "sua edição",
+    original: target.text,
+    proposed: manualEditReplacement(draft),
+  };
+  const verification = await verifyRewrite(text, target, proposal, { locale: rewriteLocalePtBR });
+  return { proposal, verification };
 }
