@@ -14,7 +14,9 @@ export type IntegratedCriterion =
   | "dupla_negacao"
   | "subordinacao_densa"
   | "leitor_terceira_pessoa"
-  | "salto_de_nivel_titulo";
+  | "salto_de_nivel_titulo"
+  | "long_heading"
+  | "single_item_list";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

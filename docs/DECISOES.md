@@ -1806,6 +1806,38 @@ item só) e o **render visual dos blocos** na UI (títulos/listas destacados no 
 
 ---
 
+## ADR-042 — Fase 2: mais dois detectores de Princípio 2 (`long_heading`, `single_item_list`) + render de blocos
+
+**Contexto.** Fecha o pendente do ADR-041: os dois detectores estruturais que faltavam e o render
+visual dos blocos. Ambos, como o `salto_de_nivel_titulo`, só existem porque o DOCX traz `heading`/`list`.
+
+**Decisão — detectores (5.2, `structural`, `warning`, `requiresHuman`, sem sugestão).**
+- `long_heading`: título LONGO (palavras acima de `maxWords`, default 12) OU em FORMA DE FRASE (≥2 frases,
+  ou termina com ponto final). Interrogação NÃO conta — título-pergunta ("O que muda para você?") é boa
+  LS. Um título ganha **uma marca só**; comprimento tem prioridade (`meta.reason: "length" | "sentence"`).
+- `single_item_list`: bloco `kind === "list"` com `items.length === 1` — determinístico, sem heurística.
+  Uma lista existe para comparar vários itens; com um só não localiza nada (falta item, ou é prosa).
+
+Nenhum reescreve (encurtar título / completar-ou-dissolver lista é do autor). Texto puro não produz
+`heading`/`list` → nenhum dispara nele (verificado no teste).
+
+**Decisão — render de blocos na UI.** `DocumentView` ganhou um caminho por BLOCOS, ligado só quando há
+documento importado (texto === `doc.source`): títulos viram `h2..h6` com eyebrow "Título · nível N";
+listas viram `<ul>/<ol>` reais com eyebrow "Lista · N itens". A máquina de marcas/seleção/flash foi
+extraída para `segmentRange` (em `editor-model`, puro) + o componente `Segments`, reusada pelos dois
+modos (linhas × blocos) sem duplicar lógica. Texto puro segue no render por linhas, idêntico ao de sempre.
+
+**Copy sem lacuna (ADR-037).** `NARRATIVE` e o `switch` de `Guidance` exaustivos por `CriterionId`
+exigiram a copy dos dois critérios no typecheck, junto com o pass.
+
+**Consequências.** 16→**18 critérios**. **939 testes verdes** (13 novos em `test/heading-list.test.ts`,
+com `Document` estruturado — o golden integrado é de texto e não produz blocos). Snapshots regenerados:
+diff só as duas entradas zeradas em `byCriterion`, **zero finding novo** no golden de texto. Verificado
+ao vivo (DOCX real: dois títulos e a lista de um item marcados, blocos destacados, nota da lista abrindo
+com "ABNT 5.2"). Typecheck/lint/depcheck limpos; cerca intacta.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

@@ -624,6 +624,20 @@ function Guidance({
           título intermediário que falta — assim o sumário e a leitura por estrutura ficam previsíveis.
         </GuideText>
       );
+    case "long_heading":
+      return (
+        <GuideText>
+          Encurte o título até virar um rótulo que o leitor use para localizar a seção — e, se ele fechou como frase,
+          tire o ponto final e reduza à etiqueta essencial. O corte é seu.
+        </GuideText>
+      );
+    case "single_item_list":
+      return (
+        <GuideText>
+          Uma lista de um item só não separa nada: acrescente os itens que faltam, ou traga o conteúdo de volta para o
+          texto corrido. A escolha depende do conteúdo — sua.
+        </GuideText>
+      );
     default:
       return assertNever(c);
   }

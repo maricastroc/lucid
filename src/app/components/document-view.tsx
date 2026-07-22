@@ -1,8 +1,8 @@
 "use client";
 
 import { forwardRef, useMemo } from "react";
-import type { Diagnostic, Finding, Span } from "@/lucid";
-import { buildLines } from "../lib/editor-model";
+import type { Block, Diagnostic, Finding, Span } from "@/lucid";
+import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityRank, SEVERITY_LABEL } from "../lib/criteria";
 
 export type Mode = "audit" | "edit";
@@ -11,6 +11,9 @@ interface Props {
   mode: Mode;
   text: string;
   diagnostic: Diagnostic;
+  /** blocos estruturais do documento IMPORTADO (DOCX): quando presentes, o render destaca títulos e
+   * listas em vez de tratar tudo como parágrafo. Ausente para texto puro/editado. */
+  blocks: readonly Block[] | null;
   selectedId: string | null;
   flashId: string | null;
   activeCriteria: ReadonlySet<string>;
@@ -19,14 +22,188 @@ interface Props {
   onSelectFinding: (finding: Finding) => void;
 }
 
+/** Estado de interação compartilhado pelos dois modos de render (linhas × blocos). */
+interface SegmentContext {
+  selectedId: string | null;
+  flashId: string | null;
+  activeCriteria: ReadonlySet<string>;
+  rewriteTarget: Span | null;
+  onSelectFinding: (finding: Finding) => void;
+}
+
+/** Renderiza os segmentos anotados de um trecho — a máquina de marcas (inline/passagem), seleção,
+ * flash e alvo de reescrita. Idêntica para parágrafo, título e item de lista. */
+function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
+  const { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding } = ctx;
+  return (
+    <>
+      {segments.map((seg, i) => {
+        const inline = seg.inline && activeCriteria.has(seg.inline.criterion) ? seg.inline : undefined;
+        const passage = seg.passage && activeCriteria.has("long_sentence") ? seg.passage : undefined;
+        const inTarget =
+          rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
+
+        if (!inline && !passage) {
+          return (
+            <span key={i} className={inTarget ? "seg rewrite-target" : "seg"}>
+              {seg.text}
+            </span>
+          );
+        }
+
+        const target = inline ?? passage!;
+        const id = findingId(target);
+        const selected = selectedId === id;
+        const meta = metaFor(target.criterion);
+        const classes = ["seg"];
+        if (inTarget) classes.push("rewrite-target");
+        if (inline) classes.push("mark", meta.markStyleClass);
+        if (passage) classes.push("passage");
+        if (selected) classes.push("seg-selected", "is-lit");
+        if (flashId === id) classes.push("seg-flash");
+        const ink = inline ? severityInkVar(inline.severity) : undefined;
+
+        return (
+          <span
+            key={i}
+            role="button"
+            tabIndex={0}
+            data-finding-id={id}
+            className={classes.join(" ")}
+            style={ink ? ({ "--mark-ink": ink } as React.CSSProperties) : undefined}
+            aria-pressed={selected}
+            aria-label={`${meta.label}: “${seg.text.trim()}”. ${SEVERITY_LABEL[target.severity]}.`}
+            onClick={() => onSelectFinding(target)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onSelectFinding(target);
+              }
+            }}
+          >
+            {seg.text}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+/** Tick de margem — herda o marcador de maior severidade que toca o bloco/linha (modo lupa). */
+function MarginTick({
+  markers,
+  selectedId,
+  isFocused,
+}: {
+  markers: Finding[];
+  selectedId: string | null;
+  isFocused: boolean;
+}) {
+  if (markers.length === 0) return null;
+  const tick = markers.reduce((a, b) => (severityRank(a.severity) >= severityRank(b.severity) ? a : b));
+  const holdsSelected = markers.some((m) => findingId(m) === selectedId);
+  return (
+    <span
+      aria-hidden
+      className="margin-tick absolute -left-4 top-[0.5em] hidden h-[1.1em] w-0.75 rounded-full sm:block"
+      style={{
+        background: holdsSelected ? "var(--accent)" : severityInkVar(tick.severity),
+        opacity: holdsSelected ? 1 : isFocused ? 0.18 : 0.4,
+        transform: holdsSelected ? "scaleY(1.15)" : "scaleY(1)",
+      }}
+    />
+  );
+}
+
+/** Nível de título → tamanho relativo (dentro do corpo serifado do documento). */
+function headingSize(level: number): string {
+  return `${Math.max(1.5 - (level - 1) * 0.14, 1.05).toFixed(2)}em`;
+}
+
+/** Render por BLOCOS de um documento estruturado (DOCX): títulos e listas ganham forma própria. */
+function BlockView({
+  blocks,
+  diagnostic,
+  activeCriteria,
+  ctx,
+  isFocused,
+}: {
+  blocks: readonly Block[];
+  diagnostic: Diagnostic;
+  activeCriteria: ReadonlySet<string>;
+  ctx: SegmentContext;
+  isFocused: boolean;
+}) {
+  const markersIn = (start: number, end: number): Finding[] =>
+    diagnostic.findings.filter(
+      (f) => activeCriteria.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
+    );
+
+  return (
+    <>
+      {blocks.map((block, bi) => {
+        const markers = markersIn(block.start, block.end);
+        const tick = <MarginTick markers={markers} selectedId={ctx.selectedId} isFocused={isFocused} />;
+
+        if (block.kind === "heading") {
+          const Tag = `h${Math.min(Math.max(block.level + 1, 2), 6)}` as "h2" | "h3" | "h4" | "h5" | "h6";
+          return (
+            <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
+              {tick}
+              <div className="mb-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-ink-3">
+                Título · nível {block.level}
+              </div>
+              <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
+                <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end)} ctx={ctx} />
+              </Tag>
+            </div>
+          );
+        }
+
+        if (block.kind === "list") {
+          const ListTag = block.ordered ? "ol" : "ul";
+          return (
+            <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+              {tick}
+              <div className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.16em] text-ink-3">
+                {block.ordered ? "Lista numerada" : "Lista"}
+                {block.items.length === 1 ? " · 1 item" : ` · ${block.items.length} itens`}
+              </div>
+              <ListTag className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}>
+                {block.items.map((item, ii) => (
+                  <li key={ii} className="pl-1">
+                    <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end)} ctx={ctx} />
+                  </li>
+                ))}
+              </ListTag>
+            </div>
+          );
+        }
+
+        return (
+          <p key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+            {tick}
+            <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end)} ctx={ctx} />
+          </p>
+        );
+      })}
+    </>
+  );
+}
+
 export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentView(
-  { mode, text, diagnostic, selectedId, flashId, activeCriteria, rewriteTarget, onChangeText, onSelectFinding },
+  { mode, text, diagnostic, blocks, selectedId, flashId, activeCriteria, rewriteTarget, onChangeText, onSelectFinding },
   scrollRef,
 ) {
   const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings), [diagnostic]);
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;
+
+  // Só destacamos a estrutura quando há blocos de VERDADE (título/lista) — um documento importado.
+  // Texto puro (só parágrafos) segue no render por linhas, idêntico ao de sempre.
+  const structured = blocks !== null && blocks.some((b) => b.kind !== "paragraph");
+  const ctx: SegmentContext = { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding };
 
   return (
     <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label="Documento em revisão">
@@ -35,7 +212,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
           <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
             <div className="flex items-center justify-between border-b border-rule-1 px-8 py-3.5 sm:px-14">
               <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-3">
-                {mode === "edit" ? "Rascunho" : "Documento em revisão"}
+                {mode === "edit" ? "Rascunho" : structured ? "Documento estruturado" : "Documento em revisão"}
               </span>
               <span className="text-[12px] tabular-nums text-ink-3">{words} palavras</span>
             </div>
@@ -53,87 +230,27 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                 />
               </div>
             ) : (
-              <article
-                className={`prose-doc px-6 py-8 sm:px-14 sm:py-12 ${isFocused ? "is-focused" : ""}`}
-              >
-                {paragraphs.map((para) => {
-                  const activeMarkers = para.markers.filter((m) => activeCriteria.has(m.criterion));
-                  const tick = activeMarkers.length
-                    ? activeMarkers.reduce((a, b) => (severityRank(a.severity) >= severityRank(b.severity) ? a : b))
-                    : null;
-                  const holdsSelected = activeMarkers.some((m) => findingId(m) === selectedId);
-
-                  return (
+              <article className={`prose-doc px-6 py-8 sm:px-14 sm:py-12 ${isFocused ? "is-focused" : ""}`}>
+                {structured ? (
+                  <BlockView
+                    blocks={blocks!}
+                    diagnostic={diagnostic}
+                    activeCriteria={activeCriteria}
+                    ctx={ctx}
+                    isFocused={isFocused}
+                  />
+                ) : (
+                  paragraphs.map((para) => (
                     <p key={para.number} className="relative">
-                      {tick && (
-                        <span
-                          aria-hidden
-                          className="margin-tick absolute -left-4 top-[0.5em] hidden h-[1.1em] w-0.75 rounded-full sm:block"
-                          style={{
-                            background: holdsSelected ? "var(--accent)" : severityInkVar(tick.severity),
-                            opacity: holdsSelected ? 1 : isFocused ? 0.18 : 0.4,
-                            transform: holdsSelected ? "scaleY(1.15)" : "scaleY(1)",
-                          }}
-                        />
-                      )}
-                      {para.text.length === 0 ? (
-                        <span>&nbsp;</span>
-                      ) : (
-                        para.segments.map((seg, i) => {
-                          const inline = seg.inline && activeCriteria.has(seg.inline.criterion) ? seg.inline : undefined;
-                          const passage =
-                            seg.passage && activeCriteria.has("long_sentence") ? seg.passage : undefined;
-                          const inTarget =
-                            rewriteTarget !== null &&
-                            seg.start >= rewriteTarget.start &&
-                            seg.end <= rewriteTarget.end;
-
-                          if (!inline && !passage) {
-                            return (
-                              <span key={i} className={inTarget ? "seg rewrite-target" : "seg"}>
-                                {seg.text}
-                              </span>
-                            );
-                          }
-
-                          const target = inline ?? passage!;
-                          const id = findingId(target);
-                          const selected = selectedId === id;
-                          const meta = metaFor(target.criterion);
-                          const classes = ["seg"];
-                          if (inTarget) classes.push("rewrite-target");
-                          if (inline) classes.push("mark", meta.markStyleClass);
-                          if (passage) classes.push("passage");
-                          if (selected) classes.push("seg-selected", "is-lit");
-                          if (flashId === id) classes.push("seg-flash");
-                          const ink = inline ? severityInkVar(inline.severity) : undefined;
-
-                          return (
-                            <span
-                              key={i}
-                              role="button"
-                              tabIndex={0}
-                              data-finding-id={id}
-                              className={classes.join(" ")}
-                              style={ink ? ({ "--mark-ink": ink } as React.CSSProperties) : undefined}
-                              aria-pressed={selected}
-                              aria-label={`${meta.label}: “${seg.text.trim()}”. ${SEVERITY_LABEL[target.severity]}.`}
-                              onClick={() => onSelectFinding(target)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  onSelectFinding(target);
-                                }
-                              }}
-                            >
-                              {seg.text}
-                            </span>
-                          );
-                        })
-                      )}
+                      <MarginTick
+                        markers={para.markers.filter((m) => activeCriteria.has(m.criterion))}
+                        selectedId={selectedId}
+                        isFocused={isFocused}
+                      />
+                      {para.text.length === 0 ? <span>&nbsp;</span> : <Segments segments={para.segments} ctx={ctx} />}
                     </p>
-                  );
-                })}
+                  ))
+                )}
               </article>
             )}
           </div>

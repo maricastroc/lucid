@@ -58,6 +58,13 @@ export interface Config {
   hierarquiaTitulos: {
     enabled: boolean;
   };
+  longHeading: {
+    enabled: boolean;
+    maxWords: number;
+  };
+  singleItemList: {
+    enabled: boolean;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -119,6 +126,13 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
   },
   hierarquiaTitulos: {
+    enabled: true,
+  },
+  longHeading: {
+    enabled: true,
+    maxWords: 12,
+  },
+  singleItemList: {
     enabled: true,
   },
   metrics: {
