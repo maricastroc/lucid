@@ -93,6 +93,27 @@ describe("Classe C — não conversível (unsupported)", () => {
   });
 });
 
+describe("regra determinística de -ar (cobertura sem tabela, ADR-032)", () => {
+  it("verbo -ar regular AUSENTE da tabela converte por regra", () => {
+    // 'fiscalizar' não está em nenhuma tabela — a regra de -ar resolve particípio e conjugação.
+    const { finding, source } = firstPassive("O contrato foi fiscalizado pela auditoria.");
+    const r = passiveToActive(finding, source);
+    expect(applied(source, r)).toBe("A auditoria fiscalizou o contrato.");
+  });
+
+  it("verbo -ar regular incomum no futuro converte por regra", () => {
+    const { finding, source } = firstPassive("O terreno será vistoriado pela prefeitura.");
+    const r = passiveToActive(finding, source);
+    expect(applied(source, r)).toBe("A prefeitura vistoriará o terreno.");
+  });
+
+  it("verbo -ear NÃO é convertido pela regra (exceção fechada → unsupported)", () => {
+    // 'nomear' flexiona 'nomeia', não 'nomea' — a regra o exclui; sem tabela → unsupported.
+    const { finding, source } = firstPassive("O servidor foi nomeado pela autoridade.");
+    expect(passiveToActive(finding, source).kind).toBe("unsupported");
+  });
+});
+
 describe("disciplina: nenhuma conversão insegura", () => {
   // Cada trecho rotulado à mão: classe esperada. Se algum 'automatic' sair diferente do esperado,
   // é conversão insegura → build vermelho (métrica dura do projeto).

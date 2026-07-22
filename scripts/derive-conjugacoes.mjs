@@ -12,20 +12,17 @@
  * (a poda de ambiguidade e a expansão a partir do VERB.tsv ficam como próximo incremento).
  */
 
-// Verbos REGULARES (a flexão de 3ª pessoa é 100% previsível pela terminação).
-// Evita deliberadamente -ear/-oar/-uir/-air (hiato/alternância) — esses entram como irregulares.
+// Verbos REGULARES que a tabela materializa. Os `-ar` regulares NÃO entram aqui — são resolvidos
+// em runtime pela regra determinística (`regular-morphology.ts`, ADR-032), pois as exceções do
+// `-ar` (`-ear`, MÁRIO `-iar`, `dar/estar`) são um conjunto fechado. A tabela guarda SÓ o que a
+// regra não cobre com segurança: `-er`/`-ir` (particípio `-ido` ambíguo) + irregulares.
 const REGULAR = [
-  // -ar
-  "enviar", "tomar", "aprovar", "realizar", "analisar", "arquivar", "apreciar", "comunicar",
-  "apresentar", "determinar", "executar", "encaminhar", "elaborar", "publicar", "autorizar",
-  "homologar", "julgar", "aplicar", "notificar", "convocar", "designar", "revogar", "cancelar",
-  "registrar", "protocolar", "assinar", "negar", "considerar", "solicitar", "encerrar", "divulgar",
-  "alterar", "aprovar", "arquivar", "indicar", "recusar", "aceitar", "instaurar", "arbitrar",
   // -er
   "receber", "resolver", "proceder", "submeter", "estabelecer", "reconhecer", "escrever", "vender",
+  "fornecer", "atender", "conceder", "promover", "prometer",
   // -ir
   "decidir", "deferir", "indeferir", "definir", "exigir", "expedir", "admitir", "remitir",
-  "discutir", "permitir", "assistir", "emitir", "transmitir",
+  "discutir", "permitir", "assistir", "emitir", "transmitir", "corrigir", "cumprir", "suprir",
 ];
 
 // Irregulares — 3ª pessoa VERIFICADA à mão. { lemma: { "pres.3s": …, "pres.3p": …, … } }

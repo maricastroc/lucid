@@ -45,12 +45,19 @@ describe("passiveScaffold — papéis extraídos do texto", () => {
     expect(passiveScaffold(irregularPlural.finding, irregularPlural.source)!.action.baseVerb).toBe("entregar");
   });
 
-  it("particípio fora da tabela: baseVerb null, particípio ainda literal (não inventa verbo)", () => {
+  it("particípio -ado regular fora da tabela: a regra determinística resolve o infinitivo (ADR-032)", () => {
     const { finding, source } = agentPassive("O muro foi pichado pelos manifestantes.");
     const s = passiveScaffold(finding, source)!;
     expect(s.action.participle).toBe("pichado");
-    expect(s.action.baseVerb).toBeNull();
+    expect(s.action.baseVerb).toBe("pichar"); // -ar regular, derivado por regra (não estava na tabela)
     expect(s.agent).toBe("manifestantes");
+  });
+
+  it("particípio -ido ambíguo fora da tabela: baseVerb null (não adivinha -er/-ir)", () => {
+    const { finding, source } = agentPassive("O metal foi fundido pela siderúrgica.");
+    const s = passiveScaffold(finding, source)!;
+    expect(s.action.participle).toBe("fundido");
+    expect(s.action.baseVerb).toBeNull();
   });
 });
 

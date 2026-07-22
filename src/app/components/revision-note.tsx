@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { passiveScaffold, type Finding, type Span, type SplitPoint } from "@/lucid";
+import {
+  applyPassiveWithAgent,
+  passiveScaffold,
+  passiveToActive,
+  type Finding,
+  type Span,
+  type SplitPoint,
+} from "@/lucid";
 import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import {
@@ -20,9 +27,17 @@ export interface RevisionNoteProps {
   onApply: (f: Finding) => void;
   onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onPassiveActive: (target: Span, replacement: string) => void;
 }
 
-export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite }: RevisionNoteProps) {
+export function RevisionNote({
+  finding,
+  source,
+  onApply,
+  onSplit,
+  onApplyRewrite,
+  onPassiveActive,
+}: RevisionNoteProps) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
@@ -76,7 +91,13 @@ export function RevisionNote({ finding, source, onApply, onSplit, onApplyRewrite
         {safe ? (
           <SafeResolution finding={finding} onApply={() => onApply(finding)} />
         ) : (
-          <HumanDecision finding={finding} source={source} onSplit={onSplit} onApplyRewrite={onApplyRewrite} />
+          <HumanDecision
+            finding={finding}
+            source={source}
+            onSplit={onSplit}
+            onApplyRewrite={onApplyRewrite}
+            onPassiveActive={onPassiveActive}
+          />
         )}
       </div>
     </div>
@@ -173,11 +194,13 @@ function HumanDecision({
   source,
   onSplit,
   onApplyRewrite,
+  onPassiveActive,
 }: {
   finding: Finding;
   source: string;
   onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onPassiveActive: (target: Span, replacement: string) => void;
 }) {
   const rationale = buildConfidence(finding).rationale;
   return (
@@ -197,7 +220,7 @@ function HumanDecision({
           <p className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">
             Como seguir
           </p>
-          <Guidance finding={finding} source={source} onSplit={onSplit} />
+          <Guidance finding={finding} source={source} onSplit={onSplit} onPassiveActive={onPassiveActive} />
         </div>
 
         <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
@@ -410,14 +433,17 @@ function Guidance({
   finding,
   source,
   onSplit,
+  onPassiveActive,
 }: {
   finding: Finding;
   source: string;
   onSplit: (point: SplitPoint) => void;
+  onPassiveActive: (target: Span, replacement: string) => void;
 }) {
   if (finding.criterion === "long_sentence")
     return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
-  if (finding.criterion === "passive_voice") return <PassiveGuide finding={finding} source={source} />;
+  if (finding.criterion === "passive_voice")
+    return <PassiveGuide finding={finding} source={source} onPassiveActive={onPassiveActive} />;
   if (finding.criterion === "nominalization") return <NominalizationGuide finding={finding} />;
   return <JargonGuide />;
 }
@@ -480,11 +506,60 @@ function LongSentenceGuide({
   );
 }
 
-function PassiveGuide({ finding, source }: { finding: Finding; source: string }) {
-  const scaffold = passiveScaffold(finding, source);
+const APPLY_BUTTON_CLASS =
+  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40";
 
+/**
+ * Voz passiva → ação estrutural do Tier 2 (ADR-032). Renderiza conforme a CLASSE devolvida pela
+ * engine (`passiveToActive`): A (rascunho pronto), B (pede só o agente), C (mantém o andaime
+ * read-only). NENHUMA lógica linguística aqui — a UI só chama a engine e mostra o resultado.
+ */
+function PassiveGuide({
+  finding,
+  source,
+  onPassiveActive,
+}: {
+  finding: Finding;
+  source: string;
+  onPassiveActive: (target: Span, replacement: string) => void;
+}) {
+  const rewrite = passiveToActive(finding, source);
+
+  if (rewrite.kind === "automatic") {
+    return (
+      <div>
+        <p className="text-[12.5px] leading-relaxed text-ink-1">
+          O texto já diz quem praticou a ação, então a ferramenta monta a voz ativa de forma segura e devolve um{" "}
+          <span className="text-ink-0">rascunho</span> para você revisar.
+        </p>
+        <div className="mt-3">
+          <p className="mb-2 text-[10.5px] uppercase tracking-[0.12em] text-ink-3">voz ativa · rascunho</p>
+          <div className="rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[14px] leading-snug text-ink-0">
+            {rewrite.replacement}
+          </div>
+          <button
+            type="button"
+            onClick={() => onPassiveActive(rewrite.target, rewrite.replacement)}
+            className={`mt-2.5 ${APPLY_BUTTON_CLASS}`}
+          >
+            Aplicar
+          </button>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+            Reordena e reconjuga deterministicamente, sem inventar informação. O resultado é um rascunho — a frase final é
+            sua.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (rewrite.kind === "needsAgent") {
+    return <PassiveNeedsAgent finding={finding} source={source} onPassiveActive={onPassiveActive} />;
+  }
+
+  // unsupported → mantém o andaime read-only (com agente) ou a pergunta (sem agente).
+  const scaffold = passiveScaffold(finding, source);
   if (!scaffold) {
-    // Sem agente no texto: nenhum papel a montar — só a pergunta que o autor precisa responder.
     return (
       <p className="text-[12.5px] leading-relaxed text-ink-1">
         <span className="font-medium text-ink-0">Falta o agente.</span> Para escrever na voz ativa, responda:{" "}
@@ -513,7 +588,56 @@ function PassiveGuide({ finding, source }: { finding: Finding; source: string })
       </div>
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        Estrutura identificada · confira. A ferramenta não vira a frase: isso exige reordenar e reconjugar — decisão sua.
+        Estrutura identificada · confira. Aqui a ferramenta não vira a frase: a conversão automática exigiria uma inferência
+        que ela se recusa a fazer — decisão sua.
+      </p>
+    </div>
+  );
+}
+
+/** Classe B: pede SÓ o agente; a engine conjuga e monta o rascunho (com prévia ao vivo). */
+function PassiveNeedsAgent({
+  finding,
+  source,
+  onPassiveActive,
+}: {
+  finding: Finding;
+  source: string;
+  onPassiveActive: (target: Span, replacement: string) => void;
+}) {
+  const [agent, setAgent] = useState("");
+  const preview = agent.trim() ? applyPassiveWithAgent(finding, source, agent) : null;
+  const ready = preview?.kind === "automatic" ? preview : null;
+
+  return (
+    <div>
+      <p className="text-[12.5px] leading-relaxed text-ink-1">
+        O texto não diz quem praticou a ação. Informe <span className="text-ink-0">só o agente</span> — a ferramenta conjuga
+        e monta o rascunho; você não escreve a frase inteira.
+      </p>
+      <label className="mt-3 block text-[10.5px] uppercase tracking-[0.12em] text-ink-3">Quem pratica essa ação?</label>
+      <input
+        value={agent}
+        onChange={(e) => setAgent(e.target.value)}
+        placeholder="ex.: a comissão"
+        className="mt-1.5 w-full rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 outline-none transition-colors focus:border-human-line"
+      />
+      {ready && (
+        <div className="mt-2 rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[13.5px] leading-snug text-ink-1">
+          {ready.replacement}
+        </div>
+      )}
+      <button
+        type="button"
+        disabled={!ready}
+        onClick={() => ready && onPassiveActive(ready.target, ready.replacement)}
+        className={`mt-2.5 ${APPLY_BUTTON_CLASS}`}
+      >
+        Aplicar
+      </button>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+        Só o agente vem de você; a conjugação e a montagem são determinísticas. O resultado é um rascunho — a frase final é
+        sua.
       </p>
     </div>
   );

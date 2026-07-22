@@ -335,3 +335,34 @@ e claras em PT, **não** entram. Sem colisão com o glossário de jargão.
 **Formato:** `{ "entries": [{ "phrase": string, "plain": string | null }] }`, caixa invariante.
 
 **Licença:** curadoria própria (fatos de língua).
+
+## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — conversão voz passiva→ativa (ADR-032)
+
+**Usados por:** `actions/passive-to-active.ts` (ação estrutural do Tier 2). São dados de **AÇÃO**,
+não de pass: **não** entram em `dataDeps`/`dataHash` (como `participios-infinitivo.pt.json`), logo
+não alteram nenhum `Diagnostic`. Runtime só CONSULTA — nunca conjuga produtivamente.
+
+**Propósito:**
+- `ser-tempos.pt.json`: forma de `ser` → `{ tense, number }`. Só os tempos SIMPLES do
+  indicativo/condicional (3ª pessoa) que a conversão consegue provar. Composto (`sido`), infinitivo
+  (`ser`), gerúndio (`sendo`), subjuntivo e 1ª/2ª pessoa ficam DE FORA → conversão `unsupported`.
+- `conjugacoes-ativas.pt.json`: tabela FECHADA `lema → traço (pres/pret/impf/fut/cond × 3s/3p) →
+  forma ativa`. **Guarda SÓ EXCEÇÕES (ADR-033):** `-er`/`-ir` (particípio `-ido` ambíguo entre
+  `-er`/`-ir`) + irregulares. Os `-ar` regulares NÃO estão aqui — são gerados em runtime pela regra
+  determinística (`actions/regular-morphology.ts`), pois as exceções do `-ar` (`-ear`, MÁRIO `-iar`,
+  `dar/estar`) são um conjunto fechado. **Combinação ausente ⇒ `unsupported`, nunca por tentativa.**
+- `participios-infinitivo.pt.json` (usado por `actions/passive-roles.ts`): particípio → infinitivo,
+  também **só exceções** — irregulares (`eleito→eleger`, `aberto→abrir`) e `-ido`. Os `-ado`
+  regulares são resolvidos por regra (`-ado → -ar`, exceto `-ear`).
+
+**Geração (build-time):** `scripts/derive-conjugacoes.mjs` — verbos regulares por regra de flexão de
+3ª pessoa (exata); irregulares verificados à mão. Chaves ordenadas → JSON estável (fingerprint
+reprodutível). Recomenda-se validação cruzada/expansão com **PortiLexicon-UD** (CC-BY 4.0) ao
+ampliar a lista, mesma fonte dos derivados do ADR-024.
+
+**Formato:** `ser-tempos` = `{ "forms": { "<forma>": { "tense", "number" } } }`;
+`conjugacoes-ativas` = `{ "verbs": { "<lema>": { "pres.3s": …, …, "cond.3p": … } } }`. Caixa
+invariante.
+
+**Licença:** verbos regulares por regra determinística + irregulares de curadoria própria (fatos de
+flexão). Ao usar formas do PortiLexicon-UD na expansão, aplicar a atribuição CC-BY 4.0 acima.

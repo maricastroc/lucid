@@ -10,6 +10,7 @@
 import type { Finding } from "@/lucid/core/types";
 import { sentenceSpanAt } from "@/lucid/core/document/locate";
 import { getPrepared } from "../datasets/registry";
+import { infinitiveFromRegularParticiple } from "./regular-morphology";
 
 const PARTICIPLE_TO_INFINITIVE: Readonly<Record<string, string>> = getPrepared("participios-infinitivo.pt");
 const ABBREVIATIONS = getPrepared("abreviacoes.pt");
@@ -55,8 +56,14 @@ function toMasculineSingular(participleLower: string): string {
   return s;
 }
 
+/**
+ * Particípio → infinitivo. Tabela fechada PRIMEIRO (cobre irregulares, `-ido` ambíguo e a classe
+ * `-ear`); se ausente, a regra de `-ado → -ar` regular resolve (ADR-032). Só um dos dois; nunca
+ * adivinha.
+ */
 export function baseVerbOf(participle: string): string | null {
-  return PARTICIPLE_TO_INFINITIVE[toMasculineSingular(participle.toLowerCase())] ?? null;
+  const mascSing = toMasculineSingular(participle.toLowerCase());
+  return PARTICIPLE_TO_INFINITIVE[mascSing] ?? infinitiveFromRegularParticiple(mascSing);
 }
 
 export function extractPassiveRoles(finding: Finding, source: string): PassiveRoles | null {

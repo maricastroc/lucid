@@ -27,6 +27,7 @@ export interface RailProps {
   onApply: (finding: Finding) => void;
   onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onPassiveActive: (target: Span, replacement: string) => void;
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
@@ -48,6 +49,7 @@ export function AuditRail(props: RailProps) {
               onApply={props.onApply}
               onSplit={props.onSplit}
               onApplyRewrite={props.onApplyRewrite}
+              onPassiveActive={props.onPassiveActive}
             />
           </div>
         </>
