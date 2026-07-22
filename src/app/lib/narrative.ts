@@ -176,6 +176,22 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
         `A ferramenta reconhece o substantivo-leitor em posição de sujeito com um verbo de obrigação — mas trocar para “você” ou imperativo muda a pessoa e o registro do texto, uma decisão de estilo do autor. É um sinal fraco (info): aponta, não corrige.`,
       ),
   },
+  salto_de_nivel_titulo: {
+    headline: (f) => {
+      const l = metaNum(f, "level");
+      const p = metaNum(f, "prevLevel");
+      return l != null && p != null ? `Salto de título · nível ${p}→${l}` : "Salto de nível de título";
+    },
+    prose: (f) => {
+      const l = metaNum(f, "level");
+      const p = metaNum(f, "prevLevel");
+      return `A hierarquia de títulos pula do nível ${p ?? "anterior"} para o ${l ?? "seguinte"}, sem o degrau intermediário. O detector lê os NÍVEIS dos títulos — só existe porque o documento é estruturado (o .docx traz essa marcação; texto puro não tem título de verdade).`;
+    },
+    confidence: () =>
+      assistida(
+        `A ferramenta lê os níveis dos títulos com exatidão, mas decidir se este título deve subir de nível ou se falta um título intermediário depende da organização do conteúdo — trabalho de autor.`,
+      ),
+  },
   mais_que_perfeito_sintetico: {
     confidence: () =>
       assistida(

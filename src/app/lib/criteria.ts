@@ -53,6 +53,7 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "long_sentence",
   "paragraph_length",
   "prose_enumeration",
+  "salto_de_nivel_titulo",
 ];
 
 export const CRITERION_META: Record<Criterion, CriterionMeta> = {
@@ -205,6 +206,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "mark-dotted",
     signal: "substantivo que nomeia o leitor em posição de sujeito + verbo deôntico numa janela local",
     why: "Falar do leitor em terceira pessoa distancia; dizer “você” aproxima e deixa claro quem deve agir.",
+  },
+  salto_de_nivel_titulo: {
+    label: "Salto de nível de título",
+    ruleId: "salto_de_nivel_titulo",
+    kind: "Estrutura do documento",
+    principleName: "Fácil de localizar",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "título cujo nível pula mais de um degrau abaixo do título anterior (só em documento estruturado)",
+    why: "Saltos na hierarquia de títulos quebram a leitura por estrutura — sumário, varredura, leitor de tela.",
   },
 };
 

@@ -13,7 +13,8 @@ export type IntegratedCriterion =
   | "mesoclise"
   | "dupla_negacao"
   | "subordinacao_densa"
-  | "leitor_terceira_pessoa";
+  | "leitor_terceira_pessoa"
+  | "salto_de_nivel_titulo";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;
