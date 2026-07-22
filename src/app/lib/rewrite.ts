@@ -10,9 +10,15 @@
  * A ideia (do usuário): o mesmo juiz determinístico avalia modelos diferentes — o que abre
  * um benchmark honesto depois. Ver ADR-014/015.
  */
-import type { Span } from "@/lucid";
+import { analyze, type Finding, type Span } from "@/lucid";
 import { GEMINI_MODELS, GROQ_MODELS } from "@/llm";
-import { proposeAndVerify, StubRewriteProposer, verifyRewrite, type VerifiedRewrite } from "@/report/rewrite";
+import {
+  proposeAndVerify,
+  StubRewriteProposer,
+  verifyRewrite,
+  type RewriteStrategy,
+  type VerifiedRewrite,
+} from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { manualEditReplacement } from "./text-edit";
 
@@ -51,19 +57,27 @@ const SAMPLE_FIXTURES: Record<string, string> = {
 
 const stubProposer = new StubRewriteProposer(SAMPLE_FIXTURES, "stub-demo@1");
 
-/**
- * Gera uma proposta para o ALVO (`target`, um parágrafo ou a frase de um finding) com o texto
- * inteiro como contexto, e a verifica num passo. `stub` roda no cliente; Groq roda no servidor
- * (com a sonda de sentido). Nunca aplica — a decisão é do autor. Lança `Error` legível em falha.
- */
+function overlapsTarget(f: Finding, target: Span): boolean {
+  return f.span.start < target.end && f.span.end > target.start;
+}
+
+export interface GenerateRewriteOptions {
+  criterion?: string;
+  directed?: boolean;
+}
+
 export async function generateRewrite(
   text: string,
   target: Span,
   choice: RewriteModel,
-  criterion?: string,
+  options: GenerateRewriteOptions = {},
 ): Promise<VerifiedRewrite> {
+  const { criterion, directed } = options;
+  const strategy: RewriteStrategy | undefined = directed ? "directed" : undefined;
+  const findings = directed ? analyze(text).findings.filter((f) => overlapsTarget(f, target)) : undefined;
+
   if (choice.providerId === "stub") {
-    return proposeAndVerify(text, target, stubProposer, { criterion, locale: rewriteLocalePtBR });
+    return proposeAndVerify(text, target, stubProposer, { criterion, strategy, findings, locale: rewriteLocalePtBR });
   }
 
   const response = await fetch("/api/rewrite", {
@@ -73,6 +87,8 @@ export async function generateRewrite(
       text,
       target,
       criterion,
+      strategy,
+      findings,
       providerId: choice.providerId,
       model: choice.model,
       localeId: ACTIVE_LOCALE_ID,

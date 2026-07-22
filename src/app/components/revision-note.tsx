@@ -350,6 +350,7 @@ function GeneratedRewrite({
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
+  const [directed, setDirected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -362,7 +363,7 @@ function GeneratedRewrite({
     setError(null);
     setResult(null);
     try {
-      setResult(await generateRewrite(source, target, choice));
+      setResult(await generateRewrite(source, target, choice, { directed }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
     } finally {
@@ -406,6 +407,18 @@ function GeneratedRewrite({
             </option>
           ))}
         </select>
+        <label
+          className="inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[12.5px] text-ink-1"
+          title="Passa os achados da engine no trecho como briefing à IA (ex.: 'prefira a voz ativa'), em vez do pedido genérico de reescrita."
+        >
+          <input
+            type="checkbox"
+            checked={directed}
+            onChange={(e) => setDirected(e.target.checked)}
+            className="accent-accent"
+          />
+          Dirigida pelos achados da engine
+        </label>
         <button
           type="button"
           onClick={run}

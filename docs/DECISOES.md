@@ -2092,6 +2092,57 @@ antes de virar default — a mesma disciplina de anti-drift do `CLAUDE.md`.
 
 ---
 
+## ADR-047 — `directed@1` ligado como opção opt-in + prova nova `directed_findings_resolved` (fecha a lacuna de `region_improved`)
+
+**Status:** aceito · Tier 3 (verificador) + UI
+
+**Contexto.** A usuária relatou que, mesmo usando "Reescrita por IA", trechos em voz passiva
+sobreviviam. Investigação encontrou DUAS lacunas distintas:
+
+1. **Encanamento morto:** a reescrita de parágrafo nunca passava `criterion` nem `findings` — a IA
+   recebia só "reescreva para ficar mais simples", sem saber que a voz passiva era o problema
+   apontado. A estratégia `directed@1` (ADR-045, Etapa 4) já existia e resolvia isso, mas nunca foi
+   conectada da UI até a API.
+2. **Lacuna no verificador** (achada DEPOIS de ligar o encanamento): mesmo dirigindo a IA
+   corretamente — confirmado lendo o prompt exato enviado, que citava "Foi realizada"/"foi
+   comunicada" — o Groq 70B ainda devolveu voz passiva, e o veredito disse "nenhuma falha de piso".
+   Motivo: `region_improved` só olha o PESO AGREGADO da região; um modelo pode ignorar um achado do
+   briefing (voz passiva) e "compensar" corrigindo outro (jargão), sem que o peso total suba —
+   passando de graça. Comparação ao vivo confirmou variação real entre modelos: Groq 70B piorou
+   (3 passivas), Gemini 2.5 Flash melhorou mas não zerou (1 remanescente) — nenhum dos dois zerou.
+
+**Decisão — duas mudanças, aditivas.**
+
+1. **Encanamento `directed@1` ponta a ponta**, como OPÇÃO (não default): `report/rewrite/index.ts`
+   (`proposeAndVerify` repassa `strategy`/`findings` ao proposer — antes só repassava `criterion`),
+   `app/lib/rewrite.ts` (`generateRewrite` ganha `{ directed?: boolean }`; quando ligado, calcula os
+   findings que sobrepõem o alvo via `analyze(text)`, o mesmo dado que o placar já mostra),
+   `api/rewrite/route.ts` (valida `strategy`/`findings` do corpo). UI: checkbox "Dirigida pelos
+   achados da engine" no painel de reescrita — o default (`rewrite@2`) segue intacto, sem pular a
+   validação formal do benchmark (ADR-045).
+
+2. **Prova nova `directed_findings_resolved`** (`verify.ts`) — generaliza `target_resolved` (que só
+   cobre 1 critério, no caminho de frase-alvo) para MÚLTIPLOS critérios, quando `VerifyOptions.
+   findings` é passado: para cada critério ÚNICO no briefing, checa se ele ainda aparece na região
+   reescrita. Falha se QUALQUER um permanecer — nomeia exatamente quais no `detail`. Tudo-ou-nada
+   por critério: resolver 2 de 3 ainda reprova. Só existe quando `findings` é passado (não infla o
+   veredito de reescritas não-dirigidas).
+
+**Verificado.** `test/rewrite-verify.test.ts` ganhou 5 casos usando os TEXTOS REAIS gerados ao vivo
+nesta sessão (Groq 70B e Gemini Flash, não inventados) — ambos agora reprovam corretamente. Ao vivo
+no browser: a MESMA chamada que antes dizia "Nenhuma falha de piso" (Flesch +15,7, peso 15→10) agora
+mostra "Uma prova falhou" com `✗ briefing dirigido não resolveu: passive_voice` — a prova pega
+exatamente o que os agregados escondiam. 975 testes verdes (+5); typecheck/lint limpos.
+
+**Consequências.**
+- O veto fica mais rigoroso para reescritas DIRIGIDAS — aceitável e desejado: é a promessa do
+  briefing sendo cobrada de verdade, não frouxidão.
+- Continua honesto (I5): a prova nova nunca vira selo — só mais um jeito de detectar falha.
+- `directed@1` segue não-default (ADR-045); a escolha de MODELO continua importando tanto quanto a
+  estratégia — nenhum modelo testado ao vivo zerou a voz passiva sozinho.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

@@ -10,20 +10,24 @@
  * (`ChatProvider`) vem do módulo neutro `src/llm`.
  */
 import type { Span } from "../../lucid";
-import type { RewriteProposer, VerifiedRewrite } from "./types";
+import type { RewriteProposer, RewriteRequest, VerifiedRewrite } from "./types";
 import { verifyRewrite, type VerifyOptions } from "./verify";
+
+export type ProposeAndVerifyOptions = VerifyOptions & Pick<RewriteRequest, "strategy" | "findings">;
 
 export async function proposeAndVerify(
   text: string,
   target: Span,
   proposer: RewriteProposer,
-  options: VerifyOptions = {},
+  options: ProposeAndVerifyOptions = {},
 ): Promise<VerifiedRewrite> {
   const proposal = await proposer.propose({
     text,
     target,
     criterion: options.criterion,
     localeId: options.locale?.id,
+    strategy: options.strategy,
+    findings: options.findings,
   });
   const verification = await verifyRewrite(text, target, proposal, options);
   return { proposal, verification };

@@ -177,10 +177,7 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       linhas.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
       linhas.push(`concordância=${(m.accuracy * 100).toFixed(0)}% · recall(travamentos)=${(m.recall * 100).toFixed(0)}% · precisão=${(m.precision * 100).toFixed(0)}%`);
       linhas.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
-
-      // Recorte POR CATEGORIA — uma categoria com muita discordância fica escondida na matriz
-      // global (ADR-043 §achado 2026-07-22: "condicao_nomeada" testa um modo de falha específico,
-      // diferente do rigor válido medido pelas demais categorias).
+      
       const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
       linhas.push("\npor categoria:");
       for (const cat of categorias) {
@@ -200,13 +197,6 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       process.stdout.write(`${linhas.join("\n")}\n\n`);
       if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${linhas.join("\n")}\n`);
 
-      // Recall sozinho NÃO detecta um modelo incoerente: um modelo que trava em quase tudo acerta
-      // todo TRUE POSITIVE de graça (recall alto) mesmo sendo inútil (achado de 2026-07-22, ADR-046
-      // — o llama-3.1-8b-instant tinha recall=100% e precisão=23%, e só a precisão expõe isso). O
-      // piso de PRECISÃO é o que efetivamente barra a troca para um modelo/prompt ruim: qualquer
-      // candidato a modelo da sonda TEM que rodar esta suíte (`set -a; . ./.env; set +a; PROBE_EVAL=1
-      // npx vitest run test/eval/probe-eval.test.ts`, ver ADR-046) e passar nos DOIS pisos antes de
-      // virar default (CLAUDE.md · "Anti-drift: trocar modelo → rodar a meta-eval de novo").
       expect(m.recall).toBeGreaterThanOrEqual(0.6);
       expect(m.precision).toBeGreaterThanOrEqual(0.7);
     },

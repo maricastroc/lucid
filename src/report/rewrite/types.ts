@@ -40,11 +40,12 @@ export interface RewriteProposal {
 export interface Proof {
   check:
     | "target_resolved"
+    | "directed_findings_resolved"
     | "region_improved"
     | "no_new_findings"
     | "numbers_preserved"
     | "dates_preserved"
-    | "no_new_jargon" 
+    | "no_new_jargon"
     | "no_invented_first_person";
   passed: boolean;
   detail: string;

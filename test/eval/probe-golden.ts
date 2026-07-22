@@ -173,8 +173,6 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     porque:
       "Responder exige inferir com data de emissão e data de hoje — informação fora do trecho; sem preencher lacuna, o piso não decide.",
   },
-
-  // ---- condicao_nomeada: a condição/agente é NOMEADO sem ser desenvolvido; o nome é a resposta ----
   {
     id: "condicao-deferimento",
     trecho: "O pagamento da taxa deve ser feito na hipótese de deferimento.",

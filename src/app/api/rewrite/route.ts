@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import type { Span } from "@/lucid";
+import type { Finding, Span } from "@/lucid";
 import { ChatProviderError, GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS } from "@/llm";
-import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer } from "@/report/rewrite";
+import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer, type RewriteStrategy } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
@@ -16,9 +16,22 @@ interface RewriteRequestBody {
   text?: unknown;
   target?: unknown;
   criterion?: unknown;
+  strategy?: unknown;
+  findings?: unknown;
   providerId?: unknown;
   model?: unknown;
   localeId?: unknown;
+}
+
+const VALID_STRATEGIES: ReadonlySet<string> = new Set<RewriteStrategy>(["correct", "rewrite", "directed"]);
+
+/** Só usada para MONTAR o briefing dirigido (texto de prompt) — validação leniente é suficiente. */
+function isFindingLike(value: unknown): value is Finding {
+  if (typeof value !== "object" || value === null) return false;
+  const f = value as Record<string, unknown>;
+  if (typeof f.criterion !== "string") return false;
+  const span = f.span as Record<string, unknown> | undefined;
+  return typeof span === "object" && span !== null && typeof span.start === "number" && typeof span.end === "number" && typeof span.text === "string";
 }
 
 const SUPPORTED_LOCALES: Record<string, typeof rewriteLocalePtBR> = { "pt-BR": rewriteLocalePtBR };
@@ -70,7 +83,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
   }
 
-  const { text, target, criterion, providerId, model, localeId } = body;
+  const { text, target, criterion, strategy, findings, providerId, model, localeId } = body;
   if (typeof text !== "string" || text.length === 0 || text.length > MAX_TEXT_LENGTH) {
     return NextResponse.json({ error: "texto ausente ou longo demais" }, { status: 400 });
   }
@@ -97,6 +110,8 @@ export async function POST(request: Request): Promise<Response> {
     const result = await proposeAndVerify(text, target, proposer, {
       locale,
       criterion: typeof criterion === "string" ? criterion : undefined,
+      strategy: typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
+      findings: Array.isArray(findings) ? findings.filter(isFindingLike) : undefined,
       probe: probe ?? undefined,
       question: probe ? FLOOR_QUESTION : undefined,
     });
