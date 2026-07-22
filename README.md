@@ -30,6 +30,10 @@
 </p>
 
 <p align="center">
+  🔗 <strong>Live demo:</strong> <a href="urban-flow.marianacastro.dev/">lucid.marianacastro.dev</a>
+</p>
+
+<p align="center">
 <img width="3118" height="1950" alt="Macbook-Air-1559x975 34" src="https://github.com/user-attachments/assets/6ff3d23a-5922-442b-9f2b-522b88699444" />
 </p>
 
