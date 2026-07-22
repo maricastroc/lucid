@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>13 detectors</strong>, <strong>847 tests</strong>, and a hard fence between the two layers that the build enforces.
+  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>13 detectors</strong>, <strong>859 tests</strong>, and a hard fence between the two layers that the build enforces.
 </p>
 
 <p align="center">
@@ -53,7 +53,8 @@
 | **🧰 Assisted structural actions** | For findings that need judgment, Lucid offers deterministic scaffolds — split a long sentence at a real clause boundary; extract the agent/action/object of a passive — **never rewriting**, always author-approved.                                          |
 | **✍️ The review studio**           | A two-mode editor (**Write / Review**) with inline annotations, an audit rail that groups by criterion and severity, the safe-suggestion applier, and the probe panel — all fed by a single client-side `analyze()`.                                          |
 | **🔒 A fence the build enforces**  | Layer 1 never imports Layer 2 (or React, or the network). Checked by **dependency-cruiser** + boundary tests: if Layer 2 falls, the product stands whole.                                                                                                    |
-| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **847 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
+| **🌍 Language-pluggable core**     | The engine is **language-neutral**; Portuguese is the first explicit `Locale`. A `LocaleBundle` carries the passes, lexicons, syllable counter, readability metric and criteria; `core` never imports a locale (a fence enforces it), so a second locale slots in **without touching the pipeline**. A synthetic test locale proves the seam.                    |
+| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **859 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
 
 <br/>
 
@@ -73,11 +74,12 @@ analyze(text):
   buildDocument   normalize (NFC) → segment sentences → tokenize → group paragraphs
   passes          13 deterministic detectors, each emitting Findings with provenance
   score           per-criterion counts + density — measures, never approves
-  → Diagnostic    { text, findings, score, metrics, meta(configHash, dataHash) }
+  → Diagnostic    { text, findings, score, metrics, meta(localeId, configHash, dataHash) }
 ```
 
 - **Deterministic by construction** — a single NFC normalization, code-unit ordering (never `localeCompare`), a canonical finding sort by `(start, end, criterion, principle)`, and no `Date`/`Math.random` anywhere in the core. Same input → the same `Diagnostic`, byte for byte, so the core is testable offline with fixtures and locked by snapshot tests.
 - **The pass architecture** — every detector is a pure `Pass` over a frozen document: `{ criterion, category, principle, dataDeps, run(ctx) → Finding[] }`. The orchestrator runs the registry, canonically sorts, and builds the score. **Adding a detector is adding one pass** — no change to the pipeline.
+- **Language-pluggable by design (ADR-031)** — `analyzeWithLocale(text, locale)` / `createAnalyzer({ locale })` drive the pipeline from a `LocaleBundle` (passes + lexicons + syllable counter + readability + criteria), with no global mutable state. The core is **language-neutral and never imports a locale**; the Portuguese default (`analyze`, `localePtBR`) is composed at the barrel. `dependency-cruiser` forbids `core → locales` and keeps every locale as pure as Layer 1. Portuguese is the first `Locale`, not the only one — a second slots in without a line changing in `core`.
 - **Provenance is the point** — a `Finding` carries the span, the norm subsection (`principle`), a justification, and `requiresHuman`. Suggestions appear only when a substitution is mechanically safe; everything else is marked, not resolved.
 - **A data registry** ([`src/lucid/core/data/`](src/lucid/core/data)) — curated lexicons (jargon, participles, nominalizations, redundancies, periphrasis…) plus morphology **derived from PortiLexicon-UD**, each fingerprinted. The union of data that influenced a run is stamped as `meta.dataHash`; editing any lexicon changes the hash and breaks the golden on purpose (automatic governance).
 - **Reuse over rebuild** — readability uses **Flesch adapted to PT-BR** (Martins et al., 1996), never the English Flesch. Verb morphology is **sliced from PortiLexicon-UD (CC-BY)** at build time — the 71 MB `VERB.tsv` distilled to an ~850 KB unambiguous set — instead of hand-writing a conjugator.

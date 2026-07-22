@@ -17,7 +17,26 @@ export type DatasetId =
   | "adverbios-mente.pt"
   | "redundancias.pt"
   | "perifrases.pt"
-  | "duplas-negacoes.pt";
+  | "duplas-negacoes.pt"
+  | "ser-tempos.pt"
+  | "conjugacoes-ativas.pt";
+
+/** Tempos verbais que a conversão voz passiva→ativa consegue PROVAR (ADR-032). */
+export type PassiveTense = "pres" | "pret" | "impf" | "fut" | "cond";
+
+/** Uma forma de `ser` anotada com o tempo/número da construção passiva (`foi` → pretérito, sg). */
+export interface SerTenseInfo {
+  tense: PassiveTense;
+  number: "sg" | "pl";
+}
+export type SerTensesPrepared = ReadonlyMap<string, SerTenseInfo>;
+
+/**
+ * Tabela FECHADA de conjugação ativa (ADR-032, reusando o mecanismo do ADR-011): lema → chave de
+ * traço (`"pres.3s"`, `"pret.3p"`, …) → forma finita da 3ª pessoa. Gerada em build-time
+ * (PortiLexicon-UD); runtime só consulta. Combinação ausente ⇒ conversão `unsupported`.
+ */
+export type ActiveConjugationsPrepared = ReadonlyMap<string, Readonly<Record<string, string>>>;
 
 export type JargonKind = "word" | "phrase";
 export type JargonDomain = "administrative" | "legal" | "general";
@@ -91,4 +110,6 @@ export interface DataTypes {
   "redundancias.pt": PhrasePrepared;
   "perifrases.pt": PhrasePrepared;
   "duplas-negacoes.pt": PhrasePrepared;
+  "ser-tempos.pt": SerTensesPrepared;
+  "conjugacoes-ativas.pt": ActiveConjugationsPrepared;
 }

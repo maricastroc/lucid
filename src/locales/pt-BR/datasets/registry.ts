@@ -9,11 +9,13 @@ import { createRegistry, type DatasetRecord, type RawSpec, type Registry } from 
 import type { DataView } from "@/lucid/core/data/types";
 import type { DataTypes, DatasetId } from "./types";
 import {
+  prepareActiveConjugations,
   preparePhrases,
   prepareJargon,
   prepareLightVerbs,
   prepareNominalizations,
   prepareRecord,
+  prepareSerTenses,
   prepareStringSet,
 } from "./prepare";
 import abreviacoesData from "./abreviacoes.pt.json";
@@ -30,6 +32,8 @@ import adverbiosMenteData from "./adverbios-mente.pt.json";
 import redundanciasData from "./redundancias.pt.json";
 import perifrasesData from "./perifrases.pt.json";
 import duplasNegacoesData from "./duplas-negacoes.pt.json";
+import serTemposData from "./ser-tempos.pt.json";
+import conjugacoesAtivasData from "./conjugacoes-ativas.pt.json";
 
 export type { DatasetId } from "./types";
 export type { DatasetRecord };
@@ -104,6 +108,16 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: duplasNegacoesData,
     prepare: preparePhrases,
     provenance: "dupla negação / litotes → forma direta (curadoria própria)",
+  },
+  "ser-tempos.pt": {
+    raw: serTemposData,
+    prepare: prepareSerTenses,
+    provenance: "forma de 'ser' → tempo/número da passiva; conversão voz ativa Tier 2 (ADR-032)",
+  },
+  "conjugacoes-ativas.pt": {
+    raw: conjugacoesAtivasData,
+    prepare: prepareActiveConjugations,
+    provenance: "tabela fechada de conjugação ativa (gerada build-time); conversão voz ativa Tier 2 (ADR-032)",
   },
 };
 
