@@ -32,7 +32,6 @@ export function parseRewrite(raw: string): string | null {
   const direct = tryParse(raw.trim());
   if (direct !== null) return direct;
 
-  // Desembrulha o primeiro objeto {...} presente (cobre cercas ```json e texto ao redor).
   const start = raw.indexOf("{");
   const end = raw.lastIndexOf("}");
   if (start >= 0 && end > start) return tryParse(raw.slice(start, end + 1));
@@ -49,7 +48,6 @@ export class LlmRewriteProposer implements RewriteProposer {
     this.provider = provider;
     this.model = model;
     this.strategy = strategy;
-    // id = provedor:modelo+estratégia@versão — o "sistema" que o benchmark compara.
     this.id = `${provider.id}:${model}+${STRATEGY_VERSION[strategy]}`;
   }
 

@@ -63,13 +63,13 @@ export const headingBodyMismatchPass: Pass = {
         if (next.kind === "heading" && next.level <= heading.level) break;
         body.push(next);
       }
-      if (body.length === 0) continue; // sem corpo (título órfão) — fora de escopo deste detector
+      if (body.length === 0) continue;
 
       const headingWords = new Set(contentWords(heading.sentences, stopwords));
-      if (headingWords.size === 0) continue; // título só de palavra função — nada para comparar
+      if (headingWords.size === 0) continue;
 
       const bodyWordList = body.flatMap((b) => contentWords(sentencesOf(b), stopwords));
-      if (bodyWordList.length < minBody) continue; // corpo curto demais — sinal pouco confiável
+      if (bodyWordList.length < minBody) continue;
 
       const bodyWords = new Set(bodyWordList);
       const overlaps = [...headingWords].some((w) => bodyWords.has(w));

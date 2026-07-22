@@ -65,7 +65,6 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
       continue;
     }
 
-    // list: itens separados por "\n" entre si; a lista inteira separada por "\n\n" do bloco anterior.
     const items: ListItemBlock[] = [];
     let listStart = -1;
     rb.items.forEach((itemText, idx) => {

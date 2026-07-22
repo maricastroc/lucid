@@ -14,12 +14,6 @@
 import type { Diagnostic, Finding, Span } from "../../lucid/core/types";
 import type { RewriteStrategy } from "./prompt";
 
-/**
- * Visão de LOCALE para o Tier 3 (ADR-031) — o que o verificador precisa saber sobre o idioma:
- * como RE-ANALISAR (o `analyze` ligado ao locale), quais são os marcadores de 1ª pessoa e qual é
- * o id do critério de jargão. Vive em `report/**`; um locale FORNECE um objeto com este shape (por
- * tipagem estrutural), sem importar `report` — a cerca proíbe locale→report.
- */
 export interface RewriteLocale {
   readonly id: string;
   analyze(text: string): Diagnostic;
@@ -27,72 +21,43 @@ export interface RewriteLocale {
   readonly jargonCriterionId: string;
 }
 
-/**
- * Pedido ao proposer: o texto inteiro (normalizado, CONTEXTO) + o ALVO a reescrever (`Span`)
- * — a frase de um finding ou um parágrafo. `criterion` é dica opcional (do finding), quando
- * há um. `strategy` seleciona o prompt (corrigir vs reescrever); default no proposer.
- */
 export interface RewriteRequest {
   text: string;
   target: Span;
   criterion?: string;
   strategy?: RewriteStrategy;
-  /**
-   * Findings da engine que caem no trecho-alvo — a estratégia `directed` os usa para DIRIGIR a
-   * reescrita (ADR-000: a engine dirige, a IA executa). Ignorado pelas demais estratégias.
-   */
   findings?: readonly Finding[];
-  /** locale para o qual a proposta é gerada — carimbado na proposta (anti-mistura, ADR-031). */
   localeId?: string;
 }
 
-/**
- * Uma reescrita PROPOSTA para o trecho de um finding. `proposerId` carrega a proveniência
- * ("modelo@versão + prompt@versão", ou o id fixo do stub) — anti-drift, igual ao `id` da
- * sonda. A proposta é do trecho (`finding.span`), não do documento inteiro.
- */
 export interface RewriteProposal {
   proposerId: string;
-  /** o trecho original = `finding.span.text` */
   original: string;
-  /** o texto proposto para substituir o trecho */
   proposed: string;
-  /** locale de origem da proposta — `verifyRewrite` recusa verificar sob outro (ADR-031). */
   localeId?: string;
 }
 
-/**
- * PROVA determinística: uma checagem objetiva, derivada de `analyze()` ou de extração
- * mecânica. `passed=false` é falha dura (a proposta é inaceitável). Um conjunto todo
- * `passed=true` NÃO é aprovação — é ausência de falha de piso.
- */
 export interface Proof {
   check:
-    | "target_resolved" // (só finding) a violação-alvo sumiu do trecho reescrito
-    | "region_improved" // os findings do trecho reescrito não aumentaram
-    | "no_new_findings" // totalFindings não aumentou
-    | "numbers_preserved" // o conjunto de números do trecho é idêntico
-    | "dates_preserved" // o conjunto de datas do trecho é idêntico
-    | "no_new_jargon" // a proposta não introduziu termo de jargão novo
-    | "no_invented_first_person"; // a proposta não fabricou um agente em 1ª pessoa ("nós"/"nossa")
+    | "target_resolved"
+    | "region_improved"
+    | "no_new_findings"
+    | "numbers_preserved"
+    | "dates_preserved"
+    | "no_new_jargon" 
+    | "no_invented_first_person";
   passed: boolean;
   detail: string;
 }
 
-/**
- * SINAL heurístico — NUNCA prova. `flagged=true` levanta uma suspeita para o autor
- * conferir; `flagged=false` é "sem sinal", não um atestado. Deliberadamente sem variante
- * de aprovação.
- */
 export interface VerificationSignal {
   check:
-    | "entities_preserved" // heurística de maiúscula/sigla: nome pode ter sumido
-    | "meaning_preserved"; // sonda de compreensão como teste NEGATIVO (piso)
+    | "entities_preserved"
+    | "meaning_preserved";
   flagged: boolean;
   detail: string;
 }
 
-/** Delta de métricas: evidência de que ficou mais SIMPLES, não só diferente. */
 export interface MetricsDelta {
   fleschPtBefore: number;
   fleschPtAfter: number;
@@ -100,12 +65,6 @@ export interface MetricsDelta {
   wordsAfter: number;
 }
 
-/**
- * Resultado da verificação. SEM campo "aprovado"/"ok" — por construção. `proofs` e
- * `signals` são listas separadas (PROVA ≠ SINAL). `hasBlockingFailure` é true se ALGUMA
- * prova falhou; é um veto mecânico, NÃO o oposto de "aprovado" (a ausência de veto não
- * atesta qualidade).
- */
 export interface RewriteVerification {
   proofs: Proof[];
   signals: VerificationSignal[];
@@ -113,17 +72,11 @@ export interface RewriteVerification {
   hasBlockingFailure: boolean;
 }
 
-/** Uma proposta com sua verificação — o que a camada de aplicação exibe, rotulado "gerada". */
 export interface VerifiedRewrite {
   proposal: RewriteProposal;
   verification: RewriteVerification;
 }
 
-/**
- * O gerador de propostas (Camada 2 / LLM) atrás de uma interface. A implementação real
- * vive atrás de flag e NÃO é dependência do build; o stub determinístico é o que os testes
- * usam (CI byte-idêntica). `id` = proveniência versionada.
- */
 export interface RewriteProposer {
   readonly id: string;
   propose(request: RewriteRequest): Promise<RewriteProposal>;

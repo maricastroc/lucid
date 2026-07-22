@@ -46,7 +46,6 @@ describe("Classe A — conversão automática (agente explícito)", () => {
   });
 
   it("agente com adjunto (limite incerto) → unsupported, nunca rascunho errado", () => {
-    // o pass estende o agente de forma gulosa e absorve "em segunda instância"; o gate recusa.
     const { finding, source } = firstPassive("O pedido foi analisado pela equipe em segunda instância.");
     expect(passiveToActive(finding, source).kind).toBe("unsupported");
   });
@@ -98,7 +97,6 @@ describe("Classe C — não conversível (unsupported)", () => {
 
 describe("regra determinística de -ar (cobertura sem tabela, ADR-032)", () => {
   it("verbo -ar regular AUSENTE da tabela converte por regra", () => {
-    // 'fiscalizar' não está em nenhuma tabela — a regra de -ar resolve particípio e conjugação.
     const { finding, source } = firstPassive("O contrato foi fiscalizado pela auditoria.");
     const r = passiveToActive(finding, source);
     expect(applied(source, r)).toBe("A auditoria fiscalizou o contrato.");
@@ -111,15 +109,12 @@ describe("regra determinística de -ar (cobertura sem tabela, ADR-032)", () => {
   });
 
   it("verbo -ear NÃO é convertido pela regra (exceção fechada → unsupported)", () => {
-    // 'nomear' flexiona 'nomeia', não 'nomea' — a regra o exclui; sem tabela → unsupported.
     const { finding, source } = firstPassive("O servidor foi nomeado pela autoridade.");
     expect(passiveToActive(finding, source).kind).toBe("unsupported");
   });
 });
 
 describe("disciplina: nenhuma conversão insegura", () => {
-  // Cada trecho rotulado à mão: classe esperada. Se algum 'automatic' sair diferente do esperado,
-  // é conversão insegura → build vermelho (métrica dura do projeto).
   const CASES: { text: string; expect: PassiveRewrite["kind"]; result?: string }[] = [
     { text: "O documento foi assinado pelo diretor.", expect: "automatic", result: "O diretor assinou o documento." },
     { text: "As contas foram aprovadas pelo conselho.", expect: "automatic", result: "O conselho aprovou as contas." },
@@ -137,12 +132,10 @@ describe("disciplina: nenhuma conversão insegura", () => {
 });
 
 describe("tabelas de ação: curadas + validadas pelo léxico (ADR-033)", () => {
-  // Irregulares cobertos: formas vêm do PortiLexicon-UD, mas o LEMA é curado (allowlist consciente).
   const IRREGULAR_ALLOWED = new Set([
     "fazer", "dizer", "ver", "dar", "ter", "pôr", "prever", "rever", "propor", "manter", "obter",
   ]);
 
-  // Regra de flexão de 3ª pessoa dos regulares -er/-ir (espelha scripts/derive-conjugacoes.mjs).
   function ruleRegular(inf: string): Record<string, string> {
     const stem = inf.slice(0, -2);
     const past = inf.endsWith("er") ? `${stem}eu` : `${stem}iu`;
@@ -174,7 +167,6 @@ describe("tabelas de ação: curadas + validadas pelo léxico (ADR-033)", () => 
   });
 
   it("nenhum particípio da tabela é resolvível pela regra -ar (sem redundância com a regra)", () => {
-    // Se a regra -ar já resolve o particípio, ele NÃO deveria ocupar a tabela de exceções.
     for (const participle of Object.keys(partData.map)) {
       expect(
         infinitiveFromRegularParticiple(participle),

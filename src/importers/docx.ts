@@ -54,7 +54,6 @@ export function htmlToRawBlocks(html: string): RawBlock[] {
       continue;
     }
 
-    // ul / ol
     const ordered = tag === "ol";
     const items: string[] = [];
     const liRe = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;

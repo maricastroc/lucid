@@ -37,9 +37,6 @@ describe("estabilidade das âncoras de snapshot (antes de comparar retratos)", (
     ]);
   });
 
-  // Prova de NEUTRALIDADE (ADR-031): removido o `localeId`, o `meta` é IDÊNTICO ao de antes do
-  // refactor de locale. Junto com o diff dos snapshots (só `+localeId`), fecha o argumento de que
-  // findings/spans/scores/hashes não mudaram.
   it("sem o localeId, o meta é byte-idêntico ao contrato anterior", () => {
     const d = analyze("Um texto qualquer para checar o meta.");
     const metaSemLocale: Record<string, unknown> = { ...d.meta };

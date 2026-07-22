@@ -68,14 +68,11 @@ describe("heading_body_mismatch", () => {
       H("Recurso: forma e prazo", 2),
       P("O pedido deve ser protocolado em até dez dias, com a justificativa do requerente."),
     ]);
-    // "recurso" no H2 ecoa "recurso" do H1 — nenhuma marca no H1.
+
     expect(found.find((f) => f.span.text === "Recurso administrativo")).toBeUndefined();
   });
 
   it("LIMITAÇÃO CONHECIDA: comparação exata (sem lemas) — singular/plural do mesmo termo não conta como eco", () => {
-    // O corpo é claramente sobre "documento" (singular), mas o título usa "Documentos" (plural);
-    // sem lematização, a ferramenta não reconhece a mesma raiz — marca mesmo sendo, na prática,
-    // relevante. Comportamento aceito e documentado: o sinal já nasce fraco (severity "info").
     const found = findingsFor([
       H("Documentos necessários"),
       P("Você deve entregar o documento na secretaria até o fim do prazo estabelecido pelo edital."),

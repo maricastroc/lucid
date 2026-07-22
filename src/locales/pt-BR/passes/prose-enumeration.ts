@@ -44,7 +44,7 @@ export const proseEnumerationPass: Pass = {
           if (token.isWord && token.lower in ORDINAL_RANK) ranks.add(ORDINAL_RANK[token.lower]);
         }
       }
-      // âncora "primeiro" + pelo menos `min` ordinais distintos — enumeração de verdade.
+
       if (!ranks.has(1) || ranks.size < min) continue;
 
       findings.push({

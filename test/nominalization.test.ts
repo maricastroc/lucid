@@ -65,7 +65,7 @@ describe("nominalizationPass — formas finitas COM conjugação segura (ADR-011
     ["Eles fazem a aprovação do projeto.", "aprovam o projeto"],
     ["A diretoria fará a avaliação dos riscos.", "avaliará os riscos"],
     ["O órgão realizava a publicação do edital.", "publicava o edital"], 
-    ["O comitê fez a análise.", "analisou"], // sem complemento
+    ["O comitê fez a análise.", "analisou"],
   ])("'%s' → '%s' (traço preservado, sem conjugador produtivo)", (text, esperada) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
@@ -173,7 +173,6 @@ describe("nominalizationPass — pontuação e conjunção como barreiras (para 
 
 describe("nominalizationPass — modificador entre determinante e nominalização", () => {
   it("adjetivo entre determinante e nominalização impede o casamento do núcleo", () => {
-    // "a boa análise": "boa" ocupa a posição que teria que ser a nominalização.
     expect(nomFindings("É preciso fazer a boa análise.")).toEqual([]);
   });
 
@@ -250,9 +249,9 @@ describe("nominalizationPass — sugestão segura no infinitivo", () => {
 
 describe("nominalizationPass — traços fora da tabela fechada continuam sem sugestão (ADR-011)", () => {
   it.each([
-    "O comitê faria a análise dos dados.", // futuro do pretérito (condicional)
-    "É bom que façam a análise de riscos.", // presente do subjuntivo
-    "Fazendo a análise dos autos, o comitê seguiu.", // gerúndio
+    "O comitê faria a análise dos dados.",
+    "É bom que façam a análise de riscos.",
+    "Fazendo a análise dos autos, o comitê seguiu.",
   ])("'%s' é detectada, mas não recebe sugestão (condicional/subjuntivo/gerúndio não cobertos)", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);

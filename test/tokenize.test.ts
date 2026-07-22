@@ -174,7 +174,6 @@ describe("tokenize — URLs e e-mails", () => {
     const url = tokens.find((t) => t.text.startsWith("http"));
     expect(url?.text).toBe("https://exemplo.com/pagina");
     expect(url?.isWord).toBe(false);
-    // o ponto final da frase continua separado, não foi engolido pela URL:
     expect(tokens.map((t) => t.text)).toContain(".");
   });
 
@@ -236,8 +235,8 @@ describe("attachTokens / Document — contagem por frase e total", () => {
     const comTokens = attachTokens(sentencas, tokens);
 
     expect(comTokens).toHaveLength(2);
-    expect(comTokens[0].wordCount).toBe(3); // O, gato, subiu
-    expect(comTokens[1].wordCount).toBe(5); // O, cachorro, correu, muito, rápido
+    expect(comTokens[0].wordCount).toBe(3);
+    expect(comTokens[1].wordCount).toBe(5);
 
     for (const s of comTokens) {
       for (const t of s.tokens) {
@@ -250,7 +249,7 @@ describe("attachTokens / Document — contagem por frase e total", () => {
   it("wordCount não conta pontuação nem números", () => {
     const source = "Chegaram 42 pessoas hoje.";
     const sentencas = attachTokens(segmentSentences(source), tokenize(source));
-    expect(sentencas[0].wordCount).toBe(3); // Chegaram, pessoas, hoje (42 não conta)
+    expect(sentencas[0].wordCount).toBe(3);
   });
 
   it("Document.tokens contém a soma de todos os tokens de todas as frases", () => {

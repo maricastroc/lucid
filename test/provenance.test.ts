@@ -91,7 +91,6 @@ describe("proveniência — normalização NFC e a convenção de offset", () =>
     const d = analyze("É preciso fazer a análise de documentos.");
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
     expect(nominal.suggestion).toBe("analisar documentos");
-    // o span original permanece o texto de entrada, distinto da sugestão
     expect(nominal.span.text).toBe("fazer a análise de documentos");
     expect(d.text.slice(nominal.span.start, nominal.span.end)).toBe("fazer a análise de documentos");
   });

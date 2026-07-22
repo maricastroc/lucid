@@ -41,13 +41,11 @@ describe("buildStructuredDocument — blocos → Document canônico", () => {
     const doc = buildStructuredDocument(blocks, ptDocumentServices);
 
     expect(doc.blocks.map((b) => b.kind)).toEqual(["heading", "paragraph", "list"]);
-    // offset ↔ source: o text de todo bloco é exatamente a fatia do source
     for (const b of doc.blocks) expect(doc.source.slice(b.start, b.end)).toBe(b.text);
 
     const heading = doc.blocks[0];
     expect(heading.kind === "heading" && heading.level).toBe(1);
 
-    // o parágrafo tem SUAS 2 frases — não vaza para o título (que não tem ponto final)
     const para = doc.blocks[1];
     expect(para.kind === "paragraph" && para.sentences.length).toBe(2);
 

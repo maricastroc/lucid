@@ -38,17 +38,13 @@ const DATASETS = path.join(HERE, "..", "src", "locales", "pt-BR", "datasets");
 const CONJ_OUT = path.join(DATASETS, "conjugacoes-ativas.pt.json");
 const PART_IN = path.join(DATASETS, "participios-infinitivo.pt.json");
 
-// ── Lista CURADA de lemas cobertos (só `-er`/`-ir` + irregulares; `-ar` regular fica na regra) ──
 const REGULAR = [
-  // -er
   "receber", "resolver", "proceder", "submeter", "estabelecer", "reconhecer", "escrever", "vender",
   "fornecer", "atender", "conceder", "promover", "prometer",
-  // -ir
   "decidir", "deferir", "indeferir", "definir", "exigir", "expedir", "admitir", "remitir",
   "discutir", "permitir", "assistir", "emitir", "transmitir", "corrigir", "cumprir", "suprir",
 ];
 
-// Irregulares — só o LEMA; as formas vêm do léxico. `dar` é `-ar` irregular (fora da regra `-ar`).
 const IRREGULAR_LEMMAS = [
   "fazer", "dizer", "ver", "dar", "ter", "pôr", "prever", "rever", "propor", "manter", "obter",
 ];
@@ -56,13 +52,11 @@ const IRREGULAR_LEMMAS = [
 const CURATED = [...new Set([...REGULAR, ...IRREGULAR_LEMMAS])];
 const REGULAR_SET = new Set(REGULAR);
 
-// Ordem CANÔNICA das 10 formas emitidas (fingerprint estável).
 const FEATURE_ORDER = [
   "pres.3s", "pres.3p", "pret.3s", "pret.3p", "impf.3s", "impf.3p",
   "fut.3s", "fut.3p", "cond.3s", "cond.3p",
 ];
 
-// traço → predicado sobre os FEATS (já pré-filtrado por Person=3, VerbForm=Fin).
 const FEATURE_MATCH = {
   "pres.3s": (f) => f.Mood === "Ind" && f.Tense === "Pres" && f.Number === "Sing",
   "pres.3p": (f) => f.Mood === "Ind" && f.Tense === "Pres" && f.Number === "Plur",
@@ -76,7 +70,6 @@ const FEATURE_MATCH = {
   "cond.3p": (f) => f.Mood === "Cnd" && f.Number === "Plur",
 };
 
-/** Regra de flexão de 3ª pessoa para `-er`/`-ir` REGULAR — usada só para CROSS-VALIDAR o léxico. */
 function ruleRegular(inf) {
   const stem = inf.slice(0, -2);
   const ending = inf.slice(-2);
@@ -129,9 +122,9 @@ async function main() {
   const participleMap = JSON.parse(fs.readFileSync(PART_IN, "utf8")).map;
   const participleKeys = new Set(Object.keys(participleMap));
 
-  // lema → { traço → forma }   (só lemas curados)
+
   const lexForms = new Map(CURATED.map((l) => [l, {}]));
-  // particípio (superfície) → Set<lema>   (só particípios da tabela a validar)
+
   const partLemmas = new Map([...participleKeys].map((p) => [p, new Set()]));
 
   const rl = readline.createInterface({ input: fs.createReadStream(tsvPath), crlfDelay: Infinity });
@@ -144,7 +137,6 @@ async function main() {
     const lemma = line.slice(tab1 + 1, tab2);
     const featsRaw = line.slice(tab2 + 1);
 
-    // Conjugação: 3ª pessoa finita de um lema curado.
     if (curatedSet.has(lemma) && featsRaw.includes("Person=3") && featsRaw.includes("VerbForm=Fin")) {
       const f = parseFeats(featsRaw);
       for (const key of FEATURE_ORDER) {
@@ -158,7 +150,6 @@ async function main() {
       }
     }
 
-    // Particípio a validar: superfície na tabela participios-infinitivo.
     if (featsRaw.includes("VerbForm=Part") && partLemmas.has(form)) {
       partLemmas.get(form).add(lemma);
     }
@@ -167,7 +158,6 @@ async function main() {
   const errors = [];
   const warnings = [];
 
-  // ── Montagem + validação das conjugações ──
   const verbs = {};
   for (const lemma of [...CURATED].sort()) {
     const slot = lexForms.get(lemma);
@@ -180,7 +170,7 @@ async function main() {
       }
       forms[key] = form;
     }
-    // Cross-validação dos regulares -er/-ir: léxico tem de bater com a regra de flexão.
+
     if (REGULAR_SET.has(lemma)) {
       const byRule = ruleRegular(lemma);
       for (const key of FEATURE_ORDER) {
@@ -192,7 +182,6 @@ async function main() {
     verbs[lemma] = forms;
   }
 
-  // ── Validação de participios-infinitivo contra o léxico ──
   for (const [participle, infinitive] of Object.entries(participleMap)) {
     const lemmas = partLemmas.get(participle) ?? new Set();
     if (!lemmas.has(infinitive)) {

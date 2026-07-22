@@ -15,12 +15,12 @@ import { testLocale } from "./support/test-locale";
 describe("fronteira de locale — arquitetura", () => {
   it("o analyzer neutro aceita o locale SINTÉTICO (sem inglês) e usa a métrica falsa dele", () => {
     const d = analyzeWithLocale("foo bar baz. qux foo.", testLocale);
-    // 3 ocorrências dos gatilhos: foo, bar, foo
+
     expect(d.findings.map((f) => f.span.text)).toEqual(["foo", "bar", "foo"]);
     expect(d.findings.every((f) => f.criterion === "test_marker")).toBe(true);
-    // métrica de legibilidade falsa e constante do locale sintético
+
     expect(d.metrics.fleschPt).toBe(42);
-    // identidade do locale carimbada no resultado
+
     expect(d.meta.localeId).toBe("test-LOCALE");
     expect(d.meta.standardVersion).toBe("TEST-STD");
   });
@@ -29,8 +29,8 @@ describe("fronteira de locale — arquitetura", () => {
     const texto = "Foi realizada a análise pela comissão.";
     const sintetico = analyzeWithLocale(texto, testLocale);
     const ptBR = analyzeWithLocale(texto, localePtBR);
-    expect(sintetico.findings).toEqual([]); // nenhum gatilho de teste no texto
-    expect(ptBR.findings.length).toBeGreaterThan(0); // pt-BR pega voz passiva/jargão
+    expect(sintetico.findings).toEqual([]);
+    expect(ptBR.findings.length).toBeGreaterThan(0);
   });
 
   it("dois analyzers de locales diferentes coexistem sem estado compartilhado", () => {
@@ -38,7 +38,6 @@ describe("fronteira de locale — arquitetura", () => {
     const tl = createAnalyzer({ locale: testLocale });
     const texto = "foo. Foi realizada a análise pela comissão.";
 
-    // intercalar as chamadas não altera nenhum resultado (sem estado global mutável)
     const pt1 = pt.analyze(texto);
     const tl1 = tl.analyze(texto);
     const pt2 = pt.analyze(texto);
@@ -55,9 +54,7 @@ describe("fronteira de locale — arquitetura", () => {
   it("os registries são independentes: o dataHash de cada locale reflete só os seus datasets", () => {
     const pt = analyzeWithLocale("Qualquer texto.", localePtBR);
     const tl = analyzeWithLocale("Qualquer texto.", testLocale);
-    // hashes de dados distintos (léxicos PT vs dataset sintético) — nenhum registry global vaza
     expect(pt.meta.dataHash).not.toBe(tl.meta.dataHash);
-    // e são estáveis entre execuções (determinismo por instância)
     expect(analyzeWithLocale("Qualquer texto.", testLocale).meta.dataHash).toBe(tl.meta.dataHash);
   });
 });

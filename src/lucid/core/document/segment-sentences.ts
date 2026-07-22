@@ -68,7 +68,6 @@ function findBoundaries(source: string, abbreviations: ReadonlySet<string>): num
 
     if (ch === ".") {
       if (source[i + 1] === ".") {
-        // corrida de 2+ pontos: reticências digitadas como "..", "...", "....".
         let j = i;
         while (source[j] === ".") j++;
         const result = tryCloseSentence(source, j);

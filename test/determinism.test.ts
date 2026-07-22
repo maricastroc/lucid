@@ -106,7 +106,7 @@ describe("determinismo — independência da ordem das entradas de dataset (long
   it("mesma primeira palavra → sempre da mais longa para a mais curta, qualquer que seja a ordem de entrada", () => {
     const direto = ordemPorPrimeiraPalavra(sintetico);
     const invertido = ordemPorPrimeiraPalavra([...sintetico].reverse());
-    expect(direto).toEqual([3, 3, 1]); // "em sede de"/"em face de" (3) antes de "em" (1)
+    expect(direto).toEqual([3, 3, 1]);
     expect(invertido).toEqual(direto);
   });
 

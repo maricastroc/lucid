@@ -48,7 +48,7 @@ export function matchPhrasesInSentence(sentence: Sentence, byFirstWord: PhrasePr
     const start = tokens[i].start;
     const end = tokens[m.endIndex].end;
     hits.push({ start, end, text: source.slice(start, end), entry: m.entry });
-    i = m.endIndex + 1; // sem sobreposição
+    i = m.endIndex + 1;
   }
   return hits;
 }
