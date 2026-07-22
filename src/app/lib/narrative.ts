@@ -262,6 +262,22 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
         `A ferramenta reconhece a lista de um item só, mas decidir entre completar a lista ou dissolvê-la no texto corrido depende do conteúdo — decisão de autor.`,
       ),
   },
+  heading_body_mismatch: {
+    headline: () => "Título sem eco no corpo",
+    prose: (f) => {
+      const hw = metaNum(f, "headingContentWords");
+      const bw = metaNum(f, "bodyContentWords");
+      return (
+        `Nenhuma palavra de conteúdo deste título reaparece nas ${bw ?? "várias"} palavras de conteúdo da seção ` +
+        `(o título tem ${hw ?? "poucas"}). A comparação é exata — sem lemas —, então plural/singular do mesmo termo ` +
+        "não conta como eco; é um proxy fraco de relevância, não uma prova de que o título está errado."
+      );
+    },
+    confidence: () =>
+      assistida(
+        `Este é o sinal mais fraco da ferramenta: um proxy determinístico (sobreposição de palavras), não uma leitura de sentido. Decidir se o título precisa mudar — e para quê — é trabalho de autor; a ferramenta não reescreve títulos.`,
+      ),
+  },
 };
 
 export function detectionHeadline(f: Finding): string {

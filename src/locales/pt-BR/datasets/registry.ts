@@ -36,6 +36,7 @@ import subordinadoresData from "./subordinadores.pt.json";
 import substantivosLeitorData from "./substantivos-leitor.pt.json";
 import serTemposData from "./ser-tempos.pt.json";
 import conjugacoesAtivasData from "./conjugacoes-ativas.pt.json";
+import stopwordsData from "./stopwords.pt.json";
 
 export type { DatasetId } from "./types";
 export type { DatasetRecord };
@@ -130,6 +131,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: conjugacoesAtivasData,
     prepare: prepareActiveConjugations,
     provenance: "tabela fechada de conjugação ativa (gerada build-time); conversão voz ativa Tier 2 (ADR-032)",
+  },
+  "stopwords.pt": {
+    raw: stopwordsData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para heading_body_mismatch (curadoria própria, ADR-044)",
   },
 };
 

@@ -21,7 +21,8 @@ export type DatasetId =
   | "subordinadores.pt"
   | "substantivos-leitor.pt"
   | "ser-tempos.pt"
-  | "conjugacoes-ativas.pt";
+  | "conjugacoes-ativas.pt"
+  | "stopwords.pt";
 
 /** Tempos verbais que a conversão voz passiva→ativa consegue PROVAR (ADR-032). */
 export type PassiveTense = "pres" | "pret" | "impf" | "fut" | "cond";
@@ -116,4 +117,5 @@ export interface DataTypes {
   "substantivos-leitor.pt": ReadonlySet<string>;
   "ser-tempos.pt": SerTensesPrepared;
   "conjugacoes-ativas.pt": ActiveConjugationsPrepared;
+  "stopwords.pt": ReadonlySet<string>;
 }

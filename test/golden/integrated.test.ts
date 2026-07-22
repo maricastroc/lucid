@@ -23,6 +23,7 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "salto_de_nivel_titulo",
   "long_heading",
   "single_item_list",
+  "heading_body_mismatch",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -120,6 +121,7 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     salto_de_nivel_titulo: zero(),
     long_heading: zero(),
     single_item_list: zero(),
+    heading_body_mismatch: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

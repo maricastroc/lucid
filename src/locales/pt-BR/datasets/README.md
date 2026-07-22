@@ -416,3 +416,28 @@ invariante.
 **Licença / atribuição (OBRIGATÓRIA):** as formas são derivadas de **PortiLexicon-UD** (CC-BY 4.0) —
 logo estes arquivos são obras derivadas e creditam a fonte (mesma nota do bloco mais-que-perfeito
 acima). A *lista* de lemas cobertos é curadoria própria (fatos de flexão); as *formas* vêm do léxico.
+
+## `stopwords.pt.json` — filtro de palavras funcionais (ADR-044)
+
+**Usado por:** `passes/heading-body-mismatch.ts` (`heading_body_mismatch`, **5.1** — o PRIMEIRO
+critério a citar o Princípio 1/Relevante; todos os anteriores citam 5.2/5.3).
+
+**Propósito:** membership para separar palavra de CONTEÚDO de palavra FUNCIONAL, na comparação
+heurística título↔corpo. Nunca dispara finding sozinho — só filtra o que entra na comparação.
+
+**Critério de curadoria:** classes fechadas de função do português (artigos, contrações
+preposição+artigo, preposições, conjunções coordenativas/subordinativas, pronomes pessoais/
+oblíquos/possessivos/demonstrativos/relativos, advérbios de baixo conteúdo semântico, e formas de
+alta frequência de `ser`/`estar`/`ter`/`haver` como cópula/auxiliar). Fatos de língua — mesma
+disciplina de `verbos-ser.pt.json`: fechado, curado, não é um stopword list genérico importado de
+biblioteca de NLP.
+
+**Fora de escopo deliberado:** verbos de conteúdo (mesmo frequentes) e substantivos — mantidos como
+conteúdo de propósito, mesmo quando muito frequentes, porque o objetivo aqui não é "frequência
+lexical" (essa é a `frequência PT-BR` prevista e não construída, ver ADR-008), é filtrar só a
+função gramatical.
+
+**Formato:** `{ "forms": string[] }`, comparação em caixa invariante. Entradas repetidas (ex.: "o"/
+"a" servem de artigo E de pronome oblíquo) são inofensivas — o dado vira `Set`.
+
+**Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.

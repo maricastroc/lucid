@@ -32,6 +32,7 @@ describe("score — forma e limites", () => {
       "salto_de_nivel_titulo",
       "long_heading",
       "single_item_list",
+      "heading_body_mismatch",
     ]);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
@@ -132,7 +133,7 @@ describe("score — texto vazio e muito curto", () => {
   it("texto vazio: critérios zerados, densidade 0 (sem divisão por zero)", () => {
     const d = analyze("");
     expect(d.score.totalFindings).toBe(0);
-    expect(d.score.byCriterion).toHaveLength(18);
+    expect(d.score.byCriterion).toHaveLength(19);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);

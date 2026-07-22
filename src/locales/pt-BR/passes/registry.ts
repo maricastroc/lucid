@@ -28,6 +28,7 @@ import { leitorTerceiraPessoaPass } from "./leitor-terceira-pessoa";
 import { hierarquiaTitulosPass } from "./hierarquia-titulos";
 import { longHeadingPass } from "./long-heading";
 import { singleItemListPass } from "./single-item-list";
+import { headingBodyMismatchPass } from "./heading-body-mismatch";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -48,4 +49,5 @@ export const PASSES: readonly Pass[] = [
   hierarquiaTitulosPass,
   longHeadingPass,
   singleItemListPass,
+  headingBodyMismatchPass,
 ];
