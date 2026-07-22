@@ -88,16 +88,16 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
   );
 }
 
+/** Marca do Lucid — SVG trocado por tema (o navy de `icon-light` casa com o accent do modo claro;
+ * o roxo de `icon-dark` casa com o accent do modo escuro, ver `globals.css`). */
 function Logo() {
+  const { theme } = useTheme();
   return (
-    <span
-      className="grid size-8 place-items-center rounded-[9px] bg-accent text-accent-ink shadow-[0_1px_2px_rgb(34_32_27/0.14)]"
+    <img
+      src={theme === "light" ? "/icon-light.svg" : "/icon-dark.svg"}
+      alt=""
       aria-hidden
-    >
-      <svg viewBox="0 0 24 24" className="size-4.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 4h7l4 4v9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" opacity="0.55" />
-        <path d="M8.5 15.5c1.2-1 2.4-1 3.6 0s2.4 1 3.6 0" />
-      </svg>
-    </span>
+      className="size-8 rounded-[9px] shadow-[0_1px_2px_rgb(34_32_27/0.14)]"
+    />
   );
 }
