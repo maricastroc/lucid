@@ -10,6 +10,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import { rewriteTargetAt } from "../src/app/lib/paragraphs";
+import { verifyManualEdit } from "../src/app/lib/rewrite";
 import { isManualEditDirty, manualEditReplacement, spliceSpan } from "../src/app/lib/text-edit";
 
 /** O alvo que o ManualEdit abre para um finding: `rewriteTargetAt(source, finding.span.start)`. */
@@ -85,5 +86,37 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
     const after = analyze(edited).findings.filter((f) => f.criterion === "passive_voice").length;
     // reescrevendo a passiva na ativa à mão, a marca de voz passiva daquele parágrafo some.
     expect(after).toBeLessThan(before);
+  });
+});
+
+/**
+ * ADR-000 · Etapa 2 — o verificador é AGNÓSTICO à fonte. A versão do autor (edição à mão ou
+ * colagem) passa pelo MESMO `verifyRewrite` que julga a IA — sem proposer e sem rede — e é
+ * julgada com o mesmo rigor: não há referendo do humano.
+ */
+describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verificador", () => {
+  const text =
+    "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
+
+  it("carimba a proveniência do autor, apara o rascunho e devolve PROVA + métricas, offline (sem sonda de sentido)", async () => {
+    const { source, span } = manualEditTargetFor(text, "passive_voice");
+    const { proposal, verification } = await verifyManualEdit(source, span, "  O conselho aprovou as contas.  ");
+
+    expect(proposal.proposerId).toBe("sua edição");
+    expect(proposal.proposed).toBe("O conselho aprovou as contas."); // aparado por manualEditReplacement
+    expect(proposal.original).toBe(span.text);
+    expect(verification.proofs.length).toBeGreaterThan(0);
+    expect(verification.metrics.wordsBefore).toBeGreaterThan(0);
+    // o caminho do autor NÃO roda a sonda (único passo com LLM) → sem o sinal de sentido.
+    expect(verification.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
+  });
+
+  it("não referenda o autor: fabricar 1ª pessoa ausente no original é VETADO (mesmo veto da IA)", async () => {
+    const { source, span } = manualEditTargetFor(text, "passive_voice");
+    const { verification } = await verifyManualEdit(source, span, "Nós aprovamos as contas na nossa reunião.");
+
+    expect(verification.hasBlockingFailure).toBe(true);
+    const firstPerson = verification.proofs.find((p) => p.check === "no_invented_first_person");
+    expect(firstPerson?.passed).toBe(false);
   });
 });
