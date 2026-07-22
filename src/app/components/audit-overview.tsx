@@ -3,6 +3,7 @@
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, metaFor, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
+import type { LedgerEntry } from "../lib/ledger";
 import { CriterionMark } from "./badges";
 import { ArrowDownIcon, WandIcon } from "./icons";
 
@@ -24,6 +25,7 @@ interface Props {
   findings: readonly Finding[];
   safeCount: number;
   humanCount: number;
+  ledger: readonly LedgerEntry[];
   activeCriteria: ReadonlySet<string>;
   onToggleCriterion: (criterion: string) => void;
   onApplyAllSafe: () => void;
@@ -34,6 +36,7 @@ export function AuditOverview({
   findings,
   safeCount,
   humanCount,
+  ledger,
   activeCriteria,
   onToggleCriterion,
   onApplyAllSafe,
@@ -98,7 +101,7 @@ export function AuditOverview({
           onClick={() =>
             downloadTextFile(
               "auditoria-lucid.md",
-              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }),
+              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }, ledger),
               "text/markdown;charset=utf-8",
             )
           }
@@ -112,6 +115,8 @@ export function AuditOverview({
           O placar mede, não aprova. A ausência de anotações não é atestado de clareza.
         </p>
       </section>
+
+      {ledger.length > 0 && <TrailSection entries={ledger} />}
 
       <section className="border-t border-rule-1 px-6 py-5">
         <SectionLabel>Critérios</SectionLabel>
@@ -180,6 +185,52 @@ function Legend({ swatch, label, value }: { swatch: string; label: string; value
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">{children}</h2>;
+}
+
+const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+
+/**
+ * Trilha de proveniência (ADR-000 · Etapa 6) — o registro acumulado das alterações da sessão, com o
+ * peso de severidade do documento antes/depois de cada uma. Presença modesta na UI (o entregável é o
+ * relatório exportado); aqui é só o registro visível. Não é atestado — é o que o auditor produz.
+ */
+function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
+  const first = entries[0];
+  const last = entries[entries.length - 1];
+  return (
+    <section className="border-t border-rule-1 px-6 py-5">
+      <SectionLabel>Trilha de revisão</SectionLabel>
+      <p className="mt-2 text-[12px] text-ink-2">
+        Peso da auditoria <span className="tabular-nums text-ink-0">{fmtBurden(first.burdenBefore)}</span> →{" "}
+        <span className="tabular-nums text-ink-0">{fmtBurden(last.burdenAfter)}</span> · {entries.length}{" "}
+        {entries.length === 1 ? "alteração" : "alterações"}
+      </p>
+      <ol className="mt-3 flex flex-col gap-1.5">
+        {entries.map((e, i) => {
+          const down = e.burdenAfter <= e.burdenBefore;
+          return (
+            <li
+              key={`${i}-${e.source}-${e.burdenAfter}`}
+              className="flex items-baseline justify-between gap-3 text-[12px]"
+            >
+              <span className="min-w-0 truncate text-ink-1">
+                <span className="tabular-nums text-ink-3">{i + 1}.</span> {e.label}
+              </span>
+              <span className="shrink-0 tabular-nums text-ink-2">
+                {fmtBurden(e.burdenBefore)}→{fmtBurden(e.burdenAfter)}{" "}
+                <span className={down ? "text-safe" : "text-human"} aria-hidden>
+                  {down ? "↓" : "↑"}
+                </span>
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className="mt-2 text-[11.5px] italic leading-relaxed text-ink-3">
+        Registro do que foi feito nesta sessão — não é atestado de qualidade. Vai no relatório exportado.
+      </p>
+    </section>
+  );
 }
 
 function metricRows(diagnostic: Diagnostic) {

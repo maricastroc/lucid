@@ -2,6 +2,7 @@
 
 import type { Diagnostic, Finding, Span, SplitPoint } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
+import type { LedgerEntry } from "../lib/ledger";
 import { AuditOverview } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
@@ -18,6 +19,7 @@ export interface RailProps {
   total: number;
   safeCount: number;
   humanCount: number;
+  ledger: readonly LedgerEntry[];
   activeCriteria: ReadonlySet<string>;
   bucket: Bucket;
   onToggleCriterion: (criterion: string) => void;
@@ -66,6 +68,7 @@ export function AuditRail(props: RailProps) {
               findings={props.findings}
               safeCount={props.safeCount}
               humanCount={props.humanCount}
+              ledger={props.ledger}
               activeCriteria={props.activeCriteria}
               onToggleCriterion={props.onToggleCriterion}
               onApplyAllSafe={props.onApplyAllSafe}

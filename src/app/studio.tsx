@@ -23,10 +23,11 @@ import {
   type SplitPoint,
 } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
+import { CRITERION_ORDER, findingId, isSafe, metaFor } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { applySafeSuggestions } from "./lib/audit";
+import { documentBurden, sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { SAMPLE_TEXT } from "./lib/sample";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -47,6 +48,7 @@ export function Studio() {
 
   const undoStack = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
+  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [importedDoc, setImportedDoc] = useState<Document | null>(null);
@@ -164,59 +166,83 @@ export function Studio() {
     setCanUndo(true);
   }, []);
 
-  const applySuggestion = useCallback(
-    (finding: Finding) => {
-      if (finding.suggestion === undefined) return;
+  const applyChange = useCallback(
+    (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
+      if (nextText === text) return;
+      const burdenBefore = documentBurden(diagnostic.findings);
+      const burdenAfter = documentBurden(analyze(nextText).findings);
       pushUndo(text);
-      setText(text.slice(0, finding.span.start) + finding.suggestion + text.slice(finding.span.end));
-      setSelectedId(null);
-    },
-    [text, pushUndo],
-  );
-
-  const applySplit = useCallback(
-    (point: SplitPoint) => {
-      const next = applySplitAt(text, point);
-      if (next !== text) {
-        pushUndo(text);
-        setText(next);
-      }
-      setSelectedId(null);
-    },
-    [text, pushUndo],
-  );
-
-  const replaceSpan = useCallback(
-    (target: Span, replacement: string) => {
-      const next = spliceSpan(diagnostic.text, target, replacement);
-      if (next !== text) {
-        pushUndo(text);
-        setText(next);
-      }
+      setLedger((prev) => [...prev, { ...entry, burdenBefore, burdenAfter }]);
+      setText(nextText);
       setSelectedId(null);
     },
     [text, diagnostic, pushUndo],
   );
 
+  const applySuggestion = useCallback(
+    (finding: Finding) => {
+      if (finding.suggestion === undefined) return;
+      applyChange(
+        {
+          source: "safe",
+          label: `${sourceLabel("safe")} · ${metaFor(finding.criterion).label}`,
+          before: finding.span.text,
+          after: finding.suggestion,
+        },
+        text.slice(0, finding.span.start) + finding.suggestion + text.slice(finding.span.end),
+      );
+    },
+    [text, applyChange],
+  );
+
+  const applySplit = useCallback(
+    (point: SplitPoint) => applyChange({ source: "split", label: sourceLabel("split") }, applySplitAt(text, point)),
+    [text, applyChange],
+  );
+
+  const applyPassiveActive = useCallback(
+    (target: Span, replacement: string) =>
+      applyChange(
+        { source: "passive", label: sourceLabel("passive"), before: target.text, after: replacement },
+        spliceSpan(diagnostic.text, target, replacement),
+      ),
+    [diagnostic, applyChange],
+  );
+
+  const applyManualEdit = useCallback(
+    (target: Span, replacement: string) =>
+      applyChange(
+        { source: "manual", label: sourceLabel("manual"), before: target.text, after: replacement },
+        spliceSpan(diagnostic.text, target, replacement),
+      ),
+    [diagnostic, applyChange],
+  );
+
   const applyRewrite = useCallback(
-    (target: Span, proposal: RewriteProposal) => replaceSpan(target, proposal.proposed),
-    [replaceSpan],
+    (target: Span, proposal: RewriteProposal) =>
+      applyChange(
+        { source: "ai", label: `${sourceLabel("ai")} · ${proposal.proposerId}`, before: target.text, after: proposal.proposed },
+        spliceSpan(diagnostic.text, target, proposal.proposed),
+      ),
+    [diagnostic, applyChange],
   );
 
   const applyAllSafe = useCallback(() => {
     const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
-    const next = applySafeSuggestions(text, applicable);
-    if (next !== text) {
-      pushUndo(text);
-      setText(next);
-    }
-    setSelectedId(null);
-  }, [text, pushUndo, activeCriteria]);
+    applyChange(
+      {
+        source: "safe",
+        label: `${sourceLabel("safe")} · ${applicable.length} ${applicable.length === 1 ? "aplicada" : "aplicadas"}`,
+      },
+      applySafeSuggestions(text, applicable),
+    );
+  }, [text, activeCriteria, applyChange]);
 
   const undo = useCallback(() => {
     const previous = undoStack.current.pop();
     if (previous === undefined) return;
     setText(previous);
+    setLedger((prev) => prev.slice(0, -1));
     setCanUndo(undoStack.current.length > 0);
   }, []);
 
@@ -239,8 +265,9 @@ export function Studio() {
     onApply: applySuggestion,
     onSplit: applySplit,
     onApplyRewrite: applyRewrite,
-    onPassiveActive: replaceSpan,
-    onManualEdit: replaceSpan,
+    onPassiveActive: applyPassiveActive,
+    onManualEdit: applyManualEdit,
+    ledger,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
     onClose: closeSelection,
@@ -326,8 +353,8 @@ export function Studio() {
                     onApply={applySuggestion}
                     onSplit={applySplit}
                     onApplyRewrite={applyRewrite}
-                    onPassiveActive={replaceSpan}
-                    onManualEdit={replaceSpan}
+                    onPassiveActive={applyPassiveActive}
+                    onManualEdit={applyManualEdit}
                   />
                 </div>
               </>
@@ -338,6 +365,7 @@ export function Studio() {
                   findings={findings}
                   safeCount={safeCount}
                   humanCount={humanCount}
+                  ledger={ledger}
                   activeCriteria={activeCriteria}
                   onToggleCriterion={toggleCriterion}
                   onApplyAllSafe={applyAllSafe}

@@ -88,7 +88,12 @@ const BURDEN_EPSILON = 1e-9;
 function regionBurden(findings: readonly Finding[], start: number, end: number): number {
   return findings.reduce((sum, f) => (overlaps(f, start, end) ? sum + SEVERITY_WEIGHT[f.severity] : sum), 0);
 }
-function totalBurden(findings: readonly Finding[]): number {
+/**
+ * Peso de severidade TOTAL de um conjunto de findings (ADR-018). A régua canônica do veredito —
+ * exportada para a trilha de proveniência (ADR-000 · Etapa 6) medir cada passo com a MESMA métrica
+ * que julga uma reescrita, em vez de contagem crua (que pune divisão de frase).
+ */
+export function totalBurden(findings: readonly Finding[]): number {
   return findings.reduce((sum, f) => sum + SEVERITY_WEIGHT[f.severity], 0);
 }
 

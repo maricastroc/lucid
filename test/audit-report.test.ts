@@ -55,4 +55,14 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("## Anotações por critério");
     expect(md).not.toContain("Ordenadas por severidade");
   });
+
+  it("inclui a trilha de proveniência quando há alterações; omite quando não há (Etapa 6)", () => {
+    const d = analyze(SAMPLE);
+    expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");
+    const withTrail = buildAuditReport(d, d.findings, META, [
+      { source: "safe", label: "Correção segura · Jargão", before: "em sede de", after: "durante", burdenBefore: 6, burdenAfter: 5 },
+    ]);
+    expect(withTrail).toContain("## Trilha de revisão");
+    expect(withTrail).toContain("Correção segura · Jargão");
+  });
 });
