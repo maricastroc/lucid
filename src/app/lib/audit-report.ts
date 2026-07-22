@@ -13,6 +13,7 @@
  */
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, isSafe, metaFor, principleGroupOf, severityRank, SEVERITY_LABEL } from "./criteria";
+import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 
 export interface AuditReportMeta {
   /** carimbo de geração — passado de fora para o relatório ser determinístico/testável. */
@@ -35,6 +36,7 @@ export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
   meta: AuditReportMeta,
+  ledger: readonly LedgerEntry[] = [],
 ): string {
   const m = diagnostic.metrics;
   const total = findings.length;
@@ -100,6 +102,11 @@ export function buildAuditReport(
       }
       out.push("");
     });
+  }
+
+  const trail = renderLedgerMarkdown(ledger);
+  if (trail) {
+    out.push(trail);
   }
 
   out.push("---");
