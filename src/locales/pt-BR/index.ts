@@ -14,7 +14,7 @@ import type { Diagnostic, Pass } from "@/lucid/core/types";
 import type { LocaleBundle, LocaleDataRegistry, ReadabilityMetric } from "@/lucid/core/contracts/locale";
 import { asLocaleId } from "@/lucid/core/contracts/locale";
 import type { Document, Span } from "@/lucid/core/types";
-import { analyzeWithLocale } from "@/lucid/core/analyzer";
+import { analyzeDocumentWithLocale, analyzeWithLocale } from "@/lucid/core/analyzer";
 import { DEFAULT_CONFIG } from "@/lucid/core/config";
 import { segmentSentences } from "@/lucid/core/document/segment-sentences";
 import { buildDocument as buildDocumentCore } from "@/lucid/core/document/model";
@@ -57,6 +57,15 @@ export const localePtBR: LocaleBundle = {
  */
 export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
   return analyzeWithLocale(text, localePtBR, configOverrides);
+}
+
+/**
+ * `analyzeDocument(doc)` — a porta em nível de documento ligada ao pt-BR (ADR-038). É o que um
+ * importador estruturado (DOCX/PDF) chama: `analyzeDocument(docxImporter(bytes))`. `analyze(text)`
+ * é o caso de texto puro; ambos produzem o mesmo `Diagnostic`.
+ */
+export function analyzeDocument(doc: Document, configOverrides?: Partial<Config>): Diagnostic {
+  return analyzeDocumentWithLocale(doc, localePtBR, configOverrides);
 }
 
 /**

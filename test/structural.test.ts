@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze, type ParagraphBlock } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 import { buildDocument } from "./support/pt";
+
+const paragraphsOf = (text: string): ParagraphBlock[] =>
+  buildDocument(text).blocks.filter((b): b is ParagraphBlock => b.kind === "paragraph");
 
 const spans = (text: string, criterion: string): string[] =>
   analyze(text)
@@ -10,17 +13,19 @@ const spans = (text: string, criterion: string): string[] =>
 
 describe("camada de blocos — parágrafos", () => {
   it("segmenta por linha em branco; sem linha em branco = 1 parágrafo", () => {
-    expect(buildDocument("Uma frase. Outra frase.").paragraphs).toHaveLength(1);
-    expect(buildDocument("Parágrafo um.\n\nParágrafo dois.").paragraphs).toHaveLength(2);
-    expect(buildDocument("").paragraphs).toHaveLength(0);
+    expect(buildDocument("Uma frase. Outra frase.").blocks).toHaveLength(1);
+    expect(buildDocument("Parágrafo um.\n\nParágrafo dois.").blocks).toHaveLength(2);
+    expect(buildDocument("").blocks).toHaveLength(0);
   });
 
-  it("cada parágrafo agrega suas frases e a contagem de palavras", () => {
+  it("texto puro só produz blocos de parágrafo; cada um agrega frases e contagem de palavras", () => {
     const doc = buildDocument("Frase um aqui. Frase dois aqui.\n\nOutro bloco só.");
-    expect(doc.paragraphs).toHaveLength(2);
-    expect(doc.paragraphs[0].sentences).toHaveLength(2);
-    expect(doc.paragraphs[1].sentences).toHaveLength(1);
-    expect(doc.paragraphs[0].wordCount).toBeGreaterThan(doc.paragraphs[1].wordCount);
+    expect(doc.blocks.every((b) => b.kind === "paragraph")).toBe(true);
+    const paras = paragraphsOf("Frase um aqui. Frase dois aqui.\n\nOutro bloco só.");
+    expect(paras).toHaveLength(2);
+    expect(paras[0].sentences).toHaveLength(2);
+    expect(paras[1].sentences).toHaveLength(1);
+    expect(paras[0].wordCount).toBeGreaterThan(paras[1].wordCount);
   });
 });
 

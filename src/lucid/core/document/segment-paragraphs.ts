@@ -1,11 +1,12 @@
-import type { Paragraph, Sentence } from "../types";
+import type { ParagraphBlock, Sentence } from "../types";
 
 const RE_BLANK_LINE = /\n[ \t]*\n/;
 
-function buildParagraph(source: string, group: readonly Sentence[]): Paragraph {
+function buildParagraph(source: string, group: readonly Sentence[]): ParagraphBlock {
   const start = group[0].start;
   const end = group[group.length - 1].end;
   return {
+    kind: "paragraph",
     start,
     end,
     text: source.slice(start, end),
@@ -14,10 +15,10 @@ function buildParagraph(source: string, group: readonly Sentence[]): Paragraph {
   };
 }
 
-export function segmentParagraphs(source: string, sentences: readonly Sentence[]): Paragraph[] {
+export function segmentParagraphs(source: string, sentences: readonly Sentence[]): ParagraphBlock[] {
   if (sentences.length === 0) return [];
 
-  const paragraphs: Paragraph[] = [];
+  const paragraphs: ParagraphBlock[] = [];
   let group: Sentence[] = [sentences[0]];
 
   for (let i = 1; i < sentences.length; i++) {

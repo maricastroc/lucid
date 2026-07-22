@@ -19,7 +19,7 @@ export function buildDocument(rawText: string, services: DocumentBuildServices):
   const sentencesWithoutTokens = services.segmentSentences(source, services.abbreviations);
   const tokens = tokenize(source);
   const sentences = attachTokens(sentencesWithoutTokens, tokens);
-  const paragraphs = segmentParagraphs(source, sentences);
+  const blocks = segmentParagraphs(source, sentences);
 
-  return { source, sentences, tokens, paragraphs };
+  return { source, sentences, tokens, blocks };
 }

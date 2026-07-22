@@ -1670,6 +1670,113 @@ lint/depcheck limpos. Nenhuma mudança de `Diagnostic` (é tudo camada de aprese
 
 ---
 
+## ADR-038 — Fundação para importadores estruturados: modelo de blocos + `analyzeDocument`
+
+**Contexto.** Objetivo: aceitar arquivos reais (`.docx`, PDF) e destravar o Princípio 2 (títulos/
+listas/seções). A usuária escolheu **DOCX primeiro** — o único formato que entrega estrutura
+confiável (o texto puro não tem título "de verdade"; o PDF só por heurística frágil). Antes do
+importador, a Camada 1 precisa de duas peças ADITIVAS já previstas no design (DESIGN-modelo-
+independente-de-formato §4/§5), sem tocar em nenhum dos 15 detectores.
+
+**Decisão (Fase 0, pura, zero-dep).**
+- **Modelo de blocos com `kind`.** `Document.paragraphs: Paragraph[]` → `Document.blocks: Block[]`,
+  onde `Block = ParagraphBlock | HeadingBlock | ListBlock` (discriminado por `kind`). O importador de
+  texto puro (`buildDocument`) só produz `paragraph` — os demais `kind` existem para os importadores
+  estruturados (DOCX/Markdown/HTML) preencherem. Os passes estruturais (`paragraph_length`,
+  `prose_enumeration`) passam a iterar `blocks` filtrando `kind === "paragraph"`.
+- **Porta em nível de documento.** `analyzeDocumentWithLocale(doc, locale)` (core) +
+  `analyzeDocument(doc)` (pt-BR): analisam um `AnnotatedDocument` já montado. `analyze(text)` vira o
+  caso de texto puro (`= analyzeDocument(buildDocument(text))`). É o que o importador DOCX vai chamar:
+  `analyzeDocument(docxImporter(bytes))`. A assinatura pública de `analyze` não muda.
+
+**Fronteira preservada.** O core segue zero-dep/zero-rede (consome `Block[]`); os importadores
+(com biblioteca: `mammoth` p/ DOCX, `pdfjs` p/ PDF) viverão FORA do core (`src/importers/`), únicos
+cientes do formato. Nada aqui adiciona dependência.
+
+**Adiado de propósito** (YAGNI, entram COM o importador que os usa): `kind: "table"`, o source-map
+(offset↔posição no arquivo original, para a UI destacar no documento), e o próprio importador DOCX.
+
+**Consequências.** Refatoração **behavior-preserving**: **916 testes verdes** inalterados (o
+`Diagnostic` não muda — `blocks` é interno ao `Document`), snapshots intactos, typecheck/lint/
+depcheck limpos. Destrava a Fase 1 (importador DOCX + detectores de Princípio 2) sem mais mexer no
+núcleo.
+
+---
+
+## ADR-039 — Importador DOCX (`.docx → AnnotatedDocument`), fora do core
+
+**Contexto.** Fase 1 do plano DOCX-first (ADR-038 fez a fundação). Objetivo: aceitar `.docx` real e
+extrair a estrutura (título/lista/parágrafo) que o Princípio 2 precisa.
+
+**Decisão.** Separação em duas peças, uma neutra e uma específica:
+- **`core/document/structured.ts` (NEUTRO, testável, zero-dep):** `buildStructuredDocument(rawBlocks,
+  services)` monta o `Document` canônico a partir de blocos já extraídos (`RawBlock` = paragraph |
+  heading | list). Cada bloco é segmentado/tokenizado ISOLADAMENTE e deslocado para sua posição no
+  `source` — isso impede uma frase de vazar de um título sem ponto para o parágrafo seguinte. Reusável
+  por qualquer importador estruturado (Markdown/HTML futuros).
+- **`src/importers/docx.ts` (específico do formato, FORA do core):** `importDocx(bytes, services)` =
+  `mammoth.convertToHtml` (Word→HTML semântico, mapeia estilos→`h1..h6`/`ul`/`ol`/`p`, roda no
+  browser, determinístico) → `htmlToRawBlocks` (parser tolerante regex, sem DOM, testável) →
+  `buildStructuredDocument`. Nenhuma detecção aqui — só extração.
+
+**Fronteira/dependência.** `mammoth` é a **primeira dependência de parsing** e vive SÓ no importador.
+Nova regra de cerca (`core-e-locale-nao-importam-importer`): `src/lucid/core` e `src/locales` não
+podem importar `src/importers`. A Camada 1 segue zero-dep de parsing; a dependência é sempre
+importer/app → lucid. Parse no CLIENTE (o arquivo nunca sai do browser — privacidade, offline).
+
+**Limitação conhecida (v1):** listas ANINHADAS são achatadas para os itens de primeiro nível;
+`kind: "table"` e o source-map (destacar no arquivo original) seguem adiados até um consumidor pedir.
+
+**Consequências.** **922 testes verdes** (6 novos: parser de HTML→blocos incl. níveis/listas/entidades/
+tags inline; assembler com offsets consistentes e frases isoladas por bloco; os 15 detectores rodando
+sobre o `Document` estruturado via `analyzeDocument`). Typecheck/lint/depcheck limpos. **Pendências:**
+a fiação na UI (upload `.docx` → parse no browser → `analyzeDocument` → render) — Fase 1b; e os
+detectores de Princípio 2 que leem `block.kind` — Fase 2. Nota de segurança: `npm audit` acusa 3
+vulnerabilidades em dependências TRANSITIVAS do mammoth (1 moderada, 2 altas) — avaliar antes de subir.
+
+---
+
+## ADR-040 — Upload `.docx` na UI (Fase 1b) + auditoria de segurança do mammoth
+
+**Contexto.** Fechar o fluxo visível: abrir um `.docx` no navegador → importar → analisar → renderizar.
+
+**Decisão (UI).** Botão **"Abrir .docx"** no masthead → `<input type=file>` → `openDocx` no studio:
+lê o `ArrayBuffer`, faz **import dinâmico** de `@/importers/docx` (o mammoth só entra no bundle do
+cliente quando um `.docx` é aberto — nada no caminho comum), chama `importDocx` e guarda o `Document`
+estruturado. O `diagnostic` prefere `analyzeDocument(importedDoc)` **enquanto o texto == `doc.source`**;
+assim que o autor edita (texto diverge), volta a `analyze(text)` — editar à mão naturalmente perde a
+estrutura do arquivo. Parse **100% no cliente**: o arquivo nunca sai do navegador. Loading + erro
+tratados.
+
+**Verificação AO VIVO (com `.docx` real).** Um `.docx` (título "Aviso aos interessados" + parágrafos)
+foi importado no browser: o dynamic import do mammoth compilou e rodou; os detectores dispararam sobre
+o conteúdo estruturado — **fala indireta** ("O interessado deverá"), **voz passiva** ("foi analisado"),
+**jargão** ("em sede de") e **subordinação densa** (o parágrafo com embora+porque+ainda que). 5
+anotações, placar correto. O risco de integração (mammoth-no-browser sob Next) está **resolvido**.
+
+**Auditoria de segurança (as 4 checagens pedidas):**
+1. **Pacotes vulneráveis:** `postcss` (moderada) e `sharp` (alta), ambos sob **`next`**
+   (`node_modules/next/node_modules/postcss`, `node_modules/sharp`).
+2. **Origem:** **NÃO é o mammoth.** As deps do mammoth@1.12.0 (`@xmldom/xmldom`, `jszip`, `lop`,
+   `underscore`, `xmlbuilder`…) não aparecem no `npm audit`. As 3 vulnerabilidades são pré-existentes
+   do toolchain do Next; o `npm install mammoth` só reimprimiu o resumo já existente.
+3. **Afeta o caminho usado?** Não. `postcss` é build-time (CSS/Tailwind); `sharp` é otimização de
+   imagem server-side do Next (libvips nativo) — nenhum no bundle de CLIENTE que o mammoth usa (jszip/
+   @xmldom parseando o docx no browser). O caminho do recurso é limpo.
+4. **Correção/mitigação:** mammoth não precisa de fix (é a versão atual e limpa). Os vulns de
+   postcss/sharp se resolvem **atualizando o Next** para release corrigida (a sugestão do audit de
+   `next@9.3.3` é um downgrade major espúrio — ignorar). São **ortogonais a esta feature** e devem ser
+   rastreados à parte; não bloqueiam o merge do DOCX.
+
+**Conclusão:** a feature DOCX é **segura para subir** no que depende dela — o mammoth não introduz
+vulnerabilidade. A dívida postcss/sharp do Next fica registrada como item separado (atualizar Next).
+
+**Consequências.** 922 testes verdes (a UI não tem teste unitário — verificada ao vivo), typecheck/
+lint/depcheck limpos. **Pendente (Fase 2):** detectores de Princípio 2 lendo `block.kind`
+(título/lista/seção) e render visual dos blocos (headings/listas destacados).
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

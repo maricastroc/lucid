@@ -36,7 +36,8 @@ export const proseEnumerationPass: Pass = {
     const min = ctx.config.proseEnumeration.minMarkers;
     const findings: Finding[] = [];
 
-    for (const paragraph of ctx.doc.paragraphs) {
+    for (const paragraph of ctx.doc.blocks) {
+      if (paragraph.kind !== "paragraph") continue;
       const ranks = new Set<number>();
       for (const sentence of paragraph.sentences) {
         for (const token of sentence.tokens) {

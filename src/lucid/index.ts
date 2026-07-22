@@ -6,12 +6,17 @@
  */
 
 export type {
+  Block,
   Category,
   CriterionScore,
   Diagnostic,
   DiagnosticMeta,
   Document,
   Finding,
+  HeadingBlock,
+  ListBlock,
+  ListItemBlock,
+  ParagraphBlock,
   Metrics,
   Pass,
   PassContext,
@@ -42,13 +47,15 @@ export type {
 export { asLocaleId } from "./core/contracts/locale";
 
 /** API NEUTRA de análise: recebe o locale explicitamente (sem estado global). */
-export { analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
+export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
+export { buildStructuredDocument } from "./core/document/structured";
+export type { RawBlock } from "./core/document/structured";
 
 /**
  * Conveniência: o Lucid com o locale pt-BR ligado. `analyze(text)` é a API compatível de sempre;
  * mora no locale (não no core). Para outro locale, use `analyzeWithLocale`/`createAnalyzer`.
  */
-export { analyze, analyzeWithPasses, localePtBR } from "../locales/pt-BR";
+export { analyze, analyzeDocument, analyzeWithPasses, localePtBR, ptDocumentServices } from "../locales/pt-BR";
 
 /**
  * Tier 2 — ação estrutural assistida (determinística, zero rede). Funções PURAS que a UI

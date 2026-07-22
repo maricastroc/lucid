@@ -12,7 +12,16 @@
  * lista vivem num bottom sheet.
  */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { analyze, applySplitAt, type Finding, type Span, type SplitPoint } from "@/lucid";
+import {
+  analyze,
+  analyzeDocument,
+  applySplitAt,
+  ptDocumentServices,
+  type Document,
+  type Finding,
+  type Span,
+  type SplitPoint,
+} from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
@@ -40,8 +49,38 @@ export function Studio() {
   const [canUndo, setCanUndo] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Documento IMPORTADO (ADR-039/040): quando um `.docx` é aberto, guardamos o `Document`
+  // ESTRUTURADO e o analisamos com `analyzeDocument` (headings/listas preservados). Assim que o
+  // autor edita (o texto diverge de `doc.source`), voltamos à análise de texto puro — editar à mão
+  // naturalmente perde a estrutura do arquivo.
+  const [importedDoc, setImportedDoc] = useState<Document | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+
   const deferredText = useDeferredValue(text);
-  const diagnostic = useMemo(() => analyze(deferredText), [deferredText]);
+  const diagnostic = useMemo(
+    () => (importedDoc && deferredText === importedDoc.source ? analyzeDocument(importedDoc) : analyze(deferredText)),
+    [importedDoc, deferredText],
+  );
+
+  const openDocx = useCallback(async (file: File) => {
+    setImporting(true);
+    setImportError(null);
+    try {
+      const bytes = await file.arrayBuffer();
+      // Import dinâmico: o mammoth só entra no bundle do cliente quando um .docx é aberto.
+      const { importDocx } = await import("@/importers/docx");
+      const doc = await importDocx(bytes, ptDocumentServices);
+      setImportedDoc(doc);
+      setText(doc.source);
+      setSelectedId(null);
+      setMode("audit");
+    } catch {
+      setImportError("Não foi possível ler o arquivo. Confirme que é um .docx válido.");
+    } finally {
+      setImporting(false);
+    }
+  }, []);
 
   const findings = useMemo(
     () => diagnostic.findings.filter((f) => activeCriteria.has(f.criterion)),
@@ -215,7 +254,18 @@ export function Studio() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
-      <Masthead mode={mode} onChangeMode={setMode} />
+      <Masthead mode={mode} onChangeMode={setMode} onOpenDocx={openDocx} importing={importing} />
+      {importError !== null && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
+        >
+          <span>{importError}</span>
+          <button type="button" onClick={() => setImportError(null)} className="text-ink-2 hover:text-ink-0">
+            Fechar
+          </button>
+        </div>
+      )}
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <DocumentView

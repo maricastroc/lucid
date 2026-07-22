@@ -60,6 +60,16 @@ module.exports = {
       to: { path: "^src/locales" },
     },
     {
+      name: "core-e-locale-nao-importam-importer",
+      severity: "error",
+      comment:
+        "Fronteira de formato (ADR-039): importadores (src/importers) usam biblioteca (mammoth/pdfjs) " +
+        "e são o único lugar ciente do formato. A dependência é sempre importer/app -> lucid, nunca o " +
+        "contrário — a Camada 1 continua zero-dep de parsing.",
+      from: { path: "^src/(lucid/core|locales)" },
+      to: { path: "^src/importers" },
+    },
+    {
       name: "locale-e-puro-como-o-core",
       severity: "error",
       comment:
