@@ -66,7 +66,7 @@ export function ProbePanel({ text }: { text: string }) {
       </p>
 
       <label className="mt-3 block">
-        <span className="text-[12px] text-ink-2">O que o leitor veio saber?</span>
+        <span className="text-[12px] text-ink-2">O que você quer encontrar no texto?</span>
         <textarea
           value={pergunta}
           onChange={(e) => setPergunta(e.target.value)}
