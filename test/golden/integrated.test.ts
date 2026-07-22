@@ -21,6 +21,8 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "subordinacao_densa",
   "leitor_terceira_pessoa",
   "salto_de_nivel_titulo",
+  "long_heading",
+  "single_item_list",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -116,6 +118,8 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     subordinacao_densa: zero(),
     leitor_terceira_pessoa: zero(),
     salto_de_nivel_titulo: zero(),
+    long_heading: zero(),
+    single_item_list: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

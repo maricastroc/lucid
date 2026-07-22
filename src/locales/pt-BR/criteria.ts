@@ -26,6 +26,8 @@ export const CRITERION_IDS = [
   "subordinacao_densa",
   "leitor_terceira_pessoa",
   "salto_de_nivel_titulo",
+  "long_heading",
+  "single_item_list",
 ] as const;
 
 /** Id estável de um critério do pt-BR — a união derivada de `CRITERION_IDS`. */

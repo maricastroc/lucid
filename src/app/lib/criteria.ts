@@ -54,6 +54,8 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "paragraph_length",
   "prose_enumeration",
   "salto_de_nivel_titulo",
+  "long_heading",
+  "single_item_list",
 ];
 
 export const CRITERION_META: Record<Criterion, CriterionMeta> = {
@@ -216,6 +218,26 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "",
     signal: "título cujo nível pula mais de um degrau abaixo do título anterior (só em documento estruturado)",
     why: "Saltos na hierarquia de títulos quebram a leitura por estrutura — sumário, varredura, leitor de tela.",
+  },
+  long_heading: {
+    label: "Título longo",
+    ruleId: "long_heading",
+    kind: "Estrutura do documento",
+    principleName: "Fácil de localizar",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "título acima do limite de palavras, ou pontuado/formado como frase (só em documento estruturado)",
+    why: "Um título é um rótulo para varrer e localizar; longo ou em forma de frase, deixa de cumprir esse papel.",
+  },
+  single_item_list: {
+    label: "Lista de um item",
+    ruleId: "single_item_list",
+    kind: "Estrutura do documento",
+    principleName: "Fácil de localizar",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "bloco de lista com exatamente um item (só em documento estruturado)",
+    why: "Uma lista existe para comparar vários itens; com um só, não ajuda a localizar e sugere item faltando.",
   },
 };
 

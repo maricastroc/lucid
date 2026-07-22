@@ -246,6 +246,22 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
         `A ferramenta reconhece a litotes (“não é incomum”), mas afirmar direto (“é comum”) pode mudar a nuance que você quis dar — por isso aponta a forma direta e deixa a decisão com você.`,
       ),
   },
+  long_heading: {
+    headline: (f) => {
+      const w = metaNum(f, "words");
+      return metaStr(f, "reason") === "length" && w != null ? `Título longo · ${w} palavras` : "Título longo";
+    },
+    confidence: () =>
+      assistida(
+        `A ferramenta mede o título (palavras, número de frases, pontuação final) com exatidão, mas encurtá-lo ou reformulá-lo como um rótulo depende do que é essencial para o leitor — trabalho de autor.`,
+      ),
+  },
+  single_item_list: {
+    confidence: () =>
+      assistida(
+        `A ferramenta reconhece a lista de um item só, mas decidir entre completar a lista ou dissolvê-la no texto corrido depende do conteúdo — decisão de autor.`,
+      ),
+  },
 };
 
 export function detectionHeadline(f: Finding): string {

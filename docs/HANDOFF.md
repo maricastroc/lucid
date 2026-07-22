@@ -216,13 +216,18 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   (nunca check verde). A UI passou a expor 3 dos 4 princípios (P4 via proxy-piso com caveat).
 - **Princípio 2 / camada de blocos (ADR-026):** `Document.paragraphs` (`segment-paragraphs.ts`,
   linha em branco) — primeira estrutura de documento. Detectores `paragraph_length` (>5 frases) +
-  `prose_enumeration` (≥3 ordinais desde "primeiro"). Títulos/listas/seções ADIADOS (precisam de
-  convenção de marcação — decidir o formato de entrada primeiro).
+  `prose_enumeration` (≥3 ordinais desde "primeiro").
+- **DOCX-first → estrutura de verdade (ADR-038→042):** modelo de blocos (`heading`/`list` + `analyzeDocument`),
+  importador DOCX (`src/importers/docx.ts`, mammoth, fora do core) + upload na UI, e **3 detectores de
+  Princípio 2 sobre estrutura**: `salto_de_nivel_titulo` (ADR-041), `long_heading` (título longo/em-forma-de-frase)
+  e `single_item_list` (ADR-042). **Render de blocos na UI (ADR-042):** títulos viram `h2..h6` e listas viram
+  `<ul>/<ol>` (só com documento importado); `segmentRange`+`Segments` compartilham a máquina de marcas entre
+  linhas × blocos. Todos só disparam em documento estruturado (texto puro não tem título/lista de verdade).
 - **Mais 2 de texto puro (ADR-028):** `mesoclise` (regex `far-se-á`/`dir-lhe-ia`, zero-FP) +
   `dupla_negacao` (litotes "não é incomum", léxico via phrase-match; NÃO marca negação simples).
-- **13 critérios, 851 testes** (ADR-029: +4 do registro de critérios). Verificado ao vivo no browser (todos os detectores marcam; sonda
-  trava e reporta sem selo; estruturais sob "Fácil de localizar"; mesóclise/dupla-negação sob
-  "Frases claras").
+- **18 critérios, 939 testes** (ADR-029: registro de critérios; ADR-041/042: +3 estruturais). Verificado ao
+  vivo no browser (todos os detectores marcam; sonda trava e reporta sem selo; estruturais sob "Fácil de
+  localizar"; mesóclise/dupla-negação sob "Frases claras").
 - **Independência de formato (ADR-027):** `Document` é o `AnnotatedDocument` canônico; `buildDocument`
   é o importador de texto puro (fronteira de formato). Contrato para DOCX/PDF/HTML futuros em
   `DESIGN-modelo-independente-de-formato.md` — detectores já são cegos ao formato (auditado). SEM

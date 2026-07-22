@@ -58,10 +58,15 @@ export function Studio() {
   const [importError, setImportError] = useState<string | null>(null);
 
   const deferredText = useDeferredValue(text);
+  // Enquanto o texto casa com o do arquivo importado, analisamos o `Document` ESTRUTURADO e
+  // expomos seus blocos ao render (títulos/listas destacados). Ao editar à mão, o texto diverge de
+  // `doc.source` → voltamos ao texto puro (blocos = null) e o render por linhas assume.
+  const structured = importedDoc !== null && deferredText === importedDoc.source;
   const diagnostic = useMemo(
-    () => (importedDoc && deferredText === importedDoc.source ? analyzeDocument(importedDoc) : analyze(deferredText)),
-    [importedDoc, deferredText],
+    () => (structured ? analyzeDocument(importedDoc!) : analyze(deferredText)),
+    [structured, importedDoc, deferredText],
   );
+  const blocks = structured ? importedDoc!.blocks : null;
 
   const openDocx = useCallback(async (file: File) => {
     setImporting(true);
@@ -273,6 +278,7 @@ export function Studio() {
           mode={mode}
           text={text}
           diagnostic={diagnostic}
+          blocks={blocks}
           selectedId={selectedId}
           flashId={flashId}
           activeCriteria={activeCriteria}
