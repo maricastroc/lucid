@@ -96,6 +96,97 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
   });
 });
 
+describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) resolvido", () => {
+  const PARAGRAPH =
+    "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
+    "administrativo destinado à verificação das condições supracitadas exigidas para a concessão do " +
+    "benefício, e a decisão foi comunicada ao interessado no processo.";
+
+  it("Groq 70B (ao vivo): manteve/introduziu voz passiva apesar do briefing — REPROVA (a lacuna real que motivou esta prova)", async () => {
+    const findings = analyze(PARAGRAPH).findings;
+    expect(findings.some((f) => f.criterion === "passive_voice")).toBe(true);
+
+    const proposed =
+      "Foi feita uma análise do documento. Isso foi feito para verificar as condições necessárias " +
+      "para conceder o benefício. A decisão foi comunicada ao interessado no processo.";
+    const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
+    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "groq-70b-live", original: PARAGRAPH, proposed }, {
+      findings,
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
+    expect(v.hasBlockingFailure).toBe(true);
+    const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
+    expect(detail).toContain("passive_voice");
+  });
+
+  it("Gemini Flash (ao vivo): resolveu a maioria mas deixou 1 voz passiva — ainda REPROVA (tudo ou nada por critério)", async () => {
+    const findings = analyze(PARAGRAPH).findings;
+    const proposed =
+      "A comissão analisou o documento. Ela verificou as condições necessárias para dar o benefício. " +
+      "A decisão foi informada à pessoa interessada no processo.";
+    const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
+    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "gemini-flash-live", original: PARAGRAPH, proposed }, {
+      findings,
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
+    expect(v.hasBlockingFailure).toBe(true);
+  });
+
+  it("uma reescrita que resolve TODOS os critérios do briefing passa", async () => {
+    const findings = analyze(PARAGRAPH).findings;
+    const proposed =
+      "A comissão competente analisou o documento no procedimento administrativo. Ela verificou as " +
+      "condições citadas acima exigidas para conceder o benefício. Depois, comunicou a decisão ao interessado.";
+    const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
+    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "ideal", original: PARAGRAPH, proposed }, {
+      findings,
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
+  });
+
+  it("resolve parcialmente (2 critérios dirigidos, só 1 corrigido) — REPROVA e nomeia só o pendente", async () => {
+    const text = "Foi realizado o pagamento em sede de acordo prévio.";
+    const passiveFinding: Finding = {
+      criterion: "passive_voice",
+      category: "syntactic",
+      principle: "5.3.3",
+      span: { start: 0, end: 24, text: "Foi realizado o pagamento" },
+      severity: "warning",
+      requiresHuman: true,
+      justification: "",
+    };
+    const jargonFinding: Finding = {
+      criterion: "jargon",
+      category: "lexical",
+      principle: "5.3.2",
+      span: { start: 28, end: 40, text: "em sede de" },
+      severity: "warning",
+      requiresHuman: false,
+      justification: "",
+    };
+
+    const proposed = "Foi realizado o pagamento conforme acordo prévio.";
+    const target = { start: 0, end: text.length, text };
+    const v = await verifyRewrite(text, target, { proposerId: "parcial", original: text, proposed }, {
+      findings: [passiveFinding, jargonFinding],
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
+    const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
+    expect(detail).toContain("passive_voice");
+    expect(detail).not.toContain("jargon");
+  });
+
+  it("sem findings dirigidos, a prova é OMITIDA (não inventa uma checagem que ninguém pediu)", async () => {
+    const finding = spanFinding("Um texto qualquer aqui.", "Um texto qualquer aqui.", "long_sentence");
+    const v = await verify("Um texto qualquer aqui.", finding, proposal(finding, "Outro texto."));
+    expect(v.proofs.find((p) => p.check === "directed_findings_resolved")).toBeUndefined();
+  });
+});
+
 describe("verifyRewrite — PROVA: preservação mecânica", () => {
   it("números perdidos reprovam numbers_preserved", async () => {
     const text = "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias após o deferimento do pedido formal.";

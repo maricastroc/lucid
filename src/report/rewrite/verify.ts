@@ -37,6 +37,14 @@ export interface VerifyOptions {
   question?: string;
   /** critério do finding, quando o alvo é a frase de um finding — habilita `target_resolved`. */
   criterion?: string;
+  /**
+   * Os findings que motivaram um BRIEFING DIRIGIDO (estratégia `directed@1`, ADR-000 · Etapa 4) —
+   * habilita `directed_findings_resolved`: generaliza `target_resolved` (um critério) para TODOS os
+   * critérios apontados no briefing. Fecha a lacuna que `region_improved` sozinho deixava: o peso
+   * total da região pode não subir mesmo que o modelo IGNORE um achado específico do briefing
+   * (ex.: corrige jargão mas mantém a voz passiva) — achado ao vivo de 2026-07-22, ver ADR-046/047.
+   */
+  findings?: readonly Finding[];
 }
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
@@ -154,6 +162,21 @@ export async function verifyRewrite(
         targetRemaining === 0
           ? `a violação de '${criterion}' não reaparece no trecho reescrito`
           : `'${criterion}' ainda é detectado ${targetRemaining}× no trecho reescrito`,
+    });
+  }
+
+  if (options.findings && options.findings.length > 0) {
+    const directedCriteria = [...new Set(options.findings.map((f) => f.criterion))].sort();
+    const stillPresent = directedCriteria.filter((c) =>
+      after.findings.some((f) => f.criterion === c && overlaps(f, newStart, newEnd)),
+    );
+    proofs.push({
+      check: "directed_findings_resolved",
+      passed: stillPresent.length === 0,
+      detail:
+        stillPresent.length === 0
+          ? `todos os ${directedCriteria.length} critérios do briefing dirigido deixaram de aparecer no trecho`
+          : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
     });
   }
 
