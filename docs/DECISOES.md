@@ -2143,6 +2143,57 @@ exatamente o que os agregados escondiam. 975 testes verdes (+5); typecheck/lint 
 
 ---
 
+## ADR-048 — `directed_findings_resolved` só cobra achados `requiresHuman: false` (correção do ADR-047)
+
+**Status:** aceito · Tier 3 (verificador + prompt) — corrige uma miscalibração do ADR-047
+
+**Contexto.** A usuária testou o toggle "Dirigida" com TRÊS modelos (Gemini 2.5 Flash, Groq 70B,
+Groq 3.1 8B) no documento real dela e os TRÊS reprovaram na mesma prova
+(`briefing dirigido não resolveu: passive_voice`) — suspeita correta ("estranho, como que os três
+erraram igual?"). Investigação: as ocorrências de voz passiva no trecho dela eram TODAS
+`requiresHuman: true` (`src/locales/pt-BR/passes/passive-voice.ts:185`,
+`requiresHuman: !hasAgent`) — sem agente reconhecido, o próprio Camada 1 já recusa resolver sem
+inventar (I5). O briefing `directed@1` (ADR-047) pedia "resolva TODOS" incluindo esses — um modelo
+bem-comportado corretamente se recusa a inventar o agente e mantém a passiva, e a prova então
+punia essa recusa CORRETA como "não resolveu". Não eram três modelos ruins: era a prova cobrando
+algo que o produto, por princípio, também recusa fazer. Confirmado que o padrão é geral do engine
+(`jargon.ts`/`nominalization.ts` também variam `requiresHuman` por ocorrência, não só voz passiva).
+
+**Decisão — filtrar `requiresHuman` em DOIS pontos, consistentemente.**
+
+1. **`buildDirectedBriefing` (`prompt.ts`, `directed@1` → `directed@2`):** só inclui findings com
+   `requiresHuman: false` no "resolva TODOS" — não pede mais o que colide com a regra de não-
+   invenção do mesmo prompt. Version bump (disciplina de anti-drift do topo do arquivo: qualquer
+   mudança de palavra no prompt sobe a versão).
+
+2. **`directed_findings_resolved` (`verify.ts`):** só considera critérios com pelo menos uma
+   ocorrência `requiresHuman: false` como "pedidos" (`resolvable`). A checagem de "ainda presente"
+   TOLERA exatamente a contagem de ocorrências `requiresHuman` do critério que já existiam na
+   região ORIGINAL (nunca foram pedidas) — só falha se sobrar (ou aparecer) MAIS que isso. Sem
+   nenhum critério pedível, a prova é OMITIDA (não vira um "passou" vazio).
+
+**Verificado.** Reproduzido com os MESMOS textos reais (Groq 70B, Gemini) do ADR-047:
+`test/rewrite-verify.test.ts` agora confirma que ambos PASSAM (a voz passiva remanescente nunca
+era pedível nesse texto — jargão e frase longa é que eram, e foram resolvidos). Casos novos
+demonstram a distinção fina: uma passiva COM agente (`"O documento foi analisado pela comissão."`,
+`requiresHuman: false`) IGNORADA pela IA ainda REPROVA corretamente; uma mistura de passiva-com-
+agente (corrigida) e passiva-sem-agente (tolerada) PASSA. `test/rewrite-directed.test.ts` atualizado
+(a asserção antiga esperava o hint de voz ativa no texto-exemplo, que não é mais pedível ali).
+979 testes verdes; typecheck/lint limpos.
+
+**Consequências.**
+- A "voz passiva sobrevivendo à IA" nem sempre é um problema resolúvel por qualquer prompt/modelo —
+  quando não há agente no texto original, o caminho certo é o `PassiveGuide`/andaime interativo
+  (pedir o agente ao autor), não a reescrita por IA. O produto agora é honesto sobre essa fronteira
+  em vez de fingir que a IA deveria conseguir.
+- Precisão > cobertura: a prova fica mais estreita (só cobra o mecanicamente pedível), mas o que
+  cobra, cobra de verdade — sem punir recusa correta de inventar.
+- Achado metodológico: quando TODOS os sistemas testados falham igual no mesmo check, suspeitar do
+  CHECK antes de concluir que é coincidência de modelos ruins (o mesmo instinto que já valeu para o
+  ADR-046, mas na direção oposta — lá a causa era mesmo o modelo; aqui era o critério de aceite).
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

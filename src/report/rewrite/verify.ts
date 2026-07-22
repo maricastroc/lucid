@@ -166,18 +166,35 @@ export async function verifyRewrite(
   }
 
   if (options.findings && options.findings.length > 0) {
-    const directedCriteria = [...new Set(options.findings.map((f) => f.criterion))].sort();
-    const stillPresent = directedCriteria.filter((c) =>
-      after.findings.some((f) => f.criterion === c && overlaps(f, newStart, newEnd)),
-    );
-    proofs.push({
-      check: "directed_findings_resolved",
-      passed: stillPresent.length === 0,
-      detail:
-        stillPresent.length === 0
-          ? `todos os ${directedCriteria.length} critérios do briefing dirigido deixaram de aparecer no trecho`
-          : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
-    });
+    // Só cobra o que foi de fato PEDIDO — achados `requiresHuman` (passiva sem agente, jargão
+    // ambíguo, nominalização sem verbo seguro) o próprio Camada 1 já recusa resolver sem inventar
+    // (I5); o briefing (`directed@2`, prompt.ts) nem pede isso. Cobrar essa recusa correta como
+    // "não resolveu" puniria o modelo por não fabricar — achado ao vivo, ADR-047/048.
+    const resolvable = options.findings.filter((f) => !f.requiresHuman);
+    const directedCriteria = [...new Set(resolvable.map((f) => f.criterion))].sort();
+    // Sem nada mecanicamente pedível (tudo requiresHuman), a prova é OMITIDA — igual a
+    // `target_resolved` quando `options.criterion` não vem. Não inflar a contagem de provas com um
+    // check vazio.
+    if (directedCriteria.length > 0) {
+      // Tolera exatamente as ocorrências `requiresHuman` do critério JÁ presentes na região
+      // original — elas nunca foram pedidas, não é falha se ainda estiverem lá. Mais que isso
+      // sobrando (ou aparecendo) é o que de fato não foi resolvido.
+      const stillPresent = directedCriteria.filter((c) => {
+        const tolerated = options.findings!.filter(
+          (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
+        ).length;
+        const afterCount = after.findings.filter((f) => f.criterion === c && overlaps(f, newStart, newEnd)).length;
+        return afterCount > tolerated;
+      });
+      proofs.push({
+        check: "directed_findings_resolved",
+        passed: stillPresent.length === 0,
+        detail:
+          stillPresent.length === 0
+            ? `todos os ${directedCriteria.length} critérios pedíveis do briefing dirigido foram resolvidos`
+            : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
+      });
+    }
   }
 
   const burdenBefore = regionBurden(before.findings, originalStart, originalEnd);

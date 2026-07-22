@@ -10,6 +10,8 @@ import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 import { APPLY_BUTTON_CLASS, Guidance } from "./revision-note-guidance";
+import { Checkbox } from "./ui/checkbox";
+import { Select } from "./ui/select";
 
 export interface RevisionNoteProps {
   finding: Finding;
@@ -374,10 +376,10 @@ function GeneratedRewrite({
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2/40">
+    <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
       <div className="flex items-center gap-2 border-b border-rule-1 px-4 py-2.5">
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-2">Reescrita por IA</span>
-        <span className="rounded-[4px] bg-surface-2 px-1.5 py-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">
+        <span className="rounded-[4px] bg-surface-3 px-1.5 py-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">
           experimental
         </span>
       </div>
@@ -387,43 +389,32 @@ function GeneratedRewrite({
           <span className="text-ink-1">editar ou colar a sua</span>. A engine julga qualquer uma delas do mesmo jeito.
           Opcional: o <span className="text-ink-1">diagnóstico acima não depende disto</span>.
         </p>
-        <p className="mt-2 rounded-lg bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
+        <p className="mt-2 rounded-lg border border-human-line bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
           A IA vai reescrever <span className="font-semibold text-ink-0">{unitLabel}</span> (destacada no documento).
         </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <select
-          aria-label="Modelo gerador"
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Select
+          ariaLabel="Modelo gerador"
           value={`${choice.providerId}:${choice.model}`}
-          onChange={(e) => {
-            const next = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === e.target.value);
-            if (next) setChoice(next);
+          onValueChange={(next) => {
+            const found = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === next);
+            if (found) setChoice(found);
           }}
-          className="rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[12.5px] text-ink-1"
-        >
-          {REWRITE_MODELS.map((m) => (
-            <option key={`${m.providerId}:${m.model}`} value={`${m.providerId}:${m.model}`}>
-              {m.label}
-            </option>
-          ))}
-        </select>
+          options={REWRITE_MODELS.map((m) => ({ value: `${m.providerId}:${m.model}`, label: m.label }))}
+        />
         <label
-          className="inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[12.5px] text-ink-1"
+          className="inline-flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2"
           title="Passa os achados da engine no trecho como briefing à IA (ex.: 'prefira a voz ativa'), em vez do pedido genérico de reescrita."
         >
-          <input
-            type="checkbox"
-            checked={directed}
-            onChange={(e) => setDirected(e.target.checked)}
-            className="accent-accent"
-          />
+          <Checkbox checked={directed} onCheckedChange={setDirected} />
           Dirigida pelos achados da engine
         </label>
         <button
           type="button"
           onClick={run}
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:opacity-60"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[12.5px] font-medium text-accent-ink transition-opacity duration-150 hover:opacity-90 disabled:opacity-60"
         >
           {loading ? "Gerando e verificando…" : "Gerar e verificar"}
         </button>
