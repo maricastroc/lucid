@@ -16,6 +16,16 @@
  *
  * Cada entrada é justificada individualmente (`porque`) — nunca "decorar o golden". Fonte dos
  * exemplos: construções típicas de texto administrativo/jurídico brasileiro.
+ *
+ * CATEGORIA "condicao_nomeada" (adicionada após achado ao vivo, sessão de 2026-07-22): o trecho
+ * nomeia uma condição/agente/categoria SEM desenvolvê-la ("na hipótese de deferimento", "para
+ * estudantes", "mediante autorização") e a pergunta bate EXATAMENTE no que está nomeado. O rótulo
+ * humano é sempre `humanoTrava: false` — o nome É a resposta; o leitor de piso não precisa saber
+ * os critérios de "deferimento" ou quem conta como "estudante" pra responder a pergunta como foi
+ * feita. Hipótese sob teste: a sonda pode trocar a pergunta por uma mais profunda ("sob que
+ * critério o deferimento ocorre?") em vez de aceitar a resposta literal — um modo de falha
+ * DIFERENTE de rigor válido (que travaria só em ambiguidade/lacuna genuína). Ver docs/DECISOES.md
+ * (achado registrado) antes de subir `PROBE_PROMPT_VERSION`.
  */
 import type { OperacaoLeitura, ProbeResult } from "../../src/lucid/probe/types";
 
@@ -41,7 +51,8 @@ export interface ProbeGoldenCase {
     | "negacao_aninhada"
     | "fato_ausente"
     | "inferencia_exigida"
-    | "carga_extraivel";
+    | "carga_extraivel"
+    | "condicao_nomeada";
   porque: string;
 }
 
@@ -161,6 +172,129 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     categoria: "inferencia_exigida",
     porque:
       "Responder exige inferir com data de emissão e data de hoje — informação fora do trecho; sem preencher lacuna, o piso não decide.",
+  },
+
+  // ---- condicao_nomeada: a condição/agente é NOMEADO sem ser desenvolvido; o nome é a resposta ----
+  {
+    id: "condicao-deferimento",
+    trecho: "O pagamento da taxa deve ser feito na hipótese de deferimento.",
+    pergunta: "Em que hipótese o pagamento da taxa é devido?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque:
+      "'Deferimento' é a hipótese nomeada e é exatamente o que a pergunta pede; os critérios de quando um pedido é deferido são OUTRA pergunta, não esta. Caso real que motivou esta categoria.",
+  },
+  {
+    id: "condicao-estudantes",
+    trecho: "O desconto na tarifa é concedido para estudantes.",
+    pergunta: "Para quem é concedido o desconto na tarifa?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Estudantes' responde 'para quem'; quem conta como estudante (critério de comprovação) é pergunta diferente.",
+  },
+  {
+    id: "condicao-autorizacao",
+    trecho: "A entrada no laboratório é permitida mediante autorização.",
+    pergunta: "Sob que condição a entrada no laboratório é permitida?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Mediante autorização' é a condição nomeada e responde a pergunta; como se obtém a autorização não foi perguntado.",
+  },
+  {
+    id: "condicao-forca-maior",
+    trecho: "O prazo pode ser prorrogado em caso de força maior.",
+    pergunta: "Em que caso o prazo pode ser prorrogado?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Força maior' é o caso nomeado; a definição jurídica do termo é outra questão, não a que foi feita.",
+  },
+  {
+    id: "condicao-aposentados",
+    trecho: "A isenção da taxa se aplica a aposentados.",
+    pergunta: "A quem a isenção da taxa se aplica?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Aposentados' é o grupo nomeado e responde diretamente; os critérios de aposentadoria não foram perguntados.",
+  },
+  {
+    id: "condicao-manifestacao",
+    trecho: "O recurso será analisado após a manifestação da parte contrária.",
+    pergunta: "Quando o recurso será analisado?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Após a manifestação da parte contrária' é o marco temporal nomeado que a pergunta pede; o conteúdo dessa manifestação é outra pergunta.",
+  },
+  {
+    id: "condicao-irregularidade",
+    trecho: "O benefício é suspenso em razão de irregularidade.",
+    pergunta: "Por que motivo o benefício é suspenso?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Irregularidade' é o motivo nomeado; o que conta como irregularidade não foi perguntado.",
+  },
+  {
+    id: "condicao-deficiencia",
+    trecho: "A vaga é destinada a candidatos com deficiência.",
+    pergunta: "A quem a vaga é destinada?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Candidatos com deficiência' responde 'a quem'; os critérios de enquadramento são outra pergunta.",
+  },
+  {
+    id: "condicao-servidores",
+    trecho: "O acesso à sala é restrito a servidores autorizados.",
+    pergunta: "Quem pode acessar a sala?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Servidores autorizados' é o grupo nomeado que responde a pergunta; como se autoriza um servidor não foi perguntado.",
+  },
+  {
+    id: "condicao-atraso",
+    trecho: "A multa incide sobre o valor em atraso.",
+    pergunta: "Sobre o que a multa incide?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'O valor em atraso' é a base nomeada e responde diretamente; o cálculo do atraso não foi perguntado.",
+  },
+  {
+    id: "condicao-ordem-chegada",
+    trecho: "O atendimento é feito por ordem de chegada.",
+    pergunta: "Como o atendimento é feito?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Por ordem de chegada' é o critério nomeado; como a chegada é registrada não foi perguntado.",
+  },
+  {
+    id: "condicao-diretoria",
+    trecho: "A renovação do contrato depende de aprovação da diretoria.",
+    pergunta: "De que a renovação do contrato depende?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Aprovação da diretoria' é a dependência nomeada e responde exatamente a pergunta; os critérios da diretoria são outra questão.",
+  },
+  {
+    id: "condicao-maioridade",
+    trecho: "O documento é exigido para maiores de idade.",
+    pergunta: "Para quem o documento é exigido?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Maiores de idade' responde diretamente 'para quem'; a comprovação da idade não foi perguntada.",
+  },
+  {
+    id: "condicao-pagamento-integral",
+    trecho: "A liberação do veículo ocorre mediante pagamento integral.",
+    pergunta: "Sob que condição a liberação do veículo ocorre?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'Mediante pagamento integral' é a condição nomeada; o valor ou a forma de pagamento não foram perguntados.",
+  },
+  {
+    id: "condicao-notificacao",
+    trecho: "O prazo é contado a partir da notificação.",
+    pergunta: "A partir de quando o prazo é contado?",
+    humanoTrava: false,
+    categoria: "condicao_nomeada",
+    porque: "'A partir da notificação' é o marco nomeado que a pergunta pede; a forma da notificação não foi perguntada.",
   },
 ];
 

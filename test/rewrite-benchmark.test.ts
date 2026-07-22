@@ -7,7 +7,9 @@ import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-const PROBE_GROQ_MODEL = "llama-3.1-8b-instant";
+// llama-3.1-8b-instant se autocontradiz na extração literal (meta-eval de 2026-07-22, ver
+// docs/DECISOES.md) — mediria "meaningFlagged" errado. 70B é grátis também, sem custo extra.
+const PROBE_GROQ_MODEL = "llama-3.3-70b-versatile";
 const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
 interface Keys {

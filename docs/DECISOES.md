@@ -2030,6 +2030,68 @@ suficiente para o benchmark decidir.
 
 ---
 
+## ADR-046 — Sonda de piso: modelo padrão trocado para `llama-3.3-70b-versatile` (o 8B se autocontradizia, não o prompt)
+
+**Status:** aceito · Camada 2 (sonda de compreensão)
+
+**Contexto.** Um teste manual da usuária no `ProbePanel` sugeria um modo de falha específico: a
+sonda parecia trocar a pergunta do leitor por uma "mais funda" (perguntou-se "em que hipótese o
+pagamento é devido?", o trecho respondia literalmente "na hipótese de deferimento", mas a sonda
+travou exigindo saber sob que critério o *deferimento em si* ocorre — uma pergunta diferente da
+que foi feita). A hipótese de trabalho era escrever um `probe@2` com uma regra explícita: "responda
+exatamente à pergunta apresentada, não a substitua por uma mais profunda".
+
+**Decisão — validar com uma bateria antes de mexer no prompt (a disciplina certa).** Estendemos
+`GOLDEN_SONDA` (`test/eval/probe-golden.ts`) com 15 casos novos, categoria `condicao_nomeada`: o
+trecho nomeia uma condição/agente/categoria sem desenvolvê-la ("para estudantes", "mediante
+autorização", "em caso de força maior"...) e a pergunta bate exatamente no nome — rótulo humano
+sempre `humanoTrava: false` (o nome É a resposta). Rodamos a meta-eval ao vivo (`PROBE_EVAL=1`,
+ADR-043) com o modelo então-default (`llama-3.1-8b-instant`, Groq, grátis):
+
+- Concordância geral: **26%**. `condicao_nomeada`: **0/15**. Mas também `claro`: 1/3 e
+  `carga_extraivel`: 0/3 — categorias SEM relação com a hipótese original.
+- Inspecionando o `motivo` bruto: no caso dos estudantes, o modelo escreveu *"o texto não diz para
+  quem é concedido o desconto, **apenas que é concedido para estudantes**"* — citando a resposta
+  certa dentro da própria justificativa de recusa. Autocontradição, não "pergunta mais funda".
+
+Isso reformulou o diagnóstico: não é o *prompt* que induz um regresso de rigor — é o *modelo*
+pequeno sendo incoerente na tarefa de extração literal, de forma ampla e não-específica ao padrão
+suspeitado. Re-rodamos o MESMO golden, MESMO prompt (`probe@1`, byte-idêntico), só trocando o
+modelo para `llama-3.3-70b-versatile` (Groq, também grátis): **100% de concordância**, `condicao_
+nomeada` 15/15, incluindo o caso real que motivou a investigação.
+
+**Ação.** Trocado o modelo padrão da sonda de `llama-3.1-8b-instant` para `llama-3.3-70b-versatile`
+em TODOS os pontos que usavam o 8B como piso: `src/app/api/probe/route.ts` (`buildFloorProbe`, o
+`ProbePanel` standalone), `src/app/api/rewrite/route.ts` (`buildProbe`, alimenta o sinal
+`meaning_preserved` de toda reescrita real por IA no Tier 3 — degradava esse sinal silenciosamente),
+`test/rewrite-benchmark.test.ts` (`PROBE_GROQ_MODEL`) e `test/eval/probe-eval.test.ts`
+(`buildLiveProbe` default, sem override). **O `probe@1` NÃO foi alterado** — a evidência mostrou que
+o prompt já era suficiente; mudar o prompt teria sido a correção errada para a causa raiz certa.
+
+**Consequências.**
+- Custo zero: os dois modelos são gratuitos no Groq (70B é mais lento/mais tokens que o 8B, mas o
+  ganho de confiabilidade compensa para uma sonda que so roda opt-in).
+- Os 15 casos `condicao_nomeada` ficam como cobertura de regressão permanente (qualquer troca futura
+  de modelo/prompt é testada contra esse padrão específico).
+- Metodológico: a meta-eval por CATEGORIA (não só a matriz global) foi o que revelou que o problema
+  era mais amplo que a categoria suspeitada — sem o recorte, `claro`/`carga_extraivel` falhando
+  ficaria escondido dentro de "26% de concordância" sem apontar a causa.
+- Se `PROBE_EVAL_MODEL=llama-3.1-8b-instant` for passado explicitamente, o achado é reproduzível.
+- **Gate corrigido:** o piso ao vivo só travava em RECALL (`expect(m.recall).toBeGreaterThanOrEqual(0.6)`)
+  — e o 8B tinha recall=100% (travar em quase tudo acerta todo TP de graça). Esse gate teria deixado
+  o 8B passar. Adicionado um piso de PRECISÃO (`expect(m.precision).toBeGreaterThanOrEqual(0.7)`),
+  que o 8B (23%) não passaria e o 70B (100%) passa com folga — é o piso que efetivamente protege
+  contra a próxima troca de modelo malfeita.
+
+**Como rodar (ao vivo, custa rede — fora da CI, mesmo padrão do benchmark de reescrita do ADR-017):**
+```
+set -a; . ./.env; set +a; PROBE_EVAL=1 npx vitest run test/eval/probe-eval.test.ts
+```
+Trocar o modelo/prompt da sonda exige rodar isto de novo e passar nos dois pisos (recall e precisão)
+antes de virar default — a mesma disciplina de anti-drift do `CLAUDE.md`.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
