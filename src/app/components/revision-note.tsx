@@ -18,6 +18,7 @@ import {
   longSentenceGuidance,
 } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
+import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, REWRITE_MODELS, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 
@@ -131,8 +132,7 @@ function ManualEdit({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(original);
 
-  const trimmed = draft.trim();
-  const dirty = trimmed.length > 0 && trimmed !== original.trim();
+  const dirty = isManualEditDirty(original, draft);
 
   if (!open) {
     return (
@@ -177,7 +177,7 @@ function ManualEdit({
           <button
             type="button"
             disabled={!dirty}
-            onClick={() => onManualEdit(target, trimmed)}
+            onClick={() => onManualEdit(target, manualEditReplacement(draft))}
             className={APPLY_BUTTON_CLASS}
           >
             Aplicar minha versão

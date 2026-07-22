@@ -16,6 +16,7 @@ import { analyze, applySplitAt, type Finding, type Span, type SplitPoint } from 
 import type { RewriteProposal } from "@/report/rewrite";
 import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
+import { spliceSpan } from "./lib/text-edit";
 import { applySafeSuggestions } from "./lib/audit";
 import { SAMPLE_TEXT } from "./lib/sample";
 import { Masthead } from "./components/masthead";
@@ -154,8 +155,7 @@ export function Studio() {
   // re-audita o resultado; a UI nunca decide clareza.
   const replaceSpan = useCallback(
     (target: Span, replacement: string) => {
-      const base = diagnostic.text;
-      const next = base.slice(0, target.start) + replacement + base.slice(target.end);
+      const next = spliceSpan(diagnostic.text, target, replacement);
       if (next !== text) {
         pushUndo(text);
         setText(next);
