@@ -65,6 +65,11 @@ export interface Config {
   singleItemList: {
     enabled: boolean;
   };
+  headingBodyMismatch: {
+    enabled: boolean;
+    /** contagem mínima de palavras de conteúdo no corpo da seção para tentar a comparação */
+    minBodyContentWords: number;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -134,6 +139,10 @@ export const DEFAULT_CONFIG: Config = {
   },
   singleItemList: {
     enabled: true,
+  },
+  headingBodyMismatch: {
+    enabled: true,
+    minBodyContentWords: 6,
   },
   metrics: {
     decimalPlaces: 1,

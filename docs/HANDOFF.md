@@ -229,9 +229,16 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   e `single_item_list` (ADR-042). **Render de blocos na UI (ADR-042):** títulos viram `h2..h6` e listas viram
   `<ul>/<ol>` (só com documento importado); `segmentRange`+`Segments` compartilham a máquina de marcas entre
   linhas × blocos. Todos só disparam em documento estruturado (texto puro não tem título/lista de verdade).
+- **`heading_body_mismatch` — primeiro detector do Princípio 1 (ADR-044).** Fecha a fase 2 do CLAUDE.md
+  por completo. Proxy de sobreposição título↔corpo (dataset novo `stopwords.pt.json`, palavras função
+  fechado/curado): zero palavra de conteúdo em comum entre título e corpo da seção → `info`,
+  `requiresHuman`. Acende o grupo "Relevante · 5.1" da UI pela primeira vez (antes só existia morto em
+  `principleGroupOf`). **Limitação conhecida e testada:** comparação exata sem lemas — plural/singular
+  do mesmo termo não conta como eco (falso positivo aceito porque o sinal já nasce fraco).
 - **Mais 2 de texto puro (ADR-028):** `mesoclise` (regex `far-se-á`/`dir-lhe-ia`, zero-FP) +
   `dupla_negacao` (litotes "não é incomum", léxico via phrase-match; NÃO marca negação simples).
-- **18 critérios, 944 testes** (ADR-029: registro de critérios; ADR-041/042: +3 estruturais; ADR-043: meta-eval da sonda). Verificado ao
+- **19 critérios, 953 testes** (ADR-029: registro de critérios; ADR-041/042/044: +4 estruturais; ADR-043:
+  meta-eval da sonda). Verificado ao
   vivo no browser (todos os detectores marcam; sonda trava e reporta sem selo; estruturais sob "Fácil de
   localizar"; mesóclise/dupla-negação sob "Frases claras").
 - **Independência de formato (ADR-027):** `Document` é o `AnnotatedDocument` canônico; `buildDocument`

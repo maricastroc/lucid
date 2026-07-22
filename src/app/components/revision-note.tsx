@@ -428,30 +428,59 @@ function GeneratedRewrite({
   );
 }
 
+/**
+ * O resultado de uma geração: o VEREDITO da engine é o protagonista (ADR-000). A ordem — e o
+ * peso visual — lideram pela verificação; a proposta da IA vira o ESPÉCIME avaliado, logo acima
+ * da ação. Isto é re-ranking de hierarquia, não mudança de contrato: mesmas provas, mesmos
+ * sinais, mesma decisão do autor. O texto gerado deixa de ser o clímax — a engine que julga é.
+ */
 function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; onApplyRewrite: () => void }) {
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
   const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
+  const passed = verification.proofs.filter((p) => p.passed).length;
 
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
-      {/* proposta */}
-      <div className="border-b border-rule-1 px-3.5 py-3">
-        <div className="mb-1.5 flex items-baseline justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Proposta · gerada</p>
-          <span className="font-mono text-[10px] text-ink-3" title="modelo + versão do prompt">
-            {proposal.proposerId}
+      {/* VEREDITO — protagonista. A engine julgou; é isto que o produto entrega, não a prosa. */}
+      <div
+        className="px-4 py-3.5"
+        style={{
+          borderBottom: "1px solid var(--rule-1)",
+          background: blocked ? "var(--human-weak)" : "var(--safe-weak)",
+        }}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: blocked ? "var(--human)" : "var(--safe)" }}
+          >
+            A engine verificou
+          </span>
+          <span className="tabular-nums text-[11px] text-ink-3">
+            {passed}/{verification.proofs.length} provas
           </span>
         </div>
-        <p className="font-serif text-[15px] leading-snug text-ink-0">{proposal.proposed}</p>
+        <p className="mt-1.5 font-serif text-[19px] leading-[1.25] text-ink-0">
+          {blocked ? "Uma prova falhou — a ferramenta não atesta este trecho." : "Nenhuma falha de piso neste trecho."}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-2">
+          <span>
+            Flesch-PT <span className="tabular-nums text-ink-1">{fmtDelta(dFlesch, 1)}</span>
+          </span>
+          <span className="text-ink-3">·</span>
+          <span>
+            palavras <span className="tabular-nums text-ink-1">{fmtDelta(dWords, 0)}</span>
+          </span>
+          <span className="text-ink-3">·</span>
+          <span className="text-ink-3">medição, não aprovação</span>
+        </div>
       </div>
 
-      {/* PROVA */}
-      <div className="px-3.5 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">
-          Prova · determinística
-        </p>
+      {/* PROVA — a substância do veredito, logo abaixo do headline */}
+      <div className="px-4 py-3">
+        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Prova · determinística</p>
         <ul className="flex flex-col gap-1.5">
           {verification.proofs.map((p) => (
             <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
@@ -461,7 +490,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
 
       {/* SINAL */}
       {verification.signals.length > 0 && (
-        <div className="border-t border-rule-1 px-3.5 py-3">
+        <div className="border-t border-rule-1 px-4 py-3">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">
             Sinal · heurístico (não é prova)
           </p>
@@ -473,17 +502,15 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         </div>
       )}
 
-      {/* métricas + ação */}
-      <div className="border-t border-rule-1 px-3.5 py-3">
-        <div className="flex items-center gap-3 text-[11.5px] text-ink-2">
-          <span>
-            Flesch-PT <span className="tabular-nums text-ink-1">{dFlesch >= 0 ? `+${dFlesch.toFixed(1)}` : dFlesch.toFixed(1)}</span>
-          </span>
-          <span className="text-ink-3">·</span>
-          <span>
-            palavras <span className="tabular-nums text-ink-1">{dWords >= 0 ? `+${dWords}` : dWords}</span>
+      {/* O ESPÉCIME avaliado — a proposta da IA, calma, junto da ação que a aplica */}
+      <div className="border-t border-rule-1 px-4 py-3">
+        <div className="mb-1.5 flex items-baseline justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Trecho avaliado</p>
+          <span className="font-mono text-[10px] text-ink-3" title="modelo + versão do prompt">
+            {proposal.proposerId}
           </span>
         </div>
+        <p className="font-serif text-[14.5px] leading-snug text-ink-1">{proposal.proposed}</p>
 
         <div className="mt-3">
           {/* O veto NUNCA autoaplica e NUNCA vira selo verde — mas não bloqueia o autor. Com
@@ -503,13 +530,19 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
           </button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
             {blocked
-              ? "Uma prova falhou — a ferramenta não aplica sozinha e não atesta. Se você entende o motivo acima e ainda quer, aplique como rascunho e reanalise."
-              : "Nenhuma falha de piso detectada. Isso não é um selo de qualidade — reveja antes de usar."}
+              ? "Se você entende o motivo acima e ainda quer, aplique como rascunho — a engine re-audita."
+              : "Reveja antes de usar — a decisão de aplicar é sua."}
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+/** Formata um delta com sinal explícito (`+3.0`, `-12`). `digits` = casas decimais. */
+function fmtDelta(n: number, digits: number): string {
+  const s = digits > 0 ? n.toFixed(digits) : String(Math.round(n));
+  return n >= 0 ? `+${s}` : s;
 }
 
 function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"; detail: string }) {
@@ -636,6 +669,13 @@ function Guidance({
         <GuideText>
           Uma lista de um item só não separa nada: acrescente os itens que faltam, ou traga o conteúdo de volta para o
           texto corrido. A escolha depende do conteúdo — sua.
+        </GuideText>
+      );
+    case "heading_body_mismatch":
+      return (
+        <GuideText>
+          Releia o título e a seção juntos: ele antecipa o que o leitor vai encontrar aqui? Se não, ajuste o título ou
+          confirme que a palavra em comum só mudou de forma (plural/singular) — a ferramenta não decide por você.
         </GuideText>
       );
     default:

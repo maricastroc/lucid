@@ -16,7 +16,8 @@ export type IntegratedCriterion =
   | "leitor_terceira_pessoa"
   | "salto_de_nivel_titulo"
   | "long_heading"
-  | "single_item_list";
+  | "single_item_list"
+  | "heading_body_mismatch";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

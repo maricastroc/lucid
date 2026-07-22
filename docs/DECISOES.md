@@ -6,6 +6,77 @@
 
 ---
 
+## ADR-000 — Modelo mental canônico: a engine julga, todo o resto propõe
+
+**Status:** aceito · fundacional (precede e enquadra ADR-001…024; nenhum ADR técnico pode
+contrariá-lo). Consolida o que `CLAUDE.md` e ADR-014/018/019 já diziam em partes.
+
+**Contexto.** Os ADRs anteriores decidem *táticas* (morfologia, jargão, estratégias de
+reescrita, peso por severidade). Nenhum registra a *constituição* — quem é o protagonista, o
+que a IA é, por que a experiência tem esta forma. Sem esse registro, a UX derivou para um
+ponto em que o clímax do fluxo mora no gerador de IA e o verificador — o diferencial real —
+fica subordinado a ele (o `PROVA` renderizado como rodapé da saída da LLM). Diagnóstico:
+**o código já está desacoplado (Camada 1 ⊥ Camada 2, a 1 nunca importa a 2); a UX ainda está acoplada** (só se
+resolve um finding passando pela IA). Este ADR fixa o modelo que os demais já serviam
+implicitamente, para a UX poder alcançá-lo.
+
+**Decisão.**
+
+1. **O núcleo é a engine determinística (`src/lucid/core`), e ela é o produto.** Detecta
+   violações contra a ABNT NBR ISO 24495-1, pontua e localiza — byte-determinística, sem LLM,
+   sem rede. Tudo mais orbita isso.
+
+2. **Só a engine tem autoridade; todo o resto propõe.** Um juiz (a engine) e três proponentes:
+   a IA, o autor escrevendo, e texto colado. Nenhum proponente decide o que é problema, o que
+   é objetivo, nem o que é bom. A engine faz três atos determinísticos — **detecta** (o que
+   está errado), **dirige** (traduz os findings de um alvo num briefing executável),
+   **verifica** (julga o candidato contra o estado anterior: PROVA determinística + SINAL
+   heurístico, nunca aprovação). O que conta como violação, a severidade, o mapeamento ABNT e o
+   resultado de cada prova permanecem exclusivamente determinísticos.
+
+3. **A IA é uma executora intercambiável de um briefing que ela não escreveu, produzindo um
+   candidato que ela não pode aprovar, para uma decisão que ela não toma.** Responsabilidade
+   única: dado um alvo e o briefing, produzir um candidato que tente cumpri-lo sem inventar.
+   Blindada (temperature 0, modelo fixado, prompt versionado, proveniência), trocável e
+   **opcional** — o fluxo fecha sem ela, por edição manual ou colagem. Sua saída não tem
+   autoridade até a engine julgar e o autor aceitar.
+
+4. **O candidato é efêmero e vive fora do documento.** Nasce quando o autor, sobre um alvo,
+   pede uma versão (IA, editando, ou colando). É sempre *sobre um alvo* e carrega o briefing.
+   Existe só para receber um veredito. Vira parte do documento apenas por **aplicação** —
+   decisão explícita do autor; a ferramenta nunca autoaplica (ADR-019). Descartado sem custo.
+   Nunca muta a auditoria nem a engine. A engine nunca cria candidato.
+
+5. **A auditoria emoldura tudo.** O fluxo começa e termina na engine:
+   `Auditoria → (Alvo → Briefing → Candidato → Veredito → Decisão) → Reauditoria`. A IA, quando
+   presente, vive só dentro de "Candidato", entre o dirigir e o verificar. A engine tem a
+   primeira e a última palavra em torno de cada candidato.
+
+**Sobre o Briefing (status).** Hoje "dirigir" é fino: uma dica estática por critério
+(`CRITERION_HINT` em `report/rewrite/prompt.ts`). O Briefing como *entidade de primeira classe*
+(montada do conjunto real de findings do alvo) fica **deferido até um benchmark (estilo
+ADR-017) provar que o briefing dirigido bate a dica estática.** Não construir a entidade pesada
+antes de provar o valor.
+
+**Por que a experiência é assim.** A tese é *auditor, não gerador* (ver
+[log] tese de posicionamento). Modelos de fronteira reescrevem; ninguém mais *prova* que a
+reescrita ficou mais simples contra a norma, preservou fatos e não inventou. Essa prova — o
+veredito — é o produto. Se o clímax da UX mora no gerador, o produto se confunde com "um
+reescritor com validação"; por isso o veredito é protagonista e a IA é só uma das portas para
+produzir algo que ele julga.
+
+**Consequências.**
+- *A favor:* identidade estável (árbitro); IA opcional de verdade; veredito reproduzível; churn
+  mínimo (o núcleo já existe — a maior parte do trabalho é re-rotear o verify para aceitar
+  qualquer candidato e re-ranquear a UI).
+- *Custo/risco:* "candidato/briefing/veredito" é vocabulário **interno**, nunca copy de
+  usuário; a IA segue sendo a porta de menor esforço (contrapeso: o veredito é idêntico para
+  toda fonte); quanto melhor a engine dirige, melhor a IA reescreve — e "melhor reescritor" é
+  deriva se a UX/marketing algum dia liderar com a prosa em vez da prova.
+- *Linha vermelha permanente:* **o Lucid vende o julgamento, não o texto.**
+
+---
+
 ## ADR-001 — Análise morfológica por regras + léxico, não POS tagger
 
 **Status:** aceito · Fase 0
@@ -1873,6 +1944,50 @@ que é o certo: não dá para medir se o provider não responde).
 intacta (teste importa `probe/`; `core ⊄ probe` segue). **Ressalva (I5):** golden pequeno, 1 corrida,
 temperature 0 — concordância é sinal de piso, não placar; passar NUNCA é aprovação de compreensão.
 **Pendente futuro:** golden maior e mais adversarial; comparar modelos quando houver quota.
+
+---
+
+## ADR-044 — `heading_body_mismatch`: primeiro detector do Princípio 1 (Relevante, 5.1)
+
+**Contexto.** Fecha o último item da fase 2 do CLAUDE.md: "título que não responde à pergunta do
+leitor (heurística fraca → flag, nunca score)". O design doc (`DESIGN-camada1-teto-deterministico.md`
+§B) já enquadrava isso como **relevância** (Princípio 1) — fora do proxy mecânico de 5.2 (localizável)
+que os três detectores de título anteriores medem (nível, comprimento, forma de frase) — e listava
+"sobreposição de termos título↔corpo" como o proxy implementável, útil só como **flag fraca, nunca
+score**. Até aqui, nenhum critério citava 5.1: o CLAUDE.md descreve o Princípio 1 como trabalho de
+autor que "nenhuma regra adivinha", coberto genericamente pelos flags `requiresHuman` — este é o
+primeiro a citar 5.1 EXPLICITAMENTE como o que está sendo medido, e acende o grupo "Relevante" que já
+existia (morto) em `principleGroupOf`.
+
+**Decisão — proxy de sobreposição título↔corpo, não semântica.** `heading_body_mismatch`: para cada
+`heading`, coleta o CORPO da seção (blocos até o próximo título de nível igual ou mais alto — inclui
+sub-títulos aninhados, que também contam como eco do pai) e compara as palavras de CONTEÚDO (tudo que
+não é palavra função) do título contra as do corpo. Zero sobreposição → flag `severity: "info"`
+(o mesmo padrão de `leitor_terceira_pessoa` para "sinal fraco"), `requiresHuman`, sem sugestão.
+Conservador: exige corpo com `minBodyContentWords` (default 6) antes de julgar; título só de palavra
+função, ou sem corpo (título órfão — fora de escopo aqui), não dispara.
+
+**Dataset novo: `stopwords.pt.json`** — palavras funcionais do PT-BR (artigos, contrações,
+preposições, conjunções, pronomes, cópulas/auxiliares de alta frequência), fechado e curado, mesma
+disciplina de `verbos-ser.pt.json`. Só filtra o que entra na comparação; nunca dispara finding sozinho.
+
+**Limitação conhecida, aceita e testada.** A comparação é EXATA (sem lemas): singular/plural do mesmo
+termo ("documentos" no título, "documento" no corpo) não conta como eco → falso positivo possível.
+Aceitável porque o sinal já nasce fraco (`info`, nunca prova) — documentado no docstring do pass, na
+justificativa do finding, e coberto por um teste dedicado (`heading-body-mismatch.test.ts`) que
+DEMONSTRA o comportamento em vez de escondê-lo, seguindo o padrão `estado: "limitacao_conhecida"` já
+usado no golden de jargão.
+
+**Consequências.** 18→**19 critérios, 953 testes verdes** (10 novos: eco exato não marca, zero
+sobreposição com corpo suficiente marca, corpo curto não marca, título órfão não marca, título só de
+função não marca, título aninhado conta como eco do pai, limitação plural/singular demonstrada, kill
+switch, texto puro nunca dispara). Snapshots regenerados: diff só a entrada zerada em `byCriterion`,
+zero finding novo no golden de texto. Verificado ao vivo (DOCX real: título "Prazos e documentos" cujo
+corpo fala de comissão/reunião/cronograma marca; nota mostra "Relevante · Relevância para o leitor ·
+ABNT 5.1" pela primeira vez na UI). Typecheck/lint/depcheck limpos; cerca intacta.
+
+**Fecha a fase 2 do CLAUDE.md por completo** (subordinação, enumeração em prosa, título-frágil e,
+agora, título-sem-eco — os quatro itens listados).
 
 ---
 

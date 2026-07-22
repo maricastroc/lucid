@@ -1,0 +1,28 @@
+{
+  "_comentario": "Palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, advérbios de baixo conteúdo, cópulas/auxiliares de alta frequência) — fatos fechados de língua, não um dataset de terceiro. Usado só para FILTRAR palavras de conteúdo numa comparação heurística (heading_body_mismatch); nunca dispara finding sozinho. Ver src/locales/pt-BR/datasets/README.md.",
+  "forms": [
+    "o", "a", "os", "as", "um", "uma", "uns", "umas",
+    "de", "do", "da", "dos", "das", "num", "numa", "nuns", "numas", "dum", "duma", "duns", "dumas",
+    "em", "no", "na", "nos", "nas",
+    "a", "ao", "aos", "à", "às",
+    "por", "pelo", "pela", "pelos", "pelas",
+    "para", "com", "sem", "sob", "sobre", "entre", "até", "desde", "após", "ante", "contra", "perante", "trás", "durante", "mediante",
+    "e", "ou", "mas", "porém", "contudo", "todavia", "entretanto", "portanto", "logo", "pois",
+    "que", "se", "como", "quando", "enquanto", "embora", "porque", "porquanto", "conquanto", "caso", "senão",
+    "eu", "tu", "ele", "ela", "nós", "vós", "eles", "elas",
+    "me", "te", "se", "nos", "vos", "lhe", "lhes", "o", "a", "os", "as", "lo", "la", "los", "las", "no", "na",
+    "meu", "minha", "meus", "minhas", "teu", "tua", "teus", "tuas", "seu", "sua", "seus", "suas",
+    "nosso", "nossa", "nossos", "nossas", "vosso", "vossa", "vossos", "vossas",
+    "este", "esta", "estes", "estas", "isto", "esse", "essa", "esses", "essas", "isso",
+    "aquele", "aquela", "aqueles", "aquelas", "aquilo",
+    "qual", "quais", "quem", "cujo", "cuja", "cujos", "cujas", "quanto", "quanta", "quantos", "quantas",
+    "você", "vocês", "dele", "dela", "deles", "delas", "nele", "nela", "neles", "nelas", "onde", "aonde",
+    "não", "sim", "também", "já", "ainda", "apenas", "só", "somente", "mais", "menos", "muito", "muita", "muitos", "muitas", "pouco", "pouca", "poucos", "poucas",
+    "bem", "mal", "aqui", "ali", "lá", "aí", "assim", "então", "agora", "sempre", "nunca", "talvez", "outrossim",
+    "todo", "toda", "todos", "todas", "cada", "algum", "alguma", "alguns", "algumas", "nenhum", "nenhuma", "nenhuns", "nenhumas", "outro", "outra", "outros", "outras",
+    "é", "são", "foi", "foram", "era", "eram", "será", "serão", "seria", "seriam", "seja", "sejam", "ser", "sendo", "sido",
+    "está", "estão", "estava", "estavam", "esteve", "estiveram", "estará", "estarão", "esteja", "estejam", "estar", "estando",
+    "tem", "têm", "tinha", "tinham", "teve", "tiveram", "terá", "terão", "tenha", "tenham", "ter", "tendo",
+    "há", "havia", "houve", "houveram", "haverá", "haverão"
+  ]
+}

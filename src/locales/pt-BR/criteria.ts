@@ -28,6 +28,7 @@ export const CRITERION_IDS = [
   "salto_de_nivel_titulo",
   "long_heading",
   "single_item_list",
+  "heading_body_mismatch",
 ] as const;
 
 /** Id estável de um critério do pt-BR — a união derivada de `CRITERION_IDS`. */
