@@ -1,4 +1,5 @@
 import type {
+  ActiveConjugationsPrepared,
   CompiledEntry,
   CompiledPhrase,
   JargonEntry,
@@ -8,6 +9,8 @@ import type {
   NominalizationPrepared,
   PhraseEntry,
   PhrasePrepared,
+  SerTenseInfo,
+  SerTensesPrepared,
 } from "./types";
 
 export function compileJargonEntries(entries: readonly JargonEntry[]): Map<string, CompiledEntry[]> {
@@ -56,6 +59,16 @@ export function prepareNominalizations(raw: unknown): NominalizationPrepared {
 export function prepareJargon(raw: unknown): JargonPrepared {
   const entries = (raw as { entries: JargonEntry[] }).entries;
   return { entries, byFirstWord: compileJargonEntries(entries) };
+}
+
+export function prepareSerTenses(raw: unknown): SerTensesPrepared {
+  const forms = (raw as { forms: Record<string, SerTenseInfo> }).forms;
+  return new Map(Object.entries(forms));
+}
+
+export function prepareActiveConjugations(raw: unknown): ActiveConjugationsPrepared {
+  const verbs = (raw as { verbs: Record<string, Record<string, string>> }).verbs;
+  return new Map(Object.entries(verbs));
 }
 
 export function preparePhrases(raw: unknown): PhrasePrepared {

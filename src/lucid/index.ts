@@ -59,4 +59,6 @@ export { clauseSplitPoints, applySplitAt } from "../locales/pt-BR/actions/split-
 export type { SplitPoint, SplitKind } from "../locales/pt-BR/actions/split-sentence";
 export { passiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
 export type { PassiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
+export { passiveToActive, applyPassiveWithAgent } from "../locales/pt-BR/actions/passive-to-active";
+export type { PassiveRewrite } from "../locales/pt-BR/actions/passive-to-active";
 export { sentenceSpanAt } from "../locales/pt-BR";
