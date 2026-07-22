@@ -2,8 +2,7 @@
  * Tipos centrais da Camada 1 (linter determinístico).
  * Contrato definido em docs/ARQUITETURA.md §3. Não importar nada de `src/lucid/probe/**`.
  */
-import type { DatasetId, DataView } from "./data/types";
-import type { CriterionId } from "./criteria";
+import type { DataView } from "./data/types";
 
 export type Severity = "info" | "warning" | "error";
 
@@ -92,15 +91,17 @@ export interface PassContext {
 }
 
 export interface Pass {
-  readonly criterion: CriterionId;
+  /** id do critério (ex.: "long_sentence"). O core é neutro: o CONJUNTO válido é do locale (ADR-031). */
+  readonly criterion: string;
   readonly category: Category;
   /** subseção-âncora do pass; um finding individual pode refinar via `principle` próprio */
   readonly principle: string;
   /**
-   * Datasets (do data registry) de que este pass depende — declarativo. Alimenta o `dataHash`
-   * (proveniência) e, no incremento 2, a visão escopada de `ctx.data`. Omitido = não usa dado.
+   * Datasets (do data registry) de que este pass depende — declarativo, por id (string). Alimenta
+   * o `dataHash` (proveniência) e a visão escopada de `ctx.data`. Os ids são do locale (ex.:
+   * `"jargao.pt"`); o core não os enumera (ADR-031). Omitido = não usa dado.
    */
-  readonly dataDeps?: readonly DatasetId[];
+  readonly dataDeps?: readonly string[];
   run(ctx: PassContext): Finding[];
 }
 
@@ -130,9 +131,12 @@ export interface Score {
 
 export interface DiagnosticMeta {
   lucidVersion: string;
+  /** locale que produziu este diagnóstico — identidade contra mistura acidental (ADR-031) */
+  localeId: string;
   configHash: string;
   dataHash: string;
-  standardVersion: "ABNT NBR ISO 24495-1:2024";
+  /** citação da norma do locale; para pt-BR, a adoção ABNT da ISO 24495-1 */
+  standardVersion: string;
 }
 
 export interface Diagnostic {

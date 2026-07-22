@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDataView } from "../src/lucid/core/data/registry";
-import { sentenceLengthPass } from "../src/lucid/core/passes/sentence-length";
+import { createDataView } from "../src/locales/pt-BR/datasets/registry";
+import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { buildDocument } from "./support/pt";
 import type { Config } from "../src/lucid/core/config";
 import type { Document, PassContext, Sentence } from "../src/lucid/core/types";
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "../src/lucid/core/document/normalize";
-import { segmentSentences } from "../src/lucid/core/document/segment-sentences";
+import { segmentSentences } from "./support/pt";
 import { attachTokens, tokenize } from "../src/lucid/core/document/tokenize";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { buildDocument } from "./support/pt";
 
 function resumo(source: string) {
   return tokenize(source).map((t) => [t.text, t.isWord] as const);

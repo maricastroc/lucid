@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
-import { passiveScaffold } from "../src/lucid/core/actions/passive-scaffold";
+import { passiveScaffold } from "../src/locales/pt-BR/actions/passive-scaffold";
 import type { Finding } from "../src/lucid/core/types";
 
 function agentPassive(text: string): { finding: Finding; source: string } {

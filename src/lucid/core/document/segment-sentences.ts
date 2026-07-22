@@ -1,8 +1,10 @@
 import type { Sentence } from "../types";
-import { getPrepared } from "../data/registry";
 
-const ABBREVIATIONS: ReadonlySet<string> = getPrepared("abreviacoes.pt");
-
+/**
+ * Segmentação de frases NEUTRA de idioma (ADR-031): o ALGORITMO (marcas terminais, maiúscula
+ * seguinte, reticências) não conhece nenhum idioma; a ÚNICA dependência linguística é o set de
+ * abreviações que não encerram frase, fornecido pelo locale via parâmetro obrigatório.
+ */
 const TERMINAL_MARKS = new Set([".", "!", "?", "…"]);
 
 const CLOSING_MARKS = new Set(['"', "'", "”", "’", "»", ")", "]"]);
@@ -56,7 +58,7 @@ function precedingWord(source: string, position: number): string {
   return source.slice(start, position);
 }
 
-function findBoundaries(source: string): number[] {
+function findBoundaries(source: string, abbreviations: ReadonlySet<string>): number[] {
   const boundaries: number[] = [];
   const length = source.length;
   let i = 0;
@@ -83,7 +85,7 @@ function findBoundaries(source: string): number[] {
       }
 
       const word = precedingWord(source, i);
-      if (word.length > 0 && ABBREVIATIONS.has(word.toLowerCase())) {
+      if (word.length > 0 && abbreviations.has(word.toLowerCase())) {
         i++;
         continue;
       }
@@ -111,8 +113,8 @@ function findBoundaries(source: string): number[] {
   return boundaries;
 }
 
-export function segmentSentences(source: string): Sentence[] {
-  const boundaries = findBoundaries(source);
+export function segmentSentences(source: string, abbreviations: ReadonlySet<string>): Sentence[] {
+  const boundaries = findBoundaries(source, abbreviations);
   const cuts = [0, ...boundaries, source.length];
 
   const sentences: Sentence[] = [];

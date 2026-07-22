@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid/core/analyzer";
+import { analyze } from "../src/lucid";
 import type { Finding } from "../src/lucid/core/types";
 
 function assertProvenanciaCompleta(f: Finding, textoDiagnostico: string) {

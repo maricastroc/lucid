@@ -9,7 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { CRITERION_IDS } from "../src/lucid";
-import { PASSES } from "../src/lucid/core/passes/registry";
+import { PASSES } from "../src/locales/pt-BR/passes/registry";
 import { CRITERION_META, CRITERION_ORDER } from "../src/app/lib/criteria";
 
 function sorted(values: readonly string[]): string[] {

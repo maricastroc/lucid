@@ -1,8 +1,15 @@
 import type { Config } from "../config";
-import { DEFAULT_CONFIG } from "../config";
 import type { Document, Metrics } from "../types";
-import { countSyllables } from "../document/syllables";
-import { calculateFleschPt } from "./flesch-pt";
+
+/**
+ * Serviços de métrica que variam por idioma (ADR-031): a contagem de SÍLABAS e a FÓRMULA de
+ * legibilidade. O esqueleto (contar palavras/frases, arredondar) é neutro e fica no core; ambos os
+ * serviços vêm do `LocaleBundle` (ex.: sílabas PT + Flesch-PT Martins 1996).
+ */
+export interface MetricServices {
+  countSyllables: (word: string) => number;
+  readability: (input: { wordsPerSentence: number; syllablesPerWord: number }) => number;
+}
 
 function round(value: number, decimalPlaces: number): number {
   const factor = 10 ** decimalPlaces;
@@ -20,11 +27,11 @@ function zeroMetrics(sentenceCount: number, wordCount: number, syllableCount: nu
   };
 }
 
-export function runMetrics(doc: Document, config: Config = DEFAULT_CONFIG): Metrics {
+export function runMetrics(doc: Document, config: Config, services: MetricServices): Metrics {
   const sentenceCount = doc.sentences.length;
   const wordTokens = doc.tokens.filter((t) => t.isWord);
   const wordCount = wordTokens.length;
-  const syllableCount = wordTokens.reduce((sum, t) => sum + countSyllables(t.text), 0);
+  const syllableCount = wordTokens.reduce((sum, t) => sum + services.countSyllables(t.text), 0);
 
   if (sentenceCount === 0 || wordCount === 0) {
     return zeroMetrics(sentenceCount, wordCount, syllableCount);
@@ -32,7 +39,10 @@ export function runMetrics(doc: Document, config: Config = DEFAULT_CONFIG): Metr
 
   const rawWordsPerSentence = wordCount / sentenceCount;
   const rawSyllablesPerWord = syllableCount / wordCount;
-  const rawFleschPt = calculateFleschPt(rawWordsPerSentence, rawSyllablesPerWord);
+  const rawFleschPt = services.readability({
+    wordsPerSentence: rawWordsPerSentence,
+    syllablesPerWord: rawSyllablesPerWord,
+  });
 
   const decimalPlaces = config.metrics.decimalPlaces;
 

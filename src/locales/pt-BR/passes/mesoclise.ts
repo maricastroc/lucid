@@ -1,4 +1,4 @@
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "mesoclise";
 const PRINCIPLE = "5.3.3";

@@ -1,4 +1,4 @@
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "adverbio_mente_denso";
 const PRINCIPLE = "5.3.4";
@@ -12,7 +12,7 @@ export const adverbioMenteDensoPass: Pass = {
   run(ctx) {
     if (!ctx.config.adverbioMente.enabled) return [];
 
-    const adverbs = ctx.data.get("adverbios-mente.pt");
+    const adverbs = ctx.data.get<ReadonlySet<string>>("adverbios-mente.pt");
     const threshold = ctx.config.adverbioMente.minPorFrase;
     const findings: Finding[] = [];
 

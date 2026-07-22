@@ -4,8 +4,8 @@
  * (token-a-token, `isWord && lower === esperado`), longest-match-first, zero sobreposição (o
  * cursor pula para depois do match). Determinístico e puro.
  */
-import type { Sentence, Token } from "../types";
-import type { PhraseEntry, PhrasePrepared } from "../data/types";
+import type { Sentence, Token } from "@/lucid/core/types";
+import type { PhraseEntry, PhrasePrepared } from "../datasets/types";
 
 export interface PhraseHit {
   start: number;

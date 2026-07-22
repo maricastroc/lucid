@@ -1,9 +1,9 @@
-import type { Finding, Pass, Token } from "../types";
-import type { JargonEntry, CompiledEntry, JargonDomain } from "../data/types";
-import { getPrepared } from "../data/registry";
+import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { JargonEntry, CompiledEntry, JargonDomain } from "../datasets/types";
+import { getPrepared } from "../datasets/registry";
 
-export { compileJargonEntries } from "../data/prepare";
-export type { JargonEntry, CompiledEntry } from "../data/types";
+export { compileJargonEntries } from "../datasets/prepare";
+export type { JargonEntry, CompiledEntry } from "../datasets/types";
 
 const CRITERION = "jargon";
 const PRINCIPLE = "5.3.2";

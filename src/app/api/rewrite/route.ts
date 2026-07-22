@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { Span } from "@/lucid";
 import { ChatProviderError, GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS } from "@/llm";
 import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer } from "@/report/rewrite";
+import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
 
@@ -17,7 +18,12 @@ interface RewriteRequestBody {
   criterion?: unknown;
   providerId?: unknown;
   model?: unknown;
+  localeId?: unknown;
 }
+
+// Único locale suportado por ora (ADR-031). A rota já ACEITA `localeId` (preparada), mas recusa
+// qualquer valor diferente de pt-BR — nada de inglês nem fallback silencioso nesta etapa.
+const SUPPORTED_LOCALES: Record<string, typeof rewriteLocalePtBR> = { "pt-BR": rewriteLocalePtBR };
 
 function isValidSpan(value: unknown, textLength: number): value is Span {
   if (typeof value !== "object" || value === null) return false;
@@ -64,7 +70,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
   }
 
-  const { text, target, criterion, providerId, model } = body;
+  const { text, target, criterion, providerId, model, localeId } = body;
   if (typeof text !== "string" || text.length === 0 || text.length > MAX_TEXT_LENGTH) {
     return NextResponse.json({ error: "texto ausente ou longo demais" }, { status: 400 });
   }
@@ -73,6 +79,11 @@ export async function POST(request: Request): Promise<Response> {
   }
   if (!isValidSpan(target, text.length)) {
     return NextResponse.json({ error: "alvo (span) inválido" }, { status: 400 });
+  }
+  const resolvedLocaleId = typeof localeId === "string" ? localeId : "pt-BR";
+  const locale = SUPPORTED_LOCALES[resolvedLocaleId];
+  if (!locale) {
+    return NextResponse.json({ error: `locale não suportado: ${resolvedLocaleId}` }, { status: 400 });
   }
 
   const proposer = buildProposer(providerId, model);
@@ -84,6 +95,7 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const result = await proposeAndVerify(text, target, proposer, {
+      locale,
       criterion: typeof criterion === "string" ? criterion : undefined,
       probe: probe ?? undefined,
       question: probe ? FLOOR_QUESTION : undefined,

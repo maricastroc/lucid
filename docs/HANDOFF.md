@@ -146,6 +146,28 @@ certo que siga. Clareza intacta (ΔFlesch ~+72). (`correct` varia um pouco run-a
 vezes devolve texto idêntico com temperature 0 → "reescreveu%" < 100; é não-determinismo do
 modelo, não bug.)
 
+**Benchmark multi-provider — Gemini na tabela (ADR-030).** O harness passou a inferir o provider
+pelo id do modelo (Groq × Gemini) pela mesma interface `ChatProvider`; a sonda segue num modelo
+grátis. Default agora inclui `gemini-2.5-flash` ao lado do `llama-3.3-70b`. Corrida ao vivo (3
+trechos/sistema, mesmo verificador determinístico):
+
+| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade% | s/nome% | sem veto% | latência ms | tokens |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| llama-3.3-70b · correct | 67 | +0.5 | -0 | 4.0 | 100 | 100 | 100 | 100 | 556 | 479 |
+| llama-3.3-70b · rewrite | 100 | **+69.8** | -1 | 2.0 | 100 | 100 | 100 | 67 | 657 | 653 |
+| gemini-2.5-flash · correct | 100 | +16.6 | -2 | 3.3 | 67 | 100 | 100 | 67 | 1440 | 377 |
+| gemini-2.5-flash · rewrite | 100 | **+71.5** | -1 | 2.0 | 67 | 100 | 100 | 33 | 1263 | 537 |
+
+**Leitura:** (1) `rewrite` compra MUITO mais clareza que `correct` (ΔFlesch ~+70 vs ~+10), nos dois
+providers; (2) **o verificador fez o trabalho:** as reescritas mais ousadas do Gemini tiveram o
+maior ΔFlesch **mas** `provas OK%` caiu para 67 — no trecho `numeros-datas-nomes` a prova
+determinística pegou um número/data alterado ou jargão novo — e o veto subiu (sem-veto 33%). Prosa
+mais clara nunca compra aprovação; quem decide é o portão de provas. (3) Latência do Gemini free ~2×
+a do Groq free, com menos tokens de saída. **Ressalva honesta (I5):** 1 corrida, `temperature 0`
+(saída ainda varia run-a-run → `reescreveu% < 100` quando `correct` devolve texto idêntico), 3
+trechos = sinal de piso, não placar. Reproduzir: `BENCHMARK=1 npx vitest run test/rewrite-benchmark.test.ts`
+(opcional `BENCHMARK_MODELS=...`, `BENCHMARK_OUT=arquivo.md`).
+
 **Tier 3 · incremento 6 FEITO — gerador FORTE (Gemini) + prova de 1ª pessoa** (ADR-021).
 Reenquadramento após comparação externa (Gemini-juiz) que via a reescrita perdendo para o GPT:
 o Tier 3 estava sendo medido como REESCRITOR (eixo proibido pelo CLAUDE.md) e só tinha geradores
@@ -167,8 +189,10 @@ determinístico é o diferencial (arquitetura já pronta em `verify.ts`). Entreg
   rascunho" habilitado, caveat honesto renderizado. `POST /api/rewrite → 200`.
 - ✅ **Typo do `.env`** corrigido → `DEEPSEEK_API_KEY` (ADR-030).
 - **Outros providers** — OpenAI/Anthropic pela mesma interface `ChatProvider` (ADIADO nesta sessão;
-  a interface já os acomoda). 2.5-pro quando houver billing (chave free = `limit: 0`).
-- Golden de benchmark maior + casos que estressem a sonda; incluir Gemini na tabela; README.
+  a interface já os acomoda). São **APIs pagas** (sem free tier), ao contrário de Groq/Gemini-flash;
+  não são necessários — o produto (Camada 1) é zero-LLM. 2.5-pro quando houver billing (chave free = `limit: 0`).
+- ✅ **Gemini na tabela de benchmark** (ADR-030) — harness multi-provider + tabela acima. Ainda falta:
+  golden de benchmark maior + casos que estressem a sonda.
 
 ---
 
@@ -220,6 +244,29 @@ Trilha nova, paralela ao Tier 3. Design docs: `DESIGN-camada1-teto-deterministic
   re-baixar se continuar na mesma sessão.
 
 ---
+
+## 4.6. Fronteira de locale — pt-BR como primeiro `Locale` (ADR-031) — FEITO
+
+Trilha nova: o Lucid virou **language-pluggable** com o português como o primeiro locale explícito,
+**comportamentalmente neutro** (única mudança de resultado: `meta.localeId`).
+
+- **Core neutro de idioma.** `analyzeWithLocale(text, locale)` + `createAnalyzer({locale})`
+  (`core/analyzer.ts`), sem estado global, sem `if (locale===)`. `DataView` neutra (`get<T>`),
+  registry como fábrica (`createRegistry`), `Pass.criterion`/`dataDeps` → `string`. O core não
+  importa nada de PT (provado por grep + cerca).
+- **Tudo que é PT** foi para `src/locales/pt-BR/**` (`passes/`, `datasets/`, `services/` sílabas,
+  `readability/` flesch, `actions/`, `criteria.ts`, `tier3.ts`) via `git mv`. O default pt-BR
+  (`analyze`, `localePtBR`) é composto no barrel `src/lucid/index.ts`.
+- **Cerca** (`dependency-cruiser`): `core ⊄ locales` + pureza de `locales/**`. Fail-loud provado.
+- **Neutralidade**: diff dos snapshots é só `+localeId`; teste strip-and-compare no
+  `diagnostic-snapshot.test`.
+- **Tier 3 anti-mistura**: `verifyRewrite({locale})` recusa proposta de outro `localeId`; pt-BR
+  fornece o `RewriteLocale` sem importar `report`.
+- **Locale sintético** (`test/support/test-locale.ts`) prova extensibilidade sem inglês
+  (`test/locale-architecture.test.ts`).
+- **App**: rota `/api/rewrite` aceita/valida `localeId` (recusa ≠ pt-BR); sem seletor, sem tradução.
+- **Deferido (decisão do usuário):** genericizar `Config`, renomear `Metrics.fleschPt`, inglês.
+- **859 testes verdes**, typecheck/lint/depcheck limpos.
 
 ## 5. Guardrails (não violar)
 

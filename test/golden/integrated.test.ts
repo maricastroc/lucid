@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../../src/lucid/core/analyzer";
+import { analyze } from "../../src/lucid";
 import type { Diagnostic, Finding } from "../../src/lucid/core/types";
 import { GOLDEN_INTEGRADO } from "./integrated-golden";
 import type { ExpectedFinding, GoldenCase, IntegratedCriterion } from "./integrated-golden";

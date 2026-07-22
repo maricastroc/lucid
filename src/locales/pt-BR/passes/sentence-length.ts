@@ -23,8 +23,8 @@
  * a regra do produto (mensagens para o usuário final ficam em PT-BR; só a nomenclatura
  * interna do código foi padronizada para inglês).
  */
-import type { Config } from "../config";
-import type { Finding, Pass, Severity } from "../types";
+import type { Config } from "@/lucid/core/config";
+import type { Finding, Pass, Severity } from "@/lucid/core/types";
 
 const CRITERION = "long_sentence";
 const PRINCIPLE = "5.3.4";

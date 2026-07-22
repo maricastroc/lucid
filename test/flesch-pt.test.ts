@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateFleschPt } from "../src/lucid/core/metrics/flesch-pt";
+import { calculateFleschPt } from "../src/locales/pt-BR/readability/flesch-pt";
 
 describe("calculateFleschPt — fórmula de Martins et al. (1996)", () => {
   it("usa a constante 248.835 (não a inglesa 206.835) quando as médias são zero", () => {

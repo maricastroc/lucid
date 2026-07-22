@@ -1,18 +1,15 @@
 import { buildDocument } from "./document/model";
 import { runMetrics } from "./metrics";
-import { PASSES } from "./passes/registry";
 import { buildScore } from "./score";
-import { DEFAULT_CONFIG, hashConfig } from "./config";
-import { DOCUMENT_DATASETS, dataHashFor, createDataView, type DatasetId } from "./data/registry";
+import { hashConfig } from "./config";
 import type { Config } from "./config";
-import type { Diagnostic, Finding, Pass, PassContext } from "./types";
+import type { LocaleBundle } from "./contracts/locale";
+import type { Diagnostic, Finding, PassContext } from "./types";
 
 const LUCID_VERSION = "0.1.0";
 
-const STANDARD_VERSION = "ABNT NBR ISO 24495-1:2024" as const;
-
-function mergeConfig(overrides?: Partial<Config>): Config {
-  return { ...DEFAULT_CONFIG, ...overrides };
+function mergeConfig(base: Config, overrides?: Partial<Config>): Config {
+  return { ...base, ...overrides };
 }
 
 export function sortFindings(findings: readonly Finding[]): Finding[] {
@@ -24,24 +21,34 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
     return 0;
   });
 }
-export function analyzeWithPasses(
-  text: string,
-  passes: readonly Pass[],
-  configOverrides?: Partial<Config>,
-): Diagnostic {
-  const config = mergeConfig(configOverrides);
-  const doc = buildDocument(text);
-  const metrics = runMetrics(doc, config);
 
-  const rawFindings = passes.flatMap((pass) => {
-    const context: PassContext = Object.freeze({ doc, config, data: createDataView(pass.dataDeps ?? []) });
+/**
+ * Núcleo do analyzer — NEUTRO de idioma (ADR-031). Recebe um `LocaleBundle` e monta o diagnóstico
+ * exclusivamente a partir dele: serviços de documento, métrica (sílabas + fórmula), passes e o
+ * registry escopado. Nenhum `import` específico de PT vive aqui; nenhum `if (locale === ...)`.
+ */
+export function analyzeWithLocale(text: string, locale: LocaleBundle, configOverrides?: Partial<Config>): Diagnostic {
+  const config = mergeConfig(locale.config, configOverrides);
+
+  const doc = buildDocument(text, {
+    segmentSentences: locale.services.segmentSentences,
+    abbreviations: locale.data.abbreviations,
+  });
+
+  const metrics = runMetrics(doc, config, {
+    countSyllables: locale.metrics.countSyllables,
+    readability: (input) => locale.metrics.readability.calculate(input),
+  });
+
+  const rawFindings = locale.passes.flatMap((pass) => {
+    const context: PassContext = Object.freeze({ doc, config, data: locale.data.createDataView(pass.dataDeps ?? []) });
     return pass.run(context);
   });
   const findings = sortFindings(rawFindings);
 
-  const score = buildScore(findings, passes, metrics.words, config);
+  const score = buildScore(findings, locale.passes, metrics.words, config);
 
-  const dataIds: DatasetId[] = [...DOCUMENT_DATASETS, ...passes.flatMap((pass) => pass.dataDeps ?? [])];
+  const dataIds: string[] = [...locale.data.documentDatasets, ...locale.passes.flatMap((pass) => pass.dataDeps ?? [])];
 
   return {
     text: doc.source,
@@ -50,13 +57,24 @@ export function analyzeWithPasses(
     metrics,
     meta: {
       lucidVersion: LUCID_VERSION,
+      localeId: locale.id,
       configHash: hashConfig(config),
-      dataHash: dataHashFor(dataIds),
-      standardVersion: STANDARD_VERSION,
+      dataHash: locale.data.dataHashFor(dataIds),
+      standardVersion: locale.standardVersion,
     },
   };
 }
 
-export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
-  return analyzeWithPasses(text, PASSES, configOverrides);
+/**
+ * Instância imutável de analyzer ligada a um locale — a alternativa sem estado global mutável.
+ * NÃO existe `setCurrentLocale`; o locale é capturado aqui ou passado a `analyzeWithLocale`.
+ */
+export function createAnalyzer(opts: { locale: LocaleBundle }): {
+  readonly localeId: string;
+  analyze(text: string, configOverrides?: Partial<Config>): Diagnostic;
+} {
+  return {
+    localeId: opts.locale.id,
+    analyze: (text, configOverrides) => analyzeWithLocale(text, opts.locale, configOverrides),
+  };
 }

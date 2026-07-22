@@ -1392,8 +1392,72 @@ browser com **`gemini-2.5-flash`** sobre a frase-monstro do texto-exemplo (35 pa
 verificador determinístico devolveu **6/6 PROVAS** (peso do trecho 7.0→2.0, peso total 15.0→10.0,
 números/datas preservados, sem jargão novo, sem 1ª pessoa fabricada), **SINAIS** ambos neutros,
 Flesch-PT +18.1, e "Usar como rascunho" habilitado (sem falha de piso) — com o caveat honesto
-renderizado ("não é um selo de qualidade"). **Escopo reduzido nesta sessão:** novos providers
-(OpenAI/Anthropic) e o benchmark ampliado ficam adiados; a interface `ChatProvider` já os acomoda.
+renderizado ("não é um selo de qualidade").
+
+**Benchmark multi-provider.** `test/rewrite-benchmark.test.ts` (gated por `BENCHMARK=1`, fora da CI)
+passou a inferir o provider pelo id do modelo (Groq × Gemini) pela mesma interface `ChatProvider` —
+o mesmo verificador determinístico julga qualquer gerador. Default inclui `gemini-2.5-flash`; sonda
+num modelo grátis. Corrida ao vivo confirmou a tese: `rewrite` compra ~+70 de ΔFlesch (vs ~+10 do
+`correct`), e as reescritas mais ousadas do Gemini caíram para `provas OK% = 67` (a prova pegou
+número/data/jargão no trecho de estresse) — prosa clara não compra aprovação. Tabela + leitura no
+HANDOFF §4.
+
+**Escopo reduzido nesta sessão (custo):** novos providers OpenAI/Anthropic ficam adiados — são APIs
+**pagas** (sem free tier), enquanto Groq e Gemini-flash têm tier grátis já em uso. A interface
+`ChatProvider` já os acomoda quando/se houver billing. O produto (Camada 1) não depende de LLM.
+
+---
+
+## ADR-031 — Fronteira de locale: pt-BR como o primeiro `Locale`
+
+**Contexto.** O Lucid era implicitamente monolíngue: `analyze(text)` embutia o português em toda a
+pilha (passes, léxicos, sílabas, Flesch-PT, segmentação por abreviações). O objetivo desta etapa foi
+tornar a arquitetura genuinamente extensível por idioma — **PT vira o primeiro locale explícito** —
+**sem implementar um segundo idioma** e **sem alterar comportamento** (mesmos findings, spans,
+ordenação, scores, sugestões e hashes). Única exceção intencional: `meta.localeId`.
+
+**Decisão.**
+- **Contrato `LocaleBundle`** (`core/contracts/locale.ts`): `{ id, standardVersion, passes, config,
+  services (segmentSentences), metrics (countSyllables + readability), data, criteria }`. Mínimo,
+  anti god-object: `normalize`/`tokenize` (neutros) e o esqueleto de verificação NÃO entram.
+- **Analyzer neutro, sem estado global** (`core/analyzer.ts`): `analyzeWithLocale(text, locale)` +
+  `createAnalyzer({locale})`. Nenhum `setCurrentLocale`, nenhum `if (locale === …)`. O core não
+  importa nada de PT.
+- **`DataView` neutralizada** (`get<T>(id: string)`); **registry como fábrica neutra**
+  (`createRegistry(specs)`); `Pass.dataDeps` e `Pass.criterion` passaram a `string`.
+- **Estabilidade de ids**: a string do id de dataset entra no `dataHash` — os ids (`"jargao.pt"`…)
+  permanecem byte-idênticos ao mover os arquivos. `configHash` inalterado (o `config` do pt-BR é o
+  mesmo `DEFAULT_CONFIG`).
+- **`meta.localeId`** (única mudança de resultado): prova de neutralidade = teste que remove
+  `localeId` e compara com o contrato anterior; o diff dos snapshots é **exclusivamente** `+localeId`.
+- **Mudança física**: passes, léxicos, sílabas, Flesch-PT, ações Tier 2 e o conjunto de critérios
+  foram para `src/locales/pt-BR/**` (com `git mv`, histórico preservado). O default pt-BR (`analyze`,
+  `localePtBR`) é composto no barrel `src/lucid/index.ts`, não no core.
+- **Cerca** (`dependency-cruiser`): `core ⊄ src/locales` + pureza de `locales/**` (sem
+  probe/report/app/llm/rede/react). Provado fail-loud (import core→locale dispara erro).
+- **Critérios por-locale** (estende ADR-029): `CRITERION_IDS`/`CriterionId` foram para
+  `locales/pt-BR/criteria.ts`. O fail-loud é preservado: `Record<CriterionId, …>` (completude
+  compile-time na UI) + `criteria-registry.test` (paridade runtime `PASSES ↔ ids ↔ meta ↔ ordem`).
+- **Tier 3 anti-mistura**: `verifyRewrite({ locale })` recebe um `RewriteLocale` (id + `analyze`
+  ligado + `firstPersonMarkers` + `jargonCriterionId`); `RewriteProposal.localeId` é carimbado e o
+  verificador **recusa** verificar uma proposta sob outro locale. O pt-BR fornece o `RewriteLocale`
+  por tipagem estrutural (`locales/pt-BR/tier3.ts`), sem importar `report` (cerca intacta).
+- **Locale sintético de teste** (`test/support/test-locale.ts`): prova que o analyzer aceita outra
+  implementação (1 pass artificial, dataset minúsculo, métrica falsa) **sem** adicionar inglês. Não
+  aparece na UI.
+- **App preparada** para receber `localeId` (rota `/api/rewrite` aceita e valida; recusa ≠ pt-BR),
+  **sem** seletor e **sem** tradução; comportamento segue pt-BR.
+
+**Deferido de propósito (fora do escopo desta etapa, por decisão do usuário):** genericizar `Config`
+(hoje o shape nomeia critérios PT — soft coupling reconhecido), renomear o campo `Metrics.fleschPt`
+para algo neutro (travado por snapshot), e qualquer implementação de inglês. O compile-time
+`Pass.criterion ∈ ids` deixou de existir no core (agora `string`); a garantia equivalente vive no
+locale (runtime, via `criteria-registry.test` + completude da UI).
+
+**Consequências.** **859 testes verdes** (novos: anti-mistura de locale, arquitetura de locale com o
+sintético); typecheck/lint/depcheck limpos. Neutralidade comportamental provada (diff de snapshot só
+`+localeId`). O core ficou **neutro de idioma** (zero imports de locale/dataset). A arquitetura está
+pronta para um 2º locale slotar sem tocar o core — falta apenas a implementação linguística.
 
 ---
 

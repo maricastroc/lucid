@@ -1,6 +1,6 @@
-import type { Span } from "../types";
-import { normalize } from "../document/normalize";
-import { tokenize } from "../document/tokenize";
+import type { Span } from "@/lucid/core/types";
+import { normalize } from "@/lucid/core/document/normalize";
+import { tokenize } from "@/lucid/core/document/tokenize";
 
 const RE_LETTER = /\p{L}/u;
 

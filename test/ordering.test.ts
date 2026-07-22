@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze, sortFindings } from "../src/lucid/core/analyzer";
+import { analyze, sortFindings } from "../src/lucid";
 import type { Finding } from "../src/lucid/core/types";
 
 function finding(overrides: Partial<Finding>): Finding {

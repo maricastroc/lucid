@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { REGISTRY, DOCUMENT_DATASETS, datasetFingerprint, dataHashFor, type DatasetId } from "../src/lucid/core/data/registry";
+import { REGISTRY, DOCUMENT_DATASETS, datasetFingerprint, dataHashFor, type DatasetId } from "../src/locales/pt-BR/datasets/registry";
 import { analyze } from "../src/lucid";
-import { PASSES } from "../src/lucid/core/passes/registry";
+import { PASSES } from "../src/locales/pt-BR/passes/registry";
 
 describe("data registry — fingerprints", () => {
   it("todo dataset tem fingerprint de 8 hex chars, estável entre chamadas", () => {
@@ -42,7 +42,7 @@ describe("data registry — integração com analyze", () => {
   });
 
   it("o dataHash do analyze bate com o hash dos deps declarados (doc + passes)", () => {
-    const expected = dataHashFor([...DOCUMENT_DATASETS, ...PASSES.flatMap((p) => p.dataDeps ?? [])]);
+    const expected = dataHashFor([...DOCUMENT_DATASETS, ...PASSES.flatMap((p) => p.dataDeps ?? [])] as DatasetId[]);
     const d = analyze("Qualquer texto.");
     expect(d.meta.dataHash).toBe(expected);
   });
@@ -50,7 +50,7 @@ describe("data registry — integração com analyze", () => {
   it("todo dataDep declarado por um pass existe no registry", () => {
     for (const pass of PASSES) {
       for (const dep of pass.dataDeps ?? []) {
-        expect(REGISTRY[dep]).toBeDefined();
+        expect(REGISTRY[dep as DatasetId]).toBeDefined();
       }
     }
   });

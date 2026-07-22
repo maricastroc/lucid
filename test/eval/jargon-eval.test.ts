@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDataView } from "../../src/lucid/core/data/registry";
-import { jargonPass } from "../../src/lucid/core/passes/jargon";
+import { createDataView } from "../../src/locales/pt-BR/datasets/registry";
+import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
-import { buildDocument } from "../../src/lucid/core/document/model";
+import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 
 interface ResultadoAvaliacao {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { buildDocument } from "./support/pt";
 
 describe("regressão conhecida — abreviação 'etc.' pode unir frases", () => {
   it("'etc. Voltamos' fica em UMA frase (trade-off documentado, não corrigido aqui)", () => {

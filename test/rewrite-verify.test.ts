@@ -294,3 +294,21 @@ describe("applyProposal — substituição pura do trecho", () => {
     );
   });
 });
+
+describe("verifyRewrite — identidade de locale (anti-mistura, ADR-031)", () => {
+  const text = "O documento foi arquivado pelo setor competente.";
+  const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
+
+  it("recusa verificar uma proposta de outro locale sob o locale default (pt-BR)", async () => {
+    const p: RewriteProposal = { ...proposal(finding, "O setor arquivou o documento."), localeId: "en-US" };
+    await expect(verify(text, finding, p)).rejects.toThrow(/locale/);
+  });
+
+  it("aceita uma proposta sem localeId (compat) e uma com o localeId do locale", async () => {
+    const semLocale: RewriteProposal = proposal(finding, "O setor arquivou o documento.");
+    await expect(verify(text, finding, semLocale)).resolves.toBeDefined();
+
+    const ptBR: RewriteProposal = { ...semLocale, localeId: "pt-BR" };
+    await expect(verify(text, finding, ptBR)).resolves.toBeDefined();
+  });
+});

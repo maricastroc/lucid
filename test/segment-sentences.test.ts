@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { normalize } from "../src/lucid/core/document/normalize";
-import { segmentSentences } from "../src/lucid/core/document/segment-sentences";
-import { buildDocument } from "../src/lucid/core/document/model";
+import { segmentSentences } from "./support/pt";
+import { buildDocument } from "./support/pt";
 
 function textos(source: string): string[] {
   return segmentSentences(source).map((s) => s.text);

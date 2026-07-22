@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countSyllables } from "../src/lucid/core/document/syllables";
+import { countSyllables } from "../src/locales/pt-BR/services/syllables";
 
 describe("countSyllables — palavras simples", () => {
   it.each([

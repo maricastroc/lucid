@@ -49,6 +49,33 @@ module.exports = {
       from: { path: "^src/lucid/core" },
       to: { path: "^src/(report|app)" },
     },
+    {
+      name: "core-nao-importa-locale",
+      severity: "error",
+      comment:
+        "Fronteira de locale (ADR-031): o core é NEUTRO de idioma e nunca importa uma implementação " +
+        "de locale. A dependência é sempre locale -> core. O default pt-BR é composto no barrel " +
+        "(src/lucid/index.ts), não no core.",
+      from: { path: "^src/lucid/core" },
+      to: { path: "^src/locales" },
+    },
+    {
+      name: "locale-e-puro-como-o-core",
+      severity: "error",
+      comment:
+        "Um locale é Camada 1: mesma pureza do core — zero probe, zero rede/LLM, zero report/app, " +
+        "zero React/Next. Ele FORNECE dados/passes/prompts; quem os executa (probe/report) importa " +
+        "o locale, nunca o contrário.",
+      from: { path: "^src/locales" },
+      to: { path: "^(src/lucid/probe|src/report|src/app|src/llm|react|react-dom|next)($|/)" },
+    },
+    {
+      name: "locale-sem-rede",
+      severity: "error",
+      comment: "Um locale (Camada 1) é zero-rede.",
+      from: { path: "^src/locales" },
+      to: { path: "^(node:)?(https?)$" },
+    },
   ],
   options: {
     tsPreCompilationDeps: true,

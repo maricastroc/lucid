@@ -1,5 +1,5 @@
-import type { Finding } from "../types";
-import { getPrepared } from "../data/registry";
+import type { Finding } from "@/lucid/core/types";
+import { getPrepared } from "../datasets/registry";
 
 const PARTICIPLE_TO_INFINITIVE: Readonly<Record<string, string>> = getPrepared("participios-infinitivo.pt");
 

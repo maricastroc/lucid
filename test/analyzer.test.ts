@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { analyze, sortFindings } from "../src/lucid/core/analyzer";
+import { analyze, sortFindings } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import { buildDocument } from "../src/lucid/core/document/model";
-import { runMetrics } from "../src/lucid/core/metrics";
+import { buildDocument } from "./support/pt";
+import { runMetrics } from "./support/pt";
 import type { Config } from "../src/lucid/core/config";
 import type { Finding } from "../src/lucid/core/types";
 
@@ -229,7 +229,9 @@ describe("analyze — ausência de findings nunca vira 'aprovado'", () => {
 });
 
 describe("analyzer — ausência de imports proibidos", () => {
-  const arquivos = ["core/analyzer.ts", "core/passes/registry.ts", "core/score/index.ts"];
+  // Passes/léxicos/métricas PT vivem agora em `src/locales/pt-BR` (ADR-031); a pureza deles é
+  // coberta pela cerca do dependency-cruiser. Aqui checamos os módulos NEUTROS do core.
+  const arquivos = ["core/analyzer.ts", "core/score/index.ts", "core/document/model.ts", "core/metrics/index.ts"];
 
   it.each(arquivos)("%s não importa probe/report/react/next/rede", (arquivoRelativo) => {
     const caminho = path.join(__dirname, "..", "src", "lucid", arquivoRelativo);

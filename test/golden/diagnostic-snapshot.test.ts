@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../../src/lucid/core/analyzer";
+import { analyze } from "../../src/lucid";
 import { GOLDEN_INTEGRADO } from "./integrated-golden";
 
 const IDS_SNAPSHOT = [
@@ -24,10 +24,27 @@ describe("estabilidade das âncoras de snapshot (antes de comparar retratos)", (
   it("meta é composto só de constantes estáveis e hashes puros (Config + dados)", () => {
     const d = analyze("Um texto qualquer para checar o meta.");
     expect(d.meta.lucidVersion).toBe("0.1.0");
+    expect(d.meta.localeId).toBe("pt-BR");
     expect(d.meta.standardVersion).toBe("ABNT NBR ISO 24495-1:2024");
     expect(d.meta.configHash).toMatch(/^[0-9a-f]{8}$/);
     expect(d.meta.dataHash).toMatch(/^[0-9a-f]{8}$/);
-    expect(Object.keys(d.meta).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
+    expect(Object.keys(d.meta).sort()).toEqual([
+      "configHash",
+      "dataHash",
+      "localeId",
+      "lucidVersion",
+      "standardVersion",
+    ]);
+  });
+
+  // Prova de NEUTRALIDADE (ADR-031): removido o `localeId`, o `meta` é IDÊNTICO ao de antes do
+  // refactor de locale. Junto com o diff dos snapshots (só `+localeId`), fecha o argumento de que
+  // findings/spans/scores/hashes não mudaram.
+  it("sem o localeId, o meta é byte-idêntico ao contrato anterior", () => {
+    const d = analyze("Um texto qualquer para checar o meta.");
+    const metaSemLocale: Record<string, unknown> = { ...d.meta };
+    delete metaSemLocale.localeId;
+    expect(Object.keys(metaSemLocale).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
   });
 });
 

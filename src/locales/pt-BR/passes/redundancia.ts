@@ -6,7 +6,8 @@
  * frase contígua (matcher compartilhado). Nunca aplica sozinho qual termo cortar (→ `requiresHuman`);
  * a forma enxuta vai só na justificativa.
  */
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
+import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";
 
 const CRITERION = "redundancia";
@@ -21,7 +22,7 @@ export const redundanciaPass: Pass = {
   run(ctx) {
     if (!ctx.config.redundancia.enabled) return [];
 
-    const byFirstWord = ctx.data.get("redundancias.pt");
+    const byFirstWord = ctx.data.get<PhrasePrepared>("redundancias.pt");
     const findings: Finding[] = [];
 
     for (const sentence of ctx.doc.sentences) {

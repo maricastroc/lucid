@@ -1,4 +1,4 @@
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "mais_que_perfeito_sintetico";
 const PRINCIPLE = "5.3.3";
@@ -17,7 +17,7 @@ export const maisQuePerfeitoPass: Pass = {
   run(ctx) {
     if (!ctx.config.maisQuePerfeito.enabled) return [];
 
-    const forms = ctx.data.get("mais-que-perfeito.pt");
+    const forms = ctx.data.get<ReadonlySet<string>>("mais-que-perfeito.pt");
     const findings: Finding[] = [];
 
     for (const token of ctx.doc.tokens) {

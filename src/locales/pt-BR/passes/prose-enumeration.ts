@@ -10,7 +10,7 @@
  * ≥3 ranks distintos evita falso positivo com "segundo" (preposição) isolado. Não converte em
  * lista sozinho (→ `requiresHuman`). Enumeradores numéricos ("1) 2) 3)") ficam adiados.
  */
-import type { Finding, Pass } from "../types";
+import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "prose_enumeration";
 const PRINCIPLE = "5.2";
