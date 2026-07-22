@@ -52,6 +52,9 @@ export interface Config {
     enabled: boolean;
     minPorFrase: number;
   };
+  leitorTerceiraPessoa: {
+    enabled: boolean;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -108,6 +111,9 @@ export const DEFAULT_CONFIG: Config = {
   subordinacao: {
     enabled: true,
     minPorFrase: 3,
+  },
+  leitorTerceiraPessoa: {
+    enabled: true,
   },
   metrics: {
     decimalPlaces: 1,

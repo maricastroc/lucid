@@ -19,6 +19,7 @@ export type DatasetId =
   | "perifrases.pt"
   | "duplas-negacoes.pt"
   | "subordinadores.pt"
+  | "substantivos-leitor.pt"
   | "ser-tempos.pt"
   | "conjugacoes-ativas.pt";
 
@@ -112,6 +113,7 @@ export interface DataTypes {
   "perifrases.pt": PhrasePrepared;
   "duplas-negacoes.pt": PhrasePrepared;
   "subordinadores.pt": PhrasePrepared;
+  "substantivos-leitor.pt": ReadonlySet<string>;
   "ser-tempos.pt": SerTensesPrepared;
   "conjugacoes-ativas.pt": ActiveConjugationsPrepared;
 }

@@ -1,0 +1,22 @@
+{
+  "_comentario": "Substantivos que NOMEIAM o leitor/destinatário em texto administrativo-jurídico — usado pelo pass 'leitor_terceira_pessoa' (5.3.3, frases claras / fale com o leitor). O detector marca quando um destes aparece como SUJEITO (precedido de artigo definido 'o/a/os/as' ou no início da frase) e recebe uma OBRIGAÇÃO (verbo deôntico 'deve/deverá/poderá/precisa' numa janela local): o texto fala SOBRE o leitor em 3ª pessoa em vez de falar COM ele ('você deve…' / imperativo). Precisão vem da dupla exigência (posição de sujeito + verbo deôntico): 'o cidadão tem direitos' (sem obrigação) NÃO marca; 'do interessado' (oblíquo, não-sujeito) NÃO marca. É sinal fraco por natureza (info; nunca reescreve — mudar a pessoa é escolha de estilo do autor). Membership em caixa invariante; formas singular/plural/feminino listadas explicitamente. Curadoria própria (fatos de língua + alinhamento aos guias gov.br/LAB.mg de 'fale com o leitor').",
+  "forms": [
+    "interessado", "interessados", "interessada", "interessadas",
+    "requerente", "requerentes",
+    "solicitante", "solicitantes",
+    "cidadão", "cidadãos", "cidadã", "cidadãs",
+    "usuário", "usuários", "usuária", "usuárias",
+    "contribuinte", "contribuintes",
+    "beneficiário", "beneficiários", "beneficiária", "beneficiárias",
+    "segurado", "segurados", "segurada", "seguradas",
+    "servidor", "servidores", "servidora", "servidoras",
+    "candidato", "candidatos", "candidata", "candidatas",
+    "consumidor", "consumidores", "consumidora", "consumidoras",
+    "titular", "titulares",
+    "declarante", "declarantes",
+    "contratante", "contratantes",
+    "munícipe", "munícipes",
+    "proponente", "proponentes",
+    "licitante", "licitantes"
+  ]
+}

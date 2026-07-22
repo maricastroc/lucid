@@ -19,6 +19,7 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "mesoclise",
   "dupla_negacao",
   "subordinacao_densa",
+  "leitor_terceira_pessoa",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -112,6 +113,7 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     mesoclise: zero(),
     dupla_negacao: zero(),
     subordinacao_densa: zero(),
+    leitor_terceira_pessoa: zero(),
   };
   let findingsSobreNaoPrevistos = 0;
   let totalEsperado = 0;

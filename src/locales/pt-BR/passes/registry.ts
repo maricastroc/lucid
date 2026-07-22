@@ -24,6 +24,7 @@ import { proseEnumerationPass } from "./prose-enumeration";
 import { mesoclisePass } from "./mesoclise";
 import { duplaNegacaoPass } from "./dupla-negacao";
 import { subordinacaoPass } from "./subordinacao";
+import { leitorTerceiraPessoaPass } from "./leitor-terceira-pessoa";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -40,4 +41,5 @@ export const PASSES: readonly Pass[] = [
   mesoclisePass,
   duplaNegacaoPass,
   subordinacaoPass,
+  leitorTerceiraPessoaPass,
 ];
