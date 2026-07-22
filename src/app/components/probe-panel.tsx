@@ -80,7 +80,7 @@ export function ProbePanel({ text }: { text: string }) {
         type="button"
         onClick={run}
         disabled={!canRun}
-        className="mt-2 inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-3 disabled:cursor-not-allowed disabled:opacity-40"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {status === "loading" ? "Testando o piso…" : "Testar o piso de compreensão"}
       </button>
@@ -133,6 +133,11 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
     <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2 px-3 py-3">
       <p className="text-[12.5px] text-ink-2">Sem violação de piso detectada.</p>
       <p className="mt-1 text-[12px] text-ink-3">{signal.nota}</p>
+
+      <p className="mt-2 text-[12px] text-ink-3">
+        Resposta que ele extraiu: <span className="text-ink-2">“{result.respostaExtraida}”</span>
+      </p>
+
       <Operacoes operacoes={operacoes} />
     </div>
   );
