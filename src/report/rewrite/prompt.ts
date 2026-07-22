@@ -24,7 +24,7 @@ export type RewriteStrategy = "correct" | "rewrite" | "directed";
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
   rewrite: "rewrite@2",
-  directed: "directed@1",
+  directed: "directed@2",
 };
 
 /** Versão da estratégia PADRÃO (`rewrite`) — mantida para compatibilidade de import. */
@@ -99,11 +99,19 @@ Responda SOMENTE com este JSON, sem texto fora dele:
  * `CRITERION_HINT`) + os trechos CURTOS citados como exemplo (jargão, passiva). Trechos longos
  * (≈ a própria frase-alvo) não são recitados. Puro e determinístico: os findings vêm de
  * `analyze()` em ordem de documento, então a saída é função pura deles (byte-idêntica).
+ *
+ * `directed@2` (achado ao vivo de 2026-07-22, ver ADR-047/048): SÓ inclui findings com
+ * `requiresHuman: false`. Um finding `requiresHuman: true` (passiva sem agente, jargão
+ * ambíguo, nominalização sem verbo seguro) é o próprio Camada 1 dizendo "não dá pra resolver
+ * sem inventar" — pedir pra IA "resolver TODOS" incluiria isso, colidindo direto com a regra de
+ * não-invenção (I5) logo abaixo no mesmo prompt. Um modelo bem-comportado recusa inventar e
+ * corretamente deixa a violação — não é falha do modelo, é a exigência errada.
  */
 function buildDirectedBriefing(findings: readonly Finding[]): string {
   const order: string[] = [];
   const spansByCriterion = new Map<string, string[]>();
   for (const f of findings) {
+    if (f.requiresHuman) continue;
     const seen = spansByCriterion.get(f.criterion);
     if (seen) seen.push(f.span.text.replace(/\s+/g, " ").trim());
     else {
@@ -122,9 +130,10 @@ function buildDirectedBriefing(findings: readonly Finding[]): string {
 }
 
 /**
- * `directed@1` — reescrita livre DIRIGIDA pelos findings da engine no trecho. Igual à livre
- * (`rewrite@2`), mas troca a dica genérica pelo briefing dos problemas REAIS que a engine apontou.
- * Sem findings, degrada para o formato livre (sem bloco de briefing). Mesmas blindagens de invenção.
+ * `directed@2` — reescrita livre DIRIGIDA pelos findings da engine no trecho. Igual à livre
+ * (`rewrite@2`), mas troca a dica genérica pelo briefing dos problemas REAIS e MECANICAMENTE
+ * PEDÍVEIS (`!requiresHuman`) que a engine apontou. Sem findings pedíveis, degrada para o formato
+ * livre (sem bloco de briefing). Mesmas blindagens de invenção.
  */
 function buildDirectedPrompt(fullText: string, target: Span, findings: readonly Finding[]): string {
   const briefing = buildDirectedBriefing(findings);
