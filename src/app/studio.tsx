@@ -148,20 +148,11 @@ export function Studio() {
     [text, pushUndo],
   );
 
-  const applyRewrite = useCallback(
-    (target: Span, proposal: RewriteProposal) => {
-      const base = diagnostic.text;
-      const next = base.slice(0, target.start) + proposal.proposed + base.slice(target.end);
-      if (next !== text) {
-        pushUndo(text);
-        setText(next);
-      }
-      setSelectedId(null);
-    },
-    [text, diagnostic, pushUndo],
-  );
-
-  const applyPassiveActive = useCallback(
+  // Máquina ÚNICA de aplicação: substitui um span do texto por uma string, empilha o desfazer e
+  // re-analisa (via setText). É o mesmo mecanismo para as três origens do "novo texto" — a ação
+  // mecânica (voz ativa), a proposta da LLM (Tier 3) e a EDIÇÃO À MÃO do autor. A engine é quem
+  // re-audita o resultado; a UI nunca decide clareza.
+  const replaceSpan = useCallback(
     (target: Span, replacement: string) => {
       const base = diagnostic.text;
       const next = base.slice(0, target.start) + replacement + base.slice(target.end);
@@ -172,6 +163,11 @@ export function Studio() {
       setSelectedId(null);
     },
     [text, diagnostic, pushUndo],
+  );
+
+  const applyRewrite = useCallback(
+    (target: Span, proposal: RewriteProposal) => replaceSpan(target, proposal.proposed),
+    [replaceSpan],
   );
 
   const applyAllSafe = useCallback(() => {
@@ -210,7 +206,8 @@ export function Studio() {
     onApply: applySuggestion,
     onSplit: applySplit,
     onApplyRewrite: applyRewrite,
-    onPassiveActive: applyPassiveActive,
+    onPassiveActive: replaceSpan,
+    onManualEdit: replaceSpan,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
     onClose: closeSelection,
@@ -284,7 +281,8 @@ export function Studio() {
                     onApply={applySuggestion}
                     onSplit={applySplit}
                     onApplyRewrite={applyRewrite}
-                    onPassiveActive={applyPassiveActive}
+                    onPassiveActive={replaceSpan}
+                    onManualEdit={replaceSpan}
                   />
                 </div>
               </>

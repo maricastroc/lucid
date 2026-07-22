@@ -1,6 +1,6 @@
 {
-  "_comentario": "Tabela FECHADA de conjugação ativa (3ª pessoa sing/plural × pres/pret/impf/fut/cond) usada SOMENTE pela conversão voz passiva→ativa do Tier 2 (ADR-032). GERADA em build-time por scripts/derive-conjugacoes.mjs — regulares por regra exata, irregulares verificados à mão. Runtime nunca conjuga: combinação ausente ⇒ conversão 'unsupported'.",
-  "_fonte": "Verbos regulares: flexão de 3ª pessoa por regra determinística. Irregulares: curadoria própria verificada. Recomenda-se validação cruzada / expansão com PortiLexicon-UD (CC-BY 4.0, ICMC-USP/NILC).",
+  "_comentario": "Tabela FECHADA de conjugação ativa (3ª pessoa sing/plural × pres/pret/impf/fut/cond) usada SOMENTE pela conversão voz passiva→ativa do Tier 2 (ADR-032/033). GERADA em build-time por scripts/derive-conjugacoes.mjs — lista de lemas CURADA (só -er/-ir + irregulares; -ar regular fica na regra de runtime), FORMAS extraídas de PortiLexicon-UD e regulares -er/-ir cross-validados contra a regra de flexão. Runtime nunca conjuga: combinação ausente ⇒ conversão 'unsupported'.",
+  "_fonte": "Formas de 3ª pessoa EXTRAÍDAS de PortiLexicon-UD (VERB.tsv, filtrado por Mood/Tense/Person/Number no padrão UD); regulares -er/-ir cross-validados contra regra determinística. Contém dados derivados de PortiLexicon-UD (Lucelene Lopes, Magali Duran, Paulo Fernandes, Thiago Pardo), licenciado sob CC-BY 4.0. https://portilexicon.icmc.usp.br/ · https://aclanthology.org/2022.lrec-1.715/",
   "verbs": {
     "admitir": {
       "pres.3s": "admite",

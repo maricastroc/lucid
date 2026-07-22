@@ -28,6 +28,7 @@ export interface RevisionNoteProps {
   onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onPassiveActive: (target: Span, replacement: string) => void;
+  onManualEdit: (target: Span, replacement: string) => void;
 }
 
 export function RevisionNote({
@@ -37,6 +38,7 @@ export function RevisionNote({
   onSplit,
   onApplyRewrite,
   onPassiveActive,
+  onManualEdit,
 }: RevisionNoteProps) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
@@ -99,6 +101,100 @@ export function RevisionNote({
             onPassiveActive={onPassiveActive}
           />
         )}
+      </div>
+
+      {/* terceira via, universal: o autor reescreve à mão. Nem máquina, nem LLM — a engine só re-mede. */}
+      <ManualEdit finding={finding} source={source} onManualEdit={onManualEdit} />
+    </div>
+  );
+}
+
+/**
+ * Edição À MÃO do autor — a terceira opção ao lado da ação mecânica e da LLM. Abre a UNIDADE-alvo
+ * (a frase ou o parágrafo do finding, o mesmo trecho que a LLM reescreveria e que fica destacado no
+ * documento) num campo editável. Ao aplicar, chama a MESMA máquina de substituição das outras ações
+ * (`onManualEdit` = `replaceSpan`): vira rascunho, a engine reanalisa, o placar se move. A ferramenta
+ * não julga a versão do autor — só volta a medir. Sem selo.
+ */
+function ManualEdit({
+  finding,
+  source,
+  onManualEdit,
+}: {
+  finding: Finding;
+  source: string;
+  onManualEdit: (target: Span, replacement: string) => void;
+}) {
+  const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
+  const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
+  const original = target.text;
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(original);
+
+  const trimmed = draft.trim();
+  const dirty = trimmed.length > 0 && trimmed !== original.trim();
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setDraft(original);
+          setOpen(true);
+        }}
+        className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+      >
+        <PenNibIcon className="size-3.5" />
+        Editar eu mesmo
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
+      <div className="flex items-center justify-between border-b border-rule-1 px-3.5 py-2.5">
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">
+          Sua versão · {unitLabel}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="rounded-md px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2"
+        >
+          Fechar
+        </button>
+      </div>
+      <div className="px-3.5 py-3">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          spellCheck={false}
+          aria-label={`Editar ${unitLabel}`}
+          className="block max-h-[46vh] min-h-[7rem] w-full resize-y rounded-lg border border-rule-1 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
+          style={{ caretColor: "var(--accent)" }}
+        />
+        <div className="mt-2.5 flex items-center gap-2">
+          <button
+            type="button"
+            disabled={!dirty}
+            onClick={() => onManualEdit(target, trimmed)}
+            className={APPLY_BUTTON_CLASS}
+          >
+            Aplicar minha versão
+          </button>
+          <button
+            type="button"
+            disabled={draft === original}
+            onClick={() => setDraft(original)}
+            className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Restaurar
+          </button>
+        </div>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          Você escreve; a ferramenta apenas re-mede {unitLabel}. É um rascunho — a engine reanalisa e o placar se move.
+          Não é atestado de clareza.
+        </p>
       </div>
     </div>
   );

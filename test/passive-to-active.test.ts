@@ -5,6 +5,9 @@
  */
 import { describe, expect, it } from "vitest";
 import { analyze, applyPassiveWithAgent, passiveToActive, type Finding, type PassiveRewrite } from "../src/lucid";
+import { infinitiveFromRegularParticiple } from "../src/locales/pt-BR/actions/regular-morphology";
+import conjData from "../src/locales/pt-BR/datasets/conjugacoes-ativas.pt.json";
+import partData from "../src/locales/pt-BR/datasets/participios-infinitivo.pt.json";
 
 function firstPassive(text: string): { finding: Finding; source: string } {
   const d = analyze(text);
@@ -130,5 +133,71 @@ describe("disciplina: nenhuma conversão insegura", () => {
     const r = passiveToActive(finding, source);
     expect(r.kind).toBe(c.expect);
     if (c.result) expect(applied(source, r)).toBe(c.result);
+  });
+});
+
+describe("tabelas de ação: curadas + validadas pelo léxico (ADR-033)", () => {
+  // Irregulares cobertos: formas vêm do PortiLexicon-UD, mas o LEMA é curado (allowlist consciente).
+  const IRREGULAR_ALLOWED = new Set([
+    "fazer", "dizer", "ver", "dar", "ter", "pôr", "prever", "rever", "propor", "manter", "obter",
+  ]);
+
+  // Regra de flexão de 3ª pessoa dos regulares -er/-ir (espelha scripts/derive-conjugacoes.mjs).
+  function ruleRegular(inf: string): Record<string, string> {
+    const stem = inf.slice(0, -2);
+    const past = inf.endsWith("er") ? `${stem}eu` : `${stem}iu`;
+    const pastP = inf.endsWith("er") ? `${stem}eram` : `${stem}iram`;
+    return {
+      "pres.3s": `${stem}e`, "pres.3p": `${stem}em`,
+      "pret.3s": past, "pret.3p": pastP,
+      "impf.3s": `${stem}ia`, "impf.3p": `${stem}iam`,
+      "fut.3s": `${inf}á`, "fut.3p": `${inf}ão`,
+      "cond.3s": `${inf}ia`, "cond.3p": `${inf}iam`,
+    };
+  }
+
+  it("conjugacoes-ativas só guarda -er/-ir + irregulares (nenhum -ar regular vaza p/ a regra)", () => {
+    for (const lemma of Object.keys(conjData.verbs)) {
+      if (IRREGULAR_ALLOWED.has(lemma)) continue;
+      expect(
+        lemma.endsWith("er") || lemma.endsWith("ir"),
+        `${lemma}: só -er/-ir regular ou irregular na allowlist deveria estar na tabela`,
+      ).toBe(true);
+    }
+  });
+
+  it("cada -er/-ir regular da tabela bate EXATAMENTE com a regra de flexão", () => {
+    for (const [lemma, forms] of Object.entries(conjData.verbs)) {
+      if (IRREGULAR_ALLOWED.has(lemma)) continue;
+      expect(forms, `formas de ${lemma}`).toEqual(ruleRegular(lemma));
+    }
+  });
+
+  it("nenhum particípio da tabela é resolvível pela regra -ar (sem redundância com a regra)", () => {
+    // Se a regra -ar já resolve o particípio, ele NÃO deveria ocupar a tabela de exceções.
+    for (const participle of Object.keys(partData.map)) {
+      expect(
+        infinitiveFromRegularParticiple(participle),
+        `"${participle}" já é resolvido pela regra -ar; não deveria estar na tabela`,
+      ).toBeNull();
+    }
+  });
+
+  it("regressão: 'escrito'→escrever presente; a fantasma 'escrevido' foi removida", () => {
+    const map = partData.map as Record<string, string>;
+    expect(map["escrito"]).toBe("escrever");
+    expect(map["escrevido"]).toBeUndefined();
+  });
+});
+
+describe("desambiguação -ido via tabela (particípio -er vs -ir → pretérito distinto)", () => {
+  it("-er: 'O ofício foi recebido pela secretaria.' → recebeu", () => {
+    const { finding, source } = firstPassive("O ofício foi recebido pela secretaria.");
+    expect(applied(source, passiveToActive(finding, source))).toBe("A secretaria recebeu o ofício.");
+  });
+
+  it("-ir: 'O recurso foi admitido pelo relator.' → admitiu", () => {
+    const { finding, source } = firstPassive("O recurso foi admitido pelo relator.");
+    expect(applied(source, passiveToActive(finding, source))).toBe("O relator admitiu o recurso.");
   });
 });
