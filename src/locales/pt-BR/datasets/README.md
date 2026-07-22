@@ -359,6 +359,27 @@ Contar `que` cru inflaria a densidade em toda oração relativa. Consequência a
 
 **Licença:** curadoria própria (fatos de língua).
 
+## `substantivos-leitor.pt.json` — fala indireta ao leitor (ADR-036)
+
+**Usado por:** `passes/leitor-terceira-pessoa.ts` (`leitor_terceira_pessoa`, 5.3.3). Matcher LOCAL por
+tokens (como `passive-voice`), NÃO o de frase contígua.
+
+**Propósito:** membership dos substantivos que **nomeiam o leitor** (interessado, requerente, cidadão,
+usuário…). O pass marca quando um deles aparece como **sujeito** (precedido de artigo definido
+`o/a/os/as` **ou** no início da frase) e recebe uma **obrigação** (verbo deôntico `deve/deverá/
+poderá/precisa`, lista fechada inline no pass, numa janela local). O texto fala SOBRE o leitor em 3ª
+pessoa em vez de falar COM ele.
+
+**Precisão pela dupla exigência (sujeito + deôntico):** `o cidadão tem direitos` (sem obrigação) não
+marca; `ao interessado` / `do interessado` (oblíquo, não-sujeito) não marca; `está interessado`
+(leitura adjetival) não marca; conjunção entre o leitor e o verbo (`…venceu e deve…`) barra o match
+(outra oração). Sinal FRACO por natureza (`info`): mudar a pessoa é escolha de estilo → **nunca**
+reescreve (`requiresHuman`, sem `suggestion`).
+
+**Formato:** `{ "forms": string[] }` (singular/plural/feminino explícitos), caixa invariante.
+
+**Licença:** curadoria própria (fatos de língua + alinhamento aos guias gov.br/LAB.mg "fale com o leitor").
+
 ## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — conversão voz passiva→ativa (ADR-032)
 
 **Usados por:** `actions/passive-to-active.ts` (ação estrutural do Tier 2). São dados de **AÇÃO**,

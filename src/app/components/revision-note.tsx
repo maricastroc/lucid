@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   applyPassiveWithAgent,
+  isCriterionId,
   passiveScaffold,
   passiveToActive,
   type Finding,
@@ -536,12 +537,134 @@ function Guidance({
   onSplit: (point: SplitPoint) => void;
   onPassiveActive: (target: Span, replacement: string) => void;
 }) {
-  if (finding.criterion === "long_sentence")
-    return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
-  if (finding.criterion === "passive_voice")
-    return <PassiveGuide finding={finding} source={source} onPassiveActive={onPassiveActive} />;
-  if (finding.criterion === "nominalization") return <NominalizationGuide finding={finding} />;
-  return <JargonGuide />;
+  const c = finding.criterion;
+  if (!isCriterionId(c)) return <GenericGuide />;
+  // Exaustivo por CriterionId (ADR-037): um critério novo sem caso QUEBRA o typecheck no `never`
+  // abaixo, em vez de cair silenciosamente no guia do jargão.
+  switch (c) {
+    case "long_sentence":
+      return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
+    case "passive_voice":
+      return <PassiveGuide finding={finding} source={source} onPassiveActive={onPassiveActive} />;
+    case "nominalization":
+      return <NominalizationGuide finding={finding} />;
+    case "jargon":
+      return <JargonGuide />;
+    case "subordinacao_densa":
+      return <SubordinacaoGuide finding={finding} />;
+    case "leitor_terceira_pessoa":
+      return <LeitorGuide finding={finding} />;
+    case "redundancia":
+      return (
+        <GuideText>
+          Corte o termo que repete o sentido do outro — a forma enxuta está na justificativa acima. Qual dos dois remover é
+          decisão sua.
+        </GuideText>
+      );
+    case "perifrase_inflada":
+      return (
+        <GuideText>
+          Troque a locução pela forma enxuta equivalente (na justificativa). Confira só se a regência do que vem depois
+          continua certa.
+        </GuideText>
+      );
+    case "dupla_negacao":
+      return (
+        <GuideText>
+          Diga direto o que a dupla negação afirma — a forma direta está na justificativa. Confirme que a nuance que você
+          quis dar não se perde.
+        </GuideText>
+      );
+    case "mais_que_perfeito_sintetico":
+      return (
+        <GuideText>
+          Prefira a forma composta, mais clara: “tinha feito” no lugar de “fizera”. A troca pede reconjugar com o
+          auxiliar — a frase final é sua.
+        </GuideText>
+      );
+    case "gerundismo":
+      return (
+        <GuideText>
+          Troque o gerúndio encadeado pelo futuro simples ou o presente: “enviaremos” / “enviamos” no lugar de “vamos
+          estar enviando”.
+        </GuideText>
+      );
+    case "adverbio_mente_denso":
+      return (
+        <GuideText>
+          Corte ou substitua parte dos advérbios em -mente — o excesso pesa a leitura. Quais tirar depende da ênfase que
+          você quer.
+        </GuideText>
+      );
+    case "mesoclise":
+      return (
+        <GuideText>
+          Reescreva sem a mesóclise: “será feito” ou “vai fazer” no lugar de “far-se-á”. Muda a construção, então a frase
+          final é sua.
+        </GuideText>
+      );
+    case "paragraph_length":
+      return (
+        <GuideText>
+          Quebre o parágrafo em blocos menores, um grupo de ideias por vez. Onde cortar depende da organização do texto —
+          decisão sua.
+        </GuideText>
+      );
+    case "prose_enumeration":
+      return (
+        <GuideText>
+          Transforme os itens embutidos no texto numa lista com marcadores — fica mais fácil localizar cada um. É uma
+          decisão de formatação sua.
+        </GuideText>
+      );
+    default:
+      return assertNever(c);
+  }
+}
+
+/** Exaustividade em compile-time: se `value` não for `never`, falta um `case` — erro de tipo. */
+function assertNever(value: never): never {
+  throw new Error(`critério sem guia de orientação: ${String(value)}`);
+}
+
+/** Parágrafo de orientação padrão — casca compartilhada dos guias só-texto. */
+function GuideText({ children }: { children: React.ReactNode }) {
+  return <p className="text-[12.5px] leading-relaxed text-ink-1">{children}</p>;
+}
+
+/** Fallback impossível (finding sem CriterionId registrado) — nunca some para o autor. */
+function GenericGuide() {
+  return (
+    <GuideText>
+      A ferramenta apontou a construção, mas a correção depende de julgamento seu — ela não reescreve por conta própria.
+    </GuideText>
+  );
+}
+
+function LeitorGuide({ finding }: { finding: Finding }) {
+  const noun = typeof finding.meta?.readerNoun === "string" ? finding.meta.readerNoun : null;
+  return (
+    <p className="text-[12.5px] leading-relaxed text-ink-1">
+      O texto fala {noun ? <>de “<span className="text-ink-0">{noun}</span>” </> : "do leitor "}em terceira pessoa. Para
+      aproximar, <span className="text-ink-0">fale com o leitor</span>: troque por “você deve…” ou use o imperativo
+      (“apresente…”, “compareça…”). A ferramenta não faz a troca porque mudar a pessoa muda o registro — a escolha é sua.
+    </p>
+  );
+}
+
+function SubordinacaoGuide({ finding }: { finding: Finding }) {
+  const clauses = typeof finding.meta?.clauses === "number" ? finding.meta.clauses : null;
+  return (
+    <p className="text-[12.5px] leading-relaxed text-ink-1">
+      {clauses != null && (
+        <>
+          <span className="font-medium text-ink-0">{clauses} orações subordinadas</span> presas numa frase só.{" "}
+        </>
+      )}
+      Separe em frases mais curtas, uma ideia por vez — o começo de cada oração subordinada costuma ser o corte natural. A
+      ferramenta não reescreve: decidir o que vira frase própria e reconjugar é decisão sua.
+    </p>
+  );
 }
 
 function LongSentenceGuide({

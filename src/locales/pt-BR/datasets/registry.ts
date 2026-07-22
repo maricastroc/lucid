@@ -33,6 +33,7 @@ import redundanciasData from "./redundancias.pt.json";
 import perifrasesData from "./perifrases.pt.json";
 import duplasNegacoesData from "./duplas-negacoes.pt.json";
 import subordinadoresData from "./subordinadores.pt.json";
+import substantivosLeitorData from "./substantivos-leitor.pt.json";
 import serTemposData from "./ser-tempos.pt.json";
 import conjugacoesAtivasData from "./conjugacoes-ativas.pt.json";
 
@@ -114,6 +115,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: subordinadoresData,
     prepare: preparePhrases,
     provenance: "conectivos subordinativos (conj./locuções + relativos seguros) para densidade (curadoria própria)",
+  },
+  "substantivos-leitor.pt": {
+    raw: substantivosLeitorData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "substantivos que nomeiam o leitor (interessado, requerente…) para fala indireta (curadoria própria)",
   },
   "ser-tempos.pt": {
     raw: serTemposData,

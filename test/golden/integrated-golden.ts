@@ -12,7 +12,8 @@ export type IntegratedCriterion =
   | "prose_enumeration"
   | "mesoclise"
   | "dupla_negacao"
-  | "subordinacao_densa";
+  | "subordinacao_densa"
+  | "leitor_terceira_pessoa";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;
@@ -258,5 +259,25 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     },
     notes:
       "conta 'para que' + 'desde que' + 'uma vez que' = 3 conectivos inequívocos; o alvo é a frase (passage). Só este finding.",
+  },
+  {
+    id: "leitor_terceira_pessoa_obrigacao",
+    description: "leitor nomeado em 3ª pessoa (sujeito) recebendo uma obrigação",
+    text: "O interessado deverá apresentar os documentos.",
+    expected: {
+      findings: [
+        {
+          criterion: "leitor_terceira_pessoa",
+          severity: "info",
+          start: 0,
+          end: 20,
+          spanText: "O interessado deverá",
+          requiresHuman: true,
+        },
+      ],
+      metrics: { words: 6, sentences: 1 },
+    },
+    notes:
+      "sujeito ('O interessado') + verbo deôntico ('deverá') em janela local → fala SOBRE o leitor. info, requiresHuman, sem sugestão.",
   },
 ];

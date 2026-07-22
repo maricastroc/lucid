@@ -1608,6 +1608,68 @@ depcheck limpos. 13→**14 critérios**. Verificado ao vivo.
 
 ---
 
+## ADR-036 — Critério novo: fala indireta ao leitor (`leitor_terceira_pessoa`, 5.3.3)
+
+**Contexto.** Segundo item do roadmap Fase 2 ("fala direta ao leitor / 2ª pessoa ausente"). A norma e
+os guias (gov.br, LAB.mg) pedem falar COM o leitor. O CLAUDE.md já marcava como "heurística fraca".
+
+**O alvo (decisão da usuária).** Não dá para detectar *ausência* de fala direta; dá para detectar a
+construção que a evita. Entre as opções apresentadas, a usuária escolheu **"leitor nomeado em 3ª
+pessoa + obrigação"** (a mais precisa, sem sobreposição com outros critérios), recusando incluir as
+impessoais ("deve-se", "é necessário") que já tangenciam passiva/nominalização.
+
+**Decisão.** Matcher LOCAL por tokens (mesma disciplina de `passive-voice`), com **dupla exigência**
+para precisão: (1) o substantivo-leitor (`substantivos-leitor.pt`) está em **posição de sujeito** —
+precedido de artigo definido `o/a/os/as` ou no início da frase (exclui oblíquos `do/ao interessado` e
+a leitura adjetival `está interessado`); (2) um **verbo deôntico** (`deve/deverá/poderá/precisa`,
+classe fechada inline) aparece numa **janela curta** à frente, abortando em pontuação/conjunção
+(exclui `o cidadão tem direitos`, sem obrigação; e `…venceu e deve…`, outra oração). Marca o span
+`sujeito → verbo`, `info` + `requiresHuman`, **sem sugestão** (mudar a pessoa é escolha de estilo).
+
+**Copy editorial — lacuna do ADR-035 evitada.** Desta vez os quatro switches de apresentação
+(`detectionHeadline`, `detectedProse`, `buildConfidence`, `Guidance`) receberam o caso do critério
+JUNTO com o pass — sem cair no fallback silencioso (id cru / guia do jargão) que o ADR-035 só pegou no
+check ao vivo. (A dívida de tornar esses switches exaustivos em compile-time segue aberta.)
+
+**Consequências.** 14→**15 critérios**. **916 testes verdes** (novos: marca sujeito+deôntico incl.
+janela com modificadores e permissão; NÃO marca sem deôntico / oblíquo / adjetival / com conjunção
+barrando; caso no golden integrado). Snapshots regenerados — diff só `dataHash`/`configHash` + entrada
+de score zerada, **zero finding novo** nos textos existentes. Typecheck/lint/depcheck limpos.
+Verificado ao vivo.
+
+---
+
+## ADR-037 — Copy editorial exaustiva por critério (fim do fallback silencioso)
+
+**Contexto.** O ADR-029 tornou `CRITERION_META` um `Record<CriterionId, …>` (completude checada em
+compile-time). Mas a copy DINÂMICA vivia em quatro `switch`/if-chain com `default` silencioso:
+`detectionHeadline`, `detectedProse`, `buildConfidence` (`narrative.ts`) e `Guidance`
+(`revision-note.tsx`). Descoberto ao vivo no ADR-035 (o cabeçalho mostrava o id cru
+`subordinacao_densa`). Inventário: **9 dos 15 critérios** caíam no fallback — cabeçalho = id cru
+(`mesoclise`, `redundancia`, `paragraph_length`…), rationale = a explicação de OUTRO critério (a do
+`long_sentence`, "mede o comprimento"), e "como seguir" = o guia do JARGÃO ("há um equivalente no
+glossário"). Copy errada, não só ausente.
+
+**Decisão.** A copy passa a viver em estruturas EXAUSTIVAS por `CriterionId`, como o `CRITERION_META`:
+- `narrative.ts`: um `Record<CriterionId, CriterionNarrative>` (`NARRATIVE`). `headline`/`prose` são
+  OPCIONAIS — o default (`CRITERION_META[id].label` / a própria `justification` do finding) é sempre
+  CORRETO, não um fallback errado; `confidence` é OBRIGATÓRIO por critério (era o campo cujo fallback
+  dava a explicação de outro).
+- `revision-note.tsx`: `Guidance` virou `switch (criterion)` exaustivo com `assertNever(c)` no default.
+  Os 9 guias que faltavam foram escritos (curtos, honestos, cada um apontando a forma mais clara e
+  reafirmando "a ferramenta não reescreve").
+
+**Prova.** Adicionar um `CriterionId` fake ao `CRITERION_IDS` quebra o typecheck em **três** pontos
+(`CRITERION_META`, `NARRATIVE`, o `assertNever` do `Guidance`) — um critério novo agora FALHA ALTO em
+vez de herdar a copy de outro. (Testado e revertido.)
+
+**Consequências.** Os 9 critérios que mostravam copy errada agora têm cabeçalho (= label), rationale
+e guia próprios. **916 testes verdes** (nenhum testava a copy → nenhuma asserção mudou); typecheck/
+lint/depcheck limpos. Nenhuma mudança de `Diagnostic` (é tudo camada de apresentação, fora do
+`dataHash`). Verificado ao vivo.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

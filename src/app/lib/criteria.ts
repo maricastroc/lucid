@@ -48,6 +48,7 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "perifrase_inflada",
   "mesoclise",
   "dupla_negacao",
+  "leitor_terceira_pessoa",
   "subordinacao_densa",
   "long_sentence",
   "paragraph_length",
@@ -194,6 +195,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "",
     signal: "concentração de conectivos subordinativos na mesma frase (léxico curado, sem os polissêmicos)",
     why: "Muitas orações subordinadas encadeadas prendem ideias demais numa frase só e pesam a leitura.",
+  },
+  leitor_terceira_pessoa: {
+    label: "Fala indireta ao leitor",
+    ruleId: "leitor_terceira_pessoa",
+    kind: "Construção sintática",
+    principleName: "Frases claras",
+    channel: "inline",
+    markStyleClass: "mark-dotted",
+    signal: "substantivo que nomeia o leitor em posição de sujeito + verbo deôntico numa janela local",
+    why: "Falar do leitor em terceira pessoa distancia; dizer “você” aproxima e deixa claro quem deve agir.",
   },
 };
 
