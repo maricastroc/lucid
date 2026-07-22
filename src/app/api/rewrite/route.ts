@@ -50,9 +50,11 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
+/** Modelo de piso: `llama-3.3-70b-versatile`, mesmo achado de `api/probe/route.ts` (o 8B se
+ * autocontradiz na extração literal — degrada o sinal `meaning_preserved` silenciosamente). */
 function buildProbe(): ComprehensionProbe | null {
   if (process.env.GROQ_API_KEY) {
-    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.1-8b-instant");
+    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.3-70b-versatile");
   }
   if (process.env.GEMINI_API_KEY) {
     return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");

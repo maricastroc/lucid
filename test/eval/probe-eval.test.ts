@@ -142,8 +142,11 @@ function loadKey(name: string): string | null {
 
 /**
  * Constrói a sonda REAL. Modelo escolhível por `PROBE_EVAL_MODEL` (provider inferido do id: nomes
- * `gemini-*` → Gemini; o resto → Groq). Sem override: modelo grátis default (Groq 8B, ou Gemini flash
- * se só houver essa chave). A sonda roda num modelo BARATO de propósito — não é o sistema sob teste.
+ * `gemini-*` → Gemini; o resto → Groq). Sem override: `llama-3.3-70b-versatile` (grátis) — o 8B foi
+ * DESQUALIFICADO como default do harness na meta-eval de 2026-07-22 (26% de concordância; achado
+ * registrado em docs/DECISOES.md): ele se autocontradiz na extração literal, o que mediria o próprio
+ * harness errado, não a qualidade do prompt/golden. Passe `PROBE_EVAL_MODEL=llama-3.1-8b-instant`
+ * explicitamente se quiser reproduzir esse achado.
  */
 function buildLiveProbe(): LlmComprehensionProbe {
   const groq = loadKey("GROQ_API_KEY");
@@ -157,7 +160,7 @@ function buildLiveProbe(): LlmComprehensionProbe {
     if (!groq) throw new Error(`GROQ_API_KEY ausente para ${override}`);
     return new LlmComprehensionProbe(new GroqProvider(groq), override);
   }
-  if (groq) return new LlmComprehensionProbe(new GroqProvider(groq), "llama-3.1-8b-instant");
+  if (groq) return new LlmComprehensionProbe(new GroqProvider(groq), "llama-3.3-70b-versatile");
   if (gemini) return new LlmComprehensionProbe(new GeminiProvider(gemini), "gemini-2.5-flash");
   throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
 }
@@ -174,6 +177,18 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       linhas.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
       linhas.push(`concordância=${(m.accuracy * 100).toFixed(0)}% · recall(travamentos)=${(m.recall * 100).toFixed(0)}% · precisão=${(m.precision * 100).toFixed(0)}%`);
       linhas.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
+
+      // Recorte POR CATEGORIA — uma categoria com muita discordância fica escondida na matriz
+      // global (ADR-043 §achado 2026-07-22: "condicao_nomeada" testa um modo de falha específico,
+      // diferente do rigor válido medido pelas demais categorias).
+      const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
+      linhas.push("\npor categoria:");
+      for (const cat of categorias) {
+        const sub = rows.filter((r) => r.categoria === cat);
+        const concordantes = sub.filter((r) => r.concorda).length;
+        linhas.push(`  ${cat}: ${concordantes}/${sub.length} concordam`);
+      }
+
       for (const r of rows) {
         const marca = r.concorda ? "ok " : "XX ";
         linhas.push(`  ${marca}[${r.categoria}] ${r.id}: humano=${r.humanoTrava ? "trava" : "lê"} · sonda=${r.sondaFlag ? "flag" : "neutro"}`);
@@ -185,7 +200,15 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       process.stdout.write(`${linhas.join("\n")}\n\n`);
       if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${linhas.join("\n")}\n`);
 
+      // Recall sozinho NÃO detecta um modelo incoerente: um modelo que trava em quase tudo acerta
+      // todo TRUE POSITIVE de graça (recall alto) mesmo sendo inútil (achado de 2026-07-22, ADR-046
+      // — o llama-3.1-8b-instant tinha recall=100% e precisão=23%, e só a precisão expõe isso). O
+      // piso de PRECISÃO é o que efetivamente barra a troca para um modelo/prompt ruim: qualquer
+      // candidato a modelo da sonda TEM que rodar esta suíte (`set -a; . ./.env; set +a; PROBE_EVAL=1
+      // npx vitest run test/eval/probe-eval.test.ts`, ver ADR-046) e passar nos DOIS pisos antes de
+      // virar default (CLAUDE.md · "Anti-drift: trocar modelo → rodar a meta-eval de novo").
       expect(m.recall).toBeGreaterThanOrEqual(0.6);
+      expect(m.precision).toBeGreaterThanOrEqual(0.7);
     },
     600_000,
   );
