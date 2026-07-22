@@ -2,8 +2,22 @@
 
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, metaFor, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
+import { buildAuditReport } from "../lib/audit-report";
 import { CriterionMark } from "./badges";
-import { WandIcon } from "./icons";
+import { ArrowDownIcon, WandIcon } from "./icons";
+
+/** Dispara o download de um arquivo de texto gerado no cliente (sem rede). */
+function downloadTextFile(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 interface Props {
   diagnostic: Diagnostic;
@@ -76,6 +90,23 @@ export function AuditOverview({
             Aplicar as {safeCount} sugestões seguras
           </button>
         )}
+
+        {/* A auditoria como ENTREGÁVEL (ADR-000 · Etapa 5): saia com o relatório sem aplicar nada
+            nem tocar na IA. Markdown determinístico, gerado no cliente. */}
+        <button
+          type="button"
+          onClick={() =>
+            downloadTextFile(
+              "auditoria-lucid.md",
+              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }),
+              "text/markdown;charset=utf-8",
+            )
+          }
+          className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+        >
+          <ArrowDownIcon className="size-4" />
+          Exportar auditoria (.md)
+        </button>
 
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">
           O placar mede, não aprova. A ausência de anotações não é atestado de clareza.

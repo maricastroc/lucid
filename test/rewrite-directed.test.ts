@@ -28,18 +28,14 @@ function targetAndFindings(text: string) {
 describe("directed@1 — a engine dirige a IA com seus findings reais", () => {
   it("o prompt dirigido lista os problemas que a engine achou no trecho", () => {
     const { source, target, findings } = targetAndFindings(SAMPLE);
-    expect(findings.length).toBeGreaterThan(1); // sanidade: o trecho tem vários problemas
+    expect(findings.length).toBeGreaterThan(1);
 
     const prompt = buildRewritePrompt(source, target, { strategy: "directed", findings });
 
-    // o bloco de briefing aparece
     expect(prompt).toContain("A engine determinística analisou o trecho e apontou os pontos abaixo");
-    // instruções por critério presentes (voz ativa da passiva + palavras comuns do jargão)
     expect(prompt).toMatch(/voz ativa/);
     expect(prompt).toMatch(/palavras comuns/);
-    // cita um termo de jargão curto como exemplo
     expect(prompt).toContain('"em sede de"');
-    // mantém as blindagens de invenção e o trecho-alvo
     expect(prompt).toContain("NÃO invente quem praticou a ação");
     expect(prompt).toContain(target.text);
   });

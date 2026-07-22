@@ -113,7 +113,6 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
   ])("reconhece agente introduzido por '%s' em '%s'", (text) => {
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(1);
-    // meta ganhou offsets de papel (ADR-013); hasAgent continua a asserção-chave.
     expect(findings[0].meta).toMatchObject({ hasAgent: true });
     expect(findings[0].requiresHuman).toBe(false);
   });

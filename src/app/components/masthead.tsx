@@ -36,7 +36,7 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onOpenDocx(file);
-            e.target.value = ""; // permite reabrir o mesmo arquivo
+            e.target.value = "";
           }}
         />
         <button

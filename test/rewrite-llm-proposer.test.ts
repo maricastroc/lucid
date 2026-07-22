@@ -49,7 +49,6 @@ describe("LlmRewriteProposer", () => {
     expect(proposal.original).toBe(target.text);
     expect(proposal.proposed).toBe("Versão curta e clara.");
     expect(proposal.proposerId).toBe(`mock:m1+${REWRITE_PROMPT_VERSION}`);
-    // o trecho entra no prompt enviado ao modelo
     expect(provider.lastPrompt).toContain(target.text);
   });
 

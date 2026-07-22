@@ -49,18 +49,11 @@ export function Studio() {
   const [canUndo, setCanUndo] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Documento IMPORTADO (ADR-039/040): quando um `.docx` é aberto, guardamos o `Document`
-  // ESTRUTURADO e o analisamos com `analyzeDocument` (headings/listas preservados). Assim que o
-  // autor edita (o texto diverge de `doc.source`), voltamos à análise de texto puro — editar à mão
-  // naturalmente perde a estrutura do arquivo.
   const [importedDoc, setImportedDoc] = useState<Document | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
   const deferredText = useDeferredValue(text);
-  // Enquanto o texto casa com o do arquivo importado, analisamos o `Document` ESTRUTURADO e
-  // expomos seus blocos ao render (títulos/listas destacados). Ao editar à mão, o texto diverge de
-  // `doc.source` → voltamos ao texto puro (blocos = null) e o render por linhas assume.
   const structured = importedDoc !== null && deferredText === importedDoc.source;
   const diagnostic = useMemo(
     () => (structured ? analyzeDocument(importedDoc!) : analyze(deferredText)),
@@ -73,7 +66,7 @@ export function Studio() {
     setImportError(null);
     try {
       const bytes = await file.arrayBuffer();
-      // Import dinâmico: o mammoth só entra no bundle do cliente quando um .docx é aberto.
+
       const { importDocx } = await import("@/importers/docx");
       const doc = await importDocx(bytes, ptDocumentServices);
       setImportedDoc(doc);
@@ -193,10 +186,6 @@ export function Studio() {
     [text, pushUndo],
   );
 
-  // Máquina ÚNICA de aplicação: substitui um span do texto por uma string, empilha o desfazer e
-  // re-analisa (via setText). É o mesmo mecanismo para as três origens do "novo texto" — a ação
-  // mecânica (voz ativa), a proposta da LLM (Tier 3) e a EDIÇÃO À MÃO do autor. A engine é quem
-  // re-audita o resultado; a UI nunca decide clareza.
   const replaceSpan = useCallback(
     (target: Span, replacement: string) => {
       const next = spliceSpan(diagnostic.text, target, replacement);

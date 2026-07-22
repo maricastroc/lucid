@@ -21,8 +21,6 @@ interface RewriteRequestBody {
   localeId?: unknown;
 }
 
-// Único locale suportado por ora (ADR-031). A rota já ACEITA `localeId` (preparada), mas recusa
-// qualquer valor diferente de pt-BR — nada de inglês nem fallback silencioso nesta etapa.
 const SUPPORTED_LOCALES: Record<string, typeof rewriteLocalePtBR> = { "pt-BR": rewriteLocalePtBR };
 
 function isValidSpan(value: unknown, textLength: number): value is Span {

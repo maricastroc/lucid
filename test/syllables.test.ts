@@ -177,7 +177,6 @@ describe("countSyllables — siglas pronunciáveis vs. soletradas", () => {
   });
 
   it("palavra maiúscula normal (não-sigla) não é afetada pela regra de soletração", () => {
-    // "A" isolado (ex.: início de frase) tem vogal — não cai na regra de soletração.
     expect(countSyllables("A")).toBe(1);
   });
 });

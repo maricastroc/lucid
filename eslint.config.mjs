@@ -5,17 +5,13 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
   ]),
   {
-    // I4 (docs/ARQUITETURA.md §1): a Camada 1 é 100% determinística. Nenhuma dessas
-    // fontes de não-determinismo pode viver em `src/lucid/core/**`.
     files: ["src/lucid/core/**/*.ts", "src/lucid/core/**/*.tsx"],
     rules: {
       "no-restricted-globals": [

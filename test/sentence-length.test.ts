@@ -151,21 +151,18 @@ describe("sentenceLengthPass — execução repetida byte-idêntica", () => {
 });
 
 describe("sentenceLengthPass — regressão: frases unidas pela política conservadora de segmentação", () => {
-  // Config com limiar bem baixo só para não depender de contar palavras manualmente —
-  // o que importa é confirmar que o pass trata a frase unida como UMA frase só, sem
-  // tentar detectar ou corrigir a união causada por abreviação/sigla.
   const configLimiarBaixo: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
 
   it("'etc.' seguido de nova frase permanece unido e é avaliado como uma frase só", () => {
     const source = "Compramos frutas, verduras, etc. Voltamos cedo para casa.";
     const doc = buildDocument(source);
 
-    expect(doc.sentences).toHaveLength(1); // confirma a união (comportamento já documentado)
+    expect(doc.sentences).toHaveLength(1);
 
     const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe(source); // a frase unida inteira, sem split
+    expect(findings[0].span.text).toBe(source);
     expect(findings[0].meta).toMatchObject({ words: doc.sentences[0].wordCount });
   });
 

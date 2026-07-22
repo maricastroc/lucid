@@ -74,11 +74,10 @@ describe("score — independência de ordem e ausência de contagem dupla", () =
 
   it("cada finding é contado exatamente uma vez, mesmo com spans sobrepostos", () => {
     const d = analyze(TEXTO_4);
-    // 5 findings, um deles (long_sentence) contém os outros; o score conta 5, não menos nem mais
     expect(d.findings).toHaveLength(5);
     expect(d.score.totalFindings).toBe(5);
     const jargon = d.score.byCriterion.find((c) => c.criterion === "jargon")!;
-    expect(jargon.count.warning).toBe(2); // exatamente as duas ocorrências, sem fusão
+    expect(jargon.count.warning).toBe(2);
   });
 });
 
@@ -98,7 +97,7 @@ describe("score — critérios desabilitados", () => {
       nominalization: { enabled: true, suggest: false },
       jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false },
     });
-    // mesmos findings (só a presença de suggestion muda), logo mesmas contagens de score
+
     const contagens = (findings: readonly Finding[]) =>
       buildScore(findings, PASSES, comSug.metrics.words, DEFAULT_CONFIG).byCriterion.map((c) => c.count);
     expect(contagens(semSug.findings)).toEqual(contagens(comSug.findings));

@@ -235,8 +235,6 @@ describe("analyze — ausência de findings nunca vira 'aprovado'", () => {
 });
 
 describe("analyzer — ausência de imports proibidos", () => {
-  // Passes/léxicos/métricas PT vivem agora em `src/locales/pt-BR` (ADR-031); a pureza deles é
-  // coberta pela cerca do dependency-cruiser. Aqui checamos os módulos NEUTROS do core.
   const arquivos = ["core/analyzer.ts", "core/score/index.ts", "core/document/model.ts", "core/metrics/index.ts"];
 
   it.each(arquivos)("%s não importa probe/report/react/next/rede", (arquivoRelativo) => {

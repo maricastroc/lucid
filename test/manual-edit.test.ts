@@ -59,7 +59,6 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
     const text = "As contas foram aprovadas pelo conselho fiscal da autarquia federal competente.";
     const { source, span, unit } = manualEditTargetFor(text, "passive_voice");
     expect(unit).toBe("sentence");
-    // o alvo é a frase inteira que contém a passiva — não só o trecho «foram aprovadas».
     expect(span.text).toBe(source.trim());
   });
 
@@ -70,7 +69,6 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
     expect(unit).toBe("paragraph");
     expect(span.text).toBe("As contas foram aprovadas pelo conselho.");
 
-    // aplicar a versão do autor troca só o parágrafo-alvo; o segundo parágrafo permanece.
     const replacement = manualEditReplacement("  O conselho aprovou as contas.  ");
     const next = spliceSpan(source, span, replacement);
     expect(next).toBe("O conselho aprovou as contas.\n\nO pagamento deve ser feito na hipótese de deferimento.");
@@ -84,16 +82,11 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
 
     const before = analyze(source).findings.filter((f) => f.criterion === "passive_voice").length;
     const after = analyze(edited).findings.filter((f) => f.criterion === "passive_voice").length;
-    // reescrevendo a passiva na ativa à mão, a marca de voz passiva daquele parágrafo some.
+
     expect(after).toBeLessThan(before);
   });
 });
 
-/**
- * ADR-000 · Etapa 2 — o verificador é AGNÓSTICO à fonte. A versão do autor (edição à mão ou
- * colagem) passa pelo MESMO `verifyRewrite` que julga a IA — sem proposer e sem rede — e é
- * julgada com o mesmo rigor: não há referendo do humano.
- */
 describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verificador", () => {
   const text =
     "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
@@ -103,11 +96,10 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
     const { proposal, verification } = await verifyManualEdit(source, span, "  O conselho aprovou as contas.  ");
 
     expect(proposal.proposerId).toBe("sua edição");
-    expect(proposal.proposed).toBe("O conselho aprovou as contas."); // aparado por manualEditReplacement
+    expect(proposal.proposed).toBe("O conselho aprovou as contas.");
     expect(proposal.original).toBe(span.text);
     expect(verification.proofs.length).toBeGreaterThan(0);
     expect(verification.metrics.wordsBefore).toBeGreaterThan(0);
-    // o caminho do autor NÃO roda a sonda (único passo com LLM) → sem o sinal de sentido.
     expect(verification.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
   });
 

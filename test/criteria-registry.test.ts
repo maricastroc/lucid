@@ -23,7 +23,7 @@ describe("registro de critérios (ADR-029)", () => {
 
   it("PASSES e CRITERION_IDS descrevem EXATAMENTE o mesmo conjunto", () => {
     const dosPasses = sorted(PASSES.map((p) => p.criterion));
-    // sem duplicatas entre passes (cada critério tem um pass)
+
     expect(dosPasses).toEqual(sorted([...new Set(dosPasses)]));
     expect(dosPasses).toEqual(sorted(CRITERION_IDS));
   });

@@ -35,16 +35,15 @@ interface Row {
 }
 
 interface Matrix {
-  tp: number; // trava & flag
-  fn: number; // trava & neutro  → MISS (a sonda falhou seu único trabalho)
-  fp: number; // não-trava & flag
-  tn: number; // não-trava & neutro
+  tp: number;
+  fn: number;
+  fp: number;
+  tn: number;
   recall: number;
   precision: number;
   accuracy: number;
 }
 
-/** Roda a sonda sobre o golden e classifica cada caso via `interpret` (flag × neutro). */
 async function runAgreement(probe: ComprehensionProbe, golden: readonly ProbeGoldenCase[]): Promise<Row[]> {
   const rows: Row[] = [];
   for (const c of golden) {
@@ -78,7 +77,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
       expect(c.porque.trim().length).toBeGreaterThan(0);
       if (c.humanoTrava) expect(c.modoDeFalha).toBeDefined();
     }
-    // as duas classes têm que existir, senão recall/precision viram vácuo
+
     expect(GOLDEN_SONDA.some((c) => c.humanoTrava)).toBe(true);
     expect(GOLDEN_SONDA.some((c) => !c.humanoTrava)).toBe(true);
   });
@@ -94,7 +93,6 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
   });
 
   it("harness: sonda que SEMPRE neutraliza → recall 0 nos travamentos (o pior caso é detectável)", async () => {
-    // fallback default do stub = 'não consegue responder' = flag; forçamos o oposto (sempre neutro)
     const alwaysNeutral = new StubComprehensionProbe(
       {},
       {
@@ -105,8 +103,8 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     const rows = await runAgreement(alwaysNeutral, GOLDEN_SONDA);
     const m = score(rows);
     expect(m.tp).toBe(0);
-    expect(m.recall).toBe(0); // nenhum travamento humano pego — o harness expõe a cegueira
-    expect(m.fp).toBe(0); // nunca deu flag
+    expect(m.recall).toBe(0);
+    expect(m.fp).toBe(0);
   });
 
   it("harness: sonda que SEMPRE trava → recall 1, precisão = taxa-base (piso pessimista tem custo)", async () => {
@@ -118,7 +116,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     const m = score(rows);
     const travamentos = GOLDEN_SONDA.filter((c) => c.humanoTrava).length;
     expect(m.recall).toBe(1);
-    expect(m.tp + m.fp).toBe(GOLDEN_SONDA.length); // deu flag em tudo
+    expect(m.tp + m.fp).toBe(GOLDEN_SONDA.length);
     expect(m.precision).toBeCloseTo(travamentos / GOLDEN_SONDA.length);
   });
 
@@ -187,8 +185,6 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       process.stdout.write(`${linhas.join("\n")}\n\n`);
       if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${linhas.join("\n")}\n`);
 
-      // Piso: a sonda tem que pegar a MAIORIA dos travamentos humanos. Um miss (FN) é a sonda
-      // falhando seu único trabalho — é o que a norma canoniza como o risco a evitar.
       expect(m.recall).toBeGreaterThanOrEqual(0.6);
     },
     600_000,

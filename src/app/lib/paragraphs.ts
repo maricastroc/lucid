@@ -44,14 +44,12 @@ export function paragraphSpanAt(text: string, offset: number): Span {
     const gapStart = match.index;
     const gapEnd = match.index + match[0].length;
     if (gapStart >= offset) {
-      end = gapStart; // primeira fronteira em branco depois do offset → fim do parágrafo
+      end = gapStart;
       break;
     }
-    // fronteira antes do offset (ou contendo-o) → o parágrafo começa depois dela.
     start = gapEnd;
   }
 
-  // apara espaços/quebras das pontas
   while (start < end && /\s/.test(text[start])) start++;
   while (end > start && /\s/.test(text[end - 1])) end--;
 

@@ -200,8 +200,6 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;
 
-  // Só destacamos a estrutura quando há blocos de VERDADE (título/lista) — um documento importado.
-  // Texto puro (só parágrafos) segue no render por linhas, idêntico ao de sempre.
   const structured = blocks !== null && blocks.some((b) => b.kind !== "paragraph");
   const ctx: SegmentContext = { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding };
 

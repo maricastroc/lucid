@@ -21,7 +21,7 @@ describe("subordinacao_densa — dispara na densidade, não no conectivo isolado
     expect(f.severity).toBe("warning");
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.span.text).toBe(text); // a frase inteira é o alvo, não o conectivo
+    expect(f.span.text).toBe(text);
     expect(f.meta?.clauses).toBe(3);
   });
 
@@ -51,7 +51,6 @@ describe("subordinacao_densa — locuções contam como uma oração cada", () =
 
 describe("subordinacao_densa — precisão: polissêmicos NÃO contam", () => {
   it("'que' relativo, 'se' e 'caso' (substantivo) não inflam a contagem", () => {
-    // muitos 'que'/'se'/'caso', mas ZERO subordinadores do léxico → nenhum finding.
     const text =
       "O documento que foi assinado, o caso que analisamos e o recurso que segue, se possível, vão em anexo.";
     expect(subordinacaoFindings(text)).toHaveLength(0);

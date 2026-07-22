@@ -41,9 +41,7 @@ export interface VerifyOptions {
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
 const RE_DATE = /\b\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gu;
-// Os marcadores de 1ª pessoa são específicos do idioma e vêm do locale (`locale.firstPersonMarkers`,
-// ADR-031) — a lista fechada de pronomes/possessivos PT vive em `src/locales/pt-BR/tier3.ts`.
-/** Palavra Capitalizada (nome próprio) ou sigla em CAIXA-ALTA — heurística de entidade. */
+
 const RE_ENTITY = /\b(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})\b/gu;
 const RE_ACRONYM = /^\p{Lu}{2,}$/u;
 const RE_SPACE = /\s/u;
@@ -53,17 +51,10 @@ function extractSorted(text: string, re: RegExp): string[] {
   return (text.match(re) ?? []).slice().sort();
 }
 
-/** Conjunto (minúsculo) de marcadores de 1ª pessoa presentes no texto, pelo padrão do locale. */
 function firstPersonMarkers(text: string, re: RegExp): Set<string> {
   return new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
 }
 
-/**
- * Entidades heurísticas: nomes próprios (Capitalizados) e siglas em caixa-alta. Palavra
- * Capitalizada em INÍCIO DE FRASE é ignorada (é só a maiúscula obrigatória, não um nome) —
- * senão "Foi"/"A" contariam como entidade e a comparação daria falso positivo. Siglas são
- * sempre mantidas (raramente são só início de frase). É SINAL, não prova.
- */
 function extractEntities(text: string): string[] {
   const out: string[] = [];
   const re = new RegExp(RE_ENTITY.source, "gu");
@@ -82,25 +73,15 @@ function extractEntities(text: string): string[] {
   return out.sort();
 }
 
-/** Igualdade de multiconjunto (ordem irrelevante, repetição importa). */
 function sameMultiset(a: string[], b: string[]): boolean {
   if (a.length !== b.length) return false;
   return a.every((value, i) => value === b[i]);
 }
 
-/** `[a,b)` de `f.span` intersecta `[start,end)`? */
 function overlaps(f: Finding, start: number, end: number): boolean {
   return f.span.start < end && f.span.end > start;
 }
 
-/**
- * Peso por severidade (ADR-018). A CONTAGEM crua de findings pune injustamente a reescrita
- * radical: trocar UMA frase-monstro (`error`) por três frases boas (`warning`s) "aumenta" a
- * contagem, mas melhora a leitura. O que veta a proposta é o PESO subir — um `error` custa
- * muito mais que um `warning`. Ratio defensável (não afinado ao benchmark): `error` ≈ 3
- * `warning`; `info` é quase-ruído. Assim 1 erro → 3 avisos empata (não piora), 1 erro → 4
- * avisos piora.
- */
 const SEVERITY_WEIGHT: Record<Severity, number> = { error: 3, warning: 1, info: 0.3 };
 const BURDEN_EPSILON = 1e-9;
 
@@ -139,7 +120,7 @@ export async function verifyRewrite(
   options: VerifyOptions = {},
 ): Promise<RewriteVerification> {
   const locale = options.locale ?? DEFAULT_LOCALE;
-  // Anti-mistura (ADR-031): uma proposta gerada para um locale não pode ser verificada sob outro.
+
   if (proposal.localeId && proposal.localeId !== locale.id) {
     throw new Error(
       `proposta do locale '${proposal.localeId}' não pode ser verificada sob o locale '${locale.id}'`,
@@ -155,11 +136,8 @@ export async function verifyRewrite(
   const newStart = target.start;
   const newEnd = target.start + proposal.proposed.length;
 
-  // --- PROVA -------------------------------------------------------------------
   const proofs: Proof[] = [];
 
-  // `target_resolved` só quando há um critério de finding (caminho da frase-alvo). Na
-  // reescrita de parágrafo não há critério único — vale o `region_improved` abaixo.
   if (options.criterion) {
     const criterion = options.criterion;
     const targetRemaining = after.findings.filter((f) => f.criterion === criterion && overlaps(f, newStart, newEnd))
@@ -174,8 +152,6 @@ export async function verifyRewrite(
     });
   }
 
-  // `region_improved`: o PESO por severidade dos findings no trecho não pode aumentar (ADR-018)
-  // — trocar 1 `error` por alguns `warning`s deixa de ser vetado; criar problema grave, não.
   const burdenBefore = regionBurden(before.findings, originalStart, originalEnd);
   const burdenAfter = regionBurden(after.findings, newStart, newEnd);
   proofs.push({
@@ -224,10 +200,6 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  // `no_invented_first_person`: a proposta não pode introduzir 1ª pessoa que NÃO existe em
-  // LUGAR NENHUM do documento-fonte. Comparar contra o documento inteiro (não só o alvo) evita
-  // falso veto quando o texto já é escrito em 1ª pessoa — aí "nós" é fiel, não fabricado. Se o
-  // marcador não aparece em parte alguma do original, o modelo inventou o agente → veto.
   const sourceFirstPerson = firstPersonMarkers(text, locale.firstPersonMarkers);
   const inventedFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].filter(
     (m) => !sourceFirstPerson.has(m),
@@ -243,7 +215,6 @@ export async function verifyRewrite(
 
   proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon, noInventedFirstPerson);
 
-  // --- SINAL (heurístico, nunca prova) ----------------------------------------
   const signals: VerificationSignal[] = [];
 
   const entitiesBefore = extractEntities(proposal.original);
@@ -263,7 +234,7 @@ export async function verifyRewrite(
       options.probe.probe({ trecho: proposal.original, pergunta: options.question }),
       options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }),
     ]);
-    // interpret garante que a sonda nunca "aprova"; aqui usamos só como teste NEGATIVO.
+
     const originalReadable = originalResult.podeResponder && !originalResult.precisouInferir;
     const proposedReadable = proposedResult.podeResponder && !proposedResult.precisouInferir;
     const lost = originalReadable && !proposedReadable;

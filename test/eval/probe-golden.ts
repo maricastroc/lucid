@@ -42,12 +42,10 @@ export interface ProbeGoldenCase {
     | "fato_ausente"
     | "inferencia_exigida"
     | "carga_extraivel";
-  /** justificativa individual da rotulagem */
   porque: string;
 }
 
 export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
-  // ---- CLARO: fato literal e direto → deve virar `neutro` --------------------------------------
   {
     id: "claro-prazo",
     trecho: "O prazo para recorrer é de dez dias. Ele começa a contar da data da publicação.",
@@ -72,8 +70,6 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     categoria: "claro",
     porque: "A instrução é uma sequência explícita de ações no próprio trecho — extraível sem preencher nada.",
   },
-
-  // ---- CARGA extraível: pesado de ler, MAS o fato está literal → `neutro` + operação de carga ----
   {
     id: "carga-termo-tecnico",
     trecho: "A guia só é aceita com a autenticação mecânica do DARF impressa no verso.",
@@ -106,7 +102,6 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
       "Responder exige ligar 'nesse dia' a 'dia 5' entre duas frases — coesão explícita, resolúvel; o fato sai do texto sem inferência externa.",
   },
 
-  // ---- TRAVA: o leitor de piso NÃO extrai o fato só do texto → deve virar `flag` ----------------
   {
     id: "agente-omitido",
     trecho: "O pedido foi indeferido por falta de documentos.",

@@ -45,7 +45,6 @@ describe("leitor_terceira_pessoa — precisão: exige sujeito E obrigação", ()
   });
 
   it("conjunção entre leitor e verbo barra a associação (outra oração)", () => {
-    // 'e deve' pertence a outra oração — a barreira de conjunção impede o match.
     expect(leitorFindings("O prazo do interessado venceu e deve ser renovado.")).toHaveLength(0);
   });
 });

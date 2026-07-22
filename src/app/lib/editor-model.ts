@@ -67,7 +67,7 @@ export function buildLines(text: string, findings: readonly Finding[]): DocLine[
   rawLines.forEach((lineText, i) => {
     const start = offset;
     const end = start + lineText.length;
-    offset = end + 1; // pula o "\n"
+    offset = end + 1;
 
     const markers = findings.filter(
       (f) => f.span.end > f.span.start && f.span.start < end && f.span.end > start,

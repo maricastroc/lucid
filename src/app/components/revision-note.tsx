@@ -158,7 +158,6 @@ function ManualEdit({
   const check = async () => {
     setChecking(true);
     try {
-      // O MESMO verificador que julga a IA. Determinístico e offline — a fonte não muda o juiz.
       setResult(await verifyManualEdit(source, target, draft));
     } finally {
       setChecking(false);
@@ -184,12 +183,11 @@ function ManualEdit({
           value={draft}
           onChange={(e) => {
             setDraft(e.target.value);
-            // O veredito tem que espelhar EXATAMENTE o texto aplicado: mexeu, invalida a prova.
             setResult(null);
           }}
           spellCheck={false}
           aria-label={`Editar ${unitLabel}`}
-          className="block max-h-[46vh] min-h-[7rem] w-full resize-y rounded-lg border border-rule-1 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
+          className="block max-h-[46vh] min-h-28 w-full resize-y rounded-lg border border-rule-1 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
           style={{ caretColor: "var(--accent)" }}
         />
         <div className="mt-2.5 flex items-center gap-2">
@@ -368,8 +366,6 @@ function GeneratedRewrite({
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // O ALVO: o parágrafo que contém o finding, OU a frase quando o texto é um bloco contínuo
-  // (sem linhas em branco) — nunca o documento inteiro. A geração recebe o texto de contexto.
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
 
@@ -378,8 +374,6 @@ function GeneratedRewrite({
     setError(null);
     setResult(null);
     try {
-      // Julgada só pelo peso da região (region_improved) + provas de corrupção — NÃO pelo
-      // critério de um finding isolado (sem `criterion` → sem target_resolved).
       setResult(await generateRewrite(source, target, choice));
     } catch (e) {
       setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
@@ -454,12 +448,6 @@ function GeneratedRewrite({
   );
 }
 
-/**
- * O resultado de uma geração: o VEREDITO da engine é o protagonista (ADR-000). A ordem — e o
- * peso visual — lideram pela verificação; a proposta da IA vira o ESPÉCIME avaliado, logo acima
- * da ação. Isto é re-ranking de hierarquia, não mudança de contrato: mesmas provas, mesmos
- * sinais, mesma decisão do autor. O texto gerado deixa de ser o clímax — a engine que julga é.
- */
 function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; onApplyRewrite: () => void }) {
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
@@ -488,7 +476,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
             {passed}/{verification.proofs.length} provas
           </span>
         </div>
-        <p className="mt-1.5 font-serif text-[19px] leading-[1.25] text-ink-0">
+        <p className="mt-1.5 font-serif text-[19px] leading-tight text-ink-0">
           {blocked ? "Uma prova falhou — a ferramenta não atesta este trecho." : "Nenhuma falha de piso neste trecho."}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-2">
@@ -565,14 +553,12 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
   );
 }
 
-/** Formata um delta com sinal explícito (`+3.0`, `-12`). `digits` = casas decimais. */
 function fmtDelta(n: number, digits: number): string {
   const s = digits > 0 ? n.toFixed(digits) : String(Math.round(n));
   return n >= 0 ? `+${s}` : s;
 }
 
 function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"; detail: string }) {
-  // Prova: ✓ verde / ✗ vermelho. Sinal: ✓ neutro / ⚠ atenção (nunca "aprovado").
   const mark = ok ? (kind === "proof" ? "✓" : "○") : kind === "proof" ? "✗" : "⚠";
   const tone = ok ? (kind === "proof" ? "text-safe" : "text-ink-3") : kind === "proof" ? "text-sev-error" : "text-human";
   return (
@@ -598,8 +584,6 @@ function Guidance({
 }) {
   const c = finding.criterion;
   if (!isCriterionId(c)) return <GenericGuide />;
-  // Exaustivo por CriterionId (ADR-037): um critério novo sem caso QUEBRA o typecheck no `never`
-  // abaixo, em vez de cair silenciosamente no guia do jargão.
   switch (c) {
     case "long_sentence":
       return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
@@ -815,11 +799,6 @@ function LongSentenceGuide({
 const APPLY_BUTTON_CLASS =
   "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40";
 
-/**
- * Voz passiva → ação estrutural do Tier 2 (ADR-032). Renderiza conforme a CLASSE devolvida pela
- * engine (`passiveToActive`): A (rascunho pronto), B (pede só o agente), C (mantém o andaime
- * read-only). NENHUMA lógica linguística aqui — a UI só chama a engine e mostra o resultado.
- */
 function PassiveGuide({
   finding,
   source,
@@ -863,7 +842,6 @@ function PassiveGuide({
     return <PassiveNeedsAgent finding={finding} source={source} onPassiveActive={onPassiveActive} />;
   }
 
-  // unsupported → mantém o andaime read-only (com agente) ou a pergunta (sem agente).
   const scaffold = passiveScaffold(finding, source);
   if (!scaffold) {
     return (

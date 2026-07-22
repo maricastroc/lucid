@@ -56,7 +56,7 @@ export const longHeadingPass: Pass = {
             "Encurtar exige decidir o que é essencial — a ferramenta não reescreve títulos.",
           meta: { reason: "length", words: block.wordCount, threshold: max },
         });
-        continue; // um título ganha uma marca só; o comprimento tem prioridade.
+        continue;
       }
 
       const multi = block.sentences.length >= 2;

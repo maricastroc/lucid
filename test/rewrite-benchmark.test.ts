@@ -7,8 +7,6 @@ import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-// A sonda roda sempre num modelo BARATO/GRÁTIS (não é o sistema sob teste) — Groq free por
-// padrão; cai no Gemini flash grátis se só houver chave do Gemini.
 const PROBE_GROQ_MODEL = "llama-3.1-8b-instant";
 const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
@@ -108,8 +106,6 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
 
   for (const item of GOLDEN) {
     const target: Span = { start: 0, end: item.text.length, text: item.text };
-    // A engine dirige `directed`: alvo = trecho inteiro → todos os findings do trecho. Inócuo para
-    // `correct`/`rewrite` (ignoram `findings`), então passamos sempre — o mesmo juiz compara os três.
     const targetFindings = analyze(item.text).findings;
 
     const t0 = Date.now();
@@ -159,8 +155,6 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
         throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
       }
 
-      // O provider de cada modelo é inferido do id (Groq × Gemini). Default inclui o gerador forte
-      // grátis do Gemini ao lado dos free da Groq, no mesmo juiz determinístico.
       const models = (process.env.BENCHMARK_MODELS ?? "llama-3.3-70b-versatile,gemini-2.5-flash")
         .split(",")
         .map((m) => m.trim())

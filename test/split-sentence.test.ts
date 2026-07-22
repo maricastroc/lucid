@@ -35,7 +35,7 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
     expect(points).toHaveLength(1);
     expect(points[0].kind).toBe("comma_conjunction");
     expect(points[0].marker).toBe("e");
-    expect(points[0].offset).toBe(source.indexOf(", e") ); // âncora é a vírgula
+    expect(points[0].offset).toBe(source.indexOf(", e") );
   });
 
   it("vírgula SEM conjunção coordenativa não vira ponto de divisão", () => {
@@ -73,7 +73,6 @@ describe("clauseSplitPoints — guardas de borda", () => {
 
   it("não há ponto quando não existe letra depois da fronteira", () => {
     const source = "O texto termina de forma abrupta aqui mesmo, e";
-    // "e" final não tem letra depois — mas o guard exige a próxima letra a capitalizar
     const points = clauseSplitPoints(source, wholeSpan(source));
     expect(points).toEqual([]);
   });
@@ -122,7 +121,6 @@ describe("applySplitAt — transform puro", () => {
     const source = "Revisamos o texto com atenção; enviamos ao setor responsável no mesmo dia.";
     const [p] = clauseSplitPoints(source, wholeSpan(source));
     const out = applySplitAt(source, p);
-    // toda palavra do original sobrevive (comparação por conjunto de palavras minúsculas)
     const words = (s: string) => (s.toLowerCase().match(/\p{L}+/gu) ?? []).sort();
     expect(words(out)).toEqual(words(source));
   });

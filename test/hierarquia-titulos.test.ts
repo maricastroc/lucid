@@ -36,7 +36,6 @@ describe("salto_de_nivel_titulo", () => {
   });
 
   it("cada salto descendente é marcado uma vez", () => {
-    // h1 → h3 (salta 2) e depois h1 → h4 (salta 2 e 3): dois findings.
     const found = saltos([H(1, "A"), H(3, "B"), H(1, "C"), H(4, "D")]);
     expect(found.map((f) => f.span.text)).toEqual(["B", "D"]);
   });

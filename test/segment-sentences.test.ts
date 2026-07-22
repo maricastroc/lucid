@@ -62,10 +62,6 @@ describe("segmentSentences — abreviações comuns em PT-BR", () => {
   it("não quebra depois de etc.", () => {
     const source = "Compramos frutas, verduras, etc. Voltamos cedo para casa.";
     expect(textos(source)).toEqual(["Compramos frutas, verduras, etc. Voltamos cedo para casa."]);
-    // etc. seguido de maiúscula é o caso mais difícil: a política conservadora do MVP
-    // suprime SEMPRE que a palavra está no léxico, então esta frase fica unida — é a
-    // limitação documentada (ver §6.1 / README dos dados): abreviação nunca quebra,
-    // mesmo quando estatisticamente o próximo período começa nova frase.
   });
 });
 

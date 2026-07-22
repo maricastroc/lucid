@@ -49,7 +49,7 @@ describe("passiveScaffold — papéis extraídos do texto", () => {
     const { finding, source } = agentPassive("O muro foi pichado pelos manifestantes.");
     const s = passiveScaffold(finding, source)!;
     expect(s.action.participle).toBe("pichado");
-    expect(s.action.baseVerb).toBe("pichar"); // -ar regular, derivado por regra (não estava na tabela)
+    expect(s.action.baseVerb).toBe("pichar");
     expect(s.agent).toBe("manifestantes");
   });
 

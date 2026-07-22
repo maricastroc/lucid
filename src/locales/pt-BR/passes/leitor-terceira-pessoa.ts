@@ -57,7 +57,6 @@ function firstWordIndex(tokens: readonly Token[]): number {
   return -1;
 }
 
-/** Procura um verbo deôntico à frente, dentro da janela, abortando em barreira. */
 function findDeonticAfter(tokens: readonly Token[], startIndex: number): number | null {
   let consumed = 0;
   for (let i = startIndex; i < tokens.length && consumed < MAX_WINDOW_TOKENS; i++) {
@@ -68,7 +67,7 @@ function findDeonticAfter(tokens: readonly Token[], startIndex: number): number 
       consumed++;
       continue;
     }
-    return null; // qualquer não-palavra que não seja barreira reconhecida → aborta
+    return null;
   }
   return null;
 }
@@ -92,7 +91,6 @@ export const leitorTerceiraPessoaPass: Pass = {
         const noun = tokens[i];
         if (!(noun.isWord && READER_NOUNS.has(noun.lower))) continue;
 
-        // Posição de sujeito: precedido de artigo definido, ou é a primeira palavra da frase.
         const prev = tokens[i - 1];
         const articleBefore = prev?.isWord && DEFINITE_ARTICLES.has(prev.lower) ? prev : null;
         const isSubject = articleBefore !== null || i === firstWord;
