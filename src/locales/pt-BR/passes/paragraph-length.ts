@@ -22,7 +22,8 @@ export const paragraphLengthPass: Pass = {
     const max = ctx.config.paragraphLength.maxSentences;
     const findings: Finding[] = [];
 
-    for (const paragraph of ctx.doc.paragraphs) {
+    for (const paragraph of ctx.doc.blocks) {
+      if (paragraph.kind !== "paragraph") continue;
       const n = paragraph.sentences.length;
       if (n <= max) continue;
       findings.push({

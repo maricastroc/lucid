@@ -54,17 +54,52 @@ export interface Sentence {
 }
 
 /**
- * Bloco de texto entre linhas em branco — a camada estrutural MÍNIMA (Princípio 2). Só
- * parágrafos por ora: títulos/listas exigem convenção de marcação e ficam adiados (ADR-026).
+ * Bloco estrutural do documento (Princípio 2). O modelo canônico cresce por FORMATO, de forma
+ * ADITIVA (docs/DESIGN-modelo-independente-de-formato.md §5, ADR-038): texto puro só produz
+ * `paragraph`; importadores estruturados (DOCX/Markdown/HTML) produzem `heading`/`list` também.
+ * `start`/`end` são offsets em `Document.source`. Os detectores leem `block.kind` e funcionam igual
+ * para qualquer origem — só não encontram `heading` em texto puro (correto: texto puro não tem
+ * título de verdade).
  */
-export interface Paragraph {
-  text: string;
-  start: number;
-  end: number;
-  sentences: readonly Sentence[];
-  /** soma de `wordCount` das frases do parágrafo */
-  wordCount: number;
+interface BlockBase {
+  readonly text: string;
+  readonly start: number;
+  readonly end: number;
 }
+
+/** Parágrafo — prosa entre linhas em branco. O ÚNICO bloco que o texto puro produz. */
+export interface ParagraphBlock extends BlockBase {
+  readonly kind: "paragraph";
+  readonly sentences: readonly Sentence[];
+  /** soma de `wordCount` das frases do bloco */
+  readonly wordCount: number;
+}
+
+/** Título/cabeçalho — só de formatos estruturados (estilos do DOCX, `#` do Markdown, `<h*>`). */
+export interface HeadingBlock extends BlockBase {
+  readonly kind: "heading";
+  /** nível hierárquico (1 = mais alto) */
+  readonly level: number;
+  readonly sentences: readonly Sentence[];
+  readonly wordCount: number;
+}
+
+/** Item de lista — mini-bloco de prosa dentro de uma `ListBlock`. */
+export interface ListItemBlock extends BlockBase {
+  readonly kind: "listItem";
+  readonly sentences: readonly Sentence[];
+  readonly wordCount: number;
+}
+
+/** Lista — itens explícitos de um formato estruturado (numeração/marcadores do DOCX, `-`/`1.`…). */
+export interface ListBlock extends BlockBase {
+  readonly kind: "list";
+  readonly ordered: boolean;
+  readonly items: readonly ListItemBlock[];
+}
+
+/** União discriminada dos blocos de TOPO. `listItem` vive dentro de `list`, não no topo. */
+export type Block = ParagraphBlock | HeadingBlock | ListBlock;
 
 /**
  * O modelo intermediário CANÔNICO da Camada 1 — o `AnnotatedDocument` do design (ver
@@ -77,8 +112,8 @@ export interface Document {
   readonly source: string;
   readonly sentences: readonly Sentence[];
   readonly tokens: readonly Token[];
-  /** blocos estruturais — hoje só parágrafos; cresce (heading/list/…) de forma ADITIVA por formato */
-  readonly paragraphs: readonly Paragraph[];
+  /** blocos estruturais — texto puro só produz `paragraph`; cresce (heading/list/…) por formato */
+  readonly blocks: readonly Block[];
 }
 
 // --- Pass (unidade do pipeline) ----------------------------------------------------

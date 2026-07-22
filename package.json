@@ -13,6 +13,7 @@
     "depcheck": "depcruise src --config .dependency-cruiser.cjs"
   },
   "dependencies": {
+    "mammoth": "^1.12.0",
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"

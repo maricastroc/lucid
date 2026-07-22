@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import type { Mode } from "./document-view";
 import { useTheme } from "../hooks/use-theme";
 import { MoonIcon, SunIcon } from "./icons";
@@ -7,10 +8,13 @@ import { MoonIcon, SunIcon } from "./icons";
 interface Props {
   mode: Mode;
   onChangeMode: (mode: Mode) => void;
+  onOpenDocx: (file: File) => void;
+  importing: boolean;
 }
 
-export function Masthead({ mode, onChangeMode }: Props) {
+export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
   const { theme, toggle } = useTheme();
+  const fileInput = useRef<HTMLInputElement>(null);
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-rule-1 bg-desk px-4 sm:px-6">
@@ -24,6 +28,26 @@ export function Masthead({ mode, onChangeMode }: Props) {
       </div>
 
       <div className="flex items-center gap-2">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onOpenDocx(file);
+            e.target.value = ""; // permite reabrir o mesmo arquivo
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileInput.current?.click()}
+          disabled={importing}
+          className="hidden items-center gap-1.5 rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60 sm:inline-flex"
+        >
+          {importing ? "Abrindo…" : "Abrir .docx"}
+        </button>
+
         <div
           role="tablist"
           aria-label="Modo de trabalho"

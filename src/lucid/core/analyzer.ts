@@ -4,7 +4,7 @@ import { buildScore } from "./score";
 import { hashConfig } from "./config";
 import type { Config } from "./config";
 import type { LocaleBundle } from "./contracts/locale";
-import type { Diagnostic, Finding, PassContext } from "./types";
+import type { Diagnostic, Document, Finding, PassContext } from "./types";
 
 const LUCID_VERSION = "0.1.0";
 
@@ -27,13 +27,17 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
  * exclusivamente a partir dele: serviços de documento, métrica (sílabas + fórmula), passes e o
  * registry escopado. Nenhum `import` específico de PT vive aqui; nenhum `if (locale === ...)`.
  */
-export function analyzeWithLocale(text: string, locale: LocaleBundle, configOverrides?: Partial<Config>): Diagnostic {
+/**
+ * A porta em NÍVEL DE DOCUMENTO (ADR-038): analisa um `AnnotatedDocument` já montado — a superfície
+ * que os importadores estruturados (DOCX/PDF/…) usam. `analyzeWithLocale(text)` é o caso de texto
+ * puro: monta o `Document` com o importador de texto e delega aqui. Nenhum detector sabe a origem.
+ */
+export function analyzeDocumentWithLocale(
+  doc: Document,
+  locale: LocaleBundle,
+  configOverrides?: Partial<Config>,
+): Diagnostic {
   const config = mergeConfig(locale.config, configOverrides);
-
-  const doc = buildDocument(text, {
-    segmentSentences: locale.services.segmentSentences,
-    abbreviations: locale.data.abbreviations,
-  });
 
   const metrics = runMetrics(doc, config, {
     countSyllables: locale.metrics.countSyllables,
@@ -63,6 +67,19 @@ export function analyzeWithLocale(text: string, locale: LocaleBundle, configOver
       standardVersion: locale.standardVersion,
     },
   };
+}
+
+/**
+ * Núcleo do analyzer para TEXTO PURO — NEUTRO de idioma (ADR-031). Monta o `Document` com o
+ * importador de texto do locale e delega a `analyzeDocumentWithLocale`. `analyze(text)` do barrel
+ * é o caso pt-BR desta função.
+ */
+export function analyzeWithLocale(text: string, locale: LocaleBundle, configOverrides?: Partial<Config>): Diagnostic {
+  const doc = buildDocument(text, {
+    segmentSentences: locale.services.segmentSentences,
+    abbreviations: locale.data.abbreviations,
+  });
+  return analyzeDocumentWithLocale(doc, locale, configOverrides);
 }
 
 /**
