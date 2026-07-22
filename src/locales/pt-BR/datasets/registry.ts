@@ -32,6 +32,7 @@ import adverbiosMenteData from "./adverbios-mente.pt.json";
 import redundanciasData from "./redundancias.pt.json";
 import perifrasesData from "./perifrases.pt.json";
 import duplasNegacoesData from "./duplas-negacoes.pt.json";
+import subordinadoresData from "./subordinadores.pt.json";
 import serTemposData from "./ser-tempos.pt.json";
 import conjugacoesAtivasData from "./conjugacoes-ativas.pt.json";
 
@@ -108,6 +109,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: duplasNegacoesData,
     prepare: preparePhrases,
     provenance: "dupla negação / litotes → forma direta (curadoria própria)",
+  },
+  "subordinadores.pt": {
+    raw: subordinadoresData,
+    prepare: preparePhrases,
+    provenance: "conectivos subordinativos (conj./locuções + relativos seguros) para densidade (curadoria própria)",
   },
   "ser-tempos.pt": {
     raw: serTemposData,

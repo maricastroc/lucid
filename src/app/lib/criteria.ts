@@ -48,6 +48,7 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "perifrase_inflada",
   "mesoclise",
   "dupla_negacao",
+  "subordinacao_densa",
   "long_sentence",
   "paragraph_length",
   "prose_enumeration",
@@ -183,6 +184,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "mark-dashed",
     signal: "expressão cadastrada que afirma negando o negativo (litotes)",
     why: "O leitor precisa desfazer a negação para chegar ao sentido afirmativo.",
+  },
+  subordinacao_densa: {
+    label: "Subordinação densa",
+    ruleId: "subordinacao_densa",
+    kind: "Construção sintática",
+    principleName: "Frases concisas",
+    channel: "passage",
+    markStyleClass: "",
+    signal: "concentração de conectivos subordinativos na mesma frase (léxico curado, sem os polissêmicos)",
+    why: "Muitas orações subordinadas encadeadas prendem ideias demais numa frase só e pesam a leitura.",
   },
 };
 

@@ -1574,6 +1574,40 @@ altera nenhum `Diagnostic`. O runtime continua sem conjugador produtivo (só `-a
 
 ---
 
+## ADR-035 — Critério novo: densidade de subordinação (`subordinacao_densa`, 5.3.4)
+
+**Contexto.** Primeiro item do roadmap Fase 2 do CLAUDE.md ("densidade de subordinação — orações por
+frase"). A norma pede frases concisas / uma ideia por frase; uma frase que encadeia muitas orações
+subordinadas viola isso. O desafio: contar "orações" sem parser.
+
+**Decisão.** Proxy determinístico = **contagem de CONECTIVOS subordinativos por frase** (léxico
+`subordinadores.pt` + o matcher de frase contígua compartilhado, single e multipalavra). Se a
+contagem atinge `config.subordinacao.minPorFrase` (default **3**), emite **um** finding por frase
+(canal `passage`, alvo = a frase inteira, como `long_sentence`), `warning` + `requiresHuman`, sem
+sugestão (separar orações é trabalho de autor).
+
+**A curadoria é a decisão (precisão > recall).** O léxico só conta conectivos de sentido estável:
+conjunções-função de baixa colisão (`embora`, `porque`, `enquanto`…) + locuções auto-desambiguadas
+pela própria expressão (`uma vez que`, `para que`, `à medida que`…, mesmo argumento das MWEs do
+jargão) + relativos seguros (`cujo/a/s`). **Deixa DE FORA, de propósito, os polissêmicos** que
+exigiriam análise sintática — `que`/`se`/`como`/`caso`/`segundo`/`conforme`/`onde`. Contar `que` cru
+marcaria toda oração relativa. Consequência assumida e honesta: a contagem **subestima** a
+subordinação real. É um piso — uma frase que bate o limiar só com conectivos inequívocos é,
+comprovadamente, densa. Nunca o contrário (falso-positivo), que é o que a regra do projeto proíbe.
+
+**Integração (14 pontos, trilha conhecida do ADR-029).** `subordinadores.pt` (dataset + registry +
+README) · `Config.subordinacao{enabled,minPorFrase}` · `passes/subordinacao.ts` + registro · novo id
+em `CRITERION_IDS` · `CRITERION_META`/`CRITERION_ORDER` (completude em compile-time) · união do
+golden. O `dataHash`/`configHash` de todo `analyze` mudou (dataDeps + Config cresceram) → snapshots
+regenerados; o diff é **só** `dataHash`/`configHash` + a entrada de score zerada do critério novo —
+**zero finding novo** nos textos existentes do golden (prova de que não há falso-positivo).
+
+**Consequências.** **904 testes verdes** (novos: dispara em ≥3 conectivos, não em 2; locuções contam
+incl. `à medida que`; `que`/`se`/`caso` NÃO inflam; caso no golden integrado). Typecheck/lint/
+depcheck limpos. 13→**14 critérios**. Verificado ao vivo.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

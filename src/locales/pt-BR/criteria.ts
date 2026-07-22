@@ -23,6 +23,7 @@ export const CRITERION_IDS = [
   "prose_enumeration",
   "mesoclise",
   "dupla_negacao",
+  "subordinacao_densa",
 ] as const;
 
 /** Id estável de um critério do pt-BR — a união derivada de `CRITERION_IDS`. */

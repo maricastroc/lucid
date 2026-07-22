@@ -336,6 +336,29 @@ e claras em PT, **não** entram. Sem colisão com o glossário de jargão.
 
 **Licença:** curadoria própria (fatos de língua).
 
+## `subordinadores.pt.json` — densidade de subordinação (ADR-035)
+
+**Usado por:** `passes/subordinacao.ts` (`subordinacao_densa`, 5.3.4). Matcher de frase compartilhado
+(`phrase-match.ts`, single + multipalavra), longest-match-first.
+
+**Propósito:** membership para **contar** orações subordinadas por frase (conectivos subordinativos)
+como proxy determinístico de "orações por frase", sem parser. **Não é troca:** `plain` é sempre
+`null` — o léxico só conta.
+
+**Critério de curadoria (PRECISÃO > recall):** entram (a) conjunções-função de baixa colisão com
+substantivo (`embora`, `porque`, `enquanto`, `conquanto`, `porquanto`, `quando`) + relativos seguros
+(`cujo/a/s`); (b) locuções auto-desambiguadas pela própria expressão (`uma vez que`, `para que`,
+`à medida que`, `desde que`, `ainda que`…) — o mesmo argumento das MWEs do jargão. **Ficam DE FORA,
+de propósito, os subordinadores polissêmicos** que exigiriam análise sintática para não gerar
+falso-positivo: `que`/`se`/`como` (integrante vs. relativo vs. comparativo), `caso`/`segundo`
+(também substantivo/ordinal), `conforme`/`onde` (também preposição/advérbio), `qual/quais/quem/quanto`.
+Contar `que` cru inflaria a densidade em toda oração relativa. Consequência assumida: a contagem
+**subestima** a subordinação real — piso honesto, nunca exagero.
+
+**Formato:** `{ "entries": [{ "phrase": string, "plain": null }] }`, caixa invariante.
+
+**Licença:** curadoria própria (fatos de língua).
+
 ## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — conversão voz passiva→ativa (ADR-032)
 
 **Usados por:** `actions/passive-to-active.ts` (ação estrutural do Tier 2). São dados de **AÇÃO**,
