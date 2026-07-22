@@ -11,7 +11,8 @@ export type IntegratedCriterion =
   | "paragraph_length"
   | "prose_enumeration"
   | "mesoclise"
-  | "dupla_negacao";
+  | "dupla_negacao"
+  | "subordinacao_densa";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;
@@ -237,5 +238,25 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     text: "O prazo (art. 5º) vale; veja o e-mail contato@exemplo.com.br e o site https://gov.br agora.",
     expected: { findings: [], metrics: { words: 12, sentences: 1 } },
     notes: "e-mail e URL são tokens únicos não-palavra; 'art.' não quebra a frase (abreviação). Zero findings.",
+  },
+  {
+    id: "subordinacao_densa_tres_conectivos",
+    description: "três locuções subordinativas encadeadas numa frase (densidade ≥3)",
+    text: "Para que o pedido avance, desde que haja verba, uma vez que o setor aprove, o processo segue.",
+    expected: {
+      findings: [
+        {
+          criterion: "subordinacao_densa",
+          severity: "warning",
+          start: 0,
+          end: 93,
+          spanText: "Para que o pedido avance, desde que haja verba, uma vez que o setor aprove, o processo segue.",
+          requiresHuman: true,
+        },
+      ],
+      metrics: { words: 18, sentences: 1 },
+    },
+    notes:
+      "conta 'para que' + 'desde que' + 'uma vez que' = 3 conectivos inequívocos; o alvo é a frase (passage). Só este finding.",
   },
 ];

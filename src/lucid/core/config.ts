@@ -48,6 +48,10 @@ export interface Config {
   duplaNegacao: {
     enabled: boolean;
   };
+  subordinacao: {
+    enabled: boolean;
+    minPorFrase: number;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -100,6 +104,10 @@ export const DEFAULT_CONFIG: Config = {
   },
   duplaNegacao: {
     enabled: true,
+  },
+  subordinacao: {
+    enabled: true,
+    minPorFrase: 3,
   },
   metrics: {
     decimalPlaces: 1,
