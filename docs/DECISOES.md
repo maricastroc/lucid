@@ -1991,6 +1991,45 @@ agora, título-sem-eco — os quatro itens listados).
 
 ---
 
+## ADR-045 — Tier 3 · terceira estratégia `directed@1`: a engine dirige a IA com seus findings reais (CONSTRUÍDA, não promovida)
+
+**Status:** aceito · Tier 3 · realiza a Etapa 4 do [ADR-000]; promoção DEFERIDA até prova de benchmark
+
+**Contexto.** O ADR-000 fecha o triângulo `detecta → dirige → verifica`, mas a perna "dirige" estava
+fina: o prompt só recebia UMA dica genérica por critério (`CRITERION_HINT`, ADR-017). A IA decidia
+sozinha o que "simples" significa — trabalho do ChatGPT, não do Lucid. A hipótese (levantada pela
+usuária): passar os findings REAIS da engine ao prompt melhora a taxa de aprovação e o delta de
+severidade, e — o que mais importa — reforça a tese, porque o crédito por um bom resultado passa a
+ser da engine (que escreveu o briefing), não da prosa da IA.
+
+**Decisão — nova estratégia versionada, comparável, NÃO default.** `directed@1` = a reescrita livre
+(`rewrite@2`) com a dica genérica trocada por um BRIEFING dos findings reais no trecho
+(`buildDirectedBriefing`: instrução por critério + trechos curtos citados como exemplo; puro e
+determinístico). `RewriteRequest.findings?` novo; `LlmRewriteProposer` repassa; o `id` carrega
+`directed@1` (proveniência/benchmark). Mesmas blindagens de invenção das outras duas.
+
+**O default segue `rewrite@2`; a UI não muda.** Fiel ao deferral do ADR-000: `directed` só vira
+default (e entra na UI) DEPOIS que o benchmark provar que bate `rewrite@2`. Construir ≠ promover.
+
+**Como provar (comando).** O benchmark (ADR-017) já compara os três sistemas
+(`correct`/`rewrite`/`directed`) no MESMO juiz determinístico:
+```
+set -a; . ./.env; set +a; BENCHMARK=1 npx vitest run test/rewrite-benchmark.test.ts
+```
+Critério de promoção: `directed` deve manter clareza (ΔFlesch) comparável a `rewrite` e **melhorar
+sem-veto% / findings(depois)** (a hipótese é que mirar os findings reais reduz o veto por peso de
+severidade, ADR-018). Se ganhar → flipar o default do proposer + passar `findings` na fiação da UI
+(`app/lib/rewrite.ts` / `api/rewrite`). Se empatar/perder → manter `rewrite@2`, registrar aqui.
+
+**Consequências.** +5 testes determinísticos (`test/rewrite-directed.test.ts`: briefing encoda os
+findings, exemplos citados, determinismo byte-idêntico, degradação sem findings, `id`), **960 verdes**.
+Zero mudança de comportamento na UI (default intacto). Typecheck/lint limpos; cerca intacta
+(`report/**` importa `core`; a direção `L1 → L2` do dado já era permitida). O Briefing como ENTIDADE
+de 1ª classe segue deferido (ADR-000) — `directed@1` é a versão mínima (prompt enriquecido), o
+suficiente para o benchmark decidir.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

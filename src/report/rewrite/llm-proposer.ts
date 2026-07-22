@@ -56,7 +56,11 @@ export class LlmRewriteProposer implements RewriteProposer {
   async propose(request: RewriteRequest): Promise<RewriteProposal> {
     const original = request.target.text;
     const strategy = request.strategy ?? this.strategy;
-    const prompt = buildRewritePrompt(request.text, request.target, { strategy, criterion: request.criterion });
+    const prompt = buildRewritePrompt(request.text, request.target, {
+      strategy,
+      criterion: request.criterion,
+      findings: request.findings,
+    });
     const raw = await this.provider.complete(prompt, { model: this.model, temperature: 0, maxTokens: 2048 });
     const parsed = parseRewrite(raw);
     return { proposerId: this.id, original, proposed: parsed ?? original, localeId: request.localeId };

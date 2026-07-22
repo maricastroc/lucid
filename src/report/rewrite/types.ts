@@ -11,7 +11,7 @@
  * Fronteira: estes tipos vivem em `report/**`, a única camada que pode conhecer `core` e
  * `probe` ao mesmo tempo. `core/**` nunca importa daqui.
  */
-import type { Diagnostic, Span } from "../../lucid/core/types";
+import type { Diagnostic, Finding, Span } from "../../lucid/core/types";
 import type { RewriteStrategy } from "./prompt";
 
 /**
@@ -37,6 +37,11 @@ export interface RewriteRequest {
   target: Span;
   criterion?: string;
   strategy?: RewriteStrategy;
+  /**
+   * Findings da engine que caem no trecho-alvo — a estratégia `directed` os usa para DIRIGIR a
+   * reescrita (ADR-000: a engine dirige, a IA executa). Ignorado pelas demais estratégias.
+   */
+  findings?: readonly Finding[];
   /** locale para o qual a proposta é gerada — carimbado na proposta (anti-mistura, ADR-031). */
   localeId?: string;
 }
