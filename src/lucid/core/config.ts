@@ -55,6 +55,9 @@ export interface Config {
   leitorTerceiraPessoa: {
     enabled: boolean;
   };
+  hierarquiaTitulos: {
+    enabled: boolean;
+  };
   metrics: {
     decimalPlaces: number;
   };
@@ -113,6 +116,9 @@ export const DEFAULT_CONFIG: Config = {
     minPorFrase: 3,
   },
   leitorTerceiraPessoa: {
+    enabled: true,
+  },
+  hierarquiaTitulos: {
     enabled: true,
   },
   metrics: {

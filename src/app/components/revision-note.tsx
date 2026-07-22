@@ -617,6 +617,13 @@ function Guidance({
           decisão de formatação sua.
         </GuideText>
       );
+    case "salto_de_nivel_titulo":
+      return (
+        <GuideText>
+          A hierarquia de títulos pulou um nível. Rebaixe este título para o nível logo abaixo do anterior, ou crie o
+          título intermediário que falta — assim o sumário e a leitura por estrutura ficam previsíveis.
+        </GuideText>
+      );
     default:
       return assertNever(c);
   }

@@ -1777,6 +1777,35 @@ lint/depcheck limpos. **Pendente (Fase 2):** detectores de Princípio 2 lendo `b
 
 ---
 
+## ADR-041 — Fase 2: primeiro detector de Princípio 2 sobre estrutura (`salto_de_nivel_titulo`, 5.2)
+
+**Contexto.** Com o modelo de blocos (ADR-038) e o importador DOCX (ADR-039/040), a Camada 1 finalmente
+tem `heading` com nível. É a hora do primeiro detector de Princípio 2 (Localizável) que **depende** da
+estrutura — algo impossível em texto puro.
+
+**Decisão.** `salto_de_nivel_titulo`: lê os blocos `kind === "heading"` em ordem e marca quando um
+título DESCE mais de um nível de uma vez (ex.: nível 1 → 3, sem o 2). Determinístico e conservador:
+só o salto DESCENDENTE (subir de volta, 3 → 1, é fechar seções — normal). `passage` (marca o título),
+`warning`, `requiresHuman`, sem sugestão (reorganizar hierarquia é do autor). Texto puro não tem
+`heading` → nunca dispara (correto: sem marcação, não há hierarquia de título de verdade). É o
+detector que **prova o payoff do DOCX-first**: a estrutura vira diagnóstico.
+
+**Copy sem lacuna (ADR-037 pagando dividendo).** Como `NARRATIVE` e o `switch` de `Guidance` são
+exaustivos por `CriterionId`, o typecheck EXIGIU a copy do critério novo junto com o pass — cabeçalho,
+prose, rationale e guia próprios, sem fallback errado. A dívida quitada evitou o bug do ADR-035.
+
+**Consequências.** 15→**16 critérios**. **927 testes verdes** (5 novos: h1→h3 marca; um-degrau-por-vez
+não marca; subir não é salto; cada salto marcado uma vez; texto puro nunca dispara). Snapshots
+regenerados — diff só `dataHash`/`configHash` + score zerado, **zero finding novo** nos golden de texto.
+Typecheck/lint/depcheck limpos. **Nota:** o golden integrado é baseado em TEXTO (`analyze(text)`), que
+não produz `heading`; por isso este critério é coberto pelo teste dedicado (com `Document` estruturado),
+não por um caso no golden de texto.
+
+**Pendente (Fase 2, futuro):** outros detectores de Princípio 2 (título longo/que-é-frase; lista de um
+item só) e o **render visual dos blocos** na UI (títulos/listas destacados no documento).
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

@@ -25,6 +25,7 @@ import { mesoclisePass } from "./mesoclise";
 import { duplaNegacaoPass } from "./dupla-negacao";
 import { subordinacaoPass } from "./subordinacao";
 import { leitorTerceiraPessoaPass } from "./leitor-terceira-pessoa";
+import { hierarquiaTitulosPass } from "./hierarquia-titulos";
 
 export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
@@ -42,4 +43,5 @@ export const PASSES: readonly Pass[] = [
   duplaNegacaoPass,
   subordinacaoPass,
   leitorTerceiraPessoaPass,
+  hierarquiaTitulosPass,
 ];
