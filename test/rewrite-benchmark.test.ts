@@ -108,9 +108,12 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
 
   for (const item of GOLDEN) {
     const target: Span = { start: 0, end: item.text.length, text: item.text };
+    // A engine dirige `directed`: alvo = trecho inteiro → todos os findings do trecho. Inócuo para
+    // `correct`/`rewrite` (ignoram `findings`), então passamos sempre — o mesmo juiz compara os três.
+    const targetFindings = analyze(item.text).findings;
 
     const t0 = Date.now();
-    const proposal = await proposer.propose({ text: item.text, target });
+    const proposal = await proposer.propose({ text: item.text, target, findings: targetFindings });
     const latencyMs = Date.now() - t0;
     const tokens = readTokens();
 
@@ -162,7 +165,7 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
         .split(",")
         .map((m) => m.trim())
         .filter(Boolean);
-      const strategies: RewriteStrategy[] = ["correct", "rewrite"];
+      const strategies: RewriteStrategy[] = ["correct", "rewrite", "directed"];
 
       const rows: string[] = [];
       rows.push("| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade(s/deriva)% | s/nome-perdido% | sem veto% | latência ms | tokens |");

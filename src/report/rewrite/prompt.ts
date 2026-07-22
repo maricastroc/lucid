@@ -1,26 +1,30 @@
 /**
  * Tier 3 · prompts VERSIONADOS da reescrita (ADR-016/017).
  *
- * DUAS ESTRATÉGIAS, para o benchmark comparar SISTEMAS (não só textos):
- *   · `correct@1` — orientada a CORRIGIR o finding com a MENOR alteração possível: mantém a
+ * TRÊS ESTRATÉGIAS, para o benchmark comparar SISTEMAS (não só textos):
+ *   · `correct@1`  — orientada a CORRIGIR o finding com a MENOR alteração possível: mantém a
  *     estrutura e a ordem das ideias, troca o mínimo. É a hipótese conservadora.
- *   · `rewrite@2` — REESCRITA DO ZERO para linguagem cidadã: liberdade para reorganizar,
+ *   · `rewrite@2`  — REESCRITA DO ZERO para linguagem cidadã: liberdade para reorganizar,
  *     condensar e mudar a estrutura do trecho. É a hipótese ousada.
+ *   · `directed@1` — a livre, mas DIRIGIDA pelos findings REAIS da engine no trecho (ADR-000:
+ *     "a engine dirige, a IA executa"). Hipótese a validar no benchmark antes de virar default —
+ *     por isso o Briefing como entidade de 1ª classe fica DEFERIDO até a prova (ver ADR-000).
  *
- * Ambas são BLINDADAS igualmente contra o risco fatal do LLM — inventar: nenhuma pode
+ * Todas são BLINDADAS igualmente contra o risco fatal do LLM — inventar: nenhuma pode
  * acrescentar fato, e nenhuma pode inventar quem praticou a ação (o "nós" fabricado). Quem
  * julga a saída é o verificador determinístico + a sonda; o prompt só propõe.
  *
  * Trocar QUALQUER palavra de um prompt exige subir a versão da estratégia — o id do proposer
  * carrega `<estratégia@versão>`, então a mudança é rastreável no benchmark.
  */
-import type { Span } from "../../lucid/core/types";
+import type { Finding, Span } from "../../lucid/core/types";
 
-export type RewriteStrategy = "correct" | "rewrite";
+export type RewriteStrategy = "correct" | "rewrite" | "directed";
 
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
   rewrite: "rewrite@2",
+  directed: "directed@1",
 };
 
 /** Versão da estratégia PADRÃO (`rewrite`) — mantida para compatibilidade de import. */
@@ -89,13 +93,79 @@ Responda SOMENTE com este JSON, sem texto fora dele:
 {"reescrita": "sua reescrita do trecho-alvo aqui"}`;
 }
 
+/**
+ * Briefing DIRIGIDO (ADR-000, "a engine dirige"): renderiza os findings REAIS que a engine
+ * determinística achou no trecho-alvo, agrupados por critério — a instrução do critério (reusa
+ * `CRITERION_HINT`) + os trechos CURTOS citados como exemplo (jargão, passiva). Trechos longos
+ * (≈ a própria frase-alvo) não são recitados. Puro e determinístico: os findings vêm de
+ * `analyze()` em ordem de documento, então a saída é função pura deles (byte-idêntica).
+ */
+function buildDirectedBriefing(findings: readonly Finding[]): string {
+  const order: string[] = [];
+  const spansByCriterion = new Map<string, string[]>();
+  for (const f of findings) {
+    const seen = spansByCriterion.get(f.criterion);
+    if (seen) seen.push(f.span.text.replace(/\s+/g, " ").trim());
+    else {
+      spansByCriterion.set(f.criterion, [f.span.text.replace(/\s+/g, " ").trim()]);
+      order.push(f.criterion);
+    }
+  }
+  return order
+    .map((criterion) => {
+      const instruction = CRITERION_HINT[criterion] ?? "Resolva o problema de clareza apontado neste ponto.";
+      const shortSpans = [...new Set((spansByCriterion.get(criterion) ?? []).filter((s) => s.split(/\s+/).length <= 6))];
+      const examples = shortSpans.length ? ` (ex.: ${shortSpans.map((s) => `"${s}"`).join(", ")})` : "";
+      return `- ${instruction}${examples}`;
+    })
+    .join("\n");
+}
+
+/**
+ * `directed@1` — reescrita livre DIRIGIDA pelos findings da engine no trecho. Igual à livre
+ * (`rewrite@2`), mas troca a dica genérica pelo briefing dos problemas REAIS que a engine apontou.
+ * Sem findings, degrada para o formato livre (sem bloco de briefing). Mesmas blindagens de invenção.
+ */
+function buildDirectedPrompt(fullText: string, target: Span, findings: readonly Finding[]): string {
+  const briefing = buildDirectedBriefing(findings);
+  const brief = briefing
+    ? `\nA engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${briefing}\n`
+    : "";
+  return `Você reescreve textos em Linguagem Simples para um cidadão comum, sem NUNCA inventar.
+
+Contexto: abaixo está o DOCUMENTO INTEIRO, apenas para você entender o assunto.
+"""
+${fullText}
+"""
+
+Sua tarefa: reescreva SOMENTE o TRECHO-ALVO abaixo para que um cidadão comum o entenda na
+primeira leitura.
+${brief}
+Você PODE, dentro do trecho-alvo:
+- reorganizar a ordem das ideias e das frases;
+- dividir uma frase longa em várias curtas (uma ideia por frase);
+- condensar expressões e trocar palavras difíceis por comuns;
+- mudar a estrutura do trecho.
+
+Você NÃO PODE:
+${NO_INVENTION_RULES}
+
+TRECHO-ALVO (reescreva só isto):
+"""
+${target.text}
+"""
+
+Responda SOMENTE com este JSON, sem texto fora dele:
+{"reescrita": "sua reescrita do trecho-alvo aqui"}`;
+}
+
 export function buildRewritePrompt(
   fullText: string,
   target: Span,
-  options: { strategy?: RewriteStrategy; criterion?: string } = {},
+  options: { strategy?: RewriteStrategy; criterion?: string; findings?: readonly Finding[] } = {},
 ): string {
   const strategy = options.strategy ?? "rewrite";
-  return strategy === "correct"
-    ? buildCorrectPrompt(target, options.criterion)
-    : buildFreePrompt(fullText, target, options.criterion);
+  if (strategy === "correct") return buildCorrectPrompt(target, options.criterion);
+  if (strategy === "directed") return buildDirectedPrompt(fullText, target, options.findings ?? []);
+  return buildFreePrompt(fullText, target, options.criterion);
 }
