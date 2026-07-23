@@ -30,6 +30,20 @@ function firstPersonMarkers(text: string, re: RegExp): Set<string> {
   return new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
 }
 
+function agentNounsAnywhere(text: string, re: RegExp): Set<string> {
+  return new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
+}
+
+function agentSubjectMentions(text: string, re: RegExp): Set<string> {
+  const set = new Set<string>();
+  const r = new RegExp(re.source, re.flags);
+  let m: RegExpExecArray | null;
+  while ((m = r.exec(text)) !== null) {
+    set.add((m[1] ?? m[0]).toLowerCase());
+  }
+  return set;
+}
+
 function extractEntities(text: string): string[] {
   const out: string[] = [];
   const re = new RegExp(RE_ENTITY.source, "gu");
@@ -223,6 +237,18 @@ export async function verifyRewrite(
         : "sem sinal de nome próprio perdido (heurística, não prova)",
   });
 
+  const sourceAgentNouns = agentNounsAnywhere(text, locale.thirdPersonAgentNouns);
+  const proposedAgentSubjects = agentSubjectMentions(proposal.proposed, locale.thirdPersonAgentSubject);
+  const inventedAgents = [...proposedAgentSubjects].filter((a) => !sourceAgentNouns.has(a)).sort();
+  signals.push({
+    check: "possible_invented_agent",
+    flagged: inventedAgents.length > 0,
+    detail:
+      inventedAgents.length > 0
+        ? `a proposta introduz possível agente ausente no original: ${inventedAgents.join(", ")}`
+        : "sem sinal de agente em 3ª pessoa fabricado (heurística, não prova)",
+  });
+
   if (options.probe && options.question) {
     try {
       const [originalResult, proposedResult] = await Promise.all([
@@ -244,9 +270,6 @@ export async function verifyRewrite(
             : "sem sinal de perda de sentido pelo piso (não é garantia de compreensão)",
       });
     } catch (error) {
-      // Sonda é camada complementar e opcional (ver CLAUDE.md) — sua falha não pode derrubar
-      // provas determinísticas já calculadas. A chamada irmã (original/proposta) pode continuar
-      // em voo em segundo plano quando é a outra que rejeita primeiro; seu resultado é descartado.
       console.warn(
         `[verify] sonda de compreensão falhou — signal 'meaning_preserved' omitido. ` +
           `criterion=${options.criterion ?? "-"} error=${error instanceof Error ? error.message : String(error)}`,

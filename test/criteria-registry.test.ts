@@ -34,8 +34,6 @@ describe("registro de critérios (ADR-029)", () => {
 });
 
 describe("cada pass só produz findings com o PRÓPRIO criterion (contrato de buildScore)", () => {
-  // Texto sintético desenhado para disparar o maior número possível de critérios de uma vez —
-  // não é sobre qualidade linguística, é sobre cobertura de passes nesta checagem.
   const richText =
     "A carta foi escrita pelo funcionário responsável. Fizemos a análise dos dados do projeto. " +
     "Houve a realização da atualização do sistema imediatamente. O trabalho far-se-á sem demora. " +
@@ -51,8 +49,6 @@ describe("cada pass só produz findings com o PRÓPRIO criterion (contrato de bu
 
   const plainDoc = buildDocument(richText);
 
-  // Só documento ESTRUTURADO dispara os critérios de título/lista (salto de nível, título
-  // longo, lista de um item, título sem eco no corpo).
   const structuredDoc = buildStructuredDocument(
     [
       { kind: "heading", level: 1, text: "Título" },

@@ -303,6 +303,79 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
   });
 });
 
+describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado (LUCID-011)", () => {
+  it("agente institucional novo, ausente no original, levanta bandeira", async () => {
+    const text = "Foi decidido que o prazo seria prorrogado depois de muita discussão entre os envolvidos.";
+    const finding = spanFinding(text, "Foi decidido que o prazo seria prorrogado");
+    const p = proposal(finding, "A comissão decidiu prorrogar o prazo");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(true);
+    const detail = v.signals.find((s) => s.check === "possible_invented_agent")!.detail;
+    expect(detail).toContain("comissão");
+    expect(v.proofs.map((pr) => pr.check as string)).not.toContain("possible_invented_agent");
+    expect(v.hasBlockingFailure).toBe(false);
+  });
+
+  it("agente humano (cargo) novo, ausente no original, levanta bandeira", async () => {
+    const text = "Foi realizada a análise do pedido antes de qualquer outra providência no processo.";
+    const finding = spanFinding(text, "Foi realizada a análise do pedido");
+    const p = proposal(finding, "O diretor realizou a análise do pedido");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(true);
+    const detail = v.signals.find((s) => s.check === "possible_invented_agent")!.detail;
+    expect(detail).toContain("diretor");
+  });
+
+  it("agente já presente no original (como sujeito) não levanta bandeira", async () => {
+    const text = "A comissão recebeu o processo, que foi analisado no mesmo dia pelos membros presentes.";
+    const finding = spanFinding(text, "que foi analisado no mesmo dia pelos membros presentes");
+    const p = proposal(finding, "que a comissão analisou no mesmo dia");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("entidade presente no original em papel não-sujeito, promovida a sujeito na proposta, não levanta bandeira", async () => {
+    const text = "O processo foi encaminhado para a comissão competente analisar antes da decisão final.";
+    const finding = spanFinding(text, "O processo foi encaminhado para a comissão competente analisar");
+    const p = proposal(finding, "A comissão competente analisou o processo");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("frase sem agente novo (reformulação impessoal) não levanta bandeira", async () => {
+    const text = "Foi verificado se a documentação está em ordem antes do encaminhamento do processo.";
+    const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
+    const p = proposal(finding, "A documentação está em ordem");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("1ª pessoa fabricada continua vetada por no_invented_first_person, sem interferência do sinal novo", async () => {
+    const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
+    const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
+    const p = proposal(finding, "Nós analisamos o documento com a nossa comissão competente");
+
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(false);
+    expect(v.hasBlockingFailure).toBe(true);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("caso ambíguo — agente mencionado só como objeto oblíquo de preposição não-artigo — não levanta bandeira", async () => {
+    const text = "O relatório final foi lido com atenção antes de ser arquivado no fim do expediente.";
+    const finding = spanFinding(text, "O relatório final foi lido com atenção");
+    const p = proposal(finding, "O relatório fala sobre a equipe responsável pelo arquivamento");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+});
+
 describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
   const readable: ProbeResult = {
     podeResponder: true,

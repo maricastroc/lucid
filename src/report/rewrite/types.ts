@@ -6,6 +6,10 @@ export interface RewriteLocale {
   analyze(text: string): Diagnostic;
   readonly firstPersonMarkers: RegExp;
   readonly jargonCriterionId: string;
+  /** Qualquer forma de substantivo-agente (institucional ou de cargo) curado, sem exigir posição de sujeito — usado para checar presença em qualquer papel no texto-fonte. */
+  readonly thirdPersonAgentNouns: RegExp;
+  /** As mesmas formas, mas só quando precedidas de artigo definido (posição de sujeito aparente) — usado para detectar o agente que a proposta introduz. Captura o substantivo no grupo 1. */
+  readonly thirdPersonAgentSubject: RegExp;
 }
 
 export interface RewriteRequest {
@@ -49,7 +53,8 @@ export interface Proof {
 export interface VerificationSignal {
   check:
     | "entities_preserved"
-    | "meaning_preserved";
+    | "meaning_preserved"
+    | "possible_invented_agent";
   flagged: boolean;
   detail: string;
 }

@@ -458,8 +458,7 @@ function RewriteResult({
 }) {
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
-  // O trecho pode ter sido editado (em outro ponto da mesma frase/parágrafo) depois que esta
-  // proposta foi gerada. Aplicar às cegas sobrescreveria essa edição com a versão congelada.
+
   const stale = proposal.original !== currentOriginal;
   const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
