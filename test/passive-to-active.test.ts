@@ -116,6 +116,27 @@ describe("Classe C — não conversível (unsupported)", () => {
     expect(passiveToActive(finding, source).kind).toBe("unsupported");
   });
 
+  it("agente com mais de 6 tokens após o marcador → unsupported, nunca cola a cauda no objeto", () => {
+    const { finding, source } = firstPassive(
+      "O relatório foi enviado pela comissão especial de avaliação de projetos de lei complementar.",
+    );
+    const r = passiveToActive(finding, source);
+    expect(r.kind).toBe("unsupported");
+  });
+
+  it("agente com exatamente 6 tokens após o marcador ainda converte íntegro", () => {
+    const { finding, source } = firstPassive(
+      "O relatório foi enviado pela comissão especial de avaliação de projetos.",
+    );
+    const r = passiveToActive(finding, source);
+    expect(r.kind).toBe("automatic");
+    if (r.kind === "automatic") {
+      expect(applied(source, r)).toBe(
+        "A comissão especial de avaliação de projetos enviou o relatório.",
+      );
+    }
+  });
+
   it("needsAgent com advérbio intercalado → unsupported mesmo com agente digitado", () => {
     const { finding, source } = firstPassive("O relatório foi apenas enviado.");
     expect(applyPassiveWithAgent(finding, source, "a comissão").kind).toBe("unsupported");

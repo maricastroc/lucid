@@ -117,7 +117,9 @@ function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): Ag
     j++;
   }
 
-  const truncated = j < tokens.length && !isBarrier(tokens[j]);
+  // Um "." de fim de frase (fora de BARRIER_PUNCTUATION) não conta como cauda
+  // perdida: só há truncamento de verdade quando ainda resta palavra por vir.
+  const truncated = j < tokens.length && tokens[j].isWord;
   return { end, truncated };
 }
 
