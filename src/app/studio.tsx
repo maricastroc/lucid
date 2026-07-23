@@ -51,12 +51,22 @@ export function Studio() {
   const blocks = structured ? importedDoc!.blocks : null;
   const isEmpty = text.trim() === "" && importedDoc === null;
 
+  // Trocar de documento tem que zerar o histórico de undo e a trilha de revisão
+  // (ADR-018) — do contrário undo aplica snapshot do documento ANTERIOR sobre o
+  // novo, e o relatório de auditoria carrega proveniência de um texto diferente.
+  const resetDocumentState = useCallback(() => {
+    undoStack.current = [];
+    setCanUndo(false);
+    setLedger([]);
+  }, []);
+
   const loadExample = useCallback(() => {
     setImportedDoc(null);
     setText(SAMPLE_TEXT);
     setSelectedId(null);
     setMode("audit");
-  }, []);
+    resetDocumentState();
+  }, [resetDocumentState]);
 
   const goHome = useCallback(() => {
     const alreadyHome = isEmpty && mode === "audit";
@@ -66,7 +76,8 @@ export function Studio() {
     setText("");
     setSelectedId(null);
     setMode("audit");
-  }, [isEmpty, mode]);
+    resetDocumentState();
+  }, [isEmpty, mode, resetDocumentState]);
 
   const openDocx = useCallback(async (file: File) => {
     setImporting(true);
@@ -80,12 +91,13 @@ export function Studio() {
       setText(doc.source);
       setSelectedId(null);
       setMode("audit");
+      resetDocumentState();
     } catch {
       setImportError("Não foi possível ler o arquivo. Confirme que é um .docx válido.");
     } finally {
       setImporting(false);
     }
-  }, []);
+  }, [resetDocumentState]);
 
   const findings = useMemo(
     () => diagnostic.findings.filter((f) => activeCriteria.has(f.criterion)),
