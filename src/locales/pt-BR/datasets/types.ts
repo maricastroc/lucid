@@ -1,8 +1,3 @@
-/**
- * Tipos dos datasets do locale pt-BR (ADR-031) — movidos do core, que agora só conhece a
- * `DataView` neutra. `DatasetId` é o conjunto FECHADO de ids do português; `DataTypes` mapeia cada
- * id ao seu shape preparado. Os shapes carregam gramática PT (ex.: `sourcePreposition: "de"`).
- */
 export type DatasetId =
   | "abreviacoes.pt"
   | "verbos-ser.pt"
@@ -25,21 +20,14 @@ export type DatasetId =
   | "conjugacoes-ativas.pt"
   | "stopwords.pt";
 
-/** Tempos verbais que a conversão voz passiva→ativa consegue PROVAR (ADR-032). */
 export type PassiveTense = "pres" | "pret" | "impf" | "fut" | "cond";
 
-/** Uma forma de `ser` anotada com o tempo/número da construção passiva (`foi` → pretérito, sg). */
 export interface SerTenseInfo {
   tense: PassiveTense;
   number: "sg" | "pl";
 }
 export type SerTensesPrepared = ReadonlyMap<string, SerTenseInfo>;
 
-/**
- * Tabela FECHADA de conjugação ativa (ADR-032, reusando o mecanismo do ADR-011): lema → chave de
- * traço (`"pres.3s"`, `"pret.3p"`, …) → forma finita da 3ª pessoa. Gerada em build-time
- * (PortiLexicon-UD); runtime só consulta. Combinação ausente ⇒ conversão `unsupported`.
- */
 export type ActiveConjugationsPrepared = ReadonlyMap<string, Readonly<Record<string, string>>>;
 
 export type JargonKind = "word" | "phrase";

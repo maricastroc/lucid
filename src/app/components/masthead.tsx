@@ -88,8 +88,6 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
   );
 }
 
-/** Marca do Lucid — SVG trocado por tema (o navy de `icon-light` casa com o accent do modo claro;
- * o roxo de `icon-dark` casa com o accent do modo escuro, ver `globals.css`). */
 function Logo() {
   const { theme } = useTheme();
   return (

@@ -1,26 +1,8 @@
-/**
- * Pass "título longo ou em forma de frase" (`long_heading`) — `5.2`, fácil de localizar (Princípio 2).
- *
- * Um título é um RÓTULO: o leitor o usa para varrer o documento e localizar a seção que procura.
- * Quando o título fica longo, ou quando é escrito como uma frase (fecha com ponto final, ou junta
- * mais de uma oração), ele deixa de cumprir esse papel — vira mini-texto que o leitor precisa ler
- * inteiro. Este detector, como o `salto_de_nivel_titulo`, só existe porque um formato ESTRUTURADO
- * (DOCX) fornece blocos `heading`; texto puro não tem título de verdade → nunca dispara.
- *
- * Dois gatilhos, um por título (comprimento tem prioridade — nunca duas marcas no mesmo bloco):
- *  - COMPRIMENTO: contagem de palavras acima do limite configurável.
- *  - FORMA DE FRASE: ≥2 frases no bloco, OU termina com ponto final. Interrogação NÃO conta —
- *    um título-pergunta ("O que muda para você?") é boa Linguagem Simples, não um defeito.
- *
- * Determinístico e conservador. NÃO reescreve: encurtar ou reformular um título exige decidir o que
- * é essencial para o leitor (`requiresHuman`, sem `suggestion`).
- */
 import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "long_heading";
 const PRINCIPLE = "5.2";
 
-/** Fecha como oração afirmativa: termina em ponto final, mas não em reticências. */
 function endsAsStatement(text: string): boolean {
   const t = text.trimEnd();
   if (t.endsWith("…") || t.endsWith("...")) return false;

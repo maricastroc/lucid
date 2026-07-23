@@ -1,9 +1,3 @@
-/**
- * Relatório de auditoria exportável (ADR-000 · Etapa 5) — a auditoria como entregável de 1ª classe.
- * O construtor é PURO: função do `Diagnostic` + metadados de fora (data), então é determinístico e
- * testável em snapshot. Aqui travamos: estrutura, caveat de honestidade sempre presente (inclusive
- * com zero anotações), citação ABNT, rótulo por fronteira (segura × decisão humana) e byte-identidade.
- */
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import { buildAuditReport } from "../src/app/lib/audit-report";

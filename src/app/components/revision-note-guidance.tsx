@@ -1,15 +1,5 @@
 "use client";
 
-/**
- * "Como seguir" — o sistema de ORIENTAÇÃO por critério da nota de revisão, extraído de
- * `revision-note.tsx` (era 41% do arquivo). Um dispatcher (`Guidance`) que escolhe, por
- * `CriterionId`, o guia editorial de cada violação — exaustivo em compile-time (um critério novo
- * sem `case` quebra o typecheck no `never`). Alguns guias são interativos (divisão de frase longa,
- * andaime de voz ativa); a maioria é copy curada. NENHUMA lógica linguística vive aqui: os guias só
- * chamam a engine (`passiveToActive`/`passiveScaffold`/`applyPassiveWithAgent`) e mostram o resultado.
- *
- * `APPLY_BUTTON_CLASS` é compartilhado com a `ManualEdit` (na casca) — por isso é exportado daqui.
- */
 import { useState, type ReactNode } from "react";
 import {
   applyPassiveWithAgent,
@@ -151,17 +141,14 @@ export function Guidance({
   }
 }
 
-/** Exaustividade em compile-time: se `value` não for `never`, falta um `case` — erro de tipo. */
 function assertNever(value: never): never {
   throw new Error(`critério sem guia de orientação: ${String(value)}`);
 }
 
-/** Parágrafo de orientação padrão — casca compartilhada dos guias só-texto. */
 function GuideText({ children }: { children: ReactNode }) {
   return <p className="text-[12.5px] leading-relaxed text-ink-1">{children}</p>;
 }
 
-/** Fallback impossível (finding sem CriterionId registrado) — nunca some para o autor. */
 function GenericGuide() {
   return (
     <GuideText>
@@ -337,7 +324,6 @@ function PassiveGuide({
   );
 }
 
-/** Classe B: pede SÓ o agente; a engine conjuga e monta o rascunho (com prévia ao vivo). */
 function PassiveNeedsAgent({
   finding,
   source,

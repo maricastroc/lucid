@@ -42,7 +42,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <head>
-        {/* Aplica o tema salvo antes da pintura para evitar flash. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{var t=localStorage.getItem('lucid-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}`,

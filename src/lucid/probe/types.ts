@@ -1,14 +1,3 @@
-/**
- * Tipos da Camada 2 (sonda de compreensão sintética). Contrato: docs/ARQUITETURA.md §5.
- *
- * REGRA DE FRONTEIRA (I1): nada em `src/lucid/core/**` pode importar deste arquivo ou
- * de qualquer outro em `src/lucid/probe/**`. Verificado por `.dependency-cruiser.cjs`
- * e `test/boundary.test.ts`.
- *
- * REGRA DE FUNDO (I5): a sonda nunca emite aprovação. `ProbeSignal` não tem — e não
- * pode ganhar — uma variante "aprovado". O melhor caso possível é "neutro".
- */
-
 export type OperacaoLeitura =
   | "resolver_referente_a_distancia"
   | "integrar_entre_frases"
@@ -19,13 +8,10 @@ export type OperacaoLeitura =
 
 export interface ProbeInput {
   trecho: string;
-  /** a pergunta que o leitor veio fazer */
   pergunta: string;
-  /** persona de piso (leitor de baixa literacia) */
   persona?: string;
 }
 
-/** Espelha o JSON do prompt do leitor sintético (ver CLAUDE.md). */
 export interface ProbeResult {
   podeResponder: boolean;
   respostaExtraida: string;
@@ -40,11 +26,6 @@ export interface ComprehensionProbe {
   probe(input: ProbeInput): Promise<ProbeResult>;
 }
 
-/**
- * Saída de `interpret(ProbeResult)`. Deliberadamente sem variante de aprovação:
- * o único par possível é "flag" (falha detectada) ou "neutro" (ausência de falha,
- * nunca evidência positiva de compreensão).
- */
 export type ProbeSignal =
   | {
       tipo: "flag";

@@ -1,10 +1,5 @@
 import type { Sentence } from "../types";
 
-/**
- * Segmentação de frases NEUTRA de idioma (ADR-031): o ALGORITMO (marcas terminais, maiúscula
- * seguinte, reticências) não conhece nenhum idioma; a ÚNICA dependência linguística é o set de
- * abreviações que não encerram frase, fornecido pelo locale via parâmetro obrigatório.
- */
 const TERMINAL_MARKS = new Set([".", "!", "?", "…"]);
 
 const CLOSING_MARKS = new Set(['"', "'", "”", "’", "»", ")", "]"]);

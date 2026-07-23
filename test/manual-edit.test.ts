@@ -1,19 +1,9 @@
-/**
- * Edição À MÃO do autor (terceira via do cartão de revisão, ao lado da ação mecânica e da LLM).
- * O componente `ManualEdit` é cola fina sobre lógica pura — testada aqui, no estilo do resto da
- * suíte (sem render). Cobre o CONTRATO que a UI depende:
- *   1. o alvo editável é a UNIDADE de reescrita (frase OU parágrafo) do finding — a mesma que a LLM usa;
- *   2. aplicar substitui EXATAMENTE esse span (via `spliceSpan`, o mesmo `replaceSpan` do studio);
- *   3. a guarda `isManualEditDirty` recusa vazio e no-op; `manualEditReplacement` apara as pontas.
- * A engine reanalisa o resultado — isto é o que fecha o loop "editou → re-mede".
- */
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import { rewriteTargetAt } from "../src/app/lib/paragraphs";
 import { verifyManualEdit } from "../src/app/lib/rewrite";
 import { isManualEditDirty, manualEditReplacement, spliceSpan } from "../src/app/lib/text-edit";
 
-/** O alvo que o ManualEdit abre para um finding: `rewriteTargetAt(source, finding.span.start)`. */
 function manualEditTargetFor(text: string, criterion: string) {
   const d = analyze(text);
   const finding = d.findings.find((f) => f.criterion === criterion);

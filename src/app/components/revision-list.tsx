@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * A LISTA DE REVISÕES — o índice editorial das anotações. Não é um "Problems Panel": cada
- * item é uma nota curta (critério em nome humano, o trecho entre aspas, uma explicação de
- * uma linha e o selo de ação). Filtra por balde de ação (todas / seguras / decisão
- * humana), navega por teclado e sincroniza com o texto e com a nota aberta.
- */
 import { useRef } from "react";
 import type { Finding } from "@/lucid";
 import { findingId, isSafe, metaFor } from "../lib/criteria";

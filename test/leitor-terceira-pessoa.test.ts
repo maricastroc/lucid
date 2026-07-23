@@ -1,8 +1,3 @@
-/**
- * Fala indireta ao leitor (`leitor_terceira_pessoa`, 5.3.3). Marca o leitor nomeado em 3ª pessoa,
- * em posição de sujeito, com uma obrigação (verbo deôntico numa janela local). Sinal FRACO (info),
- * requiresHuman, nunca reescreve. Precisão pela dupla exigência: sujeito + deôntico.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, type Finding } from "../src/lucid";
 

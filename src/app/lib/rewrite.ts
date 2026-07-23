@@ -1,17 +1,5 @@
-/**
- * Tier 3 (fiação da UI) — fonte de propostas de reescrita para a interface.
- *
- * Dois caminhos, o mesmo verificador determinístico julgando:
- *   · `stub`  — `StubRewriteProposer` client-side (fixtures do texto-exemplo). Offline, sem
- *     custo; demonstra o fluxo.
- *   · Groq    — o proposer REAL roda no SERVIDOR (`/api/rewrite`), porque a chave nunca pode
- *     ir ao browser. O cliente só faz `fetch` e recebe o `VerifiedRewrite`.
- *
- * A ideia (do usuário): o mesmo juiz determinístico avalia modelos diferentes — o que abre
- * um benchmark honesto depois. Ver ADR-014/015.
- */
 import { analyze, type Finding, type Span } from "@/lucid";
-import { GEMINI_MODELS, GROQ_MODELS } from "@/llm";
+import { DEEPSEEK_MODELS, GEMINI_MODELS, GROQ_MODELS } from "@/llm";
 import {
   proposeAndVerify,
   StubRewriteProposer,
@@ -22,34 +10,24 @@ import {
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { manualEditReplacement } from "./text-edit";
 
-/** Locale ativo da UI (ADR-031). pt-BR por ora — a fiação já passa o id ponta a ponta. */
 const ACTIVE_LOCALE_ID = "pt-BR";
 
 export interface RewriteModel {
-  providerId: "stub" | "groq" | "gemini";
+  providerId: "stub" | "groq" | "gemini" | "deepseek";
   model: string;
   label: string;
 }
 
-/**
- * Modelos oferecidos no seletor da UI. O stub é o default (offline, demonstração). Gemini 2.5
- * Pro é o GERADOR FORTE (a tese do Tier 3: gerador de qualidade + verificador determinístico);
- * os Groq free ficam como comparação barata no mesmo juiz.
- */
 export const REWRITE_MODELS: readonly RewriteModel[] = [
   { providerId: "stub", model: "demo", label: "Stub (demonstração, offline)" },
   { providerId: "gemini", model: GEMINI_MODELS[0], label: "Gemini · 2.5 Flash (gerador forte)" },
-  { providerId: "gemini", model: GEMINI_MODELS[1], label: "Gemini · 2.5 Pro (requer tier pago)" },
+  { providerId: "deepseek", model: DEEPSEEK_MODELS[0], label: "DeepSeek · V4 Flash (pago, ~$0,14/1M)" },
   { providerId: "groq", model: GROQ_MODELS[0], label: "Groq · Llama 3.3 70B" },
   { providerId: "groq", model: GROQ_MODELS[1], label: "Groq · Llama 3.1 8B" },
   { providerId: "groq", model: GROQ_MODELS[2], label: "Groq · GPT-OSS 120B" },
   { providerId: "groq", model: GROQ_MODELS[3], label: "Groq · GPT-OSS 20B" },
 ];
 
-/**
- * Reescrita curada para a frase longa do texto-exemplo (caminho stub): mais curta, voz ativa
- * onde é seguro, sem o jargão — o tipo de proposta que o verificador deve aprovar nas PROVAS.
- */
 const SAMPLE_FIXTURES: Record<string, string> = {
   [`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo destinado à verificação das condições supracitadas exigidas para a concessão do benefício, e a decisão foi comunicada ao interessado no processo.`]:
     "A comissão competente analisou o documento em procedimento administrativo. O objetivo era verificar as condições exigidas para conceder o benefício. Depois, o órgão comunicou a decisão ao interessado.",
@@ -103,14 +81,6 @@ export async function generateRewrite(
   return data;
 }
 
-/**
- * Verifica a versão DO AUTOR (edição à mão ou colagem) sob o MESMO verificador determinístico
- * que julga a IA — a decisão estrutural do ADR-000 (Etapa 2): a fonte do candidato não privilegia
- * ninguém. Sem proposer e sem rede: constrói o candidato a partir do rascunho e chama
- * `verifyRewrite` direto. Totalmente offline e determinístico (a sonda de sentido não roda aqui —
- * ela é o único passo que usaria LLM, e o texto do autor não precisa dela). O `VerifiedRewrite`
- * resultante alimenta o MESMO componente de veredito da proposta da IA.
- */
 export async function verifyManualEdit(text: string, target: Span, draft: string): Promise<VerifiedRewrite> {
   const proposal = {
     proposerId: "sua edição",

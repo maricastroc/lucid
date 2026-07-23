@@ -1,15 +1,3 @@
-/**
- * Camada 2 · sonda de compreensão REAL sobre um `ChatProvider` (ADR-016).
- *
- * Roda o leitor sintético (prompt blindado) num modelo real e devolve o `ProbeResult`. Só LÊ e
- * REPORTA — nunca aprova (o `interpret` só produz `flag`|`neutro`). Usada pelo verificador do
- * Tier 3 como TESTE NEGATIVO de sentido: se o leitor de piso extraía o fato do original e trava
- * na proposta, algo se perdeu.
- *
- * Fronteira: a infra de rede (`ChatProvider`) vem do módulo NEUTRO `src/llm` — `probe` não
- * importa `report`; a cerca (core ⊄ probe) segue intacta. `temperature 0` + modelo fixado +
- * `PROBE_PROMPT_VERSION` = reprodutibilidade suficiente para eval.
- */
 import type { ChatProvider } from "@/llm";
 import { buildProbePrompt, PROBE_PROMPT_VERSION } from "./prompt";
 import type { ComprehensionProbe, OperacaoLeitura, ProbeInput, ProbeResult } from "./types";
@@ -23,10 +11,6 @@ const VALID_OPERATIONS: ReadonlySet<string> = new Set<OperacaoLeitura>([
   "desfazer_negacao_aninhada",
 ]);
 
-/**
- * Interpreta o JSON do modelo de forma conservadora. Qualquer ambiguidade vira o caso
- * PESSIMISTA (`pode_responder=false`) — o piso não pode ser generoso. Nunca lança.
- */
 export function parseProbeResult(raw: string): ProbeResult {
   const fallback: ProbeResult = {
     podeResponder: false,

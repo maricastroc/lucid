@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { analyze, type Span } from "../src/lucid";
-import { GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
+import {
+  DeepSeekProvider,
+  DEEPSEEK_MODELS,
+  GeminiProvider,
+  GEMINI_MODELS,
+  GroqProvider,
+  GROQ_MODELS,
+  type ChatProvider,
+} from "../src/llm";
 import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
 import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
@@ -13,6 +21,7 @@ const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 interface Keys {
   groq: string | null;
   gemini: string | null;
+  deepseek: string | null;
 }
 
 function loadKey(name: string): string | null {
@@ -25,10 +34,6 @@ function loadKey(name: string): string | null {
   }
 }
 
-/**
- * Escolhe o provider pelo id do modelo (Groq × Gemini), preservando a interface `ChatProvider`.
- * Devolve também um leitor de tokens porque `lastUsage` não está no contrato `ChatProvider`.
- */
 function providerFor(model: string, keys: Keys): { provider: ChatProvider; tokens: () => number } {
   if ((GROQ_MODELS as readonly string[]).includes(model)) {
     if (!keys.groq) throw new Error(`GROQ_API_KEY ausente para ${model}`);
@@ -40,6 +45,11 @@ function providerFor(model: string, keys: Keys): { provider: ChatProvider; token
     const p = new GeminiProvider(keys.gemini);
     return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
   }
+  if ((DEEPSEEK_MODELS as readonly string[]).includes(model)) {
+    if (!keys.deepseek) throw new Error(`DEEPSEEK_API_KEY ausente para ${model}`);
+    const p = new DeepSeekProvider(keys.deepseek);
+    return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
+  }
   throw new Error(`modelo sem provider conhecido: ${model}`);
 }
 
@@ -49,7 +59,6 @@ function buildProbe(keys: Keys): LlmComprehensionProbe {
   throw new Error("nenhuma chave disponível para a sonda");
 }
 
-/** Rótulo curto do sistema (provider implícito no nome do modelo). */
 function systemLabel(model: string, strategy: RewriteStrategy): string {
   return `${model.replace("openai/", "")} · ${strategy}`;
 }
@@ -150,7 +159,11 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
   it(
     "compara (modelo × estratégia) nas 6 dimensões",
     async () => {
-      const keys: Keys = { groq: loadKey("GROQ_API_KEY"), gemini: loadKey("GEMINI_API_KEY") };
+      const keys: Keys = {
+        groq: loadKey("GROQ_API_KEY"),
+        gemini: loadKey("GEMINI_API_KEY"),
+        deepseek: loadKey("DEEPSEEK_API_KEY"),
+      };
       if (!keys.groq && !keys.gemini) {
         throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
       }

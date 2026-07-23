@@ -1,21 +1,8 @@
-/**
- * Pass "enumeração em prosa" — `5.2` (Localizável).
- *
- * Uma sequência de itens embutida no meio do texto corrido ("primeiro… segundo… terceiro…") é
- * mais difícil de localizar e comparar do que uma lista. Sinal ESTRUTURAL sobre a camada de
- * parágrafos: marca o parágrafo que concentra ≥ `minMarkers` ordinais DISTINTOS, começando por
- * "primeiro" (a âncora que separa uma enumeração real de um "segundo o artigo" solto).
- *
- * Conjunto FECHADO de ordinais (inline, sem léxico) — precisão > recall: exigir "primeiro" +
- * ≥3 ranks distintos evita falso positivo com "segundo" (preposição) isolado. Não converte em
- * lista sozinho (→ `requiresHuman`). Enumeradores numéricos ("1) 2) 3)") ficam adiados.
- */
 import type { Finding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "prose_enumeration";
 const PRINCIPLE = "5.2";
 
-/** Forma → posição na sequência (1..6). Masculino e feminino contam para o mesmo rank. */
 const ORDINAL_RANK: Record<string, number> = {
   primeiro: 1, primeira: 1,
   segundo: 2, segunda: 2,

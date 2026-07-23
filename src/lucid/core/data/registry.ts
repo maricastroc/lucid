@@ -1,9 +1,3 @@
-/**
- * Mecanismo de data registry — NEUTRO de idioma (ADR-031). Um locale constrói o SEU registry a
- * partir dos seus `specs`; `fingerprint`, `dataHash` e a `DataView` escopada saem daqui. Este
- * módulo não conhece nenhum dataset concreto: os ids são strings e os valores preparados são
- * opacos (`unknown`). A instância PT-BR e os seus ids vivem em `src/locales/pt-BR/datasets`.
- */
 import { stableHash } from "../hash";
 import type { DataView } from "./types";
 
@@ -26,10 +20,6 @@ export interface Registry {
   getPrepared<T>(id: string): T;
   datasetFingerprint(id: string): string;
   createDataView(allowed: readonly string[]): DataView;
-  /**
-   * Hash de proveniência dos datasets. IMPORTANTE (neutralidade): a STRING do id entra no hash —
-   * renomear um id muda o `dataHash` e quebra o golden. Mover o arquivo é seguro.
-   */
   dataHashFor(ids: Iterable<string>): string;
 }
 

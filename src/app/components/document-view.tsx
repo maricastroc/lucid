@@ -11,8 +11,6 @@ interface Props {
   mode: Mode;
   text: string;
   diagnostic: Diagnostic;
-  /** blocos estruturais do documento IMPORTADO (DOCX): quando presentes, o render destaca títulos e
-   * listas em vez de tratar tudo como parágrafo. Ausente para texto puro/editado. */
   blocks: readonly Block[] | null;
   selectedId: string | null;
   flashId: string | null;
@@ -22,7 +20,6 @@ interface Props {
   onSelectFinding: (finding: Finding) => void;
 }
 
-/** Estado de interação compartilhado pelos dois modos de render (linhas × blocos). */
 interface SegmentContext {
   selectedId: string | null;
   flashId: string | null;
@@ -31,8 +28,6 @@ interface SegmentContext {
   onSelectFinding: (finding: Finding) => void;
 }
 
-/** Renderiza os segmentos anotados de um trecho — a máquina de marcas (inline/passagem), seleção,
- * flash e alvo de reescrita. Idêntica para parágrafo, título e item de lista. */
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
   const { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding } = ctx;
   return (
@@ -89,7 +84,6 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
   );
 }
 
-/** Tick de margem — herda o marcador de maior severidade que toca o bloco/linha (modo lupa). */
 function MarginTick({
   markers,
   selectedId,
@@ -115,12 +109,10 @@ function MarginTick({
   );
 }
 
-/** Nível de título → tamanho relativo (dentro do corpo serifado do documento). */
 function headingSize(level: number): string {
   return `${Math.max(1.5 - (level - 1) * 0.14, 1.05).toFixed(2)}em`;
 }
 
-/** Render por BLOCOS de um documento estruturado (DOCX): títulos e listas ganham forma própria. */
 function BlockView({
   blocks,
   diagnostic,

@@ -1,11 +1,3 @@
-/**
- * Detectores de Princípio 2 (fácil de localizar) que só existem porque um formato ESTRUTURADO
- * (DOCX) traz blocos `heading`/`list`:
- *  - `long_heading` — título longo (acima do limite de palavras) OU em forma de frase (≥2 frases,
- *    ou termina com ponto final; interrogação não conta).
- *  - `single_item_list` — bloco de lista com um único item.
- * Texto puro não produz título/lista → nenhum dos dois dispara nele (verificado abaixo).
- */
 import { describe, expect, it } from "vitest";
 import { analyze, analyzeDocument, buildStructuredDocument, type Finding, type RawBlock } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";

@@ -1,24 +1,9 @@
-/**
- * Relatório de auditoria EXPORTÁVEL (ADR-000 · Etapa 5) — a auditoria como entregável de 1ª
- * classe. O profissional sai com um artefato que entrega à equipe, mesmo sem aplicar nada e sem
- * tocar na IA: é isto que torna "a auditoria é o produto" literalmente verdadeiro e desacopla o
- * valor da cobertura de auto-fix.
- *
- * PURO e DETERMINÍSTICO: função do `Diagnostic` (Camada 1) + metadados passados de fora (data/
- * título), para o snapshot ser byte-idêntico. Markdown porque abre em qualquer lugar e cola em
- * qualquer documento. Reusa a metadata de critério da UI — nomes internos nunca vazam.
- *
- * HONESTIDADE (a regra do produto): o relatório MEDE, não aprova. O caveat abre o documento e nada
- * aqui vira selo — nem quando há zero anotações.
- */
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, isSafe, metaFor, principleGroupOf, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 
 export interface AuditReportMeta {
-  /** carimbo de geração — passado de fora para o relatório ser determinístico/testável. */
   generatedAt: string;
-  /** título/arquivo do documento, quando houver. */
   documentTitle?: string;
 }
 
@@ -26,7 +11,6 @@ const fmtNum = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFix
 const plural = (n: number, one: string, many: string): string => (n === 1 ? one : many);
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
-/** Ordena por severidade (prioritário → leve) e, empatando, por posição no texto (determinístico). */
 function bySeverityThenPosition(a: Finding, b: Finding): number {
   const s = severityRank(b.severity) - severityRank(a.severity);
   return s !== 0 ? s : a.span.start - b.span.start;

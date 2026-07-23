@@ -1,34 +1,12 @@
-/**
- * Pass "título sem eco no corpo" (`heading_body_mismatch`) — `5.1`, RELEVANTE (Princípio 1).
- *
- * O PRIMEIRO detector a citar o Princípio 1 da norma: os anteriores medem mecânica de navegação
- * (5.2 — nível, comprimento, forma de frase); este mede um proxy de RELEVÂNCIA — o título antecipa
- * o que o leitor vai encontrar na seção? A norma trata "o leitor obtém o que precisa" como trabalho
- * de autor, não regra mecânica (CLAUDE.md); por isso este é, por desenho, um sinal FRACO: `info`,
- * nunca prova, nunca reescreve.
- *
- * PROXY, não semântica: compara as palavras de CONTEÚDO do título (tudo que não é palavra funcional
- * do `stopwords.pt`) contra as palavras de conteúdo do CORPO da seção (os blocos entre este título e
- * o próximo de nível igual ou mais alto). Zero sobreposição → flag. Como é comparação EXATA (sem
- * lema), singular/plural do mesmo termo não conta como eco — limitação conhecida, documentada e
- * testada (ver `heading-body-mismatch.test.ts`), aceitável porque o sinal já nasce fraco.
- *
- * Conservador: exige corpo com um mínimo de palavras de conteúdo (`minBodyContentWords`) antes de
- * julgar — evita ruído em seções curtas. Título sem palavra de conteúdo (só função) ou seção sem
- * corpo (título órfão, fora de escopo aqui) não disparam. Só existe em documento estruturado — texto
- * puro não tem título de verdade.
- */
 import type { Block, Finding, Pass, Sentence } from "@/lucid/core/types";
 
 const CRITERION = "heading_body_mismatch";
 const PRINCIPLE = "5.1";
 
-/** Frases de um bloco de topo — achata os itens quando o bloco é uma lista. */
 function sentencesOf(block: Block): readonly Sentence[] {
   return block.kind === "list" ? block.items.flatMap((item) => item.sentences) : block.sentences;
 }
 
-/** Palavras de CONTEÚDO (não função) em caixa invariante, com repetição — para contar substância. */
 function contentWords(sentences: readonly Sentence[], stopwords: ReadonlySet<string>): string[] {
   const words: string[] = [];
   for (const sentence of sentences) {

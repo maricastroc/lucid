@@ -1,8 +1,3 @@
-/**
- * Helpers de teste ligados ao locale pt-BR (ADR-031). Depois que os serviços de documento e
- * métrica passaram a ser INJETADOS pelo locale (o core não tem mais default PT), os testes de
- * unidade que constroem documento/métrica diretamente usam estes wrappers pt-BR.
- */
 import type { Config } from "../../src/lucid/core/config";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import type { Document, Metrics } from "../../src/lucid/core/types";

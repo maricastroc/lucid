@@ -47,7 +47,6 @@ interface BlockBase {
 export interface ParagraphBlock extends BlockBase {
   readonly kind: "paragraph";
   readonly sentences: readonly Sentence[];
-  /** soma de `wordCount` das frases do bloco */
   readonly wordCount: number;
 }
 
@@ -64,7 +63,6 @@ export interface ListItemBlock extends BlockBase {
   readonly wordCount: number;
 }
 
-/** Lista — itens explícitos de um formato estruturado (numeração/marcadores do DOCX, `-`/`1.`…). */
 export interface ListBlock extends BlockBase {
   readonly kind: "list";
   readonly ordered: boolean;

@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
 import type { Finding, Span } from "@/lucid";
-import { ChatProviderError, GeminiProvider, GEMINI_MODELS, GroqProvider, GROQ_MODELS } from "@/llm";
+import {
+  ChatProviderError,
+  DeepSeekProvider,
+  DEEPSEEK_MODELS,
+  GeminiProvider,
+  GEMINI_MODELS,
+  GroqProvider,
+  GROQ_MODELS,
+} from "@/llm";
 import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer, type RewriteStrategy } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
@@ -25,7 +33,6 @@ interface RewriteRequestBody {
 
 const VALID_STRATEGIES: ReadonlySet<string> = new Set<RewriteStrategy>(["correct", "rewrite", "directed"]);
 
-/** Só usada para MONTAR o briefing dirigido (texto de prompt) — validação leniente é suficiente. */
 function isFindingLike(value: unknown): value is Finding {
   if (typeof value !== "object" || value === null) return false;
   const f = value as Record<string, unknown>;
@@ -60,11 +67,17 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
     }
     return new LlmRewriteProposer(new GeminiProvider(apiKey), model);
   }
+  if (providerId === "deepseek") {
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) return { error: "DEEPSEEK_API_KEY não configurada no servidor", status: 400 };
+    if (!DEEPSEEK_MODELS.includes(model as (typeof DEEPSEEK_MODELS)[number])) {
+      return { error: `modelo não permitido para o DeepSeek: ${model}`, status: 400 };
+    }
+    return new LlmRewriteProposer(new DeepSeekProvider(apiKey), model);
+  }
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
-/** Modelo de piso: `llama-3.3-70b-versatile`, mesmo achado de `api/probe/route.ts` (o 8B se
- * autocontradiz na extração literal — degrada o sinal `meaning_preserved` silenciosamente). */
 function buildProbe(): ComprehensionProbe | null {
   if (process.env.GROQ_API_KEY) {
     return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.3-70b-versatile");

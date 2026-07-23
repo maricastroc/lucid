@@ -1,49 +1,16 @@
-/**
- * Tier 3 · o VERIFICADOR determinístico (docs/HANDOFF.md §3; ADR-014).
- *
- * Recebe uma proposta de reescrita e a submete à engine da Camada 1 como juíza. Separa,
- * por construção, PROVA de SINAL:
- *   · PROVA (determinística, de `analyze()` ou extração mecânica): a violação-alvo sumiu; o
- *     total de findings não aumentou; números e datas preservados; nenhum jargão novo; delta
- *     de métricas.
- *   · SINAL (heurístico, nunca prova): entidades/nomes preservados (heurística de
- *     maiúscula/sigla); sentido preservado via SONDA como teste NEGATIVO (se o leitor de piso
- *     extraía o fato do original e não da proposta, algo se perdeu).
- *
- * HONESTIDADE (I5): não há saída "aprovado". Tudo passar = "nenhuma falha de piso
- * detectada", jamais evidência positiva de qualidade. `hasBlockingFailure` é um veto
- * mecânico (alguma prova falhou), não o oposto de aprovação.
- *
- * Fronteira: `report/**` pode importar `core` e `probe`. `core` nunca importa daqui.
- */
 import type { Finding, Severity, Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
 import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
 import type { MetricsDelta, Proof, RewriteLocale, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
 
-/** Locale default do Tier 3 — pt-BR. Preserva a compatibilidade dos chamadores existentes. */
 const DEFAULT_LOCALE: RewriteLocale = rewriteLocalePtBR;
 
 export interface VerifyOptions {
-  /**
-   * Locale que RE-ANALISA e fornece marcadores de 1ª pessoa + id de jargão (ADR-031). Default:
-   * pt-BR. Se a proposta declara um `localeId` diferente, `verifyRewrite` recusa (anti-mistura).
-   */
   locale?: RewriteLocale;
-  /** sonda opcional para o SINAL de sentido (teste negativo). Sem ela, esse sinal é omitido. */
   probe?: ComprehensionProbe;
-  /** a pergunta que o leitor veio fazer — exigida junto com `probe`. */
   question?: string;
-  /** critério do finding, quando o alvo é a frase de um finding — habilita `target_resolved`. */
   criterion?: string;
-  /**
-   * Os findings que motivaram um BRIEFING DIRIGIDO (estratégia `directed@1`, ADR-000 · Etapa 4) —
-   * habilita `directed_findings_resolved`: generaliza `target_resolved` (um critério) para TODOS os
-   * critérios apontados no briefing. Fecha a lacuna que `region_improved` sozinho deixava: o peso
-   * total da região pode não subir mesmo que o modelo IGNORE um achado específico do briefing
-   * (ex.: corrige jargão mas mantém a voz passiva) — achado ao vivo de 2026-07-22, ver ADR-046/047.
-   */
   findings?: readonly Finding[];
 }
 
@@ -96,11 +63,7 @@ const BURDEN_EPSILON = 1e-9;
 function regionBurden(findings: readonly Finding[], start: number, end: number): number {
   return findings.reduce((sum, f) => (overlaps(f, start, end) ? sum + SEVERITY_WEIGHT[f.severity] : sum), 0);
 }
-/**
- * Peso de severidade TOTAL de um conjunto de findings (ADR-018). A régua canônica do veredito —
- * exportada para a trilha de proveniência (ADR-000 · Etapa 6) medir cada passo com a MESMA métrica
- * que julga uma reescrita, em vez de contagem crua (que pune divisão de frase).
- */
+
 export function totalBurden(findings: readonly Finding[]): number {
   return findings.reduce((sum, f) => sum + SEVERITY_WEIGHT[f.severity], 0);
 }
@@ -118,10 +81,6 @@ function jargonTextsOverlapping(
   return set;
 }
 
-/**
- * Aplica a proposta ao texto inteiro (substitui o trecho-alvo) e devolve o texto reescrito.
- * Puro: não normaliza (o `analyze` normaliza de novo, idempotente).
- */
 export function applyProposal(text: string, target: Span, proposal: RewriteProposal): string {
   return text.slice(0, target.start) + proposal.proposed + text.slice(target.end);
 }
@@ -166,19 +125,10 @@ export async function verifyRewrite(
   }
 
   if (options.findings && options.findings.length > 0) {
-    // Só cobra o que foi de fato PEDIDO — achados `requiresHuman` (passiva sem agente, jargão
-    // ambíguo, nominalização sem verbo seguro) o próprio Camada 1 já recusa resolver sem inventar
-    // (I5); o briefing (`directed@2`, prompt.ts) nem pede isso. Cobrar essa recusa correta como
-    // "não resolveu" puniria o modelo por não fabricar — achado ao vivo, ADR-047/048.
     const resolvable = options.findings.filter((f) => !f.requiresHuman);
     const directedCriteria = [...new Set(resolvable.map((f) => f.criterion))].sort();
-    // Sem nada mecanicamente pedível (tudo requiresHuman), a prova é OMITIDA — igual a
-    // `target_resolved` quando `options.criterion` não vem. Não inflar a contagem de provas com um
-    // check vazio.
+
     if (directedCriteria.length > 0) {
-      // Tolera exatamente as ocorrências `requiresHuman` do critério JÁ presentes na região
-      // original — elas nunca foram pedidas, não é falha se ainda estiverem lá. Mais que isso
-      // sobrando (ou aparecendo) é o que de fato não foi resolvido.
       const stillPresent = directedCriteria.filter((c) => {
         const tolerated = options.findings!.filter(
           (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
@@ -245,12 +195,6 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  // Fabricação de agente = INTRODUZIR voz de 1ª pessoa num texto que era impessoal. Comparação por
-  // PRESENÇA-DE-VOZ, não por novidade-de-token (ADR-049): com as conjugações pro-drop na lista
-  // (tier3.ts), cada verbo é um marcador distinto — checar token-a-token acusaria "analisamos" como
-  // novo mesmo quando o documento já fala em 1ª pessoa ("Nós recebemos… nós analisamos"), o que NÃO
-  // é fabricação (o princípio do ADR-019). Se o documento-fonte já tem QUALQUER marca de 1ª pessoa,
-  // continuar nessa voz é do autor, não invenção; só vetamos quando a fonte é impessoal.
   const sourceFirstPerson = firstPersonMarkers(text, locale.firstPersonMarkers);
   const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();
   const inventedFirstPerson = sourceFirstPerson.size === 0 ? proposalFirstPerson : [];

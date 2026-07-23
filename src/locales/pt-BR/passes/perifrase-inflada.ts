@@ -1,11 +1,3 @@
-/**
- * Pass "perífrase inflada" — `5.3.4` (frases concisas).
- *
- * Locuções que ocupam o lugar de uma preposição/conjunção simples: "no sentido de" (→ "para"),
- * "com relação a" (→ "sobre"), "a fim de" (→ "para"). Léxico fechado e curado (`perifrases.pt`),
- * casamento de frase contígua (matcher compartilhado). Não troca sozinha (o encaixe depende do
- * contexto → `requiresHuman`); a forma enxuta vai na justificativa.
- */
 import type { Finding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";

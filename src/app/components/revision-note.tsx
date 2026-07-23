@@ -57,7 +57,6 @@ export function RevisionNote({
         </span>
       </p>
 
-      {/* trecho */}
       <Block label="Trecho">
         <blockquote className="border-l-2 pl-4" style={{ borderColor: ink }}>
           <span className="font-serif text-[17px] leading-snug text-ink-0">
@@ -80,7 +79,6 @@ export function RevisionNote({
         <Prose className="mt-2 text-ink-2">{finding.justification}</Prose>
       </Block>
 
-      {/* ação — o coração da identidade */}
       <div className="mt-7">
         {safe ? (
           <SafeResolution finding={finding} onApply={() => onApply(finding)} />
@@ -95,20 +93,11 @@ export function RevisionNote({
         )}
       </div>
 
-      {/* terceira via, universal: o autor reescreve à mão. Nem máquina, nem LLM — a engine só re-mede. */}
       <ManualEdit finding={finding} source={source} onManualEdit={onManualEdit} />
     </div>
   );
 }
 
-/**
- * Edição À MÃO (ou COLAGEM) do autor — uma das TRÊS fontes de candidato, ao lado da ação mecânica e
- * da LLM. Abre a UNIDADE-alvo (a frase ou o parágrafo do finding, o mesmo trecho que a LLM
- * reescreveria e que fica destacado no documento) num campo editável. A decisão do ADR-000 (Etapa 2):
- * a versão do autor passa pelo MESMO verificador determinístico que julga a IA — nenhuma fonte é
- * privilegiada. O autor escreve/cola → `verifyManualEdit` (offline, sem LLM) → o MESMO veredito
- * (`RewriteResult`) → aplicar vira rascunho (`onManualEdit` = `replaceSpan`) e a engine re-audita.
- */
 function ManualEdit({
   finding,
   source,
@@ -335,8 +324,6 @@ function HumanDecision({
   );
 }
 
-/* ==================================================== Tier 3 · reescrita gerada e verificada */
-
 function GeneratedRewrite({
   finding,
   source,
@@ -444,7 +431,6 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
 
   return (
     <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-card)">
-      {/* VEREDITO — protagonista. A engine julgou; é isto que o produto entrega, não a prosa. */}
       <div
         className="px-4 py-3.5"
         style={{
@@ -476,7 +462,6 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         </div>
       </div>
 
-      {/* PROVA — a substância do veredito, logo abaixo do headline */}
       <div className="px-4 py-3">
         <p className="u-sublabel mb-2 text-ink-3">Prova · determinística</p>
         <ul className="flex flex-col gap-1.5">
@@ -486,7 +471,6 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         </ul>
       </div>
 
-      {/* SINAL */}
       {verification.signals.length > 0 && (
         <div className="border-t border-rule-1 px-4 py-3">
           <p className="u-sublabel mb-2 text-ink-3">
@@ -500,7 +484,6 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         </div>
       )}
 
-      {/* O ESPÉCIME avaliado — a proposta da IA, calma, junto da ação que a aplica */}
       <div className="border-t border-rule-1 px-4 py-3">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
           <p className="u-sublabel text-ink-3">Trecho avaliado</p>
@@ -511,9 +494,6 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         <p className="font-serif text-[14.5px] leading-snug text-ink-1">{proposal.proposed}</p>
 
         <div className="mt-3">
-          {/* O veto NUNCA autoaplica e NUNCA vira selo verde — mas não bloqueia o autor. Com
-              prova falhada, a ação vira um override deliberado (é só um rascunho, que a engine
-              re-audita). A decisão é do autor. */}
           <button
             type="button"
             onClick={onApplyRewrite}

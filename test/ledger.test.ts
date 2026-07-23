@@ -1,8 +1,3 @@
-/**
- * Trilha de proveniência (ADR-000 · Etapa 6). O construtor do Markdown é PURO (função das
- * entradas) → determinístico e testável. Travamos: a régua é o peso de severidade canônico
- * (não contagem), rótulos humanos (nomes internos nunca vazam), e o caveat de honestidade.
- */
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import { documentBurden, renderLedgerMarkdown, sourceLabel, type LedgerEntry } from "../src/app/lib/ledger";

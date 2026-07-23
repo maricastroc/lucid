@@ -1,8 +1,3 @@
-/**
- * Salto de nível de título (`salto_de_nivel_titulo`, 5.2). O PRIMEIRO detector que só existe porque
- * um formato estruturado (DOCX) traz `heading` com nível. Marca quando um título desce mais de um
- * nível de uma vez (h1 → h3). Texto puro não tem título → nunca dispara.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, analyzeDocument, buildStructuredDocument, type Finding, type RawBlock } from "../src/lucid";
 import { ptDocumentServices } from "../src/locales/pt-BR";

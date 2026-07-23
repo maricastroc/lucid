@@ -1,11 +1,6 @@
 import type { Config } from "../config";
 import type { Document, Metrics } from "../types";
 
-/**
- * Serviços de métrica que variam por idioma (ADR-031): a contagem de SÍLABAS e a FÓRMULA de
- * legibilidade. O esqueleto (contar palavras/frases, arredondar) é neutro e fica no core; ambos os
- * serviços vêm do `LocaleBundle` (ex.: sílabas PT + Flesch-PT Martins 1996).
- */
 export interface MetricServices {
   countSyllables: (word: string) => number;
   readability: (input: { wordsPerSentence: number; syllablesPerWord: number }) => number;

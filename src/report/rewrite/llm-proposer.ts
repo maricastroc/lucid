@@ -1,22 +1,7 @@
-/**
- * Tier 3 · `LlmRewriteProposer` — proposer real, sobre um `ChatProvider` (ADR-015).
- *
- * Monta o prompt versionado, chama o modelo (temperature 0), e extrai a reescrita do JSON.
- * O modelo só PROPÕE; o verificador determinístico (já existente) é quem julga. Se a
- * resposta vier ilegível ou vazia, devolve `proposed = original` — HONESTO: o verificador
- * então mostra que o alvo não foi resolvido, em vez de fingir uma reescrita.
- *
- * `id = "<provider>:<model>+<prompt-version>"` — proveniência para eval/anti-drift e para o
- * benchmark ("qual modelo, sob qual prompt").
- */
 import { buildRewritePrompt, STRATEGY_VERSION, type RewriteStrategy } from "./prompt";
 import type { ChatProvider } from "@/llm";
 import type { RewriteProposal, RewriteProposer, RewriteRequest } from "./types";
 
-/**
- * Extrai `{ "reescrita": "..." }` do texto do modelo, tolerando cercas ```json e texto ao
- * redor. Retorna `null` se não achar uma string de reescrita — o chamador cai no original.
- */
 export function parseRewrite(raw: string): string | null {
   const tryParse = (candidate: string): string | null => {
     try {

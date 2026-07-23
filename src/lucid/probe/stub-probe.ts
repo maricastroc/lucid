@@ -1,13 +1,3 @@
-/**
- * Camada 2 · sonda-STUB determinística (docs/ARQUITETURA.md §5). É a implementação que os
- * testes usam: mesma entrada → mesma saída, sem rede. A sonda real (`llm-probe.ts`, atrás
- * de flag) não é dependência do build.
- *
- * O stub mapeia `trecho` → `ProbeResult` fixo por FIXTURE. Trecho não cadastrado cai no
- * default configurável — deliberadamente conservador: por padrão, "não consegue responder"
- * (piso pessimista). Nada aqui aprova nada: `ProbeResult` alimenta `interpret`, que só
- * emite `flag` ou `neutro`.
- */
 import type { ComprehensionProbe, ProbeInput, ProbeResult } from "./types";
 
 const DEFAULT_UNANSWERABLE: ProbeResult = {

@@ -1,16 +1,5 @@
 "use client";
 
-/**
- * Studio — orquestrador da mesa de revisão. Único ponto que chama `analyze()`: a UI é
- * consumidora pura da Camada 1. Compõe o masthead, o documento (protagonista) e o trilho
- * editorial (visão geral ⇄ nota de um diagnóstico + lista de revisões).
- *
- * Selecionar um diagnóstico sincroniza tudo: acende o trecho na página, rola-o à vista
- * com um flash curto, faz a página recuar (modo lupa) e abre a nota dedicada. j/k (↑/↓)
- * percorrem as revisões; Esc fecha. "Aplicar as seguras" resolve num passo o que é
- * mecanicamente seguro; o resto, honestamente, fica com o autor. No mobile, a nota e a
- * lista vivem num bottom sheet.
- */
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   analyze,
@@ -189,10 +178,10 @@ export function Studio() {
           before: finding.span.text,
           after: finding.suggestion,
         },
-        text.slice(0, finding.span.start) + finding.suggestion + text.slice(finding.span.end),
+        spliceSpan(diagnostic.text, finding.span, finding.suggestion),
       );
     },
-    [text, applyChange],
+    [diagnostic, applyChange],
   );
 
   const applySplit = useCallback(
@@ -228,13 +217,14 @@ export function Studio() {
   );
 
   const applyAllSafe = useCallback(() => {
-    const applicable = analyze(text).findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
+    const freshDiagnostic = analyze(text);
+    const applicable = freshDiagnostic.findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
     applyChange(
       {
         source: "safe",
         label: `${sourceLabel("safe")} · ${applicable.length} ${applicable.length === 1 ? "aplicada" : "aplicadas"}`,
       },
-      applySafeSuggestions(text, applicable),
+      applySafeSuggestions(freshDiagnostic.text, applicable),
     );
   }, [text, activeCriteria, applyChange]);
 
