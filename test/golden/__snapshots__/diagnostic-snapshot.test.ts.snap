@@ -4,8 +4,8 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -47,6 +47,16 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },
@@ -237,10 +247,62 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "text": "A comissão responsável pela avaliação das propostas técnicas apresentadas pelos participantes do certame decidiu, após longa deliberação interna, prorrogar o prazo final de entrega dos documentos exigidos no edital.",
       },
     },
+    {
+      "category": "syntactic",
+      "criterion": "nominalizacao_encadeada",
+      "justification": "Concentração de nominalizações (3 nesta frase) — substantivos de ação empilhados pesam a leitura. Considere devolver algumas ações ao verbo; a ferramenta não decide quais.",
+      "meta": {
+        "count": 3,
+        "kind": "density",
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "info",
+      "span": {
+        "end": 37,
+        "start": 28,
+        "text": "avaliação",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "nominalizacao_encadeada",
+      "justification": "Concentração de nominalizações (3 nesta frase) — substantivos de ação empilhados pesam a leitura. Considere devolver algumas ações ao verbo; a ferramenta não decide quais.",
+      "meta": {
+        "count": 3,
+        "kind": "density",
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "info",
+      "span": {
+        "end": 136,
+        "start": 125,
+        "text": "deliberação",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "nominalizacao_encadeada",
+      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "meta": {
+        "kind": "chain",
+        "links": 1,
+        "strongLink": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "info",
+      "span": {
+        "end": 195,
+        "start": 173,
+        "text": "entrega dos documentos",
+      },
+    },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -283,6 +345,16 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 3,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
+        "densityPer100Words": 10.3,
         "principle": "5.3.3",
       },
       {
@@ -446,7 +518,7 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "principle": "5.1",
       },
     ],
-    "totalFindings": 1,
+    "totalFindings": 4,
   },
   "text": "A comissão responsável pela avaliação das propostas técnicas apresentadas pelos participantes do certame decidiu, após longa deliberação interna, prorrogar o prazo final de entrega dos documentos exigidos no edital.",
 }
@@ -513,8 +585,8 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -556,6 +628,16 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },
@@ -751,6 +833,24 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
     },
     {
       "category": "syntactic",
+      "criterion": "nominalizacao_encadeada",
+      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "meta": {
+        "kind": "chain",
+        "links": 1,
+        "strongLink": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "info",
+      "span": {
+        "end": 39,
+        "start": 18,
+        "text": "análise de documentos",
+      },
+    },
+    {
+      "category": "syntactic",
       "criterion": "nominalization",
       "justification": "Nominalização com verbo-suporte — o verbo "pagar" poderia substituir a construção diretamente, deixando a frase mais direta. A ferramenta não reescreve automaticamente; veja a sugestão.",
       "meta": {
@@ -771,8 +871,8 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -815,6 +915,16 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 14.3,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 1,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
+        "densityPer100Words": 7.1,
         "principle": "5.3.3",
       },
       {
@@ -978,7 +1088,7 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
         "principle": "5.1",
       },
     ],
-    "totalFindings": 2,
+    "totalFindings": 3,
   },
   "text": "É preciso fazer a análise de documentos. Também convém realizar o pagamento da taxa.",
 }
@@ -1047,6 +1157,24 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
       "suggestion": undefined,
     },
     {
+      "category": "syntactic",
+      "criterion": "nominalizacao_encadeada",
+      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "meta": {
+        "kind": "chain",
+        "links": 1,
+        "strongLink": false,
+      },
+      "principle": "5.3.3",
+      "requiresHuman": true,
+      "severity": "info",
+      "span": {
+        "end": 84,
+        "start": 58,
+        "text": "verificação dos documentos",
+      },
+    },
+    {
       "category": "lexical",
       "criterion": "jargon",
       "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "citados acima"; a ferramenta não reescreve automaticamente — veja a sugestão.",
@@ -1086,8 +1214,8 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
     },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1129,6 +1257,16 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
           "warning": 1,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 3.4,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 1,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 3.4,
         "principle": "5.3.3",
       },
@@ -1293,7 +1431,7 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "principle": "5.1",
       },
     ],
-    "totalFindings": 5,
+    "totalFindings": 6,
   },
   "text": "O pedido foi analisado pela comissão, que decidiu fazer a verificação dos documentos supracitados antes de conceder, em sede de procedimento administrativo, o benefício pleiteado pelo interessado no processo.",
 }
@@ -1303,8 +1441,8 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
 {
   "findings": [],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1346,6 +1484,16 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },
@@ -1520,8 +1668,8 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1563,6 +1711,16 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },
@@ -1756,8 +1914,8 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1799,6 +1957,16 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },
@@ -2014,8 +2182,8 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
     },
   ],
   "meta": {
-    "configHash": "abb2cd17",
-    "dataHash": "f5927b96",
+    "configHash": "e3fad6b0",
+    "dataHash": "c9dfc23d",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2057,6 +2225,16 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
           "warning": 0,
         },
         "criterion": "nominalization",
+        "densityPer100Words": 0,
+        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
         "principle": "5.3.3",
       },

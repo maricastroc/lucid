@@ -42,6 +42,13 @@ export function Guidance({
       return <PassiveGuide finding={finding} source={source} onPassiveActive={onPassiveActive} />;
     case "nominalization":
       return <NominalizationGuide finding={finding} />;
+    case "nominalizacao_encadeada":
+      return (
+        <GuideText>
+          Procure o verbo escondido no substantivo e devolva a ação a ele (“a verificação das informações” → “verificar as
+          informações”). Quem pratica a ação — e qual nominalização vale desfazer — é decisão sua.
+        </GuideText>
+      );
     case "jargon":
       return <JargonGuide />;
     case "subordinacao_densa":

@@ -2302,6 +2302,54 @@ typecheck/lint limpos.
 
 ---
 
+## ADR-051 — `nominalizacao_encadeada`: a nominalização SEM verbo-suporte vira critério (cadeia por "de" + densidade)
+
+**Status:** aceito · Camada 1 (locale pt-BR) — critério novo, sempre `requiresHuman`
+
+**Contexto.** A usuária auditou um rascunho saturado de nominalização ("A realização da atualização
+cadastral depende da verificação prévia das informações… e da confirmação dos documentos…") e o
+placar de Nominalização marcou ZERO. Por design (ADR-007/011), o pass `nominalization` só dispara na
+construção com verbo-suporte (`fazer/realizar/efetuar/promover/proceder + determinante +
+nominalização`) — é onde existe sugestão mecanicamente segura. O burocratês real, porém, usa a
+nominalização NUA (sujeito/complemento, sem verbo leve), que não tinha detector nenhum. Na mesma
+sessão: o rótulo da UI "Mais-que-perfeito" foi corrigido para "Mais-que-perfeito sintético" — o pass
+(`mais_que_perfeito_sintetico`) nunca cobriu a forma composta ("haviam sido encaminhados"), que é
+exatamente a correção que ele recomenda; só o rótulo enganava.
+
+**Decisão.** Critério novo `nominalizacao_encadeada` (`5.3.3`, sintático, inline), com dois sinais
+100% determinísticos sobre um léxico novo (`substantivos-acao.pt.json`, ~160 lemas com plural
+explícito — substantivos deverbais de leitura dominante de AÇÃO, curadoria precisão>recall):
+
+1. **Cadeia** — `[cabeça do léxico] + de/da/do/das/dos (+ 1 palavra opcional) + [palavra com sufixo
+   deverbal]`, estendida gulosamente. Entre a cabeça e o "de" NÃO se admite palavra intermediária
+   (um verbo ali — "a análise depende da aprovação" — seria falso positivo). Severidade gradua pela
+   evidência: elo TAMBÉM no léxico ("realização da atualização") = `warning`; elo só por sufixo
+   ("confirmação dos documentos") = `info`.
+2. **Densidade** — ≥3 cabeças na mesma frase (`minPorFrase`, configurável) marca as que não estão
+   cobertas por cadeia, como `info` (desenho do `adverbio_mente_denso`).
+
+Sempre `requiresHuman: true`, NUNCA `suggestion`: o léxico novo não carrega mapeamento
+substantivo→verbo — devolver a ação ao verbo exige decidir quem faz o quê (fronteira do
+`CLAUDE.md`). A divisão de trabalho fica: `nominalization` = com verbo-suporte (pode sugerir);
+`nominalizacao_encadeada` = sem verbo-suporte (só marca).
+
+**Verificado.** `test/nominalizacao-encadeada.test.ts`: cadeias forte/fraca, palavra intermediária
+depois do "de" ("identificação de eventuais inconsistências"), recusa de palavra entre cabeça e
+"de" (precisão), extensão gulosa, densidade por frase, léxico não dispara em substantivo
+lexicalizado ("documento do departamento"), pontuação quebra cadeia, kill switch. Snapshots do
+golden atualizados de propósito (dataHash muda com o dataset novo — governança do ADR-022).
+
+**Consequências.**
+- O rascunho da usuária passa de 0 para ~7 findings de nominalização (2 warnings + 5 infos) sem
+  nenhum falso "verde" — e sem prometer reescrita que a ferramenta não sabe fazer.
+- O sufixo do elo é lista fechada no próprio pass (`-ção/-são/-mento/-ância/-ência` + plurais);
+  o léxico só governa as cabeças. Expandir recall = adicionar cabeças ao JSON, com o critério de
+  curadoria registrado no README dos datasets.
+- Frases com só 2 nominalizações sem cadeia continuam invisíveis (limiar 3) — deliberado,
+  precisão>recall; o `minPorFrase` é config pública para quem quiser apertar.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

@@ -2,6 +2,7 @@ export type IntegratedCriterion =
   | "long_sentence"
   | "passive_voice"
   | "nominalization"
+  | "nominalizacao_encadeada"
   | "jargon"
   | "mais_que_perfeito_sintetico"
   | "gerundismo"
@@ -75,11 +76,14 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
             "A comissão responsável pela avaliação das propostas técnicas apresentadas pelos participantes do certame decidiu, após longa deliberação interna, prorrogar o prazo final de entrega dos documentos exigidos no edital.",
           requiresHuman: true,
         },
+        { criterion: "nominalizacao_encadeada", severity: "info", start: 28, end: 37, spanText: "avaliação", requiresHuman: true },
+        { criterion: "nominalizacao_encadeada", severity: "info", start: 125, end: 136, spanText: "deliberação", requiresHuman: true },
+        { criterion: "nominalizacao_encadeada", severity: "info", start: 173, end: 195, spanText: "entrega dos documentos", requiresHuman: true },
       ],
       metrics: { words: 29, sentences: 1 },
     },
     notes:
-      "Não dispara nominalização ('avaliação' vem de 'pela', não de verbo leve) nem passiva ('apresentadas' é relativa reduzida sem 'ser') — precisão sobre recall, correto por design.",
+      "Não dispara nominalização com verbo-suporte ('avaliação' vem de 'pela', não de verbo leve) nem passiva ('apresentadas' é relativa reduzida sem 'ser') — precisão sobre recall, correto por design. A nominalização SEM verbo-suporte (ADR-051) dispara: densidade (3 substantivos de ação na frase) marca 'avaliação' e 'deliberação'; 'entrega dos documentos' é cadeia fraca (elo só por sufixo) — tudo info, requiresHuman.",
   },
   {
     id: "voz_passiva_com_e_sem_agente",
@@ -102,9 +106,12 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       findings: [
         { criterion: "nominalization", severity: "warning", start: 10, end: 39, spanText: "fazer a análise de documentos", requiresHuman: false, suggestion: "analisar documentos" },
         { criterion: "nominalization", severity: "warning", start: 55, end: 83, spanText: "realizar o pagamento da taxa", requiresHuman: false, suggestion: "pagar a taxa" },
+        { criterion: "nominalizacao_encadeada", severity: "info", start: 18, end: 39, spanText: "análise de documentos", requiresHuman: true },
       ],
       metrics: { words: 14, sentences: 2 },
     },
+    notes:
+      "Sobreposição deliberada (sem dedup entre critérios, como no caso quatro_criterios): 'análise de documentos' também é cadeia fraca do ADR-051 — o verbo-suporte tem a sugestão segura; a cadeia só marca. 'pagamento da taxa' não encadeia ('taxa' sem sufixo deverbal).",
   },
   {
     id: "quatro_criterios_span_sobreposto",
@@ -123,6 +130,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
         },
         { criterion: "passive_voice", severity: "warning", start: 9, end: 36, spanText: "foi analisado pela comissão", requiresHuman: false },
         { criterion: "nominalization", severity: "warning", start: 50, end: 69, spanText: "fazer a verificação", requiresHuman: true },
+        { criterion: "nominalizacao_encadeada", severity: "info", start: 58, end: 84, spanText: "verificação dos documentos", requiresHuman: true },
         { criterion: "jargon", severity: "warning", start: 85, end: 97, spanText: "supracitados", requiresHuman: false, suggestion: "citados acima" },
         { criterion: "jargon", severity: "warning", start: 117, end: 127, spanText: "em sede de", requiresHuman: false, suggestion: "no âmbito de" },
       ],

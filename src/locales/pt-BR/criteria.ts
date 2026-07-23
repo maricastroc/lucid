@@ -13,6 +13,7 @@ export const CRITERION_IDS = [
   "long_sentence",
   "passive_voice",
   "nominalization",
+  "nominalizacao_encadeada",
   "jargon",
   "mais_que_perfeito_sintetico",
   "gerundismo",

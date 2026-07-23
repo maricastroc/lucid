@@ -40,6 +40,7 @@ export interface CriterionMeta {
 export const CRITERION_ORDER: readonly Criterion[] = [
   "passive_voice",
   "nominalization",
+  "nominalizacao_encadeada",
   "mais_que_perfeito_sintetico",
   "gerundismo",
   "jargon",
@@ -80,6 +81,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     signal: "verbo-suporte + determinante + substantivo derivado de verbo, em adjacência estrita",
     why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
   },
+  nominalizacao_encadeada: {
+    label: "Nominalização encadeada",
+    ruleId: "nominalizacao_encadeada",
+    kind: "Escolha lexical",
+    principleName: "Frases claras e concisas",
+    channel: "inline",
+    markStyleClass: "mark-dashed",
+    signal: "substantivo de ação de um léxico curado encadeado por “de” a outro substantivo abstrato, ou concentrado na mesma frase",
+    why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
+  },
   jargon: {
     label: "Jargão",
     ruleId: "jargon",
@@ -101,7 +112,7 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     why: "Frases longas sobrecarregam a memória de trabalho de quem lê.",
   },
   mais_que_perfeito_sintetico: {
-    label: "Mais-que-perfeito",
+    label: "Mais-que-perfeito sintético",
     ruleId: "mais_que_perfeito_sintetico",
     kind: "Tempo verbal",
     principleName: "Frases claras",
