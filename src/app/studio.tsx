@@ -194,14 +194,18 @@ export function Studio() {
       if (deferredText !== text) return;
       if (nextText === text) return;
       applyingRef.current = true;
-      const burdenBefore = documentBurden(diagnostic.findings);
+      // burdenAfter só existe no modo plano (a edição sempre destrutura o doc
+      // importado — nextText nunca volta a bater com importedDoc.source). Medir
+      // burdenBefore com o mesmo analyzer plano evita comparar bases diferentes
+      // (estruturado vs. plano) e um delta de peso que não reflete o que mudou (M5).
+      const burdenBefore = documentBurden(analyze(text).findings);
       const burdenAfter = documentBurden(analyze(nextText).findings);
       pushUndo(text);
       setLedger((prev) => [...prev, { ...entry, burdenBefore, burdenAfter }]);
       setText(nextText);
       setSelectedId(null);
     },
-    [text, deferredText, diagnostic, pushUndo],
+    [text, deferredText, pushUndo],
   );
 
   const applyManualEdit = useCallback(
