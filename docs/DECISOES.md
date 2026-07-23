@@ -2396,6 +2396,74 @@ lido por nenhum pass.
 
 ---
 
+## ADR-053 — `possible_invented_agent`: sinal não-bloqueante para agente de 3ª pessoa fabricado (LUCID-011)
+
+**Status:** aceito · Camada 1 (`verifyRewrite`) — sinal heurístico novo, não-bloqueante
+
+**Contexto.** O ADR-021/ADR-049 fecharam a fabricação de agente em 1ª pessoa (`no_invented_first_person`,
+prova bloqueante): uma reescrita não pode introduzir "nós"/"decidimos" ausentes do texto-fonte. O
+mesmo risco existe em 3ª pessoa — `NO_INVENTION_RULES` em `src/report/rewrite/prompt.ts` já pede
+explicitamente ao modelo para não inventar "a equipe"/"o governo" quando ativa uma passiva sem
+agente, mas nenhum guard mecânico verificava se o modelo obedeceu. Achado LUCID-011: "Foi decidido
+que o prazo seria prorrogado." → "A comissão decidiu prorrogar o prazo." fabrica "a comissão" sem
+nenhuma prova ou sinal existente detectar isso — `entities_preserved` só olha capitalização
+(`RE_ENTITY`), e "comissão" é substantivo comum minúsculo.
+
+**Decisão.** Adicionar `possible_invented_agent` como `VerificationSignal` (não `Proof`): a
+fabricação de agente institucional/de cargo em 3ª pessoa é mais arriscada de marcar como veto
+mecânico do que a de 1ª pessoa, porque não há lista fechada de pronomes/verbos pro-drop —
+substantivos comuns são uma classe aberta, e qualquer lista curada tem recall menor e risco maior
+de falso positivo sobre reorganização legítima de entidades já citadas. A heurística:
+
+1. Lista fechada de ~70 substantivos-agente em `THIRD_PERSON_AGENT_NOUNS`
+   (`src/locales/pt-BR/tier3.ts`): coletivos institucionais (comissão, equipe, diretoria, conselho…)
+   e cargos/papéis individuais (diretor, coordenador, responsável, fiscal…). Nunca capitalização —
+   é lexical, não ortográfico (evita o problema que `extractEntities` teria: marcar qualquer palavra
+   maiúscula nova como agente).
+2. **Presença no original** (`agentNounsAnywhere`): a forma aparece em QUALQUER papel gramatical no
+   texto-fonte inteiro (`text`, não só o `target`/span, mesmo differential-contra-o-documento-todo do
+   ADR-021/049) → não é fabricação, mesmo que a proposta a promova a sujeito. Cobre reorganização
+   ("recebeu… que foi analisado" → "…analisou") e entidade citada como objeto/oblíquo antes de virar
+   sujeito.
+3. **Posição de sujeito na proposta** (`agentSubjectMentions`, regex `thirdPersonAgentSubject`):
+   só conta como "agente introduzido" quando a forma é precedida de artigo definido bruto
+   (`o/a/os/as`) — contrações (`da/na/pela/à`) já ficam fora por serem tokens diferentes, o que
+   também exclui o marcador de agente da própria passiva (`pela comissão`). Uma lookbehind negativa
+   exclui ainda `para/com/sobre/sem/entre/contra/até` + artigo, para não confundir objeto oblíquo de
+   preposição ("fala sobre a equipe") com sujeito aparente.
+4. `flagged = true` só quando a proposta introduz uma forma dessas ausente do passo 2.
+
+Por que sinal, não prova: ao contrário de pronomes de 1ª pessoa (classe fechada, universo pequeno,
+falso positivo raro), substantivos-agente de 3ª pessoa são uma classe aberta — a lista cobre casos
+claros mas nunca será exaustiva (falso negativo: um agente fora da lista passa despercebido), e a
+heurística de posição de sujeito por artigo é sintática, não semântica (falso positivo residual:
+"para a equipe entregar o relatório" antes de "sobre/com/etc." bloquear — preposições não cobertas
+pela lista de exclusão, ou orações relativas onde o artigo+substantivo não é de fato o sujeito da
+oração matriz). Nenhum desses dois erros justifica vetar uma reescrita inteira; ambos justificam
+mostrar a bandeira para revisão humana, exatamente o padrão já usado por `entities_preserved`.
+
+**Verificado.** `src/report/rewrite/types.ts` (`possible_invented_agent` no union de
+`VerificationSignal`; `thirdPersonAgentNouns`/`thirdPersonAgentSubject` em `RewriteLocale`);
+`src/locales/pt-BR/tier3.ts` (lista + duas regexes); `src/report/rewrite/verify.ts` (cálculo do
+sinal); `test/rewrite-verify.test.ts` — describe "SINAL: agente de 3ª pessoa possivelmente
+fabricado (LUCID-011)": agente institucional novo, agente humano (cargo) novo, agente já presente
+como sujeito, entidade presente em papel não-sujeito promovida a sujeito, reformulação sem agente
+novo, coexistência com `no_invented_first_person` (prova antiga intacta), caso ambíguo de
+preposição não coberta. Suíte completa (`npm run test`, 1039 casos) permanece verde.
+
+**Consequências.**
+- Sem mudança de comportamento bloqueante: `hasBlockingFailure` não é afetado por este sinal, então
+  nenhuma reescrita antes aceita passa a ser rejeitada.
+- `BEST_EFFORT_CRITERIA` (ADR-050) continua com `passive_voice` como único critério na allowlist;
+  este sinal não promove `passive_voice` a um guard bloqueante — é informativo, para uso futuro se
+  uma auditoria mostrar precisão alta o suficiente para virar prova (mesma disciplina do ADR-021: só
+  vira veto mecânico com evidência).
+- A lista de substantivos-agente é curadoria própria, sem dataset/registry (mesmo padrão de
+  `FIRST_PERSON_PLURAL_VERBS`) — crescer a lista é editar um array em `tier3.ts`, não uma migração de
+  schema.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:
@@ -2415,6 +2483,9 @@ mecanismo de raridade por frequência previsto ali fica fora do runtime desta et
 `ARQUITETURA.md` já foi atualizado com uma nota curta em §6.4 registrando essa
 restrição, para as duas fontes não se contradizerem. ADR-052 reverte um placeholder do
 próprio ADR-006 (`treatEstarAsPassive`); `ARQUITETURA.md` §4/§6.2/§9 foi atualizado no mesmo
-espírito do ADR-008, para não sobrar nenhuma menção ao campo removido. Este arquivo não deve
+espírito do ADR-008, para não sobrar nenhuma menção ao campo removido. ADR-053 estende a família de
+guards de agente fabricado do ADR-021/ADR-049 (1ª pessoa, prova bloqueante) para 3ª pessoa
+(`possible_invented_agent`, sinal não-bloqueante) — mesma motivação, precisão insuficiente para
+virar veto mecânico. Este arquivo não deve
 contradizer `ARQUITETURA.md`; se um conflito aparecer, `ARQUITETURA.md` é a fonte de verdade e este
 log deve ser corrigido para acompanhá-lo.
