@@ -110,8 +110,7 @@ export async function verifyManualEdit(
     original: target.text,
     proposed: manualEditReplacement(draft),
   };
-  // A declaração vale para o autor também (nenhuma fonte é privilegiada): se você
-  // declarou o agente, a sua versão é cobrada pela mesma prova que cobra a IA.
+
   const verification = await verifyRewrite(text, target, proposal, {
     locale: rewriteLocalePtBR,
     criterion,

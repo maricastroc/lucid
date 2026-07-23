@@ -37,7 +37,7 @@ function normalizeForMatch(s: string): string {
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
 const RE_DATE = /\b\d{1,2}[/\-.]\d{1,2}[/\-.]\d{2,4}\b/gu;
 
-const RE_ENTITY = /\b(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})\b/gu;
+const RE_ENTITY = /(?<![\p{L}\p{N}])(?:\p{Lu}\p{Ll}[\p{L}]*|\p{Lu}{2,})(?![\p{L}\p{N}])/gu;
 const RE_ACRONYM = /^\p{Lu}{2,}$/u;
 const RE_SPACE = /\s/u;
 const SENTENCE_TERMINATORS = ".!?…";
@@ -142,8 +142,6 @@ export async function verifyRewrite(
   const newStart = target.start;
   const newEnd = target.start + proposal.proposed.length;
 
-  // Declarações fora do alvo não geram exigência sobre esta reescrita (defensivo:
-  // a UI só cria declaração para o finding selecionado, que vive dentro do alvo).
   const declarations = (options.declarations ?? []).filter(
     (d) => d.span.start < originalEnd && d.span.end > originalStart,
   );
@@ -168,8 +166,6 @@ export async function verifyRewrite(
     });
   }
 
-  // O autor pode declarar explicitamente "sem agente conhecido" (agent: null) — aí
-  // a passiva virar impessoal é decisão dele, não deleção silenciosa de informação.
   const explicitNoAgentDeclared = declarations.some((d) => d.agent === null);
 
   if (options.findings && options.findings.length > 0) {
@@ -184,10 +180,6 @@ export async function verifyRewrite(
         ).length;
         if (resolvableRemaining > 0) return true;
 
-        // Guarda contra falso "resolvido": se a reescrita transformou um finding
-        // pedível (requiresHuman:false) em requiresHuman:true do MESMO critério na
-        // mesma região, o critério não sumiu — só ficou irreconhecível porque a
-        // informação que o tornava resolvível (ex.: o agente da passiva) foi apagada.
         const humanBefore = before.findings.filter(
           (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
         ).length;
@@ -213,10 +205,6 @@ export async function verifyRewrite(
     }
   }
 
-  // ADR-055: o autor respondeu "quem pratica essa ação?" — a resposta é requisito,
-  // não template. A prova cobra que a reescrita NOMEIE o agente declarado (matching
-  // literal, caixa/espaço-insensível); ela nunca compõe a frase por ele. Omitida
-  // quando não há declaração com agente — não se inventa checagem que ninguém pediu.
   if (declaredAgents.length > 0) {
     const normalizedProposal = normalizeForMatch(proposal.proposed);
     const missing = declaredAgents.filter((a) => !normalizedProposal.includes(normalizeForMatch(a)));
@@ -278,8 +266,7 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  // A declaração amplia a fonte-de-verdade (ADR-055): se o autor declarou "nós"/"eu"
-  // como agente, a 1ª pessoa na proposta não é fabricação do reescritor.
+
   const sourceFirstPerson = firstPersonMarkers(`${text} ${declaredAgentsText}`, locale.firstPersonMarkers);
   const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();
   const inventedFirstPerson = sourceFirstPerson.size === 0 ? proposalFirstPerson : [];
@@ -308,7 +295,6 @@ export async function verifyRewrite(
         : "sem sinal de nome próprio perdido (heurística, não prova)",
   });
 
-  // Mesma ampliação para 3ª pessoa: o agente declarado pelo autor não é invenção.
   const sourceAgentNouns = agentNounsAnywhere(`${text} ${declaredAgentsText}`, locale.thirdPersonAgentNouns);
   const proposedAgentSubjects = agentSubjectMentions(proposal.proposed, locale.thirdPersonAgentSubject);
   const inventedAgents = [...proposedAgentSubjects].filter((a) => !sourceAgentNouns.has(a)).sort();

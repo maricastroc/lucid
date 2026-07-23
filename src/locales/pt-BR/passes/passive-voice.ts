@@ -99,11 +99,6 @@ interface AgentPhraseExtent {
   truncated: boolean;
 }
 
-// Marca o fim do sintagma do agente quando o próximo token abre um ADJUNTO novo
-// (temporal/locativo/idiomático) em vez de continuar o mesmo sintagma nominal —
-// ex.: "pelo diretor ontem à tarde": o agente para em "diretor", "ontem" já é
-// adjunto. "à"/"às" só conta como fronteira quando seguido de uma cabeça de
-// adjunto conhecida (ex. "à tarde"), não em idiomas como "à frente de".
 function isAdjunctBoundary(tokens: readonly Token[], j: number): boolean {
   const token = tokens[j];
   if (!token.isWord) return false;

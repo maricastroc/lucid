@@ -108,8 +108,6 @@ function buildDirectedPrompt(
   findings: readonly Finding[],
   declarations: readonly AgentDeclaration[] = [],
 ): string {
-  // Elicitação (ADR-055): a declaração casa com o finding por span exato, e só faz
-  // sentido para a passiva sem agente (o único ponto em que a engine PERGUNTA).
   const declarationOf = new Map(declarations.map((d) => [`${d.span.start}:${d.span.end}`, d]));
   const declOf = (f: Finding): AgentDeclaration | undefined =>
     f.criterion === "passive_voice" && f.requiresHuman

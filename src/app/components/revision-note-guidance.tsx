@@ -281,8 +281,6 @@ function PassiveGuide({
   );
 }
 
-// Elicitação (ADR-055): a engine PERGUNTA — a resposta do autor vira contexto e
-// requisito verificável, nunca parâmetro de template. Nenhuma frase é montada aqui.
 function PassiveElicitation({
   finding,
   declaration,

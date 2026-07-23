@@ -51,9 +51,6 @@ export function Studio() {
   const blocks = structured ? importedDoc!.blocks : null;
   const isEmpty = text.trim() === "" && importedDoc === null;
 
-  // Trocar de documento tem que zerar o histórico de undo e a trilha de revisão
-  // (ADR-018) — do contrário undo aplica snapshot do documento ANTERIOR sobre o
-  // novo, e o relatório de auditoria carrega proveniência de um texto diferente.
   const resetDocumentState = useCallback(() => {
     undoStack.current = [];
     setCanUndo(false);
@@ -194,10 +191,7 @@ export function Studio() {
       if (deferredText !== text) return;
       if (nextText === text) return;
       applyingRef.current = true;
-      // burdenAfter só existe no modo plano (a edição sempre destrutura o doc
-      // importado — nextText nunca volta a bater com importedDoc.source). Medir
-      // burdenBefore com o mesmo analyzer plano evita comparar bases diferentes
-      // (estruturado vs. plano) e um delta de peso que não reflete o que mudou (M5).
+
       const burdenBefore = documentBurden(analyze(text).findings);
       const burdenAfter = documentBurden(analyze(nextText).findings);
       pushUndo(text);
@@ -234,10 +228,6 @@ export function Studio() {
     setCanUndo(undoStack.current.length > 0);
   }, []);
 
-  // Digitação livre não passa por pushUndo — o snapshot no topo da pilha vira
-  // stale (desfazer descartaria o que foi digitado depois, sem aviso). Em vez de
-  // arriscar essa perda silenciosa, invalidamos o undo assim que o texto muda por
-  // fora do fluxo rastreado (M4): o "Desfazer" some, a digitação nunca é jogada fora.
   const onFreeTypeText = useCallback((value: string) => {
     if (undoStack.current.length > 0) {
       undoStack.current = [];
