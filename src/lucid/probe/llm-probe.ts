@@ -1,6 +1,6 @@
 import type { ChatProvider } from "@/llm";
 import { buildProbePrompt, PROBE_PROMPT_VERSION } from "./prompt";
-import type { ComprehensionProbe, OperacaoLeitura, ProbeInput, ProbeResult } from "./types";
+import type { ComprehensionProbe, OperacaoLeitura, ProbeInput, ProbeOptions, ProbeResult } from "./types";
 
 const VALID_OPERATIONS: ReadonlySet<string> = new Set<OperacaoLeitura>([
   "resolver_referente_a_distancia",
@@ -65,9 +65,14 @@ export class LlmComprehensionProbe implements ComprehensionProbe {
     this.id = `${provider.id}:${model}+${PROBE_PROMPT_VERSION}`;
   }
 
-  async probe(input: ProbeInput): Promise<ProbeResult> {
+  async probe(input: ProbeInput, options: ProbeOptions = {}): Promise<ProbeResult> {
     const prompt = buildProbePrompt(input.trecho, input.pergunta);
-    const raw = await this.provider.complete(prompt, { model: this.model, temperature: 0, maxTokens: 512 });
+    const raw = await this.provider.complete(prompt, {
+      model: this.model,
+      temperature: 0,
+      maxTokens: 512,
+      signal: options.signal,
+    });
     return parseProbeResult(raw);
   }
 }

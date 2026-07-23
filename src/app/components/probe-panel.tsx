@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OperacaoLeitura, ProbeResult, ProbeSignal } from "@/lucid/probe/types";
 
 interface ProbeResponse {
@@ -25,11 +25,21 @@ export function ProbePanel({ text }: { text: string }) {
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<ProbeResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [resultText, setResultText] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const canRun = pergunta.trim() !== "" && text.trim() !== "" && status !== "loading";
+  const stale = data !== null && resultText !== null && resultText !== text;
+
+  // Fechar o painel ou trocar de texto/pergunta não pode deixar a chamada ao LLM
+  // pendurada no servidor — cancela a requisição em voo (M6).
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   async function run() {
     if (!canRun) return;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setStatus("loading");
     setError(null);
     setData(null);
@@ -38,6 +48,7 @@ export function ProbePanel({ text }: { text: string }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, pergunta }),
+        signal: controller.signal,
       });
       const json = (await res.json().catch(() => null)) as ProbeResponse | { error?: string } | null;
       if (!res.ok || json === null || !("signal" in json)) {
@@ -46,10 +57,14 @@ export function ProbePanel({ text }: { text: string }) {
         return;
       }
       setData(json);
+      setResultText(text);
       setStatus("done");
     } catch (cause) {
+      if (controller.signal.aborted) return;
       setError(String(cause));
       setStatus("error");
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
     }
   }
 
@@ -87,7 +102,16 @@ export function ProbePanel({ text }: { text: string }) {
 
       {status === "error" && <p className="mt-3 text-[12px]" style={{ color: "var(--sev-error)" }}>{error}</p>}
 
-      {status === "done" && data && <ProbeResultView data={data} />}
+      {status === "done" && data && (
+        <>
+          {stale && (
+            <p className="mt-3 text-[12px] font-medium" style={{ color: "var(--sev-warn)" }}>
+              O texto mudou depois deste teste — o resultado abaixo é do trecho anterior. Teste de novo.
+            </p>
+          )}
+          <ProbeResultView data={data} />
+        </>
+      )}
 
       <p className="mt-4 text-[11px] leading-relaxed text-ink-3">
         Camada 2 usa um modelo de linguagem: <strong className="text-ink-2">não é determinística</strong> como o

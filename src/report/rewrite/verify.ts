@@ -26,6 +26,8 @@ export interface VerifyOptions {
    * fabricação: o agente declarado pelo autor não é invenção do reescritor.
    */
   declarations?: readonly AgentDeclaration[];
+  /** Cancela a chamada da sonda (ex.: o cliente da reescrita desconectou). */
+  signal?: AbortSignal;
 }
 
 function normalizeForMatch(s: string): string {
@@ -322,8 +324,8 @@ export async function verifyRewrite(
   if (options.probe && options.question) {
     try {
       const [originalResult, proposedResult] = await Promise.all([
-        options.probe.probe({ trecho: proposal.original, pergunta: options.question }),
-        options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }),
+        options.probe.probe({ trecho: proposal.original, pergunta: options.question }, { signal: options.signal }),
+        options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }, { signal: options.signal }),
       ]);
 
       const originalReadable = originalResult.podeResponder && !originalResult.precisouInferir;

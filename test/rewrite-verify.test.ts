@@ -644,6 +644,28 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(true);
   });
 
+  it("repassa o AbortSignal do verifyRewrite às DUAS chamadas da sonda (M6: cancelamento tem que propagar)", async () => {
+    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
+    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
+    const p = proposal(finding, "O prazo começa depois");
+
+    const receivedSignals: (AbortSignal | undefined)[] = [];
+    class SignalSpyProbe implements ComprehensionProbe {
+      readonly id = "signal-spy@1";
+      async probe(_input: ProbeInput, options?: { signal?: AbortSignal }): Promise<ProbeResult> {
+        receivedSignals.push(options?.signal);
+        return { podeResponder: true, respostaExtraida: "x", ondeTravou: [], operacoesDeLeitura: [], precisouInferir: false };
+      }
+    }
+
+    const controller = new AbortController();
+    await verify(text, finding, p, { probe: new SignalSpyProbe(), question: "quando o prazo começa?", signal: controller.signal });
+
+    expect(receivedSignals).toHaveLength(2);
+    expect(receivedSignals[0]).toBe(controller.signal);
+    expect(receivedSignals[1]).toBe(controller.signal);
+  });
+
   it("sonda falha no ORIGINAL: verifyRewrite resolve, provas e métricas seguem presentes, sem meaning_preserved, sem exceção", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
