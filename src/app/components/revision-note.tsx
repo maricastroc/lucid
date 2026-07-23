@@ -143,7 +143,9 @@ function ManualEdit({
   const check = async () => {
     setChecking(true);
     try {
-      setResult(await verifyManualEdit(source, target, draft, declaration ? [declaration] : undefined));
+      setResult(
+        await verifyManualEdit(source, target, draft, finding.criterion, declaration ? [declaration] : undefined),
+      );
     } finally {
       setChecking(false);
     }
@@ -370,6 +372,7 @@ function GeneratedRewrite({
     try {
       setResult(
         await generateRewrite(source, target, choice, {
+          criterion: finding.criterion,
           directed,
           declarations: declaration ? [declaration] : undefined,
           signal: controller.signal,

@@ -166,16 +166,37 @@ export async function verifyRewrite(
     });
   }
 
+  // O autor pode declarar explicitamente "sem agente conhecido" (agent: null) — aí
+  // a passiva virar impessoal é decisão dele, não deleção silenciosa de informação.
+  const explicitNoAgentDeclared = declarations.some((d) => d.agent === null);
+
   if (options.findings && options.findings.length > 0) {
     const resolvable = options.findings.filter((f) => !f.requiresHuman);
     const directedCriteria = [...new Set(resolvable.map((f) => f.criterion))].sort();
 
     if (directedCriteria.length > 0) {
+      const degraded: string[] = [];
       const stillPresent = directedCriteria.filter((c) => {
         const resolvableRemaining = after.findings.filter(
           (f) => f.criterion === c && !f.requiresHuman && overlaps(f, newStart, newEnd),
         ).length;
-        return resolvableRemaining > 0;
+        if (resolvableRemaining > 0) return true;
+
+        // Guarda contra falso "resolvido": se a reescrita transformou um finding
+        // pedível (requiresHuman:false) em requiresHuman:true do MESMO critério na
+        // mesma região, o critério não sumiu — só ficou irreconhecível porque a
+        // informação que o tornava resolvível (ex.: o agente da passiva) foi apagada.
+        const humanBefore = before.findings.filter(
+          (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
+        ).length;
+        const humanAfter = after.findings.filter(
+          (f) => f.criterion === c && f.requiresHuman && overlaps(f, newStart, newEnd),
+        ).length;
+        if (humanAfter > humanBefore && !explicitNoAgentDeclared) {
+          degraded.push(c);
+          return true;
+        }
+        return false;
       });
       proofs.push({
         check: "directed_findings_resolved",
@@ -183,7 +204,9 @@ export async function verifyRewrite(
         detail:
           stillPresent.length === 0
             ? `todos os ${directedCriteria.length} critérios pedíveis do briefing dirigido foram resolvidos`
-            : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
+            : degraded.length > 0
+              ? `briefing dirigido não resolveu: ${stillPresent.join(", ")} (${degraded.join(", ")} degradou para requiresHuman — informação que permitia resolver foi apagada, não corrigida)`
+              : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
       });
     }
   }

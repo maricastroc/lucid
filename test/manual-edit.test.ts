@@ -101,6 +101,20 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
     const firstPerson = verification.proofs.find((p) => p.check === "no_invented_first_person");
     expect(firstPerson?.passed).toBe(false);
   });
+
+  it("edição que só maquia a passiva (não resolve o critério) reprova quando o criterion é passado — regressão", async () => {
+    const { source, span } = manualEditTargetFor(text, "passive_voice");
+    const { verification } = await verifyManualEdit(
+      source,
+      span,
+      "As contas foram devidamente aprovadas pelo conselho.",
+      "passive_voice",
+    );
+
+    const targetResolved = verification.proofs.find((p) => p.check === "target_resolved");
+    expect(targetResolved?.passed).toBe(false);
+    expect(verification.hasBlockingFailure).toBe(true);
+  });
 });
 
 describe("verifyManualEdit — a declaração de agente vale para o autor também (ADR-055)", () => {
@@ -119,6 +133,7 @@ describe("verifyManualEdit — a declaração de agente vale para o autor també
       source,
       span,
       "A comissão comunicou a decisão ao interessado no processo administrativo em curso.",
+      undefined,
       [{ span: finding.span, agent: "a comissão" }],
     );
 
@@ -132,6 +147,7 @@ describe("verifyManualEdit — a declaração de agente vale para o autor també
       source,
       span,
       "O setor comunicou a decisão ao interessado no processo administrativo em curso.",
+      undefined,
       [{ span: finding.span, agent: "a comissão" }],
     );
 

@@ -199,6 +199,37 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(detail).toContain("passive_voice");
   });
 
+  it("apaga o agente da passiva pedível em vez de corrigir — REPROVA (degradação para requiresHuman, não resolução)", async () => {
+    const text = RESOLVABLE_PASSIVE;
+    const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
+    expect(findings.some((f) => !f.requiresHuman)).toBe(true);
+
+    const proposed = "O documento foi analisado.";
+    const target = { start: 0, end: text.length, text };
+    const v = await verifyRewrite(text, target, { proposerId: "apagou-o-agente", original: text, proposed }, {
+      findings,
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
+    const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
+    expect(detail).toContain("degradou");
+  });
+
+  it("com declaração explícita de 'sem agente conhecido', a mesma degradação NÃO reprova (decisão do autor, não deleção silenciosa)", async () => {
+    const text = RESOLVABLE_PASSIVE;
+    const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
+    const passive = findings.find((f) => !f.requiresHuman)!;
+
+    const proposed = "O documento foi analisado.";
+    const target = { start: 0, end: text.length, text };
+    const v = await verifyRewrite(text, target, { proposerId: "sem-agente-decidido", original: text, proposed }, {
+      findings,
+      declarations: [{ span: passive.span, agent: null }],
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
+  });
+
   it("sem findings dirigidos, a prova é OMITIDA (não inventa uma checagem que ninguém pediu)", async () => {
     const finding = spanFinding("Um texto qualquer aqui.", "Um texto qualquer aqui.", "long_sentence");
     const v = await verify("Um texto qualquer aqui.", finding, proposal(finding, "Outro texto."));
