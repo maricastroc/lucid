@@ -2,13 +2,11 @@ import { createRegistry, type DatasetRecord, type RawSpec, type Registry } from 
 import type { DataView } from "@/lucid/core/data/types";
 import type { DataTypes, DatasetId } from "./types";
 import {
-  prepareActiveConjugations,
   preparePhrases,
   prepareJargon,
   prepareLightVerbs,
   prepareNominalizations,
   prepareRecord,
-  prepareSerTenses,
   prepareStringSet,
 } from "./prepare";
 import abreviacoesData from "./abreviacoes.pt.json";
@@ -28,8 +26,6 @@ import perifrasesData from "./perifrases.pt.json";
 import duplasNegacoesData from "./duplas-negacoes.pt.json";
 import subordinadoresData from "./subordinadores.pt.json";
 import substantivosLeitorData from "./substantivos-leitor.pt.json";
-import serTemposData from "./ser-tempos.pt.json";
-import conjugacoesAtivasData from "./conjugacoes-ativas.pt.json";
 import stopwordsData from "./stopwords.pt.json";
 
 export type { DatasetId } from "./types";
@@ -120,16 +116,6 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: substantivosLeitorData,
     prepare: (r) => prepareStringSet(r, "forms"),
     provenance: "substantivos que nomeiam o leitor (interessado, requerente…) para fala indireta (curadoria própria)",
-  },
-  "ser-tempos.pt": {
-    raw: serTemposData,
-    prepare: prepareSerTenses,
-    provenance: "forma de 'ser' → tempo/número da passiva; conversão voz ativa Tier 2 (ADR-032)",
-  },
-  "conjugacoes-ativas.pt": {
-    raw: conjugacoesAtivasData,
-    prepare: prepareActiveConjugations,
-    provenance: "tabela fechada de conjugação ativa (gerada build-time); conversão voz ativa Tier 2 (ADR-032)",
   },
   "stopwords.pt": {
     raw: stopwordsData,

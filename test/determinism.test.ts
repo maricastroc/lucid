@@ -161,10 +161,9 @@ describe("determinismo — variações de Config", () => {
     { nome: "padrão", config: {} },
     { nome: "long_sentence desligado (limiar altíssimo)", config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } } },
     { nome: "passiva desligada", config: { passiveVoice: { enabled: false } } },
-    { nome: "nominalização desligada", config: { nominalization: { enabled: false, suggest: true } } },
+    { nome: "nominalização desligada", config: { nominalization: { enabled: false } } },
     { nome: "jargão desligado", config: { jargon: { enabled: false, frequencyRankCutoff: 5000, suggestFromGlossary: true } } },
-    { nome: "nominalização sem sugestão", config: { nominalization: { enabled: true, suggest: false } } },
-    { nome: "jargão sem sugestão", config: { jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false } } },
+    { nome: "jargão sem equivalente informativo", config: { jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false } } },
     { nome: "override parcial de limiar", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
   ];
 

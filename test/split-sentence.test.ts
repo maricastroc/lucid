@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { applySplitAt, clauseSplitPoints, type SplitPoint } from "../src/locales/pt-BR/actions/split-sentence";
+import { clauseSplitPoints } from "../src/locales/pt-BR/actions/split-sentence";
 import { buildDocument } from "./support/pt";
 import type { Span } from "../src/lucid/core/types";
 
@@ -88,65 +87,17 @@ describe("clauseSplitPoints — guardas de borda", () => {
   });
 });
 
-describe("applySplitAt — transform puro", () => {
-  it("ponto-e-vírgula: insere '. ' e capitaliza, descartando o ';'", () => {
+describe("clauseSplitPoints — só informação, nunca ação (ADR-054)", () => {
+  it("o módulo não exporta nenhum transform de texto — a divisão é do autor", async () => {
+    const mod = await import("../src/locales/pt-BR/actions/split-sentence");
+    expect(Object.keys(mod).sort()).toEqual(["clauseSplitPoints"]);
+  });
+
+  it("as prévias before/after são citações do texto (nada fabricado)", () => {
     const source = "Precisamos revisar o texto com cuidado; depois enviaremos ao setor.";
     const [p] = clauseSplitPoints(source, wholeSpan(source));
-    expect(applySplitAt(source, p)).toBe(
-      "Precisamos revisar o texto com cuidado. Depois enviaremos ao setor.",
-    );
-  });
-
-  it("vírgula + conjunção: preserva a conjunção como início da nova frase", () => {
-    const source = "É preciso fazer a verificação dos requisitos, e depois o pedido será apreciado.";
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    expect(applySplitAt(source, p)).toBe(
-      "É preciso fazer a verificação dos requisitos. E depois o pedido será apreciado.",
-    );
-  });
-
-  it("travessão: vira ponto final + maiúscula", () => {
-    const source = "O prazo terminou ontem — ninguém foi avisado a tempo disso.";
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    expect(applySplitAt(source, p)).toBe("O prazo terminou ontem. Ninguém foi avisado a tempo disso.");
-  });
-
-  it("capitaliza corretamente letra acentuada", () => {
-    const source = "Chegamos cedo ao setor; ótimo para adiantar o serviço combinado antes.";
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    expect(applySplitAt(source, p)).toBe("Chegamos cedo ao setor. Ótimo para adiantar o serviço combinado antes.");
-  });
-
-  it("não apaga nenhuma palavra — só remove a pontuação de fronteira e ajusta a caixa", () => {
-    const source = "Revisamos o texto com atenção; enviamos ao setor responsável no mesmo dia.";
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    const out = applySplitAt(source, p);
-    const words = (s: string) => (s.toLowerCase().match(/\p{L}+/gu) ?? []).sort();
-    expect(words(out)).toEqual(words(source));
-  });
-});
-
-describe("split — re-análise honesta (a frase alvo deixa de estourar o limiar)", () => {
-  it("dividir uma frase longa reduz a contagem do critério long_sentence", () => {
-    const source =
-      "É preciso fazer a verificação de todos os requisitos formais exigidos pela norma antes do prazo, " +
-      "e depois o requerimento apresentado pelo interessado será finalmente apreciado pela autoridade responsável.";
-
-    const before = analyze(source).score.byCriterion.find((c) => c.criterion === "long_sentence")!;
-    expect(before.count.warning + before.count.error).toBeGreaterThan(0);
-
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    const after = analyze(applySplitAt(source, p)).score.byCriterion.find((c) => c.criterion === "long_sentence")!;
-
-    const total = (c: typeof before) => c.count.info + c.count.warning + c.count.error;
-    expect(total(after)).toBeLessThan(total(before));
-  });
-
-  it("o resultado tem uma frase a mais que o original", () => {
-    const source = "Revisamos o texto com muito cuidado; enviamos ao setor responsável no mesmo dia útil.";
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    const out = applySplitAt(source, p);
-    expect(buildDocument(out).sentences.length).toBe(buildDocument(source).sentences.length + 1);
+    expect(source.replace(/\s+/g, " ")).toContain(p.before);
+    expect(source.replace(/\s+/g, " ")).toContain(p.after);
   });
 });
 
@@ -157,11 +108,5 @@ describe("split — determinismo byte-idêntico", () => {
     const r1 = JSON.stringify(clauseSplitPoints(source, wholeSpan(source)));
     const r2 = JSON.stringify(clauseSplitPoints(source, wholeSpan(source)));
     expect(r2).toBe(r1);
-  });
-
-  it("applySplitAt é puro e repetível", () => {
-    const [p] = clauseSplitPoints(source, wholeSpan(source));
-    const a: SplitPoint = p;
-    expect(applySplitAt(source, a)).toBe(applySplitAt(source, a));
   });
 });

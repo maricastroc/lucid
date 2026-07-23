@@ -1,6 +1,6 @@
 "use client";
 
-import type { Diagnostic, Finding, Span, SplitPoint } from "@/lucid";
+import type { Diagnostic, Finding, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import { AuditOverview } from "./audit-overview";
@@ -25,11 +25,7 @@ export interface RailProps {
   onToggleCriterion: (criterion: string) => void;
   onBucket: (b: Bucket) => void;
   onSelect: (finding: Finding) => void;
-  onApplyAllSafe: () => void;
-  onApply: (finding: Finding) => void;
-  onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onPassiveActive: (target: Span, replacement: string) => void;
   onManualEdit: (target: Span, replacement: string) => void;
   onPrev: () => void;
   onNext: () => void;
@@ -49,10 +45,7 @@ export function AuditRail(props: RailProps) {
             <RevisionNote
               finding={props.selectedFinding}
               source={props.diagnostic.text}
-              onApply={props.onApply}
-              onSplit={props.onSplit}
               onApplyRewrite={props.onApplyRewrite}
-              onPassiveActive={props.onPassiveActive}
               onManualEdit={props.onManualEdit}
             />
           </div>
@@ -71,7 +64,6 @@ export function AuditRail(props: RailProps) {
               ledger={props.ledger}
               activeCriteria={props.activeCriteria}
               onToggleCriterion={props.onToggleCriterion}
-              onApplyAllSafe={props.onApplyAllSafe}
             />
             <RevisionList
               findings={props.findings}

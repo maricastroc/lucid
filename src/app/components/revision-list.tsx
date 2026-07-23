@@ -33,7 +33,7 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
 
   const buckets: Array<[Bucket, string, number]> = [
     ["all", "Todas", findings.length],
-    ["safe", "Seguras", safeCount],
+    ["safe", "Troca direta", safeCount],
     ["human", "Decisão sua", humanCount],
   ];
 

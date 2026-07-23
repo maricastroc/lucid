@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { type Finding, type Span, type SplitPoint } from "@/lucid";
+import { type Finding, type Span } from "@/lucid";
 import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
@@ -9,29 +9,21 @@ import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
-import { APPLY_BUTTON_CLASS, Guidance } from "./revision-note-guidance";
+import { Guidance } from "./revision-note-guidance";
 import { Checkbox } from "./ui/checkbox";
 import { Select } from "./ui/select";
+
+export const APPLY_BUTTON_CLASS =
+  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
 
 export interface RevisionNoteProps {
   finding: Finding;
   source: string;
-  onApply: (f: Finding) => void;
-  onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onPassiveActive: (target: Span, replacement: string) => void;
   onManualEdit: (target: Span, replacement: string) => void;
 }
 
-export function RevisionNote({
-  finding,
-  source,
-  onApply,
-  onSplit,
-  onApplyRewrite,
-  onPassiveActive,
-  onManualEdit,
-}: RevisionNoteProps) {
+export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: RevisionNoteProps) {
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
@@ -81,15 +73,9 @@ export function RevisionNote({
 
       <div className="mt-7">
         {safe ? (
-          <SafeResolution finding={finding} onApply={() => onApply(finding)} />
+          <SafeEquivalent finding={finding} />
         ) : (
-          <HumanDecision
-            finding={finding}
-            source={source}
-            onSplit={onSplit}
-            onApplyRewrite={onApplyRewrite}
-            onPassiveActive={onPassiveActive}
-          />
+          <HumanDecision finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
         )}
       </div>
 
@@ -208,7 +194,7 @@ function ManualEdit({
   );
 }
 
-function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () => void }) {
+function SafeEquivalent({ finding }: { finding: Finding }) {
   const [copied, setCopied] = useState(false);
   const before = finding.span.text.replace(/\s+/g, " ").trim();
   const after = finding.suggestion!;
@@ -228,32 +214,24 @@ function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () =>
     <div className="overflow-hidden rounded-xl border border-safe-line bg-safe-weak">
       <div className="flex items-center gap-2 px-4 pt-3.5 text-[12.5px] font-semibold text-safe">
         <CheckIcon className="size-4" />
-        Pode aplicar com segurança
+        Troca direta · equivalente curado
       </div>
 
       <div className="px-4 py-3">
         <div className="rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)">
-          <DiffRow label="Antes">
+          <DiffRow label="Termo">
             <span className="font-serif text-[15.5px] text-ink-2 line-through decoration-ink-3">{before}</span>
           </DiffRow>
           <div className="flex items-center gap-2 border-t border-rule-1 px-3.5 py-1">
             <ArrowDownIcon className="size-3.5 text-safe" />
-            <span className="u-sublabel text-ink-3">substituição direta</span>
+            <span className="u-sublabel text-ink-3">equivalente 1:1 do glossário</span>
           </div>
-          <DiffRow label="Depois" tone="safe">
+          <DiffRow label="Comum" tone="safe">
             <span className="font-serif text-[15.5px] font-medium text-ink-0">{after}</span>
           </DiffRow>
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onApply}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-safe-strong px-3.5 py-2 text-[13px] font-semibold text-on-safe shadow-(--shadow-card) transition-colors duration-150 hover:bg-safe"
-          >
-            <CheckIcon className="size-4" />
-            Aplicar
-          </button>
           <button
             type="button"
             onClick={copy}
@@ -264,6 +242,10 @@ function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () =>
         </div>
 
         <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          A ferramenta indica o equivalente; ela não altera o texto. Faça a troca em “Editar ou colar minha versão”
+          abaixo — a engine re-audita o resultado.
+        </p>
       </div>
     </div>
   );
@@ -291,15 +273,11 @@ function DiffRow({
 function HumanDecision({
   finding,
   source,
-  onSplit,
   onApplyRewrite,
-  onPassiveActive,
 }: {
   finding: Finding;
   source: string;
-  onSplit: (point: SplitPoint) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onPassiveActive: (target: Span, replacement: string) => void;
 }) {
   const rationale = buildConfidence(finding).rationale;
   return (
@@ -319,7 +297,7 @@ function HumanDecision({
           <p className="u-sublabel mb-2.5 text-ink-3">
             Como seguir
           </p>
-          <Guidance finding={finding} source={source} onSplit={onSplit} onPassiveActive={onPassiveActive} />
+          <Guidance finding={finding} source={source} />
         </div>
 
         <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />

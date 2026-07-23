@@ -21,14 +21,7 @@ export interface PassiveRoles {
   participleEnd: number;
   agentMarkerStart: number | null;
   agentEnd: number | null;
-  // true quando o detector parou de estender o agente por atingir o limite de
-  // tokens, e não por uma barreira sintática — o agente real continua além do
-  // span capturado, então convertê-lo automaticamente cortaria o agente no meio.
   agentTruncated: boolean;
-  // Advérbio/conector entre o auxiliar e o particípio ("foi apenas enviado")
-  // ou entre o particípio e o agente ("enviado apenas pela comissão"). A
-  // reconstrução ativa monta só sujeito+verbo+objeto — se isso existir e for
-  // descartado, a conversão perde sentido silenciosamente.
   interveningModifier: string | null;
 }
 

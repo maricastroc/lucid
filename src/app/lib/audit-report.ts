@@ -46,7 +46,9 @@ export function buildAuditReport(
       `${sev.error} ${plural(sev.error, "prioritária", "prioritárias")}, ` +
       `${sev.warning} de atenção, ${sev.info} ${plural(sev.info, "leve", "leves")}`,
   );
-  out.push(`- **${safe}** ${plural(safe, "segura", "seguras")} para aplicar · **${human}** de decisão do autor`);
+  out.push(
+    `- **${safe}** de troca direta (equivalente indicado; a aplicação é do autor) · **${human}** de decisão do autor`,
+  );
   out.push(`- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`);
   out.push(`- Legibilidade (Flesch-PT): ${fmtNum(m.fleschPt)}`);
   out.push("");
@@ -79,7 +81,7 @@ export function buildAuditReport(
       out.push(f.justification);
       if (isSafe(f) && f.suggestion !== undefined) {
         out.push("");
-        out.push(`**Sugestão segura:** ${f.suggestion}`);
+        out.push(`**Equivalente direto (curado):** ${f.suggestion} — indicado pela ferramenta; a troca no texto é do autor.`);
       } else if (f.requiresHuman) {
         out.push("");
         out.push("_Exige decisão humana — a ferramenta aponta, não reescreve por você._");

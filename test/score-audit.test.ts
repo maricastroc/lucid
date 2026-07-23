@@ -92,10 +92,9 @@ describe("score — critérios desabilitados", () => {
     expect(d.findings.some((f) => f.criterion === "jargon")).toBe(false);
   });
 
-  it("desabilitar sugestões não altera as CONTAGENS do score (sugestão não é contada)", () => {
+  it("desabilitar o equivalente informativo do jargão não altera as CONTAGENS do score (sugestão não é contada)", () => {
     const comSug = analyze(TEXTO_4);
     const semSug = analyze(TEXTO_4, {
-      nominalization: { enabled: true, suggest: false },
       jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false },
     });
 

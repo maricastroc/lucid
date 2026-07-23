@@ -1,16 +1,12 @@
 import type {
-  ActiveConjugationsPrepared,
   CompiledEntry,
   CompiledPhrase,
   JargonEntry,
   JargonPrepared,
   LightVerbForm,
   NominalizationEntry,
-  NominalizationPrepared,
   PhraseEntry,
   PhrasePrepared,
-  SerTenseInfo,
-  SerTensesPrepared,
 } from "./types";
 
 export function compileJargonEntries(entries: readonly JargonEntry[]): Map<string, CompiledEntry[]> {
@@ -48,27 +44,14 @@ export function prepareLightVerbs(raw: unknown): ReadonlyMap<string, LightVerbFo
   return new Map(forms.map((entry) => [entry.form, entry]));
 }
 
-export function prepareNominalizations(raw: unknown): NominalizationPrepared {
-  const data = raw as { entries: NominalizationEntry[]; conjugations: NominalizationPrepared["conjugations"] };
-  return {
-    entries: new Map(data.entries.map((entry) => [entry.noun, entry])),
-    conjugations: data.conjugations,
-  };
+export function prepareNominalizations(raw: unknown): ReadonlyMap<string, NominalizationEntry> {
+  const entries = (raw as { entries: NominalizationEntry[] }).entries;
+  return new Map(entries.map((entry) => [entry.noun, entry]));
 }
 
 export function prepareJargon(raw: unknown): JargonPrepared {
   const entries = (raw as { entries: JargonEntry[] }).entries;
   return { entries, byFirstWord: compileJargonEntries(entries) };
-}
-
-export function prepareSerTenses(raw: unknown): SerTensesPrepared {
-  const forms = (raw as { forms: Record<string, SerTenseInfo> }).forms;
-  return new Map(Object.entries(forms));
-}
-
-export function prepareActiveConjugations(raw: unknown): ActiveConjugationsPrepared {
-  const verbs = (raw as { verbs: Record<string, Record<string, string>> }).verbs;
-  return new Map(Object.entries(verbs));
 }
 
 export function preparePhrases(raw: unknown): PhrasePrepared {

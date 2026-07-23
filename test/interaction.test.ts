@@ -28,21 +28,22 @@ describe("interação — quatro critérios na mesma frase", () => {
     expect(d.findings.length).toBe(5);
   });
 
-  it("cada finding reconstrói seu próprio span, e cada suggestion pertence ao seu span", () => {
+  it("cada finding reconstrói seu próprio span; só jargão carrega equivalente curado (ADR-054)", () => {
     for (const f of d.findings) {
       expect(d.text.slice(f.span.start, f.span.end)).toBe(f.span.text);
       if (f.suggestion !== undefined) {
         expect(f.suggestion.length).toBeGreaterThan(0);
-        expect(f.criterion === "jargon" || f.criterion === "nominalization").toBe(true);
+        expect(f.criterion).toBe("jargon");
       }
     }
   });
 
-  it("requiresHuman é individual: a passiva com agente é false; a nominalização insegura é true", () => {
+  it("requiresHuman é individual: passiva com agente e nominalização de mapeamento único são false", () => {
     const passiva = d.findings.find((f) => f.criterion === "passive_voice")!;
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
     expect(passiva.requiresHuman).toBe(false);
-    expect(nominal.requiresHuman).toBe(true);
+    expect(nominal.requiresHuman).toBe(false);
+    expect(nominal.meta).toMatchObject({ baseVerb: "verificar" });
   });
 
   it("não há findings duplicados (mesmo critério + mesmo span)", () => {

@@ -1,79 +1,355 @@
 {
-  "_comentario": "Formas de verbo-suporte ('verbo leve') usadas pelo pass de nominalização (src/lucid/core/passes/nominalization.ts) para ancorar a construção '[verbo leve] + [determinante] + [nominalização]'. Léxico CURADO e EXTENSÍVEL, não um conjugador — cada forma é listada explicitamente, sem análise morfológica produtiva. 'infinitive: true' só na forma infinitiva de cada verbo. 'feature' é o TRAÇO morfológico (tempo/modo/pessoa/número) da forma, usado no ADR-011 para casar com a conjugação do verbo-base na tabela fechada 'conjugations' de nominalizacoes.pt.json — a forma finita só recebe sugestão quando existe uma conjugação cadastrada para o mesmo 'feature'. Traços: 'inf' (infinitivo), 'pres.3s/3p' (presente indicativo), 'pret.3s/3p' (pretérito perfeito), 'fut.3s/3p' (futuro do presente), 'impf.3s/3p' (pretérito imperfeito), 'cond.3s/3p' (futuro do pretérito), 'subj.3s/3p' (presente do subjuntivo), 'ger' (gerúndio). 'pattern' decide o conjunto de conectores aceito entre o verbo e a nominalização: 'direct' = o/a/os/as/um/uma (fazer, realizar, efetuar, promover); 'a' = à/ao/às/aos, a contração de preposição regida por 'proceder'. Comparação em caixa invariante (toLowerCase). Cobertura por verbo: infinitivo, presente do indicativo (3ª pessoa singular/plural), pretérito perfeito, futuro do presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo, gerúndio — deliberadamente NÃO cobre 1ª/2ª pessoa, imperativo nem pretérito mais-que-perfeito simples; ver docs/DECISOES.md (ADR-007/ADR-011).",
+  "_comentario": "Formas de verbo-suporte ('verbo leve') usadas pelo pass de nominalização (src/locales/pt-BR/passes/nominalization.ts) para ancorar a construção '[verbo leve] + [determinante] + [nominalização]'. Léxico CURADO e EXTENSÍVEL, não um conjugador — cada forma é listada explicitamente, sem análise morfológica produtiva. 'infinitive: true' só na forma infinitiva de cada verbo. 'feature' é o TRAÇO morfológico (tempo/modo/pessoa/número) da forma, usado no ADR-011 para casar com a conjugação do verbo-base na tabela fechada 'conjugations' de nominalizacoes.pt.json — a forma finita só recebe sugestão quando existe uma conjugação cadastrada para o mesmo 'feature'. Traços: 'inf' (infinitivo), 'pres.3s/3p' (presente indicativo), 'pret.3s/3p' (pretérito perfeito), 'fut.3s/3p' (futuro do presente), 'impf.3s/3p' (pretérito imperfeito), 'cond.3s/3p' (futuro do pretérito), 'subj.3s/3p' (presente do subjuntivo), 'ger' (gerúndio). 'pattern' decide o conjunto de conectores aceito entre o verbo e a nominalização: 'direct' = o/a/os/as/um/uma (fazer, realizar, efetuar, promover); 'a' = à/ao/às/aos, a contração de preposição regida por 'proceder'. Comparação em caixa invariante (toLowerCase). Cobertura por verbo: infinitivo, presente do indicativo (3ª pessoa singular/plural), pretérito perfeito, futuro do presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo, gerúndio — deliberadamente NÃO cobre 1ª/2ª pessoa, imperativo nem pretérito mais-que-perfeito simples; ver docs/DECISOES.md (ADR-007/ADR-011). Os traços de flexão ('feature'/'infinitive') que cada forma carregava serviam só ao compositor de sugestão finita (removido no ADR-054); cada forma agora carrega o mínimo que a detecção usa: form, lemma e pattern.",
   "forms": [
-    { "form": "fazer", "lemma": "fazer", "infinitive": true, "feature": "inf", "pattern": "direct" },
-    { "form": "faz", "lemma": "fazer", "infinitive": false, "feature": "pres.3s", "pattern": "direct" },
-    { "form": "fazem", "lemma": "fazer", "infinitive": false, "feature": "pres.3p", "pattern": "direct" },
-    { "form": "fez", "lemma": "fazer", "infinitive": false, "feature": "pret.3s", "pattern": "direct" },
-    { "form": "fizeram", "lemma": "fazer", "infinitive": false, "feature": "pret.3p", "pattern": "direct" },
-    { "form": "fará", "lemma": "fazer", "infinitive": false, "feature": "fut.3s", "pattern": "direct" },
-    { "form": "farão", "lemma": "fazer", "infinitive": false, "feature": "fut.3p", "pattern": "direct" },
-    { "form": "fazia", "lemma": "fazer", "infinitive": false, "feature": "impf.3s", "pattern": "direct" },
-    { "form": "faziam", "lemma": "fazer", "infinitive": false, "feature": "impf.3p", "pattern": "direct" },
-    { "form": "faria", "lemma": "fazer", "infinitive": false, "feature": "cond.3s", "pattern": "direct" },
-    { "form": "fariam", "lemma": "fazer", "infinitive": false, "feature": "cond.3p", "pattern": "direct" },
-    { "form": "faça", "lemma": "fazer", "infinitive": false, "feature": "subj.3s", "pattern": "direct" },
-    { "form": "façam", "lemma": "fazer", "infinitive": false, "feature": "subj.3p", "pattern": "direct" },
-    { "form": "fazendo", "lemma": "fazer", "infinitive": false, "feature": "ger", "pattern": "direct" },
-
-    { "form": "realizar", "lemma": "realizar", "infinitive": true, "feature": "inf", "pattern": "direct" },
-    { "form": "realiza", "lemma": "realizar", "infinitive": false, "feature": "pres.3s", "pattern": "direct" },
-    { "form": "realizam", "lemma": "realizar", "infinitive": false, "feature": "pres.3p", "pattern": "direct" },
-    { "form": "realizou", "lemma": "realizar", "infinitive": false, "feature": "pret.3s", "pattern": "direct" },
-    { "form": "realizaram", "lemma": "realizar", "infinitive": false, "feature": "pret.3p", "pattern": "direct" },
-    { "form": "realizará", "lemma": "realizar", "infinitive": false, "feature": "fut.3s", "pattern": "direct" },
-    { "form": "realizarão", "lemma": "realizar", "infinitive": false, "feature": "fut.3p", "pattern": "direct" },
-    { "form": "realizava", "lemma": "realizar", "infinitive": false, "feature": "impf.3s", "pattern": "direct" },
-    { "form": "realizavam", "lemma": "realizar", "infinitive": false, "feature": "impf.3p", "pattern": "direct" },
-    { "form": "realizaria", "lemma": "realizar", "infinitive": false, "feature": "cond.3s", "pattern": "direct" },
-    { "form": "realizariam", "lemma": "realizar", "infinitive": false, "feature": "cond.3p", "pattern": "direct" },
-    { "form": "realize", "lemma": "realizar", "infinitive": false, "feature": "subj.3s", "pattern": "direct" },
-    { "form": "realizem", "lemma": "realizar", "infinitive": false, "feature": "subj.3p", "pattern": "direct" },
-    { "form": "realizando", "lemma": "realizar", "infinitive": false, "feature": "ger", "pattern": "direct" },
-
-    { "form": "efetuar", "lemma": "efetuar", "infinitive": true, "feature": "inf", "pattern": "direct" },
-    { "form": "efetua", "lemma": "efetuar", "infinitive": false, "feature": "pres.3s", "pattern": "direct" },
-    { "form": "efetuam", "lemma": "efetuar", "infinitive": false, "feature": "pres.3p", "pattern": "direct" },
-    { "form": "efetuou", "lemma": "efetuar", "infinitive": false, "feature": "pret.3s", "pattern": "direct" },
-    { "form": "efetuaram", "lemma": "efetuar", "infinitive": false, "feature": "pret.3p", "pattern": "direct" },
-    { "form": "efetuará", "lemma": "efetuar", "infinitive": false, "feature": "fut.3s", "pattern": "direct" },
-    { "form": "efetuarão", "lemma": "efetuar", "infinitive": false, "feature": "fut.3p", "pattern": "direct" },
-    { "form": "efetuava", "lemma": "efetuar", "infinitive": false, "feature": "impf.3s", "pattern": "direct" },
-    { "form": "efetuavam", "lemma": "efetuar", "infinitive": false, "feature": "impf.3p", "pattern": "direct" },
-    { "form": "efetuaria", "lemma": "efetuar", "infinitive": false, "feature": "cond.3s", "pattern": "direct" },
-    { "form": "efetuariam", "lemma": "efetuar", "infinitive": false, "feature": "cond.3p", "pattern": "direct" },
-    { "form": "efetue", "lemma": "efetuar", "infinitive": false, "feature": "subj.3s", "pattern": "direct" },
-    { "form": "efetuem", "lemma": "efetuar", "infinitive": false, "feature": "subj.3p", "pattern": "direct" },
-    { "form": "efetuando", "lemma": "efetuar", "infinitive": false, "feature": "ger", "pattern": "direct" },
-
-    { "form": "promover", "lemma": "promover", "infinitive": true, "feature": "inf", "pattern": "direct" },
-    { "form": "promove", "lemma": "promover", "infinitive": false, "feature": "pres.3s", "pattern": "direct" },
-    { "form": "promovem", "lemma": "promover", "infinitive": false, "feature": "pres.3p", "pattern": "direct" },
-    { "form": "promoveu", "lemma": "promover", "infinitive": false, "feature": "pret.3s", "pattern": "direct" },
-    { "form": "promoveram", "lemma": "promover", "infinitive": false, "feature": "pret.3p", "pattern": "direct" },
-    { "form": "promoverá", "lemma": "promover", "infinitive": false, "feature": "fut.3s", "pattern": "direct" },
-    { "form": "promoverão", "lemma": "promover", "infinitive": false, "feature": "fut.3p", "pattern": "direct" },
-    { "form": "promovia", "lemma": "promover", "infinitive": false, "feature": "impf.3s", "pattern": "direct" },
-    { "form": "promoviam", "lemma": "promover", "infinitive": false, "feature": "impf.3p", "pattern": "direct" },
-    { "form": "promoveria", "lemma": "promover", "infinitive": false, "feature": "cond.3s", "pattern": "direct" },
-    { "form": "promoveriam", "lemma": "promover", "infinitive": false, "feature": "cond.3p", "pattern": "direct" },
-    { "form": "promova", "lemma": "promover", "infinitive": false, "feature": "subj.3s", "pattern": "direct" },
-    { "form": "promovam", "lemma": "promover", "infinitive": false, "feature": "subj.3p", "pattern": "direct" },
-    { "form": "promovendo", "lemma": "promover", "infinitive": false, "feature": "ger", "pattern": "direct" },
-
-    { "form": "proceder", "lemma": "proceder", "infinitive": true, "feature": "inf", "pattern": "a" },
-    { "form": "procede", "lemma": "proceder", "infinitive": false, "feature": "pres.3s", "pattern": "a" },
-    { "form": "procedem", "lemma": "proceder", "infinitive": false, "feature": "pres.3p", "pattern": "a" },
-    { "form": "procedeu", "lemma": "proceder", "infinitive": false, "feature": "pret.3s", "pattern": "a" },
-    { "form": "procederam", "lemma": "proceder", "infinitive": false, "feature": "pret.3p", "pattern": "a" },
-    { "form": "procederá", "lemma": "proceder", "infinitive": false, "feature": "fut.3s", "pattern": "a" },
-    { "form": "procederão", "lemma": "proceder", "infinitive": false, "feature": "fut.3p", "pattern": "a" },
-    { "form": "procedia", "lemma": "proceder", "infinitive": false, "feature": "impf.3s", "pattern": "a" },
-    { "form": "procediam", "lemma": "proceder", "infinitive": false, "feature": "impf.3p", "pattern": "a" },
-    { "form": "procederia", "lemma": "proceder", "infinitive": false, "feature": "cond.3s", "pattern": "a" },
-    { "form": "procederiam", "lemma": "proceder", "infinitive": false, "feature": "cond.3p", "pattern": "a" },
-    { "form": "proceda", "lemma": "proceder", "infinitive": false, "feature": "subj.3s", "pattern": "a" },
-    { "form": "procedam", "lemma": "proceder", "infinitive": false, "feature": "subj.3p", "pattern": "a" },
-    { "form": "procedendo", "lemma": "proceder", "infinitive": false, "feature": "ger", "pattern": "a" }
+    {
+      "form": "fazer",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faz",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazem",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fez",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizeram",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fará",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "farão",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazia",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faziam",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faria",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fariam",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faça",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "façam",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazendo",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizar",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realiza",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizam",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizou",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaram",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizará",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizarão",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizava",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizavam",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaria",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizariam",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realize",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizem",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizando",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuar",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetua",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuam",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuou",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaram",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuará",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuarão",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuava",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuavam",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaria",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuariam",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetue",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuem",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuando",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "promover",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promove",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovem",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveu",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveram",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverá",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverão",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovia",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoviam",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveria",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveriam",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promova",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovam",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovendo",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "proceder",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procede",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedem",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedeu",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederam",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederá",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederão",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedia",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procediam",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederia",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederiam",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "proceda",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedam",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedendo",
+      "lemma": "proceder",
+      "pattern": "a"
+    }
   ]
 }

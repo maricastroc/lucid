@@ -16,19 +16,7 @@ export type DatasetId =
   | "duplas-negacoes.pt"
   | "subordinadores.pt"
   | "substantivos-leitor.pt"
-  | "ser-tempos.pt"
-  | "conjugacoes-ativas.pt"
   | "stopwords.pt";
-
-export type PassiveTense = "pres" | "pret" | "impf" | "fut" | "cond";
-
-export interface SerTenseInfo {
-  tense: PassiveTense;
-  number: "sg" | "pl";
-}
-export type SerTensesPrepared = ReadonlyMap<string, SerTenseInfo>;
-
-export type ActiveConjugationsPrepared = ReadonlyMap<string, Readonly<Record<string, string>>>;
 
 export type JargonKind = "word" | "phrase";
 export type JargonDomain = "administrative" | "legal" | "general";
@@ -56,24 +44,13 @@ export interface JargonPrepared {
 export interface LightVerbForm {
   form: string;
   lemma: string;
-  infinitive: boolean;
-  feature: string;
   pattern: "direct" | "a";
 }
 
 export interface NominalizationEntry {
   noun: string;
   verb: string;
-  sourcePreposition: "de" | null;
-  targetPreposition: "de" | null;
   safeForSuggestion: boolean;
-}
-
-export type ConjugationTable = Record<string, Record<string, string>>;
-
-export interface NominalizationPrepared {
-  entries: ReadonlyMap<string, NominalizationEntry>;
-  conjugations: ConjugationTable;
 }
 
 export interface PhraseEntry {
@@ -95,7 +72,7 @@ export interface DataTypes {
   "participios-falsos-nominais.pt": ReadonlySet<string>;
   "participios-infinitivo.pt": Readonly<Record<string, string>>;
   "verbos-leves.pt": ReadonlyMap<string, LightVerbForm>;
-  "nominalizacoes.pt": NominalizationPrepared;
+  "nominalizacoes.pt": ReadonlyMap<string, NominalizationEntry>;
   "substantivos-acao.pt": ReadonlySet<string>;
   "jargao.pt": JargonPrepared;
   "mais-que-perfeito.pt": ReadonlySet<string>;
@@ -105,7 +82,5 @@ export interface DataTypes {
   "duplas-negacoes.pt": PhrasePrepared;
   "subordinadores.pt": PhrasePrepared;
   "substantivos-leitor.pt": ReadonlySet<string>;
-  "ser-tempos.pt": SerTensesPrepared;
-  "conjugacoes-ativas.pt": ActiveConjugationsPrepared;
   "stopwords.pt": ReadonlySet<string>;
 }

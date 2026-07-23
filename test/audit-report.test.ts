@@ -25,14 +25,16 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).toContain("Gerado em 2026-07-22 14:00");
   });
 
-  it("rotula cada anotação pela fronteira do Lucid (segura × decisão humana)", () => {
+  it("rotula cada anotação pela fronteira do Lucid (troca direta × decisão humana) — e nunca oferece aplicação", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
     const anySafe = d.findings.some((f) => f.suggestion !== undefined && !f.requiresHuman);
     const anyHuman = d.findings.some((f) => f.requiresHuman);
-    if (anySafe) expect(md).toContain("**Sugestão segura:**");
+    if (anySafe) expect(md).toContain("**Equivalente direto (curado):**");
     if (anyHuman) expect(md).toContain("_Exige decisão humana");
     expect(anySafe || anyHuman).toBe(true);
+    expect(md).not.toContain("Sugestão segura");
+    expect(md).not.toContain("seguras para aplicar");
   });
 
   it("determinístico: mesma entrada → relatório byte-idêntico", () => {
@@ -54,9 +56,9 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     const d = analyze(SAMPLE);
     expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");
     const withTrail = buildAuditReport(d, d.findings, META, [
-      { source: "safe", label: "Correção segura · Jargão", before: "em sede de", after: "durante", burdenBefore: 6, burdenAfter: 5 },
+      { source: "manual", label: "Edição do autor · Jargão", before: "em sede de", after: "durante", burdenBefore: 6, burdenAfter: 5 },
     ]);
     expect(withTrail).toContain("## Trilha de revisão");
-    expect(withTrail).toContain("Correção segura · Jargão");
+    expect(withTrail).toContain("Edição do autor · Jargão");
   });
 });

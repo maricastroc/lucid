@@ -99,19 +99,19 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     notes: "Passiva nunca gera sugestão (reconjugar para ativa não é mecanicamente seguro — ADR-006).",
   },
   {
-    id: "nominalizacao_com_sugestao",
-    description: "duas nominalizações verbo-leve com sugestão mecânica segura",
+    id: "nominalizacao_mapeamento_unico",
+    description: "duas nominalizações verbo-leve com mapeamento único (requiresHuman false, sem sugestão — ADR-054)",
     text: "É preciso fazer a análise de documentos. Também convém realizar o pagamento da taxa.",
     expected: {
       findings: [
-        { criterion: "nominalization", severity: "warning", start: 10, end: 39, spanText: "fazer a análise de documentos", requiresHuman: false, suggestion: "analisar documentos" },
-        { criterion: "nominalization", severity: "warning", start: 55, end: 83, spanText: "realizar o pagamento da taxa", requiresHuman: false, suggestion: "pagar a taxa" },
+        { criterion: "nominalization", severity: "warning", start: 10, end: 25, spanText: "fazer a análise", requiresHuman: false },
+        { criterion: "nominalization", severity: "warning", start: 55, end: 75, spanText: "realizar o pagamento", requiresHuman: false },
         { criterion: "nominalizacao_encadeada", severity: "info", start: 18, end: 39, spanText: "análise de documentos", requiresHuman: true },
       ],
       metrics: { words: 14, sentences: 2 },
     },
     notes:
-      "Sobreposição deliberada (sem dedup entre critérios, como no caso quatro_criterios): 'análise de documentos' também é cadeia fraca do ADR-051 — o verbo-suporte tem a sugestão segura; a cadeia só marca. 'pagamento da taxa' não encadeia ('taxa' sem sufixo deverbal).",
+      "Desde o ADR-054 a engine não compõe troca: o span cobre só o núcleo verbo-leve+determinante+nominalização, e o verbo-base ('analisar', 'pagar') vai em meta/justification como informação. Sobreposição deliberada com a cadeia fraca do ADR-051 ('análise de documentos'), que só marca. 'pagamento da taxa' não encadeia ('taxa' sem sufixo deverbal).",
   },
   {
     id: "quatro_criterios_span_sobreposto",
@@ -129,7 +129,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
           requiresHuman: true,
         },
         { criterion: "passive_voice", severity: "warning", start: 9, end: 36, spanText: "foi analisado pela comissão", requiresHuman: false },
-        { criterion: "nominalization", severity: "warning", start: 50, end: 69, spanText: "fazer a verificação", requiresHuman: true },
+        { criterion: "nominalization", severity: "warning", start: 50, end: 69, spanText: "fazer a verificação", requiresHuman: false },
         { criterion: "nominalizacao_encadeada", severity: "info", start: 58, end: 84, spanText: "verificação dos documentos", requiresHuman: true },
         { criterion: "jargon", severity: "warning", start: 85, end: 97, spanText: "supracitados", requiresHuman: false, suggestion: "citados acima" },
         { criterion: "jargon", severity: "warning", start: 117, end: 127, spanText: "em sede de", requiresHuman: false, suggestion: "no âmbito de" },
@@ -137,7 +137,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 29, sentences: 1 },
     },
     notes:
-      "'fazer a verificação' não recebe sugestão: o complemento 'dos documentos supracitados' não é o formato limpo (1 palavra + fim) exigido por ADR-007. long_sentence é 'warning' (29 palavras, entre 20 e 30).",
+      "'fazer a verificação' tem mapeamento único (verificar) → requiresHuman false; sem sugestão composta (ADR-054). long_sentence é 'warning' (29 palavras, entre 20 e 30).",
   },
   {
     id: "multiplas_ocorrencias_jargao",
@@ -164,11 +164,11 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
         { criterion: "jargon", severity: "warning", start: 12, end: 23, spanText: "supracitado", requiresHuman: false, suggestion: "citado acima" },
         { criterion: "passive_voice", severity: "warning", start: 24, end: 36, spanText: "foi assinado", requiresHuman: true },
         { criterion: "jargon", severity: "warning", start: 38, end: 47, spanText: "doravante", requiresHuman: false, suggestion: "a partir de agora" },
-        { criterion: "nominalization", severity: "warning", start: 76, end: 91, spanText: "fazer a análise", requiresHuman: true },
+        { criterion: "nominalization", severity: "warning", start: 76, end: 91, spanText: "fazer a análise", requiresHuman: false },
       ],
       metrics: { words: 19, sentences: 1 },
     },
-    notes: "19 palavras — abaixo do limiar de 20, então NÃO é frase longa, apesar de densa. 'fazer a análise' + 'dele' não é complemento limpo → sem sugestão.",
+    notes: "19 palavras — abaixo do limiar de 20, então NÃO é frase longa, apesar de densa. 'fazer a análise' → mapeamento único (analisar), requiresHuman false; sem sugestão composta (ADR-054).",
   },
   {
     id: "termos_protegidos_por_guardas",
