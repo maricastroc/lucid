@@ -135,6 +135,26 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
       expect(findings[0].meta).toMatchObject({ hasAgent: false });
     }
   });
+
+  it("adjuntos temporais/locativos/idiomáticos após 'pela/pelo' NÃO contam como agente (A4)", () => {
+    for (const texto of [
+      "O documento foi assinado pela manhã.",
+      "O carro foi visto pela janela.",
+      "A obra foi concluída pela metade.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings.length).toBeGreaterThanOrEqual(1);
+      expect(findings[0].meta).toMatchObject({ hasAgent: false });
+      expect(findings[0].requiresHuman).toBe(true);
+    }
+  });
+
+  it("agente institucional real continua reconhecido (não regrediu com o A4)", () => {
+    const findings = passiveFindings("O pedido foi aprovado pelo diretor.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].meta).toMatchObject({ hasAgent: true });
+    expect(findings[0].requiresHuman).toBe(false);
+  });
 });
 
 describe("passiveVoicePass — agente omitido", () => {

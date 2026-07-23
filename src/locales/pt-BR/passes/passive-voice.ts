@@ -8,6 +8,7 @@ const SER_FORMS = getPrepared("verbos-ser.pt");
 const IRREGULAR_PARTICIPLES = getPrepared("participios-irregulares.pt");
 const AMBIGUOUS_PARTICIPLES = getPrepared("participios-ambiguos.pt");
 const NOMINAL_FALSE_POSITIVES = getPrepared("participios-falsos-nominais.pt");
+const NON_AGENT_HEADS = getPrepared("adjuntos-nao-agente.pt");
 
 const CONNECTOR_ADVERBS = new Set(["não", "já", "ainda", "também", "sempre", "nunca", "apenas", "logo"]);
 const RE_MENTE_ADVERB = /^\p{L}+mente$/u;
@@ -17,8 +18,6 @@ const BARRIER_PUNCTUATION = new Set([",", ";", ":", "!", "?", "…", "(", ")", "
 const BARRIER_CONJUNCTIONS = new Set(["que", "mas", "e", "porque", "quando"]);
 
 const AGENT_MARKERS = new Set(["pelo", "pela", "pelos", "pelas"]);
-
-const NON_AGENT_IDIOM_HEADS = new Set(["menos", "visto", "contrário"]);
 
 const MAX_CONNECTOR_TOKENS = 2;
 
@@ -79,8 +78,8 @@ function findAgentAfter(tokens: readonly Token[], startIndex: number): AgentSear
 
     if (token.isWord && AGENT_MARKERS.has(token.lower)) {
       const next = tokens[i + 1];
-      const isIdiom = next?.isWord && NON_AGENT_IDIOM_HEADS.has(next.lower);
-      if (!isIdiom) return { markerIndex: i };
+      const isNonAgentHead = next?.isWord && NON_AGENT_HEADS.has(next.lower);
+      if (!isNonAgentHead) return { markerIndex: i };
       return null;
     }
     if (isBarrier(token)) return null;
@@ -152,6 +151,7 @@ export const passiveVoicePass: Pass = {
     "participios-irregulares.pt",
     "participios-ambiguos.pt",
     "participios-falsos-nominais.pt",
+    "adjuntos-nao-agente.pt",
   ],
 
   run(ctx) {

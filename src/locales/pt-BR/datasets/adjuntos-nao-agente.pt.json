@@ -1,0 +1,11 @@
+{
+  "_comentario": "Cabeças de sintagma que aparecem logo após um marcador de agente ('pelo/pela/pelos/pelas') mas introduzem um ADJUNTO (temporal, locativo, instrumental/meio ou idiomático), não o agente real da ação. Usado pelo pass de voz passiva (src/locales/pt-BR/passes/passive-voice.ts) para NÃO reconhecer agente nesses casos — o lado seguro é requiresHuman:true (a ferramenta se recusa a atestar 'agente explícito' quando não há um). Léxico CURADO e EXTENSÍVEL, não uma lista fechada de todo adjunto possível em português. Comparação em caixa invariante (toLowerCase).",
+  "forms": [
+    "menos", "visto", "contrário",
+    "manhã", "tarde", "noite", "madrugada",
+    "metade",
+    "janela", "porta",
+    "telefone", "correio", "internet", "email", "e-mail",
+    "primeira", "última"
+  ]
+}
