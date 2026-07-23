@@ -120,9 +120,11 @@ function buildJustification(hasAgent: boolean): string {
     );
   }
   return (
-    "Frase na voz passiva, sem agente explícito — não é possível saber, só pelo " +
-    "texto, quem praticou a ação. Indique o agente ou reescreva na voz ativa; a " +
-    "ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu."
+    "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança — o padrão " +
+    'fechado que ela detecta é "pelo/pela/pelos/pelas"; se o texto nomear o agente de outra ' +
+    'forma (ex.: "por fulano"), confira o trecho antes de decidir. Indique o agente ou ' +
+    "reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria " +
+    "adivinhar quem agiu."
   );
 }
 
