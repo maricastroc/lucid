@@ -391,11 +391,8 @@ function GeneratedRewrite({
 
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
-      <div className="flex items-center gap-2 border-b border-rule-1 px-4 py-2.5">
+      <div className="flex items-center border-b border-rule-1 px-4 py-2.5">
         <span className="u-sublabel text-ink-2">Reescrita por IA</span>
-        <span className="u-sublabel rounded-[5px] border border-rule-1 bg-surface-3 px-1.5 py-0.5 font-medium text-ink-3">
-          experimental
-        </span>
       </div>
       <div className="px-4 py-3">
         <p className="text-[12px] leading-relaxed text-ink-2">

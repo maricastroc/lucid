@@ -58,6 +58,16 @@ export function Studio() {
     setMode("audit");
   }, []);
 
+  const goHome = useCallback(() => {
+    const alreadyHome = isEmpty && mode === "audit";
+    if (alreadyHome) return;
+    if (!isEmpty && !window.confirm("Voltar ao início? O texto atual não fica salvo.")) return;
+    setImportedDoc(null);
+    setText("");
+    setSelectedId(null);
+    setMode("audit");
+  }, [isEmpty, mode]);
+
   const openDocx = useCallback(async (file: File) => {
     setImporting(true);
     setImportError(null);
@@ -233,7 +243,7 @@ export function Studio() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
-      <Masthead mode={mode} onChangeMode={setMode} onOpenDocx={openDocx} importing={importing} />
+      <Masthead mode={mode} onChangeMode={setMode} onOpenDocx={openDocx} onGoHome={goHome} importing={importing} />
       {importError !== null && (
         <div
           role="alert"
