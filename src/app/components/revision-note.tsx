@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { type Finding, type Span, type SplitPoint } from "@/lucid";
 import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
@@ -192,7 +192,11 @@ function ManualEdit({
         </div>
 
         {result !== null && (
-          <RewriteResult result={result} onApplyRewrite={() => onManualEdit(target, manualEditReplacement(draft))} />
+          <RewriteResult
+            result={result}
+            currentOriginal={target.text}
+            onApplyRewrite={() => onManualEdit(target, manualEditReplacement(draft))}
+          />
         )}
 
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
@@ -338,22 +342,30 @@ function GeneratedRewrite({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
 
   const run = async () => {
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      setResult(await generateRewrite(source, target, choice, { directed }));
+      setResult(await generateRewrite(source, target, choice, { directed, signal: controller.signal }));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
+      if (!controller.signal.aborted) {
+        setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
+      }
     } finally {
+      abortRef.current = null;
       setLoading(false);
     }
   };
+
+  const cancel = () => abortRef.current?.abort();
 
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
@@ -400,6 +412,15 @@ function GeneratedRewrite({
         >
           {loading ? "Gerando e verificando…" : "Gerar e verificar"}
         </button>
+        {loading && (
+          <button
+            type="button"
+            onClick={cancel}
+            className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+          >
+            Cancelar
+          </button>
+        )}
       </div>
 
       {error !== null && (
@@ -410,7 +431,11 @@ function GeneratedRewrite({
 
       {result !== null &&
         (hasProposal ? (
-          <RewriteResult result={result} onApplyRewrite={() => onApplyRewrite(target, result.proposal)} />
+          <RewriteResult
+            result={result}
+            currentOriginal={target.text}
+            onApplyRewrite={() => onApplyRewrite(target, result.proposal)}
+          />
         ) : (
           <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
             O modelo não devolveu uma reescrita diferente do trecho — nada a propor. O verificador não fabrica uma; a
@@ -422,9 +447,20 @@ function GeneratedRewrite({
   );
 }
 
-function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; onApplyRewrite: () => void }) {
+function RewriteResult({
+  result,
+  currentOriginal,
+  onApplyRewrite,
+}: {
+  result: VerifiedRewrite;
+  currentOriginal: string;
+  onApplyRewrite: () => void;
+}) {
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
+  // O trecho pode ter sido editado (em outro ponto da mesma frase/parágrafo) depois que esta
+  // proposta foi gerada. Aplicar às cegas sobrescreveria essa edição com a versão congelada.
+  const stale = proposal.original !== currentOriginal;
   const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
   const passed = verification.proofs.filter((p) => p.passed).length;
@@ -497,19 +533,22 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
           <button
             type="button"
             onClick={onApplyRewrite}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90"
+            disabled={stale}
+            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             style={
               blocked
                 ? { background: "var(--human-weak)", color: "var(--human)", boxShadow: "inset 0 0 0 1px var(--human-line)" }
                 : { background: "var(--accent)", color: "var(--accent-ink)" }
             }
           >
-            {blocked ? "Usar mesmo assim como rascunho" : "Usar como rascunho"}
+            {stale ? "Trecho mudou — gere de novo" : blocked ? "Usar mesmo assim como rascunho" : "Usar como rascunho"}
           </button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            {blocked
-              ? "Se você entende o motivo acima e ainda quer, aplique como rascunho — a engine re-audita."
-              : "Reveja antes de usar — a decisão de aplicar é sua."}
+            {stale
+              ? "O trecho foi editado depois que esta versão foi gerada. Para não perder sua edição, gere de novo antes de aplicar."
+              : blocked
+                ? "Se você entende o motivo acima e ainda quer, aplique como rascunho — a engine re-audita."
+                : "Reveja antes de usar — a decisão de aplicar é sua."}
           </p>
         </div>
       </div>

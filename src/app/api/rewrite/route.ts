@@ -127,6 +127,7 @@ export async function POST(request: Request): Promise<Response> {
       findings: Array.isArray(findings) ? findings.filter(isFindingLike) : undefined,
       probe: probe ?? undefined,
       question: probe ? FLOOR_QUESTION : undefined,
+      signal: request.signal,
     });
     return NextResponse.json(result);
   } catch (cause) {

@@ -1,4 +1,4 @@
-import { ChatProviderError, type ChatCompletionOptions, type ChatProvider } from "./types";
+import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -49,9 +49,10 @@ export class GroqProvider implements ChatProvider {
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: prompt }],
           }),
+          signal: requestSignal(options.signal),
         });
       } catch (cause) {
-        throw new ChatProviderError(`falha de rede ao chamar o Groq: ${String(cause)}`, this.id);
+        throw new ChatProviderError(describeFetchFailure(cause, "Groq"), this.id);
       }
 
       const data = (await response.json().catch(() => null)) as GroqChatResponse | null;
