@@ -87,6 +87,21 @@ describe("Classe C — não conversível (unsupported)", () => {
     const { finding, source } = firstPassive("O relatório tinha sido enviado.");
     expect(applyPassiveWithAgent(finding, source, "a comissão").kind).toBe("unsupported");
   });
+
+  it("negação antes do auxiliar (não) → unsupported, nunca inverte o sentido", () => {
+    const { finding, source } = firstPassive("O relatório não foi enviado pela comissão.");
+    expect(passiveToActive(finding, source).kind).toBe("unsupported");
+  });
+
+  it("negação antes do auxiliar (nunca) → unsupported", () => {
+    const { finding, source } = firstPassive("O relatório nunca foi enviado pela comissão.");
+    expect(passiveToActive(finding, source).kind).toBe("unsupported");
+  });
+
+  it("needsAgent com negação antes do auxiliar → unsupported mesmo com agente digitado", () => {
+    const { finding, source } = firstPassive("O relatório não foi enviado.");
+    expect(applyPassiveWithAgent(finding, source, "a comissão").kind).toBe("unsupported");
+  });
 });
 
 describe("regra determinística de -ar (cobertura sem tabela, ADR-032)", () => {

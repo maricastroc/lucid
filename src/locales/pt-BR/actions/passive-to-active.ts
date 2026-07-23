@@ -33,6 +33,14 @@ const AGENT_ADJUNCT_STOPWORDS = new Set([
   "quando", "onde", "conforme", "segundo",
 ]);
 
+// Advérbios de negação que, antes do auxiliar, negam o verbo — reposicioná-los
+// como cauda do objeto na ordem ativa inverteria o sentido da frase.
+const NEGATION_WORDS = new Set(["não", "nunca", "jamais", "nem", "tampouco"]);
+
+function containsNegation(text: string): boolean {
+  return text.split(/\s+/u).some((w) => NEGATION_WORDS.has(w.toLowerCase()));
+}
+
 function trimTrailingEnd(source: string, end: number): number {
   let e = end;
   while (e > 0 && /[\s.,;:!?…]/u.test(source[e - 1])) e--;
@@ -82,6 +90,7 @@ export function passiveToActive(finding: Finding, source: string): PassiveRewrit
   if (!formsFor(roles.baseVerbLemma)) return unsupported("verbo fora da tabela fechada e não regular em -ar");
   if (roles.objectRegion === null) return unsupported("sujeito posposto ou ausente (ordem não-SVO)");
   if (/[,;:]/u.test(roles.objectRegion)) return unsupported("sujeito com estrutura complexa");
+  if (containsNegation(roles.objectRegion)) return unsupported("negação antes do auxiliar (a conversão inverteria o sentido)");
 
   const object = roles.objectRegion;
 
