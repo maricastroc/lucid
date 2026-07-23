@@ -51,6 +51,18 @@ export class LlmRewriteProposer implements RewriteProposer {
       signal: request.signal,
     });
     const parsed = parseRewrite(raw);
-    return { proposerId: this.id, original, proposed: parsed ?? original, localeId: request.localeId };
+    if (parsed === null) {
+      console.warn(
+        `[rewrite] parseRewrite() não extraiu reescrita válida — mantendo original. ` +
+          `proposerId=${this.id} criterion=${request.criterion ?? "-"} raw=${JSON.stringify(raw.slice(0, 200))}`,
+      );
+    }
+    return {
+      proposerId: this.id,
+      original,
+      proposed: parsed ?? original,
+      localeId: request.localeId,
+      parseOutcome: parsed === null ? "unparseable" : "ok",
+    };
   }
 }

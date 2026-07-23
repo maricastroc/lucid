@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION } from "../src/report/rewrite";
 import { ChatProviderError, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
 import type { Span } from "../src/lucid/core/types";
@@ -57,6 +57,28 @@ describe("LlmRewriteProposer", () => {
     const target = span("Trecho original intacto.");
     const proposal = await proposer.propose({ text: target.text, target });
     expect(proposal.proposed).toBe(target.text);
+  });
+
+  it("resposta ilegível → parseOutcome sinaliza 'unparseable' (LUCID-012: não passa despercebido)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
+    const target = span("Trecho original intacto.");
+    const proposal = await proposer.propose({ text: target.text, target, criterion: "long_sentence" });
+    expect(proposal.parseOutcome).toBe("unparseable");
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain("long_sentence");
+    warnSpy.mockRestore();
+  });
+
+  it("resposta parseável → parseOutcome = 'ok', sem warning", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
+    const proposer = new LlmRewriteProposer(provider, "m1");
+    const target = span("Um trecho longo e enrolado que precisa de ajuda.");
+    const proposal = await proposer.propose({ text: target.text, target });
+    expect(proposal.parseOutcome).toBe("ok");
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it("a estratégia entra no id e escolhe o prompt (correct minimiza, rewrite reorganiza)", async () => {
