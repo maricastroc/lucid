@@ -22,8 +22,6 @@
     { "phrase": "detalhes minuciosos", "plain": "detalhes" },
     { "phrase": "comparecer pessoalmente em pessoa", "plain": "comparecer pessoalmente" },
     { "phrase": "expressamente proibido", "plain": "proibido" },
-    { "phrase": "elo de união", "plain": "elo" },
-    { "phrase": "criar novos", "plain": "criar" },
-    { "phrase": "manter o mesmo", "plain": "manter" }
+    { "phrase": "elo de união", "plain": "elo" }
   ]
 }
