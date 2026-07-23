@@ -29,8 +29,6 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
   const safe = isSafe(finding);
   const group = principleGroupOf(finding.principle);
 
-  // Elicitação (ADR-055): a resposta do autor a "quem pratica essa ação?" vive na
-  // nota — vale para a reescrita por IA E para a edição manual (mesmo verificador).
   const [declaration, setDeclaration] = useState<AgentDeclaration | null>(null);
 
   return (
@@ -110,9 +108,6 @@ function ManualEdit({
   const original = target.text;
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(original);
-  // O veredito lembra a declaração sob a qual foi produzido: se a resposta da
-  // elicitação mudar, o resultado antigo deixa de falar pela versão atual (derivado
-  // na renderização — sem effect).
   const [verified, setVerified] = useState<{ result: VerifiedRewrite; forDeclaration: AgentDeclaration | null } | null>(
     null,
   );
@@ -350,14 +345,11 @@ function GeneratedRewrite({
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // A resposta da elicitação só chega à IA pelo briefing dirigido — ao declarar,
-  // ligue-o (visível e reversível). Ajuste de estado derivado durante a renderização,
-  // o padrão sancionado no lugar de um effect com setState síncrono.
   const [prevDeclaration, setPrevDeclaration] = useState<AgentDeclaration | null>(declaration);
   if (declaration !== prevDeclaration) {
     setPrevDeclaration(declaration);
     if (declaration) setDirected(true);
-    setResult(null); // o veredito antigo foi produzido sob outra declaração
+    setResult(null);
   }
 
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);

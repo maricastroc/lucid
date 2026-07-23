@@ -495,6 +495,17 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
     const v = await verify(text, finding, p);
     expect(signalFlagged(v, "entities_preserved")).toBe(false);
   });
+
+  it("nome próprio com inicial acentuada ausente na proposta levanta bandeira (M7 — \\b é ASCII-only)", async () => {
+    const text = "O acordo envolveu autoridades da Índia e do Brasil antes da assinatura final do tratado.";
+    const finding = spanFinding(text, "O acordo envolveu autoridades da Índia e do Brasil");
+    const p = proposal(finding, "O acordo envolveu autoridades do Brasil");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "entities_preserved")).toBe(true);
+    const detail = v.signals.find((s) => s.check === "entities_preserved")!.detail;
+    expect(detail).toContain("Índia");
+  });
 });
 
 describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado (LUCID-011)", () => {
@@ -544,6 +555,15 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     const text = "Foi verificado se a documentação está em ordem antes do encaminhamento do processo.";
     const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
     const p = proposal(finding, "A documentação está em ordem");
+
+    const v = await verify(text, finding, p);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("agente com inicial acentuada ('órgão') já presente no original não levanta bandeira (M7 — \\b é ASCII-only)", async () => {
+    const text = "O processo foi analisado pelo órgão competente antes da decisão final.";
+    const finding = spanFinding(text, "O processo foi analisado pelo órgão competente");
+    const p = proposal(finding, "O órgão competente analisou o processo");
 
     const v = await verify(text, finding, p);
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);

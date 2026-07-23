@@ -1,7 +1,3 @@
-// Todos os glifos vêm do lucide-react — nada é desenhado à mão.
-// Este barril só reexporta os ícones do lucide com os nomes usados no app
-// e aplica dois padrões da identidade: stroke mais fino e aria-hidden
-// (decorativos por padrão; a semântica vem do botão/rótulo que os envolve).
 import {
   ArrowDown,
   ArrowLeft,

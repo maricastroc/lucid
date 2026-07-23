@@ -70,16 +70,19 @@ const THIRD_PERSON_AGENT_NOUNS = [
   "autoridade", "autoridades",
 ];
 
+const WORD_START = "(?<![\\p{L}\\p{N}])";
+const WORD_END = "(?![\\p{L}\\p{N}])";
+
 export const RE_THIRD_PERSON_AGENT_NOUN_PT = new RegExp(
-  `\\b(?:${THIRD_PERSON_AGENT_NOUNS.join("|")})\\b`,
+  `${WORD_START}(?:${THIRD_PERSON_AGENT_NOUNS.join("|")})${WORD_END}`,
   "giu",
 );
 
 const AGENT_PRECEDING_PREPOSITIONS = ["para", "com", "sobre", "sem", "entre", "contra", "até"];
 
 export const RE_THIRD_PERSON_AGENT_SUBJECT_PT = new RegExp(
-  `(?<!\\b(?:${AGENT_PRECEDING_PREPOSITIONS.join("|")})\\s)\\b(?:o|a|os|as)\\s+` +
-    `(${THIRD_PERSON_AGENT_NOUNS.join("|")})\\b`,
+  `(?<!${WORD_START}(?:${AGENT_PRECEDING_PREPOSITIONS.join("|")})\\s)${WORD_START}(?:o|a|os|as)\\s+` +
+    `(${THIRD_PERSON_AGENT_NOUNS.join("|")})${WORD_END}`,
   "giu",
 );
 

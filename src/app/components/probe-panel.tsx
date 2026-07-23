@@ -31,8 +31,6 @@ export function ProbePanel({ text }: { text: string }) {
   const canRun = pergunta.trim() !== "" && text.trim() !== "" && status !== "loading";
   const stale = data !== null && resultText !== null && resultText !== text;
 
-  // Fechar o painel ou trocar de texto/pergunta não pode deixar a chamada ao LLM
-  // pendurada no servidor — cancela a requisição em voo (M6).
   useEffect(() => () => abortRef.current?.abort(), []);
 
   async function run() {
