@@ -13,6 +13,12 @@
     "teclado", "teclados",
     "ditado", "ditados",
     "feriado", "feriados",
-    "achado", "achados"
+    "achado", "achados",
+    "advogado", "advogada", "advogados", "advogadas",
+    "empregado", "empregada", "empregados", "empregadas",
+    "deputado", "deputada", "deputados", "deputadas",
+    "soldado", "soldada", "soldados", "soldadas",
+    "delegado", "delegada", "delegados", "delegadas",
+    "magistrado", "magistrada", "magistrados", "magistradas"
   ]
 }
