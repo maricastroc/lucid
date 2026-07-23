@@ -101,7 +101,7 @@ analyze(text):
 
 The reading: `rewrite` buys far more clarity than `correct` (ΔFlesch ~+70 vs ~+10), and the verifier does its job — Gemini's bolder rewrites scored the biggest Flesch gains **but** its `proofs OK%` dropped to 67% (on the numbers-dates-names text the deterministic check caught an altered value or new jargon) and its veto rate rose. Stronger prose never buys a pass; the proof gate is what decides. Honest caveat: single run, `temperature 0` (LLM output still varies run-to-run — hence `rewrote% < 100` when `correct` returns identical text), 3 texts — a floor signal, not a leaderboard.
 
-The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 000–055) in [`docs/DECISOES.md`](docs/DECISOES.md).
+The architecture is the code itself: a pure `src/lucid/core` (language-neutral) driven by a `src/locales/pt-BR` bundle, with the layer fence enforced by `dependency-cruiser` and byte-identical snapshot tests. Design rationale is kept as a local ADR log (one file per decision), outside the repo.
 
 <br/>
 

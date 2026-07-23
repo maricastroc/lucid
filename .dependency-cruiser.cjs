@@ -1,15 +1,3 @@
-/**
- * Cerca arquitetural (I1 — docs/ARQUITETURA.md §1).
- *
- *   - `src/lucid/core/**` nunca importa de `src/lucid/probe/**`.
- *   - `src/lucid/core/**` nunca importa `react`, `next`, nem qualquer módulo de I/O
- *     de rede (fetch/http/https/node:http/node:https).
- *   - `src/lucid/core/**` nunca importa de `src/report/**` nem `src/app/**` (a
- *     dependência é sempre na direção contrária).
- *
- * `src/report/**` é o único lugar autorizado a importar de `core` e `probe` ao mesmo
- * tempo — por isso não aparece nas regras "forbidden" abaixo.
- */
 module.exports = {
   forbidden: [
     {
