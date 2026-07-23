@@ -91,6 +91,11 @@ export function passiveToActive(finding: Finding, source: string): PassiveRewrit
   if (roles.objectRegion === null) return unsupported("sujeito posposto ou ausente (ordem não-SVO)");
   if (/[,;:]/u.test(roles.objectRegion)) return unsupported("sujeito com estrutura complexa");
   if (containsNegation(roles.objectRegion)) return unsupported("negação antes do auxiliar (a conversão inverteria o sentido)");
+  if (roles.interveningModifier !== null) {
+    // "foi apenas enviado", "foi devidamente enviado", "enviado apenas pela comissão":
+    // o rebuild sujeito+verbo+objeto descartaria o advérbio, mudando o sentido.
+    return unsupported(`advérbio intercalado ("${roles.interveningModifier}") — a conversão o descartaria`);
+  }
 
   const object = roles.objectRegion;
 
@@ -99,6 +104,7 @@ export function passiveToActive(finding: Finding, source: string): PassiveRewrit
     const article = DECONTRACT[marker];
     if (!article) return unsupported("agente sem contração pel- clara");
     if (!roles.agentBody || roles.agentEnd === null) return unsupported("agente vazio");
+    if (roles.agentTruncated) return unsupported("agente truncado no limite de tokens reconhecido com segurança");
     if (agentHasAdjunct(roles.agentBody)) return unsupported("limite do agente incerto (adjunto)");
     const number = SINGULAR_MARKERS.has(marker) ? "sg" : "pl";
     const verb = conjugate(roles.baseVerbLemma, ser.tense, number);

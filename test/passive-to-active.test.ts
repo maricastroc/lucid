@@ -102,6 +102,24 @@ describe("Classe C — não conversível (unsupported)", () => {
     const { finding, source } = firstPassive("O relatório não foi enviado.");
     expect(applyPassiveWithAgent(finding, source, "a comissão").kind).toBe("unsupported");
   });
+
+  it.each(["apenas", "já", "sempre", "devidamente"])(
+    "advérbio entre auxiliar e particípio (foi %s enviado) → unsupported, nunca some",
+    (adv) => {
+      const { finding, source } = firstPassive(`O relatório foi ${adv} enviado pela comissão.`);
+      expect(passiveToActive(finding, source).kind).toBe("unsupported");
+    },
+  );
+
+  it("advérbio entre particípio e agente (enviado apenas pela) → unsupported", () => {
+    const { finding, source } = firstPassive("O relatório foi enviado apenas pela comissão.");
+    expect(passiveToActive(finding, source).kind).toBe("unsupported");
+  });
+
+  it("needsAgent com advérbio intercalado → unsupported mesmo com agente digitado", () => {
+    const { finding, source } = firstPassive("O relatório foi apenas enviado.");
+    expect(applyPassiveWithAgent(finding, source, "a comissão").kind).toBe("unsupported");
+  });
 });
 
 describe("regra determinística de -ar (cobertura sem tabela, ADR-032)", () => {

@@ -21,6 +21,15 @@ export interface PassiveRoles {
   participleEnd: number;
   agentMarkerStart: number | null;
   agentEnd: number | null;
+  // true quando o detector parou de estender o agente por atingir o limite de
+  // tokens, e não por uma barreira sintática — o agente real continua além do
+  // span capturado, então convertê-lo automaticamente cortaria o agente no meio.
+  agentTruncated: boolean;
+  // Advérbio/conector entre o auxiliar e o particípio ("foi apenas enviado")
+  // ou entre o particípio e o agente ("enviado apenas pela comissão"). A
+  // reconstrução ativa monta só sujeito+verbo+objeto — se isso existir e for
+  // descartado, a conversão perde sentido silenciosamente.
+  interveningModifier: string | null;
 }
 
 function metaNum(finding: Finding, key: string): number | null {
@@ -60,11 +69,15 @@ export function extractPassiveRoles(finding: Finding, source: string): PassiveRo
   const objectRaw = trimRole(source.slice(subjectStart, serStart));
   const objectRegion = objectRaw.length > 0 ? objectRaw : null;
 
+  const betweenSerAndParticiple = trimRole(source.slice(serStart + serForm.length, participleStart));
+
   if (finding.meta?.hasAgent === true) {
     const agentMarkerStart = metaNum(finding, "agentMarkerStart");
     const agentMarkerEnd = metaNum(finding, "agentMarkerEnd");
     const agentEnd = metaNum(finding, "agentEnd");
     if (agentMarkerStart === null || agentMarkerEnd === null || agentEnd === null) return null;
+    const betweenParticipleAndAgent = trimRole(source.slice(participleEnd, agentMarkerStart));
+    const interveningModifier = betweenSerAndParticiple || betweenParticipleAndAgent || null;
     return {
       serForm,
       participle,
@@ -78,6 +91,8 @@ export function extractPassiveRoles(finding: Finding, source: string): PassiveRo
       participleEnd,
       agentMarkerStart,
       agentEnd,
+      agentTruncated: finding.meta?.agentTruncated === true,
+      interveningModifier,
     };
   }
 
@@ -94,5 +109,7 @@ export function extractPassiveRoles(finding: Finding, source: string): PassiveRo
     participleEnd,
     agentMarkerStart: null,
     agentEnd: null,
+    agentTruncated: false,
+    interveningModifier: betweenSerAndParticiple || null,
   };
 }

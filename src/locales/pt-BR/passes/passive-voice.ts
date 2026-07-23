@@ -95,28 +95,47 @@ function findAgentAfter(tokens: readonly Token[], startIndex: number): AgentSear
   return null;
 }
 
-function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): number {
+interface AgentPhraseExtent {
+  end: number;
+  // true quando a extensão parou por ter atingido MAX_AGENT_PHRASE_TOKENS, e não
+  // por uma barreira sintática — ou seja, o agente continua além do que a
+  // ferramenta reconhece com segurança. Um agente truncado assim não pode virar
+  // sujeito da ativa: o resto do span original sobraria colado ao objeto.
+  truncated: boolean;
+}
+
+function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): AgentPhraseExtent {
   let end = tokens[markerIndex].end;
   let consumed = 0;
   let j = markerIndex + 1;
 
   while (j < tokens.length && consumed < MAX_AGENT_PHRASE_TOKENS) {
     const token = tokens[j];
-    if (isBarrier(token)) break;
+    if (isBarrier(token)) return { end, truncated: false };
     end = token.end;
     consumed++;
     j++;
   }
 
-  return end;
+  const truncated = j < tokens.length && !isBarrier(tokens[j]);
+  return { end, truncated };
 }
 
-function buildJustification(hasAgent: boolean): string {
-  if (hasAgent) {
+function buildJustification(hasAgent: boolean, agentTruncated: boolean): string {
+  if (hasAgent && !agentTruncated) {
     return (
       "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a " +
       "ação. Considere reescrever na voz ativa para tornar a frase mais direta; a " +
       "ferramenta não reescreve automaticamente."
+    );
+  }
+  if (agentTruncated) {
+    return (
+      "Frase na voz passiva com agente explícito, mas o agente é longo demais para a " +
+      "ferramenta delimitar com segurança — reconhece só os primeiros " +
+      `${MAX_AGENT_PHRASE_TOKENS} termos após o marcador. Indique o agente manualmente ou ` +
+      "reescreva na voz ativa; converter automaticamente arriscaria cortar o agente no meio " +
+      "e colar o resto da frase ao objeto, corrompendo o sentido."
     );
   }
   return (
@@ -162,8 +181,11 @@ export const passiveVoicePass: Pass = {
         const agentMatch = findAgentAfter(tokens, participleMatch.index + 1);
         const hasAgent = agentMatch !== null;
 
+        const agentExtent = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : null;
+        const agentTruncated = agentExtent?.truncated ?? false;
+
         const start = anchor.start;
-        const end = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : participle.end;
+        const end = agentExtent ? agentExtent.end : participle.end;
 
         const marker = hasAgent ? tokens[agentMatch.markerIndex] : null;
         const meta: Record<string, string | number | boolean> = {
@@ -176,6 +198,7 @@ export const passiveVoicePass: Pass = {
           meta.agentMarkerEnd = marker.end;
           meta.agentEnd = end;
           meta.subjectStart = sentence.start;
+          meta.agentTruncated = agentTruncated;
         }
 
         findings.push({
@@ -184,8 +207,8 @@ export const passiveVoicePass: Pass = {
           principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
-          requiresHuman: !hasAgent,
-          justification: buildJustification(hasAgent),
+          requiresHuman: !hasAgent || agentTruncated,
+          justification: buildJustification(hasAgent, agentTruncated),
           meta,
         });
       }
