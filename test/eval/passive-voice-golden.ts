@@ -71,4 +71,11 @@ export const GOLDEN_VOZ_PASSIVA: readonly EntradaGolden[] = [
   },
 
   { texto: "Ele foi envolvido no escândalo.", expectedCount: 0, estado: "correto" },
+
+  { texto: "O réu é advogado.", expectedCount: 0, estado: "correto" },
+  { texto: "Ele é empregado da empresa.", expectedCount: 0, estado: "correto" },
+  { texto: "João é deputado federal.", expectedCount: 0, estado: "correto" },
+  { texto: "Ele é soldado do exército.", expectedCount: 0, estado: "correto" },
+  { texto: "Ela é delegada de polícia.", expectedCount: 0, estado: "correto" },
+  { texto: "Ele é magistrado há dez anos.", expectedCount: 0, estado: "correto" },
 ];
