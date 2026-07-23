@@ -1,8 +1,3 @@
-/**
- * `heading_body_mismatch` (5.1, Relevante) — o primeiro detector de Princípio 1: título e corpo da
- * seção não compartilham NENHUMA palavra de conteúdo (proxy fraco de "o título antecipa o que o
- * leitor vai encontrar?"). Só existe em documento estruturado — texto puro não tem título de verdade.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, analyzeDocument, buildStructuredDocument, type Finding, type RawBlock } from "../src/lucid";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";

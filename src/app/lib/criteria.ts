@@ -1,42 +1,20 @@
-/**
- * Metadados de APRESENTAÇÃO dos critérios — puros, de view. A autoridade sobre
- * critério/princípio/severidade é sempre o `Finding` do engine; aqui só traduzimos para
- * a IDENTIDADE EDITORIAL (nome humano, forma da marca) e para a curadoria do que
- * explicar. Nada é inventado: `signal` descreve o mecanismo determinístico real de cada
- * pass (ADR-006/007/008); `why` é glosa curada do princípio da norma.
- *
- * Nomes internos (`long_sentence`, `requiresHuman`, …) NUNCA vazam para o usuário — só
- * `label` e a copy em português aparecem na interface.
- */
 import type { Category, CriterionId, Finding, Severity } from "@/lucid";
 import { isCriterionId } from "@/lucid";
 
-/**
- * Um critério de apresentação é, por construção, um critério do engine: `Criterion` é o
- * `CriterionId` publicado por `@/lucid` (ADR-029). Assim, `CRITERION_META` abaixo é um
- * `Record<CriterionId, …>` — se o engine ganha um pass novo, este módulo deixa de compilar
- * até que a copy editorial dele seja escrita. Não há mais registro paralelo digitado à mão.
- */
 export type Criterion = CriterionId;
 export type Channel = "inline" | "passage";
 
 export interface CriterionMeta {
-  /** nome humano — o único que aparece na UI */
   label: string;
   ruleId: Criterion;
-  /** tipo de trabalho editorial (para o cabeçalho da nota) */
   kind: string;
-  /** diretriz da norma, em português corrente */
   principleName: string;
   channel: Channel;
   markStyleClass: string;
-  /** como a regra determinística dispara (instrumentação honesta) */
   signal: string;
-  /** por que isso afeta a leitura (glosa curta do princípio) */
   why: string;
 }
 
-/** Ordem de apresentação — sintaxe primeiro, depois léxico, depois medida. */
 export const CRITERION_ORDER: readonly Criterion[] = [
   "passive_voice",
   "nominalization",
@@ -274,8 +252,6 @@ export function findingId(f: Finding): string {
   return `${f.criterion}:${f.span.start}:${f.span.end}`;
 }
 
-/* ---- Severidade -------------------------------------------------------- */
-
 const SEVERITY_RANK: Record<Severity, number> = { info: 0, warning: 1, error: 2 };
 export function severityRank(sev: Severity): number {
   return SEVERITY_RANK[sev];
@@ -285,7 +261,7 @@ export function severityInkVar(sev: Severity): string {
   if (sev === "warning") return "var(--sev-warn)";
   return "var(--sev-info)";
 }
-/** Rótulos humanos e editoriais — sem "info/alerta/erro" de terminal. */
+
 export const SEVERITY_LABEL: Record<Severity, string> = {
   info: "Observação",
   warning: "Atenção",
@@ -299,11 +275,8 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   metric: "métrica",
 };
 
-/* ---- Estado de automação (o eixo central da identidade do Lucid) ------- */
-
 export type ActionState = "safe" | "human";
 
-/** Segura só quando o engine assina uma substituição mecânica e não pede julgamento. */
 export function actionStateOf(f: Finding): ActionState {
   return f.suggestion !== undefined && !f.requiresHuman ? "safe" : "human";
 }
@@ -311,9 +284,6 @@ export function isSafe(f: Finding): boolean {
   return actionStateOf(f) === "safe";
 }
 
-/* ---- Princípios da norma (agrupamento por seção) ----------------------- */
-
-/** Nome do princípio a partir da subseção ABNT (5.1→Relevante … 5.4→Usável). */
 export function principleGroupOf(principle: string): string {
   if (principle.startsWith("5.1")) return "Relevante";
   if (principle.startsWith("5.2")) return "Localizável";

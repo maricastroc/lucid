@@ -1,14 +1,3 @@
-/**
- * Locale pt-BR — o PRIMEIRO locale oficial do Lucid (ADR-031).
- *
- * Reúne, atrás do contrato `LocaleBundle`, tudo que é específico do português: os 13 passes, os
- * léxicos (via o registry PT), a contagem de sílabas, o Flesch-PT, a segmentação por abreviações e
- * o conjunto de critérios. O core não conhece nada disto — recebe este bundle e compõe.
- *
- * Nota de migração: nesta etapa os módulos PT ainda vivem fisicamente em `src/lucid/core/**`; este
- * arquivo os REÚNE (direção locale→core, permitida). A mudança física para `src/locales/pt-BR/**`
- * é a etapa seguinte e não altera comportamento (ids/valores idênticos).
- */
 import type { Config } from "@/lucid/core/config";
 import type { Diagnostic, Pass } from "@/lucid/core/types";
 import type { LocaleBundle, LocaleDataRegistry, ReadabilityMetric } from "@/lucid/core/contracts/locale";
@@ -31,7 +20,6 @@ const readability: ReadabilityMetric = {
   calculate: ({ wordsPerSentence, syllablesPerWord }) => calculateFleschPt(wordsPerSentence, syllablesPerWord),
 };
 
-/** Adaptador do registry PT (tipado a `DatasetId`) para o contrato neutro `LocaleDataRegistry`. */
 const data: LocaleDataRegistry = {
   createDataView: (deps) => REGISTRY_PT.createDataView(deps as DatasetId[]),
   documentDatasets: DOCUMENT_DATASETS,
@@ -50,28 +38,14 @@ export const localePtBR: LocaleBundle = {
   criteria: { ids: CRITERION_IDS },
 };
 
-/**
- * `analyze(text)` — conveniência: o Lucid com o locale pt-BR ligado. É a API compatível de sempre;
- * o default pt-BR NÃO contamina o core (mora aqui, no locale). Para outro locale, use
- * `analyzeWithLocale`/`createAnalyzer` do core.
- */
 export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
   return analyzeWithLocale(text, localePtBR, configOverrides);
 }
 
-/**
- * `analyzeDocument(doc)` — a porta em nível de documento ligada ao pt-BR (ADR-038). É o que um
- * importador estruturado (DOCX/PDF) chama: `analyzeDocument(docxImporter(bytes))`. `analyze(text)`
- * é o caso de texto puro; ambos produzem o mesmo `Diagnostic`.
- */
 export function analyzeDocument(doc: Document, configOverrides?: Partial<Config>): Diagnostic {
   return analyzeDocumentWithLocale(doc, localePtBR, configOverrides);
 }
 
-/**
- * Helper de teste: roda um conjunto ARBITRÁRIO de passes com o resto do locale pt-BR (serviços,
- * métrica, registry). Usado por `determinism.test` para checar independência de ordem dos passes.
- */
 export function analyzeWithPasses(
   text: string,
   passes: readonly Pass[],
@@ -80,18 +54,15 @@ export function analyzeWithPasses(
   return analyzeWithLocale(text, { ...localePtBR, passes }, configOverrides);
 }
 
-/** Serviços de documento do pt-BR, prontos para `buildDocument` (conveniência). */
 export const ptDocumentServices = {
   segmentSentences: localePtBR.services.segmentSentences,
   abbreviations: localePtBR.data.abbreviations,
 };
 
-/** `buildDocument` já ligado ao pt-BR — conveniência para a UI e testes. */
 export function buildDocument(text: string): Document {
   return buildDocumentCore(text, ptDocumentServices);
 }
 
-/** `sentenceSpanAt` já ligado às abreviações do pt-BR — conveniência para a UI (Tier 2). */
 export function sentenceSpanAt(text: string, offset: number): Span {
   return sentenceSpanAtCore(text, offset, localePtBR.data.abbreviations);
 }

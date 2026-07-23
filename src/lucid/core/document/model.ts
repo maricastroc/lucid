@@ -3,12 +3,6 @@ import { normalize } from "./normalize";
 import { segmentParagraphs } from "./segment-paragraphs";
 import { attachTokens, tokenize } from "./tokenize";
 
-/**
- * Serviços de documento que um `LocaleBundle` pode fornecer (ADR-031). `normalize` (NFC) e
- * `tokenize` são NEUTROS de idioma e ficam no core como default — não entram no bundle a menos
- * que um script não-latino realmente exija (YAGNI agora). Só a segmentação de frases carrega uma
- * dependência de idioma (o set de abreviações), por isso é o único parametrizável aqui.
- */
 export interface DocumentBuildServices {
   segmentSentences: (source: string, abbreviations: ReadonlySet<string>) => Sentence[];
   abbreviations: ReadonlySet<string>;

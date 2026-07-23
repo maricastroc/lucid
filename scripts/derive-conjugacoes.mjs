@@ -1,33 +1,3 @@
-/**
- * GERAÇÃO + VALIDAÇÃO (build-time) das tabelas FECHADAS de voz passiva→ativa do Tier 2 (ADR-032/033).
- * NUNCA roda em runtime — o runtime só lê os JSON gerados.
- *
- * Fonte das FORMAS: PortiLexicon-UD (CC-BY 4.0, ICMC-USP/NILC; HF `NILC-ICMC-USP/PortiLexicon-UD`,
- * `VERB.tsv`, colunas `forma⇥lema⇥FEATS` no padrão Universal Dependencies). A LISTA de lemas continua
- * CURADA por domínio (admin/jurídico) — a decisão de "quais verbos cobrir" é humana; o que o léxico
- * fornece é a FORMA correta de cada um (ADR-033: curada + validada pelo léxico). Assim, adicionar um
- * verbo à cobertura vira só "pôr o lema na lista": as 10 formas saem do léxico, e os regulares `-er`/
- * `-ir` ainda são cross-validados contra a regra de flexão — some o risco de digitar forma irregular
- * errada à mão. Só as 10 formas que a detecção consegue provar (3ª pessoa sing/plural × 5 tempos
- * simples do indicativo/condicional).
- *
- * Os `-ar` regulares NÃO entram aqui — são resolvidos em runtime pela regra determinística
- * (`actions/regular-morphology.ts`, ADR-033), pois as exceções do `-ar` (`-ear`, MÁRIO `-iar`,
- * `dar/estar`) são um conjunto fechado. A tabela guarda SÓ o que a regra não cobre com segurança:
- * `-er`/`-ir` (particípio `-ido` ambíguo) + irregulares.
- *
- * Este script também VALIDA `participios-infinitivo.pt.json` (particípio→infinitivo do andaime de
- * passiva): cada entrada é conferida contra o léxico (o particípio, como `VerbForm=Part`, tem de ter
- * o infinitivo curado entre seus lemas). É a desambiguação `-ido` (`recebido→receber` vs
- * `partido→partir`) feita pela autoridade do léxico, não à mão.
- *
- * Uso:  VERB_TSV=/caminho/para/VERB.tsv node scripts/derive-conjugacoes.mjs
- *   Baixe o VERB.tsv (71 MB, CC-BY 4.0) uma vez, fora do repo:
- *   curl -sL "https://huggingface.co/spaces/NILC-ICMC-USP/PortiLexicon-UD/resolve/main/VERB.tsv" -o VERB.tsv
- *   O script escreve `conjugacoes-ativas.pt.json` e falha (exit≠0) se qualquer forma ou
- *   desambiguação divergir do léxico. Chaves ordenadas → JSON estável (fingerprint reprodutível).
- */
-
 import fs from "node:fs";
 import path from "node:path";
 import readline from "node:readline";

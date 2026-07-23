@@ -1,20 +1,3 @@
-/**
- * META-EVAL da sonda de compreensão (Camada 2) — CLAUDE.md, "Disciplina de eval":
- * "Meta-eval da sonda: a sonda tem que travar onde os humanos travaram. Medir concordância com os
- * rótulos. Prompt e modelo versionados; regressão quebra o build."
- *
- * Duas camadas, como o benchmark de reescrita:
- *  - CI (offline, sempre roda): prova que o GOLDEN é bem-formado, que o HARNESS de concordância
- *    computa a matriz certa (com sondas-oráculo controladas), e que a ponte rótulo→`interpret`
- *    mapeia os dois modos de falha para `flag`. Não mede a sonda real (sem rede na CI).
- *  - Ao vivo (`PROBE_EVAL=1`, fora da CI): roda a sonda LLM REAL sobre o golden, imprime a matriz de
- *    confusão + concordância, e TRAVA um piso de recall nos travamentos — a sonda tem que pegar onde
- *    o humano travou. Modelo/prompt versionados no `id` da sonda (anti-drift), impresso no relatório.
- *
- * Eixos medidos (classe positiva = "travar", isto é, `interpret` → `flag`):
- *  - recall  = travamentos humanos que a sonda pegou  (o que MAIS importa: um miss é a sonda falhando)
- *  - precision = flags da sonda que eram travamentos de verdade (piso pessimista tolera FP; medimos)
- */
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { interpret } from "../../src/lucid/probe/interpret";
@@ -64,8 +47,6 @@ function score(rows: readonly Row[]): Matrix {
   const accuracy = rows.length === 0 ? 1 : (tp + tn) / rows.length;
   return { tp, fn, fp, tn, recall, precision, accuracy };
 }
-
-/* ============================ CAMADA CI (offline, determinística) ============================ */
 
 describe("meta-eval da sonda — golden + harness (offline)", () => {
   it("golden bem-formado: ids únicos, campos preenchidos, DUAS classes presentes", () => {
@@ -128,8 +109,6 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
   });
 });
 
-/* ============================ CAMADA AO VIVO (rede — fora da CI) ============================== */
-
 function loadKey(name: string): string | null {
   if (process.env[name]) return process.env[name] ?? null;
   try {
@@ -140,14 +119,6 @@ function loadKey(name: string): string | null {
   }
 }
 
-/**
- * Constrói a sonda REAL. Modelo escolhível por `PROBE_EVAL_MODEL` (provider inferido do id: nomes
- * `gemini-*` → Gemini; o resto → Groq). Sem override: `llama-3.3-70b-versatile` (grátis) — o 8B foi
- * DESQUALIFICADO como default do harness na meta-eval de 2026-07-22 (26% de concordância; achado
- * registrado em docs/DECISOES.md): ele se autocontradiz na extração literal, o que mediria o próprio
- * harness errado, não a qualidade do prompt/golden. Passe `PROBE_EVAL_MODEL=llama-3.1-8b-instant`
- * explicitamente se quiser reproduzir esse achado.
- */
 function buildLiveProbe(): LlmComprehensionProbe {
   const groq = loadKey("GROQ_API_KEY");
   const gemini = loadKey("GEMINI_API_KEY");
@@ -177,7 +148,7 @@ describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
       linhas.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
       linhas.push(`concordância=${(m.accuracy * 100).toFixed(0)}% · recall(travamentos)=${(m.recall * 100).toFixed(0)}% · precisão=${(m.precision * 100).toFixed(0)}%`);
       linhas.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
-      
+
       const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
       linhas.push("\npor categoria:");
       for (const cat of categorias) {

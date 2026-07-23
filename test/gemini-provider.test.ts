@@ -26,7 +26,7 @@ describe("GeminiProvider — allow-list (sem rede)", () => {
   });
 
   it("expõe a allow-list de modelos", () => {
-    expect(GEMINI_MODELS).toContain("gemini-2.5-pro");
+    expect(GEMINI_MODELS).toContain("gemini-2.5-flash");
     expect(new GeminiProvider("x").models).toEqual(GEMINI_MODELS);
   });
 });
@@ -37,7 +37,7 @@ describe("GeminiProvider — parse da resposta (fetch mockado)", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const provider = new GeminiProvider("chave-fake");
-    const out = await provider.complete("prompt", { model: "gemini-2.5-pro", temperature: 0 });
+    const out = await provider.complete("prompt", { model: "gemini-2.5-flash", temperature: 0 });
 
     expect(out).toBe('{"reescrita":"clara"}');
     expect(provider.lastUsage).toEqual({ promptTokens: 10, completionTokens: 5, totalTokens: 15 });
@@ -54,7 +54,7 @@ describe("GeminiProvider — parse da resposta (fetch mockado)", () => {
       vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ candidates: [] }), headers: new Headers() }) as unknown as Response),
     );
     const provider = new GeminiProvider("chave-fake");
-    await expect(provider.complete("p", { model: "gemini-2.5-pro", temperature: 0 })).rejects.toBeInstanceOf(
+    await expect(provider.complete("p", { model: "gemini-2.5-flash", temperature: 0 })).rejects.toBeInstanceOf(
       ChatProviderError,
     );
   });

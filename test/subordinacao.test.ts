@@ -1,9 +1,3 @@
-/**
- * Densidade de subordinação (`subordinacao_densa`, 5.3.4). Conta conectivos subordinativos por
- * frase (léxico curado + matcher de frase contígua) como proxy de "orações por frase". Precisão >
- * recall: só conectivos inequívocos contam; os polissêmicos (que/se/como/caso…) NÃO — o piso
- * honesto é subestimar, nunca exagerar.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, type Finding } from "../src/lucid";
 

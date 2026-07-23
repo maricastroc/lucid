@@ -1,49 +1,14 @@
-/**
- * Golden da META-EVAL da sonda de compreensão (Camada 2) — CLAUDE.md, seção "Disciplina de eval":
- * "a sonda tem que travar onde os humanos travaram. Medir concordância com os rótulos."
- *
- * Cada entrada é um trecho + a PERGUNTA que o leitor veio fazer + o RÓTULO HUMANO `humanoTrava`.
- * O rótulo é definido EXATAMENTE pelo que o piso da sonda mede (ver `interpret`): o leitor de baixa
- * literacia consegue extrair o fato pedido USANDO SÓ O TEXTO, sem inferir? — `humanoTrava = false`
- * (deve virar `neutro`) — ou não consegue / precisa preencher lacuna? — `humanoTrava = true` (deve
- * virar `flag`).
- *
- * FRONTEIRA IMPORTANTE (honestidade): o piso da sonda é EXTRAÇÃO, não COMPREENSÃO. Um trecho pode
- * ser pesado de ler (termo técnico, sujeito longo, coesão entre frases) e ainda assim ter o fato
- * LITERALMENTE extraível — esse caso é `humanoTrava = false` e carrega uma `operacaoLeitura` no eixo
- * de CARGA (sinal, não piso). Confundir carga com travamento penalizaria a sonda por algo fora do
- * seu contrato. Por isso os dois eixos são medidos separadamente.
- *
- * Cada entrada é justificada individualmente (`porque`) — nunca "decorar o golden". Fonte dos
- * exemplos: construções típicas de texto administrativo/jurídico brasileiro.
- *
- * CATEGORIA "condicao_nomeada" (adicionada após achado ao vivo, sessão de 2026-07-22): o trecho
- * nomeia uma condição/agente/categoria SEM desenvolvê-la ("na hipótese de deferimento", "para
- * estudantes", "mediante autorização") e a pergunta bate EXATAMENTE no que está nomeado. O rótulo
- * humano é sempre `humanoTrava: false` — o nome É a resposta; o leitor de piso não precisa saber
- * os critérios de "deferimento" ou quem conta como "estudante" pra responder a pergunta como foi
- * feita. Hipótese sob teste: a sonda pode trocar a pergunta por uma mais profunda ("sob que
- * critério o deferimento ocorre?") em vez de aceitar a resposta literal — um modo de falha
- * DIFERENTE de rigor válido (que travaria só em ambiguidade/lacuna genuína). Ver docs/DECISOES.md
- * (achado registrado) antes de subir `PROBE_PROMPT_VERSION`.
- */
 import type { OperacaoLeitura, ProbeResult } from "../../src/lucid/probe/types";
 
-/** Por que o leitor de piso trava, quando trava — o modo de falha que `interpret` reconhece. */
 export type ModoDeFalha = "nao_extrai" | "precisa_inferir";
 
 export interface ProbeGoldenCase {
   id: string;
   trecho: string;
-  /** a pergunta que o leitor veio fazer */
   pergunta: string;
-  /** rótulo humano: o leitor de piso NÃO extrai o fato só do texto → deve virar `flag` */
   humanoTrava: boolean;
-  /** presente só quando `humanoTrava` — como o piso falha (alimenta o oráculo determinístico) */
   modoDeFalha?: ModoDeFalha;
-  /** eixo de CARGA (sinal): operação de leitura que o trecho exige, mesmo quando extraível */
   operacaoLeitura?: OperacaoLeitura;
-  /** família do caso, para o relatório por categoria */
   categoria:
     | "claro"
     | "agente_omitido"
@@ -296,11 +261,6 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
   },
 ];
 
-/**
- * ORÁCULO determinístico: o `ProbeResult` que um leitor de piso PERFEITO produziria para cada caso,
- * derivado só do rótulo humano. Usado na camada CI (sem rede) para provar o harness de concordância
- * e a ponte rótulo→`interpret` — NÃO é a sonda real (essa é medida na camada ao vivo).
- */
 export function oracleResult(c: ProbeGoldenCase): ProbeResult {
   const operacoes = c.operacaoLeitura ? [c.operacaoLeitura] : [];
   if (!c.humanoTrava) {

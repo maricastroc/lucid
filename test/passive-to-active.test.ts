@@ -1,8 +1,3 @@
-/**
- * Voz passiva → ativa (ação Tier 2, ADR-032). Testa a classificação (A/B/C), a montagem EXATA do
- * rascunho e a disciplina do projeto: nenhuma conversão insegura. Os findings vêm do `analyze` real
- * (com o `meta` que o pass emite), não construídos à mão.
- */
 import { describe, expect, it } from "vitest";
 import { analyze, applyPassiveWithAgent, passiveToActive, type Finding, type PassiveRewrite } from "../src/lucid";
 import { infinitiveFromRegularParticiple } from "../src/locales/pt-BR/actions/regular-morphology";
@@ -16,7 +11,6 @@ function firstPassive(text: string): { finding: Finding; source: string } {
   return { finding, source: d.text };
 }
 
-/** Aplica o rascunho automático ao texto inteiro (o que a UI faz via studio). */
 function applied(source: string, r: PassiveRewrite): string {
   if (r.kind !== "automatic") throw new Error(`esperava automatic, veio ${r.kind}`);
   return source.slice(0, r.target.start) + r.replacement + source.slice(r.target.end);

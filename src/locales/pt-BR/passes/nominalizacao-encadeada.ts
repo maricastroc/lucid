@@ -1,22 +1,3 @@
-/**
- * Nominalização ENCADEADA (ADR-051) — a nominalização sem verbo-suporte, que o pass
- * `nominalization` (verbo leve + determinante + nominalização) não alcança por design.
- *
- * Dois sinais, ambos por léxico e adjacência (zero morfologia produtiva):
- *
- * 1. CADEIA — substantivo de ação do léxico (`substantivos-acao.pt`) governando um
- *    complemento abstrato por "de": `[cabeça] + de/da/do/das/dos (+ 1 palavra opcional)
- *    + [palavra com sufixo deverbal]`, estendida gulosamente ("realização da atualização
- *    da verificação" = uma cadeia só). Entre a cabeça e o "de" NÃO se admite palavra
- *    intermediária — um verbo ali ("a análise depende da aprovação") criaria falso
- *    positivo; precisão > recall.
- * 2. DENSIDADE — ≥ `minPorFrase` substantivos de ação na mesma frase marca os que não
- *    estão cobertos por uma cadeia (mesmo desenho do `adverbio_mente_denso`).
- *
- * Nunca sugere (`requiresHuman` sempre): devolver a ação ao verbo exige decidir quem faz
- * o quê — julgamento de autor. Severidade gradua pela evidência: cadeia com elo TAMBÉM
- * no léxico de ação = warning; elo só por sufixo, e densidade, = info.
- */
 import type { Finding, Pass, Token } from "@/lucid/core/types";
 
 const CRITERION = "nominalizacao_encadeada";
@@ -24,7 +5,6 @@ const PRINCIPLE = "5.3.3";
 
 const DE_FORMS = new Set(["de", "da", "do", "das", "dos"]);
 
-/** Sufixos deverbais aceitos no ELO (cauda) da cadeia — a cabeça vem sempre do léxico. */
 const TAIL_SUFFIXES = ["ção", "ções", "são", "sões", "mento", "mentos", "ância", "âncias", "ência", "ências"];
 
 function hasDeverbalSuffix(lower: string): boolean {
@@ -34,12 +14,10 @@ function hasDeverbalSuffix(lower: string): boolean {
 interface Chain {
   headIndex: number;
   endIndex: number;
-  /** algum elo é ele próprio um substantivo de ação do léxico (evidência forte) */
   strongLink: boolean;
   links: number;
 }
 
-/** Casa uma cadeia a partir da cabeça, estendendo gulosamente elo a elo. */
 function matchChain(tokens: readonly Token[], headIndex: number, heads: ReadonlySet<string>): Chain | null {
   let endIndex = headIndex;
   let links = 0;
@@ -52,7 +30,6 @@ function matchChain(tokens: readonly Token[], headIndex: number, heads: Readonly
     let tailIndex = endIndex + 2;
     let tail = tokens[tailIndex];
     if (tail?.isWord && !heads.has(tail.lower) && !hasDeverbalSuffix(tail.lower)) {
-      // uma palavra intermediária (artigo/adjetivo) entre o "de" e o elo: "de eventuais inconsistências"
       tailIndex = endIndex + 3;
       tail = tokens[tailIndex];
     }

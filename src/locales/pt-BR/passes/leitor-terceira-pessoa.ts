@@ -1,24 +1,3 @@
-/**
- * Pass "fala indireta ao leitor" (`leitor_terceira_pessoa`) — `5.3.3`, frases claras / fale COM o
- * leitor (docs/CLAUDE.md, Fase 2; guias gov.br e LAB.mg).
- *
- * Marca quando o texto se refere ao leitor em TERCEIRA PESSOA e lhe atribui uma OBRIGAÇÃO — "o
- * interessado deverá apresentar", "o requerente deve comparecer", "os candidatos precisam" — em vez
- * de falar diretamente ("você deve…" / imperativo). É a operacionalização determinística de "falta
- * fala direta": não dá para detectar ausência, mas dá para detectar a construção que a evita.
- *
- * MATCHER LOCAL POR TOKENS, SEM PARSER (mesma disciplina de `passive-voice`). Dupla exigência para
- * precisão:
- *   1. o substantivo-leitor (léxico `substantivos-leitor.pt`) está em POSIÇÃO DE SUJEITO — precedido
- *      de artigo definido ("o/a/os/as") ou no início da frase. Isso exclui os oblíquos ("do
- *      interessado", "ao requerente") e a leitura adjetival ("está interessado");
- *   2. um verbo DEÔNTICO (deve/deverá/poderá/precisa…) aparece numa janela curta à frente, abortando
- *      em pontuação ou conjunção (que muda de oração). Isso exclui "o cidadão tem direitos" (sem
- *      obrigação).
- *
- * Sinal FRACO por natureza (`info`): mudar a pessoa do texto é escolha de estilo do autor. NÃO
- * reescreve — `suggestion` nunca é preenchida; `requiresHuman` é sempre `true`.
- */
 import type { Finding, Pass, Token } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
 
@@ -27,23 +6,18 @@ const PRINCIPLE = "5.3.3";
 
 const READER_NOUNS = getPrepared("substantivos-leitor.pt");
 
-/** Artigos definidos que marcam o substantivo-leitor como sujeito (nunca contrações como "do/ao"). */
 const DEFINITE_ARTICLES = new Set(["o", "a", "os", "as"]);
 
-/** Verbos deônticos de 3ª pessoa (obrigação/permissão). Classe fechada, inline como em passive-voice. */
 const DEONTIC_VERBS = new Set([
   "deve", "devem", "deverá", "deverão", "deveria", "deveriam",
   "precisa", "precisam", "precisará", "precisarão",
   "poderá", "poderão", "pode", "podem",
 ]);
 
-/** Pontuação que encerra/divide a oração — barreira dura. */
 const BARRIER_PUNCTUATION = new Set([",", ";", ":", "!", "?", "…", "(", ")", "[", "]", '"', "'", "—", "–", "/"]);
 
-/** Conjunções cuja presença indica que o verbo seguinte pertence a outra oração. */
 const BARRIER_CONJUNCTIONS = new Set(["que", "e", "ou", "mas", "porque", "pois", "quando", "se", "como", "porém"]);
 
-/** Máximo de tokens-palavra entre o substantivo-leitor e o verbo deôntico. */
 const MAX_WINDOW_TOKENS = 4;
 
 function isBarrier(token: Token): boolean {
@@ -51,7 +25,6 @@ function isBarrier(token: Token): boolean {
   return BARRIER_PUNCTUATION.has(token.text);
 }
 
-/** Índice do primeiro token-PALAVRA da frase (para reconhecer o sujeito no início, sem artigo). */
 function firstWordIndex(tokens: readonly Token[]): number {
   for (let i = 0; i < tokens.length; i++) if (tokens[i].isWord) return i;
   return -1;

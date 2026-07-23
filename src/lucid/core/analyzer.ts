@@ -22,16 +22,6 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
   });
 }
 
-/**
- * Núcleo do analyzer — NEUTRO de idioma (ADR-031). Recebe um `LocaleBundle` e monta o diagnóstico
- * exclusivamente a partir dele: serviços de documento, métrica (sílabas + fórmula), passes e o
- * registry escopado. Nenhum `import` específico de PT vive aqui; nenhum `if (locale === ...)`.
- */
-/**
- * A porta em NÍVEL DE DOCUMENTO (ADR-038): analisa um `AnnotatedDocument` já montado — a superfície
- * que os importadores estruturados (DOCX/PDF/…) usam. `analyzeWithLocale(text)` é o caso de texto
- * puro: monta o `Document` com o importador de texto e delega aqui. Nenhum detector sabe a origem.
- */
 export function analyzeDocumentWithLocale(
   doc: Document,
   locale: LocaleBundle,
@@ -69,11 +59,6 @@ export function analyzeDocumentWithLocale(
   };
 }
 
-/**
- * Núcleo do analyzer para TEXTO PURO — NEUTRO de idioma (ADR-031). Monta o `Document` com o
- * importador de texto do locale e delega a `analyzeDocumentWithLocale`. `analyze(text)` do barrel
- * é o caso pt-BR desta função.
- */
 export function analyzeWithLocale(text: string, locale: LocaleBundle, configOverrides?: Partial<Config>): Diagnostic {
   const doc = buildDocument(text, {
     segmentSentences: locale.services.segmentSentences,
@@ -82,10 +67,6 @@ export function analyzeWithLocale(text: string, locale: LocaleBundle, configOver
   return analyzeDocumentWithLocale(doc, locale, configOverrides);
 }
 
-/**
- * Instância imutável de analyzer ligada a um locale — a alternativa sem estado global mutável.
- * NÃO existe `setCurrentLocale`; o locale é capturado aqui ou passado a `analyzeWithLocale`.
- */
 export function createAnalyzer(opts: { locale: LocaleBundle }): {
   readonly localeId: string;
   analyze(text: string, configOverrides?: Partial<Config>): Diagnostic;

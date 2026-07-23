@@ -1,12 +1,3 @@
-/**
- * Testes ARQUITETURAIS da fronteira de locale (ADR-031) — provam a fronteira, não o caminho feliz:
- *   · a arquitetura neutra aceita outro locale (o sintético) sem adicionar inglês;
- *   · dois analyzers de locales diferentes coexistem sem estado compartilhado;
- *   · nenhum registry global vaza entre instâncias;
- *   · o resultado carrega a identidade do locale (`meta.localeId`).
- * A cerca "core não importa locale" + pureza de `locales/**` é provada por `boundary.test.ts`
- * (dependency-cruiser).
- */
 import { describe, expect, it } from "vitest";
 import { analyzeWithLocale, createAnalyzer } from "../src/lucid/core/analyzer";
 import { localePtBR } from "../src/locales/pt-BR";

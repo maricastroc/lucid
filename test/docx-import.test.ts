@@ -1,9 +1,3 @@
-/**
- * Importador DOCX (ADR-039). Testa as duas peças puras — o parser `HTML(mammoth)→RawBlock[]` e o
- * assembler neutro `buildStructuredDocument` — sem precisar de um `.docx` real nem do mammoth (a
- * conversão docx→html do mammoth é exercida ao vivo na UI). Prova a fronteira: os 15 detectores
- * rodam sobre o `Document` estruturado via `analyzeDocument`, cegos à origem.
- */
 import { describe, expect, it } from "vitest";
 import { analyzeDocument, buildStructuredDocument } from "../src/lucid";
 import { htmlToRawBlocks } from "../src/importers/docx";

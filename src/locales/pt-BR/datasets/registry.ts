@@ -1,10 +1,3 @@
-/**
- * Registry de dados do locale pt-BR (ADR-031). Constrói a instância a partir do mecanismo neutro
- * `createRegistry` do core e dos `specs` do português. Expõe helpers TIPADOS (`getPrepared<K>` →
- * `DataTypes[K]`) que os passes consomem — a tipagem forte de datasets vive no locale, não no core.
- *
- * Os ids (`"jargao.pt"`…) são estáveis por design: entram no `dataHash`.
- */
 import { createRegistry, type DatasetRecord, type RawSpec, type Registry } from "@/lucid/core/data/registry";
 import type { DataView } from "@/lucid/core/data/types";
 import type { DataTypes, DatasetId } from "./types";
@@ -145,13 +138,10 @@ const SPECS: Record<DatasetId, RawSpec> = {
   },
 };
 
-/** Instância do registry PT-BR. */
 export const REGISTRY_PT: Registry = createRegistry(SPECS);
 
-/** Datasets consumidos na CONSTRUÇÃO do documento (não por um pass) — entram no `dataHash`. */
 export const DOCUMENT_DATASETS: readonly DatasetId[] = ["abreviacoes.pt"];
 
-/** Helper TIPADO: `getPrepared("jargao.pt")` devolve `JargonPrepared`, etc. */
 export function getPrepared<K extends DatasetId>(id: K): DataTypes[K] {
   return REGISTRY_PT.getPrepared<DataTypes[K]>(id);
 }
@@ -168,7 +158,6 @@ export function dataHashFor(ids: Iterable<DatasetId>): string {
   return REGISTRY_PT.dataHashFor(ids);
 }
 
-/** Registro cru (para testes de proveniência). */
 export const REGISTRY: Readonly<Record<DatasetId, DatasetRecord>> = REGISTRY_PT.records as Readonly<
   Record<DatasetId, DatasetRecord>
 >;

@@ -8,14 +8,6 @@ export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 8000;
 
-/**
- * Modelo de piso: `llama-3.3-70b-versatile`, não o `llama-3.1-8b-instant` (achado ao vivo,
- * meta-eval de 2026-07-22, ver docs/DECISOES.md). O 8B se autocontradiz na extração literal —
- * chegou a citar a resposta certa dentro do próprio motivo de recusa e ainda assim travar
- * (26% de concordância no golden, categorias sem relação nenhuma entre si). O 70B, MESMO prompt
- * (`probe@1`, intocado), fechou 100% no mesmo golden — a causa era o modelo, não o prompt. Ambos
- * são gratuitos no Groq; a troca não tem custo.
- */
 function buildFloorProbe(): ComprehensionProbe | { error: string } {
   if (process.env.GROQ_API_KEY) {
     return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.3-70b-versatile");

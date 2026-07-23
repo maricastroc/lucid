@@ -1,21 +1,3 @@
-/**
- * Narrativa dos diagnósticos — a copy do RELATÓRIO técnico do inspetor, centralizada e
- * honesta. Tudo é derivado do `Finding` real (span, meta, suggestion) + dos metadados de
- * critério; nada é inventado. A "confiança" NÃO é uma probabilidade: é a explicação
- * determinística de por que a engine assina (ou não) uma sugestão.
- *
- * COMPLETUDE EM COMPILE-TIME (ADR-037): a copy vive num `Record<CriterionId, …>` — como o
- * `CRITERION_META`. Adicionar um critério ao engine QUEBRA o typecheck aqui até a copy dele ser
- * escrita, em vez de cair silenciosamente num fallback errado. `headline`/`prose` são opcionais
- * (o default — `label` do critério / a própria `justification` do finding — é sempre CORRETO);
- * `confidence` é OBRIGATÓRIO por critério (era exatamente o campo cujo fallback dava a explicação
- * de outro critério).
- *
- * `longSentenceGuidance` implementa a orientação assistida (Tier 2, item 1): mede a frase
- * e DELEGA a localização dos pontos de divisão ao core determinístico (`clauseSplitPoints`,
- * ADR-012) — a detecção não é reimplementada aqui. A ferramenta não corta; ela aponta e,
- * quando o autor escolhe, o core insere a quebra. A decisão é do autor.
- */
 import { clauseSplitPoints, isCriterionId, type CriterionId, type Finding, type SplitPoint } from "@/lucid";
 import { CRITERION_META } from "./criteria";
 
@@ -43,24 +25,16 @@ const DOMAIN_PT: Record<string, string> = {
 export type ConfidenceLevel = "segura" | "assistida";
 type Confidence = { level: ConfidenceLevel; rationale: string };
 
-/** Atalho para o caso comum: sinal assistido (requiresHuman), sem troca segura. */
 function assistida(rationale: string): Confidence {
   return { level: "assistida", rationale };
 }
 
 interface CriterionNarrative {
-  /** Cabeçalho da nota. Ausente → `CRITERION_META[id].label` (sempre correto). */
   headline?: (f: Finding) => string;
-  /** "O que encontramos". Ausente → a própria `f.justification` (escrita pelo pass). */
   prose?: (f: Finding) => string;
-  /** Explicação de confiança — OBRIGATÓRIA: cada critério diz POR QUE assina (ou não). */
   confidence: (f: Finding) => Confidence;
 }
 
-/**
- * Uma entrada por critério — exaustiva por construção (`Record<CriterionId, …>`). É isto que faz
- * um critério novo FALHAR ALTO no typecheck em vez de herdar a copy de outro.
- */
 const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
   long_sentence: {
     headline: (f) => {
@@ -309,26 +283,17 @@ export function buildConfidence(f: Finding): Confidence {
   return NARRATIVE[c].confidence(f);
 }
 
-/* ------------------------------------------------- orientação (Tier 2, item 1) --- */
-
 export interface LongSentenceGuidance {
   words: number | null;
   threshold: number | null;
   over: number | null;
   subordination: number;
   targetSentences: number | null;
-  /** pontos de divisão candidatos — vêm do core determinístico (`clauseSplitPoints`). */
   candidates: SplitPoint[];
 }
 
 const SUBORD_RE = /\b(que|quando|porque|embora|cuj[ao]s?|onde|caso|conforme|porquanto|ainda que|de modo que)\b/gi;
 
-/**
- * `source` é o texto normalizado do diagnóstico (`Diagnostic.text`) — necessário para que
- * os offsets dos pontos de divisão sejam absolutos no documento e sirvam direto ao
- * `applySplitAt`. A subordinação (medida de esforço, só exibição) continua sendo uma
- * contagem simples sobre o span.
- */
 export function longSentenceGuidance(f: Finding, source: string): LongSentenceGuidance {
   const span = f.span.text;
   const words = metaNum(f, "words");

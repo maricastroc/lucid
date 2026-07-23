@@ -7,7 +7,6 @@ import type { LedgerEntry } from "../lib/ledger";
 import { CriterionMark } from "./badges";
 import { ArrowDownIcon, WandIcon } from "./icons";
 
-/** Dispara o download de um arquivo de texto gerado no cliente (sem rede). */
 function downloadTextFile(filename: string, content: string, mime: string) {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -98,8 +97,6 @@ export function AuditOverview({
           </button>
         )}
 
-        {/* A auditoria como ENTREGÁVEL (ADR-000 · Etapa 5): saia com o relatório sem aplicar nada
-            nem tocar na IA. Markdown determinístico, gerado no cliente. */}
         <button
           type="button"
           onClick={() =>
@@ -193,11 +190,6 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
-/**
- * Trilha de proveniência (ADR-000 · Etapa 6) — o registro acumulado das alterações da sessão, com o
- * peso de severidade do documento antes/depois de cada uma. Presença modesta na UI (o entregável é o
- * relatório exportado); aqui é só o registro visível. Não é atestado — é o que o auditor produz.
- */
 function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
   const first = entries[0];
   const last = entries[entries.length - 1];

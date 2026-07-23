@@ -1,12 +1,3 @@
-/**
- * Extração COMPARTILHADA dos papéis de uma voz passiva analítica (ADR-032). É a única fonte de
- * verdade estrutural para os dois consumidores do Tier 2 — o andaime read-only (`passive-scaffold`)
- * e a conversão voz ativa (`passive-to-active`) —, para não duplicar lógica.
- *
- * Lê SOMENTE os offsets que o pass já emite em `finding.meta` (participleStart/End, agentMarker*,
- * agentEnd) e recupera a forma de `ser` da região `[span.start, participleStart)`. NÃO re-analisa,
- * NÃO reconstrói a detecção e NÃO altera o pass — logo, nenhum `Diagnostic`/snapshot muda.
- */
 import type { Finding } from "@/lucid/core/types";
 import { sentenceSpanAt } from "@/lucid/core/document/locate";
 import { getPrepared } from "../datasets/registry";
@@ -18,22 +9,14 @@ const ABBREVIATIONS = getPrepared("abreviacoes.pt");
 const RE_LEADING_WORD = /^\p{L}+/u;
 
 export interface PassiveRoles {
-  /** forma de `ser` que ancorou a passiva (caixa invariante), ex.: "foi" */
   serForm: string;
-  /** particípio como aparece no texto */
   participle: string;
-  /** particípio → infinitivo (tabela fechada); `null` se desconhecido */
   baseVerbLemma: string | null;
   hasAgent: boolean;
-  /** marcador de agente (`pela`/`pelo`/…), minúsculo; `null` sem agente */
   agentMarker: string | null;
-  /** sintagma do agente após o marcador (pode ser ""); `null` sem agente */
   agentBody: string | null;
-  /** sujeito da passiva (= objeto da ativa), antes de `ser`; `null` se vazio */
   objectRegion: string | null;
-  /** início do sujeito = início da frase que contém a passiva */
   subjectStart: number;
-  /** início da forma de `ser` (= `finding.span.start`) */
   serStart: number;
   participleEnd: number;
   agentMarkerStart: number | null;
@@ -56,11 +39,6 @@ function toMasculineSingular(participleLower: string): string {
   return s;
 }
 
-/**
- * Particípio → infinitivo. Tabela fechada PRIMEIRO (cobre irregulares, `-ido` ambíguo e a classe
- * `-ear`); se ausente, a regra de `-ado → -ar` regular resolve (ADR-032). Só um dos dois; nunca
- * adivinha.
- */
 export function baseVerbOf(participle: string): string | null {
   const mascSing = toMasculineSingular(participle.toLowerCase());
   return PARTICIPLE_TO_INFINITIVE[mascSing] ?? infinitiveFromRegularParticiple(mascSing);

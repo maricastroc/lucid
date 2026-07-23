@@ -1,14 +1,3 @@
-/**
- * Tier 3 · orquestrador `proposeAndVerify` + barrel do módulo de reescrita (ADR-014/016).
- *
- * Fluxo (docs/HANDOFF.md §3): um ALVO (`Span`) — a frase de um finding OU um parágrafo —
- * dentro do texto inteiro (contexto) → Proposta (proposer) → Reanálise + verificação
- * (`verifyRewrite`) → `VerifiedRewrite` rotulado "gerada". NUNCA aplica sozinho; a decisão é
- * do autor. Passar nas provas é ausência de falha, não aprovação (I5).
- *
- * `report/**` é a única camada que conhece `core` e `probe` ao mesmo tempo; a infra de rede
- * (`ChatProvider`) vem do módulo neutro `src/llm`.
- */
 import type { Span } from "../../lucid";
 import type { RewriteProposer, RewriteRequest, VerifiedRewrite } from "./types";
 import { verifyRewrite, type VerifyOptions } from "./verify";

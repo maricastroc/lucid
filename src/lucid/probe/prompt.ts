@@ -1,14 +1,3 @@
-/**
- * Camada 2 · prompt VERSIONADO do leitor sintético (CLAUDE.md; docs/ARQUITETURA.md §5).
- *
- * O risco fatal é o LLM PREENCHER LACUNAS — usar conhecimento de mundo para "adivinhar" o que
- * o texto quis dizer, que é justo o que o leitor real não faz. O prompt força leitura literal
- * e local, sem conhecimento externo, e obriga a reportar o ponto de travamento.
- *
- * Versionado: trocar qualquer palavra exige subir `PROBE_PROMPT_VERSION` (entra no `id` da
- * sonda, para anti-drift/eval).
- */
-
 export const PROBE_PROMPT_VERSION = "probe@1";
 
 export function buildProbePrompt(trecho: string, pergunta: string): string {

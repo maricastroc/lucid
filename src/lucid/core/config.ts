@@ -71,7 +71,6 @@ export interface Config {
   };
   headingBodyMismatch: {
     enabled: boolean;
-    /** contagem mínima de palavras de conteúdo no corpo da seção para tentar a comparação */
     minBodyContentWords: number;
   };
   metrics: {

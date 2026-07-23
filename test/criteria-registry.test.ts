@@ -1,12 +1,3 @@
-/**
- * Trava anti-drift entre o conjunto CANÔNICO de critérios (`CRITERION_IDS`), os passes
- * realmente registrados (`PASSES`), e a apresentação editorial da UI (`CRITERION_META` /
- * `CRITERION_ORDER`) — ADR-029.
- *
- * Objetivo: adicionar um pass no engine e esquecer de registrá-lo/apresentá-lo em algum dos
- * três lugares deve FALHAR (aqui ou no typecheck), nunca cair em silêncio no meta de outro
- * critério.
- */
 import { describe, expect, it } from "vitest";
 import { CRITERION_IDS } from "../src/lucid";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";

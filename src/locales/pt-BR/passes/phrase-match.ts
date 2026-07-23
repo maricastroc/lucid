@@ -1,9 +1,3 @@
-/**
- * Matcher de FRASES FEITAS contíguas — compartilhado pelos passes de léxico multipalavra
- * (redundância, perífrase). Mesma disciplina do matcher de jargão: contiguidade estrita
- * (token-a-token, `isWord && lower === esperado`), longest-match-first, zero sobreposição (o
- * cursor pula para depois do match). Determinístico e puro.
- */
 import type { Sentence, Token } from "@/lucid/core/types";
 import type { PhraseEntry, PhrasePrepared } from "../datasets/types";
 
@@ -14,7 +8,6 @@ export interface PhraseHit {
   entry: PhraseEntry;
 }
 
-/** Tenta casar, a partir de `index`, a frase mais longa cadastrada para a palavra desse token. */
 function matchAt(tokens: readonly Token[], index: number, byFirstWord: PhrasePrepared): { endIndex: number; entry: PhraseEntry } | null {
   const first = tokens[index];
   if (!first.isWord) return null;
@@ -35,7 +28,6 @@ function matchAt(tokens: readonly Token[], index: number, byFirstWord: PhrasePre
   return null;
 }
 
-/** Todas as ocorrências de frase numa frase (oração), sem sobreposição, em ordem de leitura. */
 export function matchPhrasesInSentence(sentence: Sentence, byFirstWord: PhrasePrepared, source: string): PhraseHit[] {
   const tokens = sentence.tokens;
   const hits: PhraseHit[] = [];

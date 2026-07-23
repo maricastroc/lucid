@@ -3,7 +3,7 @@ import type { TokenUsage } from "./groq";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
-export const GEMINI_MODELS = ["gemini-2.5-flash", "gemini-2.5-pro"] as const;
+export const GEMINI_MODELS = ["gemini-2.5-flash"] as const;
 
 interface GeminiResponse {
   candidates?: { content?: { parts?: { text?: string }[] } }[];

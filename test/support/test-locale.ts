@@ -1,12 +1,3 @@
-/**
- * Locale SINTÉTICO, exclusivo de teste (ADR-031). Não é um idioma, não aparece na UI, não é
- * divulgado — existe só para PROVAR que a arquitetura neutra do core aceita outra implementação de
- * `LocaleBundle` sem adicionar inglês de verdade. Tudo aqui é mínimo e determinístico:
- *   · tokenização/segmentação: reusa os serviços neutros do core;
- *   · 1 pass artificial que marca palavras de um dataset minúsculo;
- *   · 1 dataset pequeno construído pelo mecanismo neutro `createRegistry`;
- *   · uma métrica de legibilidade FALSA e constante (42).
- */
 import type { LocaleBundle, LocaleDataRegistry } from "../../src/lucid/core/contracts/locale";
 import { asLocaleId } from "../../src/lucid/core/contracts/locale";
 import type { Finding, Pass } from "../../src/lucid/core/types";
