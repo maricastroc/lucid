@@ -427,6 +427,20 @@ textarea.prose-doc:focus-visible {
   animation: note-in 0.3s var(--ease-settle) both;
 }
 
+@keyframes caret-blink {
+  0%,
+  55% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+.caret-blink {
+  animation: caret-blink 1.05s step-end infinite;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

@@ -61,12 +61,14 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
                   </span>
                 ))}
               </div>
-              <div className="mt-3 inline-flex items-center gap-2 text-[13px] text-ink-2">
-                <span className="grid size-4.5 place-items-center rounded-full border border-human-line bg-human-weak">
+              <div className="mt-3 flex items-center gap-2 text-[13px] text-ink-2">
+                <span className="grid size-4.5 shrink-0 place-items-center rounded-full border border-human-line bg-human-weak">
                   <CloseIcon className="size-2.5 text-human" />
                 </span>
-                O que ele <span className="font-medium text-ink-1">não</span> faz: escrever o texto no seu
-                lugar.
+                <span>
+                  O que ele <span className="font-medium text-ink-1">não</span> faz: escrever o texto no
+                  seu lugar.
+                </span>
               </div>
             </div>
 

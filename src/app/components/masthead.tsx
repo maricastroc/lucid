@@ -9,23 +9,29 @@ interface Props {
   mode: Mode;
   onChangeMode: (mode: Mode) => void;
   onOpenDocx: (file: File) => void;
+  onGoHome: () => void;
   importing: boolean;
 }
 
-export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
+export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }: Props) {
   const { theme, toggle } = useTheme();
   const fileInput = useRef<HTMLInputElement>(null);
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-rule-1 bg-desk px-4 sm:px-6">
-      <div className="flex items-center gap-3">
+      <button
+        type="button"
+        onClick={onGoHome}
+        aria-label="Voltar ao início"
+        className="flex items-center gap-3 rounded-lg transition-opacity duration-150 hover:opacity-80"
+      >
         <Logo />
         <div className="flex items-baseline gap-2.5">
-          <span className="text-[15px] font-semibold tracking-[-0.01em] text-ink-0">Lucid</span>
+          <span className="font-serif text-[19px] font-semibold leading-none tracking-[-0.01em] text-ink-0">Lucid</span>
           <span className="hidden h-3 w-px bg-rule-2 sm:block" aria-hidden />
           <span className="hidden text-[12.5px] text-ink-2 sm:block">Auditor de linguagem simples</span>
         </div>
-      </div>
+      </button>
 
       <div className="flex items-center gap-2">
         <input

@@ -20,7 +20,6 @@ export interface RewriteModel {
 }
 
 export const REWRITE_MODELS: readonly RewriteModel[] = [
-  { providerId: "stub", model: "demo", label: "Stub (demonstração, offline)" },
   { providerId: "gemini", model: GEMINI_MODELS[0], label: "Gemini · 2.5 Flash (gerador forte)" },
   { providerId: "deepseek", model: DEEPSEEK_MODELS[0], label: "DeepSeek · V4 Flash (pago, ~$0,14/1M)" },
   { providerId: "groq", model: GROQ_MODELS[0], label: "Groq · Llama 3.3 70B" },

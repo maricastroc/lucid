@@ -4,6 +4,7 @@ import { forwardRef, useMemo } from "react";
 import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityRank, SEVERITY_LABEL } from "../lib/criteria";
+import { PenNibIcon } from "./icons";
 
 export type Mode = "audit" | "edit";
 
@@ -208,16 +209,36 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
             </div>
 
             {mode === "edit" ? (
-              <div className="px-6 py-8 sm:px-14 sm:py-12">
+              <div className="relative px-6 py-8 sm:px-14 sm:py-12">
                 <textarea
                   value={text}
                   onChange={(e) => onChangeText(e.target.value)}
                   spellCheck={false}
+                  autoFocus
                   aria-label="Texto do documento"
-                  className="prose-doc block min-h-[62vh] w-full resize-none border-0 bg-transparent p-0 outline-none placeholder:text-ink-3"
+                  className={`prose-doc block min-h-[58vh] w-full resize-none border-0 bg-transparent p-0 outline-none transition-opacity duration-200 ${
+                    text === "" ? "opacity-0" : "opacity-100"
+                  }`}
                   style={{ caretColor: "var(--accent)" }}
-                  placeholder="Cole ou escreva aqui o texto a revisar…"
                 />
+                {text === "" && (
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                    <span className="grid size-11 place-items-center rounded-full bg-accent-weak text-accent">
+                      <PenNibIcon className="size-5" />
+                    </span>
+                    <p className="mt-4 font-serif text-[21px] leading-snug text-ink-1">
+                      Comece o seu rascunho
+                    </p>
+                    <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">
+                      Escreva ou cole o seu texto. A auditoria roda em tempo real, critério por critério —
+                      sem reescrever no seu lugar.
+                    </p>
+                    <span
+                      aria-hidden
+                      className="caret-blink mt-5 h-[1.4em] w-[3px] rounded-full bg-accent"
+                    />
+                  </div>
+                )}
               </div>
             ) : (
               <article className={`prose-doc px-6 py-8 sm:px-14 sm:py-12 ${isFocused ? "is-focused" : ""}`}>
