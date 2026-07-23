@@ -230,6 +230,18 @@ export function Studio() {
     setCanUndo(undoStack.current.length > 0);
   }, []);
 
+  // Digitação livre não passa por pushUndo — o snapshot no topo da pilha vira
+  // stale (desfazer descartaria o que foi digitado depois, sem aviso). Em vez de
+  // arriscar essa perda silenciosa, invalidamos o undo assim que o texto muda por
+  // fora do fluxo rastreado (M4): o "Desfazer" some, a digitação nunca é jogada fora.
+  const onFreeTypeText = useCallback((value: string) => {
+    if (undoStack.current.length > 0) {
+      undoStack.current = [];
+      setCanUndo(false);
+    }
+    setText(value);
+  }, []);
+
   const railProps = {
     diagnostic,
     text,
@@ -287,7 +299,7 @@ export function Studio() {
             flashId={flashId}
             activeCriteria={activeCriteria}
             rewriteTarget={rewriteTarget}
-            onChangeText={setText}
+            onChangeText={onFreeTypeText}
             onSelectFinding={selectFinding}
           />
         )}
