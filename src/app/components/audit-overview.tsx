@@ -60,9 +60,13 @@ export function AuditOverview({
 
         {total > 0 && (
           <>
-            <div className="mt-5 flex h-2 gap-0.75 overflow-hidden rounded-full bg-surface-3" role="img" aria-label={`${safeCount} seguras, ${humanCount} exigem decisão humana`}>
-              {safeCount > 0 && <span style={{ width: `${(safeCount / total) * 100}%`, background: "var(--safe)" }} />}
-              {humanCount > 0 && <span style={{ width: `${(humanCount / total) * 100}%`, background: "var(--human)" }} />}
+            <div className="mt-5 flex h-1.5 gap-1" role="img" aria-label={`${safeCount} seguras, ${humanCount} exigem decisão humana`}>
+              {safeCount > 0 && (
+                <span className="rounded-full" style={{ width: `${(safeCount / total) * 100}%`, background: "var(--safe)" }} />
+              )}
+              {humanCount > 0 && (
+                <span className="rounded-full" style={{ width: `${(humanCount / total) * 100}%`, background: "var(--human)" }} />
+              )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px]">
               <Legend swatch="var(--safe)" label="seguras para aplicar" value={safeCount} />
@@ -87,7 +91,7 @@ export function AuditOverview({
           <button
             type="button"
             onClick={onApplyAllSafe}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-safe-line bg-safe-weak px-3 py-2.5 text-[13px] font-medium text-safe transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--safe)_16%,transparent)]"
+            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-safe-strong px-3 py-2.5 text-[13px] font-semibold text-on-safe shadow-(--shadow-card) transition-colors duration-150 hover:bg-safe"
           >
             <WandIcon className="size-4" />
             Aplicar as {safeCount} sugestões seguras
@@ -154,7 +158,7 @@ export function AuditOverview({
 
       <section className="border-t border-rule-1 px-6 py-5">
         <SectionLabel>Leitura</SectionLabel>
-        <dl className="mt-3 flex flex-col">
+        <dl className="mt-2 flex flex-col divide-y divide-rule-1">
           {metricRows(diagnostic).map((r) => (
             <div key={r.label} className="flex items-baseline justify-between py-2">
               <dt className="text-[12.5px] text-ink-2">{r.label}</dt>
@@ -184,7 +188,7 @@ function Legend({ swatch, label, value }: { swatch: string; label: string; value
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">{children}</h2>;
+  return <h2 className="u-label text-ink-3">{children}</h2>;
 }
 
 const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));

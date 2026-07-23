@@ -150,7 +150,7 @@ function BlockView({
           return (
             <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
               {tick}
-              <div className="mb-1 text-[10.5px] font-medium uppercase tracking-[0.16em] text-ink-3">
+              <div className="u-sublabel mb-1 text-ink-3">
                 Título · nível {block.level}
               </div>
               <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
@@ -165,7 +165,7 @@ function BlockView({
           return (
             <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
               {tick}
-              <div className="mb-1.5 text-[10.5px] font-medium uppercase tracking-[0.16em] text-ink-3">
+              <div className="u-sublabel mb-1.5 text-ink-3">
                 {block.ordered ? "Lista numerada" : "Lista"}
                 {block.items.length === 1 ? " · 1 item" : ` · ${block.items.length} itens`}
               </div>
@@ -208,8 +208,8 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
           <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
-            <div className="flex items-center justify-between border-b border-rule-1 px-8 py-3.5 sm:px-14">
-              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-ink-3">
+            <div className="flex items-center justify-between border-b border-rule-1 px-6 py-3.5 sm:px-14">
+              <span className="u-sublabel text-ink-3">
                 {mode === "edit" ? "Rascunho" : structured ? "Documento estruturado" : "Documento em revisão"}
               </span>
               <span className="text-[12px] tabular-nums text-ink-3">{words} palavras</span>

@@ -56,8 +56,8 @@ export function ProbePanel({ text }: { text: string }) {
   return (
     <section className="border-t border-rule-1 px-6 py-5">
       <div className="flex items-baseline justify-between">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">Sonda de compreensão</h3>
-        <span className="text-[10.5px] uppercase tracking-widest text-ink-3">Camada 2 · opt-in</span>
+        <h3 className="u-label text-ink-3">Sonda de compreensão</h3>
+        <span className="u-sublabel font-medium text-ink-3">Camada 2 · opt-in</span>
       </div>
 
       <p className="mt-2 text-[12px] leading-relaxed text-ink-3">
@@ -72,7 +72,7 @@ export function ProbePanel({ text }: { text: string }) {
           onChange={(e) => setPergunta(e.target.value)}
           rows={2}
           placeholder="Ex.: quando o prazo começa a contar?"
-          className="mt-1 w-full resize-none rounded-lg border border-rule-1 bg-surface-2 px-3 py-2 text-[13px] text-ink-1 placeholder:text-ink-3 focus:border-accent focus:outline-none"
+          className="mt-1.5 w-full resize-none rounded-lg border border-rule-2 bg-sheet px-3 py-2 text-[13px] text-ink-0 shadow-(--shadow-card) transition-colors placeholder:text-ink-3 focus:border-accent-line focus:outline-none"
         />
       </label>
 
@@ -104,7 +104,13 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
 
   if (signal.tipo === "flag") {
     return (
-      <div className="mt-3 rounded-lg border px-3 py-3" style={{ borderColor: "var(--sev-warn)" }}>
+      <div
+        className="mt-3 rounded-lg border px-3 py-3"
+        style={{
+          borderColor: "color-mix(in srgb, var(--sev-warn) 42%, transparent)",
+          background: "color-mix(in srgb, var(--sev-warn) 6%, transparent)",
+        }}
+      >
         <p className="text-[12.5px] font-medium" style={{ color: "var(--sev-warn)" }}>
           O leitor de piso travou.
         </p>
@@ -147,7 +153,7 @@ function Operacoes({ operacoes }: { operacoes: readonly OperacaoLeitura[] }) {
   if (operacoes.length === 0) return null;
   return (
     <div className="mt-3">
-      <p className="text-[11px] uppercase tracking-widest text-ink-3">Carga de leitura</p>
+      <p className="u-sublabel text-ink-3">Carga de leitura</p>
       <ul className="mt-1.5 space-y-1">
         {operacoes.map((op) => (
           <li key={op} className="text-[12px] text-ink-2">

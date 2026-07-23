@@ -262,6 +262,27 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
     const v = await verify(text, finding, p);
     expect(proofPassed(v, "no_invented_first_person")).toBe(true);
   });
+
+  // ADR-049 — o "nós" PRO-DROP (escondido no verbo, sem o pronome) é a forma mais comum de
+  // fabricar agente em PT e vazava pelo guard só-pronome. Casos reais da investigação de 2026-07-22.
+  it("veta 'nós' pro-drop escondido no verbo (sem escrever o pronome)", async () => {
+    const text = "Foi verificado se a documentação está em ordem. Os documentos serão examinados na decisão final.";
+    const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
+    const p = proposal(finding, "Verificamos a documentação. Vamos analisar mais e decidir depois.");
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(false);
+    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")!.detail).toMatch(/verificamos|vamos/i);
+    expect(v.hasBlockingFailure).toBe(true);
+  });
+
+  it("reformulação impessoal (sem inventar agente) continua passando", async () => {
+    const text = "Foi verificado se a documentação está em ordem. Os documentos serão examinados na decisão final.";
+    const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
+    // reformula sem fabricar quem age — o caminho LEGÍTIMO que o guard não pode punir
+    const p = proposal(finding, "A documentação está em ordem");
+    const v = await verify(text, finding, p);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+  });
 });
 
 describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {

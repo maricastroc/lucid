@@ -60,7 +60,7 @@ export function AuditRail(props: RailProps) {
       ) : (
         <>
           <div className="flex h-12 shrink-0 items-center border-b border-rule-1 px-6">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">Auditoria</span>
+            <span className="u-label text-ink-3">Auditoria</span>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <AuditOverview

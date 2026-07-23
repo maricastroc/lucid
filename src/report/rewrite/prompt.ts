@@ -6,7 +6,7 @@
  *     estrutura e a ordem das ideias, troca o mínimo. É a hipótese conservadora.
  *   · `rewrite@2`  — REESCRITA DO ZERO para linguagem cidadã: liberdade para reorganizar,
  *     condensar e mudar a estrutura do trecho. É a hipótese ousada.
- *   · `directed@1` — a livre, mas DIRIGIDA pelos findings REAIS da engine no trecho (ADR-000:
+ *   · `directed` — a livre, mas DIRIGIDA pelos findings REAIS da engine no trecho (ADR-000:
  *     "a engine dirige, a IA executa"). Hipótese a validar no benchmark antes de virar default —
  *     por isso o Briefing como entidade de 1ª classe fica DEFERIDO até a prova (ver ADR-000).
  *
@@ -24,7 +24,7 @@ export type RewriteStrategy = "correct" | "rewrite" | "directed";
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
   rewrite: "rewrite@2",
-  directed: "directed@2",
+  directed: "directed@3",
 };
 
 /** Versão da estratégia PADRÃO (`rewrite`) — mantida para compatibilidade de import. */
@@ -94,24 +94,35 @@ Responda SOMENTE com este JSON, sem texto fora dele:
 }
 
 /**
- * Briefing DIRIGIDO (ADR-000, "a engine dirige"): renderiza os findings REAIS que a engine
- * determinística achou no trecho-alvo, agrupados por critério — a instrução do critério (reusa
- * `CRITERION_HINT`) + os trechos CURTOS citados como exemplo (jargão, passiva). Trechos longos
- * (≈ a própria frase-alvo) não são recitados. Puro e determinístico: os findings vêm de
- * `analyze()` em ordem de documento, então a saída é função pura deles (byte-idêntica).
- *
- * `directed@2` (achado ao vivo de 2026-07-22, ver ADR-047/048): SÓ inclui findings com
- * `requiresHuman: false`. Um finding `requiresHuman: true` (passiva sem agente, jargão
- * ambíguo, nominalização sem verbo seguro) é o próprio Camada 1 dizendo "não dá pra resolver
- * sem inventar" — pedir pra IA "resolver TODOS" incluiria isso, colidindo direto com a regra de
- * não-invenção (I5) logo abaixo no mesmo prompt. Um modelo bem-comportado recusa inventar e
- * corretamente deixa a violação — não é falha do modelo, é a exigência errada.
+ * Rótulo NEUTRO dos critérios `requiresHuman` no briefing best-effort — sem a instrução do
+ * `CRITERION_HINT` (que, pra passiva, diz "diga quem faz a ação" e nudge à invenção). Aqui só
+ * NOMEIA o problema; a instrução (reformule-sem-inventar) vive no cabeçalho da seção.
  */
-function buildDirectedBriefing(findings: readonly Finding[]): string {
+const REQUIRES_HUMAN_LABEL: Record<string, string> = {
+  passive_voice: "Voz passiva sem agente explícito",
+};
+
+/**
+ * Critérios `requiresHuman` que a IA PODE TENTAR reformular (best-effort), porque a falha de
+ * invenção correspondente TEM guard determinístico no verificador. `passive_voice` (agente
+ * omitido): o guard é `no_invented_first_person` (ADR-049) — se a IA "ativar" a frase inventando
+ * um "nós"/"a equipe", o verificador VETA e a passiva fica honestamente sem resolver. Jargão
+ * ambíguo e nominalização sem verbo seguro ficam FORA: sua falha (trocar por sentido errado) não
+ * tem guard mecânico, então seguem só-humano (ADR-048). Allowlist, não denylist: só entra o que
+ * comprovadamente tem rede de segurança.
+ */
+const BEST_EFFORT_CRITERIA = new Set(["passive_voice"]);
+
+/**
+ * Agrupa findings por critério (ordem de 1ª aparição) e renderiza um bullet por critério:
+ * `- <rótulo><exemplos curtos>`. Trechos longos (> 6 palavras, ≈ a própria frase-alvo) não viram
+ * exemplo. Puro e determinístico: os findings vêm de `analyze()` em ordem de documento, então a
+ * saída é função pura deles (byte-idêntica). O `labelFor` decide o texto do bullet por critério.
+ */
+function renderBriefing(findings: readonly Finding[], labelFor: (criterion: string) => string): string {
   const order: string[] = [];
   const spansByCriterion = new Map<string, string[]>();
   for (const f of findings) {
-    if (f.requiresHuman) continue;
     const seen = spansByCriterion.get(f.criterion);
     if (seen) seen.push(f.span.text.replace(/\s+/g, " ").trim());
     else {
@@ -121,25 +132,50 @@ function buildDirectedBriefing(findings: readonly Finding[]): string {
   }
   return order
     .map((criterion) => {
-      const instruction = CRITERION_HINT[criterion] ?? "Resolva o problema de clareza apontado neste ponto.";
       const shortSpans = [...new Set((spansByCriterion.get(criterion) ?? []).filter((s) => s.split(/\s+/).length <= 6))];
       const examples = shortSpans.length ? ` (ex.: ${shortSpans.map((s) => `"${s}"`).join(", ")})` : "";
-      return `- ${instruction}${examples}`;
+      return `- ${labelFor(criterion)}${examples}`;
     })
     .join("\n");
 }
 
 /**
- * `directed@2` — reescrita livre DIRIGIDA pelos findings da engine no trecho. Igual à livre
- * (`rewrite@2`), mas troca a dica genérica pelo briefing dos problemas REAIS e MECANICAMENTE
- * PEDÍVEIS (`!requiresHuman`) que a engine apontou. Sem findings pedíveis, degrada para o formato
- * livre (sem bloco de briefing). Mesmas blindagens de invenção.
+ * `directed@3` — reescrita livre DIRIGIDA pelos findings da engine no trecho. Igual à livre
+ * (`rewrite@2`), mas troca a dica genérica por DOIS briefings dos problemas REAIS:
+ *   · MANDATÓRIO (`!requiresHuman`) — "Resolva TODOS". Cobrado tudo-ou-nada pelo verificador.
+ *   · BEST-EFFORT (`requiresHuman` ∈ `BEST_EFFORT_CRITERIA`) — "reformule SE der sem inventar;
+ *     senão MANTENHA". NÃO é cobrado como resolução (a recusa correta de inventar não é punida,
+ *     ADR-048); a rede é o guard de invenção (ADR-049), que VETA se a IA fabricar o agente.
+ *
+ * `directed@3` (ADR-050) REABRE o que o `directed@2` (ADR-047/048) tinha excluído: passiva sem
+ * agente volta ao prompt, agora que existe guard determinístico contra a única forma perigosa de
+ * "resolvê-la" (inventar quem age). Sem NENHUM finding em nenhuma das duas listas, degrada para o
+ * formato livre (sem bloco de briefing). Mesmas blindagens de invenção.
  */
 function buildDirectedPrompt(fullText: string, target: Span, findings: readonly Finding[]): string {
-  const briefing = buildDirectedBriefing(findings);
-  const brief = briefing
-    ? `\nA engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${briefing}\n`
-    : "";
+  const mandatory = findings.filter((f) => !f.requiresHuman);
+  const bestEffort = findings.filter((f) => f.requiresHuman && BEST_EFFORT_CRITERIA.has(f.criterion));
+
+  const mandatoryBrief = renderBriefing(
+    mandatory,
+    (c) => CRITERION_HINT[c] ?? "Resolva o problema de clareza apontado neste ponto.",
+  );
+  const bestEffortBrief = renderBriefing(bestEffort, (c) => REQUIRES_HUMAN_LABEL[c] ?? "Ponto que exige julgamento.");
+
+  const sections: string[] = [];
+  if (mandatoryBrief) {
+    sections.push(`A engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${mandatoryBrief}`);
+  }
+  if (bestEffortBrief) {
+    sections.push(
+      "O ponto abaixo a engine NÃO resolve sozinha, porque o texto não diz quem pratica a ação. " +
+        "TENTE reformular SEM inventar o agente — mude a estrutura da frase ou use o sujeito real que já " +
+        'está no texto. Se a ÚNICA forma de resolver seria criar um agente que o texto não dá ("nós", ' +
+        '"a equipe", "o órgão"), MANTENHA como está — não invente:\n' +
+        bestEffortBrief,
+    );
+  }
+  const brief = sections.length ? `\n${sections.join("\n\n")}\n` : "";
   return `Você reescreve textos em Linguagem Simples para um cidadão comum, sem NUNCA inventar.
 
 Contexto: abaixo está o DOCUMENTO INTEIRO, apenas para você entender o assunto.
