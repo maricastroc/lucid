@@ -40,7 +40,7 @@ export function segmentRange(text: string, findings: readonly Finding[], start: 
     const b = bounds[k + 1];
     if (b <= a) continue;
     const inline = pickHighest(inlineF.filter((f) => f.span.start <= a && f.span.end >= b));
-    const passage = passageF.find((f) => f.span.start <= a && f.span.end >= b);
+    const passage = pickHighest(passageF.filter((f) => f.span.start <= a && f.span.end >= b));
     segments.push({ text: text.slice(a, b), start: a, end: b, inline, passage });
   }
   return segments;
