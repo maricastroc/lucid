@@ -1,50 +1,62 @@
 @import "tailwindcss";
 
+/* Tema claro — desenhado como tema PRIMÁRIO (papel sobre mesa), não como inversão do escuro.
+ * Três decisões estruturais:
+ *   1. escala de tinta com degraus reais (ink-1/2/3 distinguíveis) — hierarquia sem pesos extras;
+ *   2. mesa um degrau mais funda + folha um degrau mais clara — a página ganha presença física;
+ *   3. sombras em camadas curtas (contato + ambiente), nunca borrão único. */
 :root {
-  --desk: #ece7dd;
-  --sheet: #fdfcf9;
-  --surface: #f8f5ef;
-  --surface-2: #f1ede4;
-  --surface-3: #e9e3d7;
-  --ink-0: #22201b;
-  --ink-1: #55514a;
-  --ink-2: #655f55;
-  --ink-3: #6f6a5e;
-  --ink-dim: #cbc5b7;
+  --desk: #eae4d8;
+  --sheet: #fffdf8;
+  --surface: #f7f3eb;
+  --surface-2: #efeadf;
+  --surface-3: #e5decf;
+  --ink-0: #1f1d18;
+  --ink-1: #4f4a42;
+  --ink-2: #6d6659;
+  --ink-3: #837b6b;
+  --ink-dim: #c8c1b1;
 
-  --rule-1: rgb(34 32 27 / 0.07);
-  --rule-2: rgb(34 32 27 / 0.12);
-  --rule-3: rgb(34 32 27 / 0.18);
+  --rule-1: rgb(31 29 24 / 0.08);
+  --rule-2: rgb(31 29 24 / 0.13);
+  --rule-3: rgb(31 29 24 / 0.2);
 
   --accent: #3a4691;
-  --accent-strong: #303a7c;
+  --accent-strong: #2e3878;
   --accent-ink: #ffffff;
   --accent-weak: rgb(58 70 145 / 0.09);
-  --accent-flash: rgb(58 70 145 / 0.2);
-  --accent-line: rgb(58 70 145 / 0.28);
+  --accent-flash: rgb(58 70 145 / 0.22);
+  --accent-line: rgb(58 70 145 / 0.3);
 
-  --sev-info: #7c776c;
-  --sev-warn: #946614;
-  --sev-error: #a8443a;
+  --sev-info: #7a7365;
+  --sev-warn: #92620f;
+  --sev-error: #a63c31;
 
-  --safe: #2c7350;
-  --safe-weak: rgb(47 124 87 / 0.1);
-  --safe-line: rgb(47 124 87 / 0.28);
-  --safe-strong: #24694a;
+  --safe: #276b4a;
+  --safe-weak: rgb(39 107 74 / 0.1);
+  --safe-line: rgb(39 107 74 / 0.3);
+  --safe-strong: #1f5f41;
   --on-safe: #ffffff;
   --human: #4a4f8a;
   --human-weak: rgb(74 79 138 / 0.08);
   --human-line: rgb(74 79 138 / 0.26);
 
-  --mark-passage: rgb(154 106 22 / 0.09);
+  --mark-passage: rgb(146 98 15 / 0.1);
 
   --radius-sm: 5px;
   --radius-md: 9px;
   --radius-lg: 14px;
   --radius-xl: 20px;
 
-  --shadow-sheet: 0 1px 1px rgb(34 32 27 / 0.03), 0 24px 60px -34px rgb(34 32 27 / 0.24);
-  --shadow-pop: 0 20px 48px -18px rgb(34 32 27 / 0.28), 0 2px 6px rgb(34 32 27 / 0.06);
+  --shadow-sheet:
+    0 1px 2px rgb(31 29 24 / 0.04),
+    0 10px 24px -16px rgb(31 29 24 / 0.1),
+    0 36px 80px -40px rgb(31 29 24 / 0.24);
+  --shadow-pop:
+    0 0 0 1px rgb(31 29 24 / 0.03),
+    0 2px 6px rgb(31 29 24 / 0.06),
+    0 24px 56px -20px rgb(31 29 24 / 0.28);
+  --shadow-card: 0 1px 2px rgb(31 29 24 / 0.05);
   --shadow-rail: -1px 0 0 var(--rule-1);
 
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -88,44 +100,52 @@
     --mark-passage: rgb(217 169 79 / 0.12);
     --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
     --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="light"] {
-  --desk: #ece7dd;
-  --sheet: #fdfcf9;
-  --surface: #f8f5ef;
-  --surface-2: #f1ede4;
-  --surface-3: #e9e3d7;
-  --ink-0: #22201b;
-  --ink-1: #55514a;
-  --ink-2: #655f55;
-  --ink-3: #6f6a5e;
-  --ink-dim: #cbc5b7;
-  --rule-1: rgb(34 32 27 / 0.07);
-  --rule-2: rgb(34 32 27 / 0.12);
-  --rule-3: rgb(34 32 27 / 0.18);
+  --desk: #eae4d8;
+  --sheet: #fffdf8;
+  --surface: #f7f3eb;
+  --surface-2: #efeadf;
+  --surface-3: #e5decf;
+  --ink-0: #1f1d18;
+  --ink-1: #4f4a42;
+  --ink-2: #6d6659;
+  --ink-3: #837b6b;
+  --ink-dim: #c8c1b1;
+  --rule-1: rgb(31 29 24 / 0.08);
+  --rule-2: rgb(31 29 24 / 0.13);
+  --rule-3: rgb(31 29 24 / 0.2);
   --accent: #3a4691;
-  --accent-strong: #303a7c;
+  --accent-strong: #2e3878;
   --accent-ink: #ffffff;
   --accent-weak: rgb(58 70 145 / 0.09);
-  --accent-flash: rgb(58 70 145 / 0.2);
-  --accent-line: rgb(58 70 145 / 0.28);
-  --sev-info: #7c776c;
-  --sev-warn: #946614;
-  --sev-error: #a8443a;
-  --safe: #2c7350;
-  --safe-weak: rgb(47 124 87 / 0.1);
-  --safe-line: rgb(47 124 87 / 0.28);
-  --safe-strong: #24694a;
+  --accent-flash: rgb(58 70 145 / 0.22);
+  --accent-line: rgb(58 70 145 / 0.3);
+  --sev-info: #7a7365;
+  --sev-warn: #92620f;
+  --sev-error: #a63c31;
+  --safe: #276b4a;
+  --safe-weak: rgb(39 107 74 / 0.1);
+  --safe-line: rgb(39 107 74 / 0.3);
+  --safe-strong: #1f5f41;
   --on-safe: #ffffff;
   --human: #4a4f8a;
   --human-weak: rgb(74 79 138 / 0.08);
   --human-line: rgb(74 79 138 / 0.26);
-  --mark-passage: rgb(154 106 22 / 0.09);
-  --shadow-sheet: 0 1px 1px rgb(34 32 27 / 0.03), 0 24px 60px -34px rgb(34 32 27 / 0.24);
-  --shadow-pop: 0 20px 48px -18px rgb(34 32 27 / 0.28), 0 2px 6px rgb(34 32 27 / 0.06);
+  --mark-passage: rgb(146 98 15 / 0.1);
+  --shadow-sheet:
+    0 1px 2px rgb(31 29 24 / 0.04),
+    0 10px 24px -16px rgb(31 29 24 / 0.1),
+    0 36px 80px -40px rgb(31 29 24 / 0.24);
+  --shadow-pop:
+    0 0 0 1px rgb(31 29 24 / 0.03),
+    0 2px 6px rgb(31 29 24 / 0.06),
+    0 24px 56px -20px rgb(31 29 24 / 0.28);
+  --shadow-card: 0 1px 2px rgb(31 29 24 / 0.05);
   color-scheme: light;
 }
 
@@ -163,6 +183,7 @@
   --mark-passage: rgb(217 169 79 / 0.12);
   --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
   --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35);
   color-scheme: dark;
 }
 
@@ -192,6 +213,8 @@
   --color-safe: var(--safe);
   --color-safe-weak: var(--safe-weak);
   --color-safe-line: var(--safe-line);
+  --color-safe-strong: var(--safe-strong);
+  --color-on-safe: var(--on-safe);
   --color-human: var(--human);
   --color-human-weak: var(--human-weak);
   --color-human-line: var(--human-line);
@@ -204,6 +227,24 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+}
+
+/* Vozes tipográficas do sistema — TODO rótulo em caixa alta usa uma destas duas classes.
+ * `u-label` = título de seção; `u-sublabel` = rótulo interno de cartão/linha.
+ * Uma escala de dois degraus mata a deriva de 9.5/10/10.5/11px que existia antes. */
+@utility u-label {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@utility u-sublabel {
+  font-size: 10.5px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 * {
@@ -229,7 +270,7 @@ button {
 }
 
 ::selection {
-  background: var(--accent-weak);
+  background: var(--accent-flash);
 }
 
 :focus-visible {

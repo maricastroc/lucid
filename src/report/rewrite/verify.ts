@@ -245,17 +245,22 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
+  // Fabricação de agente = INTRODUZIR voz de 1ª pessoa num texto que era impessoal. Comparação por
+  // PRESENÇA-DE-VOZ, não por novidade-de-token (ADR-049): com as conjugações pro-drop na lista
+  // (tier3.ts), cada verbo é um marcador distinto — checar token-a-token acusaria "analisamos" como
+  // novo mesmo quando o documento já fala em 1ª pessoa ("Nós recebemos… nós analisamos"), o que NÃO
+  // é fabricação (o princípio do ADR-019). Se o documento-fonte já tem QUALQUER marca de 1ª pessoa,
+  // continuar nessa voz é do autor, não invenção; só vetamos quando a fonte é impessoal.
   const sourceFirstPerson = firstPersonMarkers(text, locale.firstPersonMarkers);
-  const inventedFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].filter(
-    (m) => !sourceFirstPerson.has(m),
-  );
+  const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();
+  const inventedFirstPerson = sourceFirstPerson.size === 0 ? proposalFirstPerson : [];
   const noInventedFirstPerson: Proof = {
     check: "no_invented_first_person",
     passed: inventedFirstPerson.length === 0,
     detail:
       inventedFirstPerson.length === 0
         ? "a proposta não fabricou agente em 1ª pessoa"
-        : `1ª pessoa inventada (ausente no original): ${inventedFirstPerson.sort().join(", ")}`,
+        : `1ª pessoa inventada (texto original é impessoal): ${inventedFirstPerson.join(", ")}`,
   };
 
   proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon, noInventedFirstPerson);

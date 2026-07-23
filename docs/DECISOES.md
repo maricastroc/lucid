@@ -2194,6 +2194,114 @@ agente (corrigida) e passiva-sem-agente (tolerada) PASSA. `test/rewrite-directed
 
 ---
 
+## ADR-049 — o guard de 1ª pessoa passa a pegar o "nós" PRO-DROP (escondido no verbo)
+
+**Status:** aceito · Tier 3 (verificador + locale pt-BR) — fecha um furo de segurança em `no_invented_first_person` (ADR-019)
+
+**Contexto.** Depois do ADR-048 (passiva sem agente é EXCLUÍDA do briefing dirigido), a usuária
+perguntou se valia a pena, em vez de excluir, MANDAR a passiva sem agente pra IA com instrução de
+"reformular sem inventar o agente". Investigamos ao vivo (a amostra real dela, os dois modelos do
+trail: `llama-3.1-8b-instant` e `llama-3.3-70b-versatile`), com um briefing candidato que incluía a
+passiva sem agente. Resultado das 5 passivas sem agente do texto:
+- **70B:** reformula parte SEM inventar ("Foi verificado se a documentação está em ordem" → "A
+  documentação está boa"), e honestamente deixa o resto — 0 invenções.
+- **8B:** "resolve" fabricando o agente — converteu impessoal em 1ª pessoa do plural ("precisamos de
+  mais informações. Vamos analisar"). Exatamente o risco fatal (I5).
+
+O achado decisivo veio ao investigar se o veto pegava isso: **NÃO pegava.** `RE_FIRST_PERSON_PT`
+(`src/locales/pt-BR/tier3.ts`) era uma lista fechada só de PRONOMES/possessivos. Num idioma pro-drop
+como o PT, a 1ª pessoa mora na desinência do verbo ("verificamos", "vamos") sem escrever "nós" — a
+forma MAIS comum de fabricar o agente. A reescrita do 8B passava todas as provas bloqueantes
+(`hasBlockingFailure: false`) e seria APLICADA no documento. Provado com teste determinístico antes
+do fix.
+
+**Decisão — duas mudanças coerentes.**
+
+1. **Léxico (`tier3.ts`):** estender a lista FECHADA com conjugações de 1ª pessoa do plural
+   (auxiliares/modais + verbos de ação administrativa, em presente/pretérito/futuro/imperfeito).
+   Mantém a disciplina do ADR-019/031: **zero morfologia produtiva** — "-mos" cru colide com
+   "mesmos/termos/últimos/extremos", então NÃO se usa o padrão; usa-se lista curada, extensível,
+   jamais produtiva.
+
+2. **Semântica do check (`verify.ts`):** trocar *novidade-por-token* por *presença-de-voz*. Com os
+   verbos na lista, cada conjugação é um marcador distinto — checar token-a-token acusaria
+   "analisamos" como novo mesmo quando o documento JÁ fala em 1ª pessoa ("Nós recebemos… nós
+   analisamos"), punindo o que o ADR-019 (teste "1ª pessoa que já existe não é fabricada")
+   explicitamente NÃO quer punir. Novo critério: se a fonte já tem QUALQUER marca de 1ª pessoa,
+   continuar nessa voz é do autor; só veta quando o texto-fonte é impessoal e a proposta introduz a
+   voz. É a implementação fiel do princípio que o teste do ADR-019 já enunciava.
+
+**Verificado.** Regressão determinística em `test/rewrite-verify.test.ts`: o "nós" pro-drop
+("Verificamos… Vamos analisar") agora REPROVA com `hasBlockingFailure: true`; a reformulação
+impessoal ("A documentação está em ordem") PASSA. Os três casos do ADR-019 seguem verdes.
+Confirmação ao vivo (Groq, mesma amostra): a saída real do 8B ("precisamos… Vamos examinar") é
+VETADA (`precisamos, vamos`); a do 70B ("Verificou-se… é preciso investigar… serão examinados")
+PASSA — reformulação sem agente fabricado. 981 testes verdes; typecheck/lint limpos.
+
+**Consequências.**
+- O furo era independente da pergunta original (valha ou não incluir passiva sem agente no
+  dirigido): inventar "nós" via desinência verbal vazava em QUALQUER estratégia (`rewrite`,
+  `directed`, edição manual). Fechado para todas.
+- **Reabre a Opção B com segurança:** agora que o veto pega o agente fabricado, incluir passiva sem
+  agente no briefing com instrução de reformular fica seguro — o 70B ganha as reformulações limpas,
+  e a invenção do 8B é vetada → passiva fica honestamente sem resolver. Decisão deferida à usuária
+  (ainda não implementada); este ADR só fecha o pré-requisito de segurança.
+- Precisão preservada: a lista fechada não reintroduz os falsos-positivos de "-mos" que o ADR-031
+  temia; a semântica de presença-de-voz não pune quem continua uma voz já estabelecida no texto.
+- Método: o mesmo instinto dos ADR-046/048 — quando um sinal (aqui, "a IA fixa a passiva") parece
+  bom, checar se o GUARD que deveria protegê-lo realmente protege, em vez de confiar na aparência.
+
+---
+
+## ADR-050 — `directed@3` reabre a passiva sem agente como briefing BEST-EFFORT (a rede de segurança do ADR-049 tornou seguro)
+
+**Status:** aceito · Tier 3 (prompt dirigido) — reverte parcialmente o ADR-048, agora com guard
+
+**Contexto.** O ADR-048 EXCLUIU a passiva sem agente (`requiresHuman: true`) do briefing dirigido
+porque, sem guard, pedir pra IA "resolver" isso colidia com a não-invenção (o modelo "ativa" a
+frase fabricando "nós"). A investigação ao vivo (ADR-049, mesma amostra real, 8B + 70B) mediu o
+trade-off e revelou duas coisas: (1) o 70B REFORMULA parte das passivas sem agente SEM inventar
+("Foi verificado se a documentação está em ordem" → "A documentação está boa") e honestamente deixa
+o resto; (2) o 8B "resolve" fabricando o agente. O bloqueador era que o veto de invenção tinha um
+furo (só pegava pronome, não o "nós" pro-drop) — fechado no ADR-049. Com o furo fechado, a exclusão
+total do ADR-048 virou conservadora demais: deixa na mesa as reformulações limpas do modelo bom,
+para se proteger de uma invenção que agora é VETADA de qualquer jeito.
+
+**Decisão — dois briefings no prompt dirigido (`directed@2` → `directed@3`).**
+
+1. **MANDATÓRIO** (`requiresHuman: false`): igual ao ADR-048 — "Resolva TODOS", cobrado
+   tudo-ou-nada por `directed_findings_resolved`.
+2. **BEST-EFFORT** (`requiresHuman: true` ∈ allowlist `BEST_EFFORT_CRITERIA`): seção nova —
+   "reformule SE der SEM inventar o agente; se a única forma seria inventar, MANTENHA como está".
+   NÃO é cobrado como resolução (a recusa correta de inventar não é punida — lição do ADR-048); a
+   rede é o `no_invented_first_person` (ADR-049), que VETA se a IA fabricar o agente.
+
+**Allowlist, não denylist.** Só entra em best-effort o critério `requiresHuman` cuja falha de
+invenção tenha guard determinístico. Hoje: só `passive_voice` (guard = 1ª pessoa fabricada). Jargão
+ambíguo (trocar por sentido errado) e nominalização sem verbo seguro ficam FORA — sua falha não tem
+rede mecânica, seguem só-humano. O rótulo no briefing é NEUTRO ("Voz passiva sem agente explícito"),
+sem o `CRITERION_HINT` de "diga quem faz a ação" (que nudge à invenção) — a instrução
+reformule-sem-inventar vive no cabeçalho da seção.
+
+**Verificado.** `test/rewrite-directed.test.ts` (determinístico): o SAMPLE separa jargão
+(mandatório) de passiva sem agente (best-effort); um trecho SÓ com passiva sem agente gera a seção
+best-effort SEM "Resolva TODOS" (o caso exato do usuário). Ao vivo (Groq, amostra real): o 8B tentou
+a passiva mas via invenção ("Vamos verificar") → VETADO (`hasBlockingFailure: true`), não chega ao
+documento; o 70B reformula impessoal e passa (demonstrado no ADR-049). 982 testes verdes;
+typecheck/lint limpos.
+
+**Consequências.**
+- Fecha o arco da pergunta original do usuário ("a passiva não é corrigida no dirigido"): agora ela
+  É pedida, e o resultado é honesto — resolvida quando dá sem inventar, vetada quando o modelo
+  tentaria inventar, mantida (sem punição) quando não dá. Nenhum caminho aplica invenção.
+- O DEFAULT da UI não muda (segue `rewrite@2`, deferral do ADR-000); `directed` continua opt-in
+  ("Dirigida pelos achados da engine"). O VALOR (dirigir bate a dica estática, e best-effort ajuda)
+  é do benchmark (`rewrite-benchmark.test.ts`, rede), não deste ADR.
+- Depende inteiramente do ADR-049: sem o guard de pro-drop, esta reabertura seria a regressão que o
+  ADR-048 corretamente evitou. A ordem importa — guard primeiro, reabertura depois.
+
+---
+
 ## Referência cruzada
 
 Cada ADR aqui corresponde a uma decisão já fechada em `docs/ARQUITETURA.md`:

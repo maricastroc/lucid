@@ -213,7 +213,7 @@ function LongSentenceGuide({
 
       {g.candidates.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-[10.5px] uppercase tracking-[0.12em] text-ink-3">
+          <p className="u-sublabel mb-2 text-ink-3">
             pontos de divisão possíveis · confira
           </p>
           <ul className="flex flex-col gap-1.5">
@@ -231,7 +231,7 @@ function LongSentenceGuide({
                     </span>
                     <span className="text-ink-0">{c.after}…</span>
                   </span>
-                  <span className="shrink-0 text-[10.5px] font-sans uppercase tracking-widest text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+                  <span className="u-sublabel shrink-0 font-sans text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
                     dividir
                   </span>
                 </button>
@@ -248,7 +248,7 @@ function LongSentenceGuide({
 }
 
 export const APPLY_BUTTON_CLASS =
-  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
 
 function PassiveGuide({
   finding,
@@ -269,7 +269,7 @@ function PassiveGuide({
           <span className="text-ink-0">rascunho</span> para você revisar.
         </p>
         <div className="mt-3">
-          <p className="mb-2 text-[10.5px] uppercase tracking-[0.12em] text-ink-3">voz ativa · rascunho</p>
+          <p className="u-sublabel mb-2 text-ink-3">voz ativa · rascunho</p>
           <div className="rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[14px] leading-snug text-ink-0">
             {rewrite.replacement}
           </div>
@@ -350,12 +350,12 @@ function PassiveNeedsAgent({
         O texto não diz quem praticou a ação. Informe <span className="text-ink-0">só o agente</span> — a ferramenta conjuga
         e monta o rascunho; você não escreve a frase inteira.
       </p>
-      <label className="mt-3 block text-[10.5px] uppercase tracking-[0.12em] text-ink-3">Quem pratica essa ação?</label>
+      <label className="u-sublabel mt-3 block text-ink-3">Quem pratica essa ação?</label>
       <input
         value={agent}
         onChange={(e) => setAgent(e.target.value)}
         placeholder="ex.: a comissão"
-        className="mt-1.5 w-full rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 outline-none transition-colors focus:border-human-line"
+        className="mt-1.5 w-full rounded-lg border border-rule-2 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 shadow-(--shadow-card) outline-none transition-colors focus:border-human-line"
       />
       {ready && (
         <div className="mt-2 rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[13.5px] leading-snug text-ink-1">
@@ -393,7 +393,7 @@ function RoleRow({
 }) {
   return (
     <div className="flex items-baseline gap-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2">
-      <span className="w-16 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] text-human">{label}</span>
+      <span className="u-sublabel w-16 shrink-0 text-human">{label}</span>
       <span className="min-w-0 flex-1">
         {value ? (
           <span className="font-serif text-[14px] text-ink-0">{value}</span>
@@ -433,9 +433,9 @@ function JargonGuide() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-rule-1 bg-sheet px-2 py-2 text-center">
+    <div className="rounded-lg border border-rule-1 bg-sheet px-2 py-2 text-center shadow-(--shadow-card)">
       <div className="text-[15px] tabular-nums text-ink-0">{value}</div>
-      <div className="mt-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">{label}</div>
+      <div className="u-sublabel mt-0.5 font-medium text-ink-3">{label}</div>
     </div>
   );
 }

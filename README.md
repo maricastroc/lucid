@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="public/app-icon.svg" alt="Lucid" width="40">
+  <img src="public/icon-light.svg" alt="Lucid" width="40">
   <br>
   Lucid
   <br>

@@ -66,7 +66,7 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
               onClick={() => onChangeMode(m)}
               className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors duration-150 ${
                 mode === m
-                  ? "bg-sheet text-ink-0 shadow-[0_1px_2px_rgb(34_32_27/0.08)]"
+                  ? "bg-sheet text-ink-0 shadow-[0_0_0_1px_rgb(31_29_24/0.05),0_1px_2px_rgb(31_29_24/0.1)]"
                   : "text-ink-2 hover:text-ink-0"
               }`}
             >
@@ -97,7 +97,7 @@ function Logo() {
       src={theme === "light" ? "/icon-light.svg" : "/icon-dark.svg"}
       alt=""
       aria-hidden
-      className="size-8 rounded-[9px] shadow-[0_1px_2px_rgb(34_32_27/0.14)]"
+      className="size-8 rounded-[9px] shadow-[0_0_0_1px_rgb(31_29_24/0.06),0_1px_2px_rgb(31_29_24/0.14)]"
     />
   );
 }

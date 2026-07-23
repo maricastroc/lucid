@@ -29,14 +29,14 @@ export function Select({
         <RadixSelect.Content
           position="popper"
           sideOffset={4}
-          className="z-50 overflow-hidden rounded-lg border border-rule-2 bg-sheet text-[12.5px] text-ink-1 shadow-lg"
+          className="z-50 overflow-hidden rounded-lg border border-rule-2 bg-sheet text-[12.5px] text-ink-1 shadow-(--shadow-pop)"
         >
           <RadixSelect.Viewport className="p-1">
             {options.map((option) => (
               <RadixSelect.Item
                 key={option.value}
                 value={option.value}
-                className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-1.5 outline-none data-[highlighted]:bg-surface-2 data-[state=checked]:text-ink-0"
+                className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-2.5 py-1.5 outline-none data-[highlighted]:bg-surface-2 data-[state=checked]:font-medium data-[state=checked]:text-ink-0"
               >
                 <RadixSelect.ItemText>{option.label}</RadixSelect.ItemText>
                 <RadixSelect.ItemIndicator>

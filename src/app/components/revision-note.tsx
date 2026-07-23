@@ -40,7 +40,7 @@ export function RevisionNote({
   return (
     <div className="note-in flex flex-col px-6 py-6">
       <div className="flex items-center gap-2 text-[11.5px]">
-        <span className="font-medium uppercase tracking-[0.12em] text-ink-3">{meta.kind}</span>
+        <span className="u-label text-ink-3">{meta.kind}</span>
         <span className="text-ink-3">·</span>
         <span className="inline-flex items-center gap-1.5 text-ink-2">
           <span className="size-1.75 rounded-full" style={{ background: ink }} aria-hidden />
@@ -52,7 +52,7 @@ export function RevisionNote({
 
       <p className="mt-2 text-[12.5px] text-ink-2">
         <span className="text-ink-1">{group}</span> · {meta.principleName}
-        <span className="ml-2 rounded-[4px] bg-surface-2 px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3">
+        <span className="ml-2 rounded-[5px] border border-rule-1 bg-surface-2 px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3">
           ABNT {finding.principle}
         </span>
       </p>
@@ -157,7 +157,7 @@ function ManualEdit({
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
       <div className="flex items-center justify-between border-b border-rule-1 px-3.5 py-2.5">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">
+        <span className="u-sublabel text-ink-3">
           Sua versão · {unitLabel}
         </span>
         <button
@@ -177,7 +177,7 @@ function ManualEdit({
           }}
           spellCheck={false}
           aria-label={`Editar ${unitLabel}`}
-          className="block max-h-[46vh] min-h-28 w-full resize-y rounded-lg border border-rule-1 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
+          className="block max-h-[46vh] min-h-28 w-full resize-y rounded-lg border border-rule-2 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
           style={{ caretColor: "var(--accent)" }}
         />
         <div className="mt-2.5 flex items-center gap-2">
@@ -239,13 +239,13 @@ function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () =>
       </div>
 
       <div className="px-4 py-3">
-        <div className="rounded-lg border border-rule-1 bg-sheet">
+        <div className="rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)">
           <DiffRow label="Antes">
             <span className="font-serif text-[15.5px] text-ink-2 line-through decoration-ink-3">{before}</span>
           </DiffRow>
           <div className="flex items-center gap-2 border-t border-rule-1 px-3.5 py-1">
             <ArrowDownIcon className="size-3.5 text-safe" />
-            <span className="text-[10.5px] uppercase tracking-[0.14em] text-ink-3">substituição direta</span>
+            <span className="u-sublabel text-ink-3">substituição direta</span>
           </div>
           <DiffRow label="Depois" tone="safe">
             <span className="font-serif text-[15.5px] font-medium text-ink-0">{after}</span>
@@ -256,8 +256,7 @@ function SafeResolution({ finding, onApply }: { finding: Finding; onApply: () =>
           <button
             type="button"
             onClick={onApply}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90"
-            style={{ background: "var(--safe-strong)", color: "var(--on-safe)" }}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-safe-strong px-3.5 py-2 text-[13px] font-semibold text-on-safe shadow-(--shadow-card) transition-colors duration-150 hover:bg-safe"
           >
             <CheckIcon className="size-4" />
             Aplicar
@@ -288,11 +287,7 @@ function DiffRow({
 }) {
   return (
     <div className="flex items-baseline gap-3 px-3.5 py-2.5">
-      <span
-        className={`w-12 shrink-0 text-[10px] font-semibold uppercase tracking-[0.12em] ${
-          tone === "safe" ? "text-safe" : "text-ink-3"
-        }`}
-      >
+      <span className={`u-sublabel w-12 shrink-0 ${tone === "safe" ? "text-safe" : "text-ink-3"}`}>
         {label}
       </span>
       <span className="min-w-0">{children}</span>
@@ -328,7 +323,7 @@ function HumanDecision({
         <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
 
         <div className="mt-4 border-t border-human-line pt-4">
-          <p className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">
+          <p className="u-sublabel mb-2.5 text-ink-3">
             Como seguir
           </p>
           <Guidance finding={finding} source={source} onSplit={onSplit} onPassiveActive={onPassiveActive} />
@@ -378,8 +373,8 @@ function GeneratedRewrite({
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
       <div className="flex items-center gap-2 border-b border-rule-1 px-4 py-2.5">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-2">Reescrita por IA</span>
-        <span className="rounded-[4px] bg-surface-3 px-1.5 py-0.5 text-[9.5px] uppercase tracking-widest text-ink-3">
+        <span className="u-sublabel text-ink-2">Reescrita por IA</span>
+        <span className="u-sublabel rounded-[5px] border border-rule-1 bg-surface-3 px-1.5 py-0.5 font-medium text-ink-3">
           experimental
         </span>
       </div>
@@ -414,7 +409,7 @@ function GeneratedRewrite({
           type="button"
           onClick={run}
           disabled={loading}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[12.5px] font-medium text-accent-ink transition-opacity duration-150 hover:opacity-90 disabled:opacity-60"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
         >
           {loading ? "Gerando e verificando…" : "Gerar e verificar"}
         </button>
@@ -448,7 +443,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
   const passed = verification.proofs.filter((p) => p.passed).length;
 
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
+    <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-card)">
       {/* VEREDITO — protagonista. A engine julgou; é isto que o produto entrega, não a prosa. */}
       <div
         className="px-4 py-3.5"
@@ -458,10 +453,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
         }}
       >
         <div className="flex items-center justify-between gap-2">
-          <span
-            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
-            style={{ color: blocked ? "var(--human)" : "var(--safe)" }}
-          >
+          <span className="u-sublabel" style={{ color: blocked ? "var(--human)" : "var(--safe)" }}>
             A engine verificou
           </span>
           <span className="tabular-nums text-[11px] text-ink-3">
@@ -486,7 +478,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
 
       {/* PROVA — a substância do veredito, logo abaixo do headline */}
       <div className="px-4 py-3">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Prova · determinística</p>
+        <p className="u-sublabel mb-2 text-ink-3">Prova · determinística</p>
         <ul className="flex flex-col gap-1.5">
           {verification.proofs.map((p) => (
             <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
@@ -497,7 +489,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
       {/* SINAL */}
       {verification.signals.length > 0 && (
         <div className="border-t border-rule-1 px-4 py-3">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">
+          <p className="u-sublabel mb-2 text-ink-3">
             Sinal · heurístico (não é prova)
           </p>
           <ul className="flex flex-col gap-1.5">
@@ -511,7 +503,7 @@ function RewriteResult({ result, onApplyRewrite }: { result: VerifiedRewrite; on
       {/* O ESPÉCIME avaliado — a proposta da IA, calma, junto da ação que a aplica */}
       <div className="border-t border-rule-1 px-4 py-3">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-3">Trecho avaliado</p>
+          <p className="u-sublabel text-ink-3">Trecho avaliado</p>
           <span className="font-mono text-[10px] text-ink-3" title="modelo + versão do prompt">
             {proposal.proposerId}
           </span>
@@ -566,7 +558,7 @@ function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"
 function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mt-6">
-      <p className="mb-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-3">{label}</p>
+      <p className="u-sublabel mb-2 text-ink-3">{label}</p>
       {children}
     </div>
   );

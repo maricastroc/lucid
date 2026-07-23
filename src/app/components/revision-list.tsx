@@ -46,7 +46,7 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
   return (
     <section aria-label="Revisões" className="border-t border-rule-1">
       <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-5">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-3">Revisões</h2>
+        <h2 className="u-label text-ink-3">Revisões</h2>
       </div>
 
       <div role="tablist" aria-label="Filtrar revisões" className="flex items-center gap-1.5 px-6 pb-3">
