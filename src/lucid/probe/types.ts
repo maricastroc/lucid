@@ -20,10 +20,15 @@ export interface ProbeResult {
   precisouInferir: boolean;
 }
 
+export interface ProbeOptions {
+  /** Cancela a chamada (ex.: o usuário fechou o painel, ou o texto mudou de novo). */
+  signal?: AbortSignal;
+}
+
 export interface ComprehensionProbe {
   /** "modelo@versão + prompt@versão" — proveniência para eval e anti-drift */
   readonly id: string;
-  probe(input: ProbeInput): Promise<ProbeResult>;
+  probe(input: ProbeInput, options?: ProbeOptions): Promise<ProbeResult>;
 }
 
 export type ProbeSignal =

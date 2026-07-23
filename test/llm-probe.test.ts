@@ -8,9 +8,11 @@ class MockChatProvider implements ChatProvider {
   readonly id = "mock";
   readonly models = ["m1"] as const;
   lastPrompt = "";
+  lastSignal: AbortSignal | undefined;
   constructor(private readonly reply: string) {}
-  async complete(prompt: string): Promise<string> {
+  async complete(prompt: string, options?: { signal?: AbortSignal }): Promise<string> {
     this.lastPrompt = prompt;
+    this.lastSignal = options?.signal;
     return this.reply;
   }
 }
@@ -57,5 +59,15 @@ describe("LlmComprehensionProbe", () => {
     expect(provider.lastPrompt).toContain("trecho X");
     expect(provider.lastPrompt).toContain("quando começa?");
     expect(interpret(result).tipo).toBe("flag");
+  });
+
+  it("repassa o AbortSignal ao provedor (M6: cancelamento tem que chegar até a chamada do LLM)", async () => {
+    const provider = new MockChatProvider("{}");
+    const probe = new LlmComprehensionProbe(provider, "m1");
+    const controller = new AbortController();
+
+    await probe.probe({ trecho: "trecho X", pergunta: "?" }, { signal: controller.signal });
+
+    expect(provider.lastSignal).toBe(controller.signal);
   });
 });

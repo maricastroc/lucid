@@ -45,7 +45,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const result = await probe.probe({ trecho: text, pergunta });
+    const result = await probe.probe({ trecho: text, pergunta }, { signal: request.signal });
     const signal = interpret(result);
     return NextResponse.json({ signal, result, probeId: probe.id });
   } catch (cause) {
