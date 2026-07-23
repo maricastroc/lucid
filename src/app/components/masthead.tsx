@@ -23,7 +23,7 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, importing }: Props) {
         <div className="flex items-baseline gap-2.5">
           <span className="text-[15px] font-semibold tracking-[-0.01em] text-ink-0">Lucid</span>
           <span className="hidden h-3 w-px bg-rule-2 sm:block" aria-hidden />
-          <span className="hidden text-[12.5px] text-ink-2 sm:block">Revisão de linguagem simples</span>
+          <span className="hidden text-[12.5px] text-ink-2 sm:block">Auditor de linguagem simples</span>
         </div>
       </div>
 

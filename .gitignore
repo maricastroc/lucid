@@ -41,7 +41,6 @@ yarn-error.log*
 next-env.d.ts
 CLAUDE.md
 docs/ARQUITETURA.md
-DECISOES.md
+/docs/decisoes
 AGENTS.md
 .claude
-/docs

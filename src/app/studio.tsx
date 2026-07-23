@@ -21,10 +21,11 @@ import { AuditRail, NoteNav, RailFooter } from "./components/audit-rail";
 import { AuditOverview } from "./components/audit-overview";
 import { RevisionList, type Bucket } from "./components/revision-list";
 import { RevisionNote } from "./components/revision-note";
+import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 
 export function Studio() {
-  const [text, setText] = useState(SAMPLE_TEXT);
+  const [text, setText] = useState("");
   const [mode, setMode] = useState<Mode>("audit");
   const [activeCriteria, setActiveCriteria] = useState<ReadonlySet<string>>(new Set(CRITERION_ORDER));
   const [selectedIdRaw, setSelectedId] = useState<string | null>(null);
@@ -48,6 +49,14 @@ export function Studio() {
     [structured, importedDoc, deferredText],
   );
   const blocks = structured ? importedDoc!.blocks : null;
+  const isEmpty = text.trim() === "" && importedDoc === null;
+
+  const loadExample = useCallback(() => {
+    setImportedDoc(null);
+    setText(SAMPLE_TEXT);
+    setSelectedId(null);
+    setMode("audit");
+  }, []);
 
   const openDocx = useCallback(async (file: File) => {
     setImporting(true);
@@ -238,21 +247,30 @@ export function Studio() {
       )}
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <DocumentView
-          ref={scrollRef}
-          mode={mode}
-          text={text}
-          diagnostic={diagnostic}
-          blocks={blocks}
-          selectedId={selectedId}
-          flashId={flashId}
-          activeCriteria={activeCriteria}
-          rewriteTarget={rewriteTarget}
-          onChangeText={setText}
-          onSelectFinding={selectFinding}
-        />
+        {isEmpty && mode === "audit" ? (
+          <Welcome
+            onWrite={() => setMode("edit")}
+            onOpenDocx={openDocx}
+            onLoadExample={loadExample}
+            importing={importing}
+          />
+        ) : (
+          <DocumentView
+            ref={scrollRef}
+            mode={mode}
+            text={text}
+            diagnostic={diagnostic}
+            blocks={blocks}
+            selectedId={selectedId}
+            flashId={flashId}
+            activeCriteria={activeCriteria}
+            rewriteTarget={rewriteTarget}
+            onChangeText={setText}
+            onSelectFinding={selectFinding}
+          />
+        )}
 
-        <AuditRail {...railProps} />
+        {!isEmpty && <AuditRail {...railProps} />}
       </div>
 
       {mode === "audit" && findings.length > 0 && !sheetOpen && (

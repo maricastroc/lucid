@@ -2,8 +2,8 @@
 
 Cada dataset aqui é consumido pela Camada 1 (`core`) como dado estático, carregado sem
 rede e sem I/O assíncrono. Este README documenta proveniência e critério de curadoria
-por arquivo — obrigatório por `docs/ARQUITETURA.md` §2 e §11.1 ("`principio` nunca é
-inventado"; aqui, análogo: nenhum dado entra sem origem registrada).
+por arquivo — disciplina do projeto ("`principle` nunca é inventado"; análogo aqui:
+nenhum dado entra sem origem registrada).
 
 ## Data registry e `dataHash` (ADR-022)
 
@@ -12,7 +12,7 @@ Além do consumo direto, cada dataset é registrado em `core/data/registry.ts` c
 datasets em jogo (dados de estágio de documento + `dataDeps` dos passes), de modo que a
 reprodutibilidade de um `Diagnostic` seja `(lucidVersion, configHash, dataHash)`. **Mexer
 em qualquer JSON aqui muda o `fingerprint` → muda o `dataHash` → quebra o snapshot de
-propósito** (governança automática, ver `docs/DESIGN-data-registry.md`). Adicionar um
+propósito** (governança automática, ver ADR-022/ADR-023). Adicionar um
 dataset novo = novo id em `DatasetId` + entrada no registry + este README + golden.
 
 ## `abreviacoes.pt.json`
@@ -37,7 +37,7 @@ fim de frase (ex.: `"Sr. Silva chegou"` não quebra depois de `Sr.`).
 **Fora de escopo deliberado (Fase 1):** abreviações regionais raras, siglas de
 instituições específicas (essas são tratadas pela regra genérica de sigla — sequência de
 maiúsculas isoladas por ponto — não pelo léxico), e gírias. Adicionar exige avaliação de
-impacto no golden set (`docs/ARQUITETURA.md` §8) antes de entrar.
+impacto no golden set antes de entrar.
 
 **Formato:** `{ "abbreviations": string[] }`. Cada entrada é a forma **sem** o ponto final,
 em minúsculas (comparação em caixa invariante — `toLowerCase()`, nunca
@@ -58,7 +58,7 @@ vem logo depois de uma destas formas. Lista fechada, não um conjugador.
 **Critério de curadoria:** paradigma completo de `ser` (indicativo, subjuntivo,
 infinitivo pessoal/impessoal, gerúndio, particípio, imperativo). Deliberadamente
 **não** inclui formas de `estar`/`ficar` — fora de escopo nesta etapa (ver
-`docs/DECISOES.md`, ADR-006/ADR-052). O placeholder `Config.passiveVoice.treatEstarAsPassive`
+ADR-006/ADR-052). O placeholder `Config.passiveVoice.treatEstarAsPassive`
 foi removido (ADR-052): `estar`/`ficar` + particípio é predominantemente resultativo/adjetival,
 não passiva de ação, e um flag que os tratasse igual a `ser` teria alto risco de falso positivo.
 
@@ -101,7 +101,7 @@ voz passiva de uma ação praticada por um agente.
 
 **Critério de curadoria:** julgamento linguístico de que a leitura adjetival domina
 esmagadoramente sobre a leitura de ação passiva. Curado e extensível — cada entrada
-nova (ver `docs/DECISOES.md`, ADR-006, para o exemplo de `envolvido`) precisa da mesma
+nova (ver ADR-006, para o exemplo de `envolvido`) precisa da mesma
 justificativa: pertencer à mesma classe semântica das entradas já presentes
 (psicológico/relacional), não ser um ajuste pontual para um único exemplo.
 
@@ -137,7 +137,7 @@ precisa de `form`, `lemma` e `pattern`.
 
 **Fora de escopo deliberado:** `dar`/`ter` como verbos-suporte de nominalização
 ("dar continuidade a") — regência e ambiguidade lexical próprias, não demonstradas
-como seguras nesta etapa (ver `docs/DECISOES.md`, ADR-007). Regências alternativas de
+como seguras nesta etapa (ver ADR-007). Regências alternativas de
 `proceder` (`proceder com`) — só o padrão `à/ao/às/aos` foi implementado.
 
 **Formato:** `{ "forms": [{ "form", "lemma", "pattern" }] }`, comparação em caixa
@@ -182,7 +182,7 @@ caixa invariante.
 ## `jargao.pt.json`
 
 **Usado por:** `src/locales/pt-BR/passes/jargon.ts` (pass de jargão — Fase 1, ver
-`docs/DECISOES.md`, ADR-008).
+ADR-008).
 
 **Propósito:** mapeia termo/expressão de linguagem administrativa e jurídica ao
 equivalente em linguagem simples, quando existe um equivalente único e defensável.
@@ -231,7 +231,7 @@ como detecção-sem-equivalente — sem ganho de informação segura para exibir
 - `consoante` — substantivo comum (letra do alfabeto) tão frequente quanto o uso
   conjuntivo formal; nenhum contexto sintático barato o bastante para desambiguar sem
   parser. Omitida, não cadastrada com `safeForSuggestion:false`.
-- Frequência lexical (`frequencia.pt.json`, previsto em `docs/ARQUITETURA.md` §2) —
+- Frequência lexical (`frequencia.pt.json`, previsto no plano original) —
   vira ferramenta de curadoria offline (achar candidatos para humano avaliar antes de
   entrar aqui), nunca dispara finding em runtime.
 - Siglas, nomes próprios, NER, aprendizado por corpus, embeddings, LLM — fora do MVP
@@ -273,7 +273,7 @@ precede a palavra (`"foi o resultado"`) — esses já são barrados pelo própri
 
 **Usados por:** `passes/mais-que-perfeito.ts` (`mais_que_perfeito_sintetico`, 5.3.3) e
 `passes/adverbio-mente-denso.ts` (`adverbio_mente_denso`, 5.3.4). Primeiros datasets derivados
-de um léxico externo reusado (fatia vertical da Camada 1; ver ADR-024 e docs/DESIGN-d1-*).
+de um léxico externo reusado (fatia vertical da Camada 1; ver ADR-024/ADR-034).
 
 **Fonte:** **PortiLexicon-UD** (Lopes, Duran, Fernandes, Pardo — ICMC-USP/NILC), TSV por classe
 `forma ⇥ lema ⇥ FEATS` (Universal Dependencies), em
