@@ -24,6 +24,12 @@ export interface RewriteProposal {
   original: string;
   proposed: string;
   localeId?: string;
+  /**
+   * Diagnóstico do parse da resposta do provedor — só definido por proponentes baseados em LLM.
+   * "unparseable": parseRewrite() não extraiu uma reescrita válida e o pipeline manteve `original`
+   * em `proposed`; distingue essa queda de uma decisão legítima do modelo (ver llm-proposer.ts).
+   */
+  parseOutcome?: "ok" | "unparseable";
 }
 
 export interface Proof {

@@ -289,7 +289,6 @@ interface Config {
   sentenceLength: { warnAbove: number; errorAbove: number };   // default 20 / 30 palavras
   passiveVoice: {
     enabled: boolean;                 // default true
-    treatEstarAsPassive: boolean;     // default FALSE (ver §6.2 — estar é ruidoso)
   };
   nominalization: { enabled: boolean; suggest: boolean };  // suggest default true
   jargon: {
@@ -397,6 +396,16 @@ Registrar essa escolha no `docs/DECISOES.md` (ADR-001) na fase de código.
 
 ### 6.2 Voz passiva (`5.3.3`)
 
+**Decisão de escopo (ADR-006/ADR-052 em `docs/DECISOES.md`):** só `ser` + particípio
+dispara este pass. `estar`/`ficar` + particípio ficam permanentemente fora dele —
+não atrás de uma flag de configuração (o placeholder `treatEstarAsPassive` foi
+removido no ADR-052). Ver o raciocínio completo no ADR-052: são fenômenos
+gramaticalmente distintos (`estar` = passiva de resultado/estado; `ser` = passiva
+de ação), então tratá-los como intercambiáveis no mesmo matcher teria alto risco de
+falso positivo por construção, não por falta de tempo de implementação. Se um
+detector de `estar` resultativo-vs-passivo for construído no futuro, ele nasce como
+critério próprio, com dataset e eval próprios — não como esta flag reaproveitada.
+
 **Alvo MVP:** passiva analítica com auxiliar **`ser`** + particípio.
 `[ser conjugado] (+ advérbio opcional) + [particípio]`, com detecção de agente
 `por/pelo/pela/pelos/pelas + SN`.
@@ -406,8 +415,8 @@ Regras de decisão:
   irregulares (`feito, dito, visto, posto, escrito, aberto, ganho, pago…`) em
   `participios-irregulares.pt.json`.
 - **`estar` + particípio** é frequentemente resultativo/adjetival ("a porta está
-  fechada"), não passiva de ação. **Decisão:** `estar` fica **atrás da flag
-  `treatEstarAsPassive` (default false)**. No default, só `ser` dispara.
+  fechada"), não passiva de ação — nunca dispara este pass (ver decisão de escopo
+  acima).
 - **Passiva sintética/reflexa** ("vendem-se casas", `se` + verbo 3ª pessoa) →
   **Fase 2**. É outra construção e outro conjunto de falsos positivos.
 - **Predicativo adjetival** ("é importante", "é necessário") → **não** é passiva:
@@ -593,7 +602,10 @@ proveniência, tudo com snapshot byte-idêntico e as suites I1/I2/I3 verdes; son
 stub atrás de flag.
 
 ### Fase 2 — Ampliação
-- `treatEstarAsPassive`, passiva sintética (`se` + verbo), predicativo adjetival refinado.
+- Passiva sintética (`se` + verbo), predicativo adjetival refinado. Detecção de
+  `estar`/`ficar` resultativo-vs-passivo NÃO está mais planejada como extensão do
+  pass de voz passiva (ver ADR-052) — se algum dia for construída, é um critério
+  novo e independente.
 - Densidade de subordinação (orações/frase); enumeração-em-prosa→lista;
   título-que-não-responde (flag fraca, nunca score); 2ª pessoa ausente.
 - Densidade de nominalizações (sinal fraco, `info`).

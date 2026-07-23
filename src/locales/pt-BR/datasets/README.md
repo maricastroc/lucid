@@ -58,8 +58,9 @@ vem logo depois de uma destas formas. Lista fechada, não um conjugador.
 **Critério de curadoria:** paradigma completo de `ser` (indicativo, subjuntivo,
 infinitivo pessoal/impessoal, gerúndio, particípio, imperativo). Deliberadamente
 **não** inclui formas de `estar`/`ficar` — fora de escopo nesta etapa (ver
-`docs/DECISOES.md`, ADR-006); `Config.passiveVoice.treatEstarAsPassive` existe mas
-ainda não é consultado por nenhum código.
+`docs/DECISOES.md`, ADR-006/ADR-052). O placeholder `Config.passiveVoice.treatEstarAsPassive`
+foi removido (ADR-052): `estar`/`ficar` + particípio é predominantemente resultativo/adjetival,
+não passiva de ação, e um flag que os tratasse igual a `ser` teria alto risco de falso positivo.
 
 **Fora de escopo deliberado:** `estar`/`ficar` (Fase 2, se algum dia — exige separar
 leitura resultativa de leitura passiva genuína, uma heurística própria).
