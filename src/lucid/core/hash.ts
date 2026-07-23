@@ -10,6 +10,15 @@ export function stableStringify(value: unknown): string {
   return `{${pairs.join(",")}}`;
 }
 
+/**
+ * Fingerprint de 32 bits (8 caracteres hex) de `value`, determinístico (mesma entrada → mesmo
+ * hash, sempre). NÃO é criptográfico e NÃO tem resistência a colisão — é uma soma de
+ * verificação simples (estilo `hashCode` do Java), adequada para exibição/proveniência
+ * (`Diagnostic.meta.configHash`/`dataHash`) e para invalidar cache best-effort, mas não deve
+ * virar prova de integridade nem controle de acesso. Se algum dia um fluxo precisar de garantia
+ * forte de unicidade, troque por um hash mais largo — isso muda o formato do valor retornado
+ * (hoje fixado em 8 hex chars por `test/golden/diagnostic-snapshot.test.ts`).
+ */
 export function stableHash(value: unknown): string {
   const serialized = stableStringify(value);
   let hash = 0;

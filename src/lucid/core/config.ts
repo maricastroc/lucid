@@ -7,6 +7,11 @@ export interface Config {
   };
   passiveVoice: {
     enabled: boolean;
+    /**
+     * Reservado para uma fase futura (ver docs/ARQUITETURA.md §6.2). Hoje NÃO tem efeito: o
+     * pass de voz passiva só reconhece o auxiliar "ser" — "estar"/"ficar" nunca disparam,
+     * independente deste valor. Mudar este campo não muda o comportamento do motor.
+     */
     treatEstarAsPassive: boolean;
   };
   nominalization: {

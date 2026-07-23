@@ -36,7 +36,19 @@ export function analyzeDocumentWithLocale(
 
   const rawFindings = locale.passes.flatMap((pass) => {
     const context: PassContext = Object.freeze({ doc, config, data: locale.data.createDataView(pass.dataDeps ?? []) });
-    return pass.run(context);
+    const findings = pass.run(context);
+    for (const finding of findings) {
+      // Contrato exigido por buildScore (score/index.ts): ele agrupa achados em byCriterion
+      // filtrando por pass.criterion. Um finding com criterion diferente do pass que o gerou
+      // continuaria contando em totalFindings mas sumiria silenciosamente do placar por critério.
+      if (finding.criterion !== pass.criterion) {
+        throw new Error(
+          `pass "${pass.criterion}" produziu um finding com criterion "${finding.criterion}" — ` +
+            "finding.criterion deve ser sempre igual ao criterion do pass que o gerou.",
+        );
+      }
+    }
+    return findings;
   });
   const findings = sortFindings(rawFindings);
 
