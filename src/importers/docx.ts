@@ -14,16 +14,62 @@ function decodeEntities(s: string): string {
 }
 
 function textOf(innerHtml: string): string {
-  return decodeEntities(innerHtml.replace(/<[^>]+>/g, "")).replace(/\s+/g, " ").trim();
+  return decodeEntities(innerHtml.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Índice de início da tag de fechamento que casa com uma abertura de `tagName` já consumida (a
+ * busca começa em `from`, logo após essa abertura). Rastreia profundidade para não parar no
+ * fechamento de uma tag aninhada do MESMO nome — necessário porque `ul`/`ol`/`li` podem se
+ * aninhar (lista dentro de item de lista), diferente de `h1-6`/`p`, que não se aninham.
+ * `null` se a tag nunca fecha (HTML malformado).
+ */
+function findMatchingClose(html: string, tagName: string, from: number): number | null {
+  const tagRe = new RegExp(`<${tagName}\\b[^>]*>|<\\/${tagName}>`, "gi");
+  tagRe.lastIndex = from;
+  let depth = 1;
+  for (let m = tagRe.exec(html); m !== null; m = tagRe.exec(html)) {
+    if (m[0][1] === "/") {
+      depth--;
+      if (depth === 0) return m.index;
+    } else {
+      depth++;
+    }
+  }
+  return null;
+}
+
+/**
+ * Itens de TOPO de uma lista: separa cada `<li>` usando `findMatchingClose` (não o primeiro
+ * `</li>` que aparecer), então achata o conteúdo dele — inclusive de uma sub-lista aninhada —
+ * em texto corrido. Achatar sub-listas é uma limitação conhecida (v1); o que este parser NUNCA
+ * deve fazer é perder itens irmãos depois de uma sub-lista, ou colar palavras sem espaço.
+ */
+function extractListItems(inner: string): string[] {
+  const items: string[] = [];
+  const liOpenRe = /<li\b[^>]*>/gi;
+  for (let m = liOpenRe.exec(inner); m !== null; m = liOpenRe.exec(inner)) {
+    const openEnd = liOpenRe.lastIndex;
+    const closeStart = findMatchingClose(inner, "li", openEnd);
+    if (closeStart === null) break;
+    const text = textOf(inner.slice(openEnd, closeStart));
+    if (text) items.push(text);
+    liOpenRe.lastIndex = closeStart + "</li>".length;
+  }
+  return items;
 }
 
 export function htmlToRawBlocks(html: string): RawBlock[] {
   const blocks: RawBlock[] = [];
-  const blockRe = /<(h[1-6]|p|ul|ol)\b[^>]*>([\s\S]*?)<\/\1>/gi;
+  const topOpenRe = /<(h[1-6]|p|ul|ol)\b[^>]*>/gi;
 
-  for (let m = blockRe.exec(html); m !== null; m = blockRe.exec(html)) {
+  for (let m = topOpenRe.exec(html); m !== null; m = topOpenRe.exec(html)) {
     const tag = m[1].toLowerCase();
-    const inner = m[2];
+    const openEnd = topOpenRe.lastIndex;
+    const closeStart = findMatchingClose(html, tag, openEnd);
+    if (closeStart === null) break;
+    const inner = html.slice(openEnd, closeStart);
+    topOpenRe.lastIndex = closeStart + `</${tag}>`.length;
 
     if (tag === "p") {
       const text = textOf(inner);
@@ -36,14 +82,8 @@ export function htmlToRawBlocks(html: string): RawBlock[] {
       continue;
     }
 
-    const ordered = tag === "ol";
-    const items: string[] = [];
-    const liRe = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;
-    for (let li = liRe.exec(inner); li !== null; li = liRe.exec(inner)) {
-      const text = textOf(li[1]);
-      if (text) items.push(text);
-    }
-    if (items.length > 0) blocks.push({ kind: "list", ordered, items });
+    const items = extractListItems(inner);
+    if (items.length > 0) blocks.push({ kind: "list", ordered: tag === "ol", items });
   }
 
   return blocks;
