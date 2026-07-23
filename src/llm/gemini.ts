@@ -1,4 +1,4 @@
-import { ChatProviderError, type ChatCompletionOptions, type ChatProvider } from "./types";
+import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
 import type { TokenUsage } from "./groq";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
@@ -43,9 +43,10 @@ export class GeminiProvider implements ChatProvider {
               thinkingConfig: { thinkingBudget: 0 },
             },
           }),
+          signal: requestSignal(options.signal),
         });
       } catch (cause) {
-        throw new ChatProviderError(`falha de rede ao chamar o Gemini: ${String(cause)}`, this.id);
+        throw new ChatProviderError(describeFetchFailure(cause, "Gemini"), this.id);
       }
 
       const data = (await response.json().catch(() => null)) as GeminiResponse | null;

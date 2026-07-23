@@ -1,4 +1,4 @@
-import { ChatProviderError, type ChatCompletionOptions, type ChatProvider } from "./types";
+import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
 import type { TokenUsage } from "./groq";
 
 const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";
@@ -39,9 +39,10 @@ export class DeepSeekProvider implements ChatProvider {
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: prompt }],
           }),
+          signal: requestSignal(options.signal),
         });
       } catch (cause) {
-        throw new ChatProviderError(`falha de rede ao chamar o DeepSeek: ${String(cause)}`, this.id);
+        throw new ChatProviderError(describeFetchFailure(cause, "DeepSeek"), this.id);
       }
 
       const data = (await response.json().catch(() => null)) as DeepSeekChatResponse | null;

@@ -15,6 +15,8 @@ export interface RewriteRequest {
   strategy?: RewriteStrategy;
   findings?: readonly Finding[];
   localeId?: string;
+  /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou o cliente desconectou). */
+  signal?: AbortSignal;
 }
 
 export interface RewriteProposal {

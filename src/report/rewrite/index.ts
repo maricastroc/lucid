@@ -2,7 +2,7 @@ import type { Span } from "../../lucid";
 import type { RewriteProposer, RewriteRequest, VerifiedRewrite } from "./types";
 import { verifyRewrite, type VerifyOptions } from "./verify";
 
-export type ProposeAndVerifyOptions = VerifyOptions & Pick<RewriteRequest, "strategy" | "findings">;
+export type ProposeAndVerifyOptions = VerifyOptions & Pick<RewriteRequest, "strategy" | "findings" | "signal">;
 
 export async function proposeAndVerify(
   text: string,
@@ -17,6 +17,7 @@ export async function proposeAndVerify(
     localeId: options.locale?.id,
     strategy: options.strategy,
     findings: options.findings,
+    signal: options.signal,
   });
   const verification = await verifyRewrite(text, target, proposal, options);
   return { proposal, verification };

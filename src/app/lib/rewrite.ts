@@ -42,6 +42,8 @@ function overlapsTarget(f: Finding, target: Span): boolean {
 export interface GenerateRewriteOptions {
   criterion?: string;
   directed?: boolean;
+  /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou a nota foi fechada). */
+  signal?: AbortSignal;
 }
 
 export async function generateRewrite(
@@ -50,12 +52,12 @@ export async function generateRewrite(
   choice: RewriteModel,
   options: GenerateRewriteOptions = {},
 ): Promise<VerifiedRewrite> {
-  const { criterion, directed } = options;
+  const { criterion, directed, signal } = options;
   const strategy: RewriteStrategy | undefined = directed ? "directed" : undefined;
   const findings = directed ? analyze(text).findings.filter((f) => overlapsTarget(f, target)) : undefined;
 
   if (choice.providerId === "stub") {
-    return proposeAndVerify(text, target, stubProposer, { criterion, strategy, findings, locale: rewriteLocalePtBR });
+    return proposeAndVerify(text, target, stubProposer, { criterion, strategy, findings, locale: rewriteLocalePtBR, signal });
   }
 
   const response = await fetch("/api/rewrite", {
@@ -71,6 +73,7 @@ export async function generateRewrite(
       model: choice.model,
       localeId: ACTIVE_LOCALE_ID,
     }),
+    signal,
   });
 
   const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;
