@@ -102,3 +102,47 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
     expect(firstPerson?.passed).toBe(false);
   });
 });
+
+describe("verifyManualEdit — a declaração de agente vale para o autor também (ADR-055)", () => {
+  const text = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
+
+  function agentlessPassive() {
+    const d = analyze(text);
+    const finding = d.findings.find((f) => f.criterion === "passive_voice" && f.requiresHuman)!;
+    const span = { start: 0, end: d.text.length, text: d.text };
+    return { source: d.text, span, finding };
+  }
+
+  it("versão do autor que nomeia o agente declarado → prova declared_agent_present PASSA", async () => {
+    const { source, span, finding } = agentlessPassive();
+    const { verification } = await verifyManualEdit(
+      source,
+      span,
+      "A comissão comunicou a decisão ao interessado no processo administrativo em curso.",
+      [{ span: finding.span, agent: "a comissão" }],
+    );
+
+    const proof = verification.proofs.find((p) => p.check === "declared_agent_present");
+    expect(proof?.passed).toBe(true);
+  });
+
+  it("o autor declarou um agente e escreveu OUTRO → a própria versão dele reprova (nenhuma fonte é privilegiada)", async () => {
+    const { source, span, finding } = agentlessPassive();
+    const { verification } = await verifyManualEdit(
+      source,
+      span,
+      "O setor comunicou a decisão ao interessado no processo administrativo em curso.",
+      [{ span: finding.span, agent: "a comissão" }],
+    );
+
+    const proof = verification.proofs.find((p) => p.check === "declared_agent_present");
+    expect(proof?.passed).toBe(false);
+    expect(verification.hasBlockingFailure).toBe(true);
+  });
+
+  it("sem declaração, a prova não existe (comportamento anterior intacto)", async () => {
+    const { source, span } = agentlessPassive();
+    const { verification } = await verifyManualEdit(source, span, "A decisão foi comunicada ao interessado.");
+    expect(verification.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
+  });
+});

@@ -1,4 +1,4 @@
-# Dados versionados de `src/lucid/data`
+# Dados versionados de `src/locales/pt-BR/datasets`
 
 Cada dataset aqui é consumido pela Camada 1 (`core`) como dado estático, carregado sem
 rede e sem I/O assíncrono. Este README documenta proveniência e critério de curadoria
@@ -50,7 +50,7 @@ sem dependência de fonte externa com licença restritiva.
 
 ## `verbos-ser.pt.json`
 
-**Usado por:** `src/lucid/core/passes/passive-voice.ts` (pass de voz passiva — Fase 1).
+**Usado por:** `src/locales/pt-BR/passes/passive-voice.ts` (pass de voz passiva — Fase 1).
 
 **Propósito:** âncora do matcher — o pass só considera candidato a voz passiva o que
 vem logo depois de uma destas formas. Lista fechada, não um conjugador.
@@ -71,7 +71,7 @@ leitura resultativa de leitura passiva genuína, uma heurística própria).
 
 ## `participios-irregulares.pt.json`
 
-**Usado por:** `src/lucid/core/passes/passive-voice.ts`.
+**Usado por:** `src/locales/pt-BR/passes/passive-voice.ts`.
 
 **Propósito:** reconhece particípios que não seguem o sufixo regular `-ado/-ido` — ou
 cujo radical é curto demais para o padrão regular do matcher (`dado`, de "dar").
@@ -91,7 +91,7 @@ probabilidade de aparecer em texto administrativo/jurídico.
 
 ## `participios-ambiguos.pt.json`
 
-**Usado por:** `src/lucid/core/passes/passive-voice.ts` — para **suprimir** o finding,
+**Usado por:** `src/locales/pt-BR/passes/passive-voice.ts` — para **suprimir** o finding,
 nunca para emitir.
 
 **Propósito:** particípios genuínos (têm verbo de origem real) que, na posição "ser +
@@ -115,13 +115,13 @@ lista só quando o desequilíbrio a favor do adjetivo é claro.
 
 ## `verbos-leves.pt.json`
 
-**Usado por:** `src/lucid/core/passes/nominalization.ts` (pass de nominalização —
+**Usado por:** `src/locales/pt-BR/passes/nominalization.ts` (pass de nominalização —
 Fase 1).
 
 **Propósito:** ancora o matcher da construção `[verbo leve] + [determinante] +
-[nominalização]`. Cada entrada associa a forma superficial ao lema e marca se é a
-forma infinitiva — a trava que decide se uma sugestão mecânica pode ser gerada
-(nunca se reconjuga o verbo-base para uma forma finita).
+[nominalização]`. Cada entrada associa a forma superficial ao lema e ao `pattern`
+de regência (os conectores aceitos). Só detecção: desde o ADR-054 o dataset **não**
+alimenta composição de sugestão — a engine detecta e informa, nunca monta a troca.
 
 **Critério de curadoria:** os 5 verbos-suporte demonstrados como seguros no pedido de
 implementação (`fazer, realizar, efetuar, promover, proceder`), com cobertura de
@@ -181,7 +181,7 @@ caixa invariante.
 
 ## `jargao.pt.json`
 
-**Usado por:** `src/lucid/core/passes/jargon.ts` (pass de jargão — Fase 1, ver
+**Usado por:** `src/locales/pt-BR/passes/jargon.ts` (pass de jargão — Fase 1, ver
 `docs/DECISOES.md`, ADR-008).
 
 **Propósito:** mapeia termo/expressão de linguagem administrativa e jurídica ao
@@ -214,8 +214,9 @@ vem depois na frase (sintagma nominal vs. oração com "que", ou regência da pr
 seguinte) — risco de regência quebrada, não de sentido incerto. `plain` continua
 preenchido nesses casos para alimentar a `justification`, nunca a `suggestion`.
 
-**Lote 2 (ADR-010) — expansão curada para subir a taxa de auto-fix no domínio.** 13
-entradas novas, todas `safeForSuggestion:true` (troca 1:1 invariante), em três famílias:
+**Lote 2 (ADR-010) — expansão curada do equivalente informativo no domínio.** 13
+entradas novas, todas `safeForSuggestion:true` (equivalente 1:1 invariante, exibido como
+cartão "Copiar" — nunca aplicado pela engine, ADR-054), em três famílias:
 (a) conectores/advérbios formais invariantes e monossêmicos (`destarte`→"assim",
 `conquanto`→"embora", `porquanto`→"porque", `mormente`→"principalmente"); (b) MWEs fixas
 desambiguadas pela própria expressão (`tão logo`→"assim que", `via de regra`→"em geral",
@@ -224,7 +225,7 @@ base …`, cadastrando as contrações (`em/no/na/nos/nas`) explicitamente porqu
 parte do span casado e são preservadas 1:1 na troca. Nenhuma exige reconjugação nem muda
 regência. Candidatos `context_dependent` (`nos termos de`, `à luz de`, `em que pese`)
 foram deliberadamente adiados: o equivalente muda regência/estrutura, então entrariam só
-como detecção-sem-sugestão — sem ganho de auto-fix.
+como detecção-sem-equivalente — sem ganho de informação segura para exibir.
 
 **Fora de escopo deliberado (ver ADR-008 para o raciocínio completo):**
 - `consoante` — substantivo comum (letra do alfabeto) tão frequente quanto o uso
@@ -250,7 +251,7 @@ invariante.
 
 ## `participios-falsos-nominais.pt.json`
 
-**Usado por:** `src/lucid/core/passes/passive-voice.ts` — para **suprimir** o finding,
+**Usado por:** `src/locales/pt-BR/passes/passive-voice.ts` — para **suprimir** o finding,
 nunca para emitir.
 
 **Propósito:** palavras com sufixo `-ado/-ido` (formato de particípio regular) que, na
@@ -382,9 +383,31 @@ reescreve (`requiresHuman`, sem `suggestion`).
 ## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — REMOVIDOS (ADR-054)
 
 Existiam exclusivamente para a conversão determinística voz passiva→ativa (ADR-032/033/034),
-removida por completo: a engine não escreve. `participios-infinitivo.pt.json` sobrevive
-(alimenta o andaime do ADR-013, direção de análise) e sua validação contra o
-PortiLexicon-UD vive em `scripts/validate-participios.mjs`.
+removida por completo: a engine não escreve. Sua validação de particípios sobrevive no
+`participios-infinitivo.pt.json` (seção abaixo).
+
+## `participios-infinitivo.pt.json`
+
+**Usado por:** `src/locales/pt-BR/actions/passive-scaffold.ts` (andaime de voz passiva — Tier 2,
+ADR-013). Registrado como `participios-infinitivo.pt`.
+
+**Propósito:** mapa `particípio (masculino singular) → verbo-base no infinitivo`, consumido pelo
+andaime como **SINAL** "estrutura identificada, confira" — nunca como sugestão aplicável (a
+engine não escreve, ADR-054). Fora da tabela, o andaime devolve `baseVerb=null` e mostra só o
+particípio, deixando o verbo com o autor.
+
+**Critério de curadoria:** tabela **fechada e curada** (lista de particípios coberta é decisão
+humana), forte em verbos de alta frequência administrativa/jurídica. Cada par
+particípio→infinitivo é **validado contra PortiLexicon-UD** em curadoria-time por
+`scripts/validate-participios.mjs` (ADR-034/ADR-054) — a autoridade que desambigua o `-ido`
+(`recebido`→`receber` vs. `partido`→`partir`). Zero conjugador produtivo (disciplina do
+ADR-011); o andaime normaliza gênero/número por concordância regular antes de consultar.
+Adicionar entrada exige confirmar que o particípio não é um substantivo/adjetivo lexicalizado
+mais comum (mesma cautela dos léxicos `participios-*`).
+
+**Formato:** `{ "map": { [participio]: infinitivo } }`, comparação em caixa invariante.
+
+**Licença:** fatos de flexão verbal, curadoria própria; pares validados contra PortiLexicon-UD.
 
 ## `stopwords.pt.json` — filtro de palavras funcionais (ADR-044)
 
@@ -420,8 +443,9 @@ função gramatical.
 da cadeia `[cabeça] + de/da/do/das/dos (+ 1 palavra opcional) + [substantivo com sufixo
 deverbal]` e de unidade da densidade por frase. É o complemento do par
 `verbos-leves.pt.json`/`nominalizacoes.pt.json`: aquele detecta a nominalização COM
-verbo-suporte (e pode sugerir); este detecta a nominalização SEM âncora de verbo leve
-(e nunca sugere — `requiresHuman` sempre).
+verbo-suporte (e informa o verbo-base curado); este detecta a nominalização SEM âncora de
+verbo leve (e nem verbo-base tem para informar). Desde o ADR-054 **nenhum** dos dois compõe
+a troca — `requiresHuman` conforme o mapeamento seja único (informa) ou ambíguo (só marca).
 
 **Critério de curadoria (precisão > recall):** só entra palavra (a) transparentemente
 deverbal e (b) cuja leitura dominante é ação — nunca entidade, artefato, lugar ou sentido

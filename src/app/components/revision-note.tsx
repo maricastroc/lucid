@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { type Finding, type Span } from "@/lucid";
-import type { RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
+import type { AgentDeclaration, RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
@@ -28,6 +28,10 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
   const group = principleGroupOf(finding.principle);
+
+  // Elicitação (ADR-055): a resposta do autor a "quem pratica essa ação?" vive na
+  // nota — vale para a reescrita por IA E para a edição manual (mesmo verificador).
+  const [declaration, setDeclaration] = useState<AgentDeclaration | null>(null);
 
   return (
     <div className="note-in flex flex-col px-6 py-6">
@@ -75,11 +79,17 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
         {safe ? (
           <SafeEquivalent finding={finding} />
         ) : (
-          <HumanDecision finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
+          <HumanDecision
+            finding={finding}
+            source={source}
+            declaration={declaration}
+            onDeclare={setDeclaration}
+            onApplyRewrite={onApplyRewrite}
+          />
         )}
       </div>
 
-      <ManualEdit finding={finding} source={source} onManualEdit={onManualEdit} />
+      <ManualEdit finding={finding} source={source} declaration={declaration} onManualEdit={onManualEdit} />
     </div>
   );
 }
@@ -87,10 +97,12 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
 function ManualEdit({
   finding,
   source,
+  declaration,
   onManualEdit,
 }: {
   finding: Finding;
   source: string;
+  declaration: AgentDeclaration | null;
   onManualEdit: (target: Span, replacement: string) => void;
 }) {
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
@@ -98,8 +110,16 @@ function ManualEdit({
   const original = target.text;
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(original);
-  const [result, setResult] = useState<VerifiedRewrite | null>(null);
+  // O veredito lembra a declaração sob a qual foi produzido: se a resposta da
+  // elicitação mudar, o resultado antigo deixa de falar pela versão atual (derivado
+  // na renderização — sem effect).
+  const [verified, setVerified] = useState<{ result: VerifiedRewrite; forDeclaration: AgentDeclaration | null } | null>(
+    null,
+  );
   const [checking, setChecking] = useState(false);
+  const result = verified !== null && verified.forDeclaration === declaration ? verified.result : null;
+  const setResult = (r: VerifiedRewrite | null) =>
+    setVerified(r === null ? null : { result: r, forDeclaration: declaration });
 
   const dirty = isManualEditDirty(original, draft);
 
@@ -123,7 +143,7 @@ function ManualEdit({
   const check = async () => {
     setChecking(true);
     try {
-      setResult(await verifyManualEdit(source, target, draft));
+      setResult(await verifyManualEdit(source, target, draft, declaration ? [declaration] : undefined));
     } finally {
       setChecking(false);
     }
@@ -273,10 +293,14 @@ function DiffRow({
 function HumanDecision({
   finding,
   source,
+  declaration,
+  onDeclare,
   onApplyRewrite,
 }: {
   finding: Finding;
   source: string;
+  declaration: AgentDeclaration | null;
+  onDeclare: (d: AgentDeclaration | null) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const rationale = buildConfidence(finding).rationale;
@@ -297,10 +321,10 @@ function HumanDecision({
           <p className="u-sublabel mb-2.5 text-ink-3">
             Como seguir
           </p>
-          <Guidance finding={finding} source={source} />
+          <Guidance finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />
         </div>
 
-        <GeneratedRewrite finding={finding} source={source} onApplyRewrite={onApplyRewrite} />
+        <GeneratedRewrite finding={finding} source={source} declaration={declaration} onApplyRewrite={onApplyRewrite} />
       </div>
     </div>
   );
@@ -309,10 +333,12 @@ function HumanDecision({
 function GeneratedRewrite({
   finding,
   source,
+  declaration,
   onApplyRewrite,
 }: {
   finding: Finding;
   source: string;
+  declaration: AgentDeclaration | null;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
@@ -321,6 +347,16 @@ function GeneratedRewrite({
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // A resposta da elicitação só chega à IA pelo briefing dirigido — ao declarar,
+  // ligue-o (visível e reversível). Ajuste de estado derivado durante a renderização,
+  // o padrão sancionado no lugar de um effect com setState síncrono.
+  const [prevDeclaration, setPrevDeclaration] = useState<AgentDeclaration | null>(declaration);
+  if (declaration !== prevDeclaration) {
+    setPrevDeclaration(declaration);
+    if (declaration) setDirected(true);
+    setResult(null); // o veredito antigo foi produzido sob outra declaração
+  }
 
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
@@ -332,7 +368,13 @@ function GeneratedRewrite({
     setError(null);
     setResult(null);
     try {
-      setResult(await generateRewrite(source, target, choice, { directed, signal: controller.signal }));
+      setResult(
+        await generateRewrite(source, target, choice, {
+          directed,
+          declarations: declaration ? [declaration] : undefined,
+          signal: controller.signal,
+        }),
+      );
     } catch (e) {
       if (!controller.signal.aborted) {
         setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");

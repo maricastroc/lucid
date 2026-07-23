@@ -1,17 +1,27 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { isCriterionId, passiveScaffold, type Finding } from "@/lucid";
+import type { AgentDeclaration } from "@/report/rewrite";
+import { Checkbox } from "./ui/checkbox";
 import { longSentenceGuidance } from "../lib/narrative";
 
-export function Guidance({ finding, source }: { finding: Finding; source: string }) {
+export interface GuidanceProps {
+  finding: Finding;
+  source: string;
+  /** Elicitação (ADR-055) — usada só pelo guia da passiva sem agente. */
+  declaration?: AgentDeclaration | null;
+  onDeclare?: (d: AgentDeclaration | null) => void;
+}
+
+export function Guidance({ finding, source, declaration, onDeclare }: GuidanceProps) {
   const c = finding.criterion;
   if (!isCriterionId(c)) return <GenericGuide />;
   switch (c) {
     case "long_sentence":
       return <LongSentenceGuide finding={finding} source={source} />;
     case "passive_voice":
-      return <PassiveGuide finding={finding} source={source} />;
+      return <PassiveGuide finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />;
     case "nominalization":
       return <NominalizationGuide finding={finding} />;
     case "nominalizacao_encadeada":
@@ -209,7 +219,17 @@ function LongSentenceGuide({ finding, source }: { finding: Finding; source: stri
   );
 }
 
-function PassiveGuide({ finding, source }: { finding: Finding; source: string }) {
+function PassiveGuide({
+  finding,
+  source,
+  declaration,
+  onDeclare,
+}: {
+  finding: Finding;
+  source: string;
+  declaration?: AgentDeclaration | null;
+  onDeclare?: (d: AgentDeclaration | null) => void;
+}) {
   const scaffold = passiveScaffold(finding, source);
 
   if (!scaffold) {
@@ -223,12 +243,15 @@ function PassiveGuide({ finding, source }: { finding: Finding; source: string })
       );
     }
     return (
-      <p className="text-[12.5px] leading-relaxed text-ink-1">
-        <span className="font-medium text-ink-0">O texto não diz quem praticou a ação.</span> Para escrever na voz
-        ativa, responda: <span className="text-ink-0">quem pratica essa ação?</span> Essa informação só você tem — a
-        ferramenta não a inventa, nem monta a frase por você. Com a resposta em mãos, reescreva abaixo ou peça a
-        reescrita à IA; a engine verifica o resultado.
-      </p>
+      <div>
+        <p className="text-[12.5px] leading-relaxed text-ink-1">
+          <span className="font-medium text-ink-0">O texto não diz quem praticou a ação.</span> Essa informação só
+          você tem — a ferramenta não a inventa, nem monta a frase por você. Responda abaixo e a resposta vira{" "}
+          <span className="text-ink-0">requisito</span>: entra no briefing da reescrita por IA e a engine cobra que a
+          versão final (sua ou da IA) nomeie esse agente.
+        </p>
+        {onDeclare && <PassiveElicitation finding={finding} declaration={declaration ?? null} onDeclare={onDeclare} />}
+      </div>
     );
   }
 
@@ -254,6 +277,60 @@ function PassiveGuide({ finding, source }: { finding: Finding; source: string })
         Estrutura identificada · confira. A ferramenta não vira a frase: reordenar e reconjugar é escrever — e quem
         escreve é você (ou a IA, que a engine então verifica).
       </p>
+    </div>
+  );
+}
+
+// Elicitação (ADR-055): a engine PERGUNTA — a resposta do autor vira contexto e
+// requisito verificável, nunca parâmetro de template. Nenhuma frase é montada aqui.
+function PassiveElicitation({
+  finding,
+  declaration,
+  onDeclare,
+}: {
+  finding: Finding;
+  declaration: AgentDeclaration | null;
+  onDeclare: (d: AgentDeclaration | null) => void;
+}) {
+  const [raw, setRaw] = useState(declaration?.agent ?? "");
+  const keep = declaration !== null && declaration.agent === null;
+
+  const emit = (nextRaw: string, nextKeep: boolean) => {
+    if (nextKeep) {
+      onDeclare({ span: finding.span, agent: null });
+      return;
+    }
+    const agent = nextRaw.trim();
+    onDeclare(agent.length > 0 ? { span: finding.span, agent } : null);
+  };
+
+  return (
+    <div className="mt-3">
+      <label className="u-sublabel block text-ink-3" htmlFor="agent-declaration">
+        Quem pratica essa ação?
+      </label>
+      <input
+        id="agent-declaration"
+        value={keep ? "" : raw}
+        disabled={keep}
+        onChange={(e) => {
+          setRaw(e.target.value);
+          emit(e.target.value, false);
+        }}
+        placeholder="ex.: a comissão"
+        className="mt-1.5 w-full rounded-lg border border-rule-2 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 shadow-(--shadow-card) outline-none transition-colors focus:border-human-line disabled:opacity-50"
+      />
+      <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2">
+        <Checkbox checked={keep} onCheckedChange={(c) => emit(raw, c === true)} />
+        O agente não deve ser nomeado (manter impessoal)
+      </label>
+      {declaration && (
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          {keep
+            ? "Registrado: manter a construção impessoal é uma decisão sua. O briefing instrui a IA a não inventar agente, e a verificação não cobra a ativação."
+            : `Registrado como requisito: a versão final deve nomear «${declaration.agent}». A ferramenta não monta a frase — ela verifica quem montou.`}
+        </p>
+      )}
     </div>
   );
 }

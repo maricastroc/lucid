@@ -12,12 +12,26 @@ export interface RewriteLocale {
   readonly thirdPersonAgentSubject: RegExp;
 }
 
+/**
+ * Resposta do autor à pergunta "quem pratica essa ação?" de uma passiva sem agente
+ * (elicitação — ADR-055). `span` aponta o finding no texto-fonte; `agent` é o texto
+ * livre declarado pelo autor, ou `null` quando ele decide manter a construção impessoal.
+ * A engine nunca monta a frase com essa resposta (ADR-054): ela vira requisito do
+ * briefing dirigido e prova de verificação (`declared_agent_present`).
+ */
+export interface AgentDeclaration {
+  span: Span;
+  agent: string | null;
+}
+
 export interface RewriteRequest {
   text: string;
   target: Span;
   criterion?: string;
   strategy?: RewriteStrategy;
   findings?: readonly Finding[];
+  /** Respostas de elicitação do autor (ADR-055) — só surtem efeito na estratégia `directed`. */
+  declarations?: readonly AgentDeclaration[];
   localeId?: string;
   /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou o cliente desconectou). */
   signal?: AbortSignal;
@@ -40,6 +54,7 @@ export interface Proof {
   check:
     | "target_resolved"
     | "directed_findings_resolved"
+    | "declared_agent_present"
     | "region_improved"
     | "no_new_findings"
     | "numbers_preserved"
