@@ -13,6 +13,10 @@ export interface Config {
     enabled: boolean;
     suggest: boolean;
   };
+  nominalizacaoEncadeada: {
+    enabled: boolean;
+    minPorFrase: number;
+  };
   jargon: {
     enabled: boolean;
     frequencyRankCutoff: number;
@@ -87,6 +91,10 @@ export const DEFAULT_CONFIG: Config = {
   nominalization: {
     enabled: true,
     suggest: true,
+  },
+  nominalizacaoEncadeada: {
+    enabled: true,
+    minPorFrase: 3,
   },
   jargon: {
     enabled: true,

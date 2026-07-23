@@ -12,6 +12,7 @@ export type DatasetId =
   | "participios-infinitivo.pt"
   | "verbos-leves.pt"
   | "nominalizacoes.pt"
+  | "substantivos-acao.pt"
   | "jargao.pt"
   | "mais-que-perfeito.pt"
   | "adverbios-mente.pt"
@@ -107,6 +108,7 @@ export interface DataTypes {
   "participios-infinitivo.pt": Readonly<Record<string, string>>;
   "verbos-leves.pt": ReadonlyMap<string, LightVerbForm>;
   "nominalizacoes.pt": NominalizationPrepared;
+  "substantivos-acao.pt": ReadonlySet<string>;
   "jargao.pt": JargonPrepared;
   "mais-que-perfeito.pt": ReadonlySet<string>;
   "adverbios-mente.pt": ReadonlySet<string>;

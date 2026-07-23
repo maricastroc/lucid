@@ -192,6 +192,17 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
         `A ferramenta lê os níveis dos títulos com exatidão, mas decidir se este título deve subir de nível ou se falta um título intermediário depende da organização do conteúdo — trabalho de autor.`,
       ),
   },
+  nominalizacao_encadeada: {
+    headline: (f) => (metaStr(f, "kind") === "chain" ? "Nominalizações em cadeia" : "Nominalizações concentradas"),
+    prose: (f) =>
+      metaStr(f, "kind") === "chain"
+        ? `«${flat(f.span.text)}» esconde a ação num substantivo que governa outro substantivo abstrato por “de” — a frase empilha abstrações no lugar de dizer quem faz o quê.`
+        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação — cada um esconde um verbo, e o acúmulo pesa a leitura.`,
+    confidence: () =>
+      assistida(
+        `A detecção é por léxico curado e adjacência — sem interpretação. Mas desfazer a nominalização é devolver a ação ao verbo e dizer quem a pratica, o que muda a estrutura da frase; a ferramenta não reescreve nem inventa o agente.`,
+      ),
+  },
   mais_que_perfeito_sintetico: {
     confidence: () =>
       assistida(

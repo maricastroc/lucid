@@ -13,6 +13,7 @@ import type { Pass } from "@/lucid/core/types";
 import { sentenceLengthPass } from "./sentence-length";
 import { passiveVoicePass } from "./passive-voice";
 import { nominalizationPass } from "./nominalization";
+import { nominalizacaoEncadeadaPass } from "./nominalizacao-encadeada";
 import { jargonPass } from "./jargon";
 import { maisQuePerfeitoPass } from "./mais-que-perfeito";
 import { gerundismoPass } from "./gerundismo";
@@ -34,6 +35,7 @@ export const PASSES: readonly Pass[] = [
   sentenceLengthPass,
   passiveVoicePass,
   nominalizationPass,
+  nominalizacaoEncadeadaPass,
   jargonPass,
   maisQuePerfeitoPass,
   gerundismoPass,

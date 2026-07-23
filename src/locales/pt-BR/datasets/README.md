@@ -441,3 +441,35 @@ função gramatical.
 "a" servem de artigo E de pronome oblíquo) são inofensivas — o dado vira `Set`.
 
 **Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.
+
+## `substantivos-acao.pt.json` — nominalização encadeada (ADR-051)
+
+**Usado por:** `passes/nominalizacao-encadeada.ts` (`nominalizacao_encadeada`, `5.3.3`).
+
+**Propósito:** allowlist de substantivos deverbais cuja leitura dominante é ATO/PROCESSO
+("nominalizações nuas": `realização`, `verificação`, `encaminhamento`…). Serve de CABEÇA
+da cadeia `[cabeça] + de/da/do/das/dos (+ 1 palavra opcional) + [substantivo com sufixo
+deverbal]` e de unidade da densidade por frase. É o complemento do par
+`verbos-leves.pt.json`/`nominalizacoes.pt.json`: aquele detecta a nominalização COM
+verbo-suporte (e pode sugerir); este detecta a nominalização SEM âncora de verbo leve
+(e nunca sugere — `requiresHuman` sempre).
+
+**Critério de curadoria (precisão > recall):** só entra palavra (a) transparentemente
+deverbal e (b) cuja leitura dominante é ação — nunca entidade, artefato, lugar ou sentido
+lexicalizado. Formas singular e plural listadas explicitamente (membership, caixa
+invariante), mesma disciplina anti-morfologia-produtiva de `nominalizacoes.pt.json`.
+Plural fica de fora quando lexicalizou sozinho: `prestações` (parcelas), `cumprimentos`
+(saudação).
+
+**Fora de escopo deliberado:** `informação`/`documentação` (dado/conjunto de documentos),
+`organização`/`administração`/`coordenação`/`direção` (entidade), `procedimento`/
+`documento`/`regulamento`/`requerimento` (artefato), `manutenção` (serviço),
+`situação`/`condição`/`relação`/`atenção`/`exceção`/`opção`/`seção`/`função`
+(lexicalizados), `decisão`/`ocorrência`/`providência`/`pendência` (artefato/estado),
+`habilitação` (CNH), `classificação`/`seleção`/`promoção`/`liquidação`/`conferência`
+(polissemia forte). O SUFIXO do elo (cauda) da cadeia não vem deste arquivo — é uma
+lista fechada de terminações no próprio pass; este léxico só governa as cabeças.
+
+**Formato:** `{ "forms": string[] }`, caixa invariante.
+
+**Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.

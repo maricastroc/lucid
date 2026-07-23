@@ -26,6 +26,7 @@ import participiosFalsosNominaisData from "./participios-falsos-nominais.pt.json
 import participiosInfinitivoData from "./participios-infinitivo.pt.json";
 import verbosLevesData from "./verbos-leves.pt.json";
 import nominalizacoesData from "./nominalizacoes.pt.json";
+import substantivosAcaoData from "./substantivos-acao.pt.json";
 import jargaoData from "./jargao.pt.json";
 import maisQuePerfeitoData from "./mais-que-perfeito.pt.json";
 import adverbiosMenteData from "./adverbios-mente.pt.json";
@@ -81,6 +82,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: nominalizacoesData,
     prepare: prepareNominalizations,
     provenance: "nominalização→verbo + conjugação fechada (curadoria própria)",
+  },
+  "substantivos-acao.pt": {
+    raw: substantivosAcaoData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "substantivos deverbais de ação — cabeças da nominalização encadeada (curadoria própria, precisão>recall)",
   },
   "jargao.pt": {
     raw: jargaoData,
