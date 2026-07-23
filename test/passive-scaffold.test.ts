@@ -45,7 +45,7 @@ describe("passiveScaffold — papéis extraídos do texto", () => {
     expect(passiveScaffold(irregularPlural.finding, irregularPlural.source)!.action.baseVerb).toBe("entregar");
   });
 
-  it("particípio -ado regular fora da tabela: a regra determinística resolve o infinitivo (ADR-032)", () => {
+  it("particípio -ado regular fora da tabela: a regra determinística resolve o infinitivo (análise, não geração — ADR-054)", () => {
     const { finding, source } = agentPassive("O muro foi pichado pelos manifestantes.");
     const s = passiveScaffold(finding, source)!;
     expect(s.action.participle).toBe("pichado");

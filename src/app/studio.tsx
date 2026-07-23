@@ -4,18 +4,15 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import {
   analyze,
   analyzeDocument,
-  applySplitAt,
   ptDocumentServices,
   type Document,
   type Finding,
   type Span,
-  type SplitPoint,
 } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { CRITERION_ORDER, findingId, isSafe, metaFor } from "./lib/criteria";
+import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
-import { applySafeSuggestions } from "./lib/audit";
 import { documentBurden, sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { SAMPLE_TEXT } from "./lib/sample";
 import { Masthead } from "./components/masthead";
@@ -176,36 +173,6 @@ export function Studio() {
     [text, deferredText, diagnostic, pushUndo],
   );
 
-  const applySuggestion = useCallback(
-    (finding: Finding) => {
-      if (finding.suggestion === undefined) return;
-      applyChange(
-        {
-          source: "safe",
-          label: `${sourceLabel("safe")} · ${metaFor(finding.criterion).label}`,
-          before: finding.span.text,
-          after: finding.suggestion,
-        },
-        spliceSpan(diagnostic.text, finding.span, finding.suggestion),
-      );
-    },
-    [diagnostic, applyChange],
-  );
-
-  const applySplit = useCallback(
-    (point: SplitPoint) => applyChange({ source: "split", label: sourceLabel("split") }, applySplitAt(text, point)),
-    [text, applyChange],
-  );
-
-  const applyPassiveActive = useCallback(
-    (target: Span, replacement: string) =>
-      applyChange(
-        { source: "passive", label: sourceLabel("passive"), before: target.text, after: replacement },
-        spliceSpan(diagnostic.text, target, replacement),
-      ),
-    [diagnostic, applyChange],
-  );
-
   const applyManualEdit = useCallback(
     (target: Span, replacement: string) =>
       applyChange(
@@ -223,18 +190,6 @@ export function Studio() {
       ),
     [diagnostic, applyChange],
   );
-
-  const applyAllSafe = useCallback(() => {
-    const freshDiagnostic = analyze(text);
-    const applicable = freshDiagnostic.findings.filter((f) => activeCriteria.has(f.criterion) && isSafe(f));
-    applyChange(
-      {
-        source: "safe",
-        label: `${sourceLabel("safe")} · ${applicable.length} ${applicable.length === 1 ? "aplicada" : "aplicadas"}`,
-      },
-      applySafeSuggestions(freshDiagnostic.text, applicable),
-    );
-  }, [text, activeCriteria, applyChange]);
 
   const undo = useCallback(() => {
     const previous = undoStack.current.pop();
@@ -259,11 +214,7 @@ export function Studio() {
     onToggleCriterion: toggleCriterion,
     onBucket: setBucket,
     onSelect: selectFinding,
-    onApplyAllSafe: applyAllSafe,
-    onApply: applySuggestion,
-    onSplit: applySplit,
     onApplyRewrite: applyRewrite,
-    onPassiveActive: applyPassiveActive,
     onManualEdit: applyManualEdit,
     ledger,
     onPrev: () => goTo(-1),
@@ -348,10 +299,7 @@ export function Studio() {
                   <RevisionNote
                     finding={selectedFinding}
                     source={diagnostic.text}
-                    onApply={applySuggestion}
-                    onSplit={applySplit}
                     onApplyRewrite={applyRewrite}
-                    onPassiveActive={applyPassiveActive}
                     onManualEdit={applyManualEdit}
                   />
                 </div>
@@ -366,7 +314,6 @@ export function Studio() {
                   ledger={ledger}
                   activeCriteria={activeCriteria}
                   onToggleCriterion={toggleCriterion}
-                  onApplyAllSafe={applyAllSafe}
                 />
                 <RevisionList
                   findings={findings}
@@ -389,7 +336,7 @@ export function Studio() {
           <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
             <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
               <ArrowDownIcon className="size-4 text-safe" aria-hidden />
-              Sugestão aplicada ao texto.
+              Alteração aplicada ao texto.
             </span>
             <button
               type="button"

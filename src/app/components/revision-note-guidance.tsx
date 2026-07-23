@@ -1,35 +1,17 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import {
-  applyPassiveWithAgent,
-  isCriterionId,
-  passiveScaffold,
-  passiveToActive,
-  type Finding,
-  type Span,
-  type SplitPoint,
-} from "@/lucid";
+import { type ReactNode } from "react";
+import { isCriterionId, passiveScaffold, type Finding } from "@/lucid";
 import { longSentenceGuidance } from "../lib/narrative";
 
-export function Guidance({
-  finding,
-  source,
-  onSplit,
-  onPassiveActive,
-}: {
-  finding: Finding;
-  source: string;
-  onSplit: (point: SplitPoint) => void;
-  onPassiveActive: (target: Span, replacement: string) => void;
-}) {
+export function Guidance({ finding, source }: { finding: Finding; source: string }) {
   const c = finding.criterion;
   if (!isCriterionId(c)) return <GenericGuide />;
   switch (c) {
     case "long_sentence":
-      return <LongSentenceGuide finding={finding} source={source} onSplit={onSplit} />;
+      return <LongSentenceGuide finding={finding} source={source} />;
     case "passive_voice":
-      return <PassiveGuide finding={finding} source={source} onPassiveActive={onPassiveActive} />;
+      return <PassiveGuide finding={finding} source={source} />;
     case "nominalization":
       return <NominalizationGuide finding={finding} />;
     case "nominalizacao_encadeada":
@@ -183,21 +165,13 @@ function SubordinacaoGuide({ finding }: { finding: Finding }) {
   );
 }
 
-function LongSentenceGuide({
-  finding,
-  source,
-  onSplit,
-}: {
-  finding: Finding;
-  source: string;
-  onSplit: (point: SplitPoint) => void;
-}) {
+function LongSentenceGuide({ finding, source }: { finding: Finding; source: string }) {
   const g = longSentenceGuidance(finding, source);
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        A ferramenta não reescreve — mas mede o esforço e localiza onde a frase pode se dividir. Escolha um ponto e ela
-        insere a quebra, devolvendo um <span className="text-ink-0">rascunho</span> para você revisar e reanalisar.
+        A ferramenta não reescreve — mas mede o esforço e <span className="text-ink-0">localiza onde a frase pode se
+        dividir</span>. Use os pontos abaixo na sua edição, ou peça uma reescrita à IA e deixe a engine verificar.
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         <Stat label="palavras" value={g.words != null ? String(g.words) : "—"} />
@@ -208,32 +182,26 @@ function LongSentenceGuide({
       {g.candidates.length > 0 && (
         <div className="mt-4">
           <p className="u-sublabel mb-2 text-ink-3">
-            pontos de divisão possíveis · confira
+            pontos de divisão possíveis · informação, não ação
           </p>
           <ul className="flex flex-col gap-1.5">
             {g.candidates.map((c) => (
-              <li key={c.offset}>
-                <button
-                  type="button"
-                  onClick={() => onSplit(c)}
-                  className="group flex w-full items-baseline gap-1.5 rounded-lg border border-rule-1 bg-sheet px-3 py-2 text-left font-serif text-[13px] leading-snug transition-colors duration-150 hover:border-human-line hover:bg-human-weak"
-                >
-                  <span className="min-w-0 flex-1 truncate">
-                    <span className="text-ink-2">…{c.before}</span>
-                    <span className="mx-1.5 text-human" aria-hidden>
-                      ⁝
-                    </span>
-                    <span className="text-ink-0">{c.after}…</span>
+              <li
+                key={c.offset}
+                className="flex w-full items-baseline gap-1.5 rounded-lg border border-rule-1 bg-sheet px-3 py-2 text-left font-serif text-[13px] leading-snug"
+              >
+                <span className="min-w-0 flex-1 truncate">
+                  <span className="text-ink-2">…{c.before}</span>
+                  <span className="mx-1.5 text-human" aria-hidden>
+                    ⁝
                   </span>
-                  <span className="u-sublabel shrink-0 font-sans text-human opacity-0 transition-opacity duration-150 group-hover:opacity-100">
-                    dividir
-                  </span>
-                </button>
+                  <span className="text-ink-0">{c.after}…</span>
+                </span>
               </li>
             ))}
           </ul>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            Insere ponto final e maiúscula, sem apagar palavra. O resultado é um rascunho — a frase final é sua.
+            Fronteiras detectadas por pontuação e conjunção — a ferramenta aponta, não divide. A frase nova é sua.
           </p>
         </div>
       )}
@@ -241,59 +209,25 @@ function LongSentenceGuide({
   );
 }
 
-export const APPLY_BUTTON_CLASS =
-  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
-
-function PassiveGuide({
-  finding,
-  source,
-  onPassiveActive,
-}: {
-  finding: Finding;
-  source: string;
-  onPassiveActive: (target: Span, replacement: string) => void;
-}) {
-  const rewrite = passiveToActive(finding, source);
-
-  if (rewrite.kind === "automatic") {
-    return (
-      <div>
-        <p className="text-[12.5px] leading-relaxed text-ink-1">
-          O texto já diz quem praticou a ação, então a ferramenta monta a voz ativa de forma segura e devolve um{" "}
-          <span className="text-ink-0">rascunho</span> para você revisar.
-        </p>
-        <div className="mt-3">
-          <p className="u-sublabel mb-2 text-ink-3">voz ativa · rascunho</p>
-          <div className="rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[14px] leading-snug text-ink-0">
-            {rewrite.replacement}
-          </div>
-          <button
-            type="button"
-            onClick={() => onPassiveActive(rewrite.target, rewrite.replacement)}
-            className={`mt-2.5 ${APPLY_BUTTON_CLASS}`}
-          >
-            Aplicar
-          </button>
-          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            Reordena e reconjuga deterministicamente, sem inventar informação. O resultado é um rascunho — a frase final é
-            sua.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (rewrite.kind === "needsAgent") {
-    return <PassiveNeedsAgent finding={finding} source={source} onPassiveActive={onPassiveActive} />;
-  }
-
+function PassiveGuide({ finding, source }: { finding: Finding; source: string }) {
   const scaffold = passiveScaffold(finding, source);
+
   if (!scaffold) {
+    if (finding.meta?.hasAgent === true) {
+      return (
+        <GuideText>
+          O agente está no texto, então a informação existe — reordene para “quem faz → ação → o quê” e reconjugue o
+          verbo. A ferramenta não monta a frase: reescreva abaixo ou peça a reescrita à IA; a engine verifica o
+          resultado.
+        </GuideText>
+      );
+    }
     return (
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        <span className="font-medium text-ink-0">Falta o agente.</span> Para escrever na voz ativa, responda:{" "}
-        <span className="text-ink-0">quem praticou a ação?</span> Só com essa informação a frase ativa é possível — e a
-        resposta é sua, não da ferramenta.
+        <span className="font-medium text-ink-0">O texto não diz quem praticou a ação.</span> Para escrever na voz
+        ativa, responda: <span className="text-ink-0">quem pratica essa ação?</span> Essa informação só você tem — a
+        ferramenta não a inventa, nem monta a frase por você. Com a resposta em mãos, reescreva abaixo ou peça a
+        reescrita à IA; a engine verifica o resultado.
       </p>
     );
   }
@@ -317,55 +251,8 @@ function PassiveGuide({
       </div>
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        Estrutura identificada · confira. Aqui a ferramenta não vira a frase: a conversão automática exigiria uma inferência
-        que ela se recusa a fazer — decisão sua.
-      </p>
-    </div>
-  );
-}
-
-function PassiveNeedsAgent({
-  finding,
-  source,
-  onPassiveActive,
-}: {
-  finding: Finding;
-  source: string;
-  onPassiveActive: (target: Span, replacement: string) => void;
-}) {
-  const [agent, setAgent] = useState("");
-  const preview = agent.trim() ? applyPassiveWithAgent(finding, source, agent) : null;
-  const ready = preview?.kind === "automatic" ? preview : null;
-
-  return (
-    <div>
-      <p className="text-[12.5px] leading-relaxed text-ink-1">
-        O texto não diz quem praticou a ação. Informe <span className="text-ink-0">só o agente</span> — a ferramenta conjuga
-        e monta o rascunho; você não escreve a frase inteira.
-      </p>
-      <label className="u-sublabel mt-3 block text-ink-3">Quem pratica essa ação?</label>
-      <input
-        value={agent}
-        onChange={(e) => setAgent(e.target.value)}
-        placeholder="ex.: a comissão"
-        className="mt-1.5 w-full rounded-lg border border-rule-2 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 shadow-(--shadow-card) outline-none transition-colors focus:border-human-line"
-      />
-      {ready && (
-        <div className="mt-2 rounded-lg border border-rule-1 bg-sheet px-3 py-2 font-serif text-[13.5px] leading-snug text-ink-1">
-          {ready.replacement}
-        </div>
-      )}
-      <button
-        type="button"
-        disabled={!ready}
-        onClick={() => ready && onPassiveActive(ready.target, ready.replacement)}
-        className={`mt-2.5 ${APPLY_BUTTON_CLASS}`}
-      >
-        Aplicar
-      </button>
-      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        Só o agente vem de você; a conjugação e a montagem são determinísticas. O resultado é um rascunho — a frase final é
-        sua.
+        Estrutura identificada · confira. A ferramenta não vira a frase: reordenar e reconjugar é escrever — e quem
+        escreve é você (ou a IA, que a engine então verifica).
       </p>
     </div>
   );

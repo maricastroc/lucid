@@ -180,6 +180,25 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
 
+  it("mistura: passiva SEM agente (tolerada) é 'corrigida', mas a COM agente (pedível) fica intacta — REPROVA (não paga por contagem)", async () => {
+    const text = `${RESOLVABLE_PASSIVE} A decisão foi comunicada ao interessado.`;
+    const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
+    const resolvableCount = findings.filter((f) => !f.requiresHuman).length;
+    const tolerableCount = findings.filter((f) => f.requiresHuman).length;
+    expect(resolvableCount).toBeGreaterThan(0);
+    expect(tolerableCount).toBeGreaterThan(0);
+
+    const proposed = `${RESOLVABLE_PASSIVE} O interessado recebeu a decisão.`;
+    const target = { start: 0, end: text.length, text };
+    const v = await verifyRewrite(text, target, { proposerId: "trocou-o-errado", original: text, proposed }, {
+      findings,
+    });
+
+    expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
+    const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
+    expect(detail).toContain("passive_voice");
+  });
+
   it("sem findings dirigidos, a prova é OMITIDA (não inventa uma checagem que ninguém pediu)", async () => {
     const finding = spanFinding("Um texto qualquer aqui.", "Um texto qualquer aqui.", "long_sentence");
     const v = await verify("Um texto qualquer aqui.", finding, proposal(finding, "Outro texto."));

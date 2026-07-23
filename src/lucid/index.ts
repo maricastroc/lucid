@@ -43,10 +43,8 @@ export type { RawBlock } from "./core/document/structured";
 
 export { analyze, analyzeDocument, analyzeWithPasses, localePtBR, ptDocumentServices } from "../locales/pt-BR";
 
-export { clauseSplitPoints, applySplitAt } from "../locales/pt-BR/actions/split-sentence";
+export { clauseSplitPoints } from "../locales/pt-BR/actions/split-sentence";
 export type { SplitPoint, SplitKind } from "../locales/pt-BR/actions/split-sentence";
 export { passiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
 export type { PassiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
-export { passiveToActive, applyPassiveWithAgent } from "../locales/pt-BR/actions/passive-to-active";
-export type { PassiveRewrite } from "../locales/pt-BR/actions/passive-to-active";
 export { sentenceSpanAt } from "../locales/pt-BR";

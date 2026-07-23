@@ -95,12 +95,3 @@ export function clauseSplitPoints(text: string, span: Span): SplitPoint[] {
   return points;
 }
 
-export function applySplitAt(text: string, point: SplitPoint): string {
-  const source = normalize(text);
-  const nextLetter = firstLetterFrom(source, point.offset + 1, source.length);
-  if (nextLetter < 0) return source;
-
-  const left = source.slice(0, point.offset).replace(/[ \t]+$/u, "");
-  const right = source.slice(nextLetter);
-  return `${left}. ${right.charAt(0).toUpperCase()}${right.slice(1)}`;
-}

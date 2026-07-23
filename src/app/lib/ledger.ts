@@ -1,7 +1,7 @@
 import type { Finding } from "@/lucid";
 import { totalBurden } from "@/report/rewrite";
 
-export type LedgerSource = "safe" | "split" | "passive" | "manual" | "ai";
+export type LedgerSource = "manual" | "ai";
 
 export interface LedgerEntry {
   source: LedgerSource;
@@ -13,9 +13,6 @@ export interface LedgerEntry {
 }
 
 const SOURCE_LABEL: Record<LedgerSource, string> = {
-  safe: "Correção segura",
-  split: "Divisão de frase",
-  passive: "Voz ativa",
   manual: "Edição do autor",
   ai: "Reescrita por IA",
 };

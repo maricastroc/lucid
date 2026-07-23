@@ -4,8 +4,8 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -301,8 +301,8 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -585,8 +585,8 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -808,16 +808,15 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
 }
 `;
 
-exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
+exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`] = `
 {
   "findings": [
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "analisar" poderia substituir a construção diretamente, deixando a frase mais direta. A ferramenta não reescreve automaticamente; veja a sugestão.",
+      "justification": "Nominalização com verbo-suporte — o verbo "analisar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
       "meta": {
         "baseVerb": "analisar",
-        "hasSuggestion": true,
         "lightVerb": "fazer",
         "nominalization": "análise",
       },
@@ -825,11 +824,10 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
       "requiresHuman": false,
       "severity": "warning",
       "span": {
-        "end": 39,
+        "end": 25,
         "start": 10,
-        "text": "fazer a análise de documentos",
+        "text": "fazer a análise",
       },
-      "suggestion": "analisar documentos",
     },
     {
       "category": "syntactic",
@@ -852,10 +850,9 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "pagar" poderia substituir a construção diretamente, deixando a frase mais direta. A ferramenta não reescreve automaticamente; veja a sugestão.",
+      "justification": "Nominalização com verbo-suporte — o verbo "pagar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
       "meta": {
         "baseVerb": "pagar",
-        "hasSuggestion": true,
         "lightVerb": "realizar",
         "nominalization": "pagamento",
       },
@@ -863,16 +860,15 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_com_sugestao' 1`] = `
       "requiresHuman": false,
       "severity": "warning",
       "span": {
-        "end": 83,
+        "end": 75,
         "start": 55,
-        "text": "realizar o pagamento da taxa",
+        "text": "realizar o pagamento",
       },
-      "suggestion": "pagar a taxa",
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1140,22 +1136,20 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "verificar" poderia substituir a construção diretamente, mas a ferramenta não gera uma sugestão automática porque o complemento da frase não está em um formato reconhecido com segurança.",
+      "justification": "Nominalização com verbo-suporte — o verbo "verificar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
       "meta": {
         "baseVerb": "verificar",
-        "hasSuggestion": false,
         "lightVerb": "fazer",
         "nominalization": "verificação",
       },
       "principle": "5.3.3",
-      "requiresHuman": true,
+      "requiresHuman": false,
       "severity": "warning",
       "span": {
         "end": 69,
         "start": 50,
         "text": "fazer a verificação",
       },
-      "suggestion": undefined,
     },
     {
       "category": "syntactic",
@@ -1215,8 +1209,8 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1442,8 +1436,8 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
 {
   "findings": [],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1669,8 +1663,8 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1915,8 +1909,8 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2184,8 +2178,8 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
     },
   ],
   "meta": {
-    "configHash": "15f08c47",
-    "dataHash": "c9dfc23d",
+    "configHash": "c7cf55bf",
+    "dataHash": "8e30aa4c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",

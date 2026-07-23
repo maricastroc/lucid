@@ -20,57 +20,56 @@ function nomFindings(text: string, config: Config = DEFAULT_CONFIG) {
 
 describe("nominalizationPass — cada verbo leve cadastrado", () => {
   it.each([
-    ["É preciso fazer a análise de documentos.", "analisar documentos"],
-    ["É preciso realizar o pagamento da taxa.", "pagar a taxa"],
-    ["É preciso efetuar a solicitação de acesso.", "solicitar acesso"],
-    ["É preciso promover a avaliação de riscos.", "avaliar riscos"],
-    ["É preciso proceder à verificação dos dados.", "verificar os dados"],
-  ])("detecta e sugere corretamente em '%s'", (text, esperado) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe(esperado);
-    expect(findings[0].requiresHuman).toBe(false);
-  });
-});
-
-describe("nominalizationPass — formas infinitivas", () => {
-  it("infinitivo gera sugestão quando o resto é seguro", () => {
-    const findings = nomFindings("É obrigatório fazer a análise de documentos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe("analisar documentos");
-    expect(findings[0].requiresHuman).toBe(false);
-  });
-});
-
-describe("nominalizationPass — formas finitas sem sugestão (complemento inseguro ou traço não cadastrado)", () => {
-  it.each([
-    "O comitê fez a análise ontem.",
-    "A equipe efetuará a solicitação amanhã.",
-    "Eles fazem a análise semanalmente.",
-    "Eles faziam a análise semanalmente.",
-    "É bom que façam a análise.",
-  ])("'%s' é detectada, mas não recebe sugestão", (text) => {
+    "É preciso fazer a análise de documentos.",
+    "É preciso realizar o pagamento da taxa.",
+    "É preciso efetuar a solicitação de acesso.",
+    "É preciso promover a avaliação de riscos.",
+    "É preciso proceder à verificação dos dados.",
+  ])("detecta a construção em '%s' — sem compor troca (ADR-054)", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].requiresHuman).toBe(true);
   });
 });
 
-describe("nominalizationPass — formas finitas COM conjugação segura (ADR-011)", () => {
+describe("nominalizationPass — a engine nunca compõe a troca (ADR-054)", () => {
   it.each([
-    ["O comitê fez a análise de documentos.", "analisou documentos"],
-    ["A equipe realizou o pagamento da taxa.", "pagou a taxa"],
-    ["Eles procederam à verificação dos dados.", "verificaram os dados"],
-    ["Eles fazem a aprovação do projeto.", "aprovam o projeto"],
-    ["A diretoria fará a avaliação dos riscos.", "avaliará os riscos"],
-    ["O órgão realizava a publicação do edital.", "publicava o edital"], 
-    ["O comitê fez a análise.", "analisou"],
-  ])("'%s' → '%s' (traço preservado, sem conjugador produtivo)", (text, esperada) => {
+    "É preciso fazer a análise de documentos.",
+    "O comitê fez a análise de documentos.",
+    "O comitê fez a análise ontem.",
+    "É preciso promover a revisão dos autos.",
+  ])("'%s': nenhum finding carrega suggestion", (text) => {
+    for (const f of nomFindings(text)) expect(f.suggestion).toBeUndefined();
+  });
+
+  it("o verbo-base curado é informado via meta e justification — informação, não texto pronto", () => {
+    const [f] = nomFindings("É preciso fazer a análise de documentos.");
+    expect(f.meta).toMatchObject({ lightVerb: "fazer", nominalization: "análise", baseVerb: "analisar" });
+    expect(f.justification).toContain('"analisar"');
+    expect(f.justification).toContain("não reescreve");
+  });
+});
+
+describe("nominalizationPass — requiresHuman classifica a ambiguidade do mapeamento", () => {
+  it.each([
+    "É preciso fazer a análise de documentos.",
+    "O comitê fez a análise ontem.",
+    "Eles fazem a análise semanalmente.",
+    "É bom que façam a análise.",
+  ])("mapeamento único ('%s' → analisar): requiresHuman=false — qualquer reescritor resolve sem informação nova", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe(esperada);
     expect(findings[0].requiresHuman).toBe(false);
+  });
+
+  it.each([
+    "É preciso promover a revisão dos autos.",
+    "É preciso fazer a revisão de documentos.",
+  ])("mapeamento ambíguo ('%s' → revisão): requiresHuman=true — a escolha do verbo é do autor", (text) => {
+    const findings = nomFindings(text);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].requiresHuman).toBe(true);
+    expect(findings[0].meta).toMatchObject({ nominalization: expect.stringContaining("revis") });
   });
 });
 
@@ -114,14 +113,6 @@ describe("nominalizationPass — nominalizações cadastradas", () => {
       expect(findings).toHaveLength(1);
     },
   );
-
-  it("'revisão' é detectada mas NUNCA recebe sugestão (mapeamento não-único)", () => {
-    const findings = nomFindings("É preciso promover a revisão dos autos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].requiresHuman).toBe(true);
-    expect(findings[0].meta).toMatchObject({ nominalization: "revisão" });
-  });
 });
 
 describe("nominalizationPass — palavras não cadastradas", () => {
@@ -155,22 +146,6 @@ describe("nominalizationPass — nominalização sem verbo leve", () => {
   );
 });
 
-describe("nominalizationPass — pontuação e conjunção como barreiras (para a sugestão)", () => {
-  it("coordenação de nominalizações é detectada, mas não recebe sugestão", () => {
-    const findings = nomFindings("É preciso fazer a análise e a revisão dos dados.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe("fazer a análise");
-    expect(findings[0].suggestion).toBeUndefined();
-  });
-
-  it("oração encaixada é detectada, mas não recebe sugestão", () => {
-    const findings = nomFindings("É preciso realizar a análise que foi solicitada.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe("realizar a análise");
-    expect(findings[0].suggestion).toBeUndefined();
-  });
-});
-
 describe("nominalizationPass — modificador entre determinante e nominalização", () => {
   it("adjetivo entre determinante e nominalização impede o casamento do núcleo", () => {
     expect(nomFindings("É preciso fazer a boa análise.")).toEqual([]);
@@ -179,130 +154,20 @@ describe("nominalizationPass — modificador entre determinante e nominalizaçã
   it("possessivo entre determinante e nominalização impede o casamento do núcleo", () => {
     expect(nomFindings("É preciso fazer a nossa análise.")).toEqual([]);
   });
-
-  it("modificador DEPOIS da nominalização não impede detecção, mas impede sugestão", () => {
-    const findings = nomFindings("É preciso realizar uma análise cuidadosa dos documentos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe("realizar uma análise");
-    expect(findings[0].suggestion).toBeUndefined();
-  });
 });
 
-describe("nominalizationPass — complemento sem preposição", () => {
-  it("nominalização no fim da frase (sem complemento) é segura para sugestão", () => {
-    const findings = nomFindings("É preciso fazer a análise.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe("analisar");
-    expect(findings[0].span.text).toBe("fazer a análise");
-  });
-});
-
-describe("nominalizationPass — complemento com 'de'", () => {
-  it("'de' + 1 palavra + fim de frase é seguro", () => {
-    const findings = nomFindings("É preciso fazer a análise de documentos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe("analisar documentos");
-    expect(findings[0].span.text).toBe("fazer a análise de documentos");
-  });
-
-  it("complemento com mais de 1 palavra não é seguro", () => {
-    const findings = nomFindings("É preciso fazer a análise de documentos e contratos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].span.text).toBe("fazer a análise");
-  });
-});
-
-describe("nominalizationPass — contrações do/da/dos/das no complemento", () => {
+describe("nominalizationPass — span cobre sempre o núcleo de 3 tokens", () => {
   it.each([
-    ["É preciso fazer a análise do processo.", "analisar o processo"],
-    ["É preciso realizar o pagamento da taxa.", "pagar a taxa"],
-    ["É preciso proceder à verificação dos dados.", "verificar os dados"],
-    ["É preciso fazer a análise das propostas.", "analisar as propostas"],
-  ])("'%s' expande a contração corretamente", (text, esperado) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe(esperado);
-  });
-});
-
-describe("nominalizationPass — regência preservada", () => {
-  it("a preposição de origem não aparece na sugestão (é absorvida pelo verbo transitivo)", () => {
-    const findings = nomFindings("É preciso fazer a análise de documentos.");
-    expect(findings[0].suggestion).not.toMatch(/\bde\b/);
-  });
-
-  it("o artigo da contração aparece corretamente na sugestão, sem duplicar", () => {
-    const findings = nomFindings("É preciso realizar o pagamento da taxa.");
-    expect(findings[0].suggestion).toBe("pagar a taxa");
-    expect(findings[0].suggestion).not.toContain("da");
-  });
-});
-
-describe("nominalizationPass — sugestão segura no infinitivo", () => {
-  it("todas as condições satisfeitas produzem requiresHuman: false", () => {
-    const findings = nomFindings("É preciso fazer a análise de documentos.");
-    expect(findings[0].requiresHuman).toBe(false);
-    expect(findings[0].suggestion).toBeTruthy();
-  });
-});
-
-describe("nominalizationPass — traços fora da tabela fechada continuam sem sugestão (ADR-011)", () => {
-  it.each([
-    "O comitê faria a análise dos dados.",
-    "É bom que façam a análise de riscos.",
-    "Fazendo a análise dos autos, o comitê seguiu.",
-  ])("'%s' é detectada, mas não recebe sugestão (condicional/subjuntivo/gerúndio não cobertos)", (text) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].requiresHuman).toBe(true);
-  });
-});
-
-describe("nominalizationPass — ausência de sugestão diante de ambiguidade", () => {
-  it("mapeamento não-único ('revisão') nunca recebe sugestão, mesmo infinitivo e complemento limpo", () => {
-    const findings = nomFindings("É preciso fazer a revisão de documentos.");
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].requiresHuman).toBe(true);
-  });
-});
-
-describe("nominalizationPass — ausência de perda de modificadores", () => {
-  it("nenhuma sugestão insegura é emitida quando material adicional existiria fora do span", () => {
-    for (const text of [
-      "É preciso fazer a análise e a revisão dos dados.",
-      "É preciso realizar a análise que foi solicitada.",
-      "É preciso fazer a análise de documentos e contratos.",
-      "É preciso realizar uma análise cuidadosa dos documentos.",
-    ]) {
-      const findings = nomFindings(text);
-      expect(findings).toHaveLength(1);
-      expect(findings[0].suggestion).toBeUndefined();
-    }
-  });
-});
-
-describe("nominalizationPass — offsets exatos", () => {
-  it("span reconstrói exatamente o trecho via slice do texto original", () => {
-    const text = "É preciso fazer a análise de documentos.";
+    ["É preciso fazer a análise de documentos.", "fazer a análise"],
+    ["O comitê fez a análise ontem.", "fez a análise"],
+    ["É preciso fazer a análise e a revisão dos dados.", "fazer a análise"],
+    ["É preciso realizar uma análise cuidadosa dos documentos.", "realizar uma análise"],
+  ])("'%s' → span '%s' (o complemento é do autor, não do finding)", (text, esperado) => {
     const doc = buildDocument(text);
     const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
-    expect(doc.source.slice(findings[0].span.start, findings[0].span.end)).toBe(findings[0].span.text);
-    expect(findings[0].span.text).toBe("fazer a análise de documentos");
-    expect(findings[0].suggestion).toBe("analisar documentos");
-  });
-
-  it("span sem sugestão cobre só o núcleo de 3 tokens", () => {
-    const text = "O comitê fez a análise ontem.";
-    const doc = buildDocument(text);
-    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-
-    expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe("fez a análise");
+    expect(findings[0].span.text).toBe(esperado);
     expect(doc.source.slice(findings[0].span.start, findings[0].span.end)).toBe(findings[0].span.text);
   });
 });
@@ -312,8 +177,8 @@ describe("nominalizationPass — múltiplos findings", () => {
     const text = "É preciso fazer a análise de documentos. Depois, realizar o pagamento da taxa.";
     const findings = nomFindings(text);
     expect(findings).toHaveLength(2);
-    expect(findings[0].suggestion).toBe("analisar documentos");
-    expect(findings[1].suggestion).toBe("pagar a taxa");
+    expect(findings[0].meta).toMatchObject({ baseVerb: "analisar" });
+    expect(findings[1].meta).toMatchObject({ baseVerb: "pagar" });
   });
 
   it("detecta duas construções na mesma frase", () => {
@@ -325,16 +190,8 @@ describe("nominalizationPass — múltiplos findings", () => {
 
 describe("nominalizationPass — config.nominalization", () => {
   it("enabled:false desliga o pass inteiro", () => {
-    const config: Config = { ...DEFAULT_CONFIG, nominalization: { ...DEFAULT_CONFIG.nominalization, enabled: false } };
+    const config: Config = { ...DEFAULT_CONFIG, nominalization: { enabled: false } };
     expect(nomFindings("É preciso fazer a análise de documentos.", config)).toEqual([]);
-  });
-
-  it("suggest:false remove toda sugestão, mesmo quando seria segura", () => {
-    const config: Config = { ...DEFAULT_CONFIG, nominalization: { ...DEFAULT_CONFIG.nominalization, suggest: false } };
-    const findings = nomFindings("É preciso fazer a análise de documentos.", config);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBeUndefined();
-    expect(findings[0].requiresHuman).toBe(true);
   });
 });
 

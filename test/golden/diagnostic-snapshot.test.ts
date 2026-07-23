@@ -7,7 +7,7 @@ const IDS_SNAPSHOT = [
   "admin_simples_sem_finding",
   "frase_longa",
   "voz_passiva_com_e_sem_agente",
-  "nominalizacao_com_sugestao",
+  "nominalizacao_mapeamento_unico",
   "juridico_com_jargao",
   "quatro_criterios_span_sobreposto",
   "termos_protegidos_por_guardas",

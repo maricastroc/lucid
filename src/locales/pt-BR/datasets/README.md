@@ -130,29 +130,30 @@ presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo e
 gerúndio — 14 formas por verbo. Deliberadamente **não** cobre 1ª/2ª pessoa,
 imperativo nem pretérito mais-que-perfeito simples.
 
-**`feature` (ADR-011):** cada forma carrega o traço morfológico (`inf`, `pres.3s/3p`,
-`pret.3s/3p`, `fut.3s/3p`, `impf.3s/3p`, `cond.3s/3p`, `subj.3s/3p`, `ger`). É a chave que
-casa com a tabela `conjugations` de `nominalizacoes.pt.json` para reescrever a
-nominalização quando o verbo leve é finito — preservando tempo/pessoa/número, sem
-conjugador produtivo.
+**Histórico (`feature`/`infinitive`, ADR-011 → ADR-054):** cada forma já carregou o traço
+morfológico que casava com a tabela `conjugations` de `nominalizacoes.pt.json` para compor a
+sugestão finita. Os dois campos foram **removidos** com o compositor (ADR-054): a detecção só
+precisa de `form`, `lemma` e `pattern`.
 
 **Fora de escopo deliberado:** `dar`/`ter` como verbos-suporte de nominalização
 ("dar continuidade a") — regência e ambiguidade lexical próprias, não demonstradas
 como seguras nesta etapa (ver `docs/DECISOES.md`, ADR-007). Regências alternativas de
 `proceder` (`proceder com`) — só o padrão `à/ao/às/aos` foi implementado.
 
-**Formato:** `{ "forms": LightVerbForm[] }` (cada forma com `feature`), comparação em
-caixa invariante.
+**Formato:** `{ "forms": [{ "form", "lemma", "pattern" }] }`, comparação em caixa
+invariante.
 
 **Licença:** fatos de flexão verbal, curadoria própria.
 
 ## `nominalizacoes.pt.json`
 
-**Usado por:** `src/lucid/core/passes/nominalization.ts`.
+**Usado por:** `src/locales/pt-BR/passes/nominalization.ts`.
 
-**Propósito:** mapeia nominalização → verbo-base + regência, para decidir se uma
-construção `verbo-leve + determinante + nominalização` corresponde a um verbo único e
-seguro para sugestão mecânica.
+**Propósito:** mapeia nominalização → verbo-base, para o pass detectar a construção
+`verbo-leve + determinante + nominalização`, **classificar** o mapeamento
+(`safeForSuggestion` ⇒ `requiresHuman = false`: único e defensável) e **informar** o
+verbo-base curado. Desde o ADR-054 nada aqui alimenta composição de texto — a engine
+não sugere a troca, só a classifica e nomeia.
 
 **Critério de curadoria:** só nominalizações com mapeamento verbo único e defensável,
 relevantes ao domínio administrativo (`CLAUDE.md`). Formas singular e plural são
@@ -167,17 +168,14 @@ completamente omitidas, não incluídas com `safeForSuggestion:false`. `revisão
 exceção: cadastrada (aparece nos exemplos de detecção do pedido) mas com
 `safeForSuggestion:false` (mapeamento genuinamente não-único — "revisar" ou "rever").
 
-**Tabela `conjugations` (ADR-011) — reescrita de forma FINITA sem conjugador.** Bloco
-`conjugations`: verbo-base → traço morfológico → forma finita, **cada forma verificada à
-mão** (11 verbos-base seguros × 8 traços indicativos comuns). Quando o verbo leve é finito
-("fez a análise"), o matcher escolhe a forma da sugestão por `conjugations[verbo][feature]`
-("analisou"), preservando tempo/pessoa/número. Não é morfologia produtiva: um par
-não cadastrado não gera sugestão. Só presente/pretérito/futuro/imperfeito do indicativo
-(3ª pessoa sing/plural) estão cobertos; **condicional, subjuntivo e gerúndio ficam de
-fora** (seguem `requiresHuman`). `revisar` não aparece na tabela (`safeForSuggestion:false`).
+**Histórico (ADR-011 → ADR-054):** este dataset já carregou uma tabela `conjugations`
+(verbo-base → traço → forma finita, verificada à mão) para compor sugestões finitas
+("fez a análise" → "analisou"). A tabela foi **removida** junto com o compositor: compor
+a troca é escrever, e a engine não escreve. Também saíram os campos
+`sourcePreposition`/`targetPreposition`, que só o compositor consumia.
 
-**Formato:** `{ "entries": NominalizationEntry[], "conjugations": Record<verbo, Record<feature, forma>> }`,
-comparação em caixa invariante.
+**Formato:** `{ "entries": [{ "noun", "verb", "safeForSuggestion" }] }`, comparação em
+caixa invariante.
 
 **Licença:** julgamento linguístico próprio, curadoria própria.
 
@@ -381,42 +379,12 @@ reescreve (`requiresHuman`, sem `suggestion`).
 
 **Licença:** curadoria própria (fatos de língua + alinhamento aos guias gov.br/LAB.mg "fale com o leitor").
 
-## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — conversão voz passiva→ativa (ADR-032)
+## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — REMOVIDOS (ADR-054)
 
-**Usados por:** `actions/passive-to-active.ts` (ação estrutural do Tier 2). São dados de **AÇÃO**,
-não de pass: **não** entram em `dataDeps`/`dataHash` (como `participios-infinitivo.pt.json`), logo
-não alteram nenhum `Diagnostic`. Runtime só CONSULTA — nunca conjuga produtivamente.
-
-**Propósito:**
-- `ser-tempos.pt.json`: forma de `ser` → `{ tense, number }`. Só os tempos SIMPLES do
-  indicativo/condicional (3ª pessoa) que a conversão consegue provar. Composto (`sido`), infinitivo
-  (`ser`), gerúndio (`sendo`), subjuntivo e 1ª/2ª pessoa ficam DE FORA → conversão `unsupported`.
-- `conjugacoes-ativas.pt.json`: tabela FECHADA `lema → traço (pres/pret/impf/fut/cond × 3s/3p) →
-  forma ativa`. **Guarda SÓ EXCEÇÕES (ADR-033):** `-er`/`-ir` (particípio `-ido` ambíguo entre
-  `-er`/`-ir`) + irregulares. Os `-ar` regulares NÃO estão aqui — são gerados em runtime pela regra
-  determinística (`actions/regular-morphology.ts`), pois as exceções do `-ar` (`-ear`, MÁRIO `-iar`,
-  `dar/estar`) são um conjunto fechado. **Combinação ausente ⇒ `unsupported`, nunca por tentativa.**
-- `participios-infinitivo.pt.json` (usado por `actions/passive-roles.ts`): particípio → infinitivo,
-  também **só exceções** — irregulares (`eleito→eleger`, `aberto→abrir`) e `-ido`. Os `-ado`
-  regulares são resolvidos por regra (`-ado → -ar`, exceto `-ear`).
-
-**Geração + validação (build-time, ADR-034):** `scripts/derive-conjugacoes.mjs`. A LISTA de lemas/
-particípios cobertos continua **curada por domínio** (decisão humana), mas as FORMAS vêm do
-**PortiLexicon-UD** (`VERB.tsv`, filtrado por `Mood/Tense/Person/Number` no padrão UD): o script
-extrai as 10 formas de cada lema, **cross-valida** os regulares `-er`/`-ir` contra a regra de flexão
-de 3ª pessoa, e **valida** cada par de `participios-infinitivo` contra o léxico (a autoridade da
-desambiguação `-ido`). Qualquer divergência → `exit≠0`, nada escrito (foi assim que a entrada-
-fantasma `escrevido→escrever` — o particípio de *escrever* é o irregular `escrito` — foi eliminada).
-O `VERB.tsv` (71 MB) nunca entra no repo; passa-se o caminho via `VERB_TSV`. Chaves ordenadas → JSON
-estável (fingerprint reprodutível). Mesma fonte dos derivados do ADR-024.
-
-**Formato:** `ser-tempos` = `{ "forms": { "<forma>": { "tense", "number" } } }`;
-`conjugacoes-ativas` = `{ "verbs": { "<lema>": { "pres.3s": …, …, "cond.3p": … } } }`. Caixa
-invariante.
-
-**Licença / atribuição (OBRIGATÓRIA):** as formas são derivadas de **PortiLexicon-UD** (CC-BY 4.0) —
-logo estes arquivos são obras derivadas e creditam a fonte (mesma nota do bloco mais-que-perfeito
-acima). A *lista* de lemas cobertos é curadoria própria (fatos de flexão); as *formas* vêm do léxico.
+Existiam exclusivamente para a conversão determinística voz passiva→ativa (ADR-032/033/034),
+removida por completo: a engine não escreve. `participios-infinitivo.pt.json` sobrevive
+(alimenta o andaime do ADR-013, direção de análise) e sua validação contra o
+PortiLexicon-UD vive em `scripts/validate-participios.mjs`.
 
 ## `stopwords.pt.json` — filtro de palavras funcionais (ADR-044)
 

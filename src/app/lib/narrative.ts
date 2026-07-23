@@ -82,16 +82,13 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
       return `A ação${base ? ` do verbo “${base}”` : ""} aparece disfarçada de substantivo, presa a um verbo-suporte — o que alonga a frase e afasta o verbo do seu sentido.`;
     },
     confidence: (f) => {
-      if (f.suggestion !== undefined)
-        return {
-          level: "segura",
-          rationale: `O verbo-base substitui a construção diretamente e o complemento está num formato limpo. A forma verbal — infinitivo ou finita — vem de uma tabela fechada verificada à mão, sem conjugador produtivo, preservando tempo e pessoa. Troca 1:1, segura para aplicar.`,
-        };
       const base = metaStr(f, "baseVerb");
+      if (!f.requiresHuman)
+        return assistida(
+          `O mapeamento para o verbo${base ? ` “${base}”` : ""} é único e vem de léxico curado — mas reconjugar e ajustar o complemento é escrever, e a engine não escreve. Devolva a ação ao verbo na sua edição, ou peça a reescrita à IA; a engine verifica o resultado.`,
+        );
       return assistida(
-        `A construção foi detectada, mas gerar a troca exigiria reconjugar o verbo${
-          base ? ` “${base}”` : ""
-        } ou o complemento não está num formato que a ferramenta reconheça com segurança. Ela recusa flexionar automaticamente e devolve o verbo-base para você reescrever.`,
+        `A construção foi detectada, mas o mapeamento desta palavra para um único verbo não é seguro (mais de um sentido possível). Escolher o verbo${base ? ` — talvez “${base}” —` : ""} é decisão sua; a ferramenta não escolhe por você.`,
       );
     },
   },
@@ -105,7 +102,7 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `“${flat(f.span.text)}” consta no glossário curado com um equivalente único e independente de contexto; trocar por “${f.suggestion}” preserva a regência e não pede reconjugação. É uma substituição 1:1 — por isso a ferramenta assina embaixo.`,
+          rationale: `“${flat(f.span.text)}” consta no glossário curado com um equivalente único e independente de contexto; trocar por “${f.suggestion}” preserva a regência e não pede reconjugação. É uma substituição 1:1 — a ferramenta assina a equivalência; a troca no texto é sua.`,
         };
       return assistida(
         `Há um equivalente mais simples, mas a troca depende do que vem depois na frase: aplicá-la às cegas poderia quebrar a concordância. A ferramenta detecta e aponta o caminho, mas deixa a troca com você.`,

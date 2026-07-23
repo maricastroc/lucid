@@ -33,8 +33,6 @@ const AGENT_ADJUNCT_STOPWORDS = new Set([
   "quando", "onde", "conforme", "segundo",
 ]);
 
-// Advérbios de negação que, antes do auxiliar, negam o verbo — reposicioná-los
-// como cauda do objeto na ordem ativa inverteria o sentido da frase.
 const NEGATION_WORDS = new Set(["não", "nunca", "jamais", "nem", "tampouco"]);
 
 function containsNegation(text: string): boolean {
@@ -92,8 +90,6 @@ export function passiveToActive(finding: Finding, source: string): PassiveRewrit
   if (/[,;:]/u.test(roles.objectRegion)) return unsupported("sujeito com estrutura complexa");
   if (containsNegation(roles.objectRegion)) return unsupported("negação antes do auxiliar (a conversão inverteria o sentido)");
   if (roles.interveningModifier !== null) {
-    // "foi apenas enviado", "foi devidamente enviado", "enviado apenas pela comissão":
-    // o rebuild sujeito+verbo+objeto descartaria o advérbio, mudando o sentido.
     return unsupported(`advérbio intercalado ("${roles.interveningModifier}") — a conversão o descartaria`);
   }
 

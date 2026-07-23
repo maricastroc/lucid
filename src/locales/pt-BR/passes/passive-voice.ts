@@ -97,10 +97,6 @@ function findAgentAfter(tokens: readonly Token[], startIndex: number): AgentSear
 
 interface AgentPhraseExtent {
   end: number;
-  // true quando a extensão parou por ter atingido MAX_AGENT_PHRASE_TOKENS, e não
-  // por uma barreira sintática — ou seja, o agente continua além do que a
-  // ferramenta reconhece com segurança. Um agente truncado assim não pode virar
-  // sujeito da ativa: o resto do span original sobraria colado ao objeto.
   truncated: boolean;
 }
 
@@ -117,8 +113,6 @@ function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): Ag
     j++;
   }
 
-  // Um "." de fim de frase (fora de BARRIER_PUNCTUATION) não conta como cauda
-  // perdida: só há truncamento de verdade quando ainda resta palavra por vir.
   const truncated = j < tokens.length && tokens[j].isWord;
   return { end, truncated };
 }

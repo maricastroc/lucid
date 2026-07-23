@@ -15,7 +15,7 @@ export function ActionBadge({ finding, size = "sm" }: { finding: Finding; size?:
         className={`inline-flex shrink-0 items-center rounded-full border border-safe-line bg-safe-weak font-medium text-safe ${pad}`}
       >
         <CheckIcon className={icon} />
-        {size === "md" ? "Pode aplicar com segurança" : "Segura"}
+        {size === "md" ? "Troca direta indicada" : "Troca direta"}
       </span>
     );
   }

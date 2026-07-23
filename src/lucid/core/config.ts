@@ -10,7 +10,6 @@ export interface Config {
   };
   nominalization: {
     enabled: boolean;
-    suggest: boolean;
   };
   nominalizacaoEncadeada: {
     enabled: boolean;
@@ -87,7 +86,6 @@ export const DEFAULT_CONFIG: Config = {
   },
   nominalization: {
     enabled: true,
-    suggest: true,
   },
   nominalizacaoEncadeada: {
     enabled: true,

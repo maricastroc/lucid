@@ -144,11 +144,10 @@ export async function verifyRewrite(
 
     if (directedCriteria.length > 0) {
       const stillPresent = directedCriteria.filter((c) => {
-        const tolerated = options.findings!.filter(
-          (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
+        const resolvableRemaining = after.findings.filter(
+          (f) => f.criterion === c && !f.requiresHuman && overlaps(f, newStart, newEnd),
         ).length;
-        const afterCount = after.findings.filter((f) => f.criterion === c && overlaps(f, newStart, newEnd)).length;
-        return afterCount > tolerated;
+        return resolvableRemaining > 0;
       });
       proofs.push({
         check: "directed_findings_resolved",

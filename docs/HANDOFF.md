@@ -2,16 +2,27 @@
 
 > Documento de continuidade. Para retomar numa sessão nova: **leia este arquivo primeiro**,
 > depois `CLAUDE.md` (identidade do produto) e `docs/DECISOES.md` (ADRs). Última atualização
-> ao fim da sessão de 2026-07-21.
+> ao fim da sessão de 2026-07-23.
+>
+> **⚠️ Mudança de direção (2026-07-23, ADR-054): a engine nunca escreve nem aplica texto.**
+> Saíram: conversão passiva→ativa (ADR-032/033/034), `applySplitAt`, sugestão composta de
+> nominalização, aplicação de sugestões (individual e em lote) e os sources `safe`/`split`/
+> `passive` do ledger. Ficaram: detecção intacta, andaime da passiva (ADR-013),
+> `clauseSplitPoints` como informação, equivalente de jargão como informação (Copiar, sem
+> Aplicar), edição manual e reescrita por IA — ambas verificadas por `verifyRewrite`.
+> As menções abaixo a "aplicação automática"/"insere a quebra" descrevem o estado ANTERIOR;
+> onde houver conflito, vale o ADR-054.
 
 ---
 
 ## 1. O que é o Lucid (1 parágrafo)
 
 Motor **determinístico** de auditoria de Linguagem Simples (ABNT NBR ISO 24495-1:2024).
-Camada 1 (linter, zero LLM, zero rede) detecta violações, pontua e **só sugere quando a
-troca é mecanicamente segura**; o resto é marcado como decisão humana. Identidade:
-**instrumento honesto — marca em vez de inventar.** Detalhes em `CLAUDE.md`.
+Camada 1 (linter, zero LLM, zero rede) **detecta, explica, pergunta e verifica — nunca
+escreve nem aplica** (ADR-054). Equivalente curado 1:1 (glossário) aparece como informação;
+o resto é marcado como decisão humana. Toda produção de texto é do autor ou da IA, e passa
+pelo verificador. Identidade: **instrumento honesto — marca em vez de inventar.**
+Detalhes em `CLAUDE.md`.
 
 ---
 
@@ -290,6 +301,8 @@ Trilha nova: o Lucid virou **language-pluggable** com o português como o primei
 
 - Camada 1: zero LLM, zero rede, saída byte-idêntica. Não importar nada de `probe/`/`report/` no `core/`.
 - Nunca inventar: sem sugestão insegura; na dúvida, marca e devolve ao humano.
+- **A engine nunca escreve nem aplica (ADR-054):** todo texto exibido é citação do documento
+  ou dado curado; toda alteração no documento parte do autor ou da IA verificada.
 - LLM só na Camada 2, atrás de flag, com stub determinístico nos testes; verificação = piso, nunca selo.
 - Toda mudança de dado/heurística: ADR + entrada no golden + eval mostrando **0 sugestões inseguras**.
 - Rodar sempre no fim: `npm run test && npm run typecheck && npm run lint && npm run depcheck`.

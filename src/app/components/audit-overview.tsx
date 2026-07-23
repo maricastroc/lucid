@@ -5,7 +5,7 @@ import { CRITERION_ORDER, metaFor, SEVERITY_LABEL, severityInkVar } from "../lib
 import { buildAuditReport } from "../lib/audit-report";
 import type { LedgerEntry } from "../lib/ledger";
 import { CriterionMark } from "./badges";
-import { ArrowDownIcon, WandIcon } from "./icons";
+import { ArrowDownIcon } from "./icons";
 
 function downloadTextFile(filename: string, content: string, mime: string) {
   const blob = new Blob([content], { type: mime });
@@ -27,7 +27,6 @@ interface Props {
   ledger: readonly LedgerEntry[];
   activeCriteria: ReadonlySet<string>;
   onToggleCriterion: (criterion: string) => void;
-  onApplyAllSafe: () => void;
 }
 
 export function AuditOverview({
@@ -38,7 +37,6 @@ export function AuditOverview({
   ledger,
   activeCriteria,
   onToggleCriterion,
-  onApplyAllSafe,
 }: Props) {
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
@@ -59,7 +57,7 @@ export function AuditOverview({
 
         {total > 0 && (
           <>
-            <div className="mt-5 flex h-1.5 gap-1" role="img" aria-label={`${safeCount} seguras, ${humanCount} exigem decisão humana`}>
+            <div className="mt-5 flex h-1.5 gap-1" role="img" aria-label={`${safeCount} de troca direta, ${humanCount} exigem decisão humana`}>
               {safeCount > 0 && (
                 <span className="rounded-full" style={{ width: `${(safeCount / total) * 100}%`, background: "var(--safe)" }} />
               )}
@@ -68,7 +66,7 @@ export function AuditOverview({
               )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px]">
-              <Legend swatch="var(--safe)" label="seguras para aplicar" value={safeCount} />
+              <Legend swatch="var(--safe)" label="troca direta indicada" value={safeCount} />
               <Legend swatch="var(--human)" label="decisão do autor" value={humanCount} />
             </div>
             {(sev.error > 0 || sev.warning > 0 || sev.info > 0) && (
@@ -84,17 +82,6 @@ export function AuditOverview({
               </div>
             )}
           </>
-        )}
-
-        {safeCount > 0 && (
-          <button
-            type="button"
-            onClick={onApplyAllSafe}
-            className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-safe-strong px-3 py-2.5 text-[13px] font-semibold text-on-safe shadow-(--shadow-card) transition-colors duration-150 hover:bg-safe"
-          >
-            <WandIcon className="size-4" />
-            Aplicar as {safeCount} sugestões seguras
-          </button>
         )}
 
         <button

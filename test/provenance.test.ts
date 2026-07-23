@@ -87,11 +87,12 @@ describe("proveniência — normalização NFC e a convenção de offset", () =>
     expect(passiva.span.text).toBe("foi publicada");
   });
 
-  it("a sugestão nunca é confundida com o texto original do span", () => {
+  it("nominalização não carrega sugestão composta (ADR-054) — o verbo-base vive em meta, o span é citação", () => {
     const d = analyze("É preciso fazer a análise de documentos.");
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
-    expect(nominal.suggestion).toBe("analisar documentos");
-    expect(nominal.span.text).toBe("fazer a análise de documentos");
-    expect(d.text.slice(nominal.span.start, nominal.span.end)).toBe("fazer a análise de documentos");
+    expect(nominal.suggestion).toBeUndefined();
+    expect(nominal.meta).toMatchObject({ baseVerb: "analisar" });
+    expect(nominal.span.text).toBe("fazer a análise");
+    expect(d.text.slice(nominal.span.start, nominal.span.end)).toBe("fazer a análise");
   });
 });

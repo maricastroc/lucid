@@ -41,7 +41,7 @@ Estes valem como testes, não como intenção. Cada um tem um mecanismo de garan
 | I4 | Nenhuma fonte de não-determinismo (`Date.now`, `Math.random`, ordem de `Set`/`Map` dependente de inserção não-controlada, `toLocaleLowerCase`) em `core` | Regra de lint (`no-restricted-syntax`/`no-restricted-properties`) + revisão |
 | I5 | A sonda nunca emite aprovação; "passou no piso" = neutro | O tipo de saída da sonda **não tem** estado `aprovado`; só `flag` \| `neutro` |
 | I6 | Todo `Finding` cita `principle` (subseção da norma) e traz `justification` | Campos obrigatórios no tipo; nenhum pass pode emitir sem eles |
-| I7 | Sugestão mecânica só quando o mapeamento é **único e seguro** | Cada pass decide `suggestion?`; ausência é o default; multi-sentido nunca gera `suggestion` |
+| I7 | `suggestion` só quando é **dado curado 1:1** (glossário) — e sempre **informativa**: a engine nunca compõe nem aplica texto (ADR-054) | Ausência é o default; multi-sentido nunca gera `suggestion`; nenhum pass compõe texto por algoritmo |
 
 **Nota sobre I2 (determinismo é a espinha dorsal).** Três armadilhas concretas em PT/TS:
 1. **Ponto flutuante:** métricas (Flesch-PT) devem ser arredondadas a casas fixas na
@@ -145,7 +145,7 @@ interface Finding {
   principle: string;         // subseção ABNT, ex. "5.3.4"  (nunca inventado)
   span: Span;
   severity: Severity;
-  suggestion?: string;       // presente SÓ quando mecanicamente segura (I7)
+  suggestion?: string;       // SÓ equivalente curado 1:1, informativo — nunca aplicado pela engine (I7/ADR-054)
   requiresHuman: boolean;    // true = a ferramenta se recusa a resolver
   justification: string;     // por que este trecho viola este critério (texto em PT-BR)
   // proveniência opcional p/ debug/telemetria (não entra no snapshot canônico):
@@ -428,11 +428,12 @@ Regras de decisão:
 - Passiva **sempre é flag** (`warning`).
 - `requiresHuman = (agente ausente)`. Sem agente explícito, ativar a voz exigiria
   **inventar quem agiu** — proibido. Com agente, o ator é recuperável, mas…
-- **Decisão sobre `suggestion`:** o MVP **não** auto-sugere a forma ativa, nem com
-  agente presente. Transformar passiva→ativa exige reordenar e reconjugar (concordância
-  de número/pessoa/tempo) — mecanicamente frágil demais para caber em I7. A ferramenta
-  **aponta** a passiva e diz *por quê*; a reescrita é do humano. (Reavaliar na Fase 2 só
-  para o caso trivialíssimo "SN₁ + ser + particípio + por + SN₂".)
+- **Decisão sobre `suggestion` (definitiva — ADR-054):** a engine **não** sugere nem monta
+  a forma ativa, nunca. A reavaliação "Fase 2" foi tentada (ADR-032/033/034) e revertida:
+  a auditoria de 2026-07-23 mostrou que negação, advérbios, agentes truncados e concordância
+  não são cauda de bugs — são a semântica; o "caso trivialíssimo" não existe. A ferramenta
+  **aponta** a passiva, monta o **andaime** de papéis (ADR-013) e **verifica** a reescrita
+  do autor ou da IA; escrever é sempre de quem escreve.
 
 ### 6.3 Nominalização (`5.3.3`/`5.3.4`)
 
@@ -445,15 +446,18 @@ Duas detecções, tratadas diferente:
    - Verbos leves em `verbos-leves.pt.json` (`fazer, realizar, proceder, efetuar,
      promover, dar, ter…`).
    - Nominalização→verbo em `nominalizacoes.pt.json`, **apenas mapeamentos 1:1 seguros**.
-   - **`suggestion` só quando:** (a) a nominalização está na tabela, (b) o verbo leve casa,
-     (c) o mapeamento é único. Senão: flag sem sugestão.
+   - **Sem `suggestion` composta (ADR-054):** o pass classifica o mapeamento
+     (`requiresHuman = !safeForSuggestion`) e informa o verbo-base curado em
+     meta/justification; compor a troca (reconjugar, ajustar complemento) é escrever —
+     e a engine não escreve.
 
 2. **Densidade de nominalizações** (sinal fraco): muitas palavras `-ção/-mento/-ância/
    -agem` numa frase. → **flag `info`, nunca sugestão, nunca score punitivo forte.**
    Fica melhor como Fase 2 para não gerar ruído no MVP.
 
-`requiresHuman`: `false` no caso 1 com sugestão (é mecanicamente seguro); `true` quando
-detecta a construção mas não tem mapeamento seguro (a decisão do verbo certo é do autor).
+`requiresHuman`: `false` no caso 1 com mapeamento único (qualquer reescritor — autor ou IA —
+resolve sem informação nova); `true` quando o mapeamento é ambíguo (a decisão do verbo certo
+é do autor). Desde o ADR-054 o flag classifica o problema, não a capacidade da engine.
 
 ### 6.4 Jargão / termo incomum (`5.3.2`)
 
@@ -467,7 +471,8 @@ raciocínio completo (por que frequência sozinha inverteria precisão⟷recall)
 Mecanismos previstos, saídas distintas:
 
 1. **Glossário jargão→comum** (`jargao.pt.json`): termo técnico com equivalente comum
-   **único**. → flag `warning` **com `suggestion`**. **Implementado.**
+   **único**. → flag `warning` **com `suggestion` informativa** (dado curado exibido com
+   "Copiar"; a engine nunca aplica — ADR-054). **Implementado.**
 2. **Raridade por frequência** (`frequencia.pt.json`): palavra abaixo do ranque de corte
    e **sem** mapeamento no glossário. → flag `info` "termo pouco comum", **sem sugestão**.
    **Não implementado nesta etapa** (ADR-008).
