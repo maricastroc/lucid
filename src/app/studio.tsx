@@ -155,9 +155,20 @@ export function Studio() {
     setCanUndo(true);
   }, []);
 
+  // Trava contra reentrância: enquanto uma aplicação anterior ainda não comitou (o texto
+  // ainda não terminou de re-renderizar), uma segunda chamada de applyChange usaria o mesmo
+  // `text` desatualizado em closure e sobrescreveria silenciosamente a primeira correção.
+  const applyingRef = useRef(false);
+  useEffect(() => {
+    applyingRef.current = false;
+  }, [text]);
+
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
+      if (applyingRef.current) return;
+      if (deferredText !== text) return; // diagnostic ainda reflete uma versão anterior do texto
       if (nextText === text) return;
+      applyingRef.current = true;
       const burdenBefore = documentBurden(diagnostic.findings);
       const burdenAfter = documentBurden(analyze(nextText).findings);
       pushUndo(text);
@@ -165,7 +176,7 @@ export function Studio() {
       setText(nextText);
       setSelectedId(null);
     },
-    [text, diagnostic, pushUndo],
+    [text, deferredText, diagnostic, pushUndo],
   );
 
   const applySuggestion = useCallback(
