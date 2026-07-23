@@ -1,5 +1,5 @@
 import type { Finding } from "@/lucid";
-import { severityRank } from "./criteria";
+import { metaFor, severityRank } from "./criteria";
 
 export interface LineSegment {
   text: string;
@@ -24,8 +24,8 @@ function pickHighest(candidates: Finding[]): Finding | undefined {
 }
 
 export function segmentRange(text: string, findings: readonly Finding[], start: number, end: number): LineSegment[] {
-  const inlineF = findings.filter((f) => f.criterion !== "long_sentence");
-  const passageF = findings.filter((f) => f.criterion === "long_sentence");
+  const inlineF = findings.filter((f) => metaFor(f.criterion).channel !== "passage");
+  const passageF = findings.filter((f) => metaFor(f.criterion).channel === "passage");
 
   const bset = new Set<number>([start, end]);
   for (const f of findings) {
