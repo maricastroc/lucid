@@ -35,7 +35,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
     <>
       {segments.map((seg, i) => {
         const inline = seg.inline && activeCriteria.has(seg.inline.criterion) ? seg.inline : undefined;
-        const passage = seg.passage && activeCriteria.has("long_sentence") ? seg.passage : undefined;
+        const passage = seg.passage && activeCriteria.has(seg.passage.criterion) ? seg.passage : undefined;
         const inTarget =
           rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
 
