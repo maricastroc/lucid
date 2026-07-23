@@ -155,6 +155,20 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
     expect(findings[0].meta).toMatchObject({ hasAgent: true });
     expect(findings[0].requiresHuman).toBe(false);
   });
+
+  it("span do agente para no fim do sintagma nominal, sem engolir adjunto temporal seguinte (M2)", () => {
+    const findings = passiveFindings("O contrato foi assinado pelo diretor ontem à tarde.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe("foi assinado pelo diretor");
+    expect(findings[0].meta).toMatchObject({ hasAgent: true, agentTruncated: false });
+    expect(findings[0].requiresHuman).toBe(false);
+  });
+
+  it("continuação genitiva do agente ('diretor da empresa') não é cortada pela fronteira de adjunto (M2)", () => {
+    const findings = passiveFindings("O contrato foi assinado pelo diretor da empresa ontem.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe("foi assinado pelo diretor da empresa");
+  });
 });
 
 describe("passiveVoicePass — agente omitido", () => {
