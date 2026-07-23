@@ -224,24 +224,34 @@ export async function verifyRewrite(
   });
 
   if (options.probe && options.question) {
-    const [originalResult, proposedResult] = await Promise.all([
-      options.probe.probe({ trecho: proposal.original, pergunta: options.question }),
-      options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }),
-    ]);
+    try {
+      const [originalResult, proposedResult] = await Promise.all([
+        options.probe.probe({ trecho: proposal.original, pergunta: options.question }),
+        options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }),
+      ]);
 
-    const originalReadable = originalResult.podeResponder && !originalResult.precisouInferir;
-    const proposedReadable = proposedResult.podeResponder && !proposedResult.precisouInferir;
-    const lost = originalReadable && !proposedReadable;
-    const proposedSignal = interpret(proposedResult);
-    signals.push({
-      check: "meaning_preserved",
-      flagged: lost,
-      detail: lost
-        ? "o leitor de piso extraía o fato do original mas trava na proposta — possível perda de informação"
-        : proposedSignal.tipo === "flag"
-          ? "a proposta trava o leitor de piso, mas o original também travava — sem conclusão de perda"
-          : "sem sinal de perda de sentido pelo piso (não é garantia de compreensão)",
-    });
+      const originalReadable = originalResult.podeResponder && !originalResult.precisouInferir;
+      const proposedReadable = proposedResult.podeResponder && !proposedResult.precisouInferir;
+      const lost = originalReadable && !proposedReadable;
+      const proposedSignal = interpret(proposedResult);
+      signals.push({
+        check: "meaning_preserved",
+        flagged: lost,
+        detail: lost
+          ? "o leitor de piso extraía o fato do original mas trava na proposta — possível perda de informação"
+          : proposedSignal.tipo === "flag"
+            ? "a proposta trava o leitor de piso, mas o original também travava — sem conclusão de perda"
+            : "sem sinal de perda de sentido pelo piso (não é garantia de compreensão)",
+      });
+    } catch (error) {
+      // Sonda é camada complementar e opcional (ver CLAUDE.md) — sua falha não pode derrubar
+      // provas determinísticas já calculadas. A chamada irmã (original/proposta) pode continuar
+      // em voo em segundo plano quando é a outra que rejeita primeiro; seu resultado é descartado.
+      console.warn(
+        `[verify] sonda de compreensão falhou — signal 'meaning_preserved' omitido. ` +
+          `criterion=${options.criterion ?? "-"} error=${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   const metrics: MetricsDelta = {

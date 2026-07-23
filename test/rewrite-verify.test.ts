@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { analyze } from "../src/lucid";
 import type { Finding } from "../src/lucid/core/types";
 import {
@@ -10,7 +10,7 @@ import {
   type VerifyOptions,
 } from "../src/report/rewrite";
 import { StubComprehensionProbe } from "../src/lucid/probe/stub-probe";
-import type { ProbeResult } from "../src/lucid/probe/types";
+import type { ComprehensionProbe, ProbeInput, ProbeResult } from "../src/lucid/probe/types";
 
 function spanFinding(text: string, sub: string, criterion = "long_sentence"): Finding {
   const start = text.indexOf(sub);
@@ -346,6 +346,91 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
 
     const v = await verify(text, finding, p);
     expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
+  });
+});
+
+describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", () => {
+  const readable: ProbeResult = {
+    podeResponder: true,
+    respostaExtraida: "o fato",
+    ondeTravou: [],
+    operacoesDeLeitura: [],
+    precisouInferir: false,
+  };
+
+  class FailingProbe implements ComprehensionProbe {
+    readonly id = "failing-probe@1";
+    constructor(private readonly failOn: string) {}
+    async probe(input: ProbeInput): Promise<ProbeResult> {
+      if (input.trecho === this.failOn) throw new Error("sonda indisponível (timeout simulado)");
+      return readable;
+    }
+  }
+
+  it("sonda funcionando: meaning_preserved é emitido normalmente (comportamento inalterado)", async () => {
+    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
+    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
+    const p = proposal(finding, "O prazo começa depois");
+    const probe = new StubComprehensionProbe({ [p.original]: readable, [p.proposed]: readable });
+
+    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
+    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(true);
+  });
+
+  it("sonda falha no ORIGINAL: verifyRewrite resolve, provas e métricas seguem presentes, sem meaning_preserved, sem exceção", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
+    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
+    const p = proposal(finding, "O prazo começa depois");
+    const probe = new FailingProbe(p.original);
+
+    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
+
+    expect(v.proofs.length).toBeGreaterThan(0);
+    expect(v.metrics).toBeDefined();
+    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
+    expect(v.hasBlockingFailure).toBe(false);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain("sonda");
+    warnSpy.mockRestore();
+  });
+
+  it("sonda falha na PROPOSTA: mesma degradação graciosa", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
+    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
+    const p = proposal(finding, "O prazo começa depois");
+    const probe = new FailingProbe(p.proposed);
+
+    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
+
+    expect(v.proofs.length).toBeGreaterThan(0);
+    expect(v.metrics).toBeDefined();
+    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
+    expect(v.hasBlockingFailure).toBe(false);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    warnSpy.mockRestore();
+  });
+
+  it("sem sonda: comportamento permanece inalterado (nenhum warning, nenhum signal)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
+    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
+    const p = proposal(finding, "O prazo começa depois");
+
+    const v = await verify(text, finding, p);
+
+    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it("falha determinística real (fora da sonda) continua propagando — o catch não engole erros alheios", async () => {
+    const text = "O documento foi arquivado pelo setor competente.";
+    const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
+    const p: RewriteProposal = { ...proposal(finding, "O setor arquivou o documento."), localeId: "en-US" };
+
+    await expect(verify(text, finding, p)).rejects.toThrow(/locale/);
   });
 });
 
