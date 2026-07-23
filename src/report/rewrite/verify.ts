@@ -2,7 +2,15 @@ import type { Finding, Severity, Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
 import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
-import type { MetricsDelta, Proof, RewriteLocale, RewriteProposal, RewriteVerification, VerificationSignal } from "./types";
+import type {
+  AgentDeclaration,
+  MetricsDelta,
+  Proof,
+  RewriteLocale,
+  RewriteProposal,
+  RewriteVerification,
+  VerificationSignal,
+} from "./types";
 
 const DEFAULT_LOCALE: RewriteLocale = rewriteLocalePtBR;
 
@@ -12,6 +20,16 @@ export interface VerifyOptions {
   question?: string;
   criterion?: string;
   findings?: readonly Finding[];
+  /**
+   * Respostas de elicitação do autor (ADR-055). Uma declaração com `agent` vira a
+   * prova `declared_agent_present` E amplia a fonte-de-verdade dos guards de
+   * fabricação: o agente declarado pelo autor não é invenção do reescritor.
+   */
+  declarations?: readonly AgentDeclaration[];
+}
+
+function normalizeForMatch(s: string): string {
+  return s.toLowerCase().replace(/\s+/gu, " ").trim();
 }
 
 const RE_NUMBER = /\d[\d.,]*\d|\d/gu;
@@ -122,6 +140,16 @@ export async function verifyRewrite(
   const newStart = target.start;
   const newEnd = target.start + proposal.proposed.length;
 
+  // Declarações fora do alvo não geram exigência sobre esta reescrita (defensivo:
+  // a UI só cria declaração para o finding selecionado, que vive dentro do alvo).
+  const declarations = (options.declarations ?? []).filter(
+    (d) => d.span.start < originalEnd && d.span.end > originalStart,
+  );
+  const declaredAgents = declarations
+    .map((d) => d.agent)
+    .filter((a): a is string => a !== null && a.trim().length > 0);
+  const declaredAgentsText = declaredAgents.join(" ");
+
   const proofs: Proof[] = [];
 
   if (options.criterion) {
@@ -158,6 +186,23 @@ export async function verifyRewrite(
             : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
       });
     }
+  }
+
+  // ADR-055: o autor respondeu "quem pratica essa ação?" — a resposta é requisito,
+  // não template. A prova cobra que a reescrita NOMEIE o agente declarado (matching
+  // literal, caixa/espaço-insensível); ela nunca compõe a frase por ele. Omitida
+  // quando não há declaração com agente — não se inventa checagem que ninguém pediu.
+  if (declaredAgents.length > 0) {
+    const normalizedProposal = normalizeForMatch(proposal.proposed);
+    const missing = declaredAgents.filter((a) => !normalizedProposal.includes(normalizeForMatch(a)));
+    proofs.push({
+      check: "declared_agent_present",
+      passed: missing.length === 0,
+      detail:
+        missing.length === 0
+          ? `a reescrita nomeia o agente declarado pelo autor: ${declaredAgents.map((a) => `«${a}»`).join(", ")}`
+          : `o autor declarou o agente, mas a reescrita não o nomeia: ${missing.map((a) => `«${a}»`).join(", ")}`,
+    });
   }
 
   const burdenBefore = regionBurden(before.findings, originalStart, originalEnd);
@@ -208,7 +253,9 @@ export async function verifyRewrite(
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
 
-  const sourceFirstPerson = firstPersonMarkers(text, locale.firstPersonMarkers);
+  // A declaração amplia a fonte-de-verdade (ADR-055): se o autor declarou "nós"/"eu"
+  // como agente, a 1ª pessoa na proposta não é fabricação do reescritor.
+  const sourceFirstPerson = firstPersonMarkers(`${text} ${declaredAgentsText}`, locale.firstPersonMarkers);
   const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();
   const inventedFirstPerson = sourceFirstPerson.size === 0 ? proposalFirstPerson : [];
   const noInventedFirstPerson: Proof = {
@@ -236,7 +283,8 @@ export async function verifyRewrite(
         : "sem sinal de nome próprio perdido (heurística, não prova)",
   });
 
-  const sourceAgentNouns = agentNounsAnywhere(text, locale.thirdPersonAgentNouns);
+  // Mesma ampliação para 3ª pessoa: o agente declarado pelo autor não é invenção.
+  const sourceAgentNouns = agentNounsAnywhere(`${text} ${declaredAgentsText}`, locale.thirdPersonAgentNouns);
   const proposedAgentSubjects = agentSubjectMentions(proposal.proposed, locale.thirdPersonAgentSubject);
   const inventedAgents = [...proposedAgentSubjects].filter((a) => !sourceAgentNouns.has(a)).sort();
   signals.push({

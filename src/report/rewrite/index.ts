@@ -17,6 +17,7 @@ export async function proposeAndVerify(
     localeId: options.locale?.id,
     strategy: options.strategy,
     findings: options.findings,
+    declarations: options.declarations,
     signal: options.signal,
   });
   const verification = await verifyRewrite(text, target, proposal, options);
@@ -30,6 +31,7 @@ export type { RewriteStrategy } from "./prompt";
 export { applyProposal, totalBurden, verifyRewrite } from "./verify";
 export type { VerifyOptions } from "./verify";
 export type {
+  AgentDeclaration,
   MetricsDelta,
   Proof,
   RewriteLocale,

@@ -9,7 +9,13 @@ import {
   GroqProvider,
   GROQ_MODELS,
 } from "@/llm";
-import { LlmRewriteProposer, proposeAndVerify, type RewriteProposer, type RewriteStrategy } from "@/report/rewrite";
+import {
+  LlmRewriteProposer,
+  proposeAndVerify,
+  type AgentDeclaration,
+  type RewriteProposer,
+  type RewriteStrategy,
+} from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
@@ -26,10 +32,13 @@ interface RewriteRequestBody {
   criterion?: unknown;
   strategy?: unknown;
   findings?: unknown;
+  declarations?: unknown;
   providerId?: unknown;
   model?: unknown;
   localeId?: unknown;
 }
+
+const MAX_DECLARED_AGENT_LENGTH = 200;
 
 const VALID_STRATEGIES: ReadonlySet<string> = new Set<RewriteStrategy>(["correct", "rewrite", "directed"]);
 
@@ -48,6 +57,14 @@ function isValidSpan(value: unknown, textLength: number): value is Span {
   const s = value as Record<string, unknown>;
   if (typeof s.start !== "number" || typeof s.end !== "number" || typeof s.text !== "string") return false;
   return s.start >= 0 && s.end <= textLength && s.start < s.end;
+}
+
+function isDeclarationLike(value: unknown, textLength: number): value is AgentDeclaration {
+  if (typeof value !== "object" || value === null) return false;
+  const d = value as Record<string, unknown>;
+  if (d.agent !== null && typeof d.agent !== "string") return false;
+  if (typeof d.agent === "string" && (d.agent.length === 0 || d.agent.length > MAX_DECLARED_AGENT_LENGTH)) return false;
+  return isValidSpan(d.span, textLength);
 }
 
 function buildProposer(providerId: string, model: string): RewriteProposer | { error: string; status: number } {
@@ -96,7 +113,7 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
   }
 
-  const { text, target, criterion, strategy, findings, providerId, model, localeId } = body;
+  const { text, target, criterion, strategy, findings, declarations, providerId, model, localeId } = body;
   if (typeof text !== "string" || text.length === 0 || text.length > MAX_TEXT_LENGTH) {
     return NextResponse.json({ error: "texto ausente ou longo demais" }, { status: 400 });
   }
@@ -125,6 +142,9 @@ export async function POST(request: Request): Promise<Response> {
       criterion: typeof criterion === "string" ? criterion : undefined,
       strategy: typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
       findings: Array.isArray(findings) ? findings.filter(isFindingLike) : undefined,
+      declarations: Array.isArray(declarations)
+        ? declarations.filter((d): d is AgentDeclaration => isDeclarationLike(d, text.length))
+        : undefined,
       probe: probe ?? undefined,
       question: probe ? FLOOR_QUESTION : undefined,
       signal: request.signal,

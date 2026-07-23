@@ -43,6 +43,7 @@ export class LlmRewriteProposer implements RewriteProposer {
       strategy,
       criterion: request.criterion,
       findings: request.findings,
+      declarations: request.declarations,
     });
     const raw = await this.provider.complete(prompt, {
       model: this.model,

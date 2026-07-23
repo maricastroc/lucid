@@ -1,11 +1,12 @@
 import type { Finding, Span } from "../../lucid/core/types";
+import type { AgentDeclaration } from "./types";
 
 export type RewriteStrategy = "correct" | "rewrite" | "directed";
 
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
   rewrite: "rewrite@2",
-  directed: "directed@3",
+  directed: "directed@4",
 };
 
 export const REWRITE_PROMPT_VERSION = STRATEGY_VERSION.rewrite;
@@ -97,9 +98,30 @@ function renderBriefing(findings: readonly Finding[], labelFor: (criterion: stri
     .join("\n");
 }
 
-function buildDirectedPrompt(fullText: string, target: Span, findings: readonly Finding[]): string {
+function flatSpan(f: Finding): string {
+  return f.span.text.replace(/\s+/g, " ").trim();
+}
+
+function buildDirectedPrompt(
+  fullText: string,
+  target: Span,
+  findings: readonly Finding[],
+  declarations: readonly AgentDeclaration[] = [],
+): string {
+  // Elicitação (ADR-055): a declaração casa com o finding por span exato, e só faz
+  // sentido para a passiva sem agente (o único ponto em que a engine PERGUNTA).
+  const declarationOf = new Map(declarations.map((d) => [`${d.span.start}:${d.span.end}`, d]));
+  const declOf = (f: Finding): AgentDeclaration | undefined =>
+    f.criterion === "passive_voice" && f.requiresHuman
+      ? declarationOf.get(`${f.span.start}:${f.span.end}`)
+      : undefined;
+
   const mandatory = findings.filter((f) => !f.requiresHuman);
-  const bestEffort = findings.filter((f) => f.requiresHuman && BEST_EFFORT_CRITERIA.has(f.criterion));
+  const declared = findings.filter((f) => declOf(f)?.agent != null);
+  const keepImpersonal = findings.filter((f) => declOf(f) !== undefined && declOf(f)!.agent === null);
+  const bestEffort = findings.filter(
+    (f) => f.requiresHuman && BEST_EFFORT_CRITERIA.has(f.criterion) && declOf(f) === undefined,
+  );
 
   const mandatoryBrief = renderBriefing(
     mandatory,
@@ -110,6 +132,24 @@ function buildDirectedPrompt(fullText: string, target: Span, findings: readonly 
   const sections: string[] = [];
   if (mandatoryBrief) {
     sections.push(`A engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${mandatoryBrief}`);
+  }
+  if (declared.length > 0) {
+    const lines = declared.map((f) => `- "${flatSpan(f)}" → agente declarado: «${declOf(f)!.agent}»`).join("\n");
+    sections.push(
+      "O AUTOR do texto respondeu quem pratica a ação nos pontos abaixo. Reescreva cada um na voz " +
+        "ativa nomeando o agente declarado como sujeito — exatamente ELE, nenhum outro (não troque por " +
+        "sinônimo nem por pronome). O agente declarado pelo autor conta como informação do texto: " +
+        "usá-lo NÃO é inventar:\n" +
+        lines,
+    );
+  }
+  if (keepImpersonal.length > 0) {
+    const lines = keepImpersonal.map((f) => `- "${flatSpan(f)}"`).join("\n");
+    sections.push(
+      "Nos pontos abaixo o AUTOR decidiu NÃO nomear quem pratica a ação. MANTENHA a construção " +
+        "impessoal nesses pontos — não invente agente nem force a voz ativa:\n" +
+        lines,
+    );
   }
   if (bestEffortBrief) {
     sections.push(
@@ -152,10 +192,17 @@ Responda SOMENTE com este JSON, sem texto fora dele:
 export function buildRewritePrompt(
   fullText: string,
   target: Span,
-  options: { strategy?: RewriteStrategy; criterion?: string; findings?: readonly Finding[] } = {},
+  options: {
+    strategy?: RewriteStrategy;
+    criterion?: string;
+    findings?: readonly Finding[];
+    declarations?: readonly AgentDeclaration[];
+  } = {},
 ): string {
   const strategy = options.strategy ?? "rewrite";
   if (strategy === "correct") return buildCorrectPrompt(target, options.criterion);
-  if (strategy === "directed") return buildDirectedPrompt(fullText, target, options.findings ?? []);
+  if (strategy === "directed") {
+    return buildDirectedPrompt(fullText, target, options.findings ?? [], options.declarations ?? []);
+  }
   return buildFreePrompt(fullText, target, options.criterion);
 }

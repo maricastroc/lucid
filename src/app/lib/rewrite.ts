@@ -4,6 +4,7 @@ import {
   proposeAndVerify,
   StubRewriteProposer,
   verifyRewrite,
+  type AgentDeclaration,
   type RewriteStrategy,
   type VerifiedRewrite,
 } from "@/report/rewrite";
@@ -42,6 +43,12 @@ function overlapsTarget(f: Finding, target: Span): boolean {
 export interface GenerateRewriteOptions {
   criterion?: string;
   directed?: boolean;
+  /**
+   * Respostas de elicitação do autor (ADR-055). Sempre entram na VERIFICAÇÃO
+   * (requisito declarado = requisito cobrado, seja qual for o gerador); só entram
+   * no PROMPT na estratégia dirigida — a única que carrega briefing.
+   */
+  declarations?: readonly AgentDeclaration[];
   /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou a nota foi fechada). */
   signal?: AbortSignal;
 }
@@ -52,12 +59,19 @@ export async function generateRewrite(
   choice: RewriteModel,
   options: GenerateRewriteOptions = {},
 ): Promise<VerifiedRewrite> {
-  const { criterion, directed, signal } = options;
+  const { criterion, directed, declarations, signal } = options;
   const strategy: RewriteStrategy | undefined = directed ? "directed" : undefined;
   const findings = directed ? analyze(text).findings.filter((f) => overlapsTarget(f, target)) : undefined;
 
   if (choice.providerId === "stub") {
-    return proposeAndVerify(text, target, stubProposer, { criterion, strategy, findings, locale: rewriteLocalePtBR, signal });
+    return proposeAndVerify(text, target, stubProposer, {
+      criterion,
+      strategy,
+      findings,
+      declarations,
+      locale: rewriteLocalePtBR,
+      signal,
+    });
   }
 
   const response = await fetch("/api/rewrite", {
@@ -69,6 +83,7 @@ export async function generateRewrite(
       criterion,
       strategy,
       findings,
+      declarations,
       providerId: choice.providerId,
       model: choice.model,
       localeId: ACTIVE_LOCALE_ID,
@@ -84,12 +99,19 @@ export async function generateRewrite(
   return data;
 }
 
-export async function verifyManualEdit(text: string, target: Span, draft: string): Promise<VerifiedRewrite> {
+export async function verifyManualEdit(
+  text: string,
+  target: Span,
+  draft: string,
+  declarations?: readonly AgentDeclaration[],
+): Promise<VerifiedRewrite> {
   const proposal = {
     proposerId: "sua edição",
     original: target.text,
     proposed: manualEditReplacement(draft),
   };
-  const verification = await verifyRewrite(text, target, proposal, { locale: rewriteLocalePtBR });
+  // A declaração vale para o autor também (nenhuma fonte é privilegiada): se você
+  // declarou o agente, a sua versão é cobrada pela mesma prova que cobra a IA.
+  const verification = await verifyRewrite(text, target, proposal, { locale: rewriteLocalePtBR, declarations });
   return { proposal, verification };
 }

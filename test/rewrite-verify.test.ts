@@ -205,6 +205,21 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(v.proofs.find((p) => p.check === "directed_findings_resolved")).toBeUndefined();
   });
 
+  it("com agente declarado, a prova declared_agent_present coexiste com a dirigida", async () => {
+    const text = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
+    const passive = analyze(text).findings.find((f) => f.criterion === "passive_voice")!;
+    expect(passive.requiresHuman).toBe(true);
+
+    const target = { start: 0, end: text.length, text };
+    const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
+    const v = await verifyRewrite(text, target, { proposerId: "com-declaracao", original: text, proposed }, {
+      findings: [passive],
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(true);
+  });
+
   it("achados 100% requiresHuman (nada pedível) — a prova é OMITIDA, não vira um 'passou' vazio", async () => {
     const passives = analyze(PARAGRAPH).findings.filter((f) => f.criterion === "passive_voice");
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
@@ -212,6 +227,135 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
       findings: passives,
     });
     expect(v.proofs.find((p) => p.check === "directed_findings_resolved")).toBeUndefined();
+  });
+});
+
+describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, ADR-055)", () => {
+  const TEXT = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
+
+  function passiveOf(text: string): Finding {
+    const f = analyze(text).findings.find((x) => x.criterion === "passive_voice");
+    if (!f) throw new Error("sem passiva no texto de teste");
+    return f;
+  }
+
+  function wholeTarget(text: string) {
+    return { start: 0, end: text.length, text };
+  }
+
+  it("a reescrita nomeia o agente declarado (caixa diferente) → PASSA", async () => {
+    const passive = passiveOf(TEXT);
+    const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
+    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(true);
+    expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
+  });
+
+  it("a reescrita ativa com OUTRO agente → REPROVA (o requisito é o agente do autor, não um qualquer)", async () => {
+    const passive = passiveOf(TEXT);
+    const proposed = "O setor comunicou a decisão ao interessado no processo administrativo em curso.";
+    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(false);
+    expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
+    expect(v.hasBlockingFailure).toBe(true);
+  });
+
+  it("a reescrita mantém a passiva sem nomear o agente declarado → REPROVA", async () => {
+    const passive = passiveOf(TEXT);
+    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(false);
+  });
+
+  it("decisão de manter impessoal (agent: null) → prova OMITIDA (a recusa é legítima, não exige ativação)", async () => {
+    const passive = passiveOf(TEXT);
+    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
+      declarations: [{ span: passive.span, agent: null }],
+    });
+
+    expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
+  });
+
+  it("sem declarações → prova OMITIDA (não inventa checagem que ninguém pediu)", async () => {
+    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {});
+    expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
+  });
+
+  it("declaração FORA do alvo → prova OMITIDA (não exige nada sobre trecho que não está sendo reescrito)", async () => {
+    const text = "O relatório segue em análise. A decisão foi comunicada ao interessado no processo.";
+    const passive = passiveOf(text);
+    const firstSentence = { start: 0, end: 29, text: text.slice(0, 29) };
+    expect(passive.span.start).toBeGreaterThan(firstSentence.end);
+
+    const v = await verifyRewrite(
+      text,
+      firstSentence,
+      { proposerId: "t", original: firstSentence.text, proposed: "O relatório está em análise." },
+      { declarations: [{ span: passive.span, agent: "a comissão" }] },
+    );
+
+    expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
+  });
+
+  it("isenção de 1ª pessoa: agente declarado «nós» não é fabricação (o autor forneceu o fato)", async () => {
+    const text = "Foi verificada a documentação enviada pelo requerente ao protocolo geral.";
+    const passive = passiveOf(text);
+    const proposed = "Nós verificamos a documentação enviada pelo requerente ao protocolo geral.";
+    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
+      declarations: [{ span: passive.span, agent: "nós" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(true);
+    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+  });
+
+  it("SEM a declaração, a mesma proposta em 1ª pessoa segue vetada (a isenção é da declaração, não geral)", async () => {
+    const text = "Foi verificada a documentação enviada pelo requerente ao protocolo geral.";
+    const proposed = "Nós verificamos a documentação enviada pelo requerente ao protocolo geral.";
+    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {});
+
+    expect(proofPassed(v, "no_invented_first_person")).toBe(false);
+  });
+
+  it("isenção de 3ª pessoa: agente declarado «a comissão» não levanta possible_invented_agent", async () => {
+    const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
+    const passive = passiveOf(text);
+    const proposed = "A comissão decidiu prorrogar o prazo até o fim do mês corrente.";
+    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(true);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
+  });
+
+  it("a isenção é cirúrgica: agente NÃO declarado continua flagrado mesmo com outra declaração ativa", async () => {
+    const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
+    const passive = passiveOf(text);
+    const proposed = "A equipe decidiu prorrogar o prazo até o fim do mês corrente.";
+    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
+      declarations: [{ span: passive.span, agent: "a comissão" }],
+    });
+
+    expect(proofPassed(v, "declared_agent_present")).toBe(false);
+    expect(signalFlagged(v, "possible_invented_agent")).toBe(true);
+  });
+
+  it("determinístico: mesma declaração → mesmo JSON", async () => {
+    const passive = passiveOf(TEXT);
+    const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
+    const opts: VerifyOptions = { declarations: [{ span: passive.span, agent: "a comissão" }] };
+    const a = JSON.stringify(await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts));
+    const b = JSON.stringify(await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts));
+    expect(b).toBe(a);
   });
 });
 

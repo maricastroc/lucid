@@ -26,11 +26,11 @@
 </p>
 
 <p align="center">
-  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>13 detectors</strong>, <strong>874 tests</strong>, and a hard fence between the two layers that the build enforces.
+  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>20 detectors</strong>, <strong>1011 tests</strong>, and a hard fence between the two layers that the build enforces.
 </p>
 
 <p align="center">
-  🔗 <strong>Live demo:</strong> <a href="urban-flow.marianacastro.dev/">lucid.marianacastro.dev</a>
+  🔗 <strong>Live demo:</strong> <a href="https://lucid.marianacastro.dev/">lucid.marianacastro.dev</a>
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 | **🏷️ Per-criterion provenance**    | Every finding cites the exact **ABNT NBR ISO 24495-1** subsection it violates (e.g. `5.3.4`) plus a plain-Portuguese justification. The `principle` is never invented — it maps to the norm.                                                                 |
 | **✋ Marks, never invents**         | Anything that needs judgment — a hidden agent, a multi-sense word, cutting the superfluous — is flagged `requiresHuman` and left to the author, **with the reason**. The tool refuses to fake it.                                                            |
 | **✅ Indicates, never applies**    | A curated 1:1 glossary equivalent is surfaced **as information** — never as an applied edit. The engine composes no text and touches no document (ADR-054): every change comes from the author, or from an AI proposal the engine then verifies.               |
-| **🧩 13 detectors, per principle** | Long sentences, passive voice, nominalization, jargon, synthetic pluperfect, gerundism, `-mente` adverb pile-ups, redundancy, inflated periphrasis, mesoclisis and double-negation (**Principle 3**); long paragraphs and prose-enumeration (**Principle 2**). |
+| **🧩 20 detectors, per principle** | Long sentences, passive voice, nominalization, chained nominalization, jargon, synthetic pluperfect, gerundism, `-mente` adverb pile-ups, redundancy, inflated periphrasis, mesoclisis, double-negation, dense subordination and third-person address (**Principle 3**); long paragraphs, prose-enumeration, heading-hierarchy skips, over-long headings and single-item lists (**Principle 2**); heading↔body mismatch (**Principle 1**). |
 | **🇧🇷 Built for bureaucratese**    | The detectors target exactly what plagues official Brazilian Portuguese — and what no English tool covers: mesoclisis (`far-se-á`), gerundism (`vai estar enviando`), synthetic pluperfect (`requerera`), litotes (`não é incomum`), latinisms.             |
 | **🧪 The comprehension probe**     | An opt-in floor-reader (**Layer 2**, LLM) reads *only* the passage and tries to answer the reader's question. It is a **negative test**: it can flag where a real reader would stall, but it **never returns a green check**.                                 |
 | **♻️ Verified AI rewrites**        | When a model *does* rewrite, the **deterministic engine is the judge**: separated **PROOF** (target violation gone, numbers/dates preserved, no fabricated first person) vs. **SIGNAL** (meaning preserved via the probe) — never a seal. The author decides. |
@@ -58,7 +58,7 @@
 | **✍️ The review studio**           | A two-mode editor (**Write / Review**) with inline annotations, an audit rail that groups by criterion and severity, curated-equivalent cards (copy, not apply), and the probe panel — all fed by a single client-side `analyze()`.                           |
 | **🔒 A fence the build enforces**  | Layer 1 never imports Layer 2 (or React, or the network). Checked by **dependency-cruiser** + boundary tests: if Layer 2 falls, the product stands whole.                                                                                                    |
 | **🌍 Language-pluggable core**     | The engine is **language-neutral**; Portuguese is the first explicit `Locale`. A `LocaleBundle` carries the passes, lexicons, syllable counter, readability metric and criteria; `core` never imports a locale (a fence enforces it), so a second locale slots in **without touching the pipeline**. A synthetic test locale proves the seam.                    |
-| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **991 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
+| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **1011 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
 
 <br/>
 
@@ -76,7 +76,7 @@ The whole of Layer 1 is a fixed, pure pipeline ([`src/lucid/core/analyzer.ts`](s
 ```
 analyze(text):
   buildDocument   normalize (NFC) → segment sentences → tokenize → group paragraphs
-  passes          13 deterministic detectors, each emitting Findings with provenance
+  passes          20 deterministic detectors, each emitting Findings with provenance
   score           per-criterion counts + density — measures, never approves
   → Diagnostic    { text, findings, score, metrics, meta(localeId, configHash, dataHash) }
 ```
@@ -101,7 +101,7 @@ analyze(text):
 
 The reading: `rewrite` buys far more clarity than `correct` (ΔFlesch ~+70 vs ~+10), and the verifier does its job — Gemini's bolder rewrites scored the biggest Flesch gains **but** its `proofs OK%` dropped to 67% (on the numbers-dates-names text the deterministic check caught an altered value or new jargon) and its veto rate rose. Stronger prose never buys a pass; the proof gate is what decides. Honest caveat: single run, `temperature 0` (LLM output still varies run-to-run — hence `rewrote% < 100` when `correct` returns identical text), 3 texts — a floor signal, not a leaderboard.
 
-The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 001–032) in [`docs/DECISOES.md`](docs/DECISOES.md).
+The architecture and every design decision live in [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md), with the full decision log (ADRs 000–055) in [`docs/DECISOES.md`](docs/DECISOES.md).
 
 <br/>
 
@@ -196,7 +196,7 @@ npm run depcheck    # dependency-cruiser — the layer fence
 
 The **code** is released under the [MIT License](LICENSE) — use, study, fork and build on it, **as long as the original copyright and license notice are kept.**
 
-The **bundled linguistic data** derived from **PortiLexicon-UD** (`mais-que-perfeito.pt.json`, `adverbios-mente.pt.json`) is a derivative work under **Creative Commons Attribution 4.0 (CC-BY 4.0)** — attribution is required; see [`src/lucid/data/README.md`](src/lucid/data/README.md).
+The **bundled linguistic data** derived from **PortiLexicon-UD** (`mais-que-perfeito.pt.json`, `adverbios-mente.pt.json`) is a derivative work under **Creative Commons Attribution 4.0 (CC-BY 4.0)** — attribution is required; see [`src/locales/pt-BR/datasets/README.md`](src/locales/pt-BR/datasets/README.md).
 
 © 2025–2026 Mariana Castro
 
