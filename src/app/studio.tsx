@@ -10,7 +10,7 @@ import {
   type Span,
 } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { CRITERION_ORDER, criterionRank, findingId, isSafe } from "./lib/criteria";
+import { CRITERION_ORDER, findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { documentBurden, sourceLabel, type LedgerEntry } from "./lib/ledger";
@@ -18,7 +18,7 @@ import { SAMPLE_TEXT } from "./lib/sample";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
 import { AuditRail, NoteNav, RailFooter } from "./components/audit-rail";
-import { AuditOverview } from "./components/audit-overview";
+import { AuditOverview, ReadingSection } from "./components/audit-overview";
 import { RevisionList, type Bucket } from "./components/revision-list";
 import { RevisionNote } from "./components/revision-note";
 import { Welcome } from "./components/welcome";
@@ -97,15 +97,7 @@ export function Studio() {
   }, [resetDocumentState]);
 
   const findings = useMemo(
-    () =>
-      diagnostic.findings
-        .filter((f) => activeCriteria.has(f.criterion))
-        .sort((a, b) => {
-          const byCriterion = criterionRank(a.criterion) - criterionRank(b.criterion);
-          if (byCriterion !== 0) return byCriterion;
-          if (a.span.start !== b.span.start) return a.span.start - b.span.start;
-          return a.span.end - b.span.end;
-        }),
+    () => orderFindingsForIndex(diagnostic.findings.filter((f) => activeCriteria.has(f.criterion))),
     [diagnostic, activeCriteria],
   );
 
@@ -366,18 +358,20 @@ export function Studio() {
                   safeCount={safeCount}
                   humanCount={humanCount}
                   ledger={ledger}
-                  activeCriteria={activeCriteria}
-                  onToggleCriterion={toggleCriterion}
                 />
                 <RevisionList
+                  diagnostic={diagnostic}
                   findings={findings}
                   selectedId={selectedId}
                   bucket={bucket}
                   safeCount={safeCount}
                   humanCount={humanCount}
+                  activeCriteria={activeCriteria}
                   onBucket={setBucket}
                   onSelect={selectFinding}
+                  onToggleCriterion={toggleCriterion}
                 />
+                <ReadingSection diagnostic={diagnostic} />
               </div>
             )}
             <RailFooter diagnostic={diagnostic} />

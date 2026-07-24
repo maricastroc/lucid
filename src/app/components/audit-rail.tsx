@@ -3,7 +3,7 @@
 import type { Diagnostic, Finding, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
-import { AuditOverview } from "./audit-overview";
+import { AuditOverview, ReadingSection } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
 import { ProbePanel } from "./probe-panel";
@@ -62,18 +62,20 @@ export function AuditRail(props: RailProps) {
               safeCount={props.safeCount}
               humanCount={props.humanCount}
               ledger={props.ledger}
-              activeCriteria={props.activeCriteria}
-              onToggleCriterion={props.onToggleCriterion}
             />
             <RevisionList
+              diagnostic={props.diagnostic}
               findings={props.findings}
               selectedId={props.selectedId}
               bucket={props.bucket}
               safeCount={props.safeCount}
               humanCount={props.humanCount}
+              activeCriteria={props.activeCriteria}
               onBucket={props.onBucket}
               onSelect={props.onSelect}
+              onToggleCriterion={props.onToggleCriterion}
             />
+            <ReadingSection diagnostic={props.diagnostic} />
             <ProbePanel text={props.text} />
           </div>
         </>

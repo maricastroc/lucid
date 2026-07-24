@@ -348,3 +348,46 @@ export function provenanceLabel(f: Finding): string {
   if (f.source === "editorial-pt-br") return "Extensão editorial PT-BR";
   return "Heurística estrutural";
 }
+
+/**
+ * Etiqueta compacta de proveniência para o índice (ADR-056). Honesta por
+ * construção: só o critério ISO exibe a seção da norma; extensão editorial e
+ * heurística estrutural mostram a origem, nunca uma citação inventada.
+ */
+export function provenanceTag(f: Finding): { text: string; title: string } {
+  if (f.source === "iso-24495-1" && f.normativeReference) {
+    return {
+      text: f.normativeReference.section,
+      title: `${f.normativeReference.standard} · ${f.normativeReference.section}`,
+    };
+  }
+  if (f.source === "editorial-pt-br") {
+    return { text: "PT-BR", title: "Extensão editorial PT-BR — fora da norma ISO" };
+  }
+  return { text: "estrut.", title: "Heurística estrutural — fora da norma ISO" };
+}
+
+/**
+ * Ordena os findings para o índice da auditoria: primeiro pela severidade do
+ * critério (o mais grave no topo), depois por volume, depois pela ordem canônica
+ * e pela posição no texto. Mantém os findings de um mesmo critério contíguos, de
+ * modo que a navegação por teclado (j/k) segue exatamente a ordem visual da lista.
+ */
+export function orderFindingsForIndex(findings: readonly Finding[]): Finding[] {
+  const maxSev = new Map<string, number>();
+  const volume = new Map<string, number>();
+  for (const f of findings) {
+    maxSev.set(f.criterion, Math.max(maxSev.get(f.criterion) ?? 0, severityRank(f.severity)));
+    volume.set(f.criterion, (volume.get(f.criterion) ?? 0) + 1);
+  }
+  return [...findings].sort((a, b) => {
+    const bySeverity = (maxSev.get(b.criterion) ?? 0) - (maxSev.get(a.criterion) ?? 0);
+    if (bySeverity !== 0) return bySeverity;
+    const byVolume = (volume.get(b.criterion) ?? 0) - (volume.get(a.criterion) ?? 0);
+    if (byVolume !== 0) return byVolume;
+    const byRank = criterionRank(a.criterion) - criterionRank(b.criterion);
+    if (byRank !== 0) return byRank;
+    if (a.span.start !== b.span.start) return a.span.start - b.span.start;
+    return a.span.end - b.span.end;
+  });
+}

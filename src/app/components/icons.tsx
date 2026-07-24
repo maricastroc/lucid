@@ -6,6 +6,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  EyeOff,
   Moon,
   PenTool,
   Quote,
@@ -35,3 +37,5 @@ export const SunIcon = icon(Sun, "SunIcon");
 export const MoonIcon = icon(Moon, "MoonIcon");
 export const WandIcon = icon(Wand2, "WandIcon");
 export const QuoteIcon = icon(Quote, "QuoteIcon");
+export const EyeIcon = icon(Eye, "EyeIcon");
+export const EyeOffIcon = icon(EyeOff, "EyeOffIcon");

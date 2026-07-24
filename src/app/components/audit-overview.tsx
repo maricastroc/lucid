@@ -1,10 +1,9 @@
 "use client";
 
 import type { Diagnostic, Finding, Severity } from "@/lucid";
-import { CRITERION_ORDER, metaFor, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
+import { SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
 import type { LedgerEntry } from "../lib/ledger";
-import { CriterionMark } from "./badges";
 import { ArrowDownIcon } from "./icons";
 
 function downloadTextFile(filename: string, content: string, mime: string) {
@@ -25,19 +24,9 @@ interface Props {
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
-  activeCriteria: ReadonlySet<string>;
-  onToggleCriterion: (criterion: string) => void;
 }
 
-export function AuditOverview({
-  diagnostic,
-  findings,
-  safeCount,
-  humanCount,
-  ledger,
-  activeCriteria,
-  onToggleCriterion,
-}: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger }: Props) {
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
@@ -105,60 +94,31 @@ export function AuditOverview({
       </section>
 
       {ledger.length > 0 && <TrailSection entries={ledger} />}
-
-      <section className="border-t border-rule-1 px-6 py-5">
-        <SectionLabel>Critérios</SectionLabel>
-        <ul className="mt-3 flex flex-col gap-0.5">
-          {CRITERION_ORDER.map((criterion) => {
-            const meta = metaFor(criterion);
-            const score = diagnostic.score.byCriterion.find((c) => c.criterion === criterion);
-            const count = score ? score.count.info + score.count.warning + score.count.error : 0;
-            const active = activeCriteria.has(criterion);
-            return (
-              <li key={criterion}>
-                <button
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => onToggleCriterion(criterion)}
-                  className={`row-hit flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left hover:bg-surface-2 ${
-                    active ? "" : "opacity-45"
-                  }`}
-                >
-                  <CriterionMark criterion={criterion} />
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] text-ink-0">{meta.label}</span>
-                  <span className="text-[11px] text-ink-3">{meta.principleName}</span>
-                  <span
-                    className={`w-5 text-right text-[13px] tabular-nums ${count === 0 ? "text-ink-dim" : "text-ink-1"}`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="mt-2 px-2 text-[11.5px] text-ink-3">Toque num critério para mostrar ou ocultar suas anotações.</p>
-      </section>
-
-      <section className="border-t border-rule-1 px-6 py-5">
-        <SectionLabel>Leitura</SectionLabel>
-        <dl className="mt-2 flex flex-col divide-y divide-rule-1">
-          {metricRows(diagnostic).map((r) => (
-            <div key={r.label} className="flex items-baseline justify-between py-2">
-              <dt className="text-[12.5px] text-ink-2">{r.label}</dt>
-              <dd className="flex items-baseline gap-2">
-                {r.note && <span className="text-[10.5px] text-ink-3">{r.note}</span>}
-                <span className="text-[13px] tabular-nums text-ink-0">{r.value}</span>
-              </dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          Legibilidade e coesão são descritores de apoio, nunca aprovação: valor alto ou baixo não é, sozinho, bom nem
-          ruim (coesão alta pode ser repetição; baixa pode ser variação).
-        </p>
-      </section>
     </div>
+  );
+}
+
+/** Descritores de leitura (Flesch-PT + coesão). Fica depois do índice para não empurrá-lo para baixo. */
+export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
+  return (
+    <section className="border-t border-rule-1 px-6 py-5">
+      <SectionLabel>Leitura</SectionLabel>
+      <dl className="mt-2 flex flex-col divide-y divide-rule-1">
+        {metricRows(diagnostic).map((r) => (
+          <div key={r.label} className="flex items-baseline justify-between py-2">
+            <dt className="text-[12.5px] text-ink-2">{r.label}</dt>
+            <dd className="flex items-baseline gap-2">
+              {r.note && <span className="text-[10.5px] text-ink-3">{r.note}</span>}
+              <span className="text-[13px] tabular-nums text-ink-0">{r.value}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+        Legibilidade e coesão são descritores de apoio, nunca aprovação: valor alto ou baixo não é, sozinho, bom nem
+        ruim (coesão alta pode ser repetição; baixa pode ser variação).
+      </p>
+    </section>
   );
 }
 

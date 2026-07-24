@@ -1,21 +1,24 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { Finding } from "@/lucid";
-import { findingId, isSafe, metaFor } from "../lib/criteria";
+import type { Diagnostic, Finding } from "@/lucid";
+import { CRITERION_ORDER, findingId, isSafe, metaFor, provenanceTag } from "../lib/criteria";
 import { ActionBadge, CriterionMark, SeverityDot } from "./badges";
-import { ChevronDownIcon } from "./icons";
+import { ChevronDownIcon, EyeIcon, EyeOffIcon } from "./icons";
 
 export type Bucket = "all" | "safe" | "human";
 
 interface Props {
+  diagnostic: Diagnostic;
   findings: readonly Finding[];
   selectedId: string | null;
   bucket: Bucket;
   safeCount: number;
   humanCount: number;
+  activeCriteria: ReadonlySet<string>;
   onBucket: (b: Bucket) => void;
   onSelect: (finding: Finding) => void;
+  onToggleCriterion: (criterion: string) => void;
 }
 
 interface Group {
@@ -33,13 +36,51 @@ function groupByCriterion(findings: readonly Finding[]): Group[] {
   return groups;
 }
 
-export function RevisionList({ findings, selectedId, bucket, safeCount, humanCount, onBucket, onSelect }: Props) {
+function countOf(diagnostic: Diagnostic, criterion: string): number {
+  const s = diagnostic.score.byCriterion.find((c) => c.criterion === criterion);
+  return s ? s.count.info + s.count.warning + s.count.error : 0;
+}
+
+/** Etiqueta de proveniência lida do primeiro finding do critério — honesta (ADR-056); nulo se zerado. */
+function tagFor(diagnostic: Diagnostic, criterion: string) {
+  const f = diagnostic.findings.find((x) => x.criterion === criterion);
+  return f ? provenanceTag(f) : null;
+}
+
+function ProvenanceTag({ tag }: { tag: { text: string; title: string } | null }) {
+  if (!tag) return null;
+  return (
+    <span
+      title={tag.title}
+      className="shrink-0 rounded-[3px] bg-surface-3 px-1.5 py-px text-[10px] tabular-nums tracking-wide text-ink-3"
+    >
+      {tag.text}
+    </span>
+  );
+}
+
+export function RevisionList({
+  diagnostic,
+  findings,
+  selectedId,
+  bucket,
+  safeCount,
+  humanCount,
+  activeCriteria,
+  onBucket,
+  onSelect,
+  onToggleCriterion,
+}: Props) {
   const listRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [coverageOpen, setCoverageOpen] = useState(false);
 
   const shown =
     bucket === "safe" ? findings.filter(isSafe) : bucket === "human" ? findings.filter((f) => !isSafe(f)) : findings;
   const groups = groupByCriterion(shown);
+
+  const hidden = CRITERION_ORDER.filter((c) => countOf(diagnostic, c) > 0 && !activeCriteria.has(c));
+  const clean = CRITERION_ORDER.filter((c) => countOf(diagnostic, c) === 0);
 
   const toggle = (criterion: string) =>
     setCollapsed((prev) => {
@@ -65,12 +106,13 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
   ];
 
   return (
-    <section aria-label="Revisões" className="border-t border-rule-1">
+    <section aria-label="Índice da auditoria" className="border-t border-rule-1">
       <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-5">
-        <h2 className="u-label text-ink-3">Revisões</h2>
+        <h2 className="u-label text-ink-3">Índice da auditoria</h2>
+        {groups.length > 0 && <span className="text-[10.5px] text-ink-3">por gravidade</span>}
       </div>
 
-      <div role="tablist" aria-label="Filtrar revisões" className="flex items-center gap-1.5 px-6 pb-3">
+      <div role="tablist" aria-label="Filtrar anotações" className="flex items-center gap-1.5 px-6 pb-3">
         {buckets.map(([b, labelText, n]) => (
           <button
             key={b}
@@ -89,9 +131,11 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
         ))}
       </div>
 
-      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1.5 px-3 pb-4">
+      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1.5 px-3 pb-3">
         {groups.length === 0 ? (
-          <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">Nenhuma anotação neste filtro.</p>
+          <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">
+            {findings.length === 0 ? "Nenhuma anotação disparada." : "Nenhuma anotação neste filtro."}
+          </p>
         ) : (
           groups.map((g) => {
             const meta = metaFor(g.criterion);
@@ -99,22 +143,34 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
             const panelId = `revgrp-${g.criterion}`;
             return (
               <div key={g.criterion} className="flex flex-col">
-                <button
-                  type="button"
-                  aria-expanded={!isCollapsed}
-                  aria-controls={panelId}
-                  onClick={() => toggle(g.criterion)}
-                  className="row-hit flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left hover:bg-surface-2"
-                >
-                  <ChevronDownIcon
-                    className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${
-                      isCollapsed ? "-rotate-90" : ""
-                    }`}
-                  />
-                  <CriterionMark criterion={g.criterion} />
-                  <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
-                  <span className="tabular-nums text-[12px] text-ink-3">{g.items.length}</span>
-                </button>
+                <div className="row-hit flex w-full items-center rounded-lg hover:bg-surface-2">
+                  <button
+                    type="button"
+                    aria-expanded={!isCollapsed}
+                    aria-controls={panelId}
+                    onClick={() => toggle(g.criterion)}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2 text-left"
+                  >
+                    <ChevronDownIcon
+                      className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${
+                        isCollapsed ? "-rotate-90" : ""
+                      }`}
+                    />
+                    <CriterionMark criterion={g.criterion} />
+                    <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
+                    <ProvenanceTag tag={tagFor(diagnostic, g.criterion)} />
+                    <span className="tabular-nums text-[13px] text-ink-1">{g.items.length}</span>
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`Ocultar “${meta.label}” no documento`}
+                    title="Ocultar no documento"
+                    onClick={() => onToggleCriterion(g.criterion)}
+                    className="mr-1.5 grid size-7 shrink-0 place-items-center rounded-md text-ink-dim transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
+                  >
+                    <EyeIcon className="size-3.5" />
+                  </button>
+                </div>
 
                 {!isCollapsed && (
                   <div id={panelId} className="flex flex-col gap-0.5 pl-2">
@@ -150,6 +206,64 @@ export function RevisionList({ findings, selectedId, bucket, safeCount, humanCou
           })
         )}
       </div>
+
+      {(clean.length > 0 || hidden.length > 0) && (
+        <div className="px-3 pb-4">
+          <button
+            type="button"
+            aria-expanded={coverageOpen}
+            onClick={() => setCoverageOpen((v) => !v)}
+            className="row-hit flex w-full items-center gap-2.5 rounded-lg border-t border-dashed border-rule-2 px-3 pt-3.5 pb-2 text-left text-ink-3 hover:text-ink-2"
+          >
+            <ChevronDownIcon
+              className={`size-3.5 shrink-0 transition-transform duration-150 ${coverageOpen ? "" : "-rotate-90"}`}
+            />
+            <span className="min-w-0 flex-1 text-[12px]">
+              {clean.length} {clean.length === 1 ? "critério verificado, sem ocorrência" : "critérios verificados, sem ocorrência"}
+              {hidden.length > 0 && ` · ${hidden.length} ${hidden.length === 1 ? "oculto" : "ocultos"}`}
+            </span>
+            <span className="u-sublabel">Cobertura</span>
+          </button>
+
+          {coverageOpen && (
+            <div className="mt-1 flex flex-col gap-0.5">
+              {hidden.map((c) => {
+                const meta = metaFor(c);
+                return (
+                  <div key={c} className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 opacity-60">
+                    <CriterionMark criterion={c} />
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-1">{meta.label}</span>
+                    <ProvenanceTag tag={tagFor(diagnostic, c)} />
+                    <span className="tabular-nums text-[12px] text-ink-3">{countOf(diagnostic, c)}</span>
+                    <button
+                      type="button"
+                      aria-label={`Mostrar “${meta.label}” no documento`}
+                      title="Mostrar no documento"
+                      onClick={() => onToggleCriterion(c)}
+                      className="grid size-6 shrink-0 place-items-center rounded-md text-ink-3 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
+                    >
+                      <EyeOffIcon className="size-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+              {clean.map((c) => {
+                const meta = metaFor(c);
+                return (
+                  <div key={c} className="flex items-center gap-2.5 px-3 py-1.5">
+                    <CriterionMark criterion={c} className="opacity-45" />
+                    <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-3">{meta.label}</span>
+                    <span className="tabular-nums text-[12px] text-ink-dim">0</span>
+                  </div>
+                );
+              })}
+              <p className="px-3 pt-1.5 text-[11px] italic leading-relaxed text-ink-3">
+                A ausência de anotações não é atestado de clareza — é a cobertura da auditoria.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
