@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Moon,
@@ -26,6 +27,7 @@ export const PenNibIcon = icon(PenTool, "PenNibIcon");
 export const ArrowRightIcon = icon(ArrowRight, "ArrowRightIcon");
 export const ArrowLeftIcon = icon(ArrowLeft, "ArrowLeftIcon");
 export const ArrowDownIcon = icon(ArrowDown, "ArrowDownIcon");
+export const ChevronDownIcon = icon(ChevronDown, "ChevronDownIcon");
 export const ChevronLeftIcon = icon(ChevronLeft, "ChevronLeftIcon");
 export const ChevronRightIcon = icon(ChevronRight, "ChevronRightIcon");
 export const CloseIcon = icon(X, "CloseIcon");
