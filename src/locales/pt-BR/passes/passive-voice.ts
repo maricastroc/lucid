@@ -65,7 +65,6 @@ function isParticipleShape(token: Token): boolean {
   if (IRREGULAR_PARTICIPLES.has(token.lower)) return true;
   const match = RE_REGULAR_PARTICIPLE_SUFFIX.exec(token.lower);
   if (!match) return false;
-  // Radical (grupo 1) com acento tônico ⇒ adjetivo qualificativo, não particípio.
   return !RE_STEM_STRESS_ACCENT.test(match[1]);
 }
 

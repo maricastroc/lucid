@@ -5,13 +5,21 @@ const CRITERION = "leitor_terceira_pessoa";
 
 const READER_NOUNS = getPrepared("substantivos-leitor.pt");
 
-const DEFINITE_ARTICLES = new Set(["o", "a", "os", "as"]);
+const SUBJECT_DETERMINERS = new Set([
+  "o", "a", "os", "as",
+  "todo", "toda", "todos", "todas",
+  "cada", "qualquer", "nenhum", "nenhuma",
+]);
 
 const DEONTIC_VERBS = new Set([
   "deve", "devem", "deverá", "deverão", "deveria", "deveriam",
   "precisa", "precisam", "precisará", "precisarão",
   "poderá", "poderão", "pode", "podem",
 ]);
+
+const COPULA_OBLIGATION = new Set(["é", "são", "está", "estão", "fica", "ficam", "será", "serão"]);
+const OBRIGADO_FORMS = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
+const TER_FORMS = new Set(["tem", "têm"]);
 
 const BARRIER_PUNCTUATION = new Set([",", ";", ":", "!", "?", "…", "(", ")", "[", "]", '"', "'", "—", "–", "/"]);
 
@@ -29,16 +37,38 @@ function firstWordIndex(tokens: readonly Token[]): number {
   return -1;
 }
 
-function findDeonticAfter(tokens: readonly Token[], startIndex: number): number | null {
+function deonticEndAt(tokens: readonly Token[], i: number): number | null {
+  const token = tokens[i];
+  if (!token.isWord) return null;
+
+  if (DEONTIC_VERBS.has(token.lower)) return i;
+
+  if (COPULA_OBLIGATION.has(token.lower)) {
+    const part = tokens[i + 1];
+    const prep = tokens[i + 2];
+    if (part?.isWord && OBRIGADO_FORMS.has(part.lower) && prep?.isWord && prep.lower === "a") return i + 2;
+  }
+
+  if (TER_FORMS.has(token.lower)) {
+    const next = tokens[i + 1];
+    if (next?.isWord && (next.lower === "de" || next.lower === "que")) return i + 1;
+  }
+
+  return null;
+}
+
+/** Procura o deôntico numa janela após o sujeito; devolve a faixa `[start, end]` de tokens dele. */
+function findDeonticAfter(tokens: readonly Token[], startIndex: number): { start: number; end: number } | null {
   let consumed = 0;
   for (let i = startIndex; i < tokens.length && consumed < MAX_WINDOW_TOKENS; i++) {
     const token = tokens[i];
-    if (token.isWord && DEONTIC_VERBS.has(token.lower)) return i;
-    if (isBarrier(token)) return null;
     if (token.isWord) {
+      const end = deonticEndAt(tokens, i);
+      if (end !== null) return { start: i, end };
       consumed++;
       continue;
     }
+    if (isBarrier(token)) return null;
     return null;
   }
   return null;
@@ -63,15 +93,16 @@ export const leitorTerceiraPessoaPass: Pass = {
         if (!(noun.isWord && READER_NOUNS.has(noun.lower))) continue;
 
         const prev = tokens[i - 1];
-        const articleBefore = prev?.isWord && DEFINITE_ARTICLES.has(prev.lower) ? prev : null;
-        const isSubject = articleBefore !== null || i === firstWord;
+        const determinerBefore = prev?.isWord && SUBJECT_DETERMINERS.has(prev.lower) ? prev : null;
+        const isSubject = determinerBefore !== null || i === firstWord;
         if (!isSubject) continue;
 
-        const deonticIndex = findDeonticAfter(tokens, i + 1);
-        if (deonticIndex === null) continue;
+        const deontic = findDeonticAfter(tokens, i + 1);
+        if (deontic === null) continue;
 
-        const start = (articleBefore ?? noun).start;
-        const end = tokens[deonticIndex].end;
+        const start = (determinerBefore ?? noun).start;
+        const end = tokens[deontic.end].end;
+        const deonticText = ctx.doc.source.slice(tokens[deontic.start].start, tokens[deontic.end].end);
 
         findings.push({
           criterion: CRITERION,
@@ -83,7 +114,7 @@ export const leitorTerceiraPessoaPass: Pass = {
             `O texto se refere ao leitor em terceira pessoa (“${noun.text}”) e lhe atribui uma obrigação. ` +
             "Falar diretamente com o leitor (“você deve…”) ou usar o imperativo aproxima e deixa claro quem " +
             "age. A ferramenta não reescreve: mudar a pessoa do texto é decisão de estilo sua.",
-          meta: { readerNoun: noun.text, deonticVerb: tokens[deonticIndex].text },
+          meta: { readerNoun: noun.text, deonticVerb: deonticText },
         });
       }
     }

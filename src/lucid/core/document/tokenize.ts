@@ -143,10 +143,29 @@ export function tokenize(source: string): Token[] {
   return tokens;
 }
 
+/**
+ * Anexa a cada frase os tokens contidos nela. Frases e tokens já vêm ordenados por
+ * offset e as frases são disjuntas, então um único merge-walk O(frases + tokens)
+ * substitui o filtro O(frases × tokens) anterior — sem mudar a saída (byte-idêntica).
+ * O predicado exato do filtro antigo (`start >= frase.start && end <= frase.end`) é
+ * preservado: `start < frase.end` no laço interno não exclui nada que o filtro
+ * incluía (um token com `start >= frase.end` e `end <= frase.end` teria comprimento
+ * zero, impossível).
+ */
 export function attachTokens(sentences: readonly Sentence[], tokens: readonly Token[]): Sentence[] {
+  let ti = 0;
   return sentences.map((sentence) => {
-    const sentenceTokens = tokens.filter((t) => t.start >= sentence.start && t.end <= sentence.end);
-    const wordCount = sentenceTokens.reduce((total, t) => total + (t.isWord ? 1 : 0), 0);
+    while (ti < tokens.length && tokens[ti].start < sentence.start) ti++;
+    const sentenceTokens: Token[] = [];
+    let wordCount = 0;
+    while (ti < tokens.length && tokens[ti].start < sentence.end) {
+      const token = tokens[ti];
+      if (token.end <= sentence.end) {
+        sentenceTokens.push(token);
+        if (token.isWord) wordCount++;
+      }
+      ti++;
+    }
     return { ...sentence, tokens: sentenceTokens, wordCount };
   });
 }

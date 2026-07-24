@@ -69,7 +69,6 @@ describe("estrutura em texto colado (F4) — invariantes de offset e segmentaç�
   });
 
   it("título sem pontuação NÃO se funde com o corpo (segmentação por bloco)", () => {
-    // Sem o reconhecimento de bloco, "# Titulo ... Corpo." vira UMA frase só.
     const doc = buildDocument("# Titulo\n\nCorpo do texto aqui.");
     const heading = doc.blocks.find((b) => b.kind === "heading");
     expect(heading?.sentences.map((s) => s.text)).toEqual(["Titulo"]);
@@ -87,7 +86,6 @@ describe("estrutura em texto colado (F4) — prosa sem marcação fica intacta",
   });
 
   it("caminho de prosa é byte-idêntico ao anterior (mesmos parágrafos por frase)", () => {
-    // Regressão: sem marcadores, o resultado tem de bater com a segmentação por parágrafo antiga.
     const text = "Primeira frase. Segunda frase.\n\nTerceira, num novo bloco.";
     const doc = buildDocument(text);
     expect(doc.blocks.map((b) => b.kind)).toEqual(["paragraph", "paragraph"]);

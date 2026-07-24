@@ -26,7 +26,39 @@ describe("leitor_terceira_pessoa — marca sujeito-leitor + obrigação", () => 
   });
 });
 
+describe("leitor_terceira_pessoa — deônticos perifrásticos e sujeitos com quantificador (F6)", () => {
+  it("'é obrigado a' é reconhecido como obrigação", () => {
+    const [f, ...rest] = leitorFindings("O contribuinte é obrigado a declarar os rendimentos.");
+    expect(rest).toHaveLength(0);
+    expect(f.span.text).toBe("O contribuinte é obrigado a");
+    expect(f.meta?.deonticVerb).toBe("é obrigado a");
+  });
+
+  it("'tem que' e 'tem de' são reconhecidos", () => {
+    expect(leitorFindings("O usuário tem que enviar o formulário.")[0].span.text).toBe("O usuário tem que");
+    expect(leitorFindings("O usuário tem de enviar o formulário.")[0].span.text).toBe("O usuário tem de");
+  });
+
+  it("'será obrigado a' (futuro) também conta", () => {
+    expect(leitorFindings("O interessado será obrigado a comparecer.")[0].span.text).toBe("O interessado será obrigado a");
+  });
+
+  it("sujeito com quantificador genérico (todo/cada/qualquer) é reconhecido", () => {
+    expect(leitorFindings("Todo cidadão deve pagar a taxa.")[0].span.text).toBe("Todo cidadão deve");
+    expect(leitorFindings("Cada interessado deverá apresentar o pedido.")[0].span.text).toBe("Cada interessado deverá");
+    expect(leitorFindings("Qualquer usuário pode consultar o sistema.")[0].span.text).toBe("Qualquer usuário pode");
+  });
+});
+
 describe("leitor_terceira_pessoa — precisão: exige sujeito E obrigação", () => {
+  it("'tem' + substantivo (não de/que) NÃO marca ('o interessado tem razão')", () => {
+    expect(leitorFindings("O interessado tem razão no pedido.")).toHaveLength(0);
+  });
+
+  it("'obrigado' sem sujeito-leitor (agradecimento) NÃO marca", () => {
+    expect(leitorFindings("Muito obrigado a todos pela presença.")).toHaveLength(0);
+  });
+
   it("sem verbo deôntico → não marca ('o cidadão tem direitos')", () => {
     expect(leitorFindings("O cidadão tem direitos e deveres.")).toHaveLength(0);
   });

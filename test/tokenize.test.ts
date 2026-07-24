@@ -3,10 +3,37 @@ import { normalize } from "../src/lucid/core/document/normalize";
 import { segmentSentences } from "./support/pt";
 import { attachTokens, tokenize } from "../src/lucid/core/document/tokenize";
 import { buildDocument } from "./support/pt";
+import type { Sentence, Token } from "../src/lucid/core/types";
 
 function resumo(source: string) {
   return tokenize(source).map((t) => [t.text, t.isWord] as const);
 }
+
+function attachTokensNaive(sentences: readonly Sentence[], tokens: readonly Token[]): Sentence[] {
+  return sentences.map((sentence) => {
+    const sentenceTokens = tokens.filter((t) => t.start >= sentence.start && t.end <= sentence.end);
+    const wordCount = sentenceTokens.reduce((total, t) => total + (t.isWord ? 1 : 0), 0);
+    return { ...sentence, tokens: sentenceTokens, wordCount };
+  });
+}
+
+describe("attachTokens — merge-walk O(n) equivale ao filtro ingênuo (F10)", () => {
+  const casos = [
+    "O gato subiu. O cachorro latiu forte demais. As crianças riram.",
+    'Ele disse: "Já chega." Todos concordaram, e foram embora sem pressa.',
+    "Visite www.exemplo.com. Depois, escreva para a@b.com em 30 dias.",
+    "Custa 1.234,56 reais! Sério? Sim... foi caro para o E.U.A.",
+    "   \n\n  Uma frase só, com espaços estranhos   e quebras.\n\nOutra aqui.  ",
+    "",
+    "Sem pontuação final e sem nada terminando a frase",
+  ];
+  it.each(casos)("mesma saída (tokens + wordCount) para: %s", (texto) => {
+    const source = normalize(texto);
+    const tokens = tokenize(source);
+    const sentences = segmentSentences(source);
+    expect(attachTokens(sentences, tokens)).toEqual(attachTokensNaive(sentences, tokens));
+  });
+});
 
 describe("tokenize — texto simples", () => {
   it("tokeniza palavras e pontuação separadamente", () => {

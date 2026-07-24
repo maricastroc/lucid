@@ -125,8 +125,6 @@ function parseBlockRanges(source: string): BlockRange[] {
       continue;
     }
 
-    // Parágrafo: linhas consecutivas até uma linha em branco, título ou lista.
-    // O range engloba as linhas cruas; `segmentAt` apara o espaço nas pontas.
     let end = line.start + line.text.length;
     let j = i + 1;
     while (j < lines.length) {

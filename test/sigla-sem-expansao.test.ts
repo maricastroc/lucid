@@ -71,19 +71,11 @@ describe("sigla_sem_expansao — siglas só com letras romanas mas que NÃO são
   });
 
   it("mas o numeral romano válido (fora da allowlist) segue excluído", () => {
-    // "MI" (=1001) e "DL" (=550): romanos bem-formados, não estão na allowlist —
-    // excluídos pela regra de numeral, não por serem conhecidos. Colisão aceita.
     expect(spans("O anexo MI e o item DL seguem no processo.")).toEqual([]);
   });
 });
 
 describe("sigla_sem_expansao — limitação conhecida: sigla colada a dígito (F5)", () => {
-  // O tokenizer separa letras de dígitos ("G20" -> "G"+"20"; "MP3" -> "MP"+"3").
-  // Comportamento atual (imperfeito, PRÉ-EXISTENTE, fora do escopo desta correção):
-  //  - prefixo de 1 letra (G20, G7) não casa a forma de sigla (2–6) -> não marca;
-  //  - prefixo de 2+ letras marca só a parte de letras (MP3 -> "MP") — discutível.
-  // Corrigir de forma limpa exigiria mexer no tokenizer (alcance amplo) + decidir se
-  // "sigla+número" está sequer no escopo do critério. Deixado como aberto/documentado.
   it("G20 (prefixo de 1 letra) não marca", () => {
     expect(spans("A cúpula do G20 terminou.")).toEqual([]);
   });

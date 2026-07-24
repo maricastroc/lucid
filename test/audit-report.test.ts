@@ -41,13 +41,11 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     const text = "O documento foi analisado pela comissão.";
     const d = analyze(text);
     const passive = d.findings.find((f) => f.criterion === "passive_voice");
-    // passiva COM agente: resolvível (requiresHuman=false) mas sem troca 1:1 (sem suggestion)
     expect(passive?.requiresHuman).toBe(false);
     expect(passive?.suggestion).toBeUndefined();
 
     const md = buildAuditReport(d, d.findings, META);
     expect(md).toContain("Sem troca 1:1 pronta, mas resolvível");
-    // e não a rotula, incorretamente, como se exigisse julgamento humano
     expect(md).not.toContain("_Exige decisão humana");
   });
 
@@ -60,9 +58,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
   it("sinaliza honestamente a cobertura léxica curada — silêncio não é prova de ausência (F9)", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
-    // caveat sempre presente (mesmo com zero anotações)
     expect(buildAuditReport(d, [], META)).toContain("listas curadas");
-    // coluna de cobertura na tabela por critério, e o jargão (léxico curado) marcado como "curada"
     expect(md).toContain("| Critério | Dimensão | Proveniência | Cobertura | Anotações |");
     const jargonRow = md.split("\n").find((l) => l.startsWith("| Jargão "));
     expect(jargonRow).toContain("curada");
