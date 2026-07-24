@@ -63,6 +63,34 @@ describe("segmentSentences — abreviações comuns em PT-BR", () => {
     const source = "Compramos frutas, verduras, etc. Voltamos cedo para casa.";
     expect(textos(source)).toEqual(["Compramos frutas, verduras, etc. Voltamos cedo para casa."]);
   });
+
+  it("não quebra em abreviações de referência/figura/processo seguidas de maiúscula ou dígito", () => {
+    // Antes: falso split ("Veja a Fig." | "3 do relatório.") porque o dígito/maiúscula
+    // após o ponto confirmava fronteira. Agora a abreviação está no léxico e o ponto não fecha.
+    expect(textos("Veja a Fig. 3 do relatório. Ela mostra os dados.")).toEqual([
+      "Veja a Fig. 3 do relatório.",
+      "Ela mostra os dados.",
+    ]);
+    expect(textos("A Tab. 2 resume os valores.")).toEqual(["A Tab. 2 resume os valores."]);
+    expect(textos("Fulano vs. Beltrano foi julgado.")).toEqual(["Fulano vs. Beltrano foi julgado."]);
+    expect(textos("Obs. Os prazos podem mudar sem aviso.")).toEqual(["Obs. Os prazos podem mudar sem aviso."]);
+    expect(textos("Conforme o proc. 123 foi decidido.")).toEqual(["Conforme o proc. 123 foi decidido."]);
+    expect(textos("Veja o séc. XX na história.")).toEqual(["Veja o séc. XX na história."]);
+  });
+});
+
+describe("segmentSentences — limitação conhecida: frase iniciada em minúscula (F3)", () => {
+  // POR DESIGN (precisão > recall): a fronteira só é confirmada quando o próximo
+  // caractere sinaliza início de frase (maiúscula/dígito/aspa de abertura). Uma
+  // frase que (agramaticalmente) continua em minúscula não é separada — o mesmo
+  // critério que mantém junto "Era uma vez... uma história" e "art. 5 da lei".
+  // Separar em minúscula introduziria falso split em abreviações desconhecidas e
+  // exigiria um léxico de palavras plenas (fora do escopo zero-dependência).
+  it("ponto + minúscula NÃO separa (funde as frases) — comportamento documentado", () => {
+    expect(textos("O prazo venceu à noite. o recurso é cabível.")).toEqual([
+      "O prazo venceu à noite. o recurso é cabível.",
+    ]);
+  });
 });
 
 describe("segmentSentences — números decimais", () => {
