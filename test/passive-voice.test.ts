@@ -117,11 +117,39 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
     expect(findings[0].requiresHuman).toBe(false);
   });
 
-  it("'por' isolado (sem contração) NÃO conta como evidência de agente", () => {
-    const findings = passiveFindings("O pedido foi aprovado por conveniência.");
+  it("'por' + substantivo comum nu (adjunto) NÃO conta como agente", () => {
+    for (const texto of [
+      "O pedido foi aprovado por conveniência.",
+      "O pedido foi aprovado por unanimidade.",
+      "A multa foi aplicada por lei.",
+      "O relatório foi entregue por engano.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false });
+      expect(findings[0].requiresHuman, texto).toBe(true);
+    }
+  });
+
+  it("'por' + nome próprio/pronome/determinante indefinido É agente explícito (F2)", () => {
+    for (const texto of [
+      "O documento foi assinado por João.",
+      "O pedido foi aprovado por ele.",
+      "A carta foi escrita por mim.",
+      "A decisão foi tomada por uma comissão.",
+      "O contrato foi assinado por Maria Silva.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings, texto).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true });
+      expect(findings[0].requiresHuman, texto).toBe(false);
+    }
+  });
+
+  it("'por' + cabeça de adjunto conhecida ('por telefone') não é agente", () => {
+    const findings = passiveFindings("O aviso foi transmitido por telefone.");
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent: false });
-    expect(findings[0].requiresHuman).toBe(true);
   });
 
   it("idiomas 'pelo menos'/'pelo visto'/'pelo contrário' não contam como agente", () => {

@@ -18,6 +18,20 @@ const BARRIER_CONJUNCTIONS = new Set(["que", "mas", "e", "porque", "quando"]);
 
 const AGENT_MARKERS = new Set(["pelo", "pela", "pelos", "pelas"]);
 
+/**
+ * "por" (sem contração) é ambíguo: introduz agente ("assinado por João") OU
+ * adjunto de causa/modo/meio ("aprovado por unanimidade", "por lei", "por
+ * engano"). Reconhecemos "por" como AGENTE só quando o que vem depois o licencia
+ * sem ambiguidade — nome próprio, pronome oblíquo ou determinante indefinido; um
+ * substantivo comum nu fica como adjunto (mantido sem-agente, precisão > recall).
+ * Corrige o F2: antes, TODO "por + agente" era classificado como "sem agente",
+ * pondo requiresHuman=true à toa e escondendo o agente explícito do roteamento.
+ */
+const POR_AGENT_MARKER = "por";
+const AGENT_DETERMINERS = new Set(["um", "uma", "uns", "umas"]);
+const AGENT_PRONOUNS = new Set(["mim", "ti", "ele", "ela", "eles", "elas", "nós", "vós", "você", "vocês"]);
+const RE_PROPER_NOUN_START = /^\p{Lu}/u;
+
 const MAX_CONNECTOR_TOKENS = 2;
 
 const MAX_AGENT_PHRASE_TOKENS = 6;
@@ -84,6 +98,16 @@ interface AgentSearchResult {
 }
 
 
+function porLicensesAgent(next: Token | undefined): boolean {
+  if (!next?.isWord) return false;
+  if (NON_AGENT_HEADS.has(next.lower)) return false;
+  return (
+    AGENT_DETERMINERS.has(next.lower) ||
+    AGENT_PRONOUNS.has(next.lower) ||
+    RE_PROPER_NOUN_START.test(next.text)
+  );
+}
+
 function findAgentAfter(tokens: readonly Token[], startIndex: number): AgentSearchResult | null {
   let i = startIndex;
   let connectorsUsed = 0;
@@ -96,6 +120,9 @@ function findAgentAfter(tokens: readonly Token[], startIndex: number): AgentSear
       const isNonAgentHead = next?.isWord && NON_AGENT_HEADS.has(next.lower);
       if (!isNonAgentHead) return { markerIndex: i };
       return null;
+    }
+    if (token.isWord && token.lower === POR_AGENT_MARKER) {
+      return porLicensesAgent(tokens[i + 1]) ? { markerIndex: i } : null;
     }
     if (isBarrier(token)) return null;
     if (isConnector(token) && connectorsUsed < MAX_CONNECTOR_TOKENS) {
@@ -157,11 +184,11 @@ function buildJustification(hasAgent: boolean, agentTruncated: boolean): string 
     );
   }
   return (
-    "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança — o padrão " +
-    'fechado que ela detecta é "pelo/pela/pelos/pelas"; se o texto nomear o agente de outra ' +
-    'forma (ex.: "por fulano"), confira o trecho antes de decidir. Indique o agente ou ' +
-    "reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria " +
-    "adivinhar quem agiu."
+    "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece " +
+    '"pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ' +
+    '("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") ' +
+    "fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a " +
+    "ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu."
   );
 }
 

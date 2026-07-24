@@ -588,7 +588,7 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança — o padrão fechado que ela detecta é "pelo/pela/pelos/pelas"; se o texto nomear o agente de outra forma (ex.: "por fulano"), confira o trecho antes de decidir. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
       "meta": {
         "hasAgent": false,
         "participleEnd": 20,
@@ -2105,7 +2105,7 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança — o padrão fechado que ela detecta é "pelo/pela/pelos/pelas"; se o texto nomear o agente de outra forma (ex.: "por fulano"), confira o trecho antes de decidir. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
       "meta": {
         "hasAgent": false,
         "participleEnd": 23,
@@ -2403,7 +2403,7 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança — o padrão fechado que ela detecta é "pelo/pela/pelos/pelas"; se o texto nomear o agente de outra forma (ex.: "por fulano"), confira o trecho antes de decidir. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
       "meta": {
         "hasAgent": false,
         "participleEnd": 64,
