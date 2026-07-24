@@ -104,7 +104,14 @@ export function buildAuditReport(
       if (isSafe(f) && f.suggestion !== undefined) {
         out.push("");
         out.push(`**Equivalente direto (curado):** ${f.suggestion} — indicado pela ferramenta; a troca no texto é do autor.`);
-      } else if (f.requiresHuman) {
+      } else if (!f.requiresHuman) {
+        // Resolvível pela engine, mas SEM troca 1:1 pronta para exibir (ex.: passiva
+        // com agente explícito, nominalização de mapeamento seguro): não é troca direta
+        // nem exige julgamento humano — a IA pode reescrever e a engine verifica. Antes
+        // (F8) caía entre as duas ramificações e ficava sem nenhum rótulo de ação.
+        out.push("");
+        out.push("_Sem troca 1:1 pronta, mas resolvível: a IA pode reescrever e a engine verifica — aplicar é decisão sua._");
+      } else {
         out.push("");
         out.push("_Exige decisão humana — a ferramenta aponta, não reescreve por você._");
       }

@@ -318,6 +318,20 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 
 export type ActionState = "safe" | "human";
 
+/**
+ * `requiresHuman` e `suggestion` são EIXOS DISTINTOS, não sinônimos (ver F8):
+ * - `requiresHuman` (autoridade da engine, usado pelo verificador dirigido): a
+ *   construção exige julgamento humano para ser resolvida/roteada?
+ * - `suggestion`: existe uma troca 1:1 CURADA para exibir como informação (ADR-054)?
+ *
+ * `isSafe`/`actionStateOf` colapsam os dois num binário para a UI e significam
+ * apenas "há troca direta para mostrar" (`suggestion` presente e `!requiresHuman`)
+ * — hoje só o jargão seguro. Existe uma categoria INTERMEDIÁRIA legítima
+ * (`!requiresHuman && suggestion === undefined`: passiva com agente, nominalização
+ * de mapeamento seguro) que é resolvível pela IA + verificação, mas sem troca 1:1;
+ * a UI a dobra em "human" de propósito, mas o relatório a rotula à parte (F8), para
+ * não a apresentar como se exigisse julgamento humano.
+ */
 export function actionStateOf(f: Finding): ActionState {
   return f.suggestion !== undefined && !f.requiresHuman ? "safe" : "human";
 }

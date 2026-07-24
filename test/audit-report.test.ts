@@ -37,6 +37,20 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("seguras para aplicar");
   });
 
+  it("categoria intermediária (resolvível sem troca 1:1) recebe rótulo próprio, não fica em branco (F8)", () => {
+    const text = "O documento foi analisado pela comissão.";
+    const d = analyze(text);
+    const passive = d.findings.find((f) => f.criterion === "passive_voice");
+    // passiva COM agente: resolvível (requiresHuman=false) mas sem troca 1:1 (sem suggestion)
+    expect(passive?.requiresHuman).toBe(false);
+    expect(passive?.suggestion).toBeUndefined();
+
+    const md = buildAuditReport(d, d.findings, META);
+    expect(md).toContain("Sem troca 1:1 pronta, mas resolvível");
+    // e não a rotula, incorretamente, como se exigisse julgamento humano
+    expect(md).not.toContain("_Exige decisão humana");
+  });
+
   it("determinístico: mesma entrada → relatório byte-idêntico", () => {
     const a = analyze(SAMPLE);
     const b = analyze(SAMPLE);
