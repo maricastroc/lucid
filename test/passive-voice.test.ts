@@ -258,6 +258,35 @@ describe("passiveVoicePass — nenhuma detecção para formas ambíguas do léxi
   );
 });
 
+describe("passiveVoicePass — adjetivos proparoxítonos em -ido/-ada não são particípios (F1)", () => {
+  it.each([
+    "O prazo é válido.",
+    "O carro é rápido.",
+    "O material é sólido.",
+    "O ar é úmido.",
+    "Ele é tímido.",
+    "O texto é lúcido.",
+    "A regra é rígida.",
+    "O líquido é ácido.",
+  ])("'%s' não gera finding (acento no radical delata adjetivo, não particípio)", (text) => {
+    expect(passiveFindings(text)).toEqual([]);
+  });
+
+  it("não regride o recall: particípio com hiato -ído (acento NO sufixo) segue detectado", () => {
+    const findings = passiveFindings("O documento foi distribuído pela secretaria.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].meta).toMatchObject({ hasAgent: true });
+  });
+
+  it.each([
+    ["O prédio foi construído em dois anos.", "construído"],
+    ["A tarefa foi concluída ontem.", "concluída"],
+    ["O valor foi distribuído entre os sócios.", "distribuído"],
+  ])("particípio de hiato '%s' continua ancorando passiva", (text) => {
+    expect(passiveFindings(text)).toHaveLength(1);
+  });
+});
+
 describe("passiveVoicePass — barreiras de pontuação e conjunção", () => {
   it("vírgula entre auxiliar e particípio aborta a busca (falso negativo aceito)", () => {
     expect(passiveFindings("Foi, sem dúvida, um erro grave.")).toEqual([]);

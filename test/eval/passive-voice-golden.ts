@@ -82,4 +82,20 @@ export const GOLDEN_VOZ_PASSIVA: readonly EntradaGolden[] = [
   { texto: "O documento foi assinado pela manhã.", expectedCount: 1, estado: "correto" },
   { texto: "O carro foi visto pela janela.", expectedCount: 1, estado: "correto" },
   { texto: "A obra foi concluída pela metade.", expectedCount: 1, estado: "correto" },
+
+  // Adjetivos proparoxítonos em -ido/-ada, homógrafos de forma com particípio,
+  // mas com acento NO RADICAL — não são voz passiva (F1). Antes marcados; agora
+  // suprimidos pela regra de acento-no-radical em isParticipleShape.
+  { texto: "O prazo é válido.", expectedCount: 0, estado: "correto" },
+  { texto: "O carro é rápido.", expectedCount: 0, estado: "correto" },
+  { texto: "O material é sólido.", expectedCount: 0, estado: "correto" },
+  { texto: "O ar é úmido.", expectedCount: 0, estado: "correto" },
+  { texto: "O texto é lúcido.", expectedCount: 0, estado: "correto" },
+  { texto: "A regra é rígida.", expectedCount: 0, estado: "correto" },
+  { texto: "O resultado é válido, mas o prazo é rígido.", expectedCount: 0, estado: "correto" },
+
+  // Guarda de recall: particípios reais com acento de hiato NO SUFIXO (-ído)
+  // continuam sendo detectados — o acento está no grupo 2, não no radical.
+  { texto: "O documento foi distribuído pela secretaria.", expectedCount: 1, estado: "correto" },
+  { texto: "O gráfico foi construído com dados de 2020.", expectedCount: 1, estado: "correto" },
 ];

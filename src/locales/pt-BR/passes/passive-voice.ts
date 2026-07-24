@@ -24,6 +24,19 @@ const MAX_AGENT_PHRASE_TOKENS = 6;
 
 const RE_REGULAR_PARTICIPLE_SUFFIX = /^(.{2,}?)(ad|id|íd)[ao]s?$/u;
 
+/**
+ * Vogais com acento tônico escrito. Um particípio regular em -ado/-ido é tônico
+ * no SUFIXO, então seu radical fica pretônico e NÃO carrega acento escrito
+ * (validado, aplicada, concedido). O acento de hiato do -ído/-úido cai DENTRO do
+ * sufixo (distribu-ído, constru-ído), capturado no grupo 2 da regex — nunca no
+ * radical (grupo 1). Logo, acento NO RADICAL delata um adjetivo proparoxítono
+ * apenas homógrafo de forma — "válido", "rápido", "sólido", "líquido", "lúcido",
+ * "rígida", "úmido" — que NÃO é particípio e não deve ancorar voz passiva. Regra
+ * determinística que dispensa um léxico fechado de particípios (preservando o
+ * recall sobre verbos produtivos) e elimina a família dominante de falso positivo.
+ */
+const RE_STEM_STRESS_ACCENT = /[áàâãéêíóôõú]/u;
+
 function isConnector(token: Token): boolean {
   return token.isWord && (CONNECTOR_ADVERBS.has(token.lower) || RE_MENTE_ADVERB.test(token.lower));
 }
@@ -36,7 +49,10 @@ function isBarrier(token: Token): boolean {
 function isParticipleShape(token: Token): boolean {
   if (!token.isWord) return false;
   if (IRREGULAR_PARTICIPLES.has(token.lower)) return true;
-  return RE_REGULAR_PARTICIPLE_SUFFIX.test(token.lower);
+  const match = RE_REGULAR_PARTICIPLE_SUFFIX.exec(token.lower);
+  if (!match) return false;
+  // Radical (grupo 1) com acento tônico ⇒ adjetivo qualificativo, não particípio.
+  return !RE_STEM_STRESS_ACCENT.test(match[1]);
 }
 
 interface ParticipleSearchResult {
