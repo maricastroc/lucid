@@ -10,7 +10,6 @@ import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
-import { Checkbox } from "./ui/checkbox";
 import { Select } from "./ui/select";
 
 export const APPLY_BUTTON_CLASS =
@@ -409,13 +408,6 @@ function GeneratedRewrite({
           }}
           options={REWRITE_MODELS.map((m) => ({ value: `${m.providerId}:${m.model}`, label: m.label }))}
         />
-        <label
-          className="inline-flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2"
-          title="Passa os achados da engine no trecho como briefing à IA (ex.: 'prefira a voz ativa'), em vez do pedido genérico de reescrita."
-        >
-          <Checkbox checked={directed} onCheckedChange={setDirected} />
-          Dirigida pelos achados da engine
-        </label>
         <button
           type="button"
           onClick={run}

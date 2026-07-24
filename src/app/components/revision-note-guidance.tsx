@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { isCriterionId, passiveScaffold, type Finding } from "@/lucid";
+import { isCriterionId, passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
 import type { AgentDeclaration } from "@/report/rewrite";
 import { Checkbox } from "./ui/checkbox";
 import { longSentenceGuidance } from "../lib/narrative";
@@ -175,13 +175,32 @@ function SubordinacaoGuide({ finding }: { finding: Finding }) {
   );
 }
 
+function boundaryLabel(c: SplitPoint): string {
+  switch (c.kind) {
+    case "semicolon":
+      return "ponto-e-vírgula";
+    case "dash":
+      return "travessão";
+    case "comma_conjunction":
+      return `vírgula antes de “${c.marker}”`;
+  }
+}
+
 function LongSentenceGuide({ finding, source }: { finding: Finding; source: string }) {
   const g = longSentenceGuidance(finding, source);
+  const hasCuts = g.candidates.length > 0;
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        A ferramenta não reescreve — mas mede o esforço e <span className="text-ink-0">localiza onde a frase pode se
-        dividir</span>. Use os pontos abaixo na sua edição, ou peça uma reescrita à IA e deixe a engine verificar.
+        A ferramenta não reescreve — <span className="text-ink-0">mede o esforço</span> da frase
+        {hasCuts ? (
+          <>
+            {" "}
+            e <span className="text-ink-0">aponta abaixo onde ela se separa</span>. Recompor cada lado é decisão sua.
+          </>
+        ) : (
+          <>. Onde dividir e como recompor é decisão sua.</>
+        )}
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
         <Stat label="palavras" value={g.words != null ? String(g.words) : "—"} />
@@ -189,29 +208,32 @@ function LongSentenceGuide({ finding, source }: { finding: Finding; source: stri
         <Stat label="meta" value={g.targetSentences != null ? `${g.targetSentences} frases` : "—"} />
       </div>
 
-      {g.candidates.length > 0 && (
+      {hasCuts && (
         <div className="mt-4">
           <p className="u-sublabel mb-2 text-ink-3">
-            pontos de divisão possíveis · informação, não ação
+            {g.candidates.length === 1 ? "1 corte possível" : `${g.candidates.length} cortes possíveis`} · informação,
+            não ação
           </p>
-          <ul className="flex flex-col gap-1.5">
-            {g.candidates.map((c) => (
+          <ul className="flex flex-col gap-2">
+            {g.candidates.map((c, i) => (
               <li
                 key={c.offset}
-                className="flex w-full items-baseline gap-1.5 rounded-lg border border-rule-1 bg-sheet px-3 py-2 text-left font-serif text-[13px] leading-snug"
+                className="overflow-hidden rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)"
               >
-                <span className="min-w-0 flex-1 truncate">
-                  <span className="text-ink-2">…{c.before}</span>
-                  <span className="mx-1.5 text-human" aria-hidden>
-                    ⁝
+                <p className="px-3 pt-2 pb-1.5 font-serif text-[13px] leading-snug text-ink-1">…{c.before}</p>
+                <div className="flex items-center gap-2 px-3">
+                  <span className="h-px flex-1 bg-human-line" aria-hidden />
+                  <span className="u-sublabel whitespace-nowrap text-human">
+                    corte {i + 1} · {boundaryLabel(c)}
                   </span>
-                  <span className="text-ink-0">{c.after}…</span>
-                </span>
+                  <span className="h-px flex-1 bg-human-line" aria-hidden />
+                </div>
+                <p className="px-3 pt-1.5 pb-2 font-serif text-[13px] leading-snug text-ink-1">{c.after}…</p>
               </li>
             ))}
           </ul>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            Fronteiras detectadas por pontuação e conjunção — a ferramenta aponta, não divide. A frase nova é sua.
+            A ferramenta aponta a fronteira, não divide. A frase nova é sua.
           </p>
         </div>
       )}
