@@ -15,6 +15,12 @@ describe("runMetrics — documento vazio", () => {
       syllables: 0,
       wordsPerSentence: 0,
       syllablesPerWord: 0,
+      cohesion: {
+        referentialOverlap: 0,
+        adjacentGapRatio: 0,
+        connectivesPer100Words: 0,
+        connectivesByClass: { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 },
+      },
     });
   });
 

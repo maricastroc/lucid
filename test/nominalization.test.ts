@@ -223,7 +223,7 @@ describe("nominalizationPass — integração pelo registry e por analyze()", ()
 
     const nominalizations = diagnostic.findings.filter((f) => f.criterion === "nominalization");
     expect(nominalizations).toHaveLength(2);
-    expect(nominalizations[0].principle).toBe("5.3.3");
+    expect(nominalizations[0].normativeReference?.section).toBe("5.3.3");
     expect(nominalizations[0].category).toBe("syntactic");
   });
 
@@ -232,7 +232,6 @@ describe("nominalizationPass — integração pelo registry e por analyze()", ()
     const entry = diagnostic.score.byCriterion.find((c) => c.criterion === "nominalization");
 
     expect(entry).toBeDefined();
-    expect(entry?.principle).toBe("5.3.3");
     expect(entry?.count.warning).toBe(1);
   });
 });

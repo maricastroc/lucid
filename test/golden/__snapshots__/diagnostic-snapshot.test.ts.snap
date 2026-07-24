@@ -4,13 +4,25 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 1,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 85.8,
     "sentences": 3,
     "syllables": 28,
@@ -28,7 +40,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -38,7 +49,15 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "passive_voice",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -48,7 +67,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -58,7 +76,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -68,7 +85,15 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -78,7 +103,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -88,7 +112,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -98,7 +121,15 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -108,7 +139,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -118,7 +148,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -128,7 +157,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -138,7 +166,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -148,7 +175,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -158,7 +184,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -168,7 +193,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -178,7 +202,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -188,7 +211,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -198,7 +220,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -208,7 +229,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -218,7 +238,6 @@ exports[`snapshots do Diagnostic completo > 'admin_simples_sem_finding' 1`] = `
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 0,
@@ -238,9 +257,14 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "threshold": 20,
         "words": 29,
       },
-      "principle": "5.3.4",
+      "normativeReference": {
+        "section": "5.3.4",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 215,
         "start": 0,
@@ -255,9 +279,14 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "count": 3,
         "kind": "density",
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "info",
+      "source": "iso-24495-1",
       "span": {
         "end": 37,
         "start": 28,
@@ -272,9 +301,14 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "count": 3,
         "kind": "density",
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "info",
+      "source": "iso-24495-1",
       "span": {
         "end": 136,
         "start": 125,
@@ -290,9 +324,14 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         "links": 1,
         "strongLink": false,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "info",
+      "source": "iso-24495-1",
       "span": {
         "end": 195,
         "start": 173,
@@ -301,13 +340,25 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 0,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": -5.2,
     "sentences": 1,
     "syllables": 77,
@@ -325,7 +376,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "long_sentence",
         "densityPer100Words": 3.4,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -335,7 +385,15 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "passive_voice",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -345,7 +403,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -355,7 +412,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 10.3,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -365,7 +421,15 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -375,7 +439,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -385,7 +448,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -395,7 +457,15 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -405,7 +475,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -415,7 +484,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -425,7 +493,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -435,7 +502,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -445,7 +511,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -455,7 +520,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -465,7 +529,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -475,7 +538,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -485,7 +547,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -495,7 +556,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -505,7 +565,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -515,7 +574,6 @@ exports[`snapshots do Diagnostic completo > 'frase_longa' 1`] = `
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 4,
@@ -536,9 +594,14 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         "participleEnd": 20,
         "participleStart": 14,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 20,
         "start": 10,
@@ -554,9 +617,14 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         "kind": "phrase",
         "term": "em sede de",
       },
-      "principle": "5.3.2",
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 31,
         "start": 21,
@@ -573,9 +641,14 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         "kind": "word",
         "term": "supracitado",
       },
-      "principle": "5.3.2",
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 65,
         "start": 54,
@@ -585,13 +658,25 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 1,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 54.4,
     "sentences": 2,
     "syllables": 31,
@@ -609,7 +694,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -619,7 +703,15 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "passive_voice",
         "densityPer100Words": 7.1,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -629,7 +721,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -639,7 +730,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -649,7 +739,15 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "jargon",
         "densityPer100Words": 14.3,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -659,7 +757,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -669,7 +766,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -679,7 +775,15 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -689,7 +793,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -699,7 +802,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -709,7 +811,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -719,7 +820,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -729,7 +829,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -739,7 +838,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -749,7 +847,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -759,7 +856,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -769,7 +865,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -779,7 +874,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -789,7 +883,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -799,7 +892,6 @@ exports[`snapshots do Diagnostic completo > 'juridico_com_jargao' 1`] = `
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 3,
@@ -820,9 +912,14 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         "lightVerb": "fazer",
         "nominalization": "análise",
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 25,
         "start": 10,
@@ -838,9 +935,14 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         "links": 1,
         "strongLink": false,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "info",
+      "source": "iso-24495-1",
       "span": {
         "end": 39,
         "start": 18,
@@ -856,9 +958,14 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         "lightVerb": "realizar",
         "nominalization": "pagamento",
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 75,
         "start": 55,
@@ -867,13 +974,25 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 1,
+      "connectivesByClass": {
+        "additive": 1,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 7.1,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 48.4,
     "sentences": 2,
     "syllables": 32,
@@ -891,7 +1010,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -901,7 +1019,15 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "passive_voice",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -911,7 +1037,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "nominalization",
         "densityPer100Words": 14.3,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -921,7 +1046,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 7.1,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -931,7 +1055,15 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -941,7 +1073,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -951,7 +1082,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -961,7 +1091,15 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -971,7 +1109,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -981,7 +1118,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -991,7 +1127,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1001,7 +1136,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1011,7 +1145,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1021,7 +1154,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1031,7 +1163,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1041,7 +1172,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1051,7 +1181,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1061,7 +1190,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1071,7 +1199,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1081,7 +1208,6 @@ exports[`snapshots do Diagnostic completo > 'nominalizacao_mapeamento_unico' 1`]
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 3,
@@ -1101,9 +1227,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "threshold": 20,
         "words": 29,
       },
-      "principle": "5.3.4",
+      "normativeReference": {
+        "section": "5.3.4",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 208,
         "start": 0,
@@ -1124,9 +1255,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "participleStart": 13,
         "subjectStart": 0,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 36,
         "start": 9,
@@ -1142,9 +1278,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "lightVerb": "fazer",
         "nominalization": "verificação",
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 69,
         "start": 50,
@@ -1160,9 +1301,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "links": 1,
         "strongLink": false,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "info",
+      "source": "iso-24495-1",
       "span": {
         "end": 84,
         "start": 58,
@@ -1178,9 +1324,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "kind": "word",
         "term": "supracitados",
       },
-      "principle": "5.3.2",
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 97,
         "start": 85,
@@ -1197,9 +1348,14 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         "kind": "phrase",
         "term": "em sede de",
       },
-      "principle": "5.3.2",
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 127,
         "start": 117,
@@ -1209,13 +1365,25 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 0,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 1,
+      },
+      "connectivesPer100Words": 3.4,
+      "referentialOverlap": 0,
+    },
     "fleschPt": -8.1,
     "sentences": 1,
     "syllables": 78,
@@ -1233,7 +1401,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "long_sentence",
         "densityPer100Words": 3.4,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1243,7 +1410,15 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "passive_voice",
         "densityPer100Words": 3.4,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1253,7 +1428,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "nominalization",
         "densityPer100Words": 3.4,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1263,7 +1437,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 3.4,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1273,7 +1446,15 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "jargon",
         "densityPer100Words": 6.9,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1283,7 +1464,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1293,7 +1473,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1303,7 +1482,15 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1313,7 +1500,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1323,7 +1509,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1333,7 +1518,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1343,7 +1527,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1353,7 +1536,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1363,7 +1545,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1373,7 +1554,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1383,7 +1563,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1393,7 +1572,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1403,7 +1581,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1413,7 +1590,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1423,7 +1599,6 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 6,
@@ -1436,13 +1611,25 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
 {
   "findings": [],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 1,
+      "connectivesByClass": {
+        "additive": 1,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 6.3,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 68.9,
     "sentences": 3,
     "syllables": 33,
@@ -1460,7 +1647,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1470,7 +1656,15 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "passive_voice",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1480,7 +1674,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1490,7 +1683,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1500,7 +1692,15 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1510,7 +1710,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1520,7 +1719,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1530,7 +1728,15 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1540,7 +1746,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1550,7 +1755,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1560,7 +1764,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1570,7 +1773,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1580,7 +1782,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1590,7 +1791,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1600,7 +1800,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1610,7 +1809,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1620,7 +1818,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1630,7 +1827,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1640,7 +1836,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1650,7 +1845,6 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 0,
@@ -1663,13 +1857,25 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 0,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 0,
     "sentences": 0,
     "syllables": 0,
@@ -1687,7 +1893,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1697,7 +1902,15 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "passive_voice",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1707,7 +1920,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1717,7 +1929,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1727,7 +1938,15 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1737,7 +1956,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1747,7 +1965,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1757,7 +1974,15 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1767,7 +1992,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1777,7 +2001,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1787,7 +2010,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1797,7 +2019,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1807,7 +2028,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1817,7 +2037,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1827,7 +2046,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1837,7 +2055,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1847,7 +2064,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1857,7 +2073,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1867,7 +2082,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -1877,7 +2091,6 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 0,
@@ -1898,9 +2111,14 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         "participleEnd": 23,
         "participleStart": 14,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 23,
         "start": 10,
@@ -1909,13 +2127,25 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 0,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 53.3,
     "sentences": 1,
     "syllables": 30,
@@ -1933,7 +2163,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -1943,7 +2172,15 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "passive_voice",
         "densityPer100Words": 7.1,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1953,7 +2190,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1963,7 +2199,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1973,7 +2208,15 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -1983,7 +2226,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -1993,7 +2235,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2003,7 +2244,15 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -2013,7 +2262,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2023,7 +2271,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2033,7 +2280,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2043,7 +2289,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2053,7 +2298,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2063,7 +2307,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2073,7 +2316,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2083,7 +2325,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2093,7 +2334,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2103,7 +2343,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2113,7 +2352,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2123,7 +2361,6 @@ exports[`snapshots do Diagnostic completo > 'unicode_aspas_travessao' 1`] = `
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 1,
@@ -2149,9 +2386,14 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         "participleStart": 16,
         "subjectStart": 0,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": false,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 38,
         "start": 12,
@@ -2167,9 +2409,14 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         "participleEnd": 64,
         "participleStart": 55,
       },
-      "principle": "5.3.3",
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
       "requiresHuman": true,
       "severity": "warning",
+      "source": "iso-24495-1",
       "span": {
         "end": 64,
         "start": 49,
@@ -2178,13 +2425,25 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
     },
   ],
   "meta": {
-    "configHash": "c7cf55bf",
-    "dataHash": "44f87b2e",
+    "configHash": "ebb6dee9",
+    "dataHash": "3f34444e",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
   },
   "metrics": {
+    "cohesion": {
+      "adjacentGapRatio": 1,
+      "connectivesByClass": {
+        "additive": 0,
+        "adversative": 0,
+        "causal": 0,
+        "conclusive": 0,
+        "temporal": 0,
+      },
+      "connectivesPer100Words": 0,
+      "referentialOverlap": 0,
+    },
     "fleschPt": 40.7,
     "sentences": 2,
     "syllables": 24,
@@ -2202,7 +2461,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "long_sentence",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2212,7 +2470,15 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "passive_voice",
         "densityPer100Words": 20,
-        "principle": "5.3.3",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passiva_sintetica",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -2222,7 +2488,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "nominalization",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2232,7 +2497,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "nominalizacao_encadeada",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2242,7 +2506,15 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "jargon",
         "densityPer100Words": 0,
-        "principle": "5.3.2",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "sigla_sem_expansao",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -2252,7 +2524,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "mais_que_perfeito_sintetico",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2262,7 +2533,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "gerundismo",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2272,7 +2542,15 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "adverbio_mente_denso",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "adverbios_vagos",
+        "densityPer100Words": 0,
       },
       {
         "count": {
@@ -2282,7 +2560,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "redundancia",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2292,7 +2569,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "perifrase_inflada",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2302,7 +2578,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "paragraph_length",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2312,7 +2587,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "prose_enumeration",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2322,7 +2596,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "mesoclise",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2332,7 +2605,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "dupla_negacao",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2342,7 +2614,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "subordinacao_densa",
         "densityPer100Words": 0,
-        "principle": "5.3.4",
       },
       {
         "count": {
@@ -2352,7 +2623,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "leitor_terceira_pessoa",
         "densityPer100Words": 0,
-        "principle": "5.3.3",
       },
       {
         "count": {
@@ -2362,7 +2632,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "salto_de_nivel_titulo",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2372,7 +2641,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "long_heading",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2382,7 +2650,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "single_item_list",
         "densityPer100Words": 0,
-        "principle": "5.2",
       },
       {
         "count": {
@@ -2392,7 +2659,6 @@ exports[`snapshots do Diagnostic completo > 'voz_passiva_com_e_sem_agente' 1`] =
         },
         "criterion": "heading_body_mismatch",
         "densityPer100Words": 0,
-        "principle": "5.1",
       },
     ],
     "totalFindings": 2,

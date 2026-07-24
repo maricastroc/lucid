@@ -1,0 +1,52 @@
+{
+  "_comentario": "Conectivos de discurso com CLASSE, para a métrica de coesão (ADR-061). Descritor, não finding. Cada conectivo recebe UMA classe primária (curadoria; alguns são polissêmicos — 'logo' temporal/conclusivo → conclusivo; 'pois' causal/conclusivo → causal). Exclui de propósito os coordenadores ultrafrequentes 'e'/'ou' (dominariam a contagem sem informar sobre coesão de discurso). Curadoria própria, precisão>recall.",
+  "entries": [
+    { "phrase": "também", "class": "additive" },
+    { "phrase": "além disso", "class": "additive" },
+    { "phrase": "ademais", "class": "additive" },
+    { "phrase": "outrossim", "class": "additive" },
+    { "phrase": "bem como", "class": "additive" },
+    { "phrase": "não só", "class": "additive" },
+    { "phrase": "igualmente", "class": "additive" },
+
+    { "phrase": "mas", "class": "adversative" },
+    { "phrase": "porém", "class": "adversative" },
+    { "phrase": "contudo", "class": "adversative" },
+    { "phrase": "todavia", "class": "adversative" },
+    { "phrase": "entretanto", "class": "adversative" },
+    { "phrase": "no entanto", "class": "adversative" },
+    { "phrase": "não obstante", "class": "adversative" },
+    { "phrase": "em contrapartida", "class": "adversative" },
+    { "phrase": "apesar disso", "class": "adversative" },
+
+    { "phrase": "porque", "class": "causal" },
+    { "phrase": "pois", "class": "causal" },
+    { "phrase": "porquanto", "class": "causal" },
+    { "phrase": "já que", "class": "causal" },
+    { "phrase": "uma vez que", "class": "causal" },
+    { "phrase": "visto que", "class": "causal" },
+    { "phrase": "em razão de", "class": "causal" },
+    { "phrase": "devido a", "class": "causal" },
+    { "phrase": "por causa de", "class": "causal" },
+
+    { "phrase": "quando", "class": "temporal" },
+    { "phrase": "enquanto", "class": "temporal" },
+    { "phrase": "assim que", "class": "temporal" },
+    { "phrase": "logo que", "class": "temporal" },
+    { "phrase": "antes de", "class": "temporal" },
+    { "phrase": "depois de", "class": "temporal" },
+    { "phrase": "à medida que", "class": "temporal" },
+    { "phrase": "posteriormente", "class": "temporal" },
+    { "phrase": "em seguida", "class": "temporal" },
+
+    { "phrase": "portanto", "class": "conclusive" },
+    { "phrase": "logo", "class": "conclusive" },
+    { "phrase": "por isso", "class": "conclusive" },
+    { "phrase": "consequentemente", "class": "conclusive" },
+    { "phrase": "por conseguinte", "class": "conclusive" },
+    { "phrase": "dessa forma", "class": "conclusive" },
+    { "phrase": "assim sendo", "class": "conclusive" },
+    { "phrase": "em suma", "class": "conclusive" },
+    { "phrase": "por fim", "class": "conclusive" }
+  ]
+}

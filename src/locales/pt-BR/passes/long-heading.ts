@@ -1,7 +1,6 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "long_heading";
-const PRINCIPLE = "5.2";
 
 function endsAsStatement(text: string): boolean {
   const t = text.trimEnd();
@@ -12,13 +11,12 @@ function endsAsStatement(text: string): boolean {
 export const longHeadingPass: Pass = {
   criterion: CRITERION,
   category: "structural",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.longHeading.enabled) return [];
 
     const max = ctx.config.longHeading.maxWords;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const block of ctx.doc.blocks) {
       if (block.kind !== "heading") continue;
@@ -28,7 +26,6 @@ export const longHeadingPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "structural",
-          principle: PRINCIPLE,
           span,
           severity: "warning",
           requiresHuman: true,
@@ -46,7 +43,6 @@ export const longHeadingPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "structural",
-          principle: PRINCIPLE,
           span,
           severity: "warning",
           requiresHuman: true,

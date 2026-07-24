@@ -1,7 +1,6 @@
-import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 
 const CRITERION = "nominalizacao_encadeada";
-const PRINCIPLE = "5.3.3";
 
 const DE_FORMS = new Set(["de", "da", "do", "das", "dos"]);
 
@@ -64,7 +63,6 @@ function chainJustification(strongLink: boolean): string {
 export const nominalizacaoEncadeadaPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: ["substantivos-acao.pt"],
 
   run(ctx) {
@@ -72,7 +70,7 @@ export const nominalizacaoEncadeadaPass: Pass = {
 
     const heads = ctx.data.get<ReadonlySet<string>>("substantivos-acao.pt");
     const minPorFrase = ctx.config.nominalizacaoEncadeada.minPorFrase;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
@@ -98,7 +96,6 @@ export const nominalizacaoEncadeadaPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: chain.strongLink ? "warning" : "info",
           requiresHuman: true,
@@ -114,7 +111,6 @@ export const nominalizacaoEncadeadaPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start: token.start, end: token.end, text: token.text },
           severity: "info",
           requiresHuman: true,

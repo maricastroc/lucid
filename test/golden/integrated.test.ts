@@ -7,12 +7,15 @@ import type { ExpectedFinding, GoldenCase, IntegratedCriterion } from "./integra
 const CRITERIA: readonly IntegratedCriterion[] = [
   "long_sentence",
   "passive_voice",
+  "passiva_sintetica",
   "nominalization",
   "nominalizacao_encadeada",
   "jargon",
+  "sigla_sem_expansao",
   "mais_que_perfeito_sintetico",
   "gerundismo",
   "adverbio_mente_denso",
+  "adverbios_vagos",
   "redundancia",
   "perifrase_inflada",
   "paragraph_length",
@@ -51,7 +54,8 @@ describe("golden integrado — asserções semânticas por caso", () => {
         expect(actual.severity).toBe(esperado.severity);
         expect(actual.requiresHuman).toBe(esperado.requiresHuman);
         expect(actual.suggestion).toBe(esperado.suggestion);
-        expect(actual.principle).toMatch(/^5\.\d/);
+        expect(actual.source).toBeDefined();
+        expect(actual.normativeReference !== undefined).toBe(actual.source === "iso-24495-1");
         expect(actual.category).toBeDefined();
         expect(actual.justification.length).toBeGreaterThan(0);
         expect(diagnostic.text.slice(actual.span.start, actual.span.end)).toBe(actual.span.text);
@@ -106,12 +110,15 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
   const porCriterio: Record<IntegratedCriterion, Acc> = {
     long_sentence: zero(),
     passive_voice: zero(),
+    passiva_sintetica: zero(),
     nominalization: zero(),
     nominalizacao_encadeada: zero(),
     jargon: zero(),
+    sigla_sem_expansao: zero(),
     mais_que_perfeito_sintetico: zero(),
     gerundismo: zero(),
     adverbio_mente_denso: zero(),
+    adverbios_vagos: zero(),
     redundancia: zero(),
     perifrase_inflada: zero(),
     paragraph_length: zero(),

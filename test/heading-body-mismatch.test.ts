@@ -29,7 +29,8 @@ describe("heading_body_mismatch", () => {
     ]);
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe(titulo);
-    expect(found[0].principle).toBe("5.1");
+    expect(found[0].source).toBe("structural-heuristic");
+    expect(found[0].principleGroup).toBe("findable");
     expect(found[0].category).toBe("structural");
     expect(found[0].severity).toBe("info");
     expect(found[0].requiresHuman).toBe(true);
@@ -67,10 +68,43 @@ describe("heading_body_mismatch", () => {
     expect(found.find((f) => f.span.text === "Recurso administrativo")).toBeUndefined();
   });
 
-  it("LIMITAÇÃO CONHECIDA: comparação exata (sem lemas) — singular/plural do mesmo termo não conta como eco", () => {
+  it("plural/singular do mesmo termo conta como eco (normalização de número — Etapa 1)", () => {
     const found = findingsFor([
       H("Documentos necessários"),
       P("Você deve entregar o documento na secretaria até o fim do prazo estabelecido pelo edital."),
+    ]);
+    expect(found).toHaveLength(0);
+  });
+
+  it("plural em -ções ecoa o singular em -ção (solicitações ≈ solicitação)", () => {
+    const found = findingsFor([
+      H("Solicitações de acesso"),
+      P("Cada solicitação de acesso é analisada pela equipe responsável no prazo de cinco dias úteis."),
+    ]);
+    expect(found).toHaveLength(0);
+  });
+
+  it("caso do briefing: 'Solicitação de benefícios' × 'solicitar o benefício' não marca (eco via 'benefício')", () => {
+    const found = findingsFor([
+      H("Solicitação de benefícios"),
+      P("Para solicitar o benefício, o interessado apresenta os documentos exigidos e aguarda a análise."),
+    ]);
+    expect(found).toHaveLength(0);
+  });
+
+  it("LIMITAÇÃO CONHECIDA: relação derivacional (substantivo × verbo) NÃO é reconhecida", () => {
+    const found = findingsFor([
+      H("Solicitação"),
+      P("Para solicitar, o interessado comparece à unidade e aguarda o atendimento presencial da equipe."),
+    ]);
+    expect(found).toHaveLength(1);
+    expect(found[0].severity).toBe("info");
+  });
+
+  it("títulos com raízes distintas NÃO são fundidos pela normalização (casamento ≠ casas)", () => {
+    const found = findingsFor([
+      H("Casamento civil"),
+      P("As casas antigas do bairro foram tombadas pelo conselho municipal de patrimônio histórico."),
     ]);
     expect(found).toHaveLength(1);
     expect(found[0].severity).toBe("info");

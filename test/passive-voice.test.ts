@@ -313,7 +313,7 @@ describe("passiveVoicePass — integração pelo registry e por analyze()", () =
 
     const passive = diagnostic.findings.filter((f) => f.criterion === "passive_voice");
     expect(passive).toHaveLength(1);
-    expect(passive[0].principle).toBe("5.3.3");
+    expect(passive[0].normativeReference?.section).toBe("5.3.3");
     expect(passive[0].category).toBe("syntactic");
   });
 
@@ -322,7 +322,6 @@ describe("passiveVoicePass — integração pelo registry e por analyze()", () =
     const entry = diagnostic.score.byCriterion.find((c) => c.criterion === "passive_voice");
 
     expect(entry).toBeDefined();
-    expect(entry?.principle).toBe("5.3.3");
     expect(entry?.count.warning).toBe(1);
   });
 });

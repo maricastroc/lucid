@@ -162,8 +162,8 @@ describe("determinismo — variações de Config", () => {
     { nome: "long_sentence desligado (limiar altíssimo)", config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } } },
     { nome: "passiva desligada", config: { passiveVoice: { enabled: false } } },
     { nome: "nominalização desligada", config: { nominalization: { enabled: false } } },
-    { nome: "jargão desligado", config: { jargon: { enabled: false, frequencyRankCutoff: 5000, suggestFromGlossary: true } } },
-    { nome: "jargão sem equivalente informativo", config: { jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false } } },
+    { nome: "jargão desligado", config: { jargon: { enabled: false, suggestFromGlossary: true } } },
+    { nome: "jargão sem equivalente informativo", config: { jargon: { enabled: true, suggestFromGlossary: false } } },
     { nome: "override parcial de limiar", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
   ];
 
@@ -175,7 +175,7 @@ describe("determinismo — variações de Config", () => {
 
   it("cada pass desabilitado zera exatamente o seu critério, sem afetar os outros", () => {
     const base = analyze(TEXTO_RICO);
-    const semJargao = analyze(TEXTO_RICO, { jargon: { enabled: false, frequencyRankCutoff: 5000, suggestFromGlossary: true } });
+    const semJargao = analyze(TEXTO_RICO, { jargon: { enabled: false, suggestFromGlossary: true } });
 
     expect(semJargao.findings.some((f) => f.criterion === "jargon")).toBe(false);
     

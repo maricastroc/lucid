@@ -9,6 +9,7 @@ import {
   prepareRecord,
   prepareStringSet,
 } from "./prepare";
+import { compileConnectives, type ConnectiveEntry } from "../metrics/cohesion";
 import abreviacoesData from "./abreviacoes.pt.json";
 import verbosSerData from "./verbos-ser.pt.json";
 import participiosIrregularesData from "./participios-irregulares.pt.json";
@@ -22,12 +23,16 @@ import substantivosAcaoData from "./substantivos-acao.pt.json";
 import jargaoData from "./jargao.pt.json";
 import maisQuePerfeitoData from "./mais-que-perfeito.pt.json";
 import adverbiosMenteData from "./adverbios-mente.pt.json";
+import adverbiosVagosData from "./adverbios-vagos.pt.json";
 import redundanciasData from "./redundancias.pt.json";
 import perifrasesData from "./perifrases.pt.json";
 import duplasNegacoesData from "./duplas-negacoes.pt.json";
 import subordinadoresData from "./subordinadores.pt.json";
 import substantivosLeitorData from "./substantivos-leitor.pt.json";
 import stopwordsData from "./stopwords.pt.json";
+import siglasConhecidasData from "./siglas-conhecidas.pt.json";
+import verbosPronominaisData from "./verbos-pronominais.pt.json";
+import conectivosData from "./conectivos.pt.json";
 
 export type { DatasetId } from "./types";
 export type { DatasetRecord };
@@ -96,7 +101,12 @@ const SPECS: Record<DatasetId, RawSpec> = {
   "adverbios-mente.pt": {
     raw: adverbiosMenteData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0)",
+    provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0); dataset do critério DESCONTINUADO adverbio_mente_denso (ADR-058)",
+  },
+  "adverbios-vagos.pt": {
+    raw: adverbiosVagosData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "advérbios vagos (reforço/hedge) — curadoria própria, precisão>recall (ADR-058)",
   },
   "redundancias.pt": {
     raw: redundanciasData,
@@ -127,6 +137,21 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: stopwordsData,
     prepare: (r) => prepareStringSet(r, "forms"),
     provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para heading_body_mismatch (curadoria própria, ADR-044)",
+  },
+  "siglas-conhecidas.pt": {
+    raw: siglasConhecidasData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "siglas universalmente conhecidas (UFs, cotidiano, unidades) a NÃO sinalizar — allowlist enxuta (curadoria própria, ADR-059)",
+  },
+  "verbos-pronominais.pt": {
+    raw: verbosPronominaisData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "formas enclíticas de verbos inerentemente pronominais (trata-se, refere-se…) a NÃO tratar como passiva sintética (curadoria própria, ADR-060)",
+  },
+  "conectivos.pt": {
+    raw: conectivosData,
+    prepare: (r) => compileConnectives((r as { entries: ConnectiveEntry[] }).entries),
+    provenance: "conectivos de discurso com classe, para a métrica de coesão — exclui 'e'/'ou' (curadoria própria, ADR-061)",
   },
 };
 

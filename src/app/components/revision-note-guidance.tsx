@@ -22,6 +22,13 @@ export function Guidance({ finding, source, declaration, onDeclare }: GuidancePr
       return <LongSentenceGuide finding={finding} source={source} />;
     case "passive_voice":
       return <PassiveGuide finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />;
+    case "passiva_sintetica":
+      return (
+        <GuideText>
+          O “se” esconde quem age. Se quiser deixar o agente claro, reescreva com sujeito explícito (“a multa é aplicada
+          pelo órgão” ou “o órgão aplica a multa”). Se o “se” for reflexivo, ignore — só você sabe qual é o caso.
+        </GuideText>
+      );
     case "nominalization":
       return <NominalizationGuide finding={finding} />;
     case "nominalizacao_encadeada":
@@ -33,6 +40,13 @@ export function Guidance({ finding, source, declaration, onDeclare }: GuidancePr
       );
     case "jargon":
       return <JargonGuide />;
+    case "sigla_sem_expansao":
+      return (
+        <GuideText>
+          Na primeira vez que a sigla aparece, escreva o nome por extenso seguido dela entre parênteses — “Nome Por
+          Extenso (SIGLA)”. Depois disso, use só a sigla. A expansão é sua; a ferramenta não a conhece.
+        </GuideText>
+      );
     case "subordinacao_densa":
       return <SubordinacaoGuide finding={finding} />;
     case "leitor_terceira_pessoa":
@@ -76,7 +90,14 @@ export function Guidance({ finding, source, declaration, onDeclare }: GuidancePr
       return (
         <GuideText>
           Corte ou substitua parte dos advérbios em -mente — o excesso pesa a leitura. Quais tirar depende da ênfase que
-          você quer.
+          você quer. (Critério descontinuado — ver “Advérbios vagos”.)
+        </GuideText>
+      );
+    case "adverbios_vagos":
+      return (
+        <GuideText>
+          Tente ler a frase sem este advérbio (“basicamente”, “efetivamente”, “realmente”…): se o sentido não muda, ele
+          era só reforço e pode sair. Manter ou cortar é decisão sua.
         </GuideText>
       );
     case "mesoclise":

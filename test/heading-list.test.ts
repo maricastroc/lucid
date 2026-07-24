@@ -20,7 +20,7 @@ describe("long_heading", () => {
     const found = findingsFor([H(longo), P("Um parágrafo.")], "long_heading");
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe(longo);
-    expect(found[0].principle).toBe("5.2");
+    expect(found[0].normativeReference?.section).toBe("5.2");
     expect(found[0].category).toBe("structural");
     expect(found[0].severity).toBe("warning");
     expect(found[0].requiresHuman).toBe(true);
@@ -68,13 +68,14 @@ describe("long_heading", () => {
 });
 
 describe("single_item_list", () => {
-  it("lista de um item → marca (warning, requiresHuman, sem sugestão)", () => {
+  it("lista de um item → marca (info — higiene estrutural, requiresHuman, sem sugestão)", () => {
     const found = findingsFor([P("Intro."), L(false, "Único item da lista")], "single_item_list");
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe("Único item da lista");
-    expect(found[0].principle).toBe("5.2");
+    expect(found[0].principleGroup).toBe("findable");
     expect(found[0].category).toBe("structural");
-    expect(found[0].severity).toBe("warning");
+    expect(found[0].severity).toBe("info");
+    expect(found[0].source).toBe("structural-heuristic");
     expect(found[0].requiresHuman).toBe(true);
     expect(found[0].suggestion).toBeUndefined();
     expect(found[0].meta).toMatchObject({ ordered: false });

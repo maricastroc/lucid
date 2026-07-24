@@ -1,0 +1,12 @@
+{
+  "_comentario": "Siglas 'universalmente conhecidas' que NÃO disparam sigla_sem_expansao mesmo sem definição (ADR-059). Escopo ENXUTO por decisão do autor: só o incontestável para o público leigo brasileiro. NÃO inclui órgãos/instituições (IBGE, INSS, STF…) de propósito — muita gente leiga não os decodifica, e esconder isso iria contra o critério. Três blocos: (1) UFs; (2) siglas do cotidiano; (3) unidades e formatos técnicos universais. Curadoria própria, precisão>recall.",
+  "forms": [
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+    "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+    "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+
+    "CPF", "CNPJ", "CEP", "RG", "PIX", "SUS", "CLT", "FGTS", "CNH", "DDD",
+
+    "KG", "KM", "CM", "MM", "MB", "GB", "KB", "TB", "PDF", "URL", "TV"
+  ]
+}

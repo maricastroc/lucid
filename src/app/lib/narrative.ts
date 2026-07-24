@@ -72,6 +72,15 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
           : `Além de reordenar e reconjugar, aqui o agente não está no texto: reescrever na ativa exigiria inventar quem praticou a ação. A ferramenta se recusa a fabricar e devolve a decisão a você.`,
       ),
   },
+  passiva_sintetica: {
+    headline: () => "Voz passiva sintética (“se”)",
+    prose: (f) =>
+      `«${flat(f.span.text)}» usa o “se” enclítico: a ação existe, mas o texto não diz quem a pratica (“aplica-se a multa” — quem aplica?). O detector marca a forma enclítica “verbo-se” e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`,
+    confidence: () =>
+      assistida(
+        `O “se” é ambíguo — pode ser passiva, indeterminação do sujeito ou reflexivo. A ferramenta não desfaz essa ambiguidade nem inventa o agente: aponta a construção e devolve a decisão a você.`,
+      ),
+  },
   nominalization: {
     headline: (f) => {
       const base = metaStr(f, "baseVerb");
@@ -108,6 +117,20 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
         `Há um equivalente mais simples, mas a troca depende do que vem depois na frase: aplicá-la às cegas poderia quebrar a concordância. A ferramenta detecta e aponta o caminho, mas deixa a troca com você.`,
       );
     },
+  },
+  sigla_sem_expansao: {
+    headline: (f) => {
+      const a = metaStr(f, "acronym");
+      return a ? `Sigla sem expansão · “${a}”` : "Sigla sem expansão";
+    },
+    prose: (f) => {
+      const a = metaStr(f, "acronym");
+      return `A sigla${a ? ` “${a}”` : ""} aparece sem ter sido apresentada por extenso antes desta ocorrência. O detector marca apenas a PRIMEIRA vez não definida, e ignora UFs, unidades e siglas universais (CPF, CEP…).`;
+    },
+    confidence: () =>
+      assistida(
+        `A ferramenta localiza a primeira ocorrência não definida com exatidão, mas escrever o nome por extenso — “Nome Por Extenso (SIGLA)” — é redação sua; ela não sabe o que a sigla significa nem inventa a expansão.`,
+      ),
   },
   subordinacao_densa: {
     headline: (f) => {
@@ -189,7 +212,13 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
   adverbio_mente_denso: {
     confidence: () =>
       assistida(
-        `A ferramenta conta os advérbios em -mente da frase com exatidão, mas decidir quais cortar ou substituir depende do que você quer enfatizar — trabalho de autor.`,
+        `Critério descontinuado (ADR-058): conta advérbios em -mente por densidade. Substituído por “Advérbios vagos”, que mira o advérbio-fumaça em si. Desligado por padrão.`,
+      ),
+  },
+  adverbios_vagos: {
+    confidence: () =>
+      assistida(
+        `A ferramenta reconhece o advérbio vago pelo léxico curado, mas decidir se cortá-lo enfraquece ou limpa a frase depende da ênfase que você quer — por isso é um sinal fraco (info) que aponta, não corrige.`,
       ),
   },
   redundancia: {
@@ -251,8 +280,8 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
       const bw = metaNum(f, "bodyContentWords");
       return (
         `Nenhuma palavra de conteúdo deste título reaparece nas ${bw ?? "várias"} palavras de conteúdo da seção ` +
-        `(o título tem ${hw ?? "poucas"}). A comparação é exata — sem lemas —, então plural/singular do mesmo termo ` +
-        "não conta como eco; é um proxy fraco de relevância, não uma prova de que o título está errado."
+        `(o título tem ${hw ?? "poucas"}). A comparação normaliza plural/singular (documentos ≈ documento), mas ` +
+        "não relaciona derivações nem sinônimos; é um proxy fraco de localização, não prova de que o título está errado."
       );
     },
     confidence: () =>

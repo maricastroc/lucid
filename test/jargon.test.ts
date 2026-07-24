@@ -301,7 +301,7 @@ describe("jargonPass — integração pelo registry e por analyze()", () => {
 
     const jargonFindingsFromAnalyze = diagnostic.findings.filter((f) => f.criterion === "jargon");
     expect(jargonFindingsFromAnalyze).toHaveLength(2);
-    expect(jargonFindingsFromAnalyze[0].principle).toBe("5.3.2");
+    expect(jargonFindingsFromAnalyze[0].normativeReference?.section).toBe("5.3.2");
     expect(jargonFindingsFromAnalyze[0].category).toBe("lexical");
   });
 
@@ -310,7 +310,6 @@ describe("jargonPass — integração pelo registry e por analyze()", () => {
     const entry = diagnostic.score.byCriterion.find((c) => c.criterion === "jargon");
 
     expect(entry).toBeDefined();
-    expect(entry?.principle).toBe("5.3.2");
     expect(entry?.count.warning).toBe(1);
   });
 });

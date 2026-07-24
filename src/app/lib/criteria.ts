@@ -1,4 +1,4 @@
-import type { Category, CriterionId, Finding, Severity } from "@/lucid";
+import type { Category, CriterionId, Finding, PrincipleGroup, Severity } from "@/lucid";
 import { isCriterionId } from "@/lucid";
 
 export type Criterion = CriterionId;
@@ -17,11 +17,14 @@ export interface CriterionMeta {
 
 export const CRITERION_ORDER: readonly Criterion[] = [
   "passive_voice",
+  "passiva_sintetica",
   "nominalization",
   "nominalizacao_encadeada",
   "mais_que_perfeito_sintetico",
   "gerundismo",
   "jargon",
+  "sigla_sem_expansao",
+  "adverbios_vagos",
   "adverbio_mente_denso",
   "redundancia",
   "perifrase_inflada",
@@ -48,6 +51,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "mark-dotted",
     signal: "âncora numa forma de “ser” seguida de particípio, em janela local de palavras",
     why: "Some quem pratica a ação — e o leitor precisa saber quem faz o quê.",
+  },
+  passiva_sintetica: {
+    label: "Voz passiva sintética",
+    ruleId: "passiva_sintetica",
+    kind: "Construção sintática",
+    principleName: "Frases claras",
+    channel: "inline",
+    markStyleClass: "mark-dotted",
+    signal: "“se” enclítico em verbo (aplica-se, publicam-se); exclui verbos inerentemente pronominais (trata-se, refere-se…)",
+    why: "O “se” esconde quem pratica a ação — e o leitor precisa saber quem faz o quê.",
   },
   nominalization: {
     label: "Nominalização",
@@ -79,6 +92,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     signal: "correspondência exata num glossário curado (maior correspondência primeiro)",
     why: "Termo pouco familiar fora do domínio afasta o leitor não especialista.",
   },
+  sigla_sem_expansao: {
+    label: "Sigla sem expansão",
+    ruleId: "sigla_sem_expansao",
+    kind: "Escolha lexical",
+    principleName: "Palavras familiares",
+    channel: "inline",
+    markStyleClass: "mark-solid",
+    signal: "sigla (2–6 letras maiúsculas) usada antes de ser apresentada por extenso; exclui UFs, unidades e siglas universais",
+    why: "Sigla não apresentada exige que o leitor já a conheça — quem não conhece trava logo no começo.",
+  },
   long_sentence: {
     label: "Frase longa",
     ruleId: "long_sentence",
@@ -109,15 +132,25 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     signal: "padrão “ir + estar + gerúndio” (ex.: “vai estar enviando”)",
     why: "Alonga a frase sem necessidade — a forma simples (“vai enviar”) é mais direta.",
   },
+  adverbios_vagos: {
+    label: "Advérbios vagos",
+    ruleId: "adverbios_vagos",
+    kind: "Escolha lexical",
+    principleName: "Frases concisas",
+    channel: "inline",
+    markStyleClass: "mark-solid",
+    signal: "advérbio de reforço/atenuação de um léxico curado (basicamente, efetivamente, realmente…)",
+    why: "Advérbio que reforça sem acrescentar: costuma sair sem mudar o que a frase afirma.",
+  },
   adverbio_mente_denso: {
-    label: "Advérbios em -mente",
+    label: "Advérbios em -mente (descontinuado)",
     ruleId: "adverbio_mente_denso",
     kind: "Escolha lexical",
     principleName: "Frases concisas",
     channel: "inline",
     markStyleClass: "mark-solid",
     signal: "concentração de advérbios em -mente na mesma frase (allowlist do PortiLexicon-UD)",
-    why: "O empilhamento de advérbios em -mente pesa a leitura.",
+    why: "Critério descontinuado (ADR-058), substituído por “Advérbios vagos”; desligado por padrão.",
   },
   redundancia: {
     label: "Redundância",
@@ -292,9 +325,26 @@ export function isSafe(f: Finding): boolean {
   return actionStateOf(f) === "safe";
 }
 
-export function principleGroupOf(principle: string): string {
-  if (principle.startsWith("5.1")) return "Relevante";
-  if (principle.startsWith("5.2")) return "Localizável";
-  if (principle.startsWith("5.4")) return "Usável";
-  return "Compreensível";
+const PRINCIPLE_GROUP_LABEL: Record<PrincipleGroup, string> = {
+  relevant: "Relevante",
+  findable: "Localizável",
+  understandable: "Compreensível",
+  usable: "Usável",
+};
+
+/** Rótulo PT da dimensão de Linguagem Simples (ADR-056). */
+export function principleGroupLabel(group: PrincipleGroup): string {
+  return PRINCIPLE_GROUP_LABEL[group];
+}
+
+/**
+ * Rótulo de proveniência (ADR-056): referência normativa direta só para critérios
+ * ISO; extensões editoriais e heurísticas NUNCA citam a norma.
+ */
+export function provenanceLabel(f: Finding): string {
+  if (f.source === "iso-24495-1" && f.normativeReference) {
+    return `${f.normativeReference.standard} · ${f.normativeReference.section}`;
+  }
+  if (f.source === "editorial-pt-br") return "Extensão editorial PT-BR";
+  return "Heurística estrutural";
 }

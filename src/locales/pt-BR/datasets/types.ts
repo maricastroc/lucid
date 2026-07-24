@@ -1,3 +1,5 @@
+import type { ConnectivesIndex } from "../metrics/cohesion";
+
 export type DatasetId =
   | "abreviacoes.pt"
   | "verbos-ser.pt"
@@ -12,12 +14,16 @@ export type DatasetId =
   | "jargao.pt"
   | "mais-que-perfeito.pt"
   | "adverbios-mente.pt"
+  | "adverbios-vagos.pt"
   | "redundancias.pt"
   | "perifrases.pt"
   | "duplas-negacoes.pt"
   | "subordinadores.pt"
   | "substantivos-leitor.pt"
-  | "stopwords.pt";
+  | "stopwords.pt"
+  | "siglas-conhecidas.pt"
+  | "verbos-pronominais.pt"
+  | "conectivos.pt";
 
 export type JargonKind = "word" | "phrase";
 export type JargonDomain = "administrative" | "legal" | "general";
@@ -79,10 +85,14 @@ export interface DataTypes {
   "jargao.pt": JargonPrepared;
   "mais-que-perfeito.pt": ReadonlySet<string>;
   "adverbios-mente.pt": ReadonlySet<string>;
+  "adverbios-vagos.pt": ReadonlySet<string>;
   "redundancias.pt": PhrasePrepared;
   "perifrases.pt": PhrasePrepared;
   "duplas-negacoes.pt": PhrasePrepared;
   "subordinadores.pt": PhrasePrepared;
   "substantivos-leitor.pt": ReadonlySet<string>;
   "stopwords.pt": ReadonlySet<string>;
+  "siglas-conhecidas.pt": ReadonlySet<string>;
+  "verbos-pronominais.pt": ReadonlySet<string>;
+  "conectivos.pt": ConnectivesIndex;
 }

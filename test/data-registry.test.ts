@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { REGISTRY, DOCUMENT_DATASETS, datasetFingerprint, dataHashFor, type DatasetId } from "../src/locales/pt-BR/datasets/registry";
 import { analyze } from "../src/lucid";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
+import { localePtBR } from "../src/locales/pt-BR";
 
 describe("data registry — fingerprints", () => {
   it("todo dataset tem fingerprint de 8 hex chars, estável entre chamadas", () => {
@@ -41,8 +42,12 @@ describe("data registry — integração com analyze", () => {
     expect(d.meta.dataHash).toMatch(/^[0-9a-f]{8}$/);
   });
 
-  it("o dataHash do analyze bate com o hash dos deps declarados (doc + passes)", () => {
-    const expected = dataHashFor([...DOCUMENT_DATASETS, ...PASSES.flatMap((p) => p.dataDeps ?? [])] as DatasetId[]);
+  it("o dataHash do analyze bate com o hash dos deps declarados (doc + passes + métricas)", () => {
+    const expected = dataHashFor([
+      ...DOCUMENT_DATASETS,
+      ...PASSES.flatMap((p) => p.dataDeps ?? []),
+      ...(localePtBR.metrics.dataDeps ?? []),
+    ] as DatasetId[]);
     const d = analyze("Qualquer texto.");
     expect(d.meta.dataHash).toBe(expected);
   });

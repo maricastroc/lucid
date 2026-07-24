@@ -1,0 +1,21 @@
+{
+  "_comentario": "Advérbios vagos (reforço/hedge) — critério de inclusão: advérbio que, removido, NÃO altera a proposição da frase, só o 'volume' (ênfase/atenuação). EXCLUI advérbios de modo com conteúdo real (rapidamente, mensalmente, judicialmente, digitalmente) para não empurrar a reescrita para perífrases do tipo 'de forma rápida' (que o critério perifrase_inflada penalizaria). Curadoria própria (ADR-058). Fronteiriços deixados FORA da lista inicial por risco de foco/conteúdo: 'particularmente' (= em especial) e 'naturalmente' (advérbio de modo real). Disparo por presença (cada ocorrência vira um info).",
+  "forms": [
+    "basicamente",
+    "efetivamente",
+    "certamente",
+    "obviamente",
+    "meramente",
+    "simplesmente",
+    "literalmente",
+    "realmente",
+    "praticamente",
+    "evidentemente",
+    "definitivamente",
+    "absolutamente",
+    "totalmente",
+    "completamente",
+    "claramente",
+    "sinceramente"
+  ]
+}

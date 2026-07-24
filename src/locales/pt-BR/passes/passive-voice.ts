@@ -1,8 +1,7 @@
-import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
 
 const CRITERION = "passive_voice";
-const PRINCIPLE = "5.3.3";
 
 const SER_FORMS = getPrepared("verbos-ser.pt");
 const IRREGULAR_PARTICIPLES = getPrepared("participios-irregulares.pt");
@@ -153,7 +152,6 @@ function buildJustification(hasAgent: boolean, agentTruncated: boolean): string 
 export const passiveVoicePass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: [
     "verbos-ser.pt",
     "participios-irregulares.pt",
@@ -165,7 +163,7 @@ export const passiveVoicePass: Pass = {
   run(ctx) {
     if (!ctx.config.passiveVoice.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
@@ -208,7 +206,6 @@ export const passiveVoicePass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
           requiresHuman: !hasAgent || agentTruncated,

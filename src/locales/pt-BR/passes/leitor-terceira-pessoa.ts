@@ -1,8 +1,7 @@
-import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
 
 const CRITERION = "leitor_terceira_pessoa";
-const PRINCIPLE = "5.3.3";
 
 const READER_NOUNS = getPrepared("substantivos-leitor.pt");
 
@@ -48,13 +47,12 @@ function findDeonticAfter(tokens: readonly Token[], startIndex: number): number 
 export const leitorTerceiraPessoaPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: ["substantivos-leitor.pt"],
 
   run(ctx) {
     if (!ctx.config.leitorTerceiraPessoa.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
@@ -78,7 +76,6 @@ export const leitorTerceiraPessoaPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "info",
           requiresHuman: true,

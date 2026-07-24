@@ -1,7 +1,6 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "prose_enumeration";
-const PRINCIPLE = "5.2";
 
 const ORDINAL_RANK: Record<string, number> = {
   primeiro: 1, primeira: 1,
@@ -15,13 +14,12 @@ const ORDINAL_RANK: Record<string, number> = {
 export const proseEnumerationPass: Pass = {
   criterion: CRITERION,
   category: "structural",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.proseEnumeration.enabled) return [];
 
     const min = ctx.config.proseEnumeration.minMarkers;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const paragraph of ctx.doc.blocks) {
       if (paragraph.kind !== "paragraph") continue;
@@ -37,7 +35,6 @@ export const proseEnumerationPass: Pass = {
       findings.push({
         criterion: CRITERION,
         category: "structural",
-        principle: PRINCIPLE,
         span: { start: paragraph.start, end: paragraph.end, text: paragraph.text },
         severity: "warning",
         requiresHuman: true,

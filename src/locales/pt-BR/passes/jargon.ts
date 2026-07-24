@@ -1,4 +1,4 @@
-import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import type { JargonEntry, CompiledEntry, JargonDomain } from "../datasets/types";
 import { getPrepared } from "../datasets/registry";
 
@@ -6,7 +6,6 @@ export { compileJargonEntries } from "../datasets/prepare";
 export type { JargonEntry, CompiledEntry } from "../datasets/types";
 
 const CRITERION = "jargon";
-const PRINCIPLE = "5.3.2";
 
 const BY_FIRST_WORD: ReadonlyMap<string, readonly CompiledEntry[]> = getPrepared("jargao.pt").byFirstWord;
 
@@ -121,13 +120,12 @@ function buildJustification(entry: JargonEntry, hasSuggestion: boolean): string 
 export const jargonPass: Pass = {
   criterion: CRITERION,
   category: "lexical",
-  principle: PRINCIPLE,
   dataDeps: ["jargao.pt"],
 
   run(ctx) {
     if (!ctx.config.jargon.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
@@ -165,7 +163,6 @@ export const jargonPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "lexical",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
           suggestion: suggestionAllowed ? match.entry.plain! : undefined,
