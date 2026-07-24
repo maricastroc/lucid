@@ -4,10 +4,23 @@ const CRITERION = "sigla_sem_expansao";
 
 const RE_ACRONYM = /^\p{Lu}{2,6}$/u;
 
-const RE_ROMAN = /^[IVXLCDM]+$/;
+/**
+ * Numeral romano BEM-FORMADO (1..3999). Substitui a exclusão antiga
+ * `/^[IVXLCDM]+$/`, que descartava QUALQUER token composto só dessas letras —
+ * inclusive siglas reais que NÃO são numerais válidos (CID, DVD, LCD). Agora só o
+ * numeral de fato (II, IV, XII, MCMXCIX) é excluído; "CID"/"DVD"/"LCD" voltam a
+ * ser candidatos a sigla. Colisões residuais em que a sigla é, por acaso, um
+ * numeral válido (ex.: "CD" = 400, "MIX" = 1009) são raras e aceitas
+ * (precisão do numeral > recall marginal dessas poucas siglas).
+ */
+const RE_ROMAN = /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
+
+function isRomanNumeral(text: string): boolean {
+  return text.length > 0 && RE_ROMAN.test(text);
+}
 
 function isAcronymShape(token: Token): boolean {
-  return token.isWord && RE_ACRONYM.test(token.text) && !RE_ROMAN.test(token.text);
+  return token.isWord && RE_ACRONYM.test(token.text) && !isRomanNumeral(token.text);
 }
 
 function isAllCapsWord(token: Token | undefined): boolean {

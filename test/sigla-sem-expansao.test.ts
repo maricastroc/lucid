@@ -47,8 +47,9 @@ describe("sigla_sem_expansao — precisão (baixo falso positivo)", () => {
     expect(spans("O arquivo tem 10 MB e está em PDF.")).toEqual([]);
   });
 
-  it("numerais romanos não marcam", () => {
+  it("numerais romanos BEM-FORMADOS não marcam", () => {
     expect(spans("O Capítulo II e o Título IV tratam do tema. A Guerra XII foi longa.")).toEqual([]);
+    expect(spans("O item XXIV e a fase VIII do processo MMXXIV.")).toEqual([]);
   });
 
   it("caixa-alta de ênfase/título (run de maiúsculas) não marca", () => {
@@ -59,5 +60,35 @@ describe("sigla_sem_expansao — precisão (baixo falso positivo)", () => {
   it("kill switch", () => {
     const config = { ...DEFAULT_CONFIG, siglaSemExpansao: { enabled: false } };
     expect(analyze("A LGPD entrou em vigor.", config).findings.filter((f) => f.criterion === "sigla_sem_expansao")).toEqual([]);
+  });
+});
+
+describe("sigla_sem_expansao — siglas só com letras romanas mas que NÃO são numeral (F5)", () => {
+  it("CID/DVD/LCD (letras de {IVXLCDM}, mas numeral romano malformado) voltam a marcar", () => {
+    expect(spans("O CID informado estava errado.")).toEqual(["CID"]);
+    expect(spans("Comprei um DVD novo ontem.")).toEqual(["DVD"]);
+    expect(spans("A tela é um LCD antigo.")).toEqual(["LCD"]);
+  });
+
+  it("mas o numeral romano válido (fora da allowlist) segue excluído", () => {
+    // "MI" (=1001) e "DL" (=550): romanos bem-formados, não estão na allowlist —
+    // excluídos pela regra de numeral, não por serem conhecidos. Colisão aceita.
+    expect(spans("O anexo MI e o item DL seguem no processo.")).toEqual([]);
+  });
+});
+
+describe("sigla_sem_expansao — limitação conhecida: sigla colada a dígito (F5)", () => {
+  // O tokenizer separa letras de dígitos ("G20" -> "G"+"20"; "MP3" -> "MP"+"3").
+  // Comportamento atual (imperfeito, PRÉ-EXISTENTE, fora do escopo desta correção):
+  //  - prefixo de 1 letra (G20, G7) não casa a forma de sigla (2–6) -> não marca;
+  //  - prefixo de 2+ letras marca só a parte de letras (MP3 -> "MP") — discutível.
+  // Corrigir de forma limpa exigiria mexer no tokenizer (alcance amplo) + decidir se
+  // "sigla+número" está sequer no escopo do critério. Deixado como aberto/documentado.
+  it("G20 (prefixo de 1 letra) não marca", () => {
+    expect(spans("A cúpula do G20 terminou.")).toEqual([]);
+  });
+
+  it("MP3 marca só a parte de letras 'MP' (comportamento pré-existente, não introduzido aqui)", () => {
+    expect(spans("O arquivo é MP3.")).toEqual(["MP"]);
   });
 });
