@@ -2,28 +2,6 @@ import type { Block, Document, ListItemBlock, Sentence, Token } from "../types";
 import type { DocumentBuildServices } from "./model";
 import { segmentAt } from "./structured";
 
-/**
- * Reconhecedor estrutural determinístico para texto simples / Markdown (F4).
- *
- * O caminho `analyze()` (texto colado/digitado) só produzia parágrafos, deixando
- * MORTOS os critérios de "Localizável" (título longo, salto de nível, título sem
- * eco, lista de um item) — que só rodavam via importação .docx. Este módulo os
- * revive reconhecendo convenções EXPLÍCITAS de marcação:
- * - títulos ATX: `#`..`######` + espaço + texto (nível = nº de `#`);
- * - itens de lista: `-`/`*`/`+` ou `1.`/`1)` + espaço + texto.
- *
- * Diferente de `buildStructuredDocument` (que RECONSTRÓI o source com separadores,
- * ok para o docx), aqui o `source` continua sendo o texto ORIGINAL normalizado: os
- * offsets dos findings apontam para os caracteres reais que o usuário colou, então
- * a marcação na UI permanece alinhada. Cada bloco é segmentado em ISOLAMENTO (via
- * `segmentAt`), o que conserta a fusão "título sem pontuação + corpo" que a
- * segmentação sobre o texto inteiro provocaria.
- *
- * Só marcação explícita conta: um "título" sem `#` continua sendo parágrafo — a
- * norma trata detecção de título por heurística como sinal fraco, então aqui vale
- * precisão > recall (nunca inventa estrutura que o autor não marcou).
- */
-
 const RE_HEADING = /^(#{1,6})([ \t]+)(\S.*?)[ \t\r]*$/;
 const RE_LIST = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(\S.*?)[ \t\r]*$/;
 const RE_BLANK = /^[ \t\r]*$/;
@@ -33,7 +11,6 @@ interface Line {
   readonly text: string;
 }
 
-/** Linhas com offset de início; `text` exclui o `\n` terminal. */
 function splitLines(source: string): Line[] {
   const out: Line[] = [];
   let i = 0;
@@ -148,7 +125,6 @@ interface Segmented {
   end: number;
 }
 
-/** Segmenta uma faixa do source e devolve as fronteiras reais (a partir das frases). */
 function segmentRange(source: string, start: number, end: number, services: DocumentBuildServices): Segmented | null {
   const seg = segmentAt(source.slice(start, end), start, services);
   if (seg.sentences.length === 0) return null;

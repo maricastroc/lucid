@@ -2,12 +2,6 @@ import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "adverbios_vagos";
 
-/**
- * Advérbios vagos (ADR-058): advérbios de reforço/atenuação que, removidos, não
- * mudam a proposição — só o "volume". Disparo POR PRESENÇA (não densidade), sobre
- * um léxico curado que exclui advérbios de modo com conteúdo. Substitui, como
- * critério conceitualmente mais preciso, o descontinuado `adverbio_mente_denso`.
- */
 export const adverbiosVagosPass: Pass = {
   criterion: CRITERION,
   category: "lexical",

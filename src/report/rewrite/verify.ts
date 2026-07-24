@@ -20,13 +20,7 @@ export interface VerifyOptions {
   question?: string;
   criterion?: string;
   findings?: readonly Finding[];
-  /**
-   * Respostas de elicitação do autor (ADR-055). Uma declaração com `agent` vira a
-   * prova `declared_agent_present` E amplia a fonte-de-verdade dos guards de
-   * fabricação: o agente declarado pelo autor não é invenção do reescritor.
-   */
   declarations?: readonly AgentDeclaration[];
-  /** Cancela a chamada da sonda (ex.: o cliente da reescrita desconectou). */
   signal?: AbortSignal;
 }
 

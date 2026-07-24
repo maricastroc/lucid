@@ -1,14 +1,6 @@
 import type { CohesionMetrics, ConnectiveClass, Document } from "@/lucid/core/types";
 import { normalizeNumber } from "../services/normalize-number";
 
-/**
- * Métricas de coesão de superfície (ADR-061), 100% determinísticas, sem LSA nem
- * embeddings (que "adivinhariam" sentido — proibido na Camada 1). Duas famílias:
- * coesão referencial lexical (continuidade de palavras de conteúdo entre frases
- * vizinhas) e incidência/classe de conectivos de discurso. São DESCRITORES: não
- * têm direção de "melhor" e nunca entram no placar.
- */
-
 export interface ConnectiveEntry {
   phrase: string;
   class: ConnectiveClass;

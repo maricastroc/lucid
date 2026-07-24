@@ -18,15 +18,6 @@ const BARRIER_CONJUNCTIONS = new Set(["que", "mas", "e", "porque", "quando"]);
 
 const AGENT_MARKERS = new Set(["pelo", "pela", "pelos", "pelas"]);
 
-/**
- * "por" (sem contração) é ambíguo: introduz agente ("assinado por João") OU
- * adjunto de causa/modo/meio ("aprovado por unanimidade", "por lei", "por
- * engano"). Reconhecemos "por" como AGENTE só quando o que vem depois o licencia
- * sem ambiguidade — nome próprio, pronome oblíquo ou determinante indefinido; um
- * substantivo comum nu fica como adjunto (mantido sem-agente, precisão > recall).
- * Corrige o F2: antes, TODO "por + agente" era classificado como "sem agente",
- * pondo requiresHuman=true à toa e escondendo o agente explícito do roteamento.
- */
 const POR_AGENT_MARKER = "por";
 const AGENT_DETERMINERS = new Set(["um", "uma", "uns", "umas"]);
 const AGENT_PRONOUNS = new Set(["mim", "ti", "ele", "ela", "eles", "elas", "nós", "vós", "você", "vocês"]);
@@ -38,18 +29,13 @@ const MAX_AGENT_PHRASE_TOKENS = 6;
 
 const RE_REGULAR_PARTICIPLE_SUFFIX = /^(.{2,}?)(ad|id|íd)[ao]s?$/u;
 
-/**
- * Vogais com acento tônico escrito. Um particípio regular em -ado/-ido é tônico
- * no SUFIXO, então seu radical fica pretônico e NÃO carrega acento escrito
- * (validado, aplicada, concedido). O acento de hiato do -ído/-úido cai DENTRO do
- * sufixo (distribu-ído, constru-ído), capturado no grupo 2 da regex — nunca no
- * radical (grupo 1). Logo, acento NO RADICAL delata um adjetivo proparoxítono
- * apenas homógrafo de forma — "válido", "rápido", "sólido", "líquido", "lúcido",
- * "rígida", "úmido" — que NÃO é particípio e não deve ancorar voz passiva. Regra
- * determinística que dispensa um léxico fechado de particípios (preservando o
- * recall sobre verbos produtivos) e elimina a família dominante de falso positivo.
- */
 const RE_STEM_STRESS_ACCENT = /[áàâãéêíóôõú]/u;
+
+type Eventiveness = "agent" | "eventive_tense" | "ambiguous_present";
+
+const PRESENT_INDICATIVE_SER = new Set(["sou", "és", "é", "somos", "sois", "são"]);
+
+const DEONTIC_PARTICIPLES = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
 
 function isConnector(token: Token): boolean {
   return token.isWord && (CONNECTOR_ADVERBS.has(token.lower) || RE_MENTE_ADVERB.test(token.lower));
@@ -165,21 +151,30 @@ function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): Ag
   return { end, truncated };
 }
 
-function buildJustification(hasAgent: boolean, agentTruncated: boolean): string {
-  if (hasAgent && !agentTruncated) {
-    return (
-      "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a " +
-      "ação. Considere reescrever na voz ativa para tornar a frase mais direta; a " +
-      "ferramenta não reescreve automaticamente."
-    );
-  }
-  if (agentTruncated) {
+function buildJustification(eventiveness: Eventiveness, agentTruncated: boolean): string {
+  if (eventiveness === "agent") {
+    if (!agentTruncated) {
+      return (
+        "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a " +
+        "ação. Considere reescrever na voz ativa para tornar a frase mais direta; a " +
+        "ferramenta não reescreve automaticamente."
+      );
+    }
     return (
       "Frase na voz passiva com agente explícito, mas o agente é longo demais para a " +
       "ferramenta delimitar com segurança — reconhece só os primeiros " +
       `${MAX_AGENT_PHRASE_TOKENS} termos após o marcador. Indique o agente manualmente ou ` +
       "reescreva na voz ativa; converter automaticamente arriscaria cortar o agente no meio " +
       "e colar o resto da frase ao objeto, corrompendo o sentido."
+    );
+  }
+  if (eventiveness === "ambiguous_present") {
+    return (
+      'Construção "ser + particípio" no presente e sem agente explícito: pode ser voz passiva ' +
+      'de uma ação ("o benefício é concedido") ou predicativo de estado ("o servidor é ' +
+      'qualificado"), e a ferramenta não distingue os dois com segurança. Se descreve uma ação, ' +
+      "considere a voz ativa e diga quem a pratica; se descreve um estado ou característica, este " +
+      "apontamento não se aplica. A ferramenta não corrige automaticamente — a decisão é sua."
     );
   }
   return (
@@ -218,7 +213,11 @@ export const passiveVoicePass: Pass = {
         if (!participleMatch) continue;
 
         const participle = tokens[participleMatch.index];
-        if (AMBIGUOUS_PARTICIPLES.has(participle.lower) || NOMINAL_FALSE_POSITIVES.has(participle.lower)) {
+        if (
+          AMBIGUOUS_PARTICIPLES.has(participle.lower) ||
+          NOMINAL_FALSE_POSITIVES.has(participle.lower) ||
+          DEONTIC_PARTICIPLES.has(participle.lower)
+        ) {
           continue;
         }
 
@@ -228,12 +227,23 @@ export const passiveVoicePass: Pass = {
         const agentExtent = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : null;
         const agentTruncated = agentExtent?.truncated ?? false;
 
+        // Confiança/eventividade (A-1): a presença de agente é o sinal mais forte;
+        // sem agente, o tempo da âncora separa a passiva eventiva plena do presente
+        // ambíguo (passiva de ação vs. predicativo de estado). O presente NÃO é
+        // suprimido — só apontado com confiança rebaixada e justificativa honesta.
+        const eventiveness: Eventiveness = hasAgent
+          ? "agent"
+          : PRESENT_INDICATIVE_SER.has(anchor.lower)
+            ? "ambiguous_present"
+            : "eventive_tense";
+
         const start = anchor.start;
         const end = agentExtent ? agentExtent.end : participle.end;
 
         const marker = hasAgent ? tokens[agentMatch.markerIndex] : null;
         const meta: Record<string, string | number | boolean> = {
           hasAgent,
+          eventiveness,
           participleStart: participle.start,
           participleEnd: participle.end,
         };
@@ -251,7 +261,7 @@ export const passiveVoicePass: Pass = {
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
           requiresHuman: !hasAgent || agentTruncated,
-          justification: buildJustification(hasAgent, agentTruncated),
+          justification: buildJustification(eventiveness, agentTruncated),
           meta,
         });
       }

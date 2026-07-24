@@ -315,6 +315,67 @@ describe("passiveVoicePass — adjetivos proparoxítonos em -ido/-ada não são 
   });
 });
 
+describe("passiveVoicePass — eventividade em quatro níveis (A-1)", () => {
+  it("agente explícito → eventiveness 'agent' (alta confiança), em qualquer tempo", () => {
+    for (const texto of ["O laudo foi assinado por João.", "O benefício é concedido pela plataforma."]) {
+      const findings = passiveFindings(texto);
+      expect(findings, texto).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true, eventiveness: "agent" });
+      expect(findings[0].severity, texto).toBe("warning");
+    }
+  });
+
+  it("tempo claramente eventivo sem agente → 'eventive_tense' (passiva plena)", () => {
+    for (const texto of [
+      "O pedido foi aprovado.",
+      "O processo será encaminhado ao setor.",
+      "O projeto tinha sido aprovado.",
+      "A proposta era analisada todo mês.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings, texto).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false, eventiveness: "eventive_tense" });
+      expect(findings[0].severity, texto).toBe("warning");
+    }
+  });
+
+  it("presente sem agente → 'ambiguous_present': CONTINUA apontado (a ausência de agente não transforma a frase em estado)", () => {
+    for (const texto of [
+      "O benefício é concedido após a análise.",
+      "A inscrição é realizada exclusivamente pela internet.",
+      "Os documentos são enviados diariamente.",
+      "O servidor é qualificado.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings, texto).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false, eventiveness: "ambiguous_present" });
+      expect(findings[0].requiresHuman, texto).toBe(true);
+      expect(findings[0].justification, texto).toContain("predicativo de estado");
+    }
+  });
+
+  it("a justificativa do presente ambíguo NÃO afirma passiva categoricamente", () => {
+    const [f] = passiveFindings("O servidor é qualificado.");
+    expect(f.justification).toContain("pode ser voz passiva");
+    expect(f.justification).not.toContain("Frase na voz passiva,");
+  });
+
+  it("deôntico 'ser obrigado a' é excluído da passiva (coberto por leitor_terceira_pessoa)", () => {
+    for (const texto of [
+      "Os candidatos são obrigados a comparecer.",
+      "O contribuinte é obrigado a declarar os rendimentos.",
+      "A empresa será obrigada a pagar a multa.",
+    ]) {
+      expect(passiveFindings(texto), texto).toEqual([]);
+    }
+  });
+
+  it("integração: 'são obrigados a' gera SÓ leitor_terceira_pessoa, sem finding de passiva sobreposto", () => {
+    const d = analyze("Os candidatos são obrigados a comparecer.");
+    expect(d.findings.map((f) => f.criterion)).toEqual(["leitor_terceira_pessoa"]);
+  });
+});
+
 describe("passiveVoicePass — barreiras de pontuação e conjunção", () => {
   it("vírgula entre auxiliar e particípio aborta a busca (falso negativo aceito)", () => {
     expect(passiveFindings("Foi, sem dúvida, um erro grave.")).toEqual([]);

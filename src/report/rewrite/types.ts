@@ -6,19 +6,10 @@ export interface RewriteLocale {
   analyze(text: string): Diagnostic;
   readonly firstPersonMarkers: RegExp;
   readonly jargonCriterionId: string;
-  /** Qualquer forma de substantivo-agente (institucional ou de cargo) curado, sem exigir posição de sujeito — usado para checar presença em qualquer papel no texto-fonte. */
   readonly thirdPersonAgentNouns: RegExp;
-  /** As mesmas formas, mas só quando precedidas de artigo definido (posição de sujeito aparente) — usado para detectar o agente que a proposta introduz. Captura o substantivo no grupo 1. */
   readonly thirdPersonAgentSubject: RegExp;
 }
 
-/**
- * Resposta do autor à pergunta "quem pratica essa ação?" de uma passiva sem agente
- * (elicitação — ADR-055). `span` aponta o finding no texto-fonte; `agent` é o texto
- * livre declarado pelo autor, ou `null` quando ele decide manter a construção impessoal.
- * A engine nunca monta a frase com essa resposta (ADR-054): ela vira requisito do
- * briefing dirigido e prova de verificação (`declared_agent_present`).
- */
 export interface AgentDeclaration {
   span: Span;
   agent: string | null;
@@ -30,10 +21,8 @@ export interface RewriteRequest {
   criterion?: string;
   strategy?: RewriteStrategy;
   findings?: readonly Finding[];
-  /** Respostas de elicitação do autor (ADR-055) — só surtem efeito na estratégia `directed`. */
   declarations?: readonly AgentDeclaration[];
   localeId?: string;
-  /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou o cliente desconectou). */
   signal?: AbortSignal;
 }
 
@@ -42,11 +31,6 @@ export interface RewriteProposal {
   original: string;
   proposed: string;
   localeId?: string;
-  /**
-   * Diagnóstico do parse da resposta do provedor — só definido por proponentes baseados em LLM.
-   * "unparseable": parseRewrite() não extraiu uma reescrita válida e o pipeline manteve `original`
-   * em `proposed`; distingue essa queda de uma decisão legítima do modelo (ver llm-proposer.ts).
-   */
   parseOutcome?: "ok" | "unparseable";
 }
 

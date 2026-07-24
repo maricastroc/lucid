@@ -57,7 +57,6 @@ function deonticEndAt(tokens: readonly Token[], i: number): number | null {
   return null;
 }
 
-/** Procura o deôntico numa janela após o sujeito; devolve a faixa `[start, end]` de tokens dele. */
 function findDeonticAfter(tokens: readonly Token[], startIndex: number): { start: number; end: number } | null {
   let consumed = 0;
   for (let i = startIndex; i < tokens.length && consumed < MAX_WINDOW_TOKENS; i++) {

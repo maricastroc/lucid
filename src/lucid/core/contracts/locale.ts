@@ -19,9 +19,7 @@ export interface ReadabilityMetric {
 export interface MetricServices {
   countSyllables: (word: string) => number;
   readability: ReadabilityMetric;
-  /** Calcula as métricas de coesão de superfície do documento (ADR-061). */
   cohesion: (doc: Document) => CohesionMetrics;
-  /** Datasets consumidos pelas métricas (p/ compor o dataHash de forma honesta). */
   readonly dataDeps?: readonly string[];
 }
 
@@ -45,6 +43,5 @@ export interface LocaleBundle {
   readonly metrics: MetricServices;
   readonly data: LocaleDataRegistry;
   readonly criteria: LocaleCriteria;
-  /** Classificação de cada critério na taxonomia (ADR-056), keyed por criterion id. */
   readonly taxonomy: CriterionTaxonomy;
 }

@@ -283,15 +283,6 @@ export function metaFor(criterion: string): CriterionMeta {
 
 export type CriterionCoverage = "curated" | "productive";
 
-/**
- * Critérios cuja detecção é ligada a um LÉXICO CURADO — têm teto de recall (F9):
- * a ausência de anotação significa "nada da lista casou aqui", não "o fenômeno não
- * existe no texto". Curadoria é precisão > recall por design (ADR-008), então o
- * silêncio NÃO é prova de limpeza. Os demais critérios detectam por regra produtiva
- * (comprimento, forma sintática/morfológica, estrutura) e casam qualquer ocorrência
- * do padrão — aí a ausência é evidência forte. Honestidade de cobertura: expor essa
- * diferença impede que "não achei jargão" seja lido como "não há jargão".
- */
 const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([
   "jargon",
   "nominalization",
@@ -326,7 +317,7 @@ export function findingId(f: Finding): string {
 const CRITERION_RANK: Record<string, number> = Object.fromEntries(
   CRITERION_ORDER.map((c, i) => [c, i]),
 );
-/** Posição canônica do critério (ordem de CRITERION_ORDER); critérios desconhecidos vão para o fim. */
+
 export function criterionRank(criterion: string): number {
   return CRITERION_RANK[criterion] ?? CRITERION_ORDER.length;
 }
@@ -356,20 +347,6 @@ export const CATEGORY_LABEL: Record<Category, string> = {
 
 export type ActionState = "safe" | "human";
 
-/**
- * `requiresHuman` e `suggestion` são EIXOS DISTINTOS, não sinônimos (ver F8):
- * - `requiresHuman` (autoridade da engine, usado pelo verificador dirigido): a
- *   construção exige julgamento humano para ser resolvida/roteada?
- * - `suggestion`: existe uma troca 1:1 CURADA para exibir como informação (ADR-054)?
- *
- * `isSafe`/`actionStateOf` colapsam os dois num binário para a UI e significam
- * apenas "há troca direta para mostrar" (`suggestion` presente e `!requiresHuman`)
- * — hoje só o jargão seguro. Existe uma categoria INTERMEDIÁRIA legítima
- * (`!requiresHuman && suggestion === undefined`: passiva com agente, nominalização
- * de mapeamento seguro) que é resolvível pela IA + verificação, mas sem troca 1:1;
- * a UI a dobra em "human" de propósito, mas o relatório a rotula à parte (F8), para
- * não a apresentar como se exigisse julgamento humano.
- */
 export function actionStateOf(f: Finding): ActionState {
   return f.suggestion !== undefined && !f.requiresHuman ? "safe" : "human";
 }
@@ -384,15 +361,10 @@ const PRINCIPLE_GROUP_LABEL: Record<PrincipleGroup, string> = {
   usable: "Usável",
 };
 
-/** Rótulo PT da dimensão de Linguagem Simples (ADR-056). */
 export function principleGroupLabel(group: PrincipleGroup): string {
   return PRINCIPLE_GROUP_LABEL[group];
 }
 
-/**
- * Rótulo de proveniência (ADR-056): referência normativa direta só para critérios
- * ISO; extensões editoriais e heurísticas NUNCA citam a norma.
- */
 export function provenanceLabel(f: Finding): string {
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return `${f.normativeReference.standard} · ${f.normativeReference.section}`;
@@ -401,11 +373,6 @@ export function provenanceLabel(f: Finding): string {
   return "Heurística estrutural";
 }
 
-/**
- * Etiqueta compacta de proveniência para o índice (ADR-056). Honesta por
- * construção: só o critério ISO exibe a seção da norma; extensão editorial e
- * heurística estrutural mostram a origem, nunca uma citação inventada.
- */
 export function provenanceTag(f: Finding): { text: string; title: string } {
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return {
@@ -419,12 +386,6 @@ export function provenanceTag(f: Finding): { text: string; title: string } {
   return { text: "estrut.", title: "Heurística estrutural — fora da norma ISO" };
 }
 
-/**
- * Ordena os findings para o índice da auditoria: primeiro pela severidade do
- * critério (o mais grave no topo), depois por volume, depois pela ordem canônica
- * e pela posição no texto. Mantém os findings de um mesmo critério contíguos, de
- * modo que a navegação por teclado (j/k) segue exatamente a ordem visual da lista.
- */
 export function orderFindingsForIndex(findings: readonly Finding[]): Finding[] {
   const maxSev = new Map<string, number>();
   const volume = new Map<string, number>();

@@ -7,11 +7,6 @@ function sentencesOf(block: Block): readonly Sentence[] {
   return block.kind === "list" ? block.items.flatMap((item) => item.sentences) : block.sentences;
 }
 
-/**
- * Palavras de conteúdo, com plural normalizado para singular (ADR-056/Etapa 1),
- * para que "documentos" no título ecoe "documento" no corpo. A filtragem de
- * stopwords usa a forma crua; a normalização de número se aplica ao que sobra.
- */
 function contentWords(sentences: readonly Sentence[], stopwords: ReadonlySet<string>): string[] {
   const words: string[] = [];
   for (const sentence of sentences) {

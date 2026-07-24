@@ -42,13 +42,7 @@ function overlapsTarget(f: Finding, target: Span): boolean {
 export interface GenerateRewriteOptions {
   criterion?: string;
   directed?: boolean;
-  /**
-   * Respostas de elicitação do autor (ADR-055). Sempre entram na VERIFICAÇÃO
-   * (requisito declarado = requisito cobrado, seja qual for o gerador); só entram
-   * no PROMPT na estratégia dirigida — a única que carrega briefing.
-   */
   declarations?: readonly AgentDeclaration[];
-  /** Cancela a geração (ex.: o usuário clicou "Cancelar", ou a nota foi fechada). */
   signal?: AbortSignal;
 }
 

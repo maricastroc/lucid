@@ -17,13 +17,6 @@ function textOf(innerHtml: string): string {
   return decodeEntities(innerHtml.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 }
 
-/**
- * Índice de início da tag de fechamento que casa com uma abertura de `tagName` já consumida (a
- * busca começa em `from`, logo após essa abertura). Rastreia profundidade para não parar no
- * fechamento de uma tag aninhada do MESMO nome — necessário porque `ul`/`ol`/`li` podem se
- * aninhar (lista dentro de item de lista), diferente de `h1-6`/`p`, que não se aninham.
- * `null` se a tag nunca fecha (HTML malformado).
- */
 function findMatchingClose(html: string, tagName: string, from: number): number | null {
   const tagRe = new RegExp(`<${tagName}\\b[^>]*>|<\\/${tagName}>`, "gi");
   tagRe.lastIndex = from;
@@ -39,12 +32,6 @@ function findMatchingClose(html: string, tagName: string, from: number): number 
   return null;
 }
 
-/**
- * Itens de TOPO de uma lista: separa cada `<li>` usando `findMatchingClose` (não o primeiro
- * `</li>` que aparecer), então achata o conteúdo dele — inclusive de uma sub-lista aninhada —
- * em texto corrido. Achatar sub-listas é uma limitação conhecida (v1); o que este parser NUNCA
- * deve fazer é perder itens irmãos depois de uma sub-lista, ou colar palavras sem espaço.
- */
 function extractListItems(inner: string): string[] {
   const items: string[] = [];
   const liOpenRe = /<li\b[^>]*>/gi;

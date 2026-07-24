@@ -102,7 +102,6 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
   );
 }
 
-/** Descritores de leitura (Flesch-PT + coesão). Fica depois do índice para não empurrá-lo para baixo. */
 export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
   return (
     <section className="border-t border-rule-1 px-6 py-5">

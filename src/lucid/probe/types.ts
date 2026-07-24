@@ -21,7 +21,6 @@ export interface ProbeResult {
 }
 
 export interface ProbeOptions {
-  /** Cancela a chamada (ex.: o usuário fechou o painel, ou o texto mudou de novo). */
   signal?: AbortSignal;
 }
 

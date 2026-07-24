@@ -9,7 +9,6 @@ import { longSentenceGuidance } from "../lib/narrative";
 export interface GuidanceProps {
   finding: Finding;
   source: string;
-  /** Elicitação (ADR-055) — usada só pelo guia da passiva sem agente. */
   declaration?: AgentDeclaration | null;
   onDeclare?: (d: AgentDeclaration | null) => void;
 }

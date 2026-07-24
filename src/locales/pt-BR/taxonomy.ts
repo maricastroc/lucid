@@ -1,28 +1,6 @@
 import type { CriterionTaxonomyEntry } from "@/lucid/core/types";
 import type { CriterionId } from "./criteria";
 
-/**
- * Taxonomia dos critérios (ADR-056) — FONTE ÚNICA da proveniência.
- *
- * Cada critério declara:
- * - `source`: de onde vem sua autoridade (norma ISO, extensão editorial PT-BR, ou
- *   heurística estrutural);
- * - `principleGroup`: a dimensão de Linguagem Simples à qual ele contribui;
- * - `normativeReference`: presente SÓ quando `source === "iso-24495-1"` — a união
- *   discriminada de `CriterionTaxonomyEntry` torna impossível um critério editorial
- *   ou heurístico carregar uma seção ISO (invariante de honestidade).
- *
- * O analyzer carimba estes campos em cada finding a partir daqui; os passes não
- * declaram mais sua própria autoridade normativa.
- *
- * Régua para `source: "iso-24495-1"`: o critério operacionaliza uma diretriz que a
- * norma ENUNCIA (mesmo em nível de princípio). NÃO significa "a ISO nomeia este
- * dispositivo". Fenômenos de registro/uso do português sem diretriz na norma são
- * `editorial-pt-br`; higiene estrutural sem diretriz direta é `structural-heuristic`.
- *
- * Seções ISO: 5.1 Relevante · 5.2 Localizável · 5.3.2 palavras familiares ·
- * 5.3.3 frases claras · 5.3.4 frases concisas · 5.4 Usável.
- */
 const ABNT = "ABNT NBR ISO 24495-1" as const;
 function iso(section: string, principleGroup: CriterionTaxonomyEntry["principleGroup"]): CriterionTaxonomyEntry {
   return { source: "iso-24495-1", principleGroup, normativeReference: { standard: ABNT, section } };

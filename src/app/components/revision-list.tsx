@@ -41,7 +41,6 @@ function countOf(diagnostic: Diagnostic, criterion: string): number {
   return s ? s.count.info + s.count.warning + s.count.error : 0;
 }
 
-/** Etiqueta de proveniência lida do primeiro finding do critério — honesta (ADR-056); nulo se zerado. */
 function tagFor(diagnostic: Diagnostic, criterion: string) {
   const f = diagnostic.findings.find((x) => x.criterion === criterion);
   return f ? provenanceTag(f) : null;

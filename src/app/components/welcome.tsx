@@ -20,7 +20,6 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
       <div className="mx-auto flex w-full max-w-4xl flex-col px-5 py-10 sm:px-8 sm:py-16">
         <div className="fade-in overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
           <div className="px-6 py-9 sm:px-14 sm:py-14">
-            {/* Sobrelinha */}
             <div className="u-label flex items-center gap-2 text-ink-3">
               <span className="size-1.5 rounded-full bg-accent" aria-hidden />
               Auditor de Linguagem Simples
@@ -32,21 +31,18 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
               </span>
             </div>
 
-            {/* Título — a tese */}
             <h1 className="mt-5 font-serif text-[30px] leading-[1.12] tracking-[-0.012em] text-ink-0 sm:text-[40px]">
               Lucid audita a clareza do seu texto.
               <br />
               <span className="text-ink-2">Não reescreve por você.</span>
             </h1>
 
-            {/* Subtítulo — o que faz + distinção */}
             <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-ink-1">
               Ele confronta cada trecho com os princípios de Linguagem Simples da norma ABNT: mostra o que
               trava o leitor, cita o critério que disparou e explica o porquê.{" "}
               <span className="font-medium text-ink-0">A palavra final é sempre sua.</span>
             </p>
 
-            {/* Cadeia de verbos — o pipeline */}
             <div className="mt-8">
               <div className="u-sublabel text-ink-3">O que ele faz</div>
               <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-2">
@@ -72,7 +68,6 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
               </div>
             </div>
 
-            {/* Ações de entrada */}
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <input
                 ref={fileInput}
@@ -112,7 +107,6 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
             </div>
           </div>
 
-          {/* Anatomia de uma anotação — mostra a forma real da saída */}
           <div className="border-t border-rule-1 bg-surface/40 px-6 py-8 sm:px-14">
             <div className="u-sublabel text-ink-3">Cada trecho vira uma anotação assim</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -127,7 +121,6 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
             </div>
           </div>
 
-          {/* Rodapé de confiança */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-rule-1 px-6 py-4 text-[11.5px] text-ink-3 sm:px-14">
             <span className="inline-flex items-center gap-1.5 text-ink-2">
               <span className="size-1.5 rounded-full bg-accent" aria-hidden />

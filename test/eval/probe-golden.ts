@@ -272,7 +272,6 @@ export function oracleResult(c: ProbeGoldenCase): ProbeResult {
   return { podeResponder: false, respostaExtraida: "o texto não diz", ondeTravou: [{ frase: c.trecho, motivo: "o texto não diz" }], operacoesDeLeitura: operacoes, precisouInferir: false };
 }
 
-/** Fixtures (trecho → oráculo) para semear a `StubComprehensionProbe` na camada CI. */
 export function oracleFixtures(): Record<string, ProbeResult> {
   const out: Record<string, ProbeResult> = {};
   for (const c of GOLDEN_SONDA) out[c.trecho] = oracleResult(c);

@@ -12,10 +12,6 @@ function mergeConfig(base: Config, overrides?: Partial<Config>): Config {
   return { ...base, ...overrides };
 }
 
-/**
- * Carimba a proveniência (ADR-056) num finding a partir da taxonomia do locale.
- * A taxonomia é a fonte única; um pass jamais declara sua própria autoridade.
- */
 function stampTaxonomy(finding: PassFinding, taxonomy: CriterionTaxonomy): Finding {
   const entry = taxonomy[finding.criterion];
   if (!entry) {
