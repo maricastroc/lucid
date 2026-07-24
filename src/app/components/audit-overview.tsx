@@ -91,6 +91,10 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">
           O placar mede, não aprova. A ausência de anotações não é atestado de clareza.
         </p>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          Critérios de léxico (jargão, nominalização, redundância…) checam listas curadas: contagem baixa ou zero não
+          prova ausência do fenômeno — só que nada da lista casou aqui.
+        </p>
       </section>
 
       {ledger.length > 0 && <TrailSection entries={ledger} />}

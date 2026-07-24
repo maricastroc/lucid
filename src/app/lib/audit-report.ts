@@ -1,5 +1,5 @@
 import type { Diagnostic, Finding, Severity } from "@/lucid";
-import { CRITERION_ORDER, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
+import { CRITERION_ORDER, coverageLabel, coverageOf, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 
 export interface AuditReportMeta {
@@ -37,6 +37,10 @@ export function buildAuditReport(
   out.push("");
   out.push("> **Este relatório mede, não aprova.** A ausência de anotações não é atestado de clareza.");
   out.push("> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação.");
+  out.push(
+    "> Critérios de léxico (jargão, nominalização, redundância, perífrase, dupla negação, advérbios vagos) checam " +
+      "**listas curadas** (precisão > recall): contagem baixa ou zero não prova ausência do fenômeno.",
+  );
   out.push("");
 
   out.push("## Placar");
@@ -77,14 +81,19 @@ export function buildAuditReport(
   if (activeRows.length > 0) {
     out.push("## Anotações por critério");
     out.push("");
-    out.push("| Critério | Dimensão | Proveniência | Anotações |");
-    out.push("|---|---|---|--:|");
+    out.push("| Critério | Dimensão | Proveniência | Cobertura | Anotações |");
+    out.push("|---|---|---|---|--:|");
     for (const c of activeRows) {
       const first = findings.find((f) => f.criterion === c)!;
       out.push(
-        `| ${metaFor(c).label} | ${principleGroupLabel(first.principleGroup)} | ${provenanceLabel(first)} | ${counts.get(c)} |`,
+        `| ${metaFor(c).label} | ${principleGroupLabel(first.principleGroup)} | ${provenanceLabel(first)} | ${coverageLabel(coverageOf(c))} | ${counts.get(c)} |`,
       );
     }
+    out.push("");
+    out.push(
+      "_Cobertura **curada**: o critério compara contra uma lista curada — a contagem é um piso, não um teto. " +
+        "Cobertura **produtiva**: regra que casa qualquer ocorrência do padrão._",
+    );
     out.push("");
   }
 

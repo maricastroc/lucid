@@ -281,6 +281,44 @@ export function metaFor(criterion: string): CriterionMeta {
   return isCriterion(criterion) ? CRITERION_META[criterion] : CRITERION_META.jargon;
 }
 
+export type CriterionCoverage = "curated" | "productive";
+
+/**
+ * Critérios cuja detecção é ligada a um LÉXICO CURADO — têm teto de recall (F9):
+ * a ausência de anotação significa "nada da lista casou aqui", não "o fenômeno não
+ * existe no texto". Curadoria é precisão > recall por design (ADR-008), então o
+ * silêncio NÃO é prova de limpeza. Os demais critérios detectam por regra produtiva
+ * (comprimento, forma sintática/morfológica, estrutura) e casam qualquer ocorrência
+ * do padrão — aí a ausência é evidência forte. Honestidade de cobertura: expor essa
+ * diferença impede que "não achei jargão" seja lido como "não há jargão".
+ */
+const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([
+  "jargon",
+  "nominalization",
+  "nominalizacao_encadeada",
+  "redundancia",
+  "perifrase_inflada",
+  "dupla_negacao",
+  "adverbios_vagos",
+  "adverbio_mente_denso",
+  "mais_que_perfeito_sintetico",
+  "subordinacao_densa",
+  "leitor_terceira_pessoa",
+]);
+
+const COVERAGE_LABEL: Record<CriterionCoverage, string> = {
+  curated: "curada",
+  productive: "produtiva",
+};
+
+export function coverageOf(criterion: string): CriterionCoverage {
+  return isCriterion(criterion) && CURATED_COVERAGE.has(criterion) ? "curated" : "productive";
+}
+
+export function coverageLabel(coverage: CriterionCoverage): string {
+  return COVERAGE_LABEL[coverage];
+}
+
 export function findingId(f: Finding): string {
   return `${f.criterion}:${f.span.start}:${f.span.end}`;
 }

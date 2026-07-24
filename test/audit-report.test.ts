@@ -17,7 +17,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).toContain("Este relatório mede, não aprova");
     expect(md).toContain("## Placar");
     expect(md).toContain("## Anotações por critério");
-    expect(md).toContain("| Critério | Dimensão | Proveniência | Anotações |");
+    expect(md).toContain("| Critério | Dimensão | Proveniência | Cobertura | Anotações |");
     expect(md).toContain("## Anotações");
     expect(md).toMatch(/ABNT NBR ISO 24495-1 · 5\.\d/);
     expect(md).toContain("### 1.");
@@ -55,6 +55,17 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     const a = analyze(SAMPLE);
     const b = analyze(SAMPLE);
     expect(buildAuditReport(a, a.findings, META)).toBe(buildAuditReport(b, b.findings, META));
+  });
+
+  it("sinaliza honestamente a cobertura léxica curada — silêncio não é prova de ausência (F9)", () => {
+    const d = analyze(SAMPLE);
+    const md = buildAuditReport(d, d.findings, META);
+    // caveat sempre presente (mesmo com zero anotações)
+    expect(buildAuditReport(d, [], META)).toContain("listas curadas");
+    // coluna de cobertura na tabela por critério, e o jargão (léxico curado) marcado como "curada"
+    expect(md).toContain("| Critério | Dimensão | Proveniência | Cobertura | Anotações |");
+    const jargonRow = md.split("\n").find((l) => l.startsWith("| Jargão "));
+    expect(jargonRow).toContain("curada");
   });
 
   it("zero anotações NÃO vira atestado: o caveat continua, sem seções de anotações", () => {
