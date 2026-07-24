@@ -1,12 +1,10 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "adverbio_mente_denso";
-const PRINCIPLE = "5.3.4";
 
 export const adverbioMenteDensoPass: Pass = {
   criterion: CRITERION,
   category: "lexical",
-  principle: PRINCIPLE,
   dataDeps: ["adverbios-mente.pt"],
 
   run(ctx) {
@@ -14,7 +12,7 @@ export const adverbioMenteDensoPass: Pass = {
 
     const adverbs = ctx.data.get<ReadonlySet<string>>("adverbios-mente.pt");
     const threshold = ctx.config.adverbioMente.minPorFrase;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const hits = sentence.tokens.filter((t) => t.isWord && adverbs.has(t.lower));
@@ -24,7 +22,6 @@ export const adverbioMenteDensoPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "lexical",
-          principle: PRINCIPLE,
           span: { start: token.start, end: token.end, text: token.text },
           severity: "info",
           requiresHuman: true,

@@ -1,7 +1,6 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "mais_que_perfeito_sintetico";
-const PRINCIPLE = "5.3.3";
 
 const JUSTIFICATION =
   "Verbo no mais-que-perfeito sintético (ex.: 'fizera' = 'tinha feito') — forma pouco usada na " +
@@ -11,21 +10,19 @@ const JUSTIFICATION =
 export const maisQuePerfeitoPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: ["mais-que-perfeito.pt"],
 
   run(ctx) {
     if (!ctx.config.maisQuePerfeito.enabled) return [];
 
     const forms = ctx.data.get<ReadonlySet<string>>("mais-que-perfeito.pt");
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const token of ctx.doc.tokens) {
       if (!token.isWord || !forms.has(token.lower)) continue;
       findings.push({
         criterion: CRITERION,
         category: "syntactic",
-        principle: PRINCIPLE,
         span: { start: token.start, end: token.end, text: token.text },
         severity: "warning",
         requiresHuman: true,

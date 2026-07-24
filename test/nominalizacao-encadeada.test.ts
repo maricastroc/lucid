@@ -85,7 +85,7 @@ describe("nominalizacao_encadeada — contrato", () => {
     const found = findingsOf("A realização da atualização e a emissão da autorização de funcionamento atrasaram.");
     expect(found.length).toBeGreaterThan(0);
     for (const f of found) {
-      expect(f.principle).toBe("5.3.3");
+      expect(f.normativeReference?.section).toBe("5.3.3");
       expect(f.category).toBe("syntactic");
       expect(f.requiresHuman).toBe(true);
       expect(f.suggestion).toBeUndefined();

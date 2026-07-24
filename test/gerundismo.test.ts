@@ -18,7 +18,7 @@ describe("gerundismo — detecção", () => {
     const f = analyze("Vou estar enviando o documento.").findings.find((x) => x.criterion === "gerundismo")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.principle).toBe("5.3.4");
+    expect(f.source).toBe("editorial-pt-br");
   });
 });
 

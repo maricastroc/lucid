@@ -1,17 +1,15 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "salto_de_nivel_titulo";
-const PRINCIPLE = "5.2";
 
 export const hierarquiaTitulosPass: Pass = {
   criterion: CRITERION,
   category: "structural",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.hierarquiaTitulos.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
     let prevLevel: number | null = null;
 
     for (const block of ctx.doc.blocks) {
@@ -21,7 +19,6 @@ export const hierarquiaTitulosPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "structural",
-          principle: PRINCIPLE,
           span: { start: block.start, end: block.end, text: block.text },
           severity: "warning",
           requiresHuman: true,

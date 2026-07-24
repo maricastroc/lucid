@@ -1,6 +1,6 @@
 import type { LocaleBundle, LocaleDataRegistry } from "../../src/lucid/core/contracts/locale";
 import { asLocaleId } from "../../src/lucid/core/contracts/locale";
-import type { Finding, Pass } from "../../src/lucid/core/types";
+import type { PassFinding, Pass } from "../../src/lucid/core/types";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { segmentSentences } from "../../src/lucid/core/document/segment-sentences";
 import { createRegistry } from "../../src/lucid/core/data/registry";
@@ -18,18 +18,16 @@ const registry = createRegistry({
 const testMarkerPass: Pass = {
   criterion: "test_marker",
   category: "lexical",
-  principle: "0.0",
   dataDeps: [TEST_DATASET],
   run(ctx) {
     const triggers = ctx.data.get<ReadonlySet<string>>(TEST_DATASET);
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
     for (const token of ctx.doc.tokens) {
       if (token.isWord && triggers.has(token.lower)) {
         findings.push({
           criterion: "test_marker",
           category: "lexical",
-          principle: "0.0",
-          span: { start: token.start, end: token.end, text: token.text },
+                span: { start: token.start, end: token.end, text: token.text },
           severity: "info",
           requiresHuman: true,
           justification: "marcador de teste",
@@ -56,7 +54,14 @@ export const testLocale: LocaleBundle = {
   metrics: {
     countSyllables: () => 1,
     readability: { id: "fake-constant-42", calculate: () => 42 },
+    cohesion: () => ({
+      referentialOverlap: 0,
+      adjacentGapRatio: 0,
+      connectivesPer100Words: 0,
+      connectivesByClass: { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 },
+    }),
   },
   data,
   criteria: { ids: ["test_marker"] },
+  taxonomy: { test_marker: { source: "structural-heuristic", principleGroup: "understandable" } },
 };

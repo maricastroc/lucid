@@ -16,26 +16,29 @@ describe("analyze — documento vazio", () => {
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score).toEqual({
       byCriterion: [
-        { criterion: "long_sentence", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "passive_voice", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "nominalization", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "nominalizacao_encadeada", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "jargon", principle: "5.3.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "mais_que_perfeito_sintetico", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "gerundismo", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "adverbio_mente_denso", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "redundancia", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "perifrase_inflada", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "paragraph_length", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "prose_enumeration", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "mesoclise", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "dupla_negacao", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "subordinacao_densa", principle: "5.3.4", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "leitor_terceira_pessoa", principle: "5.3.3", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "salto_de_nivel_titulo", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "long_heading", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "single_item_list", principle: "5.2", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
-        { criterion: "heading_body_mismatch", principle: "5.1", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "long_sentence", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "passive_voice", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "passiva_sintetica", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "nominalization", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "nominalizacao_encadeada", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "jargon", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "sigla_sem_expansao", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "mais_que_perfeito_sintetico", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "gerundismo", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "adverbio_mente_denso", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "adverbios_vagos", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "redundancia", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "perifrase_inflada", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "paragraph_length", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "prose_enumeration", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "mesoclise", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "dupla_negacao", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "subordinacao_densa", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "leitor_terceira_pessoa", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "salto_de_nivel_titulo", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "long_heading", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "single_item_list", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "heading_body_mismatch", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
       ],
       totalFindings: 0,
     });
@@ -46,6 +49,12 @@ describe("analyze — documento vazio", () => {
       syllables: 0,
       wordsPerSentence: 0,
       syllablesPerWord: 0,
+      cohesion: {
+        referentialOverlap: 0,
+        adjacentGapRatio: 0,
+        connectivesPer100Words: 0,
+        connectivesByClass: { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 },
+      },
     });
   });
 });
@@ -56,7 +65,7 @@ describe("analyze — documento sem findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(20);
+    expect(diagnostic.score.byCriterion).toHaveLength(23);
     for (const entry of diagnostic.score.byCriterion) {
       expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(entry.densityPer100Words).toBe(0);
@@ -77,7 +86,7 @@ describe("analyze — documento com um finding", () => {
     const [finding] = diagnostic.findings;
     expect(finding.criterion).toBe("long_sentence");
     expect(finding.category).toBe("syntactic");
-    expect(finding.principle).toBe("5.3.4");
+    expect(finding.normativeReference?.section).toBe("5.3.4");
     expect(finding.severity).toBe("warning");
     expect(finding.requiresHuman).toBe(true);
     expect(finding.suggestion).toBeUndefined();
@@ -104,7 +113,9 @@ describe("sortFindings — ordenação canônica independente da ordem de entrad
     return {
       criterion: "long_sentence",
       category: "syntactic",
-      principle: "5.3.4",
+      source: "iso-24495-1",
+      principleGroup: "understandable",
+      normativeReference: { standard: "ABNT NBR ISO 24495-1", section: "5.3.4" },
       span: { start: 0, end: 1, text: "x" },
       severity: "warning",
       requiresHuman: true,
@@ -113,16 +124,15 @@ describe("sortFindings — ordenação canônica independente da ordem de entrad
     };
   }
 
-  it("ordena por span.start, span.end, criterion e principle, nessa ordem", () => {
+  it("ordena por span.start, span.end e criterion, nessa ordem", () => {
     const a = finding({ span: { start: 10, end: 20, text: "a" } });
     const b = finding({ span: { start: 0, end: 5, text: "b" } });
     const c = finding({ span: { start: 0, end: 10, text: "c" } });
     const d = finding({ span: { start: 0, end: 5, text: "d" }, criterion: "aaa_criterion" });
-    const e = finding({ span: { start: 0, end: 5, text: "e" }, criterion: "aaa_criterion", principle: "5.1" });
 
-    const esperado = [e.span.text, d.span.text, b.span.text, c.span.text, a.span.text];
+    const esperado = [d.span.text, b.span.text, c.span.text, a.span.text];
 
-    for (const entrada of permutations([a, b, c, d, e])) {
+    for (const entrada of permutations([a, b, c, d])) {
       const resultado = sortFindings(entrada).map((f) => f.span.text);
       expect(resultado).toEqual(esperado);
     }

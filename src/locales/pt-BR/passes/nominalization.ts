@@ -1,9 +1,8 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { LightVerbForm, NominalizationEntry } from "../datasets/types";
 import { getPrepared } from "../datasets/registry";
 
 const CRITERION = "nominalization";
-const PRINCIPLE = "5.3.3";
 
 const LIGHT_VERB_FORMS: ReadonlyMap<string, LightVerbForm> = getPrepared("verbos-leves.pt");
 const NOMINALIZATIONS: ReadonlyMap<string, NominalizationEntry> = getPrepared("nominalizacoes.pt");
@@ -34,13 +33,12 @@ function buildJustification(safeMapping: boolean, baseVerb: string): string {
 export const nominalizationPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: ["verbos-leves.pt", "nominalizacoes.pt"],
 
   run(ctx) {
     if (!ctx.config.nominalization.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
@@ -68,7 +66,6 @@ export const nominalizationPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
           requiresHuman: !safeMapping,

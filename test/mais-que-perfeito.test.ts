@@ -21,7 +21,7 @@ describe("mais_que_perfeito_sintetico — detecção", () => {
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
     expect(f.severity).toBe("warning");
-    expect(f.principle).toBe("5.3.3");
+    expect(f.source).toBe("editorial-pt-br");
   });
 });
 

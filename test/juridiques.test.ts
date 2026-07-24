@@ -21,7 +21,7 @@ describe("redundancia — pleonasmo e duplas", () => {
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
     expect(f.justification).toContain("certeza");
-    expect(f.principle).toBe("5.3.4");
+    expect(f.normativeReference?.section).toBe("5.3.4");
   });
 
   it("texto sem redundância não marca", () => {
@@ -48,7 +48,7 @@ describe("perifrase_inflada — locuções empoladas", () => {
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
     expect(f.justification).toContain("para");
-    expect(f.principle).toBe("5.3.4");
+    expect(f.normativeReference?.section).toBe("5.3.4");
   });
 
   it("não colide com o glossário de jargão ('em sede de' segue sendo jargão, não perífrase)", () => {

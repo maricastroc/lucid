@@ -17,9 +17,9 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).toContain("Este relatório mede, não aprova");
     expect(md).toContain("## Placar");
     expect(md).toContain("## Anotações por critério");
-    expect(md).toContain("| Critério | Diretriz (ABNT) | Anotações |");
+    expect(md).toContain("| Critério | Dimensão | Proveniência | Anotações |");
     expect(md).toContain("## Anotações");
-    expect(md).toMatch(/ABNT 5\.\d/);
+    expect(md).toMatch(/ABNT NBR ISO 24495-1 · 5\.\d/);
     expect(md).toContain("### 1.");
     expect(md).toContain("supracitadas");
     expect(md).toContain("Gerado em 2026-07-22 14:00");

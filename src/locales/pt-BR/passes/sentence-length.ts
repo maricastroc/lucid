@@ -1,8 +1,7 @@
 import type { Config } from "@/lucid/core/config";
-import type { Finding, Pass, Severity } from "@/lucid/core/types";
+import type { PassFinding, Pass, Severity } from "@/lucid/core/types";
 
 const CRITERION = "long_sentence";
-const PRINCIPLE = "5.3.4";
 
 interface ExceededThreshold {
   severity: Severity;
@@ -24,10 +23,9 @@ function evaluateThreshold(wordCount: number, config: Config): ExceededThreshold
 export const sentenceLengthPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
 
   run(ctx) {
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const exceeded = evaluateThreshold(sentence.wordCount, ctx.config);
@@ -38,7 +36,6 @@ export const sentenceLengthPass: Pass = {
       findings.push({
         criterion: CRITERION,
         category: "syntactic",
-        principle: PRINCIPLE,
         span: { start: sentence.start, end: sentence.end, text: sentence.text },
         severity,
         requiresHuman: true,

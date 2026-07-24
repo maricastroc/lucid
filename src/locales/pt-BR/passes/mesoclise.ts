@@ -1,7 +1,6 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "mesoclise";
-const PRINCIPLE = "5.3.3";
 
 const RE_MESOCLISE =
   /^\p{L}+-(?:me|te|se|o|a|os|as|lhe|lhes|nos|vos|lo|la|los|las)-(?:á|ás|ão|ei|emos|eis|ia|ias|íamos|íeis|iam)$/u;
@@ -9,18 +8,16 @@ const RE_MESOCLISE =
 export const mesoclisePass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.mesoclise.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
     for (const token of ctx.doc.tokens) {
       if (!token.isWord || !RE_MESOCLISE.test(token.lower)) continue;
       findings.push({
         criterion: CRITERION,
         category: "syntactic",
-        principle: PRINCIPLE,
         span: { start: token.start, end: token.end, text: token.text },
         severity: "warning",
         requiresHuman: true,

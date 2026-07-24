@@ -27,7 +27,6 @@ export function buildScore(
 
     return {
       criterion: pass.criterion,
-      principle: pass.principle,
       count: countBySeverity(passFindings),
       densityPer100Words,
     };

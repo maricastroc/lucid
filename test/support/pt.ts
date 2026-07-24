@@ -11,6 +11,7 @@ export const ptAbbreviations = localePtBR.data.abbreviations;
 const ptMetricServices: MetricServices = {
   countSyllables: localePtBR.metrics.countSyllables,
   readability: (input) => localePtBR.metrics.readability.calculate(input),
+  cohesion: (doc) => localePtBR.metrics.cohesion(doc),
 };
 
 export function buildDocument(text: string): Document {

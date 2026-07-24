@@ -1,14 +1,12 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";
 
 const CRITERION = "subordinacao_densa";
-const PRINCIPLE = "5.3.4";
 
 export const subordinacaoPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
   dataDeps: ["subordinadores.pt"],
 
   run(ctx) {
@@ -16,7 +14,7 @@ export const subordinacaoPass: Pass = {
 
     const byFirstWord = ctx.data.get<PhrasePrepared>("subordinadores.pt");
     const threshold = ctx.config.subordinacao.minPorFrase;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const hits = matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source);
@@ -26,7 +24,6 @@ export const subordinacaoPass: Pass = {
       findings.push({
         criterion: CRITERION,
         category: "syntactic",
-        principle: PRINCIPLE,
         span: { start: sentence.start, end: sentence.end, text: sentence.text },
         severity: "warning",
         requiresHuman: true,

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { type Finding, type Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
-import { isSafe, metaFor, principleGroupOf, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
+import { isSafe, metaFor, principleGroupLabel, provenanceLabel, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
@@ -26,7 +26,7 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
   const meta = metaFor(finding.criterion);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
-  const group = principleGroupOf(finding.principle);
+  const group = principleGroupLabel(finding.principleGroup);
 
   const [declaration, setDeclaration] = useState<AgentDeclaration | null>(null);
 
@@ -46,7 +46,7 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
       <p className="mt-2 text-[12.5px] text-ink-2">
         <span className="text-ink-1">{group}</span> · {meta.principleName}
         <span className="ml-2 rounded-[5px] border border-rule-1 bg-surface-2 px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3">
-          ABNT {finding.principle}
+          {provenanceLabel(finding)}
         </span>
       </p>
 

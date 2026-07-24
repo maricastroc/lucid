@@ -6,7 +6,9 @@ function finding(overrides: Partial<Finding>): Finding {
   return {
     criterion: "passive_voice",
     category: "syntactic",
-    principle: "5.3.3",
+    source: "iso-24495-1",
+    principleGroup: "understandable",
+    normativeReference: { standard: "ABNT NBR ISO 24495-1", section: "5.3.3" },
     span: { start: 0, end: 1, text: "x" },
     severity: "warning",
     requiresHuman: true,
@@ -24,10 +26,10 @@ describe("sortFindings — desempate por cada chave, na ordem certa", () => {
 
   it("span idêntico, critérios diferentes → ordem alfabética de critério (jargon < long_sentence < nominalization < passive_voice)", () => {
     const span = { start: 3, end: 8, text: "s" };
-    const p = finding({ span: { ...span }, criterion: "passive_voice", principle: "5.3.3" });
-    const j = finding({ span: { ...span }, criterion: "jargon", principle: "5.3.2" });
-    const l = finding({ span: { ...span }, criterion: "long_sentence", principle: "5.3.4" });
-    const n = finding({ span: { ...span }, criterion: "nominalization", principle: "5.3.3" });
+    const p = finding({ span: { ...span }, criterion: "passive_voice" });
+    const j = finding({ span: { ...span }, criterion: "jargon" });
+    const l = finding({ span: { ...span }, criterion: "long_sentence" });
+    const n = finding({ span: { ...span }, criterion: "nominalization" });
     expect(sortFindings([p, j, l, n]).map((f) => f.criterion)).toEqual([
       "jargon",
       "long_sentence",
@@ -36,14 +38,7 @@ describe("sortFindings — desempate por cada chave, na ordem certa", () => {
     ]);
   });
 
-  it("mesmo span e mesmo critério, princípios diferentes → ordem por princípio", () => {
-    const span = { start: 0, end: 4, text: "z" };
-    const a = finding({ span: { ...span }, criterion: "x", principle: "5.3.4" });
-    const b = finding({ span: { ...span }, criterion: "x", principle: "5.3.2" });
-    expect(sortFindings([a, b]).map((f) => f.principle)).toEqual(["5.3.2", "5.3.4"]);
-  });
-
-  it("empate total (start/end/criterion/principle) preserva a ordem de inserção (sort estável)", () => {
+  it("empate total (start/end/criterion) preserva a ordem de inserção (sort estável)", () => {
     const base = { start: 0, end: 2, text: "t" };
     const a = finding({ span: { ...base }, justification: "A" });
     const b = finding({ span: { ...base }, justification: "B" });
@@ -71,10 +66,8 @@ describe("sortFindings — estabilidade sobre findings reais de analyze()", () =
     for (let i = 1; i < findings.length; i++) {
       const a = findings[i - 1];
       const b = findings[i];
-      const aKey: [number, number, string, string] = [a.span.start, a.span.end, a.criterion, a.principle];
-      const bKey: [number, number, string, string] = [b.span.start, b.span.end, b.criterion, b.principle];
-      expect(aKey[0] <= bKey[0]).toBe(true);
-      if (aKey[0] === bKey[0]) expect(aKey[1] <= bKey[1]).toBe(true);
+      expect(a.span.start <= b.span.start).toBe(true);
+      if (a.span.start === b.span.start) expect(a.span.end <= b.span.end).toBe(true);
     }
   });
 

@@ -34,7 +34,7 @@ describe("paragraph_length — parágrafo com frases demais", () => {
     const seis = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
     const findings = analyze(seis).findings.filter((f) => f.criterion === "paragraph_length");
     expect(findings).toHaveLength(1);
-    expect(findings[0].principle).toBe("5.2");
+    expect(findings[0].normativeReference?.section).toBe("5.2");
     expect(findings[0].category).toBe("structural");
     expect(findings[0].requiresHuman).toBe(true);
   });
@@ -60,7 +60,7 @@ describe("prose_enumeration — enumeração em prosa", () => {
     const t = "O rito tem fases. Primeiro, protocola-se. Segundo, analisa-se. Terceiro, decide-se.";
     const findings = analyze(t).findings.filter((f) => f.criterion === "prose_enumeration");
     expect(findings).toHaveLength(1);
-    expect(findings[0].principle).toBe("5.2");
+    expect(findings[0].normativeReference?.section).toBe("5.2");
     expect(findings[0].requiresHuman).toBe(true);
   });
 

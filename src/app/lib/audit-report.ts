@@ -1,5 +1,5 @@
 import type { Diagnostic, Finding, Severity } from "@/lucid";
-import { CRITERION_ORDER, isSafe, metaFor, principleGroupOf, severityRank, SEVERITY_LABEL } from "./criteria";
+import { CRITERION_ORDER, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 
 export interface AuditReportMeta {
@@ -52,6 +52,24 @@ export function buildAuditReport(
   out.push(`- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`);
   out.push(`- Legibilidade (Flesch-PT): ${fmtNum(m.fleschPt)}`);
   out.push("");
+  out.push("### Coesão (descritores)");
+  out.push("");
+  out.push(
+    "_Descritores neutros: valor alto ou baixo não é, sozinho, aprovação nem reprovação (coesão alta pode ser " +
+      "repetição; baixa pode ser variação). Não entram no placar._",
+  );
+  const co = m.cohesion;
+  out.push(
+    `- Coesão referencial (sobreposição entre frases vizinhas): ${fmtNum(co.referentialOverlap)} · ` +
+      `pares sem continuidade: ${fmtNum(co.adjacentGapRatio)}`,
+  );
+  out.push(
+    `- Conectivos por 100 palavras: ${fmtNum(co.connectivesPer100Words)} ` +
+      `(aditivos ${co.connectivesByClass.additive}, adversativos ${co.connectivesByClass.adversative}, ` +
+      `causais ${co.connectivesByClass.causal}, temporais ${co.connectivesByClass.temporal}, ` +
+      `conclusivos ${co.connectivesByClass.conclusive})`,
+  );
+  out.push("");
 
   const counts = new Map<string, number>();
   for (const f of findings) counts.set(f.criterion, (counts.get(f.criterion) ?? 0) + 1);
@@ -59,11 +77,13 @@ export function buildAuditReport(
   if (activeRows.length > 0) {
     out.push("## Anotações por critério");
     out.push("");
-    out.push("| Critério | Diretriz (ABNT) | Anotações |");
-    out.push("|---|---|--:|");
+    out.push("| Critério | Dimensão | Proveniência | Anotações |");
+    out.push("|---|---|---|--:|");
     for (const c of activeRows) {
       const first = findings.find((f) => f.criterion === c)!;
-      out.push(`| ${metaFor(c).label} | ${metaFor(c).principleName} · ${first.principle} | ${counts.get(c)} |`);
+      out.push(
+        `| ${metaFor(c).label} | ${principleGroupLabel(first.principleGroup)} | ${provenanceLabel(first)} | ${counts.get(c)} |`,
+      );
     }
     out.push("");
   }
@@ -74,7 +94,9 @@ export function buildAuditReport(
     out.push("Ordenadas por severidade (prioritário → leve).");
     out.push("");
     [...findings].sort(bySeverityThenPosition).forEach((f, i) => {
-      out.push(`### ${i + 1}. ${metaFor(f.criterion).label} — ${SEVERITY_LABEL[f.severity]} · ${principleGroupOf(f.principle)} · ABNT ${f.principle}`);
+      out.push(
+        `### ${i + 1}. ${metaFor(f.criterion).label} — ${SEVERITY_LABEL[f.severity]} · ${principleGroupLabel(f.principleGroup)} · ${provenanceLabel(f)}`,
+      );
       out.push("");
       out.push(`> ${collapse(f.span.text)}`);
       out.push("");

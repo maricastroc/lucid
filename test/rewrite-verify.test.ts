@@ -18,7 +18,9 @@ function spanFinding(text: string, sub: string, criterion = "long_sentence"): Fi
   return {
     criterion,
     category: "syntactic",
-    principle: "5.3.4",
+    source: "iso-24495-1",
+    principleGroup: "understandable",
+    normativeReference: { standard: "ABNT NBR ISO 24495-1", section: "5.3.4" },
     span: { start, end: start + sub.length, text: sub },
     severity: "warning",
     requiresHuman: true,

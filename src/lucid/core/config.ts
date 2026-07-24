@@ -8,6 +8,9 @@ export interface Config {
   passiveVoice: {
     enabled: boolean;
   };
+  passivaSintetica: {
+    enabled: boolean;
+  };
   nominalization: {
     enabled: boolean;
   };
@@ -17,8 +20,10 @@ export interface Config {
   };
   jargon: {
     enabled: boolean;
-    frequencyRankCutoff: number;
     suggestFromGlossary: boolean;
+  };
+  siglaSemExpansao: {
+    enabled: boolean;
   };
   maisQuePerfeito: {
     enabled: boolean;
@@ -26,9 +31,13 @@ export interface Config {
   gerundismo: {
     enabled: boolean;
   };
+  /** @deprecated Critério descontinuado (ADR-058); ver `adverbiosVagos`. Desligado por padrão. */
   adverbioMente: {
     enabled: boolean;
     minPorFrase: number;
+  };
+  adverbiosVagos: {
+    enabled: boolean;
   };
   redundancia: {
     enabled: boolean;
@@ -84,6 +93,9 @@ export const DEFAULT_CONFIG: Config = {
   passiveVoice: {
     enabled: true,
   },
+  passivaSintetica: {
+    enabled: true,
+  },
   nominalization: {
     enabled: true,
   },
@@ -93,8 +105,10 @@ export const DEFAULT_CONFIG: Config = {
   },
   jargon: {
     enabled: true,
-    frequencyRankCutoff: 5000,
     suggestFromGlossary: true,
+  },
+  siglaSemExpansao: {
+    enabled: true,
   },
   maisQuePerfeito: {
     enabled: true,
@@ -103,8 +117,11 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
   },
   adverbioMente: {
-    enabled: true,
+    enabled: false,
     minPorFrase: 3,
+  },
+  adverbiosVagos: {
+    enabled: true,
   },
   redundancia: {
     enabled: true,

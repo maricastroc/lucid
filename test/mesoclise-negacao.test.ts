@@ -20,7 +20,7 @@ describe("mesoclise — pronome no meio do verbo", () => {
     const f = analyze("O prazo contar-se-á em dias.").findings.find((x) => x.criterion === "mesoclise")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.principle).toBe("5.3.3");
+    expect(f.source).toBe("editorial-pt-br");
   });
 
   it("ênclise normal NÃO é mesóclise", () => {
@@ -52,7 +52,7 @@ describe("dupla_negacao — litotes", () => {
     )!;
     expect(f.requiresHuman).toBe(true);
     expect(f.justification).toContain("é provável");
-    expect(f.principle).toBe("5.3.3");
+    expect(f.normativeReference?.section).toBe("5.3.3");
   });
 
   it("negação simples / concordância negativa NÃO marca (é normal em PT)", () => {

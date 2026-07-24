@@ -1,12 +1,15 @@
 export type IntegratedCriterion =
   | "long_sentence"
   | "passive_voice"
+  | "passiva_sintetica"
   | "nominalization"
   | "nominalizacao_encadeada"
   | "jargon"
+  | "sigla_sem_expansao"
   | "mais_que_perfeito_sintetico"
   | "gerundismo"
   | "adverbio_mente_denso"
+  | "adverbios_vagos"
   | "redundancia"
   | "perifrase_inflada"
   | "paragraph_length"
@@ -179,17 +182,18 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       "'supracitado' entre aspas → suprimido; 'Outrossim' capitalizado em meio de frase → suprimido (heurística de nome próprio); 'sede' isolada não está no glossário. Zero findings.",
   },
   {
-    id: "casos_fora_de_escopo",
-    description: "construções fora de escopo (passiva sintética, 'consoante') ignoradas; jargão em escopo detectado",
+    id: "passiva_sintetica_e_jargao",
+    description: "passiva sintética ('Vendem-se') detectada (ADR-060); 'consoante' fora do glossário; jargão em escopo detectado",
     text: "Consoante o disposto, o prazo corre. Vendem-se casas na hipótese de interesse.",
     expected: {
       findings: [
+        { criterion: "passiva_sintetica", severity: "warning", start: 37, end: 46, spanText: "Vendem-se", requiresHuman: true },
         { criterion: "jargon", severity: "warning", start: 53, end: 67, spanText: "na hipótese de", requiresHuman: true },
       ],
       metrics: { words: 12, sentences: 2 },
     },
     notes:
-      "'Consoante' foi deliberadamente omitido do glossário (polissêmico, ADR-008); 'Vendem-se' é passiva sintética, fora de escopo (ADR-006). 'na hipótese de' é detectado mas sem sugestão (context_dependent).",
+      "'Consoante' foi deliberadamente omitido do glossário (polissêmico, ADR-008); 'Vendem-se' é passiva sintética, agora EM escopo (ADR-060), requiresHuman pela ambiguidade do 'se'. 'na hipótese de' é detectado mas sem sugestão (context_dependent).",
   },
   {
     id: "unicode_aspas_travessao",

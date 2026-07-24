@@ -5,7 +5,10 @@ import type { Finding } from "../src/lucid/core/types";
 function assertProvenanciaCompleta(f: Finding, textoDiagnostico: string) {
   expect(f.criterion.length).toBeGreaterThan(0);
   expect(["lexical", "syntactic", "structural", "metric"]).toContain(f.category);
-  expect(f.principle).toMatch(/^5\.\d/);
+  expect(["iso-24495-1", "editorial-pt-br", "structural-heuristic"]).toContain(f.source);
+  expect(["relevant", "findable", "understandable", "usable"]).toContain(f.principleGroup);
+  expect(f.normativeReference !== undefined).toBe(f.source === "iso-24495-1");
+  if (f.normativeReference) expect(f.normativeReference.section).toMatch(/^5\.\d/);
   expect(["info", "warning", "error"]).toContain(f.severity);
   expect(typeof f.requiresHuman).toBe("boolean");
   expect(f.justification.length).toBeGreaterThan(0);

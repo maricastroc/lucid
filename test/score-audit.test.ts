@@ -16,12 +16,15 @@ describe("score — forma e limites", () => {
     expect(d.score.byCriterion.map((c) => c.criterion)).toEqual([
       "long_sentence",
       "passive_voice",
+      "passiva_sintetica",
       "nominalization",
       "nominalizacao_encadeada",
       "jargon",
+      "sigla_sem_expansao",
       "mais_que_perfeito_sintetico",
       "gerundismo",
       "adverbio_mente_denso",
+      "adverbios_vagos",
       "redundancia",
       "perifrase_inflada",
       "paragraph_length",
@@ -38,7 +41,6 @@ describe("score — forma e limites", () => {
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);
-      expect(c.principle).toMatch(/^5\.\d/);
     }
   });
 
@@ -84,7 +86,7 @@ describe("score — independência de ordem e ausência de contagem dupla", () =
 
 describe("score — critérios desabilitados", () => {
   it("desabilitar um pass zera o seu critério no placar, mas o critério permanece listado", () => {
-    const config: Partial<Config> = { jargon: { enabled: false, frequencyRankCutoff: 5000, suggestFromGlossary: true } };
+    const config: Partial<Config> = { jargon: { enabled: false, suggestFromGlossary: true } };
     const d = analyze(TEXTO_4, config);
     const jargon = d.score.byCriterion.find((c) => c.criterion === "jargon")!;
     expect(jargon).toBeDefined();
@@ -95,7 +97,7 @@ describe("score — critérios desabilitados", () => {
   it("desabilitar o equivalente informativo do jargão não altera as CONTAGENS do score (sugestão não é contada)", () => {
     const comSug = analyze(TEXTO_4);
     const semSug = analyze(TEXTO_4, {
-      jargon: { enabled: true, frequencyRankCutoff: 5000, suggestFromGlossary: false },
+      jargon: { enabled: true, suggestFromGlossary: false },
     });
 
     const contagens = (findings: readonly Finding[]) =>
@@ -132,7 +134,7 @@ describe("score — texto vazio e muito curto", () => {
   it("texto vazio: critérios zerados, densidade 0 (sem divisão por zero)", () => {
     const d = analyze("");
     expect(d.score.totalFindings).toBe(0);
-    expect(d.score.byCriterion).toHaveLength(20);
+    expect(d.score.byCriterion).toHaveLength(23);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);

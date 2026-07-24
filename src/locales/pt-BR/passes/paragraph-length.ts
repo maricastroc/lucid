@@ -1,18 +1,16 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "paragraph_length";
-const PRINCIPLE = "5.2";
 
 export const paragraphLengthPass: Pass = {
   criterion: CRITERION,
   category: "structural",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.paragraphLength.enabled) return [];
 
     const max = ctx.config.paragraphLength.maxSentences;
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const paragraph of ctx.doc.blocks) {
       if (paragraph.kind !== "paragraph") continue;
@@ -21,7 +19,6 @@ export const paragraphLengthPass: Pass = {
       findings.push({
         criterion: CRITERION,
         category: "structural",
-        principle: PRINCIPLE,
         span: { start: paragraph.start, end: paragraph.end, text: paragraph.text },
         severity: "warning",
         requiresHuman: true,

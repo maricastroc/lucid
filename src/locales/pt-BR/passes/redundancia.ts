@@ -1,21 +1,19 @@
-import type { Finding, Pass } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
 import { matchPhrasesInSentence } from "./phrase-match";
 
 const CRITERION = "redundancia";
-const PRINCIPLE = "5.3.4";
 
 export const redundanciaPass: Pass = {
   criterion: CRITERION,
   category: "lexical",
-  principle: PRINCIPLE,
   dataDeps: ["redundancias.pt"],
 
   run(ctx) {
     if (!ctx.config.redundancia.enabled) return [];
 
     const byFirstWord = ctx.data.get<PhrasePrepared>("redundancias.pt");
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
@@ -23,7 +21,6 @@ export const redundanciaPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "lexical",
-          principle: PRINCIPLE,
           span: { start: hit.start, end: hit.end, text: hit.text },
           severity: "warning",
           requiresHuman: true,

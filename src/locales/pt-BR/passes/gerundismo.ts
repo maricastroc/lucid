@@ -1,7 +1,6 @@
-import type { Finding, Pass, Token } from "@/lucid/core/types";
+import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 
 const CRITERION = "gerundismo";
-const PRINCIPLE = "5.3.4";
 
 const IR_FORMS = new Set(["vou", "vais", "vai", "vamos", "ides", "vão", "irei", "irás", "irá", "iremos", "ireis", "irão"]);
 
@@ -20,12 +19,11 @@ function isGerund(token: Token): boolean {
 export const gerundismoPass: Pass = {
   criterion: CRITERION,
   category: "syntactic",
-  principle: PRINCIPLE,
 
   run(ctx) {
     if (!ctx.config.gerundismo.enabled) return [];
 
-    const findings: Finding[] = [];
+    const findings: PassFinding[] = [];
 
     for (const sentence of ctx.doc.sentences) {
       const words = sentence.tokens.filter((t) => t.isWord);
@@ -39,7 +37,6 @@ export const gerundismoPass: Pass = {
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          principle: PRINCIPLE,
           span: { start, end, text: ctx.doc.source.slice(start, end) },
           severity: "warning",
           requiresHuman: true,

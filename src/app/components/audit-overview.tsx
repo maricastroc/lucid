@@ -154,7 +154,8 @@ export function AuditOverview({
           ))}
         </dl>
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação.
+          Legibilidade e coesão são descritores de apoio, nunca aprovação: valor alto ou baixo não é, sozinho, bom nem
+          ruim (coesão alta pode ser repetição; baixa pode ser variação).
         </p>
       </section>
     </div>
@@ -219,10 +220,14 @@ function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
 function metricRows(diagnostic: Diagnostic) {
   const m = diagnostic.metrics;
   const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+  const co = m.cohesion;
   return [
     { label: "Palavras", value: fmt(m.words) },
     { label: "Frases", value: fmt(m.sentences) },
     { label: "Palavras por frase", value: fmt(m.wordsPerSentence) },
     { label: "Legibilidade", value: fmt(m.fleschPt), note: "Flesch-PT" },
+    { label: "Coesão referencial", value: fmt(co.referentialOverlap), note: "descritor" },
+    { label: "Pares sem continuidade", value: fmt(co.adjacentGapRatio), note: "descritor" },
+    { label: "Conectivos /100 palavras", value: fmt(co.connectivesPer100Words), note: "descritor" },
   ] as Array<{ label: string; value: string; note?: string }>;
 }

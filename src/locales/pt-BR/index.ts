@@ -9,9 +9,11 @@ import { segmentSentences } from "@/lucid/core/document/segment-sentences";
 import { buildDocument as buildDocumentCore } from "@/lucid/core/document/model";
 import { sentenceSpanAt as sentenceSpanAtCore } from "@/lucid/core/document/locate";
 import { CRITERION_IDS } from "./criteria";
+import { CRITERION_TAXONOMY } from "./taxonomy";
 import { PASSES } from "./passes/registry";
 import { countSyllables } from "./services/syllables";
 import { calculateFleschPt } from "./readability/flesch-pt";
+import { createCohesion } from "./metrics/cohesion";
 import { DOCUMENT_DATASETS, REGISTRY_PT, getPrepared } from "./datasets/registry";
 import type { DatasetId } from "./datasets/types";
 
@@ -19,6 +21,11 @@ const readability: ReadabilityMetric = {
   id: "flesch-pt-martins-1996",
   calculate: ({ wordsPerSentence, syllablesPerWord }) => calculateFleschPt(wordsPerSentence, syllablesPerWord),
 };
+
+const cohesion = createCohesion({
+  stopwords: getPrepared("stopwords.pt"),
+  connectives: getPrepared("conectivos.pt"),
+});
 
 const data: LocaleDataRegistry = {
   createDataView: (deps) => REGISTRY_PT.createDataView(deps as DatasetId[]),
@@ -33,9 +40,10 @@ export const localePtBR: LocaleBundle = {
   passes: PASSES,
   config: DEFAULT_CONFIG,
   services: { segmentSentences },
-  metrics: { countSyllables, readability },
+  metrics: { countSyllables, readability, cohesion, dataDeps: ["stopwords.pt", "conectivos.pt"] },
   data,
   criteria: { ids: CRITERION_IDS },
+  taxonomy: CRITERION_TAXONOMY,
 };
 
 export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {

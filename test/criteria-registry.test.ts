@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { CRITERION_IDS } from "../src/lucid";
+import { analyze, CRITERION_IDS } from "../src/lucid";
+import type { CriterionId } from "../src/lucid";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
+import { CRITERION_TAXONOMY } from "../src/locales/pt-BR/taxonomy";
 import { CRITERION_META, CRITERION_ORDER } from "../src/app/lib/criteria";
 import { localePtBR, ptDocumentServices } from "../src/locales/pt-BR";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
@@ -30,6 +32,40 @@ describe("registro de critérios (ADR-029)", () => {
 
   it("CRITERION_ORDER é uma permutação de CRITERION_IDS (todo critério é ordenado, sem sobra)", () => {
     expect(sorted(CRITERION_ORDER)).toEqual(sorted(CRITERION_IDS));
+  });
+});
+
+describe("taxonomia de proveniência (ADR-056)", () => {
+  it("CRITERION_TAXONOMY cobre exatamente os CRITERION_IDS", () => {
+    expect(sorted(Object.keys(CRITERION_TAXONOMY))).toEqual(sorted(CRITERION_IDS));
+  });
+
+  it("normativeReference existe SE E SOMENTE SE source === 'iso-24495-1' (invariante de honestidade)", () => {
+    for (const [id, entry] of Object.entries(CRITERION_TAXONOMY)) {
+      const hasRef = "normativeReference" in entry && entry.normativeReference !== undefined;
+      expect(hasRef, `${id}: normativeReference deve casar com source iso`).toBe(entry.source === "iso-24495-1");
+    }
+  });
+
+  it("nenhum critério editorial/heurístico é rotulado como Relevante ou Usável indevidamente", () => {
+    for (const entry of Object.values(CRITERION_TAXONOMY)) {
+      expect(["understandable", "findable"]).toContain(entry.principleGroup);
+    }
+  });
+
+  it("analyze() carimba source/principleGroup coerentes com a taxonomia em cada finding", () => {
+    const diag = analyze(
+      "A carta foi escrita pelo funcionário responsável. Vou estar enviando o documento supracitado. " +
+        "O trabalho far-se-á sem demora. Não é incomum que isso aconteça.",
+    );
+    expect(diag.findings.length).toBeGreaterThan(0);
+    for (const f of diag.findings) {
+      const entry = CRITERION_TAXONOMY[f.criterion as CriterionId];
+      expect(entry, `sem entrada de taxonomia para ${f.criterion}`).toBeDefined();
+      expect(f.source).toBe(entry.source);
+      expect(f.principleGroup).toBe(entry.principleGroup);
+      expect(f.normativeReference !== undefined).toBe(f.source === "iso-24495-1");
+    }
   });
 });
 
