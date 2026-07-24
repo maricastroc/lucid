@@ -15,7 +15,7 @@ function shiftSentence(s: Sentence, off: number): Sentence {
   return { ...s, start: s.start + off, end: s.end + off, tokens: s.tokens.map((t) => shiftToken(t, off)) };
 }
 
-function segmentAt(
+export function segmentAt(
   text: string,
   offset: number,
   services: DocumentBuildServices,
