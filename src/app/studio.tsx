@@ -10,7 +10,7 @@ import {
   type Span,
 } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { CRITERION_ORDER, findingId, isSafe } from "./lib/criteria";
+import { CRITERION_ORDER, criterionRank, findingId, isSafe } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { documentBurden, sourceLabel, type LedgerEntry } from "./lib/ledger";
@@ -97,7 +97,15 @@ export function Studio() {
   }, [resetDocumentState]);
 
   const findings = useMemo(
-    () => diagnostic.findings.filter((f) => activeCriteria.has(f.criterion)),
+    () =>
+      diagnostic.findings
+        .filter((f) => activeCriteria.has(f.criterion))
+        .sort((a, b) => {
+          const byCriterion = criterionRank(a.criterion) - criterionRank(b.criterion);
+          if (byCriterion !== 0) return byCriterion;
+          if (a.span.start !== b.span.start) return a.span.start - b.span.start;
+          return a.span.end - b.span.end;
+        }),
     [diagnostic, activeCriteria],
   );
 

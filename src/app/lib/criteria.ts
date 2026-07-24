@@ -252,6 +252,14 @@ export function findingId(f: Finding): string {
   return `${f.criterion}:${f.span.start}:${f.span.end}`;
 }
 
+const CRITERION_RANK: Record<string, number> = Object.fromEntries(
+  CRITERION_ORDER.map((c, i) => [c, i]),
+);
+/** Posição canônica do critério (ordem de CRITERION_ORDER); critérios desconhecidos vão para o fim. */
+export function criterionRank(criterion: string): number {
+  return CRITERION_RANK[criterion] ?? CRITERION_ORDER.length;
+}
+
 const SEVERITY_RANK: Record<Severity, number> = { info: 0, warning: 1, error: 2 };
 export function severityRank(sev: Severity): number {
   return SEVERITY_RANK[sev];
