@@ -1,0 +1,175 @@
+{
+  "stamp": {
+    "lucidVersion": "0.1.0",
+    "localeId": "pt-BR",
+    "standardVersion": "ABNT NBR ISO 24495-1:2024",
+    "configHash": "ebb6dee9",
+    "dataHash": "91c09d7d"
+  },
+  "method": {
+    "scoring": "count-per-passage",
+    "caveats": [
+      "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span.",
+      "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico.",
+      "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita.",
+      "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito.",
+      "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline."
+    ]
+  },
+  "detectors": [
+    {
+      "criterion": "jargon",
+      "coverage": "curated",
+      "summary": {
+        "cases": 39,
+        "negatives": 12,
+        "limitations": 2,
+        "tp": 26,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.963,
+        "recall": 0.963
+      },
+      "failures": [
+        {
+          "texto": "Ele contou que, Outrossim, era o apelido do avô.",
+          "expectedCount": 0,
+          "actualCount": 1,
+          "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "O benefício será concedido a quem fizer jus a ele.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        }
+      ],
+      "knownLimitations": [
+        {
+          "texto": "Ele contou que, Outrossim, era o apelido do avô.",
+          "motivo": "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade (ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na precisão do eval em vez de ser mascarado."
+        },
+        {
+          "texto": "O benefício será concedido a quem fizer jus a ele.",
+          "motivo": "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação"
+        }
+      ]
+    },
+    {
+      "criterion": "nominalization",
+      "coverage": "curated",
+      "summary": {
+        "cases": 45,
+        "negatives": 11,
+        "limitations": 2,
+        "tp": 33,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1,
+        "recall": 0.9429
+      },
+      "failures": [
+        {
+          "texto": "É necessário proceder com a análise dos dados.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "É preciso dar continuidade ao processo.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        }
+      ],
+      "knownLimitations": [
+        {
+          "texto": "É necessário proceder com a análise dos dados.",
+          "motivo": "'proceder com' é regência alternativa de 'proceder' não cadastrada — só o padrão 'a' (à/ao/às/aos) foi implementado, por ser o único demonstrado nos exemplos do pedido"
+        },
+        {
+          "texto": "É preciso dar continuidade ao processo.",
+          "motivo": "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)"
+        }
+      ]
+    },
+    {
+      "criterion": "passive_voice",
+      "coverage": "productive",
+      "summary": {
+        "cases": 64,
+        "negatives": 32,
+        "limitations": 2,
+        "tp": 33,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1,
+        "recall": 0.9429
+      },
+      "failures": [
+        {
+          "texto": "O pedido foi, segundo consta, aprovado pela diretoria.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "A lei foi, após muitos debates, finalmente aprovada.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        }
+      ],
+      "knownLimitations": [
+        {
+          "texto": "O pedido foi, segundo consta, aprovado pela diretoria.",
+          "motivo": "vírgula entre auxiliar e particípio aborta a busca por design (precisão > recall)"
+        },
+        {
+          "texto": "A lei foi, após muitos debates, finalmente aprovada.",
+          "motivo": "mesma barreira de pontuação — falso negativo aceito"
+        }
+      ]
+    }
+  ],
+  "services": {
+    "syllables": {
+      "words": 56,
+      "limitations": 5,
+      "exactRate": 0.9107,
+      "meanAbsoluteError": 0.1429
+    }
+  },
+  "criteriaCoverage": {
+    "measured": [
+      "passive_voice",
+      "nominalization",
+      "jargon"
+    ],
+    "goldenLabelledOnly": [
+      "long_sentence",
+      "passiva_sintetica",
+      "nominalizacao_encadeada",
+      "subordinacao_densa",
+      "leitor_terceira_pessoa"
+    ],
+    "unitTestsOnly": [
+      "sigla_sem_expansao",
+      "mais_que_perfeito_sintetico",
+      "gerundismo",
+      "adverbio_mente_denso",
+      "adverbios_vagos",
+      "redundancia",
+      "perifrase_inflada",
+      "paragraph_length",
+      "prose_enumeration",
+      "mesoclise",
+      "dupla_negacao",
+      "salto_de_nivel_titulo",
+      "long_heading",
+      "single_item_list",
+      "heading_body_mismatch"
+    ],
+    "total": 23
+  }
+}

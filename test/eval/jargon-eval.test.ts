@@ -4,68 +4,11 @@ import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
-
-interface ResultadoAvaliacao {
-  texto: string;
-  categoria: string;
-  expectedCount: number;
-  actualCount: number;
-  expectSuggestion: boolean | undefined;
-  expectedSuggestion: string | undefined;
-  actualSuggestion: string | undefined;
-  mustNotFire: boolean;
-  estado: "correto" | "limitacao_conhecida";
-  tp: number;
-  fp: number;
-  fn: number;
-  sugestaoInsegura: boolean;
-  sugestaoCorreta: boolean;
-  disparouSemCadastro: boolean;
-}
-
-function avaliar(): ResultadoAvaliacao[] {
-  return GOLDEN_JARGAO.map((entrada) => {
-    const doc = buildDocument(entrada.texto);
-    const findings = jargonPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-    const actualCount = findings.length;
-    const actualSuggestion = actualCount === 1 ? findings[0].suggestion : undefined;
-
-    const esperaSugestao = entrada.expectedCount === 1 && entrada.expectSuggestion === true;
-    const naoEsperaSugestao = entrada.expectedCount === 1 && entrada.expectSuggestion === false;
-
-    const sugestaoCorreta = esperaSugestao && actualCount === 1 && actualSuggestion === entrada.expectedSuggestion;
-    const sugestaoInsegura =
-      (naoEsperaSugestao && actualCount === 1 && actualSuggestion !== undefined) ||
-      (esperaSugestao && actualCount === 1 && actualSuggestion !== undefined && actualSuggestion !== entrada.expectedSuggestion);
-
-    return {
-      texto: entrada.texto,
-      categoria: entrada.categoria,
-      expectedCount: entrada.expectedCount,
-      actualCount,
-      expectSuggestion: entrada.expectSuggestion,
-      expectedSuggestion: entrada.expectedSuggestion,
-      actualSuggestion,
-      mustNotFire: entrada.mustNotFire === true,
-      estado: entrada.estado,
-      tp: Math.min(actualCount, entrada.expectedCount),
-      fp: Math.max(0, actualCount - entrada.expectedCount),
-      fn: Math.max(0, entrada.expectedCount - actualCount),
-      sugestaoInsegura,
-      sugestaoCorreta,
-      disparouSemCadastro: entrada.mustNotFire === true && actualCount > 0,
-    };
-  });
-}
+import { evaluateJargon } from "./compute";
 
 describe("avaliação de jargonPass — golden set", () => {
-  const resultados = avaliar();
-
-  const totalTP = resultados.reduce((soma, r) => soma + r.tp, 0);
-  const totalFP = resultados.reduce((soma, r) => soma + r.fp, 0);
-  const totalFN = resultados.reduce((soma, r) => soma + r.fn, 0);
-  const precisao = totalTP + totalFP === 0 ? 1 : totalTP / (totalTP + totalFP);
-  const recall = totalTP + totalFN === 0 ? 1 : totalTP / (totalTP + totalFN);
+  // O MESMO cálculo que alimenta o artefato publicado (./compute).
+  const { results: resultados, summary, suggestions } = evaluateJargon();
 
   const sugestoesEsperadas = resultados.filter((r) => r.expectSuggestion === true);
   const sugestoesCorretas = sugestoesEsperadas.filter((r) => r.sugestaoCorreta);
@@ -76,8 +19,8 @@ describe("avaliação de jargonPass — golden set", () => {
 
   it("relatório: TP/FP/FN, precisão, recall, sugestões e findings sem cadastro", () => {
     console.log(
-      `\n[eval jargão] ${resultados.length} exemplos · ` +
-        `TP=${totalTP} FP=${totalFP} FN=${totalFN} · precisão=${(precisao * 100).toFixed(1)}% · recall=${(recall * 100).toFixed(1)}% · ` +
+      `\n[eval jargão] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}% · ` +
         `sugestões corretas=${sugestoesCorretas.length}/${sugestoesEsperadas.length} · ` +
         `sugestões inseguras=${sugestoesInseguras.length} · ` +
         `findings sem cadastro (deve ser 0)=${disparosSemCadastro.length}`,
@@ -99,7 +42,12 @@ describe("avaliação de jargonPass — golden set", () => {
       );
     }
 
-    expect(resultados.length).toBeGreaterThan(0);
+    expect(summary.cases).toBeGreaterThan(0);
+  });
+
+  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+    expect(summary.negatives).toBeGreaterThan(0);
+    expect(suggestions.firedWithoutEntry).toBe(0);
   });
 
   it("nenhuma sugestão insegura é emitida (métrica prioritária 1)", () => {

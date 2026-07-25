@@ -1,35 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { countSyllables } from "../../src/locales/pt-BR/services/syllables";
 import { GOLDEN_SILABAS } from "./silabas-golden";
-
-interface ResultadoAvaliacao {
-  palavra: string;
-  real: number;
-  atual: number;
-  estado: "correto" | "limitacao_conhecida";
-  acertou: boolean;
-  erroAbsoluto: number;
-}
-
-function avaliar(): ResultadoAvaliacao[] {
-  return GOLDEN_SILABAS.map((entrada) => {
-    const atual = countSyllables(entrada.palavra);
-    return {
-      palavra: entrada.palavra,
-      real: entrada.real,
-      atual,
-      estado: entrada.estado,
-      acertou: atual === entrada.real,
-      erroAbsoluto: Math.abs(atual - entrada.real),
-    };
-  });
-}
+import { evaluateSyllables } from "./compute";
 
 describe("avaliação de countSyllables — golden set", () => {
-  const resultados = avaliar();
-
-  const taxaDeAcerto = resultados.filter((r) => r.acertou).length / resultados.length;
-  const erroAbsolutoMedio = resultados.reduce((soma, r) => soma + r.erroAbsoluto, 0) / resultados.length;
+  // O MESMO cálculo que alimenta o artefato publicado (./compute).
+  const { results: resultados, summary } = evaluateSyllables();
+  const taxaDeAcerto = summary.exactRate;
+  const erroAbsolutoMedio = summary.meanAbsoluteError;
   const casosIncorretos = resultados.filter((r) => !r.acertou);
 
   it("relatório: taxa de acerto exata e erro absoluto médio no golden set completo", () => {

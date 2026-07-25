@@ -4,50 +4,20 @@ import { passiveVoicePass } from "../../src/locales/pt-BR/passes/passive-voice";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
-
-interface ResultadoAvaliacao {
-  texto: string;
-  expectedCount: number;
-  actualCount: number;
-  estado: "correto" | "limitacao_conhecida";
-  tp: number;
-  fp: number;
-  fn: number;
-}
-
-function avaliar(): ResultadoAvaliacao[] {
-  return GOLDEN_VOZ_PASSIVA.map((entrada) => {
-    const doc = buildDocument(entrada.texto);
-    const actualCount = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) }).length;
-
-    return {
-      texto: entrada.texto,
-      expectedCount: entrada.expectedCount,
-      actualCount,
-      estado: entrada.estado,
-      tp: Math.min(actualCount, entrada.expectedCount),
-      fp: Math.max(0, actualCount - entrada.expectedCount),
-      fn: Math.max(0, entrada.expectedCount - actualCount),
-    };
-  });
-}
+import { evaluatePassiveVoice } from "./compute";
 
 describe("avaliação de passiveVoicePass — golden set", () => {
-  const resultados = avaliar();
-
-  const totalTP = resultados.reduce((soma, r) => soma + r.tp, 0);
-  const totalFP = resultados.reduce((soma, r) => soma + r.fp, 0);
-  const totalFN = resultados.reduce((soma, r) => soma + r.fn, 0);
-  const precisao = totalTP + totalFP === 0 ? 1 : totalTP / (totalTP + totalFP);
-  const recall = totalTP + totalFN === 0 ? 1 : totalTP / (totalTP + totalFN);
+  // O MESMO cálculo que alimenta o artefato publicado (./compute): a página não pode
+  // divergir do CI porque não existe segunda implementação.
+  const { results: resultados, summary } = evaluatePassiveVoice();
 
   const errados = resultados.filter((r) => r.fp > 0 || r.fn > 0);
 
   it("relatório: TP/FP/FN, precisão e recall no golden set completo", () => {
     console.log(
-      `\n[eval voz-passiva] ${resultados.length} exemplos · ` +
-        `TP=${totalTP} FP=${totalFP} FN=${totalFN} · ` +
-        `precisão=${(precisao * 100).toFixed(1)}% · recall=${(recall * 100).toFixed(1)}%`,
+      `\n[eval voz-passiva] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · ` +
+        `precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}%`,
     );
     if (errados.length > 0) {
       console.log(
@@ -62,7 +32,11 @@ describe("avaliação de passiveVoicePass — golden set", () => {
       );
     }
 
-    expect(resultados.length).toBeGreaterThan(0);
+    expect(summary.cases).toBeGreaterThan(0);
+  });
+
+  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+    expect(summary.negatives).toBeGreaterThan(0);
   });
 
   it("toda entrada 'limitacao_conhecida' tem motivo documentado", () => {

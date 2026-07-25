@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "eval": "EVAL_ARTIFACT=1 vitest run test/eval/artifact.emit.test.ts",
     "test:watch": "vitest",
     "depcheck": "depcruise src --config .dependency-cruiser.cjs"
   },

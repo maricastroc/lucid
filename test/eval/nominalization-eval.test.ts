@@ -4,59 +4,11 @@ import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalizatio
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
-
-interface ResultadoAvaliacao {
-  texto: string;
-  expectedCount: number;
-  actualCount: number;
-  expectRequiresHuman: boolean | undefined;
-  actualRequiresHuman: boolean | undefined;
-  estado: "correto" | "limitacao_conhecida";
-  tp: number;
-  fp: number;
-  fn: number;
-  sugestaoEmitida: boolean;
-  classificacaoErrada: boolean;
-}
-
-function avaliar(): ResultadoAvaliacao[] {
-  return GOLDEN_NOMINALIZACAO.map((entrada) => {
-    const doc = buildDocument(entrada.texto);
-    const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-    const actualCount = findings.length;
-    const actualRequiresHuman = actualCount === 1 ? findings[0].requiresHuman : undefined;
-
-    const sugestaoEmitida = findings.some((f) => f.suggestion !== undefined);
-    const classificacaoErrada =
-      entrada.expectedCount === 1 &&
-      entrada.expectRequiresHuman !== undefined &&
-      actualCount === 1 &&
-      actualRequiresHuman !== entrada.expectRequiresHuman;
-
-    return {
-      texto: entrada.texto,
-      expectedCount: entrada.expectedCount,
-      actualCount,
-      expectRequiresHuman: entrada.expectRequiresHuman,
-      actualRequiresHuman,
-      estado: entrada.estado,
-      tp: Math.min(actualCount, entrada.expectedCount),
-      fp: Math.max(0, actualCount - entrada.expectedCount),
-      fn: Math.max(0, entrada.expectedCount - actualCount),
-      sugestaoEmitida,
-      classificacaoErrada,
-    };
-  });
-}
+import { evaluateNominalization } from "./compute";
 
 describe("avaliação de nominalizationPass — golden set", () => {
-  const resultados = avaliar();
-
-  const totalTP = resultados.reduce((soma, r) => soma + r.tp, 0);
-  const totalFP = resultados.reduce((soma, r) => soma + r.fp, 0);
-  const totalFN = resultados.reduce((soma, r) => soma + r.fn, 0);
-  const precisao = totalTP + totalFP === 0 ? 1 : totalTP / (totalTP + totalFP);
-  const recall = totalTP + totalFN === 0 ? 1 : totalTP / (totalTP + totalFN);
+  // O MESMO cálculo que alimenta o artefato publicado (./compute).
+  const { results: resultados, summary } = evaluateNominalization();
 
   const sugestoesEmitidas = resultados.filter((r) => r.sugestaoEmitida);
   const classificacoesErradas = resultados.filter((r) => r.classificacaoErrada);
@@ -64,8 +16,8 @@ describe("avaliação de nominalizationPass — golden set", () => {
 
   it("relatório: TP/FP/FN, precisão, recall, classificação do mapeamento", () => {
     console.log(
-      `\n[eval nominalização] ${resultados.length} exemplos · ` +
-        `TP=${totalTP} FP=${totalFP} FN=${totalFN} · precisão=${(precisao * 100).toFixed(1)}% · recall=${(recall * 100).toFixed(1)}% · ` +
+      `\n[eval nominalização] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}% · ` +
         `classificações erradas=${classificacoesErradas.length} · sugestões emitidas=${sugestoesEmitidas.length} (deve ser 0)`,
     );
     if (errosDeteccao.length > 0) {
@@ -77,7 +29,11 @@ describe("avaliação de nominalizationPass — golden set", () => {
       );
     }
 
-    expect(resultados.length).toBeGreaterThan(0);
+    expect(summary.cases).toBeGreaterThan(0);
+  });
+
+  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+    expect(summary.negatives).toBeGreaterThan(0);
   });
 
   it("a engine nunca emite sugestão composta — invariante dura do ADR-054", () => {
