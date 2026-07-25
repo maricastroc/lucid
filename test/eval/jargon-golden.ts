@@ -62,9 +62,6 @@ export const GOLDEN_JARGAO: readonly EntradaGolden[] = [
 
   { texto: "O benefício será concedido a quem fizer jus a ele.", expectedCount: 1, expectSuggestion: false, categoria: "multipalavra", estado: "limitacao_conhecida", motivo: "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação" },
 
-  // A12a — furo de recall por forma exata. NÃO é recorte deliberado como os de cima:
-  // é consequência do índice por `token.lower`. Declarado para contar contra o recall
-  // publicado em vez de ficar invisível na métrica.
   {
     texto: "O pedido será analisado na hipotese de indeferimento.",
     expectedCount: 1,

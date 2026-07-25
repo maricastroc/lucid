@@ -40,9 +40,6 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("o goldenHash muda quando o corpus muda — a medição depende do golden, não só do motor", () => {
-    // A lacuna que apareceu ao declarar A12a/A12d: o recall publicado caiu e config/dado
-    // não mudaram. Sem esta parte da estampa, dois artefatos discordantes seriam
-    // indistinguíveis.
     const base = hashGoldens();
     const comEntradaNova = hashGoldens({
       jargon: [...GOLDEN_JARGAO, { texto: "entrada sintética", expectedCount: 1 }],
@@ -57,8 +54,6 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("a estampa de dado cobre TODOS os datasets, não só os usados pelos evals", () => {
-    // Um dataHash escopado aos critérios avaliados afirmaria, por omissão, que o resto do
-    // dado não mudou — e mudança em qualquer léxico muda o que a engine faria.
     const todos = Object.keys(REGISTRY).sort() as DatasetId[];
     expect(artifact.stamp.dataHash).toBe(dataHashFor(todos));
     expect(todos.length).toBeGreaterThan(20);
@@ -74,8 +69,6 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("a cobertura é DERIVADA das entradas — provado com universo sintético, não com lista fixa", () => {
-    // Antes este teste comparava a saída com uma lista escrita à mão, o que era tautológico:
-    // fixava o hardcode contra ele mesmo. Agora exercita a REGRA de classificação.
     const cobertura = criteriaCoverage({
       criterionIds: ["com_eval", "so_rotulado", "so_unitario", "eval_e_rotulado"],
       evaluated: ["com_eval", "eval_e_rotulado"],
@@ -83,9 +76,7 @@ describe("artefato de eval — invariantes de publicação", () => {
     });
 
     expect(cobertura.measured).toEqual(["com_eval", "eval_e_rotulado"]);
-    // Ter avaliador prevalece sobre estar rotulado — a camada mais forte ganha.
     expect(cobertura.goldenLabelledOnly).toEqual(["so_rotulado"]);
-    // Critério sem avaliador e sem rótulo cai aqui SOZINHO, por construção.
     expect(cobertura.unitTestsOnly).toEqual(["so_unitario"]);
   });
 
@@ -102,17 +93,13 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("os critérios medidos vêm do REGISTRO de avaliadores, não de uma segunda lista", () => {
-    // A duplicação que existia: uma lista para a cobertura, outra para montar o artefato.
     expect(artifact.criteriaCoverage.measured).toEqual(
       CRITERION_IDS.filter((c) => DETECTOR_EVALUATORS.some((e) => e.criterion === c)),
     );
   });
 
   it("ORDEM CANÔNICA única: `detectors` e `measured` listam os mesmos critérios na mesma ordem", () => {
-    // Antes `detectors` saía na ordem do registro e `measured` na da engine, então a tabela
-    // e os cartões de cobertura da página discordavam sobre a ordem dos mesmos três itens.
     expect(artifact.detectors.map((d) => d.criterion)).toEqual([...artifact.criteriaCoverage.measured]);
-    // E a ordem canônica é a declaração da engine.
     const ranks = artifact.detectors.map((d) => (CRITERION_IDS as readonly string[]).indexOf(d.criterion));
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
   });
@@ -121,7 +108,6 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect(artifact.detectors.length).toBeGreaterThan(0);
     for (const d of artifact.detectors) {
       expect(["curated", "productive"]).toContain(d.coverage);
-      // Sem caso negativo, precisão é 100% de graça.
       expect(d.summary.negatives, `${d.criterion} sem casos negativos`).toBeGreaterThan(0);
       for (const taxa of [d.summary.precision, d.summary.recall]) {
         expect(taxa, `${d.criterion} sem denominador`).not.toBeNull();
@@ -135,21 +121,17 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("sem denominador o valor é null, NUNCA 1 — não se fabrica 100% (coerência com ADR-066)", () => {
-    // Corpus vazio: nenhuma oportunidade de acertar nem de errar.
     const vazio = summarize([]);
     expect(vazio.precision).toBeNull();
     expect(vazio.recall).toBeNull();
     expect(vazio.cases).toBe(0);
 
-    // Só negativos e o detector calado: precisão indefinida (0 disparos), recall indefinido
-    // (nenhum positivo esperado) — e nada disso é "100% de acerto".
     const soNegativos = summarize([
       { texto: "a", expectedCount: 0, actualCount: 0, estado: "correto", tp: 0, fp: 0, fn: 0 },
     ]);
     expect(soNegativos.precision).toBeNull();
     expect(soNegativos.recall).toBeNull();
 
-    // Um falso positivo já dá denominador de precisão: 0/1 = 0, medido de verdade.
     const umFP = summarize([
       { texto: "b", expectedCount: 0, actualCount: 1, estado: "correto", tp: 0, fp: 1, fn: 0 },
     ]);
@@ -164,32 +146,26 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect(artifact.schemaVersion).toBe(EVAL_SCHEMA_VERSION);
     expect(Number.isInteger(artifact.schemaVersion)).toBe(true);
     expect(artifact.schemaVersion).toBeGreaterThanOrEqual(1);
-    // Primeira chave do JSON: quem consome lê a versão antes de interpretar a forma.
     expect(Object.keys(artifact)[0]).toBe("schemaVersion");
   });
 
   it("limitação conhecida NÃO é excluída da métrica — a precisão publicada é a honesta", () => {
     const comLimitacao = artifact.detectors.filter((d) => d.knownLimitations.length > 0);
     expect(comLimitacao.length).toBeGreaterThan(0);
-    // Se limitações fossem descontadas da conta, fp+fn seria zero em todas elas.
     expect(comLimitacao.some((d) => d.summary.fp + d.summary.fn > 0)).toBe(true);
-    // A lista e o contador do resumo têm que falar a mesma coisa.
+
     for (const d of artifact.detectors) {
       expect(d.knownLimitations.length, `${d.criterion}: lista ≠ contador`).toBe(d.summary.limitations);
     }
   });
 
   it("REGRESSÃO é categoria separada de limitação, e em build verde está vazia", () => {
-    // Uma falha é ou declarada (com motivo) ou regressão (sem motivo, porque ninguém
-    // escreveu um). Nada infere motivo: se aparecer aqui, a página mostra sem explicação.
     for (const d of artifact.detectors) {
       expect(d.regressions, `${d.criterion} tem falha NÃO declarada`).toEqual([]);
     }
   });
 
   it("os caveats viajam identificados por id — o teste pina o id, não a redação", () => {
-    // Antes eram strings livres e isto assertava substring da prosa: reescrever a frase
-    // quebrava o teste sem mudar semântica, e o teste não garantia sobre o QUE era o caveat.
     const ids = artifact.method.caveats.map((c) => c.id);
     expect(artifact.method.scoring).toBe("count-per-passage");
     expect(ids).toEqual([
@@ -199,11 +175,11 @@ describe("artefato de eval — invariantes de publicação", () => {
       "unmeasured_criteria",
       "no_layer_2",
     ]);
-    // Todo id tem texto não vazio (o Record em compute.ts garante em compile-time).
+
     for (const c of artifact.method.caveats) {
       expect(c.text.length, `caveat ${c.id} sem texto`).toBeGreaterThan(40);
     }
-    // O caveat que mais importa para a página existe como entrada endereçável.
+
     expect(ids).toContain("circular_recall_curated");
   });
 

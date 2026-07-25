@@ -282,8 +282,6 @@ export function metaFor(criterion: string): CriterionMeta {
   return isCriterion(criterion) ? CRITERION_META[criterion] : CRITERION_META.jargon;
 }
 
-// A união vem do contrato do artefato de eval (fonte única): o mesmo vocabulário que a
-// página publica é o que a UI usa, e um valor novo quebra os dois lados em compile-time.
 export type { CriterionCoverage };
 
 const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([

@@ -28,9 +28,6 @@ function zeroMetrics(
   cohesion: CohesionMetrics,
 ): Metrics {
   return {
-    // Sem palavra ou sem frase não há medida — e `0` é um ponto real da escala
-    // ("muito difícil"), então devolvê-lo era fabricar a pior nota possível para
-    // um texto que não foi medido. `null` é a única resposta honesta aqui.
     fleschPt: null,
     words: wordCount,
     sentences: sentenceCount,

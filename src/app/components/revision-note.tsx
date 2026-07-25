@@ -464,7 +464,6 @@ function RewriteResult({
   const blocked = verification.hasBlockingFailure;
 
   const stale = proposal.original !== currentOriginal;
-  // Sem medida em um dos lados não existe delta — e inventar 0 seria afirmar "não mudou".
   const { fleschPtBefore, fleschPtAfter } = verification.metrics;
   const dFlesch = fleschPtBefore === null || fleschPtAfter === null ? null : fleschPtAfter - fleschPtBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;

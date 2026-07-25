@@ -21,8 +21,6 @@ describe("interpretação da leiturabilidade — nunca altera o valor medido", (
 
     expect(r.value).toBe(162.2);
     expect(r.position).toBe("above_range");
-    // Fora do intervalo não existe faixa — só posição. "Muito fácil" para 162,2 seria
-    // interpretar além do que a escala define.
     expect(r.band).toBeNull();
   });
 
@@ -33,7 +31,6 @@ describe("interpretação da leiturabilidade — nunca altera o valor medido", (
 
     expect(r.value).toBeLessThan(0);
     expect(r.position).toBe("below_range");
-    // Nenhuma anomalia: 44 palavras numa frase de palavras longas é juridiquês, não lixo.
     expect(r.anomalies).toEqual([]);
   });
 
@@ -73,7 +70,6 @@ describe("anomalias da medição — cada uma nomeada, com grandeza e limiar", (
     expect(r.kind).toBe("measured");
     if (r.kind !== "measured") return;
 
-    // O valor absurdo NÃO é escondido.
     expect(r.value).toBeLessThan(-1000);
     const anomaly = r.anomalies.find((a) => a.cause === "syllables_per_word_impossible");
     expect(anomaly).toBeDefined();
@@ -81,11 +77,8 @@ describe("anomalias da medição — cada uma nomeada, com grandeza e limiar", (
   });
 
   it("o limiar de 20 sílabas/palavra tem base dura: a palavra mais longa do PT conta 18", () => {
-    // A média de um conjunto não pode exceder seu máximo. Se a palavra mais longa
-    // ATESTADA conta 18, uma média acima de 20 prova que algum token não é palavra.
     expect(countSyllables("pneumoultramicroscopicossilicovulcanoconiótico")).toBe(18);
 
-    // E a palavra mais longa, sozinha, NÃO dispara a anomalia (o limiar tem margem).
     const r = read("pneumoultramicroscopicossilicovulcanoconiótico.");
     if (r.kind !== "measured") throw new Error("esperava medida");
     expect(r.anomalies.some((a) => a.cause === "syllables_per_word_impossible")).toBe(false);
@@ -98,7 +91,6 @@ describe("anomalias da medição — cada uma nomeada, com grandeza e limiar", (
 
     const anomaly = r.anomalies.find((a) => a.cause === "sentence_boundary_missing");
     expect(anomaly).toMatchObject({ cause: "sentence_boundary_missing", wordsPerSentence: 300, threshold: 100 });
-    // A causa é acionável sobre a ENTRADA, não um "fora do domínio" mudo.
     expect(describeReadability(r).notes.join(" ")).toContain("fronteira de frase");
   });
 
@@ -125,7 +117,6 @@ describe("anomalias da medição — cada uma nomeada, com grandeza e limiar", (
   });
 
   it("anomalias saem em ordem FIXA (degeneração da entrada antes de amostra)", () => {
-    // Uma palavra só, degenerada: dispara sílabas impossíveis E amostra pequena.
     const r = read(`${"aeiou".repeat(100)}.`);
     if (r.kind !== "measured") throw new Error("esperava medida");
     expect(r.anomalies.map((a) => a.cause)).toEqual(["syllables_per_word_impossible", "small_sample"]);

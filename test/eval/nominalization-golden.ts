@@ -69,8 +69,6 @@ export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
     motivo: "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)",
   },
 
-  // A12a e A12d — furos de recall que NÃO são recorte deliberado como os de cima.
-  // Declarados para contar contra o recall publicado em vez de ficarem invisíveis.
   {
     texto: "A comissão vai fazer a analise do pedido.",
     expectedCount: 1,

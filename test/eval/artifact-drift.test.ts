@@ -26,8 +26,6 @@ describe("eval/report.json — guard de drift", () => {
     const emDisco = readFileSync(ARTIFACT_PATH, "utf8");
     const atual = serializeEvalArtifact(buildEvalArtifact());
 
-    // Mensagem antes da comparação de strings gigantes: o diff do vitest é ilegível aqui,
-    // então o que precisa chegar ao autor é a instrução, não o JSON inteiro.
     if (emDisco !== atual) {
       const doDisco = JSON.parse(emDisco) as { stamp?: Record<string, string> };
       const doCodigo = JSON.parse(atual) as { stamp?: Record<string, string> };

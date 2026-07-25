@@ -7,8 +7,7 @@ import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 import { formatRate, evaluatePassiveVoice } from "./compute";
 
 describe("avaliação de passiveVoicePass — golden set", () => {
-  // O MESMO cálculo que alimenta o artefato publicado (./compute): a página não pode
-  // divergir do CI porque não existe segunda implementação.
+
   const { results: resultados, summary } = evaluatePassiveVoice();
 
   const errados = resultados.filter((r) => r.fp > 0 || r.fn > 0);

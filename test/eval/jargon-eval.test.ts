@@ -7,7 +7,6 @@ import { GOLDEN_JARGAO } from "./jargon-golden";
 import { formatRate, evaluateJargon } from "./compute";
 
 describe("avaliação de jargonPass — golden set", () => {
-  // O MESMO cálculo que alimenta o artefato publicado (./compute).
   const { results: resultados, summary, suggestions } = evaluateJargon();
 
   const sugestoesEsperadas = resultados.filter((r) => r.expectSuggestion === true);

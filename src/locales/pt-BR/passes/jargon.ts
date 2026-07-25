@@ -136,13 +136,6 @@ export const jargonPass: Pass = {
 
         const endIndex = i + match.words.length - 1;
 
-        // Só as aspas suprimem: aspas marcam MENÇÃO ao termo, não uso dele.
-        // A caixa alta, sozinha, não suprime mais (A-12b). O glossário é a
-        // autoridade curada (ADR-008) e já OMITE deliberadamente unigramas
-        // ambíguos/polissêmicos; descartar um termo cadastrado só porque está
-        // capitalizado no meio da frase criava falso negativo silencioso
-        // ("…; Outrossim, arquivo os autos" não era apontado, enquanto o mesmo
-        // termo no início da frase era) — inconsistência sem respaldo no dado.
         if (overlapsQuotes(quoteRanges, i, endIndex)) {
           i++;
           continue;

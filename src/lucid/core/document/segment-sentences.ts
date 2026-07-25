@@ -96,8 +96,6 @@ function findBoundaries(source: string, lexicon: AbbreviationLexicon): number[] 
         const lower = word.toLowerCase();
         const isUnit = lexicon.units.has(lower);
         if (lexicon.blocking.has(lower) || isUnit) {
-          // A unidade só libera a fronteira em contexto de medição; fora dele, e
-          // para toda abreviação proclítica, o ponto é interno à frase.
           const measurement = isUnit && precededByNumber(source, i - word.length);
           if (!measurement) {
             i++;

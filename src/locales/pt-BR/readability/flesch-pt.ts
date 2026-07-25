@@ -87,13 +87,8 @@ function positionOf(value: number): ReadabilityScalePosition {
   return "in_range";
 }
 
-/**
- * Interpreta sem alterar. Ordem das anomalias FIXA (degeneração da entrada primeiro,
- * tamanho de amostra depois) para a saída ser determinística como o resto da Camada 1.
- */
 export function interpretFleschPt(metrics: Metrics): ReadabilityReading {
   if (metrics.fleschPt === null) {
-    // Palavras primeiro: "!!! ???" tem fronteira de frase e nenhuma palavra.
     return { kind: "unmeasurable", cause: metrics.words === 0 ? "no_words" : "no_sentences" };
   }
 
@@ -121,9 +116,6 @@ export function interpretFleschPt(metrics: Metrics): ReadabilityReading {
     kind: "measured",
     value: metrics.fleschPt,
     position,
-    // Fora do intervalo de referência não existe faixa — só posição. Chamar 162,2 de
-    // "muito fácil" ou −8296,8 de "muito difícil" seria interpretar além do que a
-    // escala define.
     band: position === "in_range" ? bandFor(metrics.fleschPt) : null,
     anomalies,
   };

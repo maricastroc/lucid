@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { coverageLabel, metaFor } from "../lib/criteria";
 import rawReport from "../../../eval/report.json";
-// Contrato compartilhado: o mesmo módulo que o tooling de eval usa para PRODUZIR o
-// artefato. A página não redeclara a forma do que consome, e não depende de `test/`.
-import { EVAL_SCHEMA_VERSION, type EvalArtifact } from "@/report/eval/contract";
+import { EVAL_SCHEMA_VERSION, type CaveatId, type EvalArtifact } from "@/report/eval/contract";
 
 export const metadata: Metadata = {
   title: "Avaliação do motor — Lucid",
@@ -12,28 +10,18 @@ export const metadata: Metadata = {
     "Precisão, recall e cobertura do motor determinístico do Lucid, com as limitações do método declaradas. Números lidos do artefato de eval, não recalculados.",
 };
 
-/**
- * Versão de esquema que este build sabe renderizar — vem do contrato, não de uma constante
- * própria: a página compila contra a MESMA forma que o emissor produz. O gate abaixo pega o
- * caso de o JSON em disco estar atrasado em relação ao código.
- */
 export const SUPPORTED_SCHEMA_VERSION = EVAL_SCHEMA_VERSION;
 
 const artifact = rawReport as unknown as EvalArtifact;
 
-/**
- * O `as` é sustentado por teste, não por esperança: `test/eval/artifact-drift.test.ts`
- * garante que este JSON é byte-idêntico ao que `buildEvalArtifact()` produz, logo ele
- * satisfaz `EvalArtifact` por construção. Se divergir, a suíte quebra antes do deploy.
- */
+const comma = (s: string): string => s.replace(".", ",");
 
-/** `null` = não há medida. Nunca 0, nunca 100%. */
 function rate(value: number | null): string {
-  return value === null ? "—" : `${(value * 100).toFixed(1)}%`;
+  return value === null ? "—" : `${comma((value * 100).toFixed(1))}%`;
 }
 
 function decimal(value: number | null, places = 3): string {
-  return value === null ? "—" : value.toFixed(places);
+  return value === null ? "—" : comma(value.toFixed(places));
 }
 
 export default function AvaliacaoPage() {
@@ -43,328 +31,497 @@ export default function AvaliacaoPage() {
 
   const { stamp, method, detectors, services, criteriaCoverage } = artifact;
 
+  const noteNumber = (id: CaveatId): number | null => {
+    const i = method.caveats.findIndex((c) => c.id === id);
+    return i === -1 ? null : i + 1;
+  };
+
+  const temRegressao = detectors.some((d) => d.regressions.length > 0);
+
   return (
-    <main className="mx-auto max-w-[860px] px-6 py-16 md:px-10 md:py-24">
-      <header>
-        <Link
-          href="/"
-          className="u-label text-ink-3 transition-colors hover:text-ink-1"
-          aria-label="Voltar para o Lucid"
-        >
-          Lucid
-        </Link>
-        <h1 className="mt-6 font-serif text-[40px] leading-[1.1] tracking-[-0.01em] text-ink-0 md:text-[52px]">
-          Avaliação do motor
-        </h1>
-        <p className="mt-5 max-w-[62ch] text-[15px] leading-relaxed text-ink-1">
-          Precisão e recall do motor determinístico, medidos contra corpus rotulado à mão. Todos os números desta
-          página são lidos do artefato <code className="font-mono text-[13.5px] text-ink-0">eval/report.json</code> —
-          nada é recalculado aqui, e o que não foi medido aparece como não medido.
-        </p>
-        <p className="mt-3 max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          Nenhum dado desta página vem de modelo de linguagem. Para reproduzir:{" "}
-          <code className="font-mono text-[13px] text-ink-1">npm run eval</code>.
-        </p>
-      </header>
+    <main className="min-h-dvh bg-sheet">
+      <div className="mx-auto w-full max-w-300 px-6 pb-32 pt-14 md:px-12 md:pt-20 lg:px-16">
+        <header>
+          <nav aria-label="Trilha" className="flex items-center gap-2 text-[12.5px] text-ink-2">
+            <Link
+              href="/"
+              className="rounded-sm underline decoration-rule-3 decoration-1 underline-offset-4 transition-colors hover:text-ink-0 hover:decoration-ink-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink-2"
+            >
+              Lucid
+            </Link>
+            <span aria-hidden className="text-ink-dim">
+              /
+            </span>
+            <span className="text-ink-1">Avaliação do motor</span>
+          </nav>
 
-      <Section title="Identidade da rodada" id="identidade">
-        <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          A estampa identifica exatamente a rodada que produziu os números abaixo. Mesma estampa e mesmo corpus
-          devem produzir os mesmos valores — é o que permite conferir em vez de acreditar.
-        </p>
-        <dl className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-rule-1 bg-rule-1 sm:grid-cols-2">
-          <StampField label="Versão do Lucid" value={stamp.lucidVersion} />
-          <StampField label="Locale" value={stamp.localeId} />
-          <StampField label="Norma" value={stamp.standardVersion} span />
-          <StampField label="configHash" value={stamp.configHash} mono />
-          <StampField label="dataHash" value={stamp.dataHash} mono />
-          <StampField label="goldenHash" value={stamp.goldenHash} mono />
-          <StampField label="schemaVersion" value={String(artifact.schemaVersion)} mono />
-        </dl>
-        <p className="mt-4 max-w-[62ch] text-[13px] leading-relaxed text-ink-3">
-          <span className="text-ink-2">Limite conhecido:</span> nenhum destes hashes cobre o código-fonte dos
-          detectores — <code className="font-mono text-[12.5px]">lucidVersion</code> é declarada à mão. Duas rodadas
-          de código diferente sob a mesma versão têm estampa idêntica, e é por isso que o guard de atualidade do
-          artefato compara byte a byte em vez de confiar na estampa.
-        </p>
-      </Section>
+          <h1 className="mt-8 max-w-[26ch] text-balance font-serif text-[42px] leading-[1.06] tracking-[-0.022em] text-ink-0 md:text-[56px]">
+            Avaliação do motor determinístico
+          </h1>
 
-      <Section title="Limitações do método" id="metodo">
-        <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          Estes avisos vêm do artefato e vêm antes dos números de propósito: eles delimitam o que os números podem
-          significar. Pontuação por{" "}
-          <code className="font-mono text-[13px] text-ink-1">{method.scoring}</code>.
-        </p>
-        <ul className="mt-6 flex flex-col gap-px overflow-hidden rounded-lg border border-rule-2 bg-rule-1">
-          {method.caveats.map((caveat) => (
-            <li key={caveat.id} className="bg-surface-2 px-5 py-4">
-              <p className="u-sublabel text-ink-3">{caveat.id}</p>
-              <p className="mt-2 text-[14px] leading-relaxed text-ink-1">{caveat.text}</p>
-            </li>
-          ))}
-        </ul>
-      </Section>
+          <p className="mt-7 max-w-[58ch] text-pretty text-[16.5px] leading-[1.65] text-ink-1">
+            Precisão e recall medidos contra corpus rotulado à mão. Todo número desta página é lido do artefato{" "}
+            <Mono>eval/report.json</Mono> — nada é recalculado aqui, e o que não foi medido aparece como não medido.
+          </p>
 
-      <Section title="Cobertura" id="cobertura">
-        <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          O motor tem <Num>{criteriaCoverage.total}</Num> critérios. Só os da primeira camada têm precisão e recall
-          publicados; as outras duas aparecem aqui justamente para que o silêncio não seja lido como aprovação.
-        </p>
+          {/* Placa de aferição: a identidade da rodada, adjacente ao título porque
+              identifica o documento inteiro. Verbatim, monoespaçada, densa. */}
+          <section aria-labelledby="estampa" className="mt-12 border-y border-rule-2 py-5">
+            <h2 id="estampa" className="sr-only">
+              Identidade da rodada
+            </h2>
+            {/* Dois grupos: o que a rodada É, e o que a afere. Nomes de campo verbatim do
+                artefato — o leitor pode procurar cada um no JSON. */}
+            <dl className="flex flex-col gap-y-6">
+              <div className="flex flex-wrap items-baseline gap-x-12 gap-y-5">
+                <Plate term="lucidVersion" value={stamp.lucidVersion} />
+                <Plate term="localeId" value={stamp.localeId} />
+                <Plate term="standardVersion" value={stamp.standardVersion} />
+              </div>
+              <div className="flex flex-wrap items-baseline gap-x-12 gap-y-5">
+                <Plate term="configHash" value={stamp.configHash} />
+                <Plate term="dataHash" value={stamp.dataHash} />
+                <Plate term="goldenHash" value={stamp.goldenHash} />
+                <Plate term="schemaVersion" value={String(artifact.schemaVersion)} />
+              </div>
+            </dl>
+          </section>
 
-        <div className="mt-6 flex flex-col gap-3">
-          <CoverageLayer
-            title="Com métricas publicadas"
-            criteria={criteriaCoverage.measured}
-            note="Precisão e recall medidos contra golden que inclui casos negativos (oportunidade real de falso positivo)."
-            emphasis
-          />
-          <CoverageLayer
-            title="Rotulados, sem métrica agregada"
-            criteria={criteriaCoverage.goldenLabelledOnly}
-            note="Findings exatos fixados no golden integrado — regressão quebra o build, mas não há precisão/recall calculados."
-          />
-          <CoverageLayer
-            title="Apenas teste unitário"
-            criteria={criteriaCoverage.unitTestsOnly}
-            note="Teste escrito a partir da implementação: confirma o que o autor previu e não mede recall sobre texto que ninguém antecipou."
-          />
-        </div>
-      </Section>
+          <p className="mt-5 max-w-[70ch] text-[13.5px] leading-relaxed text-ink-2">
+            A estampa identifica a rodada que produziu estes números: mesma estampa e mesmo corpus devem produzir os
+            mesmos valores. Ela não cobre o código-fonte dos detectores — <Mono>lucidVersion</Mono> é declarada à mão —
+            e é por isso que o guard de atualidade do artefato compara byte a byte em vez de confiar nela.
+          </p>
 
-      <Section title="Por critério" id="criterios">
-        <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          <span className="text-ink-1">Casos</span> é o tamanho do corpus do critério e{" "}
-          <span className="text-ink-1">negativos</span> é quantos deles exigem que o detector fique calado. Um traço
-          significa ausência de medida, não zero.
-        </p>
+          <nav aria-label="Seções" className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2">
+            {[
+              ["cobertura", "Cobertura"],
+              ["metodo", "Método"],
+              ["criterios", "Critérios"],
+              ["limitacoes", "Limitações declaradas"],
+              ["silabacao", "Silabação"],
+            ].map(([id, label]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="rounded-sm text-[13px] text-ink-2 underline decoration-rule-2 decoration-1 underline-offset-4 transition-colors hover:text-ink-0 hover:decoration-ink-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink-2"
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        </header>
 
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-[13.5px]">
-            <thead>
-              <tr className="border-b border-rule-2">
-                <Th align="left">Critério</Th>
-                <Th align="left">Cobertura</Th>
-                <Th>Casos</Th>
-                <Th>Neg.</Th>
-                <Th>TP</Th>
-                <Th>FP</Th>
-                <Th>FN</Th>
-                <Th>Precisão</Th>
-                <Th>Recall</Th>
-                <Th>Limit.</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {detectors.map((d) => (
-                <tr key={d.criterion} className="border-b border-rule-1">
-                  <td className="py-3 pr-4 align-top">
-                    <span className="text-ink-0">{metaFor(d.criterion).label}</span>
-                    <span className="mt-0.5 block font-mono text-[11.5px] text-ink-3">{d.criterion}</span>
-                  </td>
-                  <td className="py-3 pr-4 align-top text-ink-2">{coverageLabel(d.coverage)}</td>
-                  <Td>{d.summary.cases}</Td>
-                  <Td>{d.summary.negatives}</Td>
-                  <Td>{d.summary.tp}</Td>
-                  <Td dim={d.summary.fp === 0}>{d.summary.fp}</Td>
-                  <Td dim={d.summary.fn === 0}>{d.summary.fn}</Td>
-                  <Td>{rate(d.summary.precision)}</Td>
-                  <Td>{rate(d.summary.recall)}</Td>
-                  <Td>{d.summary.limitations}</Td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* ── Cobertura ────────────────────────────────────────────────────── */}
+        <Section id="cobertura" label="Cobertura">
+          <p className="max-w-[56ch] text-pretty text-[15px] leading-[1.6] text-ink-1">
+            O motor tem <Tabular>{criteriaCoverage.total}</Tabular> critérios em três camadas de evidência. Só a
+            primeira tem precisão e recall publicados; as outras aparecem para que o silêncio não seja lido como
+            aprovação.
+          </p>
 
-        <p className="mt-4 text-[13px] leading-relaxed text-ink-3">
-          Cobertura <span className="text-ink-2">curada</span>: o critério compara contra lista curada, então a
-          contagem é piso e o recall é circular (ver{" "}
-          <code className="font-mono text-[12.5px]">circular_recall_curated</code> acima). Cobertura{" "}
-          <span className="text-ink-2">produtiva</span>: a regra casa qualquer ocorrência do padrão.
-        </p>
-
-        {detectors.some((d) => d.regressions.length > 0) && (
-          <div className="mt-8 rounded-lg border border-human-line bg-human-weak px-5 py-4">
-            <p className="u-sublabel text-human">Regressões não explicadas</p>
-            <p className="mt-2 max-w-[62ch] text-[13.5px] leading-relaxed text-ink-1">
-              Estes casos estão marcados como corretos no corpus e falharam. Não há motivo declarado — e a página não
-              inventa nenhum. Em build verde esta seção não existe.
-            </p>
-            <ul className="mt-4 flex flex-col gap-3">
-              {detectors.flatMap((d) =>
-                d.regressions.map((reg) => (
-                  <li key={`${d.criterion}:${reg.texto}`}>
-                    <p className="font-serif text-[15px] leading-snug text-ink-0">“{reg.texto}”</p>
-                    <p className="mt-1 font-mono text-[12px] text-ink-2">
-                      {metaFor(d.criterion).label} · esperado <Num>{reg.expectedCount}</Num> · obtido{" "}
-                      <Num>{reg.actualCount}</Num>
-                    </p>
-                  </li>
-                )),
-              )}
-            </ul>
+          <div className="mt-10 flex flex-col gap-y-10">
+            <CoverageColumn
+              n={criteriaCoverage.measured.length}
+              title="Com métricas publicadas"
+              note="Precisão e recall contra golden que inclui casos negativos — há oportunidade real de falso positivo."
+              criteria={criteriaCoverage.measured}
+              strong
+            />
+            <CoverageColumn
+              n={criteriaCoverage.goldenLabelledOnly.length}
+              title="Rotulados, sem métrica"
+              note="Findings exatos fixados no golden integrado: regressão quebra o build, mas não há taxa calculada."
+              criteria={criteriaCoverage.goldenLabelledOnly}
+            />
+            <CoverageColumn
+              n={criteriaCoverage.unitTestsOnly.length}
+              title="Apenas teste unitário"
+              note="Escrito a partir da implementação: confirma o previsto e não mede recall sobre texto não antecipado."
+              criteria={criteriaCoverage.unitTestsOnly}
+            />
           </div>
-        )}
+        </Section>
 
-        <div className="mt-10 flex flex-col gap-3">
-          {detectors.map((d) => (
-            <details key={d.criterion} className="group rounded-lg border border-rule-1 bg-sheet px-5 py-4">
-              <summary className="cursor-pointer list-none text-[14px] text-ink-1 marker:content-none">
-                <span className="text-ink-0">{metaFor(d.criterion).label}</span>
-                <span className="text-ink-3">
-                  {" — "}
-                  {d.knownLimitations.length === 1
-                    ? "1 limitação declarada"
-                    : `${d.knownLimitations.length} limitações declaradas`}
+        {/* ── Método: antes dos números, e referenciado de dentro deles ────── */}
+        <Section id="metodo" label="Método">
+          <p className="max-w-[56ch] text-pretty text-[15px] leading-[1.6] text-ink-1">
+            Estes limites vêm do artefato e vêm antes dos números porque delimitam o que os números podem significar. A
+            tabela remete a eles pelos índices. Pontuação por <Mono>{method.scoring}</Mono>.
+          </p>
+
+          <ol className="mt-9 flex flex-col">
+            {method.caveats.map((caveat, i) => (
+              <li
+                key={caveat.id}
+                id={`nota-${caveat.id}`}
+                className="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-4 border-t border-rule-1 py-5 first:border-t-0 first:pt-0 target:bg-surface-2"
+              >
+                <span aria-hidden className="pt-px font-mono text-[13px] tabular-nums text-ink-2">
+                  {i + 1}
                 </span>
-                <span className="ml-2 font-mono text-[11.5px] text-ink-dim group-open:hidden">abrir</span>
-              </summary>
-              <ul className="mt-4 flex flex-col gap-4 border-t border-rule-1 pt-4">
-                {d.knownLimitations.map((lim) => (
-                  <li key={lim.texto}>
-                    <p className="font-serif text-[15px] leading-snug text-ink-0">“{lim.texto}”</p>
-                    <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-2">{lim.motivo}</p>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-4 text-[12.5px] leading-relaxed text-ink-3">
-                Estas entradas contam contra a precisão e o recall da tabela — não são exceções removidas da conta.
+                <div>
+                  <p className="max-w-[68ch] text-pretty text-[14.5px] leading-[1.62] text-ink-1">{caveat.text}</p>
+                  {/* Id VERBATIM, minúsculo: é o dado do artefato, não um rótulo nosso. */}
+                  <p className="mt-2.5 font-mono text-[11.5px] tracking-tight text-ink-2">{caveat.id}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        {/* ── Critérios ────────────────────────────────────────────────────── */}
+        <Section id="criterios" label="Critérios">
+          {temRegressao && (
+            <div className="mb-10 border-l-2 border-human pl-5">
+              <h3 className="u-sublabel text-human">Regressões não explicadas</h3>
+              <p className="mt-2.5 max-w-[62ch] text-[14px] leading-relaxed text-ink-1">
+                Casos marcados como corretos no corpus que falharam. Não há motivo declarado — e esta página não
+                inventa nenhum. Em build verde esta seção não existe.
               </p>
-            </details>
-          ))}
-        </div>
-      </Section>
+              <ul className="mt-5 flex flex-col gap-4">
+                {detectors.flatMap((d) =>
+                  d.regressions.map((reg) => (
+                    <li key={`${d.criterion}:${reg.texto}`}>
+                      <p className="max-w-[62ch] font-serif text-[16px] leading-snug text-ink-0">
+                        <Quoted>{reg.texto}</Quoted>
+                      </p>
+                      <p className="mt-1.5 font-mono text-[12px] text-ink-2">
+                        {d.criterion} · esperado <Tabular>{reg.expectedCount}</Tabular> · obtido{" "}
+                        <Tabular>{reg.actualCount}</Tabular>
+                      </p>
+                    </li>
+                  )),
+                )}
+              </ul>
+            </div>
+          )}
 
-      <Section title="Silabação" id="silabacao">
-        <p className="max-w-[62ch] text-[14px] leading-relaxed text-ink-2">
-          A contagem de sílabas alimenta a leiturabilidade (Flesch-PT). É serviço interno, não critério da norma, e
-          por isso é medida por acerto exato em vez de precisão e recall.
-        </p>
-        <dl className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-rule-1 bg-rule-1 sm:grid-cols-3">
-          <StampField label="Acerto exato" value={rate(services.syllables.exactRate)} />
-          <StampField label="Erro absoluto médio" value={decimal(services.syllables.meanAbsoluteError)} mono />
-          <StampField label="Palavras no corpus" value={String(services.syllables.words)} mono />
-        </dl>
-        <p className="mt-4 text-[13px] leading-relaxed text-ink-3">
-          {services.syllables.limitations === 1
-            ? "1 palavra do corpus está declarada como limitação conhecida e conta contra o acerto."
-            : `${services.syllables.limitations} palavras do corpus estão declaradas como limitações conhecidas e contam contra o acerto.`}
-        </p>
-      </Section>
+          <div className="-mx-6 overflow-x-auto px-6 md:mx-0 md:px-0">
+            <table className="w-full min-w-[46rem] border-collapse text-left">
+              <caption className="sr-only">
+                Precisão, recall e contagens por critério medido. Um travessão indica ausência de medida.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" rowSpan={2} className="u-sublabel w-[26%] pb-2.5 pr-6 align-bottom text-ink-2">
+                    Critério
+                  </th>
+                  <th scope="col" rowSpan={2} className="u-sublabel pb-2.5 pr-6 align-bottom text-ink-2">
+                    Cobertura
+                    <NoteRef n={noteNumber("circular_recall_curated")} id="circular_recall_curated" />
+                  </th>
+                  <ColGroupHead span={2}>
+                    Corpus
+                    <NoteRef n={noteNumber("count_scoring")} id="count_scoring" />
+                  </ColGroupHead>
+                  <ColGroupHead span={3}>Contagens</ColGroupHead>
+                  <ColGroupHead span={2}>Taxas</ColGroupHead>
+                  <th scope="col" rowSpan={2} className="u-sublabel pb-2.5 pl-6 align-bottom text-right text-ink-2">
+                    Limitações
+                    <NoteRef n={noteNumber("known_limitations_counted")} id="known_limitations_counted" />
+                  </th>
+                </tr>
+                <tr className="border-b border-rule-3">
+                  <SubHead>Casos</SubHead>
+                  <SubHead>Negativos</SubHead>
+                  <SubHead>TP</SubHead>
+                  <SubHead>FP</SubHead>
+                  <SubHead>FN</SubHead>
+                  <SubHead>Precisão</SubHead>
+                  <SubHead>Recall</SubHead>
+                </tr>
+              </thead>
+              <tbody>
+                {detectors.map((d) => (
+                  <tr key={d.criterion} className="border-b border-rule-1">
+                    <th scope="row" className="py-5 pr-6 align-baseline font-normal">
+                      <span className="block text-[15px] leading-tight text-ink-0">{metaFor(d.criterion).label}</span>
+                      <span className="mt-1.5 block font-mono text-[11.5px] tracking-tight text-ink-2">
+                        {d.criterion}
+                      </span>
+                    </th>
+                    <td className="py-5 pr-6 align-baseline text-[14px] text-ink-1">{coverageLabel(d.coverage)}</td>
+                    <Cell>{d.summary.cases}</Cell>
+                    <Cell>{d.summary.negatives}</Cell>
+                    <Cell>{d.summary.tp}</Cell>
+                    <Cell muted={d.summary.fp === 0}>{d.summary.fp}</Cell>
+                    <Cell muted={d.summary.fn === 0}>{d.summary.fn}</Cell>
+                    <Reading>{rate(d.summary.precision)}</Reading>
+                    <Reading>{rate(d.summary.recall)}</Reading>
+                    <Cell pad>{d.summary.limitations}</Cell>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      <footer className="mt-20 border-t border-rule-1 pt-8">
-        <p className="max-w-[62ch] text-[13.5px] leading-relaxed text-ink-2">
-          Esta página mede o motor; não atesta a clareza de nenhum texto. Números altos aqui não são aprovação — são
-          o piso do que a ferramenta consegue afirmar sobre si mesma.
-        </p>
-        <p className="mt-3 max-w-[62ch] text-[13px] leading-relaxed text-ink-3">
-          O artefato é regenerado por <code className="font-mono text-[12.5px]">npm run eval</code> e um teste da
-          suíte falha se ele ficar desatualizado em relação ao código ou ao corpus.
-        </p>
-      </footer>
+          <p className="mt-6 max-w-[70ch] text-[13.5px] leading-relaxed text-ink-2">
+            <span className="text-ink-1">Casos</span> é o tamanho do corpus do critério;{" "}
+            <span className="text-ink-1">negativos</span> é quantos deles exigem que o detector fique calado. Cobertura{" "}
+            <span className="text-ink-1">curada</span> compara contra lista curada, então a contagem é piso; cobertura{" "}
+            <span className="text-ink-1">produtiva</span> casa qualquer ocorrência do padrão.
+          </p>
+        </Section>
+
+        {/* ── Limitações declaradas: visíveis, não colapsadas ──────────────── */}
+        <Section id="limitacoes" label="Limitações declaradas">
+          <p className="max-w-[56ch] text-pretty text-[15px] leading-[1.6] text-ink-1">
+            Cada falha conhecida do corpus, com o motivo escrito na curadoria. Todas contam contra a precisão e o
+            recall da tabela — nenhuma é exceção removida da conta.
+          </p>
+
+          <div className="mt-10 flex flex-col gap-14">
+            {detectors.map((d) => (
+              <section key={d.criterion} aria-labelledby={`lim-${d.criterion}`}>
+                <h3 id={`lim-${d.criterion}`} className="flex items-baseline gap-3">
+                  <span className="text-[15px] text-ink-0">{metaFor(d.criterion).label}</span>
+                  <span className="font-mono text-[11.5px] tracking-tight text-ink-2">{d.criterion}</span>
+                </h3>
+                <dl className="mt-5 flex flex-col">
+                  {d.knownLimitations.map((lim) => (
+                    <div key={lim.texto} className="border-t border-rule-1 py-5 first:border-t-0 first:pt-0">
+                      <dt className="max-w-[62ch] font-serif text-[16.5px] leading-snug text-ink-0">
+                        <Quoted>{lim.texto}</Quoted>
+                      </dt>
+                      <dd className="mt-2.5 max-w-[70ch] text-pretty text-[14px] leading-[1.62] text-ink-1">
+                        {lim.motivo}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── Silabação ────────────────────────────────────────────────────── */}
+        <Section id="silabacao" label="Silabação">
+          <p className="max-w-[56ch] text-pretty text-[15px] leading-[1.6] text-ink-1">
+            A contagem de sílabas alimenta a leiturabilidade (Flesch-PT). É serviço interno, não critério da norma, e
+            por isso é medida por acerto exato em vez de precisão e recall.
+          </p>
+
+          <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-3">
+            <ServiceReading term="Acerto exato" value={rate(services.syllables.exactRate)} />
+            <ServiceReading term="Erro absoluto médio" value={decimal(services.syllables.meanAbsoluteError)} />
+            <ServiceReading term="Palavras no corpus" value={String(services.syllables.words)} />
+          </dl>
+
+          <p className="mt-8 max-w-[62ch] text-[13.5px] leading-relaxed text-ink-2">
+            <Tabular>{services.syllables.limitations}</Tabular>{" "}
+            {services.syllables.limitations === 1 ? "palavra do corpus está" : "palavras do corpus estão"} declaradas
+            como limitação conhecida e {services.syllables.limitations === 1 ? "conta" : "contam"} contra o acerto.
+          </p>
+        </Section>
+
+        {/* ── Colofão ──────────────────────────────────────────────────────── */}
+        <footer className="mt-28 border-t border-rule-2 pt-10">
+          <dl className="grid grid-cols-1 gap-x-10 gap-y-7 sm:grid-cols-[10rem_minmax(0,1fr)]">
+            <dt className="u-sublabel pt-1 text-ink-3">O que mede</dt>
+            <dd className="max-w-[62ch] text-[14px] leading-relaxed text-ink-1">
+              O motor. Não atesta a clareza de nenhum texto: número alto aqui não é aprovação, é o piso do que a
+              ferramenta consegue afirmar sobre si mesma.
+            </dd>
+
+            <dt className="u-sublabel pt-1 text-ink-3">Reprodução</dt>
+            <dd className="max-w-[62ch] text-[14px] leading-relaxed text-ink-1">
+              <Mono>npm run eval</Mono> regenera o artefato. Um teste da suíte falha se ele ficar desatualizado em
+              relação ao código ou ao corpus.
+            </dd>
+
+            <dt className="u-sublabel pt-1 text-ink-3">Procedência</dt>
+            <dd className="max-w-[62ch] text-[14px] leading-relaxed text-ink-1">
+              Nenhum dado desta página vem de modelo de linguagem: a medição é determinística e offline.
+            </dd>
+          </dl>
+        </footer>
+      </div>
     </main>
   );
 }
 
-function Incompatible({ found }: { found: number }) {
-  return (
-    <main className="mx-auto max-w-[640px] px-6 py-24">
-      <p className="u-label text-ink-3">Avaliação do motor</p>
-      <h1 className="mt-5 font-serif text-[32px] leading-tight text-ink-0">Artefato incompatível</h1>
-      <p className="mt-5 text-[15px] leading-relaxed text-ink-1">
-        Esta página renderiza o esquema <Num>{SUPPORTED_SCHEMA_VERSION}</Num> do artefato de avaliação, e{" "}
-        <code className="font-mono text-[13.5px] text-ink-0">eval/report.json</code> declara{" "}
-        <Num>{found}</Num>.
-      </p>
-      <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
-        Nada é exibido a partir de um esquema que a página não conhece: renderizar parcialmente arriscaria mostrar
-        número fora do significado que ele tem. Atualize a página para o esquema novo — ou regenere o artefato, se o
-        arquivo é que está atrasado.
-      </p>
-      <Link href="/" className="u-label mt-8 inline-block text-ink-3 transition-colors hover:text-ink-1">
-        Voltar ao Lucid
-      </Link>
-    </main>
-  );
-}
+/* ───────────────────────────── componentes ─────────────────────────────
+ * Escala tipográfica: 11,5 (mono meta) · 13,5 (nota) · 14/14,5 (secundário) ·
+ * 15/16,5 (leitura) · 20 (número de serviço) · 32 (numeral de cobertura) · 42/56 (título).
+ * Ritmo em base 8: 8 / 16 / 24 / 40 / 56 / 96 / 112.
+ */
 
-function Section({ title, id, children }: { title: string; id: string; children: React.ReactNode }) {
+/**
+ * Seção com grid editorial: trilha de rótulo à esquerda, conteúdo à direita. O alinhamento
+ * vertical dos rótulos é o que agrupa a página — por isso não há régua de largura total
+ * entre seções, só branco.
+ */
+function Section({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
-    <section id={id} className="mt-16 border-t border-rule-1 pt-10 md:mt-20">
-      <h2 className="u-label text-ink-3">{title}</h2>
-      <div className="mt-5">{children}</div>
+    <section
+      id={id}
+      className="mt-24 grid scroll-mt-10 grid-cols-1 gap-x-10 gap-y-5 md:mt-32 md:grid-cols-[10rem_minmax(0,1fr)]"
+    >
+      <h2 className="u-sublabel pt-1.5 text-ink-2">{label}</h2>
+      <div>{children}</div>
     </section>
   );
 }
 
-function StampField({
-  label,
-  value,
-  mono = false,
-  span = false,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-  span?: boolean;
-}) {
+/** Par da placa de aferição. O termo é o nome do campo no artefato — nunca em caixa alta. */
+function Plate({ term, value }: { term: string; value: string }) {
   return (
-    <div className={`bg-sheet px-5 py-4 ${span ? "sm:col-span-2" : ""}`}>
-      <dt className="u-sublabel text-ink-3">{label}</dt>
-      <dd className={`mt-1.5 text-[14px] text-ink-0 ${mono ? "font-mono tabular-nums" : ""}`}>{value}</dd>
+    <div>
+      <dt className="font-mono text-[11px] tracking-tight text-ink-3">{term}</dt>
+      <dd className="mt-1.5 font-mono text-[13.5px] tabular-nums tracking-tight text-ink-0">{value}</dd>
     </div>
   );
 }
 
-function CoverageLayer({
+function CoverageColumn({
+  n,
   title,
-  criteria,
   note,
-  emphasis = false,
+  criteria,
+  strong = false,
 }: {
+  n: number;
   title: string;
-  criteria: readonly string[];
   note: string;
-  emphasis?: boolean;
+  criteria: readonly string[];
+  strong?: boolean;
 }) {
   return (
     <div
-      className={`rounded-lg border px-5 py-4 ${emphasis ? "border-rule-2 bg-sheet" : "border-rule-1 bg-transparent"}`}
+      className={`grid grid-cols-1 gap-x-8 gap-y-4 border-t pt-6 sm:grid-cols-[4.5rem_minmax(0,1fr)] ${
+        strong ? "border-ink-2" : "border-rule-2"
+      }`}
     >
-      <div className="flex items-baseline justify-between gap-4">
-        <h3 className={`text-[14px] ${emphasis ? "text-ink-0" : "text-ink-1"}`}>{title}</h3>
-        <span className="font-mono text-[12px] tabular-nums text-ink-3">{criteria.length}</span>
+      <p className={`font-serif text-[34px] leading-none tabular-nums ${strong ? "text-ink-0" : "text-ink-2"}`}>{n}</p>
+      <div>
+        <h3 className={`text-[15px] leading-snug ${strong ? "text-ink-0" : "text-ink-1"}`}>{title}</h3>
+        <p className="mt-2 max-w-[64ch] text-[13.5px] leading-relaxed text-ink-2">{note}</p>
+        <ul className="mt-5 flex flex-wrap gap-x-9 gap-y-3.5">
+          {criteria.map((criterion) => (
+            <li key={criterion}>
+              <span className="block text-[13.5px] leading-snug text-ink-1">{metaFor(criterion).label}</span>
+              <span className="mt-0.5 block font-mono text-[10.5px] tracking-tight text-ink-2">{criterion}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <p className="mt-1.5 max-w-[58ch] text-[13px] leading-relaxed text-ink-3">{note}</p>
-      <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-        {criteria.map((criterion) => (
-          <li key={criterion} className={`text-[13px] ${emphasis ? "text-ink-1" : "text-ink-2"}`}>
-            {metaFor(criterion).label}
-            <span className="ml-1.5 font-mono text-[11px] text-ink-dim">{criterion}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
 
-function Th({ children, align = "right" }: { children: React.ReactNode; align?: "left" | "right" }) {
+/** Referência à nota de método, âncora HTML pura (zero JS). */
+function NoteRef({ n, id }: { n: number | null; id: CaveatId }) {
+  if (n === null) return null;
+  return (
+    <sup className="ml-1 font-mono text-[10px] font-normal tracking-normal">
+      <a
+        href={`#nota-${id}`}
+        className="rounded-sm text-ink-2 underline decoration-dotted decoration-1 underline-offset-2 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-2"
+      >
+        <span className="sr-only">Nota de método </span>
+        {n}
+      </a>
+    </sup>
+  );
+}
+
+function ColGroupHead({ span, children }: { span: number; children: React.ReactNode }) {
   return (
     <th
-      scope="col"
-      className={`u-sublabel pb-2.5 text-ink-3 ${align === "left" ? "pr-4 text-left" : "pl-3 text-right"}`}
+      scope="colgroup"
+      colSpan={span}
+      className="u-sublabel border-b border-rule-2 px-6 pb-1.5 text-center align-bottom text-ink-2"
     >
       {children}
     </th>
   );
 }
 
-function Td({ children, dim = false }: { children: React.ReactNode; dim?: boolean }) {
+function SubHead({ children }: { children: React.ReactNode }) {
   return (
-    <td className={`py-3 pl-3 text-right align-top tabular-nums ${dim ? "text-ink-3" : "text-ink-0"}`}>{children}</td>
+    <th scope="col" className="pb-2 pl-6 text-right align-bottom text-[11.5px] font-medium text-ink-2">
+      {children}
+    </th>
   );
 }
 
-function Num({ children }: { children: React.ReactNode }) {
-  return <span className="tabular-nums text-ink-0">{children}</span>;
+/** Contagem bruta: tabular, discreta. Zero em `ink-3` para o não-zero ficar localizável. */
+function Cell({ children, muted = false, pad = false }: { children: React.ReactNode; muted?: boolean; pad?: boolean }) {
+  return (
+    <td
+      className={`py-5 text-right align-baseline text-[14px] tabular-nums ${pad ? "pl-6" : "pl-6"} ${
+        muted ? "text-ink-3" : "text-ink-1"
+      }`}
+    >
+      {children}
+    </td>
+  );
+}
+
+/** A LEITURA do instrumento: maior elemento da linha, porque é o que a página mede. */
+function Reading({ children }: { children: React.ReactNode }) {
+  return (
+    <td className="py-5 pl-6 text-right align-baseline font-serif text-[19px] tabular-nums text-ink-0">{children}</td>
+  );
+}
+
+function ServiceReading({ term, value }: { term: string; value: string }) {
+  return (
+    <div className="border-t border-rule-2 pt-5">
+      <dt className="u-sublabel text-ink-3">{term}</dt>
+      <dd className="mt-2.5 font-serif text-[26px] leading-none tabular-nums text-ink-0">{value}</dd>
+    </div>
+  );
+}
+
+function Mono({ children }: { children: React.ReactNode }) {
+  return <code className="font-mono text-[0.92em] tracking-tight text-ink-0">{children}</code>;
+}
+
+function Tabular({ children }: { children: React.ReactNode }) {
+  return <span className="tabular-nums">{children}</span>;
+}
+
+/** Aspas curvas fora da caixa de texto, à moda editorial. */
+function Quoted({ children }: { children: string }) {
+  return (
+    <>
+      <span aria-hidden className="text-ink-dim">
+        “
+      </span>
+      {children}
+      <span aria-hidden className="text-ink-dim">
+        ”
+      </span>
+    </>
+  );
+}
+
+function Incompatible({ found }: { found: number }) {
+  return (
+    <main className="grid min-h-dvh place-items-center bg-sheet px-6">
+      <div className="max-w-[46ch]">
+        <p className="u-sublabel text-ink-3">Avaliação do motor</p>
+        <h1 className="mt-5 font-serif text-[34px] leading-tight tracking-[-0.02em] text-ink-0">
+          Artefato incompatível
+        </h1>
+        <p className="mt-6 text-[15.5px] leading-[1.65] text-ink-1">
+          Esta página renderiza o esquema <Tabular>{SUPPORTED_SCHEMA_VERSION}</Tabular> do artefato de avaliação, e{" "}
+          <Mono>eval/report.json</Mono> declara <Tabular>{found}</Tabular>.
+        </p>
+        <p className="mt-4 text-[14px] leading-relaxed text-ink-2">
+          Nada é exibido a partir de um esquema que a página não conhece: renderizar parcialmente arriscaria mostrar
+          número fora do significado que ele tem. Atualize a página para o esquema novo — ou regenere o artefato, se o
+          arquivo é que está atrasado.
+        </p>
+        <Link
+          href="/"
+          className="mt-9 inline-block rounded-sm text-[13px] text-ink-2 underline decoration-rule-3 decoration-1 underline-offset-4 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ink-2"
+        >
+          Voltar ao Lucid
+        </Link>
+      </div>
+    </main>
+  );
 }

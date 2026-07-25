@@ -4,7 +4,6 @@ import { GOLDEN_SILABAS } from "./silabas-golden";
 import { evaluateSyllables, formatRate } from "./compute";
 
 describe("avaliação de countSyllables — golden set", () => {
-  // O MESMO cálculo que alimenta o artefato publicado (./compute).
   const { results: resultados, summary } = evaluateSyllables();
   const taxaDeAcerto = summary.exactRate;
   const erroAbsolutoMedio = summary.meanAbsoluteError;

@@ -7,7 +7,6 @@ import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { formatRate, evaluateNominalization } from "./compute";
 
 describe("avaliação de nominalizationPass — golden set", () => {
-  // O MESMO cálculo que alimenta o artefato publicado (./compute).
   const { results: resultados, summary } = evaluateNominalization();
 
   const sugestoesEmitidas = resultados.filter((r) => r.sugestaoEmitida);

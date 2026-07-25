@@ -121,7 +121,6 @@ describe("segmentSentences — unidades de medida encerram frase (A-2)", () => {
   });
 
   it("a fusão corrompia as métricas por frase — agora não mais", () => {
-    // wordCount só existe depois de attachTokens, então a prova é sobre o documento montado.
     const doc = buildDocument("A sessão abre às 9h. O público deve chegar antes.");
     expect(doc.sentences).toHaveLength(2);
     expect(doc.sentences.map((s) => s.wordCount)).toEqual([5, 5]);

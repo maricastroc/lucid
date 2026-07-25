@@ -63,7 +63,6 @@ export function describeReadability(reading: ReadabilityReading): ReadabilityDis
       return {
         measured: true,
         value,
-        // `band` nunca é null dentro do intervalo; o fallback existe só para o tipo.
         qualifier: reading.band
           ? `faixa ${reading.band.label} (${reading.band.min}–${reading.band.max})`
           : `dentro do intervalo de referência (${RANGE})`,

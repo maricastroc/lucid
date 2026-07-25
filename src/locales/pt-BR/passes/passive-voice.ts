@@ -275,24 +275,11 @@ export const passiveVoicePass: Pass = {
         const agentMatch = findAgentAfter(tokens, participleMatch.index + 1);
         const hasAgent = agentMatch !== null;
 
-        // "ser obrigado a" (A-6): sem agente é construção DEÔNTICA — atribui um
-        // dever, não narra uma ação praticada — e quem a cobre é
-        // `leitor_terceira_pessoa`; marcá-la também como passiva produzia dois
-        // findings sobre o mesmo trecho, com enquadramentos que se contradizem
-        // ("diga quem age" vs. "fale com o leitor"). COM agente explícito, porém,
-        // é passiva legítima do verbo "obrigar" ("foi obrigada pelo tribunal"):
-        // aí quem obrigou está dito, o critério tem o que apontar, e suprimir
-        // seria falso negativo. O agente é exatamente a régua que separa as duas
-        // leituras — a mesma que o critério já usa para tudo o mais.
         if (DEONTIC_PARTICIPLES.has(participle.lower) && !hasAgent) continue;
 
         const agentExtent = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : null;
         const agentTruncated = agentExtent?.truncated ?? false;
 
-        // Confiança/eventividade (A-1): a presença de agente é o sinal mais forte;
-        // sem agente, o tempo da âncora separa a passiva eventiva plena do presente
-        // ambíguo (passiva de ação vs. predicativo de estado). O presente NÃO é
-        // suprimido — só apontado com confiança rebaixada e justificativa honesta.
         const eventiveness: Eventiveness = hasAgent
           ? "agent"
           : PRESENT_INDICATIVE_SER.has(anchor.lower)
