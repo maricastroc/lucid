@@ -10,6 +10,7 @@
  * Camada 1 estendida à própria medição dela.
  */
 import { DEFAULT_CONFIG, hashConfig } from "../../src/lucid/core/config";
+import { stableHash } from "../../src/lucid/core/hash";
 import { analyze, CRITERION_IDS, localePtBR } from "../../src/lucid";
 import { createDataView, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
@@ -307,6 +308,38 @@ export interface EvalStamp {
   configHash: string;
   /** Hash sobre TODOS os datasets do registro — o estado completo de dado da rodada. */
   dataHash: string;
+  /**
+   * Hash sobre os GOLDENS. Sem ele a estampa é incompleta: a medição depende do corpus
+   * tanto quanto do motor, e declarar uma limitação nova muda o recall publicado sem
+   * mexer em config nem em dado. Dois artefatos com números diferentes e a mesma estampa
+   * seriam indistinguíveis — foi exatamente o que aconteceu ao declarar A12a/A12d.
+   */
+  goldenHash: string;
+}
+
+/** Hash do corpus de avaliação — muda quando qualquer entrada de golden muda. */
+export function hashGoldens(
+  goldens: {
+    jargon: readonly unknown[];
+    nominalization: readonly unknown[];
+    passiveVoice: readonly unknown[];
+    syllables: readonly unknown[];
+    integrated: readonly unknown[];
+  } = {
+    jargon: GOLDEN_JARGAO,
+    nominalization: GOLDEN_NOMINALIZACAO,
+    passiveVoice: GOLDEN_VOZ_PASSIVA,
+    syllables: GOLDEN_SILABAS,
+    integrated: GOLDEN_INTEGRADO,
+  },
+): string {
+  return stableHash([
+    ["jargon", goldens.jargon],
+    ["nominalization", goldens.nominalization],
+    ["passive_voice", goldens.passiveVoice],
+    ["syllables", goldens.syllables],
+    ["integrated", goldens.integrated],
+  ]);
 }
 
 export function evalStamp(): EvalStamp {
@@ -318,6 +351,7 @@ export function evalStamp(): EvalStamp {
     standardVersion: localePtBR.standardVersion,
     configHash: hashConfig(DEFAULT_CONFIG),
     dataHash: localePtBR.data.dataHashFor(allDatasets),
+    goldenHash: hashGoldens(),
   };
 }
 

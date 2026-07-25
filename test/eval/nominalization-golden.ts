@@ -68,4 +68,27 @@ export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
     estado: "limitacao_conhecida",
     motivo: "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)",
   },
+
+  // A12a e A12d — furos de recall que NÃO são recorte deliberado como os de cima.
+  // Declarados para contar contra o recall publicado em vez de ficarem invisíveis.
+  {
+    texto: "A comissão vai fazer a analise do pedido.",
+    expectedCount: 1,
+    estado: "limitacao_conhecida",
+    motivo:
+      "A12a — o léxico de nominalizações casa por forma EXATA, então 'analise' sem acento não casa 'análise'. " +
+      "Agravante próprio deste critério: 'analise' É forma verbal legítima (imperativo e subjuntivo de 'analisar'), " +
+      "então normalizar diacrítico aqui esbarra num homógrafo real — hoje 'Analise o documento' e 'Caso o setor " +
+      "analise o pedido' corretamente não disparam, e um fix ingênuo pôr isso em risco",
+  },
+  {
+    texto: "O setor deve fazer uma nova avaliação da proposta.",
+    expectedCount: 1,
+    estado: "limitacao_conhecida",
+    motivo:
+      "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2 (ADR-007), " +
+      "então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo " +
+      "fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela " +
+      "aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar",
+  },
 ];

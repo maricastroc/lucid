@@ -4,7 +4,8 @@
     "localeId": "pt-BR",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
     "configHash": "ebb6dee9",
-    "dataHash": "91c09d7d"
+    "dataHash": "91c09d7d",
+    "goldenHash": "e9fadb45"
   },
   "method": {
     "scoring": "count-per-passage",
@@ -21,14 +22,14 @@
       "criterion": "jargon",
       "coverage": "curated",
       "summary": {
-        "cases": 39,
+        "cases": 40,
         "negatives": 12,
-        "limitations": 2,
+        "limitations": 3,
         "tp": 26,
         "fp": 1,
-        "fn": 1,
+        "fn": 2,
         "precision": 0.963,
-        "recall": 0.963
+        "recall": 0.9286
       },
       "failures": [
         {
@@ -42,6 +43,12 @@
           "expectedCount": 1,
           "actualCount": 0,
           "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "O pedido será analisado na hipotese de indeferimento.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
         }
       ],
       "knownLimitations": [
@@ -52,6 +59,10 @@
         {
           "texto": "O benefício será concedido a quem fizer jus a ele.",
           "motivo": "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação"
+        },
+        {
+          "texto": "O pedido será analisado na hipotese de indeferimento.",
+          "motivo": "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o glossário curado como autoridade única de runtime)"
         }
       ]
     },
@@ -59,14 +70,14 @@
       "criterion": "nominalization",
       "coverage": "curated",
       "summary": {
-        "cases": 45,
+        "cases": 47,
         "negatives": 11,
-        "limitations": 2,
+        "limitations": 4,
         "tp": 33,
         "fp": 0,
-        "fn": 2,
+        "fn": 4,
         "precision": 1,
-        "recall": 0.9429
+        "recall": 0.8919
       },
       "failures": [
         {
@@ -80,6 +91,18 @@
           "expectedCount": 1,
           "actualCount": 0,
           "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "A comissão vai fazer a analise do pedido.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
+        },
+        {
+          "texto": "O setor deve fazer uma nova avaliação da proposta.",
+          "expectedCount": 1,
+          "actualCount": 0,
+          "estado": "limitacao_conhecida"
         }
       ],
       "knownLimitations": [
@@ -90,6 +113,14 @@
         {
           "texto": "É preciso dar continuidade ao processo.",
           "motivo": "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)"
+        },
+        {
+          "texto": "A comissão vai fazer a analise do pedido.",
+          "motivo": "A12a — o léxico de nominalizações casa por forma EXATA, então 'analise' sem acento não casa 'análise'. Agravante próprio deste critério: 'analise' É forma verbal legítima (imperativo e subjuntivo de 'analisar'), então normalizar diacrítico aqui esbarra num homógrafo real — hoje 'Analise o documento' e 'Caso o setor analise o pedido' corretamente não disparam, e um fix ingênuo pôr isso em risco"
+        },
+        {
+          "texto": "O setor deve fazer uma nova avaliação da proposta.",
+          "motivo": "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2 (ADR-007), então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar"
         }
       ]
     },

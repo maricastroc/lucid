@@ -61,6 +61,21 @@ export const GOLDEN_JARGAO: readonly EntradaGolden[] = [
   },
 
   { texto: "O benefício será concedido a quem fizer jus a ele.", expectedCount: 1, expectSuggestion: false, categoria: "multipalavra", estado: "limitacao_conhecida", motivo: "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação" },
+
+  // A12a — furo de recall por forma exata. NÃO é recorte deliberado como os de cima:
+  // é consequência do índice por `token.lower`. Declarado para contar contra o recall
+  // publicado em vez de ficar invisível na métrica.
+  {
+    texto: "O pedido será analisado na hipotese de indeferimento.",
+    expectedCount: 1,
+    categoria: "multipalavra",
+    estado: "limitacao_conhecida",
+    motivo:
+      "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. " +
+      "Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), " +
+      "mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o " +
+      "glossário curado como autoridade única de runtime)",
+  },
   { texto: "Isso ocorreu em sede, de recurso interposto.", expectedCount: 0, mustNotFire: true, categoria: "multipalavra", estado: "correto", motivo: "vírgula quebra a contiguidade exigida entre 'sede' e 'de'" },
 
   { texto: "EM SEDE DE recurso, o pedido foi negado.", expectedCount: 1, expectSuggestion: true, expectedSuggestion: "no âmbito de", categoria: "variacao_de_caixa", estado: "correto" },

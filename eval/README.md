@@ -13,9 +13,12 @@ quebra junto.
 
 ## Como ler
 
-- **`stamp`** — `(lucidVersion, localeId, configHash, dataHash)`. Sem essa tripla o número é
-  alegação, não medida: ela é o que permite reproduzir. O `dataHash` cobre **todos** os
-  datasets do registro, não só os usados pelos critérios avaliados.
+- **`stamp`** — `(lucidVersion, localeId, configHash, dataHash, goldenHash)`. Sem ela o número é
+  alegação, não medida: é o que permite reproduzir. O `dataHash` cobre **todos** os datasets do
+  registro, não só os usados pelos critérios avaliados. O `goldenHash` cobre o corpus: a medição
+  depende do golden tanto quanto do motor — declarar uma limitação nova muda o recall publicado
+  sem tocar em config nem em dado, e sem esse hash dois artefatos discordantes seriam
+  indistinguíveis.
 - **`detectors[]`** — precisão/recall por critério, com `negatives` (quantos casos exigem que o
   detector **não** dispare) e `knownLimitations` (falsos positivos/negativos conhecidos, com
   motivo). Limitação conhecida **conta contra** a métrica em vez de ser excluída.

@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { CRITERION_IDS } from "../../src/lucid";
 import { dataHashFor, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
-import { buildEvalArtifact, criteriaCoverage, scoreCounts, serializeEvalArtifact } from "./compute";
+import { buildEvalArtifact, criteriaCoverage, hashGoldens, scoreCounts, serializeEvalArtifact } from "./compute";
+import { GOLDEN_JARGAO } from "./jargon-golden";
+import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
+import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
+import { GOLDEN_SILABAS } from "./silabas-golden";
+import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
 
 /**
  * Invariantes do artefato — SEM flag, roda no CI.
@@ -21,6 +26,24 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect(stamp.standardVersion).toBe("ABNT NBR ISO 24495-1:2024");
     expect(stamp.configHash.length).toBeGreaterThan(0);
     expect(stamp.dataHash.length).toBeGreaterThan(0);
+    expect(stamp.goldenHash.length).toBeGreaterThan(0);
+  });
+
+  it("o goldenHash muda quando o corpus muda — a medição depende do golden, não só do motor", () => {
+    // A lacuna que apareceu ao declarar A12a/A12d: o recall publicado caiu e config/dado
+    // não mudaram. Sem esta parte da estampa, dois artefatos discordantes seriam
+    // indistinguíveis.
+    const base = hashGoldens();
+    const comEntradaNova = hashGoldens({
+      jargon: [...GOLDEN_JARGAO, { texto: "entrada sintética", expectedCount: 1 }],
+      nominalization: GOLDEN_NOMINALIZACAO,
+      passiveVoice: GOLDEN_VOZ_PASSIVA,
+      syllables: GOLDEN_SILABAS,
+      integrated: GOLDEN_INTEGRADO,
+    });
+
+    expect(base).toBe(artifact.stamp.goldenHash);
+    expect(comEntradaNova).not.toBe(base);
   });
 
   it("a estampa de dado cobre TODOS os datasets, não só os usados pelos evals", () => {
