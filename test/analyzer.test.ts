@@ -43,7 +43,7 @@ describe("analyze — documento vazio", () => {
       totalFindings: 0,
     });
     expect(diagnostic.metrics).toEqual({
-      fleschPt: 0,
+      fleschPt: null,
       words: 0,
       sentences: 0,
       syllables: 0,

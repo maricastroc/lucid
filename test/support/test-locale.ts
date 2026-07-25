@@ -53,7 +53,22 @@ export const testLocale: LocaleBundle = {
   services: { segmentSentences },
   metrics: {
     countSyllables: () => 1,
-    readability: { id: "fake-constant-42", calculate: () => 42 },
+    readability: {
+      id: "fake-constant-42",
+      calculate: () => 42,
+      // A costura de locale cobre a INTERPRETAÇÃO também: faixa e limiar pertencem
+      // à métrica, então um locale sintético traz os seus, não os do pt-BR.
+      interpret: (metrics) =>
+        metrics.fleschPt === null
+          ? { kind: "unmeasurable", cause: metrics.words === 0 ? "no_words" : "no_sentences" }
+          : {
+              kind: "measured",
+              value: metrics.fleschPt,
+              position: "in_range",
+              band: { id: "test_band", min: 0, max: 100, label: "faixa de teste" },
+              anomalies: [],
+            },
+    },
     cohesion: () => ({
       referentialOverlap: 0,
       adjacentGapRatio: 0,

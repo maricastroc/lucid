@@ -4,12 +4,12 @@ import { runMetrics } from "./support/pt";
 import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 
 describe("runMetrics — documento vazio", () => {
-  it("texto vazio devolve todas as métricas zeradas, sem NaN/Infinity", () => {
+  it("texto vazio: contagens zeram, mas o Flesch-PT é null (não medido) — sem NaN/Infinity", () => {
     const doc = buildDocument("");
     const metrics = runMetrics(doc);
 
     expect(metrics).toEqual({
-      fleschPt: 0,
+      fleschPt: null,
       words: 0,
       sentences: 0,
       syllables: 0,
@@ -24,21 +24,23 @@ describe("runMetrics — documento vazio", () => {
     });
   });
 
-  it("texto só com espaços/quebras de linha também zera (sem frases nem palavras)", () => {
+  it("texto só com espaços/quebras de linha: sem frase nem palavra, logo sem medida", () => {
     const doc = buildDocument("   \n\n  \t  ");
     const metrics = runMetrics(doc);
     expect(metrics.sentences).toBe(0);
     expect(metrics.words).toBe(0);
-    expect(metrics.fleschPt).toBe(0);
+    expect(metrics.fleschPt).toBeNull();
   });
 
-  it("texto só com pontuação (sem nenhuma palavra) zera palavras/sílabas sem quebrar", () => {
+  it("texto só com pontuação (sem nenhuma palavra) não recebe 0 — recebe null", () => {
     const doc = buildDocument("!!! ??? ...");
     const metrics = runMetrics(doc);
     expect(metrics.words).toBe(0);
     expect(metrics.syllables).toBe(0);
-    expect(metrics.fleschPt).toBe(0);
-    expect(Number.isFinite(metrics.fleschPt)).toBe(true);
+    // `0` é um ponto REAL da escala Flesch-PT (faixa "muito difícil"): devolvê-lo aqui
+    // fabricaria a pior nota possível para um texto que não foi medido.
+    expect(metrics.fleschPt).toBeNull();
+    expect(metrics.fleschPt).not.toBeNaN();
   });
 });
 
@@ -76,7 +78,10 @@ describe("runMetrics — texto com várias frases", () => {
           "O cão correu atrás dele por muito tempo sem nunca conseguir alcançá-lo.",
       ),
     );
-    expect(longo.fleschPt).toBeLessThan(curto.fleschPt);
+    // Textos reais: os dois lados TÊM medida — o non-null aqui é a afirmação do teste.
+    expect(longo.fleschPt).not.toBeNull();
+    expect(curto.fleschPt).not.toBeNull();
+    expect(longo.fleschPt!).toBeLessThan(curto.fleschPt!);
   });
 });
 

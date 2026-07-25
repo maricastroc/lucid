@@ -59,8 +59,9 @@ export interface VerificationSignal {
 }
 
 export interface MetricsDelta {
-  fleschPtBefore: number;
-  fleschPtAfter: number;
+  /** `null` quando o trecho não tem medida (ver `Metrics.fleschPt`) — nunca um 0 fabricado. */
+  fleschPtBefore: number | null;
+  fleschPtAfter: number | null;
   wordsBefore: number;
   wordsAfter: number;
 }

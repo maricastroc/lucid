@@ -73,6 +73,30 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("Ordenadas por severidade");
   });
 
+  it("a legibilidade sai com valor bruto + posição na escala, e o laudo declara que não trunca", () => {
+    const d = analyze(SAMPLE);
+    const md = buildAuditReport(d, d.findings, META);
+    const linha = md.split("\n").find((l) => l.startsWith("- **Legibilidade") || l.includes("Legibilidade (Flesch-PT)"));
+    expect(linha).toMatch(/Legibilidade \(Flesch-PT\): -?\d+(\.\d+)? — (faixa|abaixo|acima)/);
+    expect(md).toContain("O valor não é truncado");
+  });
+
+  it("entrada degenerada no laudo: valor bruto preservado + CAUSA nomeada (nunca um 'fora do domínio' mudo)", () => {
+    const d = analyze(`${"aeiou".repeat(100)}.`);
+    const md = buildAuditReport(d, d.findings, META);
+    expect(md).toContain("-8296.8");
+    expect(md).toContain("sílabas por palavra, acima do máximo plausível de 20");
+    expect(md).not.toContain("fora do domínio");
+  });
+
+  it("sem medida no laudo: em vez de 0, um travessão e a razão explícita", () => {
+    const d = analyze("!!! ??? ...");
+    const md = buildAuditReport(d, d.findings, META);
+    expect(md).toContain("Legibilidade (Flesch-PT): sem medida");
+    expect(md).toContain("Não há palavras para medir");
+    expect(md).not.toMatch(/Legibilidade \(Flesch-PT\): 0/);
+  });
+
   it("inclui a trilha de proveniência quando há alterações; omite quando não há (Etapa 6)", () => {
     const d = analyze(SAMPLE);
     expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");

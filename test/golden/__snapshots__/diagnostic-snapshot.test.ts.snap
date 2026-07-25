@@ -1903,7 +1903,7 @@ exports[`snapshots do Diagnostic completo > 'texto_vazio' 1`] = `
       "connectivesPer100Words": 0,
       "referentialOverlap": 0,
     },
-    "fleschPt": 0,
+    "fleschPt": null,
     "sentences": 0,
     "syllables": 0,
     "syllablesPerWord": 0,

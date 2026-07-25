@@ -134,7 +134,10 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
 
     samples.push({
       changed: proposal.proposed !== proposal.original,
-      dFlesch: verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore,
+      dFlesch:
+        verification.metrics.fleschPtAfter === null || verification.metrics.fleschPtBefore === null
+          ? 0
+          : verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore,
       dWords: verification.metrics.wordsAfter - verification.metrics.wordsBefore,
       findingsAfter,
       proofsPreserved: proofPassed("numbers_preserved") && proofPassed("dates_preserved") && proofPassed("no_new_jargon"),

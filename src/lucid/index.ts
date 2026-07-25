@@ -21,6 +21,11 @@ export type {
   PassContext,
   PassFinding,
   PrincipleGroup,
+  ReadabilityAnomaly,
+  ReadabilityBand,
+  ReadabilityReading,
+  ReadabilityScalePosition,
+  ReadabilityUnmeasurableCause,
   Score,
   Sentence,
   Severity,
@@ -49,7 +54,14 @@ export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindi
 export { buildStructuredDocument } from "./core/document/structured";
 export type { RawBlock } from "./core/document/structured";
 
-export { analyze, analyzeDocument, analyzeWithPasses, localePtBR, ptDocumentServices } from "../locales/pt-BR";
+export {
+  analyze,
+  analyzeDocument,
+  analyzeWithPasses,
+  localePtBR,
+  ptDocumentServices,
+  READABILITY_REFERENCE_RANGE,
+} from "../locales/pt-BR";
 
 export { clauseSplitPoints } from "../locales/pt-BR/actions/split-sentence";
 export type { SplitPoint, SplitKind } from "../locales/pt-BR/actions/split-sentence";

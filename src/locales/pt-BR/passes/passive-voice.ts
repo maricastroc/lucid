@@ -35,6 +35,11 @@ type Eventiveness = "agent" | "eventive_tense" | "ambiguous_present";
 
 const PRESENT_INDICATIVE_SER = new Set(["sou", "és", "é", "somos", "sois", "são"]);
 
+/**
+ * Particípios que ancoram a construção DEÔNTICA "ser obrigado a" (A-6). Só
+ * suprimem a passiva quando NÃO há agente explícito — ver a decisão no ponto de
+ * uso, dentro de `run`.
+ */
 const DEONTIC_PARTICIPLES = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
 
 /**
@@ -263,16 +268,23 @@ export const passiveVoicePass: Pass = {
         if (!participleMatch) continue;
 
         const participle = tokens[participleMatch.index];
-        if (
-          AMBIGUOUS_PARTICIPLES.has(participle.lower) ||
-          NOMINAL_FALSE_POSITIVES.has(participle.lower) ||
-          DEONTIC_PARTICIPLES.has(participle.lower)
-        ) {
+        if (AMBIGUOUS_PARTICIPLES.has(participle.lower) || NOMINAL_FALSE_POSITIVES.has(participle.lower)) {
           continue;
         }
 
         const agentMatch = findAgentAfter(tokens, participleMatch.index + 1);
         const hasAgent = agentMatch !== null;
+
+        // "ser obrigado a" (A-6): sem agente é construção DEÔNTICA — atribui um
+        // dever, não narra uma ação praticada — e quem a cobre é
+        // `leitor_terceira_pessoa`; marcá-la também como passiva produzia dois
+        // findings sobre o mesmo trecho, com enquadramentos que se contradizem
+        // ("diga quem age" vs. "fale com o leitor"). COM agente explícito, porém,
+        // é passiva legítima do verbo "obrigar" ("foi obrigada pelo tribunal"):
+        // aí quem obrigou está dito, o critério tem o que apontar, e suprimir
+        // seria falso negativo. O agente é exatamente a régua que separa as duas
+        // leituras — a mesma que o critério já usa para tudo o mais.
+        if (DEONTIC_PARTICIPLES.has(participle.lower) && !hasAgent) continue;
 
         const agentExtent = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : null;
         const agentTruncated = agentExtent?.truncated ?? false;

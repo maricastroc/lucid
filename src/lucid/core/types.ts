@@ -142,7 +142,15 @@ export interface CohesionMetrics {
 }
 
 export interface Metrics {
-  fleschPt: number;
+  /**
+   * `null` quando NÃO HÁ medida (texto sem palavra ou sem frase) — nunca um número
+   * fabricado. O `0` que ficava aqui é um ponto real da escala Flesch-PT ("muito
+   * difícil"), então um texto vazio se reportava como o pior texto possível.
+   *
+   * O valor NUNCA é limitado a 0–100: a engine não altera o que mediu. Interpretação
+   * (faixa, posição na escala, anomalia) é camada derivada — ver `ReadabilityReading`.
+   */
+  fleschPt: number | null;
   words: number;
   sentences: number;
   syllables: number;
@@ -150,6 +158,51 @@ export interface Metrics {
   syllablesPerWord: number;
   cohesion: CohesionMetrics;
 }
+
+/** Por que não há medida. Cada causa é explícita — nunca um "indisponível" genérico. */
+export type ReadabilityUnmeasurableCause = "no_words" | "no_sentences";
+
+/**
+ * Anomalia da MEDIÇÃO, não do texto: o valor foi calculado e continua exibido, mas
+ * as entradas da fórmula caíram fora do que ela descreve. Cada anomalia carrega a
+ * grandeza observada e o limiar que ela cruzou, para a UI poder dizer *por que* — não
+ * existe um estado `out_of_domain` genérico, de propósito.
+ */
+export type ReadabilityAnomaly =
+  | { readonly cause: "small_sample"; readonly words: number; readonly threshold: number }
+  | { readonly cause: "sentence_boundary_missing"; readonly wordsPerSentence: number; readonly threshold: number }
+  | {
+      readonly cause: "syllables_per_word_impossible";
+      readonly syllablesPerWord: number;
+      readonly threshold: number;
+    };
+
+/** Posição do valor em relação ao intervalo de referência — coordenada, não nota. */
+export type ReadabilityScalePosition = "in_range" | "above_range" | "below_range";
+
+export interface ReadabilityBand {
+  readonly id: string;
+  readonly min: number;
+  readonly max: number;
+  /** Rótulo do locale (o core tipa; quem escreve é o locale, como em `Finding.justification`). */
+  readonly label: string;
+}
+
+/**
+ * Leitura interpretada da leiturabilidade, SEMPRE ao lado do valor bruto — nunca em
+ * lugar dele. Não há variante de aprovação: leiturabilidade é descritor de apoio
+ * (Princípio 4), nunca selo.
+ */
+export type ReadabilityReading =
+  | { readonly kind: "unmeasurable"; readonly cause: ReadabilityUnmeasurableCause }
+  | {
+      readonly kind: "measured";
+      readonly value: number;
+      readonly position: ReadabilityScalePosition;
+      /** `null` fora do intervalo de referência: ali não existe faixa, só posição. */
+      readonly band: ReadabilityBand | null;
+      readonly anomalies: readonly ReadabilityAnomaly[];
+    };
 
 export interface CriterionScore {
   criterion: string;

@@ -12,7 +12,7 @@ import { CRITERION_IDS } from "./criteria";
 import { CRITERION_TAXONOMY } from "./taxonomy";
 import { PASSES } from "./passes/registry";
 import { countSyllables } from "./services/syllables";
-import { calculateFleschPt } from "./readability/flesch-pt";
+import { calculateFleschPt, interpretFleschPt } from "./readability/flesch-pt";
 import { createCohesion } from "./metrics/cohesion";
 import { DOCUMENT_DATASETS, REGISTRY_PT, getPrepared } from "./datasets/registry";
 import type { DatasetId } from "./datasets/types";
@@ -20,6 +20,7 @@ import type { DatasetId } from "./datasets/types";
 const readability: ReadabilityMetric = {
   id: "flesch-pt-martins-1996",
   calculate: ({ wordsPerSentence, syllablesPerWord }) => calculateFleschPt(wordsPerSentence, syllablesPerWord),
+  interpret: (metrics) => interpretFleschPt(metrics),
 };
 
 const cohesion = createCohesion({
@@ -33,6 +34,8 @@ const data: LocaleDataRegistry = {
   dataHashFor: (ids) => REGISTRY_PT.dataHashFor([...ids] as DatasetId[]),
   abbreviations: getPrepared("abreviacoes.pt"),
 };
+
+export { READABILITY_REFERENCE_RANGE } from "./readability/flesch-pt";
 
 export const localePtBR: LocaleBundle = {
   id: asLocaleId("pt-BR"),

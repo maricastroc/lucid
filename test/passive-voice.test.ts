@@ -367,13 +367,26 @@ describe("passiveVoicePass — eventividade em quatro níveis (A-1)", () => {
     expect(f.justification).not.toContain("Frase na voz passiva,");
   });
 
-  it("deôntico 'ser obrigado a' é excluído da passiva (coberto por leitor_terceira_pessoa)", () => {
+  it("deôntico 'ser obrigado a' SEM agente é excluído da passiva (coberto por leitor_terceira_pessoa)", () => {
     for (const texto of [
       "Os candidatos são obrigados a comparecer.",
       "O contribuinte é obrigado a declarar os rendimentos.",
       "A empresa será obrigada a pagar a multa.",
     ]) {
       expect(passiveFindings(texto), texto).toEqual([]);
+    }
+  });
+
+  it("'ser obrigado' COM agente explícito é passiva legítima de 'obrigar' e segue apontada (A-6)", () => {
+    for (const texto of [
+      "A empresa foi obrigada pelo tribunal a devolver o valor.",
+      "Ele foi obrigado por João a assinar.",
+      "O município foi obrigado pela Justiça a refazer a obra.",
+    ]) {
+      const findings = passiveFindings(texto);
+      expect(findings, texto).toHaveLength(1);
+      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true, eventiveness: "agent" });
+      expect(findings[0].requiresHuman, texto).toBe(false);
     }
   });
 

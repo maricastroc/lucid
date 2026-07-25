@@ -3,6 +3,7 @@
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
+import { readabilityOf } from "../lib/readability";
 import type { LedgerEntry } from "../lib/ledger";
 import { ArrowDownIcon } from "./icons";
 
@@ -103,6 +104,7 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
 }
 
 export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
+  const readingNotes = readabilityOf(diagnostic.metrics).notes;
   return (
     <section className="border-t border-rule-1 px-6 py-5">
       <SectionLabel>Leitura</SectionLabel>
@@ -117,9 +119,19 @@ export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
           </div>
         ))}
       </dl>
+      {readingNotes.length > 0 && (
+        <ul className="mt-3 flex flex-col gap-1.5 border-l border-rule-2 pl-3">
+          {readingNotes.map((note) => (
+            <li key={note} className="text-[11.5px] leading-relaxed text-ink-2">
+              {note}
+            </li>
+          ))}
+        </ul>
+      )}
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
         Legibilidade e coesão são descritores de apoio, nunca aprovação: valor alto ou baixo não é, sozinho, bom nem
-        ruim (coesão alta pode ser repetição; baixa pode ser variação).
+        ruim (coesão alta pode ser repetição; baixa pode ser variação). O valor da legibilidade nunca é truncado — o
+        número exibido é o calculado, e a faixa é leitura ao lado dele.
       </p>
     </section>
   );
@@ -184,11 +196,12 @@ function metricRows(diagnostic: Diagnostic) {
   const m = diagnostic.metrics;
   const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
   const co = m.cohesion;
+  const readability = readabilityOf(m);
   return [
     { label: "Palavras", value: fmt(m.words) },
     { label: "Frases", value: fmt(m.sentences) },
     { label: "Palavras por frase", value: fmt(m.wordsPerSentence) },
-    { label: "Legibilidade", value: fmt(m.fleschPt), note: "Flesch-PT" },
+    { label: "Legibilidade", value: readability.value, note: readability.qualifier },
     { label: "Coesão referencial", value: fmt(co.referentialOverlap), note: "descritor" },
     { label: "Pares sem continuidade", value: fmt(co.adjacentGapRatio), note: "descritor" },
     { label: "Conectivos /100 palavras", value: fmt(co.connectivesPer100Words), note: "descritor" },

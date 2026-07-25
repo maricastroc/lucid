@@ -464,7 +464,9 @@ function RewriteResult({
   const blocked = verification.hasBlockingFailure;
 
   const stale = proposal.original !== currentOriginal;
-  const dFlesch = verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore;
+  // Sem medida em um dos lados não existe delta — e inventar 0 seria afirmar "não mudou".
+  const { fleschPtBefore, fleschPtAfter } = verification.metrics;
+  const dFlesch = fleschPtBefore === null || fleschPtAfter === null ? null : fleschPtAfter - fleschPtBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
   const passed = verification.proofs.filter((p) => p.passed).length;
 
@@ -490,7 +492,7 @@ function RewriteResult({
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-2">
           <span>
-            Flesch-PT <span className="tabular-nums text-ink-1">{fmtDelta(dFlesch, 1)}</span>
+            Flesch-PT <span className="tabular-nums text-ink-1">{dFlesch === null ? "—" : fmtDelta(dFlesch, 1)}</span>
           </span>
           <span className="text-ink-3">·</span>
           <span>

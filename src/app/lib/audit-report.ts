@@ -1,6 +1,7 @@
 import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, coverageLabel, coverageOf, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
+import { readabilityOf } from "./readability";
 
 export interface AuditReportMeta {
   generatedAt: string;
@@ -36,7 +37,10 @@ export function buildAuditReport(
   out.push(`Gerado em ${meta.generatedAt}${meta.documentTitle ? ` · ${meta.documentTitle}` : ""}`);
   out.push("");
   out.push("> **Este relatório mede, não aprova.** A ausência de anotações não é atestado de clareza.");
-  out.push("> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação.");
+  out.push(
+    "> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação. O valor não é truncado: " +
+      "o número é o calculado, e a faixa de referência é leitura ao lado dele.",
+  );
   out.push(
     "> Critérios de léxico (jargão, nominalização, redundância, perífrase, dupla negação, advérbios vagos) checam " +
       "**listas curadas** (precisão > recall): contagem baixa ou zero não prova ausência do fenômeno.",
@@ -54,7 +58,15 @@ export function buildAuditReport(
     `- **${safe}** de troca direta (equivalente indicado; a aplicação é do autor) · **${human}** de decisão do autor`,
   );
   out.push(`- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`);
-  out.push(`- Legibilidade (Flesch-PT): ${fmtNum(m.fleschPt)}`);
+  const readability = readabilityOf(m);
+  out.push(
+    readability.measured
+      ? `- Legibilidade (Flesch-PT): ${readability.value} — ${readability.qualifier}`
+      : `- Legibilidade (Flesch-PT): ${readability.qualifier}`,
+  );
+  for (const note of readability.notes) {
+    out.push(`  - ${note}`);
+  }
   out.push("");
   out.push("### Coesão (descritores)");
   out.push("");
