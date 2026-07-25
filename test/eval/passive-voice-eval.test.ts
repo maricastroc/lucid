@@ -4,7 +4,7 @@ import { passiveVoicePass } from "../../src/locales/pt-BR/passes/passive-voice";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
-import { evaluatePassiveVoice } from "./compute";
+import { formatRate, evaluatePassiveVoice } from "./compute";
 
 describe("avaliação de passiveVoicePass — golden set", () => {
   // O MESMO cálculo que alimenta o artefato publicado (./compute): a página não pode
@@ -17,7 +17,7 @@ describe("avaliação de passiveVoicePass — golden set", () => {
     console.log(
       `\n[eval voz-passiva] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
         `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · ` +
-        `precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}%`,
+        `precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)}`,
     );
     if (errados.length > 0) {
       console.log(

@@ -2,7 +2,17 @@ import { describe, expect, it } from "vitest";
 import { CRITERION_IDS } from "../../src/lucid";
 import { dataHashFor, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
-import { buildEvalArtifact, criteriaCoverage, hashGoldens, scoreCounts, serializeEvalArtifact } from "./compute";
+import {
+  buildEvalArtifact,
+  criteriaCoverage,
+  DETECTOR_EVALUATORS,
+  EVAL_SCHEMA_VERSION,
+  formatRate,
+  hashGoldens,
+  scoreCounts,
+  serializeEvalArtifact,
+  summarize,
+} from "./compute";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
@@ -63,13 +73,40 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect([...todos].sort()).toEqual([...CRITERION_IDS].sort());
   });
 
-  it("a cobertura é DERIVADA dos dados — critério novo sem eval cai em 'só teste unitário'", () => {
-    const cobertura = criteriaCoverage();
-    // Nenhuma lista escrita à mão: measured são os avaliadores que existem; o resto sai
-    // do golden integrado. Se alguém adicionar um critério e esquecer a eval, ele aparece.
-    expect(cobertura.measured).toEqual(["passive_voice", "nominalization", "jargon"]);
-    expect(cobertura.unitTestsOnly.length).toBeGreaterThan(0);
-    expect(cobertura.goldenLabelledOnly).not.toContain("jargon");
+  it("a cobertura é DERIVADA das entradas — provado com universo sintético, não com lista fixa", () => {
+    // Antes este teste comparava a saída com uma lista escrita à mão, o que era tautológico:
+    // fixava o hardcode contra ele mesmo. Agora exercita a REGRA de classificação.
+    const cobertura = criteriaCoverage({
+      criterionIds: ["com_eval", "so_rotulado", "so_unitario", "eval_e_rotulado"],
+      evaluated: ["com_eval", "eval_e_rotulado"],
+      labelled: ["so_rotulado", "eval_e_rotulado"],
+    });
+
+    expect(cobertura.measured).toEqual(["com_eval", "eval_e_rotulado"]);
+    // Ter avaliador prevalece sobre estar rotulado — a camada mais forte ganha.
+    expect(cobertura.goldenLabelledOnly).toEqual(["so_rotulado"]);
+    // Critério sem avaliador e sem rótulo cai aqui SOZINHO, por construção.
+    expect(cobertura.unitTestsOnly).toEqual(["so_unitario"]);
+  });
+
+  it("critério novo sem avaliador registrado aparece como NÃO medido (fail-safe)", () => {
+    const real = artifact.criteriaCoverage;
+    const comCriterioNovo = criteriaCoverage({
+      criterionIds: [...CRITERION_IDS, "criterio_recem_criado"],
+      evaluated: real.measured,
+      labelled: real.goldenLabelledOnly,
+    });
+
+    expect(comCriterioNovo.unitTestsOnly).toContain("criterio_recem_criado");
+    expect(comCriterioNovo.measured).not.toContain("criterio_recem_criado");
+  });
+
+  it("os critérios medidos vêm do REGISTRO de avaliadores, não de uma segunda lista", () => {
+    // A duplicação que existia: uma lista para a cobertura, outra para montar o artefato.
+    expect(artifact.criteriaCoverage.measured).toEqual(
+      CRITERION_IDS.filter((c) => DETECTOR_EVALUATORS.some((e) => e.criterion === c)),
+    );
+    expect(artifact.detectors.map((d) => d.criterion)).toEqual(DETECTOR_EVALUATORS.map((e) => e.criterion));
   });
 
   it("cada detector declara cobertura léxica, casos negativos e limitações conhecidas", () => {
@@ -78,14 +115,49 @@ describe("artefato de eval — invariantes de publicação", () => {
       expect(["curated", "productive"]).toContain(d.coverage);
       // Sem caso negativo, precisão é 100% de graça.
       expect(d.summary.negatives, `${d.criterion} sem casos negativos`).toBeGreaterThan(0);
-      expect(d.summary.precision).toBeGreaterThan(0);
-      expect(d.summary.precision).toBeLessThanOrEqual(1);
-      expect(d.summary.recall).toBeGreaterThan(0);
-      expect(d.summary.recall).toBeLessThanOrEqual(1);
+      for (const taxa of [d.summary.precision, d.summary.recall]) {
+        expect(taxa, `${d.criterion} sem denominador`).not.toBeNull();
+        expect(taxa!).toBeGreaterThan(0);
+        expect(taxa!).toBeLessThanOrEqual(1);
+      }
       for (const lim of d.knownLimitations) {
         expect(lim.motivo, `limitação sem motivo em ${d.criterion}`).not.toBe("");
       }
     }
+  });
+
+  it("sem denominador o valor é null, NUNCA 1 — não se fabrica 100% (coerência com ADR-066)", () => {
+    // Corpus vazio: nenhuma oportunidade de acertar nem de errar.
+    const vazio = summarize([]);
+    expect(vazio.precision).toBeNull();
+    expect(vazio.recall).toBeNull();
+    expect(vazio.cases).toBe(0);
+
+    // Só negativos e o detector calado: precisão indefinida (0 disparos), recall indefinido
+    // (nenhum positivo esperado) — e nada disso é "100% de acerto".
+    const soNegativos = summarize([
+      { texto: "a", expectedCount: 0, actualCount: 0, estado: "correto", tp: 0, fp: 0, fn: 0 },
+    ]);
+    expect(soNegativos.precision).toBeNull();
+    expect(soNegativos.recall).toBeNull();
+
+    // Um falso positivo já dá denominador de precisão: 0/1 = 0, medido de verdade.
+    const umFP = summarize([
+      { texto: "b", expectedCount: 0, actualCount: 1, estado: "correto", tp: 0, fp: 1, fn: 0 },
+    ]);
+    expect(umFP.precision).toBe(0);
+    expect(umFP.recall).toBeNull();
+
+    expect(formatRate(null)).toBe("—");
+    expect(formatRate(0.9628)).toBe("96.3%");
+  });
+
+  it("o artefato declara schemaVersion — o consumidor externo não quebra em silêncio", () => {
+    expect(artifact.schemaVersion).toBe(EVAL_SCHEMA_VERSION);
+    expect(Number.isInteger(artifact.schemaVersion)).toBe(true);
+    expect(artifact.schemaVersion).toBeGreaterThanOrEqual(1);
+    // Primeira chave do JSON: quem consome lê a versão antes de interpretar a forma.
+    expect(Object.keys(artifact)[0]).toBe("schemaVersion");
   });
 
   it("limitação conhecida NÃO é excluída da métrica — a precisão publicada é a honesta", () => {
@@ -102,12 +174,24 @@ describe("artefato de eval — invariantes de publicação", () => {
     }
   });
 
-  it("os caveats do método viajam no artefato — a página não pode publicar o número sem eles", () => {
-    const texto = artifact.method.caveats.join(" ");
+  it("os caveats viajam identificados por id — o teste pina o id, não a redação", () => {
+    // Antes eram strings livres e isto assertava substring da prosa: reescrever a frase
+    // quebrava o teste sem mudar semântica, e o teste não garantia sobre o QUE era o caveat.
+    const ids = artifact.method.caveats.map((c) => c.id);
     expect(artifact.method.scoring).toBe("count-per-passage");
-    expect(texto).toContain("CIRCULAR");
-    expect(texto).toContain("contam CONTRA a métrica");
-    expect(texto).toContain("Camada 2");
+    expect(ids).toEqual([
+      "count_scoring",
+      "circular_recall_curated",
+      "known_limitations_counted",
+      "unmeasured_criteria",
+      "no_layer_2",
+    ]);
+    // Todo id tem texto não vazio (o Record em compute.ts garante em compile-time).
+    for (const c of artifact.method.caveats) {
+      expect(c.text.length, `caveat ${c.id} sem texto`).toBeGreaterThan(40);
+    }
+    // O caveat que mais importa para a página existe como entrada endereçável.
+    expect(ids).toContain("circular_recall_curated");
   });
 
   it("determinístico: duas construções produzem serialização byte-idêntica", () => {

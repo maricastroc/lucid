@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "stamp": {
     "lucidVersion": "0.1.0",
     "localeId": "pt-BR",
@@ -10,11 +11,26 @@
   "method": {
     "scoring": "count-per-passage",
     "caveats": [
-      "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span.",
-      "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico.",
-      "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita.",
-      "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito.",
-      "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline."
+      {
+        "id": "count_scoring",
+        "text": "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span."
+      },
+      {
+        "id": "circular_recall_curated",
+        "text": "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico."
+      },
+      {
+        "id": "known_limitations_counted",
+        "text": "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita."
+      },
+      {
+        "id": "unmeasured_criteria",
+        "text": "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito."
+      },
+      {
+        "id": "no_layer_2",
+        "text": "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline."
+      }
     ]
   },
   "detectors": [

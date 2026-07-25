@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { countSyllables } from "../../src/locales/pt-BR/services/syllables";
 import { GOLDEN_SILABAS } from "./silabas-golden";
-import { evaluateSyllables } from "./compute";
+import { evaluateSyllables, formatRate } from "./compute";
 
 describe("avaliação de countSyllables — golden set", () => {
   // O MESMO cálculo que alimenta o artefato publicado (./compute).
@@ -13,8 +13,8 @@ describe("avaliação de countSyllables — golden set", () => {
   it("relatório: taxa de acerto exata e erro absoluto médio no golden set completo", () => {
     console.log(
       `\n[eval silabas] ${resultados.length} palavras · ` +
-        `taxa de acerto exata: ${(taxaDeAcerto * 100).toFixed(1)}% · ` +
-        `erro absoluto médio: ${erroAbsolutoMedio.toFixed(3)}`,
+        `taxa de acerto exata: ${formatRate(taxaDeAcerto)} · ` +
+        `erro absoluto médio: ${erroAbsolutoMedio === null ? "—" : erroAbsolutoMedio.toFixed(3)}`,
     );
     if (casosIncorretos.length > 0) {
       console.log(

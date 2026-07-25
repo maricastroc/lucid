@@ -4,7 +4,7 @@ import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalizatio
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
-import { evaluateNominalization } from "./compute";
+import { formatRate, evaluateNominalization } from "./compute";
 
 describe("avaliação de nominalizationPass — golden set", () => {
   // O MESMO cálculo que alimenta o artefato publicado (./compute).
@@ -17,7 +17,7 @@ describe("avaliação de nominalizationPass — golden set", () => {
   it("relatório: TP/FP/FN, precisão, recall, classificação do mapeamento", () => {
     console.log(
       `\n[eval nominalização] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
-        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}% · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
         `classificações erradas=${classificacoesErradas.length} · sugestões emitidas=${sugestoesEmitidas.length} (deve ser 0)`,
     );
     if (errosDeteccao.length > 0) {

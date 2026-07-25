@@ -12,6 +12,7 @@
 import { DEFAULT_CONFIG, hashConfig } from "../../src/lucid/core/config";
 import { stableHash } from "../../src/lucid/core/hash";
 import { analyze, CRITERION_IDS, localePtBR } from "../../src/lucid";
+import type { CriterionId } from "../../src/lucid";
 import { createDataView, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
 import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
@@ -75,8 +76,14 @@ export interface CountSummary {
   tp: number;
   fp: number;
   fn: number;
-  precision: number;
-  recall: number;
+  /**
+   * `null` quando não há denominador (`tp + fp === 0`): o detector não teve oportunidade de
+   * acertar nem de errar. Devolver `1` ali seria fabricar 100% — o mesmo erro do
+   * `fleschPt: 0` corrigido no ADR-066, e no melhor ponto da escala.
+   */
+  precision: number | null;
+  /** `null` quando `tp + fn === 0` (nenhum positivo esperado no corpus). */
+  recall: number | null;
 }
 
 export function summarize(results: readonly EntryResult[]): CountSummary {
@@ -90,9 +97,14 @@ export function summarize(results: readonly EntryResult[]): CountSummary {
     tp,
     fp,
     fn,
-    precision: round(tp + fp === 0 ? 1 : tp / (tp + fp)),
-    recall: round(tp + fn === 0 ? 1 : tp / (tp + fn)),
+    precision: tp + fp === 0 ? null : round(tp / (tp + fp)),
+    recall: tp + fn === 0 ? null : round(tp / (tp + fn)),
   };
+}
+
+/** Formata taxa para leitura humana sem esconder a ausência de medida. */
+export function formatRate(value: number | null): string {
+  return value === null ? "—" : `${(value * 100).toFixed(1)}%`;
 }
 
 /* ─────────────────────────────── avaliadores ─────────────────────────────── */
@@ -239,10 +251,18 @@ export interface SyllableEntryResult {
   erroAbsoluto: number;
 }
 
+export interface SyllableSummary {
+  words: number;
+  limitations: number;
+  /** `null` sem palavra no corpus — dividir por zero devolveria `NaN`, que o JSON vira `null` em silêncio. */
+  exactRate: number | null;
+  meanAbsoluteError: number | null;
+}
+
 export function evaluateSyllables(): {
   service: "countSyllables";
   results: SyllableEntryResult[];
-  summary: { words: number; limitations: number; exactRate: number; meanAbsoluteError: number };
+  summary: SyllableSummary;
 } {
   const results = GOLDEN_SILABAS.map((entrada): SyllableEntryResult => {
     const atual = countSyllables(entrada.palavra);
@@ -262,16 +282,35 @@ export function evaluateSyllables(): {
     summary: {
       words: results.length,
       limitations: results.filter((r) => r.estado === "limitacao_conhecida").length,
-      exactRate: round(results.filter((r) => r.acertou).length / results.length),
-      meanAbsoluteError: round(results.reduce((s, r) => s + r.erroAbsoluto, 0) / results.length),
+      exactRate: results.length === 0 ? null : round(results.filter((r) => r.acertou).length / results.length),
+      meanAbsoluteError:
+        results.length === 0 ? null : round(results.reduce((s, r) => s + r.erroAbsoluto, 0) / results.length),
     },
   };
 }
 
-/* ──────────────────── cobertura: o que NÃO está medido ──────────────────── */
+/* ────────────── registro de avaliadores: a única lista da verdade ────────────── */
 
-/** Critérios com eval de precisão/recall — derivado dos avaliadores que existem. */
-const EVALUATED_CRITERIA: readonly string[] = ["jargon", "nominalization", "passive_voice"];
+/**
+ * REGISTRO ÚNICO dos detectores com eval de precisão/recall.
+ *
+ * Antes havia duas listas para o mesmo fato (uma para a cobertura, outra para montar o
+ * artefato) e a segunda podia esquecer o que a primeira dizia. Aqui, registrar o avaliador
+ * é o mesmo ato que declará-lo medido: `criteriaCoverage` e `buildEvalArtifact` derivam
+ * desta constante. O `criterion` é `CriterionId`, então um id inexistente não compila.
+ */
+export interface DetectorEvaluator {
+  readonly criterion: CriterionId;
+  readonly evaluate: () => { results: readonly EntryResult[]; summary: CountSummary };
+}
+
+export const DETECTOR_EVALUATORS: readonly DetectorEvaluator[] = [
+  { criterion: "jargon", evaluate: evaluateJargon },
+  { criterion: "nominalization", evaluate: evaluateNominalization },
+  { criterion: "passive_voice", evaluate: evaluatePassiveVoice },
+];
+
+/* ──────────────────── cobertura: o que NÃO está medido ──────────────────── */
 
 export interface CriteriaCoverage {
   /** Precisão/recall medidos contra golden com casos negativos. */
@@ -282,21 +321,43 @@ export interface CriteriaCoverage {
   unitTestsOnly: readonly string[];
 }
 
-/**
- * Derivada dos DADOS, nunca escrita à mão: critério novo sem eval aparece
- * automaticamente em `unitTestsOnly`. É o oposto de um teto silencioso.
- */
-export function criteriaCoverage(): CriteriaCoverage {
-  const inIntegrated = new Set<string>();
+export interface CoverageInputs {
+  /** Universo de critérios da engine. */
+  criterionIds: readonly string[];
+  /** Critérios com avaliador registrado. */
+  evaluated: readonly string[];
+  /** Critérios com finding rotulado no golden integrado. */
+  labelled: readonly string[];
+}
+
+function defaultCoverageInputs(): CoverageInputs {
+  const labelled = new Set<string>();
   for (const caso of GOLDEN_INTEGRADO) {
-    for (const f of caso.expected.findings) inIntegrated.add(f.criterion);
+    for (const f of caso.expected.findings) labelled.add(f.criterion);
   }
+  return {
+    criterionIds: CRITERION_IDS,
+    evaluated: DETECTOR_EVALUATORS.map((e) => e.criterion),
+    labelled: [...labelled],
+  };
+}
 
-  const measured = CRITERION_IDS.filter((c) => EVALUATED_CRITERIA.includes(c));
-  const goldenLabelledOnly = CRITERION_IDS.filter((c) => inIntegrated.has(c) && !EVALUATED_CRITERIA.includes(c));
-  const unitTestsOnly = CRITERION_IDS.filter((c) => !inIntegrated.has(c) && !EVALUATED_CRITERIA.includes(c));
+/**
+ * Derivada das entradas, nunca escrita à mão: critério sem avaliador registrado e sem
+ * rótulo no golden cai em `unitTestsOnly` por construção. É o oposto de um teto silencioso.
+ *
+ * As entradas são injetáveis para o teste poder provar a DERIVAÇÃO com um universo
+ * sintético, em vez de comparar a saída com uma lista escrita à mão (que não provaria nada).
+ */
+export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs()): CriteriaCoverage {
+  const evaluated = new Set(inputs.evaluated);
+  const labelled = new Set(inputs.labelled);
 
-  return { measured, goldenLabelledOnly, unitTestsOnly };
+  return {
+    measured: inputs.criterionIds.filter((c) => evaluated.has(c)),
+    goldenLabelledOnly: inputs.criterionIds.filter((c) => labelled.has(c) && !evaluated.has(c)),
+    unitTestsOnly: inputs.criterionIds.filter((c) => !labelled.has(c) && !evaluated.has(c)),
+  };
 }
 
 /* ────────────────────────────── o artefato ────────────────────────────── */
@@ -356,15 +417,46 @@ export function evalStamp(): EvalStamp {
 }
 
 /**
- * Caveats do método, como DADO — para a página não poder publicar o número sem eles.
+ * Caveats do método, como DADO IDENTIFICADO — para a página poder endereçar cada um
+ * (destacar, linkar, ordenar) e para o teste pinar o `id` em vez da redação.
+ *
+ * `Record<CaveatId, string>` + ordem explícita: caveat novo não compila sem texto, na
+ * disciplina do ADR-037 (fim do fallback silencioso). Antes eram strings livres e o teste
+ * assertava substring da prosa — reescrever a frase quebrava o teste sem mudar semântica.
  */
-const METHOD_CAVEATS: readonly string[] = [
-  "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span.",
-  "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico.",
-  "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita.",
-  "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito.",
-  "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline.",
+export type CaveatId =
+  | "count_scoring"
+  | "circular_recall_curated"
+  | "known_limitations_counted"
+  | "unmeasured_criteria"
+  | "no_layer_2";
+
+const CAVEAT_ORDER: readonly CaveatId[] = [
+  "count_scoring",
+  "circular_recall_curated",
+  "known_limitations_counted",
+  "unmeasured_criteria",
+  "no_layer_2",
 ];
+
+const CAVEAT_TEXT: Record<CaveatId, string> = {
+  count_scoring:
+    "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span.",
+  circular_recall_curated:
+    "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico.",
+  known_limitations_counted:
+    "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita.",
+  unmeasured_criteria:
+    "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito.",
+  no_layer_2: "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline.",
+};
+
+export interface MethodCaveat {
+  id: CaveatId;
+  text: string;
+}
+
+const METHOD_CAVEATS: readonly MethodCaveat[] = CAVEAT_ORDER.map((id) => ({ id, text: CAVEAT_TEXT[id] }));
 
 export interface DetectorReport {
   criterion: string;
@@ -374,11 +466,21 @@ export interface DetectorReport {
   knownLimitations: readonly { texto: string; motivo: string }[];
 }
 
+/**
+ * Versão do ESQUEMA do artefato (não do motor — esse é `stamp.lucidVersion`).
+ *
+ * Existe porque o artefato é consumido de fora (a página de benchmark): mudar a forma sem
+ * sinalizar quebraria o consumidor em silêncio. Incrementar em qualquer mudança
+ * incompatível de forma.
+ */
+export const EVAL_SCHEMA_VERSION = 1;
+
 export interface EvalArtifact {
+  schemaVersion: number;
   stamp: EvalStamp;
-  method: { scoring: "count-per-passage"; caveats: readonly string[] };
+  method: { scoring: "count-per-passage"; caveats: readonly MethodCaveat[] };
   detectors: readonly DetectorReport[];
-  services: { syllables: ReturnType<typeof evaluateSyllables>["summary"] };
+  services: { syllables: SyllableSummary };
   criteriaCoverage: CriteriaCoverage & { total: number };
 }
 
@@ -402,22 +504,17 @@ function detectorReport(criterion: string, results: readonly EntryResult[], summ
 }
 
 export function buildEvalArtifact(): EvalArtifact {
-  const jargon = evaluateJargon();
-  const nominalization = evaluateNominalization();
-  const passive = evaluatePassiveVoice();
-  const syllables = evaluateSyllables();
-  const coverage = criteriaCoverage();
-
   return {
+    schemaVersion: EVAL_SCHEMA_VERSION,
     stamp: evalStamp(),
     method: { scoring: "count-per-passage", caveats: METHOD_CAVEATS },
-    detectors: [
-      detectorReport(jargon.criterion, jargon.results, jargon.summary),
-      detectorReport(nominalization.criterion, nominalization.results, nominalization.summary),
-      detectorReport(passive.criterion, passive.results, passive.summary),
-    ],
-    services: { syllables: syllables.summary },
-    criteriaCoverage: { ...coverage, total: CRITERION_IDS.length },
+    // Deriva do registro: registrar o avaliador é o mesmo ato que publicá-lo.
+    detectors: DETECTOR_EVALUATORS.map(({ criterion, evaluate }) => {
+      const { results, summary } = evaluate();
+      return detectorReport(criterion, results, summary);
+    }),
+    services: { syllables: evaluateSyllables().summary },
+    criteriaCoverage: { ...criteriaCoverage(), total: CRITERION_IDS.length },
   };
 }
 

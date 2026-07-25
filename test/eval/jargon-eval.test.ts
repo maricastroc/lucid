@@ -4,7 +4,7 @@ import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
 import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
-import { evaluateJargon } from "./compute";
+import { formatRate, evaluateJargon } from "./compute";
 
 describe("avaliação de jargonPass — golden set", () => {
   // O MESMO cálculo que alimenta o artefato publicado (./compute).
@@ -20,7 +20,7 @@ describe("avaliação de jargonPass — golden set", () => {
   it("relatório: TP/FP/FN, precisão, recall, sugestões e findings sem cadastro", () => {
     console.log(
       `\n[eval jargão] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
-        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${(summary.precision * 100).toFixed(1)}% · recall=${(summary.recall * 100).toFixed(1)}% · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
         `sugestões corretas=${sugestoesCorretas.length}/${sugestoesEsperadas.length} · ` +
         `sugestões inseguras=${sugestoesInseguras.length} · ` +
         `findings sem cadastro (deve ser 0)=${disparosSemCadastro.length}`,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { buildEvalArtifact, serializeEvalArtifact } from "./compute";
+import { buildEvalArtifact, formatRate, serializeEvalArtifact } from "./compute";
 
 /**
  * Emissor do artefato de eval — GATEADO, roda só via `npm run eval`.
@@ -30,7 +30,7 @@ describe.skipIf(!RUN)("emissão do artefato de eval", () => {
           .map(
             (d) =>
               `  ${d.criterion} (${d.coverage}): ${d.summary.cases} casos, ${d.summary.negatives} negativos · ` +
-              `precisão ${(d.summary.precision * 100).toFixed(1)}% · recall ${(d.summary.recall * 100).toFixed(1)}% · ` +
+              `precisão ${formatRate(d.summary.precision)} · recall ${formatRate(d.summary.recall)} · ` +
               `${d.summary.limitations} limitação(ões)`,
           )
           .join("\n") +
