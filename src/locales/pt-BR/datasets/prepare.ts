@@ -1,3 +1,4 @@
+import type { AbbreviationLexicon } from "@/lucid/core/types";
 import type {
   CompiledEntry,
   CompiledPhrase,
@@ -33,6 +34,15 @@ export function compileJargonEntries(entries: readonly JargonEntry[]): Map<strin
 export function prepareStringSet(raw: unknown, key: "forms" | "abbreviations"): ReadonlySet<string> {
   const list = (raw as Record<string, string[]>)[key];
   return new Set(list);
+}
+
+/**
+ * Monta o léxico de abreviações em duas classes (A-2): proclíticas, que nunca
+ * encerram frase, e unidades de medida, que encerram quando fecham uma medição.
+ */
+export function prepareAbbreviations(raw: unknown): AbbreviationLexicon {
+  const data = raw as { abbreviations: string[]; unitAbbreviations: string[] };
+  return { blocking: new Set(data.abbreviations), units: new Set(data.unitAbbreviations) };
 }
 
 export function prepareRecord(raw: unknown): Readonly<Record<string, string>> {

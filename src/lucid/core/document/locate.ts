@@ -1,8 +1,8 @@
-import type { Span } from "../types";
+import type { AbbreviationLexicon, Span } from "../types";
 import { normalize } from "./normalize";
 import { segmentSentences } from "./segment-sentences";
 
-export function sentenceSpanAt(text: string, offset: number, abbreviations: ReadonlySet<string>): Span {
+export function sentenceSpanAt(text: string, offset: number, abbreviations: AbbreviationLexicon): Span {
   const source = normalize(text);
   const sentences = segmentSentences(source, abbreviations);
   if (sentences.length === 0) return { start: 0, end: source.length, text: source };

@@ -2,6 +2,7 @@ import { createRegistry, type DatasetRecord, type RawSpec, type Registry } from 
 import type { DataView } from "@/lucid/core/data/types";
 import type { DataTypes, DatasetId } from "./types";
 import {
+  prepareAbbreviations,
   preparePhrases,
   prepareJargon,
   prepareLightVerbs,
@@ -40,8 +41,9 @@ export type { DatasetRecord };
 const SPECS: Record<DatasetId, RawSpec> = {
   "abreviacoes.pt": {
     raw: abreviacoesData,
-    prepare: (r) => prepareStringSet(r, "abbreviations"),
-    provenance: "abreviações PT-BR que não encerram frase (curadoria própria)",
+    prepare: prepareAbbreviations,
+    provenance:
+      "abreviações PT-BR em duas classes: proclíticas (nunca encerram frase) e unidades de medida (encerram quando fecham uma medição) — curadoria própria, A-2",
   },
   "verbos-ser.pt": {
     raw: verbosSerData,

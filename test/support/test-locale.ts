@@ -42,7 +42,7 @@ const data: LocaleDataRegistry = {
   createDataView: (deps) => registry.createDataView(deps),
   documentDatasets: [],
   dataHashFor: (ids) => registry.dataHashFor(ids),
-  abbreviations: new Set<string>(),
+  abbreviations: { blocking: new Set<string>(), units: new Set<string>() },
 };
 
 export const testLocale: LocaleBundle = {

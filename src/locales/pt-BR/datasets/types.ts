@@ -1,3 +1,4 @@
+import type { AbbreviationLexicon } from "@/lucid/core/types";
 import type { ConnectivesIndex } from "../metrics/cohesion";
 
 export type DatasetId =
@@ -72,7 +73,7 @@ export interface CompiledPhrase {
 export type PhrasePrepared = ReadonlyMap<string, readonly CompiledPhrase[]>;
 
 export interface DataTypes {
-  "abreviacoes.pt": ReadonlySet<string>;
+  "abreviacoes.pt": AbbreviationLexicon;
   "verbos-ser.pt": ReadonlySet<string>;
   "participios-irregulares.pt": ReadonlySet<string>;
   "participios-ambiguos.pt": ReadonlySet<string>;

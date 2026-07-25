@@ -1,5 +1,5 @@
 import type { Config } from "../config";
-import type { CohesionMetrics, CriterionTaxonomy, Document, Pass, Sentence } from "../types";
+import type { AbbreviationLexicon, CohesionMetrics, CriterionTaxonomy, Document, Pass, Sentence } from "../types";
 import type { DataView } from "../data/types";
 
 export type LocaleId = string & { readonly __localeBrand: unique symbol };
@@ -8,7 +8,7 @@ export function asLocaleId(id: string): LocaleId {
 }
 
 export interface DocumentServices {
-  segmentSentences: (source: string, abbreviations: ReadonlySet<string>) => Sentence[];
+  segmentSentences: (source: string, abbreviations: AbbreviationLexicon) => Sentence[];
 }
 
 export interface ReadabilityMetric {
@@ -27,7 +27,7 @@ export interface LocaleDataRegistry {
   createDataView(deps: readonly string[]): DataView;
   readonly documentDatasets: readonly string[];
   dataHashFor(ids: Iterable<string>): string;
-  readonly abbreviations: ReadonlySet<string>;
+  readonly abbreviations: AbbreviationLexicon;
 }
 
 export interface LocaleCriteria {

@@ -1,4 +1,4 @@
-import type { Sentence } from "../types";
+import type { AbbreviationLexicon, Sentence } from "../types";
 
 const TERMINAL_MARKS = new Set([".", "!", "?", "…"]);
 
@@ -53,7 +53,20 @@ function precedingWord(source: string, position: number): string {
   return source.slice(start, position);
 }
 
-function findBoundaries(source: string, abbreviations: ReadonlySet<string>): number[] {
+/**
+ * Contexto de MEDIÇÃO: há um dígito imediatamente antes da abreviação, com no
+ * máximo espaços/tabs entre eles ("9h", "5 km", "30min"). É a condição que
+ * distingue a unidade enclítica ("A prova dura 30min.") do homógrafo não-métrico
+ * ("Valor min. 5 reais", "seg. 12 de maio"), que continua bloqueando a fronteira.
+ * Não atravessa quebra de linha: número e unidade não se separam por linha.
+ */
+function precededByNumber(source: string, wordStart: number): boolean {
+  let i = wordStart;
+  while (i > 0 && (source[i - 1] === " " || source[i - 1] === "\t")) i--;
+  return i > 0 && RE_DIGIT.test(source[i - 1]);
+}
+
+function findBoundaries(source: string, lexicon: AbbreviationLexicon): number[] {
   const boundaries: number[] = [];
   const length = source.length;
   let i = 0;
@@ -79,9 +92,18 @@ function findBoundaries(source: string, abbreviations: ReadonlySet<string>): num
       }
 
       const word = precedingWord(source, i);
-      if (word.length > 0 && abbreviations.has(word.toLowerCase())) {
-        i++;
-        continue;
+      if (word.length > 0) {
+        const lower = word.toLowerCase();
+        const isUnit = lexicon.units.has(lower);
+        if (lexicon.blocking.has(lower) || isUnit) {
+          // A unidade só libera a fronteira em contexto de medição; fora dele, e
+          // para toda abreviação proclítica, o ponto é interno à frase.
+          const measurement = isUnit && precededByNumber(source, i - word.length);
+          if (!measurement) {
+            i++;
+            continue;
+          }
+        }
       }
       if (word.length === 1 && RE_UPPERCASE.test(word)) {
         i++;
@@ -107,8 +129,8 @@ function findBoundaries(source: string, abbreviations: ReadonlySet<string>): num
   return boundaries;
 }
 
-export function segmentSentences(source: string, abbreviations: ReadonlySet<string>): Sentence[] {
-  const boundaries = findBoundaries(source, abbreviations);
+export function segmentSentences(source: string, lexicon: AbbreviationLexicon): Sentence[] {
+  const boundaries = findBoundaries(source, lexicon);
   const cuts = [0, ...boundaries, source.length];
 
   const sentences: Sentence[] = [];

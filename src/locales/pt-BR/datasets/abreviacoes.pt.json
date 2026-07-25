@@ -1,5 +1,5 @@
 {
-  "_comentario": "Léxico de abreviações PT-BR que NÃO terminam frase quando seguidas de ponto. Ver src/lucid/data/README.md para proveniência e critério de curadoria. Comparação em caixa invariante (toLowerCase) — não incluir variantes de caixa aqui.",
+  "_comentario": "Léxico de abreviações PT-BR em DUAS CLASSES (A-2). 'abbreviations' = PROCLÍTICAS: introduzem o que vem depois e por isso NUNCA encerram frase ('Sr. Silva', 'art. 5', 'Fig. 3', '12 jan. 2024') — o ponto é sempre interno à frase. 'unitAbbreviations' = unidades de medida ENCLÍTICAS: fecham uma medição e PODEM encerrar frase ('A sessão abre às 9h. Todos devem chegar'); elas só deixam de bloquear a fronteira EM CONTEXTO DE MEDIÇÃO (precedidas de número), preservando os homógrafos não-métricos ('Valor min. 5 reais', 'seg. 12 de maio'), que continuam bloqueando. Antes da separação, as unidades viviam na lista proclítica e FUNDIAM frases ('9h. Todos' virava uma frase só), corrompendo contagem de frases, palavras/frase, Flesch e todo critério por-frase. Ver src/lucid/data/README.md para proveniência e critério de curadoria. Comparação em caixa invariante (toLowerCase) — não incluir variantes de caixa aqui.",
   "abbreviations": [
     "sr",
     "sra",
@@ -67,14 +67,6 @@
     "dept",
     "depto",
     "gov",
-    "min",
-    "seg",
-    "h",
-    "kg",
-    "km",
-    "cm",
-    "mm",
-    "m",
     "jan",
     "fev",
     "mar",
@@ -87,5 +79,15 @@
     "out",
     "nov",
     "dez"
+  ],
+  "unitAbbreviations": [
+    "h",
+    "min",
+    "seg",
+    "kg",
+    "km",
+    "cm",
+    "mm",
+    "m"
   ]
 }

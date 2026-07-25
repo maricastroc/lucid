@@ -77,6 +77,57 @@ describe("segmentSentences — abreviações comuns em PT-BR", () => {
   });
 });
 
+describe("segmentSentences — unidades de medida encerram frase (A-2)", () => {
+  it("unidade colada ao número encerra a frase", () => {
+    expect(textos("A sessão abre às 9h. O público deve chegar antes.")).toEqual([
+      "A sessão abre às 9h.",
+      "O público deve chegar antes.",
+    ]);
+    expect(textos("A prova dura 30min. Depois há um intervalo.")).toEqual([
+      "A prova dura 30min.",
+      "Depois há um intervalo.",
+    ]);
+  });
+
+  it("unidade separada do número por espaço também encerra a frase", () => {
+    expect(textos("A pista tem 5 km. Corredores completam o percurso.")).toEqual([
+      "A pista tem 5 km.",
+      "Corredores completam o percurso.",
+    ]);
+    expect(textos("O peso máximo é de 70 kg. Acima disso há taxa.")).toEqual([
+      "O peso máximo é de 70 kg.",
+      "Acima disso há taxa.",
+    ]);
+  });
+
+  it("fora de contexto de medição, o homógrafo da unidade continua bloqueando", () => {
+    expect(textos("O valor min. 5 reais será cobrado.")).toEqual(["O valor min. 5 reais será cobrado."]);
+    expect(textos("A reunião ocorre seg. 12 de maio no auditório.")).toEqual([
+      "A reunião ocorre seg. 12 de maio no auditório.",
+    ]);
+  });
+
+  it("abreviação proclítica precedida de número NÃO vira fronteira (mês em data)", () => {
+    expect(textos("O prazo vence em 12 jan. 2024 conforme o edital.")).toEqual([
+      "O prazo vence em 12 jan. 2024 conforme o edital.",
+    ]);
+  });
+
+  it("a regra libera a fronteira mas não a força: minúscula depois da unidade não separa", () => {
+    expect(textos("O expediente vai das 9h. às 10h em dias úteis.")).toEqual([
+      "O expediente vai das 9h. às 10h em dias úteis.",
+    ]);
+    expect(textos("A obra tem 5 km. de extensão total.")).toEqual(["A obra tem 5 km. de extensão total."]);
+  });
+
+  it("a fusão corrompia as métricas por frase — agora não mais", () => {
+    // wordCount só existe depois de attachTokens, então a prova é sobre o documento montado.
+    const doc = buildDocument("A sessão abre às 9h. O público deve chegar antes.");
+    expect(doc.sentences).toHaveLength(2);
+    expect(doc.sentences.map((s) => s.wordCount)).toEqual([5, 5]);
+  });
+});
+
 describe("segmentSentences — limitação conhecida: frase iniciada em minúscula (F3)", () => {
   it("ponto + minúscula NÃO separa (funde as frases) — comportamento documentado", () => {
     expect(textos("O prazo venceu à noite. o recurso é cabível.")).toEqual([

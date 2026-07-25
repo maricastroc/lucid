@@ -1,12 +1,12 @@
-import type { Document, Sentence } from "../types";
+import type { AbbreviationLexicon, Document, Sentence } from "../types";
 import { normalize } from "./normalize";
 import { segmentParagraphs } from "./segment-paragraphs";
 import { buildTextDocument, hasStructuralMarkers } from "./text-blocks";
 import { attachTokens, tokenize } from "./tokenize";
 
 export interface DocumentBuildServices {
-  segmentSentences: (source: string, abbreviations: ReadonlySet<string>) => Sentence[];
-  abbreviations: ReadonlySet<string>;
+  segmentSentences: (source: string, abbreviations: AbbreviationLexicon) => Sentence[];
+  abbreviations: AbbreviationLexicon;
 }
 
 export function buildDocument(rawText: string, services: DocumentBuildServices): Document {
