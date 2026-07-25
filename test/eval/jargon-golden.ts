@@ -44,7 +44,21 @@ export const GOLDEN_JARGAO: readonly EntradaGolden[] = [
   { texto: "Consoante o disposto no edital, o prazo é de 10 dias.", expectedCount: 0, mustNotFire: true, categoria: "termo_polissemico", estado: "correto" },
   { texto: "A empresa tem sede em São Paulo.", expectedCount: 0, mustNotFire: true, categoria: "termo_polissemico", estado: "correto" },
 
-  { texto: "Ele contou que, Outrossim, era o apelido do avô.", expectedCount: 0, mustNotFire: true, categoria: "nome_proprio", estado: "correto" },
+  {
+    texto: "Ele contou que, Outrossim, era o apelido do avô.",
+    expectedCount: 0,
+    categoria: "nome_proprio",
+    estado: "limitacao_conhecida",
+    motivo:
+      "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é " +
+      "IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, " +
+      "mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance " +
+      "determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava " +
+      "este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo " +
+      "termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade " +
+      "(ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na " +
+      "precisão do eval em vez de ser mascarado.",
+  },
 
   { texto: "O benefício será concedido a quem fizer jus a ele.", expectedCount: 1, expectSuggestion: false, categoria: "multipalavra", estado: "limitacao_conhecida", motivo: "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação" },
   { texto: "Isso ocorreu em sede, de recurso interposto.", expectedCount: 0, mustNotFire: true, categoria: "multipalavra", estado: "correto", motivo: "vírgula quebra a contiguidade exigida entre 'sede' e 'de'" },

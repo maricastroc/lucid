@@ -37,6 +37,56 @@ const PRESENT_INDICATIVE_SER = new Set(["sou", "és", "é", "somos", "sois", "s�
 
 const DEONTIC_PARTICIPLES = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
 
+/**
+ * Auxiliares que formam a passiva COMPOSTA junto de "sido"/"sendo" (A-12e).
+ * A âncora do pass é a forma de "ser", então em "tinha sido aprovado" o span
+ * começava em "sido" e deixava "tinha" de fora: o destaque na UI abria no meio
+ * da locução e o trecho citado na justificativa saía truncado. Reconhecer o
+ * auxiliar imediatamente anterior faz o span cobrir a construção inteira.
+ * Só o token ADJACENTE conta — sem janela de conectores, para não engolir
+ * material alheio à locução.
+ *
+ * "estar" segue fora como ÂNCORA de passiva (ADR-052); aqui ele aparece apenas
+ * como auxiliar de "sendo" ("está sendo analisado"), onde quem ancora a passiva
+ * continua sendo "sendo", forma de "ser".
+ */
+const TER_HAVER_AUXILIARIES = new Set([
+  "tinha", "tinhas", "tínhamos", "tínheis", "tinham",
+  "tenho", "tens", "tem", "temos", "tendes", "têm",
+  "tive", "tiveste", "teve", "tivemos", "tivestes", "tiveram",
+  "terei", "terás", "terá", "teremos", "tereis", "terão",
+  "teria", "terias", "teríamos", "teríeis", "teriam",
+  "tenha", "tenhas", "tenhamos", "tenhais", "tenham",
+  "tivesse", "tivesses", "tivéssemos", "tivésseis", "tivessem",
+  "tiver", "tiveres", "tivermos", "tiverdes", "tiverem",
+  "ter", "tendo",
+  "havia", "havias", "havíamos", "havíeis", "haviam",
+  "há", "hei", "hás", "hão", "houve", "houvera", "houveram",
+  "haja", "hajam", "houvesse", "houvessem", "houver", "houverem",
+  "haver", "havendo", "haverá", "haverão", "haveria", "haveriam",
+]);
+
+const ESTAR_AUXILIARIES = new Set([
+  "está", "estás", "estou", "estamos", "estais", "estão",
+  "estava", "estavas", "estávamos", "estáveis", "estavam",
+  "esteve", "estive", "estivemos", "estiveram",
+  "estará", "estarão", "estaria", "estariam",
+  "esteja", "estejam", "estivesse", "estivessem", "estiver", "estiverem",
+  "estar", "estando",
+  "vai", "vão", "vem", "vêm", "continua", "continuam",
+]);
+
+/** Início do span, recuado para incluir o auxiliar da passiva composta. */
+function compositeStart(tokens: readonly Token[], anchorIndex: number): number | null {
+  const anchor = tokens[anchorIndex];
+  const previous = tokens[anchorIndex - 1];
+  if (!previous?.isWord) return null;
+
+  if (anchor.lower === "sido" && TER_HAVER_AUXILIARIES.has(previous.lower)) return previous.start;
+  if (anchor.lower === "sendo" && ESTAR_AUXILIARIES.has(previous.lower)) return previous.start;
+  return null;
+}
+
 function isConnector(token: Token): boolean {
   return token.isWord && (CONNECTOR_ADVERBS.has(token.lower) || RE_MENTE_ADVERB.test(token.lower));
 }
@@ -237,7 +287,7 @@ export const passiveVoicePass: Pass = {
             ? "ambiguous_present"
             : "eventive_tense";
 
-        const start = anchor.start;
+        const start = compositeStart(tokens, i) ?? anchor.start;
         const end = agentExtent ? agentExtent.end : participle.end;
 
         const marker = hasAgent ? tokens[agentMatch.markerIndex] : null;

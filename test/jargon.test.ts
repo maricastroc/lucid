@@ -213,9 +213,23 @@ describe("jargonPass — config.jargon.suggestFromGlossary", () => {
   });
 });
 
-describe("jargonPass — provável nome próprio com maiúscula", () => {
-  it("unigrama capitalizado em meio de frase é suprimido (heurística conservadora)", () => {
-    expect(jargonFindings("Ele disse que, Outrossim, viria depois.")).toEqual([]);
+describe("jargonPass — caixa alta não suprime termo cadastrado (A-12b)", () => {
+  it("unigrama capitalizado em meio de frase É apontado: o glossário curado é a autoridade", () => {
+    const findings = jargonFindings("Ele disse que, Outrossim, viria depois.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe("Outrossim");
+  });
+
+  it("o mesmo termo é tratado igual no início e no meio da frase (fim da assimetria)", () => {
+    const inicio = jargonFindings("Outrossim, arquivo os autos.");
+    const meio = jargonFindings("Indefiro o pedido; Outrossim, arquivo os autos.");
+    expect(inicio).toHaveLength(1);
+    expect(meio).toHaveLength(1);
+    expect(meio[0].suggestion).toBe(inicio[0].suggestion);
+  });
+
+  it("aspas continuam suprimindo — menção ao termo não é uso dele", () => {
+    expect(jargonFindings('O termo "supracitado" aparece no texto.')).toEqual([]);
   });
 });
 

@@ -9,8 +9,6 @@ const CRITERION = "jargon";
 
 const BY_FIRST_WORD: ReadonlyMap<string, readonly CompiledEntry[]> = getPrepared("jargao.pt").byFirstWord;
 
-const RE_UPPERCASE_START = /^\p{Lu}/u;
-
 const QUOTE_OPENERS = new Set(['"', "“", "«"]);
 
 function matchingCloser(opener: string, candidate: string): boolean {
@@ -49,15 +47,6 @@ function computeQuoteRanges(tokens: readonly Token[]): Array<readonly [number, n
 
 function overlapsQuotes(ranges: readonly (readonly [number, number])[], start: number, end: number): boolean {
   return ranges.some(([open, close]) => start <= close && end >= open);
-}
-
-function looksLikeProperNoun(token: Token, tokens: readonly Token[], index: number): boolean {
-  if (!RE_UPPERCASE_START.test(token.text)) return false;
-
-  for (let i = 0; i < index; i++) {
-    if (tokens[i].isWord) return true;
-  }
-  return false;
 }
 
 function matchAt(tokens: readonly Token[], index: number): CompiledEntry | null {
@@ -147,10 +136,14 @@ export const jargonPass: Pass = {
 
         const endIndex = i + match.words.length - 1;
 
-        const suppressedByQuotes = overlapsQuotes(quoteRanges, i, endIndex);
-        const suppressedByProperNoun = match.words.length === 1 && looksLikeProperNoun(token, tokens, i);
-
-        if (suppressedByQuotes || suppressedByProperNoun) {
+        // Só as aspas suprimem: aspas marcam MENÇÃO ao termo, não uso dele.
+        // A caixa alta, sozinha, não suprime mais (A-12b). O glossário é a
+        // autoridade curada (ADR-008) e já OMITE deliberadamente unigramas
+        // ambíguos/polissêmicos; descartar um termo cadastrado só porque está
+        // capitalizado no meio da frase criava falso negativo silencioso
+        // ("…; Outrossim, arquivo os autos" não era apontado, enquanto o mesmo
+        // termo no início da frase era) — inconsistência sem respaldo no dado.
+        if (overlapsQuotes(quoteRanges, i, endIndex)) {
           i++;
           continue;
         }

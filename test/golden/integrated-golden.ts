@@ -175,11 +175,21 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
   },
   {
     id: "termos_protegidos_por_guardas",
-    description: "todas as guardas do jargão ativas: aspas, provável nome próprio, unigrama não cadastrado",
+    description: "guardas do jargão: aspas suprimem, caixa alta não; unigrama não cadastrado",
     text: 'O termo "supracitado" aparece. Ele disse que, Outrossim, viria. A empresa tem sede em São Paulo.',
-    expected: { findings: [], metrics: { words: 16, sentences: 3 } },
+    expected: {
+      findings: [
+        { criterion: "jargon", severity: "warning", start: 46, end: 55, spanText: "Outrossim", requiresHuman: false, suggestion: "além disso" },
+      ],
+      metrics: { words: 16, sentences: 3 },
+    },
     notes:
-      "'supracitado' entre aspas → suprimido; 'Outrossim' capitalizado em meio de frase → suprimido (heurística de nome próprio); 'sede' isolada não está no glossário. Zero findings.",
+      "'supracitado' entre aspas → suprimido (aspas marcam MENÇÃO, não uso). 'Outrossim' capitalizado em " +
+      "meio de frase → APONTADO desde o A-12b: a caixa alta sozinha não veta um termo cadastrado, e o " +
+      "glossário curado é a autoridade (ADR-008). Antes era suprimido, o que criava falso negativo e " +
+      "tratava o mesmo termo de modo diferente conforme a posição na frase. 'sede' isolada não está no " +
+      "glossário. O resíduo dessa escolha (nome próprio homógrafo de termo cadastrado) está documentado " +
+      "como limitação em jargon-golden.ts.",
   },
   {
     id: "passiva_sintetica_e_jargao",

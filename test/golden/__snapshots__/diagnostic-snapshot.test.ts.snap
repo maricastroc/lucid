@@ -1611,7 +1611,32 @@ exports[`snapshots do Diagnostic completo > 'quatro_criterios_span_sobreposto' 1
 
 exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] = `
 {
-  "findings": [],
+  "findings": [
+    {
+      "category": "lexical",
+      "criterion": "jargon",
+      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "além disso"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "meta": {
+        "domain": "legal",
+        "kind": "word",
+        "term": "outrossim",
+      },
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ABNT NBR ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": false,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 55,
+        "start": 46,
+        "text": "Outrossim",
+      },
+      "suggestion": "além disso",
+    },
+  ],
   "meta": {
     "configHash": "ebb6dee9",
     "dataHash": "12660a83",
@@ -1690,10 +1715,10 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         "count": {
           "error": 0,
           "info": 0,
-          "warning": 0,
+          "warning": 1,
         },
         "criterion": "jargon",
-        "densityPer100Words": 0,
+        "densityPer100Words": 6.3,
       },
       {
         "count": {
@@ -1849,7 +1874,7 @@ exports[`snapshots do Diagnostic completo > 'termos_protegidos_por_guardas' 1`] 
         "densityPer100Words": 0,
       },
     ],
-    "totalFindings": 0,
+    "totalFindings": 1,
   },
   "text": "O termo "supracitado" aparece. Ele disse que, Outrossim, viria. A empresa tem sede em São Paulo.",
 }

@@ -32,15 +32,22 @@ describe("passiveVoicePass — formas simples de ser", () => {
     expect(findings[0].span.text).toBe("ser analisado");
   });
 
-  it("detecta com 'sido' (particípio composto), sem precisar reconhecer o auxiliar anterior", () => {
+  it("detecta com 'sido' e o span cobre a locução inteira, incluindo o auxiliar (A-12e)", () => {
     const findings = passiveFindings("O projeto tinha sido aprovado pelo conselho.");
     expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe("sido aprovado pelo conselho.");
+    expect(findings[0].span.text).toBe("tinha sido aprovado pelo conselho.");
   });
 
-  it("detecta com 'sendo' (gerúndio)", () => {
+  it("detecta com 'sendo' (gerúndio), incluindo o auxiliar no span (A-12e)", () => {
     const findings = passiveFindings("O prédio está sendo construído pela prefeitura.");
     expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe("está sendo construído pela prefeitura.");
+  });
+
+  it("o recuo só ocorre com auxiliar adjacente reconhecido — 'sido' solto mantém o span na âncora", () => {
+    const findings = passiveFindings("O projeto, sido aprovado, seguiu adiante.");
+    expect(findings).toHaveLength(1);
+    expect(findings[0].span.text).toBe("sido aprovado");
   });
 });
 
