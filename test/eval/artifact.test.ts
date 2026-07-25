@@ -6,13 +6,13 @@ import {
   buildEvalArtifact,
   criteriaCoverage,
   DETECTOR_EVALUATORS,
-  EVAL_SCHEMA_VERSION,
   formatRate,
   hashGoldens,
   scoreCounts,
   serializeEvalArtifact,
   summarize,
 } from "./compute";
+import { EVAL_SCHEMA_VERSION } from "../../src/report/eval/contract";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
@@ -106,7 +106,15 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect(artifact.criteriaCoverage.measured).toEqual(
       CRITERION_IDS.filter((c) => DETECTOR_EVALUATORS.some((e) => e.criterion === c)),
     );
-    expect(artifact.detectors.map((d) => d.criterion)).toEqual(DETECTOR_EVALUATORS.map((e) => e.criterion));
+  });
+
+  it("ORDEM CANÔNICA única: `detectors` e `measured` listam os mesmos critérios na mesma ordem", () => {
+    // Antes `detectors` saía na ordem do registro e `measured` na da engine, então a tabela
+    // e os cartões de cobertura da página discordavam sobre a ordem dos mesmos três itens.
+    expect(artifact.detectors.map((d) => d.criterion)).toEqual([...artifact.criteriaCoverage.measured]);
+    // E a ordem canônica é a declaração da engine.
+    const ranks = artifact.detectors.map((d) => (CRITERION_IDS as readonly string[]).indexOf(d.criterion));
+    expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
   });
 
   it("cada detector declara cobertura léxica, casos negativos e limitações conhecidas", () => {
@@ -161,16 +169,21 @@ describe("artefato de eval — invariantes de publicação", () => {
   });
 
   it("limitação conhecida NÃO é excluída da métrica — a precisão publicada é a honesta", () => {
-    const comLimitacaoQueFalha = artifact.detectors.filter((d) =>
-      d.failures.some((f) => f.estado === "limitacao_conhecida"),
-    );
-    // Ao menos um detector tem uma limitação que aparece como falha (hoje: jargão, o
-    // "Outrossim" nome próprio do A12b). Se um dia isso zerar por exclusão em vez de
-    // correção, este teste é o alarme.
-    expect(comLimitacaoQueFalha.length).toBeGreaterThan(0);
+    const comLimitacao = artifact.detectors.filter((d) => d.knownLimitations.length > 0);
+    expect(comLimitacao.length).toBeGreaterThan(0);
+    // Se limitações fossem descontadas da conta, fp+fn seria zero em todas elas.
+    expect(comLimitacao.some((d) => d.summary.fp + d.summary.fn > 0)).toBe(true);
+    // A lista e o contador do resumo têm que falar a mesma coisa.
     for (const d of artifact.detectors) {
-      const falhasDeclaradas = d.failures.filter((f) => f.estado === "limitacao_conhecida").length;
-      if (falhasDeclaradas > 0) expect(d.summary.fp + d.summary.fn).toBeGreaterThan(0);
+      expect(d.knownLimitations.length, `${d.criterion}: lista ≠ contador`).toBe(d.summary.limitations);
+    }
+  });
+
+  it("REGRESSÃO é categoria separada de limitação, e em build verde está vazia", () => {
+    // Uma falha é ou declarada (com motivo) ou regressão (sem motivo, porque ninguém
+    // escreveu um). Nada infere motivo: se aparecer aqui, a página mostra sem explicação.
+    for (const d of artifact.detectors) {
+      expect(d.regressions, `${d.criterion} tem falha NÃO declarada`).toEqual([]);
     }
   });
 

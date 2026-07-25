@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "stamp": {
     "lucidVersion": "0.1.0",
     "localeId": "pt-BR",
@@ -35,52 +35,29 @@
   },
   "detectors": [
     {
-      "criterion": "jargon",
-      "coverage": "curated",
+      "criterion": "passive_voice",
+      "coverage": "productive",
       "summary": {
-        "cases": 40,
-        "negatives": 12,
-        "limitations": 3,
-        "tp": 26,
-        "fp": 1,
+        "cases": 64,
+        "negatives": 32,
+        "limitations": 2,
+        "tp": 33,
+        "fp": 0,
         "fn": 2,
-        "precision": 0.963,
-        "recall": 0.9286
+        "precision": 1,
+        "recall": 0.9429
       },
-      "failures": [
-        {
-          "texto": "Ele contou que, Outrossim, era o apelido do avô.",
-          "expectedCount": 0,
-          "actualCount": 1,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "O benefício será concedido a quem fizer jus a ele.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "O pedido será analisado na hipotese de indeferimento.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        }
-      ],
       "knownLimitations": [
         {
-          "texto": "Ele contou que, Outrossim, era o apelido do avô.",
-          "motivo": "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade (ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na precisão do eval em vez de ser mascarado."
+          "texto": "O pedido foi, segundo consta, aprovado pela diretoria.",
+          "motivo": "vírgula entre auxiliar e particípio aborta a busca por design (precisão > recall)"
         },
         {
-          "texto": "O benefício será concedido a quem fizer jus a ele.",
-          "motivo": "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação"
-        },
-        {
-          "texto": "O pedido será analisado na hipotese de indeferimento.",
-          "motivo": "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o glossário curado como autoridade única de runtime)"
+          "texto": "A lei foi, após muitos debates, finalmente aprovada.",
+          "motivo": "mesma barreira de pontuação — falso negativo aceito"
         }
-      ]
+      ],
+      "regressions": []
     },
     {
       "criterion": "nominalization",
@@ -95,32 +72,6 @@
         "precision": 1,
         "recall": 0.8919
       },
-      "failures": [
-        {
-          "texto": "É necessário proceder com a análise dos dados.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "É preciso dar continuidade ao processo.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "A comissão vai fazer a analise do pedido.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "O setor deve fazer uma nova avaliação da proposta.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        }
-      ],
       "knownLimitations": [
         {
           "texto": "É necessário proceder com a análise dos dados.",
@@ -138,45 +89,37 @@
           "texto": "O setor deve fazer uma nova avaliação da proposta.",
           "motivo": "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2 (ADR-007), então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar"
         }
-      ]
+      ],
+      "regressions": []
     },
     {
-      "criterion": "passive_voice",
-      "coverage": "productive",
+      "criterion": "jargon",
+      "coverage": "curated",
       "summary": {
-        "cases": 64,
-        "negatives": 32,
-        "limitations": 2,
-        "tp": 33,
-        "fp": 0,
+        "cases": 40,
+        "negatives": 12,
+        "limitations": 3,
+        "tp": 26,
+        "fp": 1,
         "fn": 2,
-        "precision": 1,
-        "recall": 0.9429
+        "precision": 0.963,
+        "recall": 0.9286
       },
-      "failures": [
-        {
-          "texto": "O pedido foi, segundo consta, aprovado pela diretoria.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        },
-        {
-          "texto": "A lei foi, após muitos debates, finalmente aprovada.",
-          "expectedCount": 1,
-          "actualCount": 0,
-          "estado": "limitacao_conhecida"
-        }
-      ],
       "knownLimitations": [
         {
-          "texto": "O pedido foi, segundo consta, aprovado pela diretoria.",
-          "motivo": "vírgula entre auxiliar e particípio aborta a busca por design (precisão > recall)"
+          "texto": "Ele contou que, Outrossim, era o apelido do avô.",
+          "motivo": "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade (ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na precisão do eval em vez de ser mascarado."
         },
         {
-          "texto": "A lei foi, após muitos debates, finalmente aprovada.",
-          "motivo": "mesma barreira de pontuação — falso negativo aceito"
+          "texto": "O benefício será concedido a quem fizer jus a ele.",
+          "motivo": "'fizer jus a' (futuro do subjuntivo) não está entre as 11 formas cadastradas de 'fazer jus a' — recorte deliberado de formas mais frequentes em texto administrativo, não cobertura completa da conjugação"
+        },
+        {
+          "texto": "O pedido será analisado na hipotese de indeferimento.",
+          "motivo": "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o glossário curado como autoridade única de runtime)"
         }
-      ]
+      ],
+      "regressions": []
     }
   ],
   "services": {

@@ -20,14 +20,25 @@ import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalizatio
 import { passiveVoicePass } from "../../src/locales/pt-BR/passes/passive-voice";
 import { countSyllables } from "../../src/locales/pt-BR/services/syllables";
 import { coverageOf } from "../../src/app/lib/criteria";
+import { EVAL_SCHEMA_VERSION } from "../../src/report/eval/contract";
+import type {
+  CountSummary,
+  CriteriaCoverage,
+  DetectorReport,
+  EvalArtifact,
+  EvalStamp,
+  EvalState,
+  MethodCaveat,
+  CaveatId,
+  Regression,
+  SyllableSummary,
+} from "../../src/report/eval/contract";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 import { GOLDEN_SILABAS } from "./silabas-golden";
 import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
-
-export type EvalState = "correto" | "limitacao_conhecida";
 
 const ctx = () => ({ doc: buildDocument(""), config: DEFAULT_CONFIG, data: createDataView([]) });
 const runPass = (pass: { run: (c: ReturnType<typeof ctx>) => unknown[] }, texto: string): unknown[] =>
@@ -66,24 +77,6 @@ export interface EntryResult extends CountScore {
   actualCount: number;
   estado: EvalState;
   motivo?: string;
-}
-
-export interface CountSummary {
-  cases: number;
-  /** Casos em que o critério NÃO deve disparar — a oportunidade de falso positivo. */
-  negatives: number;
-  limitations: number;
-  tp: number;
-  fp: number;
-  fn: number;
-  /**
-   * `null` quando não há denominador (`tp + fp === 0`): o detector não teve oportunidade de
-   * acertar nem de errar. Devolver `1` ali seria fabricar 100% — o mesmo erro do
-   * `fleschPt: 0` corrigido no ADR-066, e no melhor ponto da escala.
-   */
-  precision: number | null;
-  /** `null` quando `tp + fn === 0` (nenhum positivo esperado no corpus). */
-  recall: number | null;
 }
 
 export function summarize(results: readonly EntryResult[]): CountSummary {
@@ -251,14 +244,6 @@ export interface SyllableEntryResult {
   erroAbsoluto: number;
 }
 
-export interface SyllableSummary {
-  words: number;
-  limitations: number;
-  /** `null` sem palavra no corpus — dividir por zero devolveria `NaN`, que o JSON vira `null` em silêncio. */
-  exactRate: number | null;
-  meanAbsoluteError: number | null;
-}
-
 export function evaluateSyllables(): {
   service: "countSyllables";
   results: SyllableEntryResult[];
@@ -312,15 +297,6 @@ export const DETECTOR_EVALUATORS: readonly DetectorEvaluator[] = [
 
 /* ──────────────────── cobertura: o que NÃO está medido ──────────────────── */
 
-export interface CriteriaCoverage {
-  /** Precisão/recall medidos contra golden com casos negativos. */
-  measured: readonly string[];
-  /** Findings exatos rotulados no golden integrado, mas sem métrica agregada. */
-  goldenLabelledOnly: readonly string[];
-  /** Só teste unitário: escrito a partir da implementação, não mede recall. */
-  unitTestsOnly: readonly string[];
-}
-
 export interface CoverageInputs {
   /** Universo de critérios da engine. */
   criterionIds: readonly string[];
@@ -349,7 +325,7 @@ function defaultCoverageInputs(): CoverageInputs {
  * As entradas são injetáveis para o teste poder provar a DERIVAÇÃO com um universo
  * sintético, em vez de comparar a saída com uma lista escrita à mão (que não provaria nada).
  */
-export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs()): CriteriaCoverage {
+export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs()): Omit<CriteriaCoverage, "total"> {
   const evaluated = new Set(inputs.evaluated);
   const labelled = new Set(inputs.labelled);
 
@@ -361,22 +337,6 @@ export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs(
 }
 
 /* ────────────────────────────── o artefato ────────────────────────────── */
-
-export interface EvalStamp {
-  lucidVersion: string;
-  localeId: string;
-  standardVersion: string;
-  configHash: string;
-  /** Hash sobre TODOS os datasets do registro — o estado completo de dado da rodada. */
-  dataHash: string;
-  /**
-   * Hash sobre os GOLDENS. Sem ele a estampa é incompleta: a medição depende do corpus
-   * tanto quanto do motor, e declarar uma limitação nova muda o recall publicado sem
-   * mexer em config nem em dado. Dois artefatos com números diferentes e a mesma estampa
-   * seriam indistinguíveis — foi exatamente o que aconteceu ao declarar A12a/A12d.
-   */
-  goldenHash: string;
-}
 
 /** Hash do corpus de avaliação — muda quando qualquer entrada de golden muda. */
 export function hashGoldens(
@@ -424,13 +384,6 @@ export function evalStamp(): EvalStamp {
  * disciplina do ADR-037 (fim do fallback silencioso). Antes eram strings livres e o teste
  * assertava substring da prosa — reescrever a frase quebrava o teste sem mudar semântica.
  */
-export type CaveatId =
-  | "count_scoring"
-  | "circular_recall_curated"
-  | "known_limitations_counted"
-  | "unmeasured_criteria"
-  | "no_layer_2";
-
 const CAVEAT_ORDER: readonly CaveatId[] = [
   "count_scoring",
   "circular_recall_curated",
@@ -451,68 +404,58 @@ const CAVEAT_TEXT: Record<CaveatId, string> = {
   no_layer_2: "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline.",
 };
 
-export interface MethodCaveat {
-  id: CaveatId;
-  text: string;
-}
-
 const METHOD_CAVEATS: readonly MethodCaveat[] = CAVEAT_ORDER.map((id) => ({ id, text: CAVEAT_TEXT[id] }));
 
-export interface DetectorReport {
-  criterion: string;
-  coverage: string;
-  summary: CountSummary;
-  failures: readonly { texto: string; expectedCount: number; actualCount: number; estado: EvalState }[];
-  knownLimitations: readonly { texto: string; motivo: string }[];
-}
-
 /**
- * Versão do ESQUEMA do artefato (não do motor — esse é `stamp.lucidVersion`).
- *
- * Existe porque o artefato é consumido de fora (a página de benchmark): mudar a forma sem
- * sinalizar quebraria o consumidor em silêncio. Incrementar em qualquer mudança
- * incompatível de forma.
+ * Uma falha é ou LIMITAÇÃO DECLARADA (tem motivo escrito na curadoria) ou REGRESSÃO
+ * (entrada `correto` que falhou, sem motivo porque ninguém escreveu um). Antes as duas
+ * viviam numa lista só, distinguidas por `estado` — e quem consumisse teria que inferir a
+ * diferença. Agora a distinção é do contrato: `regressions` é vazio em build verde.
  */
-export const EVAL_SCHEMA_VERSION = 1;
-
-export interface EvalArtifact {
-  schemaVersion: number;
-  stamp: EvalStamp;
-  method: { scoring: "count-per-passage"; caveats: readonly MethodCaveat[] };
-  detectors: readonly DetectorReport[];
-  services: { syllables: SyllableSummary };
-  criteriaCoverage: CriteriaCoverage & { total: number };
-}
-
 function detectorReport(criterion: string, results: readonly EntryResult[], summary: CountSummary): DetectorReport {
+  const falhou = (r: EntryResult): boolean => r.fp > 0 || r.fn > 0;
   return {
     criterion,
     coverage: coverageOf(criterion),
     summary,
-    failures: results
-      .filter((r) => r.fp > 0 || r.fn > 0)
-      .map((r) => ({
-        texto: r.texto,
-        expectedCount: r.expectedCount,
-        actualCount: r.actualCount,
-        estado: r.estado,
-      })),
     knownLimitations: results
       .filter((r) => r.estado === "limitacao_conhecida")
       .map((r) => ({ texto: r.texto, motivo: r.motivo ?? "" })),
+    regressions: results.filter((r) => falhou(r) && r.estado === "correto").map(toRegression),
   };
 }
 
+const toRegression = (r: EntryResult): Regression => ({
+  texto: r.texto,
+  expectedCount: r.expectedCount,
+  actualCount: r.actualCount,
+});
+
+/**
+ * ORDEM CANÔNICA dos critérios: a de `CRITERION_IDS` (a declaração da engine).
+ *
+ * Vale para `detectors` e para as três listas de `criteriaCoverage`, então a tabela e os
+ * cartões de cobertura da página nunca discordam sobre a ordem dos mesmos critérios.
+ * Antes `detectors` saía na ordem do registro de avaliadores e `measured` na da engine.
+ */
+function canonicalRank(criterion: string): number {
+  const i = (CRITERION_IDS as readonly string[]).indexOf(criterion);
+  return i === -1 ? Number.MAX_SAFE_INTEGER : i;
+}
+
 export function buildEvalArtifact(): EvalArtifact {
+  const detectors = [...DETECTOR_EVALUATORS]
+    .sort((a, b) => canonicalRank(a.criterion) - canonicalRank(b.criterion))
+    .map(({ criterion, evaluate }) => {
+      const { results, summary } = evaluate();
+      return detectorReport(criterion, results, summary);
+    });
+
   return {
     schemaVersion: EVAL_SCHEMA_VERSION,
     stamp: evalStamp(),
     method: { scoring: "count-per-passage", caveats: METHOD_CAVEATS },
-    // Deriva do registro: registrar o avaliador é o mesmo ato que publicá-lo.
-    detectors: DETECTOR_EVALUATORS.map(({ criterion, evaluate }) => {
-      const { results, summary } = evaluate();
-      return detectorReport(criterion, results, summary);
-    }),
+    detectors,
     services: { syllables: evaluateSyllables().summary },
     criteriaCoverage: { ...criteriaCoverage(), total: CRITERION_IDS.length },
   };

@@ -11,6 +11,10 @@ de eval assertam sobre o mesmo retorno que este arquivo serializa. Não existe s
 implementação para uma página divergir do CI — se o número publicado estiver errado, o teste
 quebra junto.
 
+A **forma** é declarada em [`src/report/eval/contract.ts`](../src/report/eval/contract.ts), o
+contrato do qual dependem os dois lados: o tooling que produz o artefato e a página
+[`/avaliacao`](../src/app/avaliacao/page.tsx) que o apresenta.
+
 ## Como ler
 
 - **`schemaVersion`** — versão da FORMA deste arquivo (não do motor; esse é `stamp.lucidVersion`).
@@ -32,9 +36,16 @@ quebra junto.
   oportunidade de acertar nem de errar). **Nunca `1`**: fabricar 100% seria o mesmo erro do
   `fleschPt: 0` corrigido no ADR-066, e no melhor ponto da escala. `tp`/`fp`/`fn` estão sempre lá
   para o número ser recalculável.
-- **`detectors[]`** — precisão/recall por critério, com `negatives` (quantos casos exigem que o
-  detector **não** dispare) e `knownLimitations` (falsos positivos/negativos conhecidos, com
-  motivo). Limitação conhecida **conta contra** a métrica em vez de ser excluída.
+- **`detectors[]`** — precisão/recall por critério, na **ordem canônica** de `CRITERION_IDS` (a
+  mesma de `criteriaCoverage`, para nenhum consumidor ver duas ordens do mesmo conjunto), com
+  `negatives` (quantos casos exigem que o detector **não** dispare) e duas listas de falha
+  deliberadamente separadas:
+  - `knownLimitations` — falha **declarada**, com `motivo` escrito na curadoria. Conta contra a
+    métrica em vez de ser excluída.
+  - `regressions` — falha de entrada marcada `correto`, **sem motivo, porque ninguém escreveu um**.
+    Vazio em build verde (o eval assere que nenhuma entrada `correto` falha); existe para o caso
+    impossível ficar visível em vez de se disfarçar de limitação. Quem exibe **não deve inferir
+    motivo**.
 - **`criteriaCoverage`** — as três camadas de evidência, **derivadas dos dados**: critério novo
   sem eval aparece automaticamente em `unitTestsOnly`.
   - `measured` — precisão/recall contra golden com casos negativos.

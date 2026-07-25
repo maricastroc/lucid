@@ -1,5 +1,6 @@
 import type { Category, CriterionId, Finding, PrincipleGroup, Severity } from "@/lucid";
 import { isCriterionId } from "@/lucid";
+import type { CriterionCoverage } from "@/report/eval/contract";
 
 export type Criterion = CriterionId;
 export type Channel = "inline" | "passage";
@@ -281,7 +282,9 @@ export function metaFor(criterion: string): CriterionMeta {
   return isCriterion(criterion) ? CRITERION_META[criterion] : CRITERION_META.jargon;
 }
 
-export type CriterionCoverage = "curated" | "productive";
+// A união vem do contrato do artefato de eval (fonte única): o mesmo vocabulário que a
+// página publica é o que a UI usa, e um valor novo quebra os dois lados em compile-time.
+export type { CriterionCoverage };
 
 const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([
   "jargon",
