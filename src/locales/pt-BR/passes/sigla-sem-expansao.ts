@@ -25,16 +25,6 @@ function isDigitRun(token: Token | undefined): boolean {
   return token !== undefined && !token.isWord && RE_STARTS_WITH_DIGIT.test(token.text);
 }
 
-/**
- * True when the letter run is welded to digits — directly or across a hyphen — and is
- * therefore a FRAGMENT of an alphanumeric designation ("COVID-19", "MP3", "IPTU-2025"),
- * not an acronym standing on its own.
- *
- * Adjacency is measured by OFFSET, not by neighbouring token: "NBR 5410" has a space
- * between them, so "NBR" is a real standalone acronym and stays in scope. The tokenizer
- * splits at the letter/digit boundary, so without this the criterion marked a span that
- * is not a term in the text at all — the UI underlined "COVID" inside "COVID-19".
- */
 function isWeldedToDigits(tokens: readonly Token[], index: number): boolean {
   const tok = tokens[index];
 

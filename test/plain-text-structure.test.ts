@@ -100,13 +100,6 @@ describe("structure in pasted text (F4) — unmarked prose stays intact", () => 
   });
 });
 
-/**
- * A10: `hasStructuralMarkers` is a document-wide boolean, so one bullet sends the whole
- * text through the block path. That only mattered while the two paths disagreed about
- * where a sentence ends — which they did, until a blank line became a boundary in both
- * (ADR-073). These are the property that makes the global switch harmless: the marker
- * changes what the marked region becomes, never how the rest is read.
- */
 describe("structure in pasted text (A10) — a marker in one place does not re-read the rest", () => {
   const BASES = [
     "Prazos e documentos\n\nO interessado deve entregar os documentos ate sexta.",

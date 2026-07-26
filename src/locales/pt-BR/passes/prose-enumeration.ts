@@ -13,15 +13,8 @@ const ORDINAL_RANK: Record<string, number> = {
 
 const ROMAN_RANK: Record<string, number> = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6 };
 
-/** One or two digits only: keeps years and amounts — "(2025)" — from reading as item numbers. */
 const RE_SMALL_NUMBER = /^\d{1,2}$/;
 
-/**
- * Rank of an enumeration marker written as a numeral closed by ")" — "(1)", "1)", "(i)".
- * The closing parenthesis is what separates a marker from a number that is simply part of
- * the sentence, and it must be WELDED to the numeral: "item 1 ) do edital" is not a marker.
- * The opening parenthesis is optional because both notations are current in the register.
- */
 function markerRankAt(tokens: readonly Token[], index: number): number | null {
   const numeral = tokens[index];
   const closing = tokens[index + 1];

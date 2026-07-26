@@ -191,6 +191,109 @@ describe("segmentSentences — punctuation followed by a quote or parenthesis", 
     const source = "Você fez o quê?! Não acredito nisso.";
     expect(texts(source)).toEqual(["Você fez o quê?!", "Não acredito nisso."]);
   });
+
+  it("closes the sentence before every closing mark, not just the straight quote (ADR-075)", () => {
+    expect(texts("Ela disse: 'Já chega.' Todos concordaram.")).toEqual([
+      "Ela disse: 'Já chega.'",
+      "Todos concordaram.",
+    ]);
+    expect(texts("Ela disse: “Já chega.” Todos concordaram.")).toEqual([
+      "Ela disse: “Já chega.”",
+      "Todos concordaram.",
+    ]);
+    expect(texts("Ela disse: ‘Já chega.’ Todos concordaram.")).toEqual([
+      "Ela disse: ‘Já chega.’",
+      "Todos concordaram.",
+    ]);
+    expect(texts("Ela disse: «Já chega.» Todos concordaram.")).toEqual([
+      "Ela disse: «Já chega.»",
+      "Todos concordaram.",
+    ]);
+    expect(texts("Ver o anexo [ata anexa.] Nada mais foi tratado.")).toEqual([
+      "Ver o anexo [ata anexa.]",
+      "Nada mais foi tratado.",
+    ]);
+  });
+});
+
+describe("segmentSentences — the next sentence opens with a quote or bracket (ADR-075)", () => {
+  it("an opening mark confirms the boundary just like a capital letter would", () => {
+    expect(texts('O prazo terminou. "Vamos recorrer", disse o advogado.')).toEqual([
+      "O prazo terminou.",
+      '"Vamos recorrer", disse o advogado.',
+    ]);
+    expect(texts("O prazo terminou. “Vamos recorrer”, disse o advogado.")).toEqual([
+      "O prazo terminou.",
+      "“Vamos recorrer”, disse o advogado.",
+    ]);
+    expect(texts("O prazo terminou. 'Vamos recorrer', disse o advogado.")).toEqual([
+      "O prazo terminou.",
+      "'Vamos recorrer', disse o advogado.",
+    ]);
+    expect(texts("O prazo terminou. «Vamos recorrer», disse o advogado.")).toEqual([
+      "O prazo terminou.",
+      "«Vamos recorrer», disse o advogado.",
+    ]);
+    expect(texts("A regra mudou. (A anterior foi revogada.)")).toEqual([
+      "A regra mudou.",
+      "(A anterior foi revogada.)",
+    ]);
+    expect(texts("A regra mudou. [Ver a nota do editor.]")).toEqual([
+      "A regra mudou.",
+      "[Ver a nota do editor.]",
+    ]);
+  });
+
+  it("without the space, the opening mark does NOT confirm — same rule as F3", () => {
+    expect(texts("O prazo terminou.“Vamos recorrer”, disse ele.")).toEqual([
+      "O prazo terminou.“Vamos recorrer”, disse ele.",
+    ]);
+    expect(texts("O prazo terminou.O pedido foi negado.")).toEqual([
+      "O prazo terminou.O pedido foi negado.",
+    ]);
+  });
+
+  it("an unconfirmed boundary does not abort the scan — later boundaries still land", () => {
+    expect(texts("O prazo terminou.O pedido foi negado. Depois houve recurso.")).toEqual([
+      "O prazo terminou.O pedido foi negado.",
+      "Depois houve recurso.",
+    ]);
+    expect(texts("O prazo terminou.O pedido foi negado.\n\nOutro trecho começa aqui.")).toEqual([
+      "O prazo terminou.O pedido foi negado.",
+      "Outro trecho começa aqui.",
+    ]);
+  });
+});
+
+describe("segmentSentences — the digit rule protects a decimal, not any digit near a period (ADR-075)", () => {
+  it("only a digit on BOTH sides suppresses the boundary", () => {
+    expect(texts("O valor de R$ 1.500,00 foi pago hoje.")).toEqual([
+      "O valor de R$ 1.500,00 foi pago hoje.",
+    ]);
+    expect(texts("Veja o item 1. O segundo vem depois.")).toEqual([
+      "Veja o item 1.",
+      "O segundo vem depois.",
+    ]);
+    expect(texts("O total foi de mil. 500 pessoas vieram.")).toEqual([
+      "O total foi de mil.",
+      "500 pessoas vieram.",
+    ]);
+  });
+});
+
+describe("segmentSentences — a sentence ending in a proper noun (ADR-075)", () => {
+  it("the single-initial guard does not swallow a capitalized full word", () => {
+    expect(texts("O processo foi julgado pelo juiz Silva. O réu recorreu.")).toEqual([
+      "O processo foi julgado pelo juiz Silva.",
+      "O réu recorreu.",
+    ]);
+  });
+});
+
+describe("segmentSentences — an unconfirmed !/?/… is not a boundary either (ADR-075)", () => {
+  it("an exclamation followed by a lowercase word keeps a single sentence", () => {
+    expect(texts("Ele gritou! e saiu correndo.")).toEqual(["Ele gritou! e saiu correndo."]);
+  });
 });
 
 describe("segmentSentences — line breaks", () => {
@@ -237,6 +340,12 @@ describe("segmentSentences — a blank line closes a sentence even with no punct
     ]);
   });
 
+  it("a line break followed by indentation is a wrap, not a blank line (ADR-075)", () => {
+    expect(texts("Prazos e documentos\n   O interessado deve entregar.")).toEqual([
+      "Prazos e documentos\n   O interessado deve entregar.",
+    ]);
+  });
+
   it("the boundary coincides with an existing punctuation boundary without splitting twice", () => {
     expect(texts("Primeira frase.\n\nSegunda frase.")).toEqual(["Primeira frase.", "Segunda frase."]);
   });
@@ -259,6 +368,16 @@ describe("segmentSentences — text with no final punctuation", () => {
   it("a whole text with no punctuation at all becomes a single sentence", () => {
     const source = "isso aqui é só um pedaço de texto solto sem pontuação nenhuma";
     expect(texts(source)).toEqual([source]);
+  });
+
+  it("trailing whitespace is trimmed off the unpunctuated last sentence (ADR-075)", () => {
+    const sentences = segmentSentences("Prazos e documentos   ");
+    expect(sentences.map((s) => s.text)).toEqual(["Prazos e documentos"]);
+    expect(sentences[0]).toMatchObject({ start: 0, end: 19 });
+  });
+
+  it("segmentSentences leaves tokens empty — attachTokens fills them later (ADR-075)", () => {
+    expect(segmentSentences("O prazo terminou.")[0].tokens).toEqual([]);
   });
 });
 
