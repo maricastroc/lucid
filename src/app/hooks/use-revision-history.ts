@@ -5,26 +5,14 @@ import { analyze } from "@/lucid";
 import { documentBurden, type LedgerEntry } from "../lib/ledger";
 
 export interface RevisionHistory {
-  /** Provenance trail of every change applied in this session, in order. */
   ledger: readonly LedgerEntry[];
   canUndo: boolean;
-  /**
-   * Applies a change authored by the human or by the AI — never by the engine (ADR-054) —
-   * weighing the audit burden before and after. Returns `false` when the change was refused:
-   * a reentrant call, an unsettled analysis, or a no-op.
-   */
   applyChange: (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => boolean;
   undo: () => void;
-  /** Free typing invalidates the stack: undoing over hand-typed text would destroy it. */
   noteFreeEdit: () => void;
-  /** A different document arrived — the previous trail says nothing about it. */
   reset: () => void;
 }
 
-/**
- * The session's edit history. The ledger and the undo stack move together: undoing pops
- * both, so the trail never claims a change the text no longer carries.
- */
 export function useRevisionHistory(
   text: string,
   setText: (value: string) => void,

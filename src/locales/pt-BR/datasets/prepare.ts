@@ -36,10 +36,6 @@ export function prepareStringSet(raw: unknown, key: "forms" | "abbreviations"): 
   return new Set(list);
 }
 
-/**
- * Monta o léxico de abreviações em duas classes (A-2): proclíticas, que nunca
- * encerram frase, e unidades de medida, que encerram quando fecham uma medição.
- */
 export function prepareAbbreviations(raw: unknown): AbbreviationLexicon {
   const data = raw as { abbreviations: string[]; unitAbbreviations: string[] };
   return { blocking: new Set(data.abbreviations), units: new Set(data.unitAbbreviations) };

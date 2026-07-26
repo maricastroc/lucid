@@ -53,13 +53,6 @@ function precedingWord(source: string, position: number): string {
   return source.slice(start, position);
 }
 
-/**
- * Contexto de MEDIÇÃO: há um dígito imediatamente antes da abreviação, com no
- * máximo espaços/tabs entre eles ("9h", "5 km", "30min"). É a condição que
- * distingue a unidade enclítica ("A prova dura 30min.") do homógrafo não-métrico
- * ("Valor min. 5 reais", "seg. 12 de maio"), que continua bloqueando a fronteira.
- * Não atravessa quebra de linha: número e unidade não se separam por linha.
- */
 function precededByNumber(source: string, wordStart: number): boolean {
   let i = wordStart;
   while (i > 0 && (source[i - 1] === " " || source[i - 1] === "\t")) i--;

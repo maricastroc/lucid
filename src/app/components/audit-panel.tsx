@@ -29,23 +29,10 @@ export interface AuditPanelProps {
   onPrev: () => void;
   onNext: () => void;
   onClose: () => void;
-  /** Titles the index. The rail labels it; the sheet identifies itself by its own handle. */
   header?: ReactNode;
-  /**
-   * Comprehension probe (Layer 2), declared PER SURFACE instead of assumed.
-   * Today only the desktop rail carries it — see `RevisionSheet` for why the sheet does not.
-   */
   probe?: ReactNode;
 }
 
-/**
- * The audit's content, in the single place both surfaces read it from.
- *
- * Two branches, and only two: a selected finding becomes its revision note; no selection
- * becomes the index. The desktop rail and the mobile sheet used to each hold a copy of this
- * tree, and they had already drifted — the probe reached the rail and never the sheet.
- * Whatever gets added here now arrives at both, or is refused at both by an explicit slot.
- */
 export function AuditPanel(props: AuditPanelProps) {
   if (props.selectedFinding) {
     return (
@@ -137,7 +124,6 @@ export function NoteNav({
   );
 }
 
-/** Stamp of the engine that produced the reading — the same on every surface. */
 export function AuditPanelFooter({ diagnostic }: { diagnostic: Diagnostic }) {
   return (
     <div className="flex shrink-0 items-center gap-2 border-t border-rule-1 px-6 py-3 text-[11px] text-ink-3">

@@ -5,35 +5,23 @@ import type { Diagnostic, Finding } from "@/lucid";
 import { findingId } from "../lib/criteria";
 
 export interface FindingNavigation {
-  /** Selected finding's id, or `null` — never an id that left the current index. */
   selectedId: string | null;
   selectedIndex: number;
   selectedFinding: Finding | null;
-  /** Id being briefly highlighted after a scroll, so the eye finds it. */
   flashId: string | null;
   select: (finding: Finding) => void;
   clear: () => void;
-  /** Walks the index, wrapping around. `delta` is +1/-1. */
   goTo: (delta: number) => void;
 }
 
 export interface FindingNavigationOptions {
   findings: readonly Finding[];
-  /** Container the selected finding is scrolled into view within. */
   scrollRef: RefObject<HTMLDivElement | null>;
-  /** Re-runs the scroll after the document is re-rendered. */
   diagnostic: Diagnostic;
-  /** Selection and keyboard navigation only make sense while auditing. */
   enabled: boolean;
-  /** Fired whenever navigation lands on a finding — the caller may reveal its panel. */
   onNavigate?: () => void;
 }
 
-/**
- * Which finding the reviewer is looking at, and how they walk between them — pointer,
- * `j`/`k`, or arrow keys. The selection is DERIVED against the current index: filtering a
- * criterion out drops the selection instead of leaving a dangling id behind.
- */
 export function useFindingNavigation({
   findings,
   scrollRef,

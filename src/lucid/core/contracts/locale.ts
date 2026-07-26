@@ -23,12 +23,6 @@ export interface DocumentServices {
 export interface ReadabilityMetric {
   readonly id: string;
   calculate(input: { wordsPerSentence: number; syllablesPerWord: number }): number;
-  /**
-   * Interpreta a medida SEM alterá-la (não há clamp em lugar algum). Vive junto da
-   * fórmula porque faixa de referência e limiar de plausibilidade são propriedades
-   * DELA — trocar a métrica troca as faixas no mesmo movimento. A engine não chama
-   * isto: é camada derivada, consumida por UI e relatório.
-   */
   interpret(metrics: Metrics): ReadabilityReading;
 }
 

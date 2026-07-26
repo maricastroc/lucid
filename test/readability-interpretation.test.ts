@@ -7,7 +7,6 @@ import type { ReadabilityReading } from "../src/lucid";
 
 const read = (text: string): ReadabilityReading => interpretFleschPt(analyze(text).metrics);
 
-/** A real legalese period from §1: 44 words in one sentence, a LEGITIMATELY negative Flesch-PT. */
 const JURIDIQUES =
   "Fica assegurado ao interessado, na hipótese de indeferimento do requerimento formulado perante a autoridade " +
   "competente, o direito de interposição de recurso administrativo, no prazo improrrogável de dez dias contados da " +

@@ -222,7 +222,7 @@ function SafeEquivalent({ finding }: { finding: Finding }) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch {
-      /* ignore */
+      //
     }
   };
 

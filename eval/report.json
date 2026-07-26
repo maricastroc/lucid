@@ -6,7 +6,7 @@
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
     "configHash": "ebb6dee9",
     "dataHash": "91c09d7d",
-    "goldenHash": "e9fadb45"
+    "goldenHash": "8245082f"
   },
   "method": {
     "scoring": "count-per-passage",

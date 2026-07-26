@@ -19,13 +19,6 @@ import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 import { GOLDEN_SILABAS } from "./silabas-golden";
 import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
 
-/**
- * Artifact invariants — NO flag, runs in CI.
- *
- * What this file protects is not the value of the numbers (that is the evals' job), but the
- * properties that make the artifact publishable: stamp present, no criterion silently
- * disappearing, known limitations counting against the metric, and determinism.
- */
 describe("eval artifact — publication invariants", () => {
   const artifact = buildEvalArtifact();
 

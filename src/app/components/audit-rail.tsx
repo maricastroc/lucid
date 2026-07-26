@@ -4,11 +4,9 @@ import { AuditPanel, AuditPanelFooter, type AuditPanelProps } from "./audit-pane
 import { ProbePanel } from "./probe-panel";
 
 export interface RailProps extends Omit<AuditPanelProps, "header" | "probe"> {
-  /** Current document text — input of the comprehension probe (Layer 2). */
   text: string;
 }
 
-/** Desktop surface of the audit: a fixed column beside the document. */
 export function AuditRail({ text, ...panel }: RailProps) {
   return (
     <aside

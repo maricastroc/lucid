@@ -3,18 +3,6 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { buildEvalArtifact, serializeEvalArtifact } from "./compute";
 
-/**
- * DRIFT GUARD — the published artifact must be the one the current code produces.
- *
- * Without this, changing a golden and running `npm test` passes green (the evals pin no
- * values), and `eval/report.json` ends up describing a state that no longer exists — the
- * page would publish a number that is not HEAD's, which is exactly the failure mode that
- * turns an eval into marketing. The `goldenHash` makes the divergence detectable; this
- * test DETECTS it.
- *
- * It deliberately runs in the normal suite (no flag, no git): whoever touches a golden or
- * the engine finds out right away, not in code review.
- */
 const ARTIFACT_PATH = resolve(__dirname, "../../eval/report.json");
 const REGENERATE = "npm run eval";
 

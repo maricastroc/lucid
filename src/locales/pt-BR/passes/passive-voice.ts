@@ -35,26 +35,8 @@ type Eventiveness = "agent" | "eventive_tense" | "ambiguous_present";
 
 const PRESENT_INDICATIVE_SER = new Set(["sou", "és", "é", "somos", "sois", "são"]);
 
-/**
- * Particípios que ancoram a construção DEÔNTICA "ser obrigado a" (A-6). Só
- * suprimem a passiva quando NÃO há agente explícito — ver a decisão no ponto de
- * uso, dentro de `run`.
- */
 const DEONTIC_PARTICIPLES = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
 
-/**
- * Auxiliares que formam a passiva COMPOSTA junto de "sido"/"sendo" (A-12e).
- * A âncora do pass é a forma de "ser", então em "tinha sido aprovado" o span
- * começava em "sido" e deixava "tinha" de fora: o destaque na UI abria no meio
- * da locução e o trecho citado na justificativa saía truncado. Reconhecer o
- * auxiliar imediatamente anterior faz o span cobrir a construção inteira.
- * Só o token ADJACENTE conta — sem janela de conectores, para não engolir
- * material alheio à locução.
- *
- * "estar" segue fora como ÂNCORA de passiva (ADR-052); aqui ele aparece apenas
- * como auxiliar de "sendo" ("está sendo analisado"), onde quem ancora a passiva
- * continua sendo "sendo", forma de "ser".
- */
 const TER_HAVER_AUXILIARIES = new Set([
   "tinha", "tinhas", "tínhamos", "tínheis", "tinham",
   "tenho", "tens", "tem", "temos", "tendes", "têm",
@@ -81,7 +63,6 @@ const ESTAR_AUXILIARIES = new Set([
   "vai", "vão", "vem", "vêm", "continua", "continuam",
 ]);
 
-/** Início do span, recuado para incluir o auxiliar da passiva composta. */
 function compositeStart(tokens: readonly Token[], anchorIndex: number): number | null {
   const anchor = tokens[anchorIndex];
   const previous = tokens[anchorIndex - 1];

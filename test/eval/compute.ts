@@ -1,14 +1,3 @@
-/**
- * Eval computation — SINGLE SOURCE.
- *
- * The eval tests assert over what this module returns, and the published artifact is the
- * serialization of that SAME return value. There is no second implementation for the page
- * to diverge from CI: if the number on the page is wrong, the test breaks along with it.
- *
- * Pure by construction: no vitest, no fs, no `Date`, no network. Two calls with the same
- * code and the same data return the same object — Layer 1's determinism promise extended
- * to its own measurement.
- */
 import { DEFAULT_CONFIG, hashConfig } from "../../src/lucid/core/config";
 import { stableHash } from "../../src/lucid/core/hash";
 import { analyze, CRITERION_IDS, localePtBR } from "../../src/lucid";
@@ -49,20 +38,12 @@ const round = (v: number, places = 4): number => {
   return Math.round(v * f) / f;
 };
 
-/* ─────────────────────────── counting: TP/FP/FN ─────────────────────────── */
-
 export interface CountScore {
   tp: number;
   fp: number;
   fn: number;
 }
 
-/**
- * Scoring convention BY COUNT (not by span): the golden set declares how many findings the
- * excerpt must produce; the surplus counts as FP and the shortfall as FN. It is looser than
- * matching positions — an FP landing exactly where an FN was would cancel out — and it is
- * declared in the artifact as a limitation of the method, not hidden.
- */
 export function scoreCounts(expectedCount: number, actualCount: number): CountScore {
   return {
     tp: Math.min(actualCount, expectedCount),
@@ -95,12 +76,9 @@ export function summarize(results: readonly EntryResult[]): CountSummary {
   };
 }
 
-/** Formats a rate for human reading without hiding the absence of a measurement. */
 export function formatRate(value: number | null): string {
   return value === null ? "—" : `${(value * 100).toFixed(1)}%`;
 }
-
-/* ─────────────────────────────── evaluators ─────────────────────────────── */
 
 export interface JargonEntryResult extends EntryResult {
   categoria: string;
@@ -274,16 +252,6 @@ export function evaluateSyllables(): {
   };
 }
 
-/* ────────────── evaluator registry: the single list of record ────────────── */
-
-/**
- * SINGLE REGISTRY of the detectors that have a precision/recall eval.
- *
- * There used to be two lists for the same fact (one for coverage, another to assemble the
- * artifact) and the second could forget what the first said. Here, registering the evaluator
- * is the same act as declaring it measured: `criteriaCoverage` and `buildEvalArtifact` both
- * derive from this constant. `criterion` is a `CriterionId`, so a nonexistent id fails to compile.
- */
 export interface DetectorEvaluator {
   readonly criterion: CriterionId;
   readonly evaluate: () => { results: readonly EntryResult[]; summary: CountSummary };
@@ -295,14 +263,9 @@ export const DETECTOR_EVALUATORS: readonly DetectorEvaluator[] = [
   { criterion: "passive_voice", evaluate: evaluatePassiveVoice },
 ];
 
-/* ──────────────────── coverage: what is NOT measured ──────────────────── */
-
 export interface CoverageInputs {
-  /** The engine's universe of criteria. */
   criterionIds: readonly string[];
-  /** Criteria with a registered evaluator. */
   evaluated: readonly string[];
-  /** Criteria with a labelled finding in the integrated golden set. */
   labelled: readonly string[];
 }
 
@@ -318,13 +281,6 @@ function defaultCoverageInputs(): CoverageInputs {
   };
 }
 
-/**
- * Derived from the inputs, never hand-written: a criterion with no registered evaluator and
- * no golden label lands in `unitTestsOnly` by construction. The opposite of a silent ceiling.
- *
- * The inputs are injectable so the test can prove the DERIVATION with a synthetic universe
- * instead of comparing the output against a hand-written list (which would prove nothing).
- */
 export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs()): Omit<CriteriaCoverage, "total"> {
   const evaluated = new Set(inputs.evaluated);
   const labelled = new Set(inputs.labelled);
@@ -336,9 +292,6 @@ export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs(
   };
 }
 
-/* ────────────────────────────── the artifact ────────────────────────────── */
-
-/** Hash of the evaluation corpus — changes whenever any golden entry changes. */
 export function hashGoldens(
   goldens: {
     jargon: readonly unknown[];
@@ -376,15 +329,6 @@ export function evalStamp(): EvalStamp {
   };
 }
 
-/**
- * Method caveats as IDENTIFIED DATA — so the page can address each one (highlight, link,
- * order) and so the test can pin the `id` instead of the wording.
- *
- * `Record<CaveatId, string>` + an explicit order: a new caveat does not compile without its
- * text, following the discipline of ADR-037 (the end of the silent fallback). They used to be
- * free strings and the test asserted a substring of the prose — rewording the sentence broke
- * the test without changing any semantics.
- */
 const CAVEAT_ORDER: readonly CaveatId[] = [
   "count_scoring",
   "circular_recall_curated",
@@ -407,13 +351,6 @@ const CAVEAT_TEXT: Record<CaveatId, string> = {
 
 const METHOD_CAVEATS: readonly MethodCaveat[] = CAVEAT_ORDER.map((id) => ({ id, text: CAVEAT_TEXT[id] }));
 
-/**
- * A failure is either a DECLARED LIMITATION (it has a reason written by the curator) or a
- * REGRESSION (a `correto` entry that failed, with no reason because nobody wrote one). The
- * two used to live in a single list, distinguished by `estado` — and any consumer would have
- * had to infer the difference. Now the distinction belongs to the contract: `regressions` is
- * empty on a green build.
- */
 function detectorReport(criterion: string, results: readonly EntryResult[], summary: CountSummary): DetectorReport {
   const failed = (r: EntryResult): boolean => r.fp > 0 || r.fn > 0;
   return {
@@ -433,13 +370,6 @@ const toRegression = (r: EntryResult): Regression => ({
   actualCount: r.actualCount,
 });
 
-/**
- * CANONICAL ORDER of the criteria: the one in `CRITERION_IDS` (the engine's declaration).
- *
- * It holds for `detectors` and for the three lists in `criteriaCoverage`, so the page's table
- * and its coverage cards never disagree about the order of the same criteria. `detectors` used
- * to come out in the evaluator-registry order while `measured` followed the engine's.
- */
 function canonicalRank(criterion: string): number {
   const i = (CRITERION_IDS as readonly string[]).indexOf(criterion);
   return i === -1 ? Number.MAX_SAFE_INTEGER : i;
@@ -463,7 +393,6 @@ export function buildEvalArtifact(): EvalArtifact {
   };
 }
 
-/** Stable serialization — no timestamp, so the artifact is byte-identical like the engine. */
 export function serializeEvalArtifact(artifact: EvalArtifact): string {
   return `${JSON.stringify(artifact, null, 2)}\n`;
 }

@@ -1,23 +1,10 @@
 import type { Metrics, ReadabilityAnomaly, ReadabilityReading, ReadabilityUnmeasurableCause } from "@/lucid";
 import { localePtBR, READABILITY_REFERENCE_RANGE } from "@/lucid";
 
-/**
- * Copy da leiturabilidade — camada única, consumida pela UI E pelo relatório exportado.
- *
- * Regra do módulo: o valor medido aparece SEMPRE, sem truncamento; a interpretação vem
- * ao lado, nunca no lugar. Toda causa é nomeada (sem "indisponível" genérico) e os
- * `Record`/`switch` abaixo são exaustivos por tipo — causa nova não compila sem copy,
- * na disciplina do ADR-037 (fim do fallback silencioso).
- */
-
 export interface ReadabilityDisplay {
-  /** `false` só quando não existe medida — para o consumidor não ter que comparar com "—". */
   measured: boolean;
-  /** O valor calculado, formatado. `"—"` somente quando `measured` é false. */
   value: string;
-  /** Posição na escala — coordenada, nunca nota. */
   qualifier: string;
-  /** Causas explícitas: por que não há medida, ou por que ela não descreve o texto. */
   notes: readonly string[];
 }
 
@@ -75,7 +62,6 @@ export function describeReadability(reading: ReadabilityReading): ReadabilityDis
   }
 }
 
-/** Atalho para quem tem o `Diagnostic` em mão: interpreta pela métrica do locale ativo. */
 export function readabilityOf(metrics: Metrics): ReadabilityDisplay {
   return describeReadability(localePtBR.metrics.readability.interpret(metrics));
 }

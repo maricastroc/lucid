@@ -54,9 +54,6 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
         >
           {importing ? "Abrindo…" : "Abrir .docx"}
         </button>
-
-        {/* Mesma pílula do ".docx" (borda, raio, tipografia) — some junto no mobile, onde
-            o espaço é do par Revisar/Escrever. */}
         <Link
           href="/avaliacao"
           className="hidden items-center rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 sm:inline-flex"

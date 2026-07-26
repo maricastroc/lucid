@@ -75,7 +75,9 @@ const NARRATIVE: Record<CriterionId, CriterionNarrative> = {
   passiva_sintetica: {
     headline: () => "Voz passiva sintética (“se”)",
     prose: (f) =>
-      `«${flat(f.span.text)}» usa o “se” enclítico: a ação existe, mas o texto não diz quem a pratica (“aplica-se a multa” — quem aplica?). O detector marca a forma enclítica “verbo-se” e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`,
+      metaStr(f, "position") === "proclitic"
+        ? `«${flat(f.span.text)}» põe o “se” antes do verbo: a ação existe, mas o texto não diz quem a pratica (“não se aplica a multa” — quem aplica?). O detector só marca a próclise depois de uma palavra que a obriga (“${metaStr(f, "attractor") ?? "não"}”, aqui), posição onde o “se” não pode ser o condicional; e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`
+        : `«${flat(f.span.text)}» usa o “se” enclítico: a ação existe, mas o texto não diz quem a pratica (“aplica-se a multa” — quem aplica?). O detector marca a forma enclítica “verbo-se” e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`,
     confidence: () =>
       assistida(
         `O “se” é ambíguo — pode ser passiva, indeterminação do sujeito ou reflexivo. A ferramenta não desfaz essa ambiguidade nem inventa o agente: aponta a construção e devolve a decisão a você.`,

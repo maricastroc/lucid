@@ -224,10 +224,11 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     expected: {
       findings: [
         { criterion: "jargon", severity: "warning", start: 61, end: 72, spanText: "supracitado", requiresHuman: false, suggestion: "citado acima" },
+        { criterion: "passiva_sintetica", severity: "warning", start: 89, end: 95, spanText: "se fez", requiresHuman: true, suggestion: undefined },
       ],
       metrics: { words: 16, sentences: 3 },
     },
-    notes: "'a análise que se fez' não é nominalização verbo-leve (não há verbo leve + determinante + nominalização adjacentes).",
+    notes: "'a análise que se fez' não é nominalização verbo-leve (não há verbo leve + determinante + nominalização adjacentes), mas É passiva sintética proclítica: 'que' força a próclise e o 'se' esconde quem fez a análise.",
   },
   {
     id: "emoji_antes_do_finding",

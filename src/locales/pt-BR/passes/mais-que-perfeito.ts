@@ -2,16 +2,6 @@ import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "mais_que_perfeito_sintetico";
 
-/**
- * Formas que a morfologia classifica como mais-que-perfeito, mas que no uso real
- * são LEXICALIZADAS e não pedem a troca pela forma composta (A-12c). "Pudera!" é
- * interjeição de concordância/ironia ("Pudera! Ninguém avisou"), não o
- * mais-que-perfeito de "poder" — trocá-la por "tinha podido" destrói a frase.
- * O dataset é derivado do PortiLexicon (morfológico, sem uso), então a exclusão
- * mora aqui, como em `NON_GERUND` (gerundismo) e `participios-falsos-nominais`
- * (passiva). Custo aceito: o mais-que-perfeito genuíno de "poder" — raríssimo no
- * registro-alvo — deixa de ser apontado (precisão > recall, doutrina do projeto).
- */
 const LEXICALIZED_EXCLUSIONS = new Set(["pudera"]);
 
 const JUSTIFICATION =

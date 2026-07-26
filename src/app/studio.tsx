@@ -89,9 +89,7 @@ export function Studio() {
         : null,
     [selectedFinding, diagnostic],
   );
-
-  /* ── the document changed identity: nothing said about the old one still holds ── */
-
+  
   const afterDocumentReplaced = useCallback(() => {
     clearSelection();
     resetHistory();
@@ -116,8 +114,6 @@ export function Studio() {
     clearDocument();
     afterDocumentReplaced();
   }, [isEmpty, mode, clearDocument, afterDocumentReplaced]);
-
-  /* ── applying a revision: the author or the AI writes, the engine re-reads ── */
 
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {

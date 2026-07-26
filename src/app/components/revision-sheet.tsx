@@ -6,14 +6,6 @@ export interface RevisionSheetProps extends Omit<AuditPanelProps, "header" | "pr
   onDismiss: () => void;
 }
 
-/**
- * Mobile surface of the audit: a sheet over the document, since there is no room for a column.
- *
- * It shows the same content as the rail, minus the comprehension probe. That absence was an
- * accident until now — the probe was added to the rail while this tree was a separate copy —
- * and it stays only because turning it on is a visible change nobody asked for. It is one
- * `probe={…}` away, and no longer something a future section can repeat by omission.
- */
 export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
   return (
     <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Revisões">

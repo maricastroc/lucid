@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { coverageLabel, metaFor } from "../lib/criteria";
 import rawReport from "../../../eval/report.json";
-// Contrato compartilhado: o mesmo módulo que o tooling de eval usa para PRODUZIR o
-// artefato. A página não redeclara a forma do que consome, e não depende de `test/`.
 import { EVAL_SCHEMA_VERSION, type CaveatId, type DetectorReport, type EvalArtifact } from "@/report/eval/contract";
 
 export const metadata: Metadata = {
@@ -12,31 +10,13 @@ export const metadata: Metadata = {
     "O Lucid só publica métricas onde a medição é sustentada. Precisão, recall e cobertura do motor determinístico, com as limitações do método declaradas — lidas do artefato de eval, não recalculadas.",
 };
 
-/**
- * Versão de esquema que este build sabe renderizar — vem do contrato, não de uma constante
- * própria: a página compila contra a MESMA forma que o emissor produz.
- */
 export const SUPPORTED_SCHEMA_VERSION = EVAL_SCHEMA_VERSION;
 
 const artifact = rawReport as unknown as EvalArtifact;
 
-/**
- * O `as` é sustentado por teste, não por esperança: `test/eval/artifact-drift.test.ts`
- * garante que este JSON é byte-idêntico ao que `buildEvalArtifact()` produz.
- */
-
-/* Microtipografia: página em português, decimal com VÍRGULA. `—` = ausência de medida. */
 const comma = (s: string): string => s.replace(".", ",");
 const rate = (v: number | null): string => (v === null ? "—" : `${comma((v * 100).toFixed(1))}%`);
 const decimal = (v: number | null, places = 3): string => (v === null ? "—" : comma(v.toFixed(places)));
-
-/**
- * ESCADA DE EVIDÊNCIA — copy da página (não dado do artefato).
- *
- * A régua de cada degrau codifica a força da prova: cheia → fina → tracejada. Barra de
- * progresso comunicaria "incompleto"; a escada comunica "três regimes declarados", que é
- * o que o artefato de fato sustenta.
- */
 const TIERS = [
   {
     note: "Precisão e recall contra golden que inclui casos negativos — há oportunidade real de falso positivo.",
@@ -66,7 +46,6 @@ export default function AvaliacaoPage() {
     { key: "unit", label: "apenas teste unitário", criteria: criteriaCoverage.unitTestsOnly },
   ] as const;
 
-  /** Índice da nota, derivado da POSIÇÃO no artefato — a página não inventa numeração. */
   const noteNumber = (id: CaveatId): number | null => {
     const i = method.caveats.findIndex((c) => c.id === id);
     return i === -1 ? null : i + 1;
@@ -76,9 +55,8 @@ export default function AvaliacaoPage() {
 
   return (
     <main className="min-h-dvh bg-desk px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mx-auto w-full max-w-[68rem]">
+      <div className="mx-auto w-full max-w-272">
         <div className="fade-in overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
-          {/* ── Hero: tese, recusa, e a contagem como evidência ────────────── */}
           <header className="px-6 py-10 sm:px-14 sm:py-16">
             <p className="u-label flex items-center gap-2 text-ink-2">
               <span className="size-1.5 rounded-full bg-accent" aria-hidden />
@@ -96,7 +74,6 @@ export default function AvaliacaoPage() {
               que não foi medido aparece como não medido.
             </p>
 
-            {/* Recusa como OBJETO, no padrão da landing — não como frase no parágrafo. */}
             <p className="mt-6 flex max-w-[60ch] items-start gap-2.5 text-[13.5px] leading-relaxed text-ink-1">
               <span
                 className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full border border-human-line bg-human-weak"
@@ -129,7 +106,6 @@ export default function AvaliacaoPage() {
             </nav>
           </header>
 
-          {/* ── Método: comprimido, apoio — vem antes de qualquer número ───── */}
           <Band id="metodo" label="Método" aside="o que os números podem significar">
             <p className="max-w-[64ch] text-[13.5px] leading-relaxed text-ink-2">
               Limites do método, do próprio artefato. Os cartões de critério remetem a eles pelos índices. Pontuação
@@ -153,7 +129,6 @@ export default function AvaliacaoPage() {
             </ol>
           </Band>
 
-          {/* ── A escada de evidência: o momento da página ─────────────────── */}
           <Band id="camadas" label="Camadas de evidência" aside="três regimes, não um placar">
             <p className="max-w-[62ch] text-[15px] leading-[1.65] text-ink-1">
               <Tabular>{criteriaCoverage.measured.length}</Tabular> dos{" "}
@@ -162,7 +137,6 @@ export default function AvaliacaoPage() {
             </p>
 
             <div className="relative mt-9 pl-5 sm:pl-7">
-              {/* Trilho do instrumento: conecta os três degraus. */}
               <span aria-hidden className="absolute bottom-4 left-0 top-4 w-px bg-rule-3" />
               <ol className="flex flex-col gap-7">
                 {layers.map((l, i) => (
@@ -194,7 +168,6 @@ export default function AvaliacaoPage() {
             </div>
           </Band>
 
-          {/* ── Regressão: alarme, só existe se houver ─────────────────────── */}
           {regressions.length > 0 && (
             <Band id="regressoes" label="Regressões" aside="falha sem motivo declarado">
               <div className="rounded-lg border border-human-line bg-human-weak px-5 py-4">
@@ -219,7 +192,6 @@ export default function AvaliacaoPage() {
             </Band>
           )}
 
-          {/* ── Critérios: as duas taxas são as protagonistas ──────────────── */}
           <Band id="criterios" label="Critérios medidos" aside="precisão e recall, com o corpus que os sustenta">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               {detectors.map((d) => (
@@ -233,7 +205,6 @@ export default function AvaliacaoPage() {
             </p>
           </Band>
 
-          {/* ── Falhas: anatomia de caso ───────────────────────────────────── */}
           <Band id="falhas" label="Falhas declaradas" aside="com motivo, contando contra a métrica">
             <div className="flex flex-col gap-11">
               {detectors.map((d) => (
@@ -256,11 +227,10 @@ export default function AvaliacaoPage() {
                           {i + 1}
                         </span>
                         <div>
-                          {/* Espécime e veredito são CLASSES distintas, não intensidades. */}
-                          <p className="break-words border-l-2 border-rule-3 pl-4 font-serif text-[16.5px] leading-snug text-ink-0">
+                          <p className="wrap-break-word border-l-2 border-rule-3 pl-4 font-serif text-[16.5px] leading-snug text-ink-0">
                             <Quoted>{lim.texto}</Quoted>
                           </p>
-                          <p className="mt-3 max-w-[58ch] break-words pl-4 text-[12.5px] leading-[1.65] text-ink-2">
+                          <p className="mt-3 max-w-[58ch] wrap-break-word pl-4 text-[12.5px] leading-[1.65] text-ink-2">
                             {lim.motivo}
                           </p>
                         </div>
@@ -272,7 +242,6 @@ export default function AvaliacaoPage() {
             </div>
           </Band>
 
-          {/* ── Procedência: a placa técnica da rodada ─────────────────────── */}
           <Band id="procedencia" label="Procedência" aside="assinatura da rodada">
             <div className="rounded-lg border border-rule-2 bg-surface-2 px-5 py-5">
               <dl className="grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
@@ -329,14 +298,6 @@ export default function AvaliacaoPage() {
   );
 }
 
-/* ─────────────────────────────── componentes ─────────────────────────────
- * Escala: 9,5/10,5/11 (mono meta) · 12/12,5 (apoio) · 13,5/14,5 (corpo) ·
- * 16,5 (espécime) · 40 (leitura e degrau) · 36/50 (tese).
- * Contraste: nenhum texto abaixo de 12px em ink-3 — em `--sheet` a rampa só passa
- * AA a partir de ink-2, então ink-3 fica restrito a decoração `aria-hidden`.
- */
-
-/** ✕ inline em vez de `lucide-react`: evita fronteira de cliente num server component. */
 function CrossGlyph() {
   return (
     <svg viewBox="0 0 10 10" className="size-2.5 text-human" fill="none" stroke="currentColor" strokeWidth={1.75}>
@@ -345,7 +306,6 @@ function CrossGlyph() {
   );
 }
 
-/** Faixa interna da folha: rótulo à esquerda, conteúdo à direita, régua acima. */
 function Band({
   id,
   label,
@@ -371,7 +331,6 @@ function Band({
   );
 }
 
-/** Cartão de critério: duas leituras protagonistas, corpus como metadado. */
 function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: CaveatId) => number | null }) {
   const curated = d.coverage === "curated";
   const corpus: readonly { term: string; value: number; dim?: boolean; note?: CaveatId }[] = [
@@ -395,12 +354,6 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
         </span>
       </div>
 
-      {/*
-       * Leituras EMPILHADAS, não lado a lado: o cartão tem ~200px internos e duas taxas de
-       * 38px colidiam (medido: coluna de 92px, texto de 92px, overflow nas duas). Empilhar
-       * dá a largura inteira a cada uma — protagonismo sem colisão, e o par lê como
-       * mostrador de instrumento.
-       */}
       <dl className="mt-6 flex flex-col gap-5">
         <Reading term="precisão" value={rate(d.summary.precision)} />
         <Reading term="recall" value={rate(d.summary.recall)} />
@@ -418,7 +371,6 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
         ))}
       </dl>
 
-      {/* Dois links IRMÃOS, nunca aninhados: `<a>` dentro de `<a>` é HTML inválido. */}
       <p className="mt-5 flex items-baseline gap-1.5 text-[12px] text-ink-2">
         <a
           href={`#lim-${d.criterion}`}
@@ -443,7 +395,6 @@ function Reading({ term, value }: { term: string; value: string }) {
   );
 }
 
-/** Referência à nota de método — âncora HTML pura, zero JS. */
 function NoteRef({ n, id }: { n: number | null; id: CaveatId }) {
   if (n === null) return null;
   return (
