@@ -1,115 +1,86 @@
 "use client";
 
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import {
-  analyze,
-  analyzeDocument,
-  ptDocumentServices,
-  type Document,
-  type Finding,
-  type Span,
-} from "@/lucid";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { Finding, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
-import { CRITERION_ORDER, findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
+import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
-import { documentBurden, sourceLabel, type LedgerEntry } from "./lib/ledger";
-import { SAMPLE_TEXT } from "./lib/sample";
+import { sourceLabel, type LedgerEntry } from "./lib/ledger";
+import { useCriterionFilter } from "./hooks/use-criterion-filter";
+import { useDocumentSource } from "./hooks/use-document-source";
+import { useFindingNavigation } from "./hooks/use-finding-navigation";
+import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
-import { AuditRail, NoteNav, RailFooter } from "./components/audit-rail";
-import { AuditOverview, ReadingSection } from "./components/audit-overview";
-import { RevisionList, type Bucket } from "./components/revision-list";
-import { RevisionNote } from "./components/revision-note";
+import { AuditRail } from "./components/audit-rail";
+import { RevisionSheet } from "./components/revision-sheet";
 import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 
+/**
+ * The review desk: composes the document, the audit and the session's revisions.
+ *
+ * Every piece of state lives in a hook named after the question it answers — what is being
+ * audited, what was changed, what is being looked at, what is being shown. What is left here
+ * is the wiring between them, which is the only thing that genuinely belongs to no one else:
+ * replacing the document resets the trail AND the selection; applying a change drops the
+ * selection because the finding it pointed at no longer exists.
+ */
 export function Studio() {
-  const [text, setText] = useState("");
   const [mode, setMode] = useState<Mode>("audit");
-  const [activeCriteria, setActiveCriteria] = useState<ReadonlySet<string>>(new Set(CRITERION_ORDER));
-  const [selectedIdRaw, setSelectedId] = useState<string | null>(null);
-  const [flashId, setFlashId] = useState<string | null>(null);
-  const [bucket, setBucket] = useState<Bucket>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
-
-  const undoStack = useRef<string[]>([]);
-  const [canUndo, setCanUndo] = useState(false);
-  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [importedDoc, setImportedDoc] = useState<Document | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
+  const {
+    text,
+    setText,
+    diagnostic,
+    blocks,
+    isEmpty,
+    isSettled,
+    importing,
+    importError,
+    dismissImportError,
+    loadExample: loadExampleDocument,
+    clear: clearDocument,
+    openDocx: importDocxFile,
+  } = useDocumentSource();
 
-  const deferredText = useDeferredValue(text);
-  const structured = importedDoc !== null && deferredText === importedDoc.source;
-  const diagnostic = useMemo(
-    () => (structured ? analyzeDocument(importedDoc!) : analyze(deferredText)),
-    [structured, importedDoc, deferredText],
-  );
-  const blocks = structured ? importedDoc!.blocks : null;
-  const isEmpty = text.trim() === "" && importedDoc === null;
+  const {
+    ledger,
+    canUndo,
+    applyChange: recordChange,
+    undo,
+    noteFreeEdit,
+    reset: resetHistory,
+  } = useRevisionHistory(text, setText, isSettled);
 
-  const resetDocumentState = useCallback(() => {
-    undoStack.current = [];
-    setCanUndo(false);
-    setLedger([]);
-  }, []);
-
-  const loadExample = useCallback(() => {
-    setImportedDoc(null);
-    setText(SAMPLE_TEXT);
-    setSelectedId(null);
-    setMode("audit");
-    resetDocumentState();
-  }, [resetDocumentState]);
-
-  const goHome = useCallback(() => {
-    const alreadyHome = isEmpty && mode === "audit";
-    if (alreadyHome) return;
-    if (!isEmpty && !window.confirm("Voltar ao início? O texto atual não fica salvo.")) return;
-    setImportedDoc(null);
-    setText("");
-    setSelectedId(null);
-    setMode("audit");
-    resetDocumentState();
-  }, [isEmpty, mode, resetDocumentState]);
-
-  const openDocx = useCallback(async (file: File) => {
-    setImporting(true);
-    setImportError(null);
-    try {
-      const bytes = await file.arrayBuffer();
-
-      const { importDocx } = await import("@/importers/docx");
-      const doc = await importDocx(bytes, ptDocumentServices);
-      setImportedDoc(doc);
-      setText(doc.source);
-      setSelectedId(null);
-      setMode("audit");
-      resetDocumentState();
-    } catch {
-      setImportError("Não foi possível ler o arquivo. Confirme que é um .docx válido.");
-    } finally {
-      setImporting(false);
-    }
-  }, [resetDocumentState]);
+  const { activeCriteria, toggleCriterion, bucket, setBucket } = useCriterionFilter();
 
   const findings = useMemo(
     () => orderFindingsForIndex(diagnostic.findings.filter((f) => activeCriteria.has(f.criterion))),
     [diagnostic, activeCriteria],
   );
-
   const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
   const humanCount = findings.length - safeCount;
 
-  const selectedId = useMemo(
-    () => (selectedIdRaw && findings.some((f) => findingId(f) === selectedIdRaw) ? selectedIdRaw : null),
-    [selectedIdRaw, findings],
-  );
-  const selectedIndex = selectedId ? findings.findIndex((f) => findingId(f) === selectedId) : -1;
-  const selectedFinding = selectedIndex >= 0 ? findings[selectedIndex] : null;
+  const revealSheet = useCallback(() => setSheetOpen(true), []);
+  const {
+    selectedId,
+    selectedIndex,
+    selectedFinding,
+    flashId,
+    select,
+    clear: clearSelection,
+    goTo,
+  } = useFindingNavigation({
+    findings,
+    scrollRef,
+    diagnostic,
+    enabled: mode === "audit",
+    onNavigate: revealSheet,
+  });
 
   const rewriteTarget = useMemo(
     () =>
@@ -119,87 +90,40 @@ export function Studio() {
     [selectedFinding, diagnostic],
   );
 
-  useEffect(() => {
-    if (!selectedId || mode !== "audit") return;
-    const el = scrollRef.current?.querySelector<HTMLElement>(`[data-finding-id="${cssEscape(selectedId)}"]`);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-    setFlashId(selectedId);
-    const t = window.setTimeout(() => setFlashId(null), 660);
-    return () => window.clearTimeout(t);
-  }, [selectedId, mode, diagnostic]);
+  /* ── the document changed identity: nothing said about the old one still holds ── */
 
-  const selectFinding = useCallback((finding: Finding) => {
+  const afterDocumentReplaced = useCallback(() => {
+    clearSelection();
+    resetHistory();
     setMode("audit");
-    setSelectedId(findingId(finding));
-    setSheetOpen(true);
-  }, []);
+  }, [clearSelection, resetHistory]);
 
-  const closeSelection = useCallback(() => setSelectedId(null), []);
+  const loadExample = useCallback(() => {
+    loadExampleDocument();
+    afterDocumentReplaced();
+  }, [loadExampleDocument, afterDocumentReplaced]);
 
-  const goTo = useCallback(
-    (delta: number) => {
-      if (findings.length === 0) return;
-      const from = selectedIndex < 0 ? (delta > 0 ? -1 : 0) : selectedIndex;
-      const next = (from + delta + findings.length) % findings.length;
-      setSelectedId(findingId(findings[next]));
-      setSheetOpen(true);
+  const openDocx = useCallback(
+    async (file: File) => {
+      if (await importDocxFile(file)) afterDocumentReplaced();
     },
-    [findings, selectedIndex],
+    [importDocxFile, afterDocumentReplaced],
   );
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) return;
-      if (mode !== "audit") return;
-      if (e.key === "Escape") return setSelectedId(null);
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        goTo(1);
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        goTo(-1);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [goTo, mode]);
+  const goHome = useCallback(() => {
+    if (isEmpty && mode === "audit") return;
+    if (!isEmpty && !window.confirm("Voltar ao início? O texto atual não fica salvo.")) return;
+    clearDocument();
+    afterDocumentReplaced();
+  }, [isEmpty, mode, clearDocument, afterDocumentReplaced]);
 
-  const toggleCriterion = useCallback((criterion: string) => {
-    setActiveCriteria((prev) => {
-      const next = new Set(prev);
-      if (next.has(criterion)) next.delete(criterion);
-      else next.add(criterion);
-      return next;
-    });
-  }, []);
-
-  const pushUndo = useCallback((current: string) => {
-    undoStack.current.push(current);
-    setCanUndo(true);
-  }, []);
-
-  const applyingRef = useRef(false);
-  useEffect(() => {
-    applyingRef.current = false;
-  }, [text]);
+  /* ── applying a revision: the author or the AI writes, the engine re-reads ── */
 
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
-      if (applyingRef.current) return;
-      if (deferredText !== text) return;
-      if (nextText === text) return;
-      applyingRef.current = true;
-
-      const burdenBefore = documentBurden(analyze(text).findings);
-      const burdenAfter = documentBurden(analyze(nextText).findings);
-      pushUndo(text);
-      setLedger((prev) => [...prev, { ...entry, burdenBefore, burdenAfter }]);
-      setText(nextText);
-      setSelectedId(null);
+      if (recordChange(entry, nextText)) clearSelection();
     },
-    [text, deferredText, pushUndo],
+    [recordChange, clearSelection],
   );
 
   const applyManualEdit = useCallback(
@@ -220,25 +144,24 @@ export function Studio() {
     [diagnostic, applyChange],
   );
 
-  const undo = useCallback(() => {
-    const previous = undoStack.current.pop();
-    if (previous === undefined) return;
-    setText(previous);
-    setLedger((prev) => prev.slice(0, -1));
-    setCanUndo(undoStack.current.length > 0);
-  }, []);
+  const selectFinding = useCallback(
+    (finding: Finding) => {
+      setMode("audit");
+      select(finding);
+    },
+    [select],
+  );
 
-  const onFreeTypeText = useCallback((value: string) => {
-    if (undoStack.current.length > 0) {
-      undoStack.current = [];
-      setCanUndo(false);
-    }
-    setText(value);
-  }, []);
+  const onFreeTypeText = useCallback(
+    (value: string) => {
+      noteFreeEdit();
+      setText(value);
+    },
+    [noteFreeEdit, setText],
+  );
 
-  const railProps = {
+  const panelProps = {
     diagnostic,
-    text,
     findings,
     selectedFinding,
     selectedId,
@@ -246,6 +169,7 @@ export function Studio() {
     total: findings.length,
     safeCount,
     humanCount,
+    ledger,
     activeCriteria,
     bucket,
     onToggleCriterion: toggleCriterion,
@@ -253,10 +177,9 @@ export function Studio() {
     onSelect: selectFinding,
     onApplyRewrite: applyRewrite,
     onManualEdit: applyManualEdit,
-    ledger,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
-    onClose: closeSelection,
+    onClose: clearSelection,
   };
 
   return (
@@ -268,7 +191,7 @@ export function Studio() {
           className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
           <span>{importError}</span>
-          <button type="button" onClick={() => setImportError(null)} className="text-ink-2 hover:text-ink-0">
+          <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
             Fechar
           </button>
         </div>
@@ -298,13 +221,13 @@ export function Studio() {
           />
         )}
 
-        {!isEmpty && <AuditRail {...railProps} />}
+        {!isEmpty && <AuditRail {...panelProps} text={text} />}
       </div>
 
       {mode === "audit" && findings.length > 0 && !sheetOpen && (
         <button
           type="button"
-          onClick={() => setSheetOpen(true)}
+          onClick={revealSheet}
           className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-pop) lg:hidden"
         >
           {findings.length} {findings.length === 1 ? "revisão" : "revisões"}
@@ -312,71 +235,13 @@ export function Studio() {
       )}
 
       {mode === "audit" && sheetOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Revisões">
-          <button
-            type="button"
-            aria-label="Fechar"
-            onClick={() => {
-              setSheetOpen(false);
-              setSelectedId(null);
-            }}
-            className="absolute inset-0 bg-ink-0/25 backdrop-blur-[2px]"
-          />
-          <div className="sheet-up absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col overflow-hidden rounded-t-[20px] border-t border-rule-2 bg-surface shadow-(--shadow-pop)">
-            <button
-              type="button"
-              aria-label="Recolher"
-              onClick={() => {
-                setSheetOpen(false);
-                setSelectedId(null);
-              }}
-              className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-rule-3"
-            />
-            {selectedFinding ? (
-              <>
-                <NoteNav
-                  index={selectedIndex + 1}
-                  total={findings.length}
-                  onPrev={() => goTo(-1)}
-                  onNext={() => goTo(1)}
-                  onClose={closeSelection}
-                />
-                <div key={selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
-                  <RevisionNote
-                    finding={selectedFinding}
-                    source={diagnostic.text}
-                    onApplyRewrite={applyRewrite}
-                    onManualEdit={applyManualEdit}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                <AuditOverview
-                  diagnostic={diagnostic}
-                  findings={findings}
-                  safeCount={safeCount}
-                  humanCount={humanCount}
-                  ledger={ledger}
-                />
-                <RevisionList
-                  diagnostic={diagnostic}
-                  findings={findings}
-                  selectedId={selectedId}
-                  bucket={bucket}
-                  safeCount={safeCount}
-                  humanCount={humanCount}
-                  activeCriteria={activeCriteria}
-                  onBucket={setBucket}
-                  onSelect={selectFinding}
-                  onToggleCriterion={toggleCriterion}
-                />
-                <ReadingSection diagnostic={diagnostic} />
-              </div>
-            )}
-            <RailFooter diagnostic={diagnostic} />
-          </div>
-        </div>
+        <RevisionSheet
+          {...panelProps}
+          onDismiss={() => {
+            setSheetOpen(false);
+            clearSelection();
+          }}
+        />
       )}
 
       {canUndo && (
@@ -398,8 +263,4 @@ export function Studio() {
       )}
     </div>
   );
-}
-
-function cssEscape(value: string): string {
-  return value.replace(/["\\]/g, "\\$&");
 }
