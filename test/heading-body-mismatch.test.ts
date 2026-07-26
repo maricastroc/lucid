@@ -92,13 +92,48 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("KNOWN LIMITATION: a derivational relation (noun × verb) is NOT recognized", () => {
+  it("a derivation in the CURATED glossary counts as an echo — noun in the heading, verb in the body (A7)", () => {
+    expect(
+      findingsFor([
+        H("Solicitação"),
+        P("Para solicitar, o interessado comparece à unidade e aguarda o atendimento presencial da equipe."),
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it("the audit's case: 'Pagamento da taxa' × 'pagar' no longer mismatches", () => {
+    expect(
+      findingsFor([
+        H("Pagamento da taxa"),
+        P("Para pagar, use o boleto emitido pelo sistema depois que a inscrição for confirmada."),
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it("the bridge works in either direction (verb in the heading, noun in the body)", () => {
+    expect(
+      findingsFor([
+        H("Como verificar"),
+        P("A verificação é feita pela equipe responsável no prazo de cinco dias úteis a contar do pedido."),
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it("DECLARED LIMIT: a derivation OUTSIDE the curated glossary still reads as a mismatch", () => {
     const found = findingsFor([
-      H("Solicitação"),
-      P("Para solicitar, o interessado comparece à unidade e aguarda o atendimento presencial da equipe."),
+      H("Prorrogação"),
+      P("Para prorrogar, o interessado apresenta o pedido à unidade antes do fim do prazo original."),
     ]);
     expect(found).toHaveLength(1);
     expect(found[0].severity).toBe("info");
+  });
+
+  it("the bridge does not merge unrelated words that merely start alike", () => {
+    const found = findingsFor([
+      H("Pagamento"),
+      P("A página inicial do sistema traz o painel com os pareceres publicados pela comissão nesta semana."),
+    ]);
+    expect(found).toHaveLength(1);
   });
 
   it("headings with distinct stems are NOT merged by normalization (casamento ≠ casas)", () => {

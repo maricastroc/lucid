@@ -75,12 +75,28 @@ describe("sigla_sem_expansao — acronyms made only of roman letters that are NO
   });
 });
 
-describe("sigla_sem_expansao — known limitation: acronym glued to a digit (F5)", () => {
-  it("G20 (a 1-letter prefix) does not mark", () => {
-    expect(spans("A cúpula do G20 terminou.")).toEqual([]);
+describe("sigla_sem_expansao — a letter run welded to digits is a fragment, not an acronym (A8)", () => {
+  it.each([
+    "A COVID-19 mudou tudo.",
+    "O arquivo é MP3.",
+    "A cúpula do G20 terminou.",
+    "O IPTU-2025 vence em março.",
+    "A norma NR-12 trata de máquinas.",
+    "O padrão H.264 é antigo.",
+  ])("does not mark a fragment of an alphanumeric designation: '%s'", (text) => {
+    expect(spans(text)).toEqual([]);
   });
 
-  it("MP3 marks only the letter part 'MP' (pre-existing behavior, not introduced here)", () => {
-    expect(spans("O arquivo é MP3.")).toEqual(["MP"]);
+  it("welding is measured by offset: with a SPACE the acronym stands on its own and is marked", () => {
+    expect(spans("Veja a NBR 5410 hoje.")).toEqual(["NBR"]);
+    expect(spans("A Lei 8666 trata de licitações. O CADE analisou.")).toEqual(["CADE"]);
+  });
+
+  it("a digit BEFORE the letters welds just the same", () => {
+    expect(spans("O padrão 4CIF ainda é usado.")).toEqual([]);
+  });
+
+  it("ordinary acronyms next to unrelated numbers are untouched", () => {
+    expect(spans("Em 2025 a LGPD completou sete anos.")).toEqual(["LGPD"]);
   });
 });

@@ -19,6 +19,42 @@ function isAllCapsWord(token: Token | undefined): boolean {
   return token.text === token.text.toUpperCase() && token.text !== token.text.toLowerCase();
 }
 
+const RE_STARTS_WITH_DIGIT = /^\p{Nd}/u;
+
+function isDigitRun(token: Token | undefined): boolean {
+  return token !== undefined && !token.isWord && RE_STARTS_WITH_DIGIT.test(token.text);
+}
+
+/**
+ * True when the letter run is welded to digits — directly or across a hyphen — and is
+ * therefore a FRAGMENT of an alphanumeric designation ("COVID-19", "MP3", "IPTU-2025"),
+ * not an acronym standing on its own.
+ *
+ * Adjacency is measured by OFFSET, not by neighbouring token: "NBR 5410" has a space
+ * between them, so "NBR" is a real standalone acronym and stays in scope. The tokenizer
+ * splits at the letter/digit boundary, so without this the criterion marked a span that
+ * is not a term in the text at all — the UI underlined "COVID" inside "COVID-19".
+ */
+function isWeldedToDigits(tokens: readonly Token[], index: number): boolean {
+  const tok = tokens[index];
+
+  const after = tokens[index + 1];
+  if (after?.start === tok.end) {
+    if (isDigitRun(after)) return true;
+    const afterHyphen = tokens[index + 2];
+    if (after.text === "-" && afterHyphen?.start === after.end && isDigitRun(afterHyphen)) return true;
+  }
+
+  const before = tokens[index - 1];
+  if (before?.end === tok.start) {
+    if (isDigitRun(before)) return true;
+    const beforeHyphen = tokens[index - 2];
+    if (before.text === "-" && beforeHyphen?.end === before.start && isDigitRun(beforeHyphen)) return true;
+  }
+
+  return false;
+}
+
 export const siglaSemExpansaoPass: Pass = {
   criterion: CRITERION,
   category: "lexical",
@@ -50,6 +86,7 @@ export const siglaSemExpansaoPass: Pass = {
       }
 
       if (isAllCapsWord(prev) || isAllCapsWord(next)) continue;
+      if (isWeldedToDigits(tokens, i)) continue;
 
       if (defined.has(key) || flagged.has(key)) continue;
       flagged.add(key);
