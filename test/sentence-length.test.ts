@@ -25,20 +25,20 @@ function buildContext(sentences: Sentence[], config: Config = DEFAULT_CONFIG): P
   return { doc: buildTestDocument(sentences), config, data: createDataView([]) };
 }
 
-describe("sentenceLengthPass — abaixo do limite", () => {
-  it("frase com wordCount abaixo de warnAbove não gera finding", () => {
+describe("sentenceLengthPass — below the limit", () => {
+  it("a sentence with wordCount below warnAbove yields no finding", () => {
     const ctx = buildContext([sentence({ wordCount: 10 })]);
     expect(sentenceLengthPass.run(ctx)).toEqual([]);
   });
 });
 
-describe("sentenceLengthPass — exatamente no limite (exclusivo)", () => {
-  it("wordCount === warnAbove (20) não gera finding — limiar é '> ', não '>='", () => {
+describe("sentenceLengthPass — exactly at the limit (exclusive)", () => {
+  it("wordCount === warnAbove (20) yields no finding — the threshold is '>', not '>='", () => {
     const ctx = buildContext([sentence({ wordCount: DEFAULT_CONFIG.sentenceLength.warnAbove })]);
     expect(sentenceLengthPass.run(ctx)).toEqual([]);
   });
 
-  it("wordCount === errorAbove (30) gera 'warning', não 'error' — mesmo limiar exclusivo", () => {
+  it("wordCount === errorAbove (30) yields 'warning', not 'error' — the same exclusive threshold", () => {
     const ctx = buildContext([sentence({ wordCount: DEFAULT_CONFIG.sentenceLength.errorAbove })]);
     const findings = sentenceLengthPass.run(ctx);
     expect(findings).toHaveLength(1);
@@ -47,15 +47,15 @@ describe("sentenceLengthPass — exatamente no limite (exclusivo)", () => {
   });
 });
 
-describe("sentenceLengthPass — acima do limite", () => {
-  it("wordCount === warnAbove + 1 gera 'warning'", () => {
+describe("sentenceLengthPass — above the limit", () => {
+  it("wordCount === warnAbove + 1 yields 'warning'", () => {
     const ctx = buildContext([sentence({ wordCount: DEFAULT_CONFIG.sentenceLength.warnAbove + 1 })]);
     const findings = sentenceLengthPass.run(ctx);
     expect(findings).toHaveLength(1);
     expect(findings[0].severity).toBe("warning");
   });
 
-  it("wordCount === errorAbove + 1 gera 'error'", () => {
+  it("wordCount === errorAbove + 1 yields 'error'", () => {
     const ctx = buildContext([sentence({ wordCount: DEFAULT_CONFIG.sentenceLength.errorAbove + 1 })]);
     const findings = sentenceLengthPass.run(ctx);
     expect(findings).toHaveLength(1);
@@ -64,13 +64,13 @@ describe("sentenceLengthPass — acima do limite", () => {
   });
 });
 
-describe("sentenceLengthPass — múltiplas frases", () => {
-  it("avalia cada frase independentemente e só reporta as que excedem o limite", () => {
-    const curta = sentence({ text: "curta", start: 0, end: 5, wordCount: 5 });
-    const alerta = sentence({ text: "media", start: 6, end: 11, wordCount: 25 });
-    const erro = sentence({ text: "longa", start: 12, end: 17, wordCount: 40 });
+describe("sentenceLengthPass — several sentences", () => {
+  it("evaluates each sentence independently and only reports the ones over the limit", () => {
+    const short = sentence({ text: "curta", start: 0, end: 5, wordCount: 5 });
+    const warning = sentence({ text: "media", start: 6, end: 11, wordCount: 25 });
+    const error = sentence({ text: "longa", start: 12, end: 17, wordCount: 40 });
 
-    const ctx = buildContext([curta, alerta, erro]);
+    const ctx = buildContext([short, warning, error]);
     const findings = sentenceLengthPass.run(ctx);
 
     expect(findings).toHaveLength(2);
@@ -81,28 +81,28 @@ describe("sentenceLengthPass — múltiplas frases", () => {
   });
 });
 
-describe("sentenceLengthPass — níveis diferentes de severidade", () => {
-  it("meta.threshold distingue qual limiar foi cruzado (warning vs. error)", () => {
-    const alerta = sentence({ text: "a", start: 0, end: 1, wordCount: 25 });
-    const erro = sentence({ text: "b", start: 2, end: 3, wordCount: 35 });
+describe("sentenceLengthPass — different severity levels", () => {
+  it("meta.threshold distinguishes which threshold was crossed (warning vs. error)", () => {
+    const warning = sentence({ text: "a", start: 0, end: 1, wordCount: 25 });
+    const error = sentence({ text: "b", start: 2, end: 3, wordCount: 35 });
 
-    const findings = sentenceLengthPass.run(buildContext([alerta, erro]));
+    const findings = sentenceLengthPass.run(buildContext([warning, error]));
 
     expect(findings[0].meta).toEqual({ words: 25, threshold: DEFAULT_CONFIG.sentenceLength.warnAbove });
     expect(findings[1].meta).toEqual({ words: 35, threshold: DEFAULT_CONFIG.sentenceLength.errorAbove });
   });
 });
 
-describe("sentenceLengthPass — texto vazio", () => {
-  it("documento sem frases não gera nenhum finding", () => {
+describe("sentenceLengthPass — empty text", () => {
+  it("a document with no sentences yields no finding at all", () => {
     const doc = buildDocument("");
     const findings = sentenceLengthPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
     expect(findings).toEqual([]);
   });
 });
 
-describe("sentenceLengthPass — offsets exatos", () => {
-  it("span usa start/end/text exatos da Sentence, reconstruindo por slice", () => {
+describe("sentenceLengthPass — exact offsets", () => {
+  it("the span uses the Sentence's exact start/end/text, reconstructing by slice", () => {
     const source = "Esta é uma frase razoavelmente longa para efeitos de teste de comprimento aqui mesmo.";
     const doc = buildDocument(source);
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5, errorAbove: 100 } };
@@ -120,8 +120,8 @@ describe("sentenceLengthPass — offsets exatos", () => {
   });
 });
 
-describe("sentenceLengthPass — ordem determinística", () => {
-  it("findings saem na mesma ordem das frases no documento (offsets crescentes)", () => {
+describe("sentenceLengthPass — deterministic order", () => {
+  it("findings come out in the same order as the sentences in the document (increasing offsets)", () => {
     const f1 = sentence({ text: "um", start: 0, end: 2, wordCount: 25 });
     const f2 = sentence({ text: "dois", start: 3, end: 7, wordCount: 26 });
     const f3 = sentence({ text: "tres", start: 8, end: 12, wordCount: 27 });
@@ -132,8 +132,8 @@ describe("sentenceLengthPass — ordem determinística", () => {
   });
 });
 
-describe("sentenceLengthPass — execução repetida byte-idêntica", () => {
-  it("mesma entrada produz sempre o mesmo JSON", () => {
+describe("sentenceLengthPass — byte-identical on repeated runs", () => {
+  it("the same input always produces the same JSON", () => {
     const source =
       "Esta primeira frase é longa o bastante para ultrapassar o limite de alerta configurado aqui. " +
       "Esta segunda frase também é bem longa e deve ultrapassar o limite de erro que foi definido para o teste.";
@@ -150,29 +150,29 @@ describe("sentenceLengthPass — execução repetida byte-idêntica", () => {
   });
 });
 
-describe("sentenceLengthPass — regressão: frases unidas pela política conservadora de segmentação", () => {
-  const configLimiarBaixo: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
+describe("sentenceLengthPass — regression: sentences merged by the conservative segmentation policy", () => {
+  const lowThresholdConfig: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
 
-  it("'etc.' seguido de nova frase permanece unido e é avaliado como uma frase só", () => {
+  it("'etc.' followed by a new sentence stays merged and is evaluated as a single sentence", () => {
     const source = "Compramos frutas, verduras, etc. Voltamos cedo para casa.";
     const doc = buildDocument(source);
 
     expect(doc.sentences).toHaveLength(1);
 
-    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: createDataView([]) });
+    const findings = sentenceLengthPass.run({ doc, config: lowThresholdConfig, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe(source);
     expect(findings[0].meta).toMatchObject({ words: doc.sentences[0].wordCount });
   });
 
-  it("sigla terminada em ponto seguida de nova frase permanece unida e é avaliada como uma frase só", () => {
+  it("an acronym ending in a period followed by a new sentence stays merged and is evaluated as a single sentence", () => {
     const source = "Nós moramos nos E.U.A. Eles moram na França.";
     const doc = buildDocument(source);
 
     expect(doc.sentences).toHaveLength(1);
 
-    const findings = sentenceLengthPass.run({ doc, config: configLimiarBaixo, data: createDataView([]) });
+    const findings = sentenceLengthPass.run({ doc, config: lowThresholdConfig, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe(source);

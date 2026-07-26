@@ -8,8 +8,8 @@ const SAMPLE =
   "benefício, e a decisão foi comunicada ao interessado no processo.";
 const META = { generatedAt: "2026-07-22 14:00" };
 
-describe("buildAuditReport — a auditoria como entregável", () => {
-  it("estrutura: caveat, placar, tabela por critério, anotações numeradas e citação ABNT", () => {
+describe("buildAuditReport — the audit as a deliverable", () => {
+  it("structure: caveat, scorecard, per-criterion table, numbered annotations and the ABNT citation", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
 
@@ -25,7 +25,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).toContain("Gerado em 2026-07-22 14:00");
   });
 
-  it("rotula cada anotação pela fronteira do Lucid (troca direta × decisão humana) — e nunca oferece aplicação", () => {
+  it("labels each annotation by Lucid's boundary (direct swap × human decision) — and never offers to apply it", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
     const anySafe = d.findings.some((f) => f.suggestion !== undefined && !f.requiresHuman);
@@ -37,7 +37,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("seguras para aplicar");
   });
 
-  it("categoria intermediária (resolvível sem troca 1:1) recebe rótulo próprio, não fica em branco (F8)", () => {
+  it("the middle category (solvable without a 1:1 swap) gets its own label instead of staying blank (F8)", () => {
     const text = "O documento foi analisado pela comissão.";
     const d = analyze(text);
     const passive = d.findings.find((f) => f.criterion === "passive_voice");
@@ -49,13 +49,13 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("_Exige decisão humana");
   });
 
-  it("determinístico: mesma entrada → relatório byte-idêntico", () => {
+  it("deterministic: same input → byte-identical report", () => {
     const a = analyze(SAMPLE);
     const b = analyze(SAMPLE);
     expect(buildAuditReport(a, a.findings, META)).toBe(buildAuditReport(b, b.findings, META));
   });
 
-  it("sinaliza honestamente a cobertura léxica curada — silêncio não é prova de ausência (F9)", () => {
+  it("flags curated lexical coverage honestly — silence is no proof of absence (F9)", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
     expect(buildAuditReport(d, [], META)).toContain("listas curadas");
@@ -64,7 +64,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(jargonRow).toContain("curada");
   });
 
-  it("zero anotações NÃO vira atestado: o caveat continua, sem seções de anotações", () => {
+  it("zero annotations do NOT become a certificate: the caveat stays, with no annotation sections", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, [], META);
     expect(md).toContain("**0** anotações");
@@ -73,15 +73,15 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("Ordenadas por severidade");
   });
 
-  it("a legibilidade sai com valor bruto + posição na escala, e o laudo declara que não trunca", () => {
+  it("readability comes out as a raw value + position on the scale, and the report states it does not truncate", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
-    const linha = md.split("\n").find((l) => l.startsWith("- **Legibilidade") || l.includes("Legibilidade (Flesch-PT)"));
-    expect(linha).toMatch(/Legibilidade \(Flesch-PT\): -?\d+(\.\d+)? — (faixa|abaixo|acima)/);
+    const line = md.split("\n").find((l) => l.startsWith("- **Legibilidade") || l.includes("Legibilidade (Flesch-PT)"));
+    expect(line).toMatch(/Legibilidade \(Flesch-PT\): -?\d+(\.\d+)? — (faixa|abaixo|acima)/);
     expect(md).toContain("O valor não é truncado");
   });
 
-  it("entrada degenerada no laudo: valor bruto preservado + CAUSA nomeada (nunca um 'fora do domínio' mudo)", () => {
+  it("degenerate input in the report: raw value preserved + the CAUSE named (never a mute 'out of domain')", () => {
     const d = analyze(`${"aeiou".repeat(100)}.`);
     const md = buildAuditReport(d, d.findings, META);
     expect(md).toContain("-8296.8");
@@ -89,7 +89,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toContain("fora do domínio");
   });
 
-  it("sem medida no laudo: em vez de 0, um travessão e a razão explícita", () => {
+  it("no measurement in the report: an em dash and the explicit reason instead of a 0", () => {
     const d = analyze("!!! ??? ...");
     const md = buildAuditReport(d, d.findings, META);
     expect(md).toContain("Legibilidade (Flesch-PT): sem medida");
@@ -97,7 +97,7 @@ describe("buildAuditReport — a auditoria como entregável", () => {
     expect(md).not.toMatch(/Legibilidade \(Flesch-PT\): 0/);
   });
 
-  it("inclui a trilha de proveniência quando há alterações; omite quando não há (Etapa 6)", () => {
+  it("includes the provenance trail when there are changes; omits it when there are none (Step 6)", () => {
     const d = analyze(SAMPLE);
     expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");
     const withTrail = buildAuditReport(d, d.findings, META, [

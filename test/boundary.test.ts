@@ -29,14 +29,14 @@ function runDependencyCruiser(): DependencyCruiserOutput {
   return JSON.parse(raw) as DependencyCruiserOutput;
 }
 
-describe("fronteira arquitetural (I1)", () => {
-  it("não viola nenhuma regra de dependency-cruiser em src/", () => {
+describe("architectural boundary (I1)", () => {
+  it("violates no dependency-cruiser rule under src/", () => {
     const result = runDependencyCruiser();
-    const erros = result.summary.violations.filter((v) => v.rule.severity === "error");
+    const errors = result.summary.violations.filter((v) => v.rule.severity === "error");
 
-    if (erros.length > 0) {
-      const detalhe = erros.map((v) => `  [${v.rule.name}] ${v.from} -> ${v.to}`).join("\n");
-      throw new Error(`Violações de fronteira encontradas:\n${detalhe}`);
+    if (errors.length > 0) {
+      const detail = errors.map((v) => `  [${v.rule.name}] ${v.from} -> ${v.to}`).join("\n");
+      throw new Error(`Boundary violations found:\n${detail}`);
     }
 
     expect(result.summary.error).toBe(0);

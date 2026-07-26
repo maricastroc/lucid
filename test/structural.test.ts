@@ -11,14 +11,14 @@ const spans = (text: string, criterion: string): string[] =>
     .findings.filter((f) => f.criterion === criterion)
     .map((f) => f.span.text);
 
-describe("camada de blocos — parágrafos", () => {
-  it("segmenta por linha em branco; sem linha em branco = 1 parágrafo", () => {
+describe("block layer — paragraphs", () => {
+  it("segments on blank lines; no blank line = 1 paragraph", () => {
     expect(buildDocument("Uma frase. Outra frase.").blocks).toHaveLength(1);
     expect(buildDocument("Parágrafo um.\n\nParágrafo dois.").blocks).toHaveLength(2);
     expect(buildDocument("").blocks).toHaveLength(0);
   });
 
-  it("texto puro só produz blocos de parágrafo; cada um agrega frases e contagem de palavras", () => {
+  it("plain text yields paragraph blocks only; each aggregates sentences and a word count", () => {
     const doc = buildDocument("Frase um aqui. Frase dois aqui.\n\nOutro bloco só.");
     expect(doc.blocks.every((b) => b.kind === "paragraph")).toBe(true);
     const paras = paragraphsOf("Frase um aqui. Frase dois aqui.\n\nOutro bloco só.");
@@ -29,34 +29,34 @@ describe("camada de blocos — parágrafos", () => {
   });
 });
 
-describe("paragraph_length — parágrafo com frases demais", () => {
-  it("marca parágrafo acima do limite de frases", () => {
-    const seis = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
-    const findings = analyze(seis).findings.filter((f) => f.criterion === "paragraph_length");
+describe("paragraph_length — a paragraph with too many sentences", () => {
+  it("marks a paragraph above the sentence limit", () => {
+    const six = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
+    const findings = analyze(six).findings.filter((f) => f.criterion === "paragraph_length");
     expect(findings).toHaveLength(1);
     expect(findings[0].normativeReference?.section).toBe("5.2");
     expect(findings[0].category).toBe("structural");
     expect(findings[0].requiresHuman).toBe(true);
   });
 
-  it("parágrafo dentro do limite não marca (uma frase longa é assunto de long_sentence)", () => {
+  it("a paragraph within the limit does not mark (one long sentence is long_sentence's business)", () => {
     expect(spans("Frase um. Frase dois. Frase três.", "paragraph_length")).toEqual([]);
   });
 
-  it("conta por parágrafo, não pelo documento (2 parágrafos de 3 frases não marcam)", () => {
+  it("counts per paragraph, not per document (2 paragraphs of 3 sentences do not mark)", () => {
     const t = "Frase um. Frase dois. Frase três.\n\nFrase quatro. Frase cinco. Frase seis.";
     expect(spans(t, "paragraph_length")).toEqual([]);
   });
 
   it("kill switch", () => {
     const config = { ...DEFAULT_CONFIG, paragraphLength: { enabled: false, maxSentences: 5 } };
-    const seis = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
-    expect(analyze(seis, config).findings.filter((f) => f.criterion === "paragraph_length")).toEqual([]);
+    const six = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
+    expect(analyze(six, config).findings.filter((f) => f.criterion === "paragraph_length")).toEqual([]);
   });
 });
 
-describe("prose_enumeration — enumeração em prosa", () => {
-  it("marca parágrafo com ≥3 ordinais distintos a partir de 'primeiro'", () => {
+describe("prose_enumeration — enumeration written as prose", () => {
+  it("marks a paragraph with ≥3 distinct ordinals starting from 'primeiro'", () => {
     const t = "O rito tem fases. Primeiro, protocola-se. Segundo, analisa-se. Terceiro, decide-se.";
     const findings = analyze(t).findings.filter((f) => f.criterion === "prose_enumeration");
     expect(findings).toHaveLength(1);
@@ -64,11 +64,11 @@ describe("prose_enumeration — enumeração em prosa", () => {
     expect(findings[0].requiresHuman).toBe(true);
   });
 
-  it("'segundo' isolado (preposição) não marca — falta a âncora 'primeiro'", () => {
+  it("a lone 'segundo' (the preposition) does not mark — the 'primeiro' anchor is missing", () => {
     expect(spans("Segundo o artigo, o prazo é de dez dias.", "prose_enumeration")).toEqual([]);
   });
 
-  it("menos de 3 ordinais não marca", () => {
+  it("fewer than 3 ordinals does not mark", () => {
     expect(spans("Primeiro isto. Segundo aquilo.", "prose_enumeration")).toEqual([]);
   });
 

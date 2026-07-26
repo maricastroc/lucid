@@ -7,8 +7,8 @@ function wholeSpan(source: string): Span {
   return { start: 0, end: source.length, text: source };
 }
 
-describe("clauseSplitPoints — detecção de fronteiras", () => {
-  it("ponto-e-vírgula vira uma fronteira 'semicolon'", () => {
+describe("clauseSplitPoints — boundary detection", () => {
+  it("a semicolon becomes a 'semicolon' boundary", () => {
     const source = "Precisamos revisar o texto com cuidado; depois enviaremos ao setor.";
     const points = clauseSplitPoints(source, wholeSpan(source));
 
@@ -18,7 +18,7 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
     expect(points[0].offset).toBe(source.indexOf(";"));
   });
 
-  it("travessão vira uma fronteira 'dash'", () => {
+  it("an em dash becomes a 'dash' boundary", () => {
     const source = "O prazo terminou ontem — ninguém foi avisado a tempo disso.";
     const points = clauseSplitPoints(source, wholeSpan(source));
 
@@ -27,7 +27,7 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
     expect(points[0].marker).toBe("—");
   });
 
-  it("vírgula + conjunção coordenativa vira 'comma_conjunction', ancorada na vírgula", () => {
+  it("comma + coordinating conjunction becomes 'comma_conjunction', anchored at the comma", () => {
     const source = "É preciso fazer a verificação dos requisitos, e depois o pedido será apreciado.";
     const points = clauseSplitPoints(source, wholeSpan(source));
 
@@ -37,17 +37,17 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
     expect(points[0].offset).toBe(source.indexOf(", e") );
   });
 
-  it("vírgula SEM conjunção coordenativa não vira ponto de divisão", () => {
+  it("a comma WITHOUT a coordinating conjunction is not a split point", () => {
     const source = "As contas, aprovadas ontem, seguem para o setor de pagamento agora.";
     expect(clauseSplitPoints(source, wholeSpan(source))).toEqual([]);
   });
 
-  it("conjunção coordenativa SEM vírgula antes não vira ponto (evita corte solto)", () => {
+  it("a coordinating conjunction with NO preceding comma is not a point (avoids a loose cut)", () => {
     const source = "O comitê analisou o pedido e aprovou o benefício sem qualquer ressalva.";
     expect(clauseSplitPoints(source, wholeSpan(source))).toEqual([]);
   });
 
-  it("múltiplas fronteiras saem ordenadas por offset", () => {
+  it("multiple boundaries come out ordered by offset", () => {
     const source = "Revisamos o texto; ajustamos os prazos, e enviamos ao setor responsável hoje.";
     const points = clauseSplitPoints(source, wholeSpan(source));
 
@@ -55,7 +55,7 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
     expect(points[0].offset).toBeLessThan(points[1].offset);
   });
 
-  it("prévias before/after descrevem as duas cláusulas (flatten)", () => {
+  it("the before/after previews describe the two clauses (flattened)", () => {
     const source = "Precisamos revisar o texto com cuidado; depois enviaremos ao setor.";
     const [p] = clauseSplitPoints(source, wholeSpan(source));
 
@@ -64,19 +64,19 @@ describe("clauseSplitPoints — detecção de fronteiras", () => {
   });
 });
 
-describe("clauseSplitPoints — guardas de borda", () => {
-  it("não há ponto quando não existe palavra antes da fronteira", () => {
+describe("clauseSplitPoints — edge guards", () => {
+  it("there is no point when no word precedes the boundary", () => {
     const source = "; segue o texto depois do sinal inicial sem nada antes dele aqui.";
     expect(clauseSplitPoints(source, wholeSpan(source))).toEqual([]);
   });
 
-  it("não há ponto quando não existe letra depois da fronteira", () => {
+  it("there is no point when no letter follows the boundary", () => {
     const source = "O texto termina de forma abrupta aqui mesmo, e";
     const points = clauseSplitPoints(source, wholeSpan(source));
     expect(points).toEqual([]);
   });
 
-  it("respeita os limites do span (só fronteiras internas à frase pedida)", () => {
+  it("respects the span limits (only boundaries inside the requested sentence)", () => {
     const source = "Primeira frase; ainda dentro. Segunda frase; fora do span pedido.";
     const doc = buildDocument(source);
     const first = doc.sentences[0];
@@ -87,13 +87,13 @@ describe("clauseSplitPoints — guardas de borda", () => {
   });
 });
 
-describe("clauseSplitPoints — só informação, nunca ação (ADR-054)", () => {
-  it("o módulo não exporta nenhum transform de texto — a divisão é do autor", async () => {
+describe("clauseSplitPoints — information only, never an action (ADR-054)", () => {
+  it("the module exports no text transform — splitting is the author's job", async () => {
     const mod = await import("../src/locales/pt-BR/actions/split-sentence");
     expect(Object.keys(mod).sort()).toEqual(["clauseSplitPoints"]);
   });
 
-  it("as prévias before/after são citações do texto (nada fabricado)", () => {
+  it("the before/after previews are quotations from the text (nothing fabricated)", () => {
     const source = "Precisamos revisar o texto com cuidado; depois enviaremos ao setor.";
     const [p] = clauseSplitPoints(source, wholeSpan(source));
     expect(source.replace(/\s+/g, " ")).toContain(p.before);
@@ -101,10 +101,10 @@ describe("clauseSplitPoints — só informação, nunca ação (ADR-054)", () =>
   });
 });
 
-describe("split — determinismo byte-idêntico", () => {
+describe("split — byte-identical determinism", () => {
   const source = "Precisamos revisar o texto com cuidado; depois enviaremos, e concluímos o processo.";
 
-  it("clauseSplitPoints produz sempre o mesmo JSON", () => {
+  it("clauseSplitPoints always produces the same JSON", () => {
     const r1 = JSON.stringify(clauseSplitPoints(source, wholeSpan(source)));
     const r2 = JSON.stringify(clauseSplitPoints(source, wholeSpan(source)));
     expect(r2).toBe(r1);

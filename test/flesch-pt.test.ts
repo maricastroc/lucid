@@ -1,30 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { calculateFleschPt } from "../src/locales/pt-BR/readability/flesch-pt";
 
-describe("calculateFleschPt — fórmula de Martins et al. (1996)", () => {
-  it("usa a constante 248.835 (não a inglesa 206.835) quando as médias são zero", () => {
+describe("calculateFleschPt — Martins et al. (1996) formula", () => {
+  it("uses the 248.835 constant (not the English 206.835) when both averages are zero", () => {
     expect(calculateFleschPt(0, 0)).toBe(248.835);
   });
 
-  it("calcula corretamente para valores conhecidos", () => {
+  it("computes correctly for known values", () => {
     expect(calculateFleschPt(5, 1.8)).toBeCloseTo(91.48, 10);
   });
 
-  it("é sensível a palavras/frase (mais palavras por frase reduz o índice)", () => {
-    const curto = calculateFleschPt(5, 1.5);
-    const longo = calculateFleschPt(30, 1.5);
-    expect(longo).toBeLessThan(curto);
+  it("is sensitive to words per sentence (more words per sentence lowers the index)", () => {
+    const short = calculateFleschPt(5, 1.5);
+    const long = calculateFleschPt(30, 1.5);
+    expect(long).toBeLessThan(short);
   });
 
-  it("é sensível a sílabas/palavra (mais sílabas por palavra reduz o índice)", () => {
-    const simples = calculateFleschPt(10, 1.5);
-    const complexo = calculateFleschPt(10, 3.5);
-    expect(complexo).toBeLessThan(simples);
+  it("is sensitive to syllables per word (more syllables per word lowers the index)", () => {
+    const simple = calculateFleschPt(10, 1.5);
+    const complex = calculateFleschPt(10, 3.5);
+    expect(complex).toBeLessThan(simple);
   });
 
-  it("não faz nenhum arredondamento (função pura, sem casas decimais fixas)", () => {
-    const resultado = calculateFleschPt(7, 1.666666);
-    const esperadoBruto = 248.835 - 1.015 * 7 - 84.6 * 1.666666;
-    expect(resultado).toBe(esperadoBruto);
+  it("does no rounding at all (pure function, no fixed decimal places)", () => {
+    const result = calculateFleschPt(7, 1.666666);
+    const expectedRaw = 248.835 - 1.015 * 7 - 84.6 * 1.666666;
+    expect(result).toBe(expectedRaw);
   });
 });

@@ -16,8 +16,8 @@ function targetAndFindings(text: string) {
   return { source: d.text, target, findings };
 }
 
-describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + best-effort)", () => {
-  it("separa o jargão pedível (mandatório) da passiva sem agente (best-effort)", () => {
+describe("directed@4 — the engine directs the AI through two briefings (mandatory + best-effort)", () => {
+  it("separates askable jargon (mandatory) from an agentless passive (best-effort)", () => {
     const { source, target, findings } = targetAndFindings(SAMPLE);
     expect(findings.length).toBeGreaterThan(1);
     expect(findings.every((f) => f.criterion !== "jargon" ? f.requiresHuman : !f.requiresHuman)).toBe(true);
@@ -36,7 +36,7 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
     expect(prompt).toContain(target.text);
   });
 
-  it("com uma passiva QUE TEM agente (requiresHuman: false), o hint de voz ativa aparece", () => {
+  it("with a passive that HAS an agent (requiresHuman: false), the active-voice hint shows up", () => {
     const text = "O documento foi analisado pela comissão.";
     const d = analyze(text);
     const target: Span = { start: 0, end: d.text.length, text: d.text };
@@ -47,7 +47,7 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
     expect(prompt).toMatch(/voz ativa/);
   });
 
-  it("determinístico: mesmos findings → prompt byte-idêntico", () => {
+  it("deterministic: same findings → byte-identical prompt", () => {
     const a = targetAndFindings(SAMPLE);
     const b = targetAndFindings(SAMPLE);
     expect(buildRewritePrompt(a.source, a.target, { strategy: "directed", findings: a.findings })).toBe(
@@ -55,7 +55,7 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
     );
   });
 
-  it("difere do rewrite livre: o briefing é o que muda (mesmo trecho, mesma blindagem)", () => {
+  it("differs from the free rewrite: the briefing is what changes (same excerpt, same shielding)", () => {
     const { source, target, findings } = targetAndFindings(SAMPLE);
     const directed = buildRewritePrompt(source, target, { strategy: "directed", findings });
     const free = buildRewritePrompt(source, target, { strategy: "rewrite" });
@@ -63,7 +63,7 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
     expect(free).not.toContain("apontou os pontos abaixo");
   });
 
-  it("sem findings → degrada para o formato livre (sem bloco de briefing vazio)", () => {
+  it("with no findings → degrades to the free format (no empty briefing block)", () => {
     const { source, target } = targetAndFindings(SAMPLE);
     const prompt = buildRewritePrompt(source, target, { strategy: "directed", findings: [] });
     expect(prompt).not.toContain("apontou os pontos abaixo");
@@ -71,13 +71,13 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
     expect(prompt).toContain("NÃO invente");
   });
 
-  it("o id do proposer carrega `directed@4` (proveniência/benchmark)", () => {
+  it("the proposer id carries `directed@4` (provenance/benchmark)", () => {
     const mock = { id: "mock", models: ["m1"], complete: async () => "{}" } satisfies ChatProvider;
     expect(new LlmRewriteProposer(mock, "m1", "directed").id).toBe(`mock:m1+${STRATEGY_VERSION.directed}`);
     expect(STRATEGY_VERSION.directed).toBe("directed@4");
   });
 
-  it("trecho SÓ com passiva sem agente: seção best-effort SEM 'Resolva TODOS' (o caso do usuário)", () => {
+  it("an excerpt with ONLY an agentless passive: best-effort section WITHOUT 'Resolva TODOS' (the user's case)", () => {
     const text = "Foi verificado se a documentação está em ordem.";
     const d = analyze(text);
     const target: Span = { start: 0, end: d.text.length, text: d.text };
@@ -93,18 +93,18 @@ describe("directed@4 — a engine dirige a IA em dois briefings (mandatório + b
   });
 });
 
-describe("directed@4 — elicitação no briefing (ADR-055): a resposta do autor vira requisito, não template", () => {
+describe("directed@4 — elicitation inside the briefing (ADR-055): the author's answer becomes a requirement, not a template", () => {
   const TEXT = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function passiveAndTarget(text: string) {
     const d = analyze(text);
     const target: Span = { start: 0, end: d.text.length, text: d.text };
     const findings = d.findings.filter((f) => f.criterion === "passive_voice");
-    if (findings.length === 0) throw new Error("sem passiva no texto de teste");
+    if (findings.length === 0) throw new Error("no passive in the test text");
     return { source: d.text, target, findings };
   }
 
-  it("agente declarado: o finding sai do best-effort e vira instrução de nomear EXATAMENTE esse agente", () => {
+  it("a declared agent: the finding leaves best-effort and becomes an instruction to name EXACTLY that agent", () => {
     const { source, target, findings } = passiveAndTarget(TEXT);
     const prompt = buildRewritePrompt(source, target, {
       strategy: "directed",
@@ -118,7 +118,7 @@ describe("directed@4 — elicitação no briefing (ADR-055): a resposta do autor
     expect(prompt).not.toContain("TENTE reformular SEM inventar o agente");
   });
 
-  it("decisão de manter impessoal (agent: null): instrução de NÃO forçar a voz ativa", () => {
+  it("the decision to stay impersonal (agent: null): an instruction NOT to force the active voice", () => {
     const { source, target, findings } = passiveAndTarget(TEXT);
     const prompt = buildRewritePrompt(source, target, {
       strategy: "directed",
@@ -132,7 +132,7 @@ describe("directed@4 — elicitação no briefing (ADR-055): a resposta do autor
     expect(prompt).not.toContain("TENTE reformular SEM inventar o agente");
   });
 
-  it("declaração cujo span não casa com nenhum finding é ignorada (o best-effort continua)", () => {
+  it("a declaration whose span matches no finding is ignored (best-effort carries on)", () => {
     const { source, target, findings } = passiveAndTarget(TEXT);
     const prompt = buildRewritePrompt(source, target, {
       strategy: "directed",
@@ -144,7 +144,7 @@ describe("directed@4 — elicitação no briefing (ADR-055): a resposta do autor
     expect(prompt).toContain("TENTE reformular SEM inventar o agente");
   });
 
-  it("declarações só surtem efeito na estratégia dirigida (rewrite livre não carrega briefing)", () => {
+  it("declarations only take effect in the directed strategy (the free rewrite carries no briefing)", () => {
     const { source, target, findings } = passiveAndTarget(TEXT);
     const prompt = buildRewritePrompt(source, target, {
       strategy: "rewrite",
@@ -155,7 +155,7 @@ describe("directed@4 — elicitação no briefing (ADR-055): a resposta do autor
     expect(prompt).not.toContain("agente declarado:");
   });
 
-  it("determinístico: mesmas declarações → prompt byte-idêntico", () => {
+  it("deterministic: same declarations → byte-identical prompt", () => {
     const a = passiveAndTarget(TEXT);
     const b = passiveAndTarget(TEXT);
     const declsA = [{ span: a.findings[0].span, agent: "a comissão" }];

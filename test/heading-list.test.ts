@@ -14,12 +14,12 @@ function findingsFor(blocks: RawBlock[], criterion: string, config = DEFAULT_CON
 }
 
 describe("long_heading", () => {
-  it("título acima do limite de palavras → marca (reason=length, warning, requiresHuman, sem sugestão)", () => {
-    const longo =
+  it("a heading above the word limit → marks (reason=length, warning, requiresHuman, no suggestion)", () => {
+    const long =
       "Como solicitar o benefício por incapacidade permanente junto ao instituto nacional do seguro social responsável";
-    const found = findingsFor([H(longo), P("Um parágrafo.")], "long_heading");
+    const found = findingsFor([H(long), P("Um parágrafo.")], "long_heading");
     expect(found).toHaveLength(1);
-    expect(found[0].span.text).toBe(longo);
+    expect(found[0].span.text).toBe(long);
     expect(found[0].normativeReference?.section).toBe("5.2");
     expect(found[0].category).toBe("structural");
     expect(found[0].severity).toBe("warning");
@@ -28,30 +28,30 @@ describe("long_heading", () => {
     expect(found[0].meta).toMatchObject({ reason: "length" });
   });
 
-  it("título curto que termina com ponto final → marca (reason=sentence)", () => {
+  it("a short heading ending with a full stop → marks (reason=sentence)", () => {
     const found = findingsFor([H("Regras gerais do procedimento.")], "long_heading");
     expect(found).toHaveLength(1);
     expect(found[0].meta).toMatchObject({ reason: "sentence" });
   });
 
-  it("título com duas frases → marca (reason=sentence)", () => {
+  it("a heading with two sentences → marks (reason=sentence)", () => {
     const found = findingsFor([H("Você tem direitos. Conheça-os aqui")], "long_heading");
     expect(found).toHaveLength(1);
     expect(found[0].meta).toMatchObject({ reason: "sentence", sentences: 2 });
   });
 
-  it("título curto e sem ponto final → não marca", () => {
+  it("a short heading with no full stop → no finding", () => {
     expect(findingsFor([H("Prazos e documentos")], "long_heading")).toHaveLength(0);
   });
 
-  it("título-pergunta (termina com “?”) é boa LS → não marca", () => {
+  it("a question heading (ending in “?”) is good plain language → no finding", () => {
     expect(findingsFor([H("O que muda para você?")], "long_heading")).toHaveLength(0);
   });
 
-  it("comprimento tem prioridade — um título longo ganha uma marca só", () => {
-    const longoEFrase =
+  it("length takes priority — a long heading gets a single mark", () => {
+    const longAndSentence =
       "Este título é deliberadamente longo o suficiente para ultrapassar com folga o limite configurado de palavras.";
-    const found = findingsFor([H(longoEFrase)], "long_heading");
+    const found = findingsFor([H(longAndSentence)], "long_heading");
     expect(found).toHaveLength(1);
     expect(found[0].meta).toMatchObject({ reason: "length" });
   });
@@ -61,14 +61,14 @@ describe("long_heading", () => {
     expect(findingsFor([H("Regras gerais do procedimento.")], "long_heading", config)).toHaveLength(0);
   });
 
-  it("texto puro (sem títulos) nunca dispara", () => {
+  it("plain text (no headings) never triggers", () => {
     const found = analyze("Uma frase qualquer aqui. E outra ali.").findings.filter((f) => f.criterion === "long_heading");
     expect(found).toHaveLength(0);
   });
 });
 
 describe("single_item_list", () => {
-  it("lista de um item → marca (info — higiene estrutural, requiresHuman, sem sugestão)", () => {
+  it("a one-item list → marks (info — structural hygiene, requiresHuman, no suggestion)", () => {
     const found = findingsFor([P("Intro."), L(false, "Único item da lista")], "single_item_list");
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe("Único item da lista");
@@ -81,7 +81,7 @@ describe("single_item_list", () => {
     expect(found[0].meta).toMatchObject({ ordered: false });
   });
 
-  it("lista com dois ou mais itens → não marca", () => {
+  it("a list with two or more items → no finding", () => {
     expect(findingsFor([L(true, "Primeiro", "Segundo")], "single_item_list")).toHaveLength(0);
   });
 
@@ -90,7 +90,7 @@ describe("single_item_list", () => {
     expect(findingsFor([L(false, "Único")], "single_item_list", config)).toHaveLength(0);
   });
 
-  it("texto puro (sem listas) nunca dispara", () => {
+  it("plain text (no lists) never triggers", () => {
     const found = analyze("Primeiro isto. Depois aquilo.").findings.filter((f) => f.criterion === "single_item_list");
     expect(found).toHaveLength(0);
   });

@@ -7,29 +7,29 @@ const ENTRIES: LedgerEntry[] = [
   { source: "ai", label: "Reescrita por IA · groq:llama", before: "Foi realizada a análise", after: "A comissão analisou", burdenBefore: 5, burdenAfter: 2 },
 ];
 
-describe("ledger — trilha de proveniência", () => {
-  it("sourceLabel dá rótulos humanos (nomes internos nunca vazam)", () => {
+describe("ledger — provenance trail", () => {
+  it("sourceLabel yields human labels (internal names never leak)", () => {
     expect(sourceLabel("ai")).toBe("Reescrita por IA");
     expect(sourceLabel("manual")).toBe("Edição do autor");
   });
 
-  it("só existem dois autores legítimos: o humano e a IA — a engine nunca é fonte (ADR-054)", () => {
+  it("only two legitimate authors exist: the human and the AI — the engine is never a source (ADR-054)", () => {
     const sources: LedgerEntry["source"][] = ["manual", "ai"];
     expect(sources.map(sourceLabel)).toEqual(["Edição do autor", "Reescrita por IA"]);
   });
 
-  it("documentBurden usa a régua canônica de severidade (não contagem crua)", () => {
+  it("documentBurden uses the canonical severity scale (not a raw count)", () => {
     const clean = analyze("O gato dorme no sol.");
     const heavy = analyze("Foi realizada a análise em sede de procedimento administrativo supracitado.");
     expect(documentBurden([])).toBe(0);
     expect(documentBurden(clean.findings)).toBeLessThan(documentBurden(heavy.findings));
   });
 
-  it("renderLedgerMarkdown: vazio → string vazia (o chamador omite a seção)", () => {
+  it("renderLedgerMarkdown: empty → empty string (the caller omits the section)", () => {
     expect(renderLedgerMarkdown([])).toBe("");
   });
 
-  it("renderLedgerMarkdown: cabeçalho, resumo de peso, entradas com antes→depois e caveat", () => {
+  it("renderLedgerMarkdown: heading, burden summary, entries with before→after and caveat", () => {
     const md = renderLedgerMarkdown(ENTRIES);
     expect(md).toContain("## Trilha de revisão");
     expect(md).toContain("Peso da auditoria na sessão:** 6 → 2");
@@ -39,7 +39,7 @@ describe("ledger — trilha de proveniência", () => {
     expect(md).toContain("não um atestado de qualidade");
   });
 
-  it("determinístico: mesmas entradas → markdown byte-idêntico", () => {
+  it("deterministic: same entries → byte-identical markdown", () => {
     expect(renderLedgerMarkdown(ENTRIES)).toBe(renderLedgerMarkdown(ENTRIES));
   });
 });

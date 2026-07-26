@@ -7,14 +7,14 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "passiva_sintetica")
     .map((f) => f.span.text);
 
-describe("passiva_sintetica — detecção do 'se' enclítico", () => {
-  it("passiva sintética evidente (singular e plural com concordância)", () => {
+describe("passiva_sintetica — detecting the enclitic 'se'", () => {
+  it("plain synthetic passive (singular and plural agreement)", () => {
     expect(spans("Aplica-se a multa ao infrator.")).toEqual(["Aplica-se"]);
     expect(spans("Publicam-se os resultados no diário oficial.")).toEqual(["Publicam-se"]);
     expect(spans("Considera-se aprovado o pedido.")).toEqual(["Considera-se"]);
   });
 
-  it("sempre requiresHuman (a ambiguidade do 'se' é irredutível), warning, sem sugestão, ISO 5.3.3", () => {
+  it("always requiresHuman (the ambiguity of 'se' is irreducible), warning, no suggestion, ISO 5.3.3", () => {
     const f = analyze("Aplicou-se a penalidade.").findings.find((x) => x.criterion === "passiva_sintetica")!;
     expect(f.severity).toBe("warning");
     expect(f.requiresHuman).toBe(true);
@@ -25,22 +25,22 @@ describe("passiva_sintetica — detecção do 'se' enclítico", () => {
   });
 });
 
-describe("passiva_sintetica — exclusões (baixo falso positivo)", () => {
-  it("verbos inerentemente pronominais NÃO marcam (o 'se' é partícula integrante)", () => {
+describe("passiva_sintetica — exclusions (low false positive rate)", () => {
+  it("inherently pronominal verbs do NOT mark (the 'se' is an integral particle)", () => {
     expect(spans("Trata-se de um recurso administrativo.")).toEqual([]);
     expect(spans("O artigo refere-se ao prazo legal.")).toEqual([]);
     expect(spans("Torna-se necessário revisar o texto.")).toEqual([]);
   });
 
-  it("mesóclise ('realizar-se-á') fica com o critério mesoclise, não aqui", () => {
+  it("mesoclisis ('realizar-se-á') belongs to the mesoclise criterion, not here", () => {
     expect(spans("A análise realizar-se-á em breve.")).toEqual([]);
   });
 
-  it("'se' condicional (palavra à parte, não enclítico) não marca", () => {
+  it("conditional 'se' (a separate word, not enclitic) does not mark", () => {
     expect(spans("Se o prazo vencer, o pedido será arquivado.")).toEqual([]);
   });
 
-  it("sujeito humano explícito com verbo comum não marca (não há '-se' enclítico)", () => {
+  it("an explicit human subject with an ordinary verb does not mark (there is no enclitic '-se')", () => {
     expect(spans("A comissão aplicou a penalidade ao servidor.")).toEqual([]);
   });
 
@@ -50,8 +50,8 @@ describe("passiva_sintetica — exclusões (baixo falso positivo)", () => {
   });
 });
 
-describe("passiva_sintetica — mesóclise coexiste sem dupla contagem no mesmo critério", () => {
-  it("'realizar-se-á' dispara mesoclise, e passiva_sintetica não o toca", () => {
+describe("passiva_sintetica — mesoclisis coexists without double counting under the same criterion", () => {
+  it("'realizar-se-á' triggers mesoclise, and passiva_sintetica leaves it alone", () => {
     const d = analyze("O ato realizar-se-á amanhã.");
     expect(d.findings.some((f) => f.criterion === "mesoclise")).toBe(true);
     expect(d.findings.some((f) => f.criterion === "passiva_sintetica")).toBe(false);

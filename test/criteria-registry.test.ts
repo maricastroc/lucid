@@ -14,46 +14,46 @@ function sorted(values: readonly string[]): string[] {
   return [...values].sort();
 }
 
-describe("registro de critérios (ADR-029)", () => {
-  it("CRITERION_IDS não tem duplicatas", () => {
+describe("criterion registry (ADR-029)", () => {
+  it("CRITERION_IDS has no duplicates", () => {
     expect(sorted(CRITERION_IDS)).toEqual(sorted([...new Set(CRITERION_IDS)]));
   });
 
-  it("PASSES e CRITERION_IDS descrevem EXATAMENTE o mesmo conjunto", () => {
-    const dosPasses = sorted(PASSES.map((p) => p.criterion));
+  it("PASSES and CRITERION_IDS describe EXACTLY the same set", () => {
+    const fromPasses = sorted(PASSES.map((p) => p.criterion));
 
-    expect(dosPasses).toEqual(sorted([...new Set(dosPasses)]));
-    expect(dosPasses).toEqual(sorted(CRITERION_IDS));
+    expect(fromPasses).toEqual(sorted([...new Set(fromPasses)]));
+    expect(fromPasses).toEqual(sorted(CRITERION_IDS));
   });
 
-  it("CRITERION_META cobre exatamente os CRITERION_IDS (completude da apresentação)", () => {
+  it("CRITERION_META covers exactly the CRITERION_IDS (presentation completeness)", () => {
     expect(sorted(Object.keys(CRITERION_META))).toEqual(sorted(CRITERION_IDS));
   });
 
-  it("CRITERION_ORDER é uma permutação de CRITERION_IDS (todo critério é ordenado, sem sobra)", () => {
+  it("CRITERION_ORDER is a permutation of CRITERION_IDS (every criterion is ordered, none left over)", () => {
     expect(sorted(CRITERION_ORDER)).toEqual(sorted(CRITERION_IDS));
   });
 });
 
-describe("taxonomia de proveniência (ADR-056)", () => {
-  it("CRITERION_TAXONOMY cobre exatamente os CRITERION_IDS", () => {
+describe("provenance taxonomy (ADR-056)", () => {
+  it("CRITERION_TAXONOMY covers exactly the CRITERION_IDS", () => {
     expect(sorted(Object.keys(CRITERION_TAXONOMY))).toEqual(sorted(CRITERION_IDS));
   });
 
-  it("normativeReference existe SE E SOMENTE SE source === 'iso-24495-1' (invariante de honestidade)", () => {
+  it("normativeReference exists IF AND ONLY IF source === 'iso-24495-1' (honesty invariant)", () => {
     for (const [id, entry] of Object.entries(CRITERION_TAXONOMY)) {
       const hasRef = "normativeReference" in entry && entry.normativeReference !== undefined;
-      expect(hasRef, `${id}: normativeReference deve casar com source iso`).toBe(entry.source === "iso-24495-1");
+      expect(hasRef, `${id}: normativeReference must match an iso source`).toBe(entry.source === "iso-24495-1");
     }
   });
 
-  it("nenhum critério editorial/heurístico é rotulado como Relevante ou Usável indevidamente", () => {
+  it("no editorial/heuristic criterion is wrongly labeled Relevant or Usable", () => {
     for (const entry of Object.values(CRITERION_TAXONOMY)) {
       expect(["understandable", "findable"]).toContain(entry.principleGroup);
     }
   });
 
-  it("analyze() carimba source/principleGroup coerentes com a taxonomia em cada finding", () => {
+  it("analyze() stamps source/principleGroup consistent with the taxonomy on every finding", () => {
     const diag = analyze(
       "A carta foi escrita pelo funcionário responsável. Vou estar enviando o documento supracitado. " +
         "O trabalho far-se-á sem demora. Não é incomum que isso aconteça.",
@@ -61,7 +61,7 @@ describe("taxonomia de proveniência (ADR-056)", () => {
     expect(diag.findings.length).toBeGreaterThan(0);
     for (const f of diag.findings) {
       const entry = CRITERION_TAXONOMY[f.criterion as CriterionId];
-      expect(entry, `sem entrada de taxonomia para ${f.criterion}`).toBeDefined();
+      expect(entry, `no taxonomy entry for ${f.criterion}`).toBeDefined();
       expect(f.source).toBe(entry.source);
       expect(f.principleGroup).toBe(entry.principleGroup);
       expect(f.normativeReference !== undefined).toBe(f.source === "iso-24495-1");
@@ -69,7 +69,7 @@ describe("taxonomia de proveniência (ADR-056)", () => {
   });
 });
 
-describe("cada pass só produz findings com o PRÓPRIO criterion (contrato de buildScore)", () => {
+describe("each pass only produces findings with its OWN criterion (buildScore contract)", () => {
   const richText =
     "A carta foi escrita pelo funcionário responsável. Fizemos a análise dos dados do projeto. " +
     "Houve a realização da atualização do sistema imediatamente. O trabalho far-se-á sem demora. " +
@@ -105,14 +105,14 @@ describe("cada pass só produz findings com o PRÓPRIO criterion (contrato de bu
     return pass.run(context);
   }
 
-  it.each(PASSES)("pass '$criterion': todo finding devolvido tem criterion === '$criterion'", (pass) => {
+  it.each(PASSES)("pass '$criterion': every returned finding has criterion === '$criterion'", (pass) => {
     const findings = [...findingsFor(pass, plainDoc), ...findingsFor(pass, structuredDoc)];
     for (const finding of findings) {
       expect(finding.criterion).toBe(pass.criterion);
     }
   });
 
-  it("o texto sintético realmente exercita a maioria dos critérios (a checagem acima não é vazia)", () => {
+  it("the synthetic text really exercises most criteria (the check above is not vacuous)", () => {
     const criteriaHit = new Set(
       PASSES.flatMap((pass) => [...findingsFor(pass, plainDoc), ...findingsFor(pass, structuredDoc)]).map(
         (f) => f.criterion,

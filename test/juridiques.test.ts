@@ -7,8 +7,8 @@ const spans = (text: string, criterion: string): string[] =>
     .findings.filter((f) => f.criterion === criterion)
     .map((f) => f.span.text);
 
-describe("redundancia — pleonasmo e duplas", () => {
-  it("marca duplas e pleonasmos cadastrados", () => {
+describe("redundancia — pleonasm and doublets", () => {
+  it("marks the curated doublets and pleonasms", () => {
     expect(spans("A decisão é nula e sem efeito.", "redundancia")).toEqual(["nula e sem efeito"]);
     expect(spans("Foi preciso planejar antecipadamente com certeza absoluta.", "redundancia")).toEqual([
       "planejar antecipadamente",
@@ -16,7 +16,7 @@ describe("redundancia — pleonasmo e duplas", () => {
     ]);
   });
 
-  it("finding exige decisão humana e cita a forma enxuta, sem aplicar", () => {
+  it("the finding requires a human decision and cites the lean form without applying it", () => {
     const f = analyze("Havia certeza absoluta.").findings.find((x) => x.criterion === "redundancia")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
@@ -24,7 +24,7 @@ describe("redundancia — pleonasmo e duplas", () => {
     expect(f.normativeReference?.section).toBe("5.3.4");
   });
 
-  it("texto sem redundância não marca", () => {
+  it("text with no redundancy does not mark", () => {
     expect(spans("A comissão analisou o documento com cuidado.", "redundancia")).toEqual([]);
   });
 
@@ -34,8 +34,8 @@ describe("redundancia — pleonasmo e duplas", () => {
   });
 });
 
-describe("perifrase_inflada — locuções empoladas", () => {
-  it("marca perífrases cadastradas (longest-match, sem sobreposição)", () => {
+describe("perifrase_inflada — inflated phrasings", () => {
+  it("marks the curated periphrases (longest-match, no overlap)", () => {
     expect(spans("Trabalhamos no sentido de melhorar com relação a prazos.", "perifrase_inflada")).toEqual([
       "no sentido de",
       "com relação a",
@@ -43,7 +43,7 @@ describe("perifrase_inflada — locuções empoladas", () => {
     expect(spans("Agimos a fim de cumprir no âmbito da lei.", "perifrase_inflada")).toEqual(["a fim de", "no âmbito da"]);
   });
 
-  it("finding exige decisão humana e cita a forma enxuta", () => {
+  it("the finding requires a human decision and cites the lean form", () => {
     const f = analyze("Escrevi com o objetivo de informar.").findings.find((x) => x.criterion === "perifrase_inflada")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
@@ -51,7 +51,7 @@ describe("perifrase_inflada — locuções empoladas", () => {
     expect(f.normativeReference?.section).toBe("5.3.4");
   });
 
-  it("não colide com o glossário de jargão ('em sede de' segue sendo jargão, não perífrase)", () => {
+  it("does not collide with the jargon glossary ('em sede de' stays jargon, not a periphrasis)", () => {
     expect(spans("A questão foi decidida em sede de recurso.", "perifrase_inflada")).toEqual([]);
   });
 

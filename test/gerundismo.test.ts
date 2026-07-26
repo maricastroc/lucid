@@ -7,14 +7,14 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "gerundismo")
     .map((f) => f.span.text);
 
-describe("gerundismo — detecção", () => {
-  it("marca [ir + estar + gerúndio] em várias pessoas", () => {
+describe("gerundismo — detection", () => {
+  it("marks [ir + estar + gerund] across persons", () => {
     expect(spans("Nós vamos estar enviando o parecer.")).toEqual(["vamos estar enviando"]);
     expect(spans("A equipe vai estar analisando os autos.")).toEqual(["vai estar analisando"]);
     expect(spans("Eu vou estar verificando isso amanhã.")).toEqual(["vou estar verificando"]);
   });
 
-  it("finding exige decisão humana, sem sugestão automática", () => {
+  it("the finding requires a human decision, with no automatic suggestion", () => {
     const f = analyze("Vou estar enviando o documento.").findings.find((x) => x.criterion === "gerundismo")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
@@ -22,22 +22,22 @@ describe("gerundismo — detecção", () => {
   });
 });
 
-describe("gerundismo — precisão", () => {
-  it("forma simples (sem 'estar') não é gerundismo", () => {
+describe("gerundismo — precision", () => {
+  it("the simple form (without 'estar') is not gerundismo", () => {
     expect(spans("Vou enviar o parecer amanhã.")).toEqual([]);
   });
 
-  it("'estar' + adjetivo (não gerúndio) não marca", () => {
+  it("'estar' + adjective (not a gerund) does not mark", () => {
     expect(spans("Você vai estar lindo na formatura.")).toEqual([]);
   });
 
-  it("gerúndio sem o auxiliar 'ir' não marca (estou enviando)", () => {
+  it("a gerund without the 'ir' auxiliary does not mark (estou enviando)", () => {
     expect(spans("Estou enviando o documento agora.")).toEqual([]);
   });
 });
 
 describe("gerundismo — kill switch", () => {
-  it("desligado não produz findings", () => {
+  it("produces no findings when switched off", () => {
     const config = { ...DEFAULT_CONFIG, gerundismo: { enabled: false } };
     const findings = analyze("Vou estar enviando o parecer.", config).findings.filter(
       (f) => f.criterion === "gerundismo",

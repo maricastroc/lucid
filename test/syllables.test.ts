@@ -1,215 +1,215 @@
 import { describe, expect, it } from "vitest";
 import { countSyllables } from "../src/locales/pt-BR/services/syllables";
 
-describe("countSyllables — palavras simples", () => {
+describe("countSyllables — simple words", () => {
   it.each([
     ["casa", 2],
     ["gato", 2],
     ["livro", 2],
     ["computador", 4],
-  ])("'%s' tem %i sílabas", (palavra, esperado) => {
-    expect(countSyllables(palavra)).toBe(esperado);
+  ])("'%s' has %i syllables", (word, expected) => {
+    expect(countSyllables(word)).toBe(expected);
   });
 });
 
-describe("countSyllables — acentos", () => {
+describe("countSyllables — accents", () => {
   it.each([
     ["café", 2],
     ["política", 4],
     ["número", 3],
-  ])("'%s' tem %i sílabas", (palavra, esperado) => {
-    expect(countSyllables(palavra)).toBe(esperado);
+  ])("'%s' has %i syllables", (word, expected) => {
+    expect(countSyllables(word)).toBe(expected);
   });
 });
 
-describe("countSyllables — ditongos", () => {
-  it("ditongo comum conta como 1 núcleo (cadeira: ca-dei-ra)", () => {
+describe("countSyllables — diphthongs", () => {
+  it("a common diphthong counts as 1 nucleus (cadeira: ca-dei-ra)", () => {
     expect(countSyllables("cadeira")).toBe(3);
   });
 
-  it("ditongo simples monossílabo (pai)", () => {
+  it("a simple monosyllabic diphthong (pai)", () => {
     expect(countSyllables("pai")).toBe(1);
   });
 
-  it("ditongo em posição átona no fim da palavra (história: his-tó-ria)", () => {
+  it("an unstressed diphthong at the end of the word (história: his-tó-ria)", () => {
     expect(countSyllables("história")).toBe(3);
   });
 
-  it("ditongo com 'u' após 'q' (água: á-gua — não quebra em hiato)", () => {
+  it("a diphthong with 'u' after 'q' (água: á-gua — it does not break into a hiatus)", () => {
     expect(countSyllables("água")).toBe(2);
   });
 });
 
-describe("countSyllables — hiatos com acento gráfico", () => {
-  it("hiato marcado por acento em í (saída: sa-í-da)", () => {
+describe("countSyllables — hiatuses with a written accent", () => {
+  it("hiatus marked by an accent on í (saída: sa-í-da)", () => {
     expect(countSyllables("saída")).toBe(3);
   });
 
-  it("hiato marcado por acento em ú (saúde: sa-ú-de)", () => {
+  it("hiatus marked by an accent on ú (saúde: sa-ú-de)", () => {
     expect(countSyllables("saúde")).toBe(3);
   });
 });
 
-describe("countSyllables — hiatos sem acento gráfico (regras novas)", () => {
-  it("hiato por vogal repetida (voo: vo-o)", () => {
+describe("countSyllables — hiatuses with no written accent (new rules)", () => {
+  it("hiatus from a repeated vowel (voo: vo-o)", () => {
     expect(countSyllables("voo")).toBe(2);
   });
 
-  it("hiato entre duas vogais fortes o+e (poesia: melhora de 2→3, real=4 — ver limitação abaixo)", () => {
+  it("hiatus between two strong vowels o+e (poesia: improves from 2→3, real=4 — see the limitation below)", () => {
     expect(countSyllables("poesia")).toBe(3);
   });
 
-  it("hiato entre duas vogais fortes e+a (teatro: te-a-tro)", () => {
+  it("hiatus between two strong vowels e+a (teatro: te-a-tro)", () => {
     expect(countSyllables("teatro")).toBe(3);
   });
 
-  it("hiato entre duas vogais fortes e+a, com sílaba extra antes (oceano: o-ce-a-no)", () => {
+  it("hiatus between two strong vowels e+a, with an extra syllable before (oceano: o-ce-a-no)", () => {
     expect(countSyllables("oceano")).toBe(4);
   });
 
-  it("hiato entre duas vogais fortes e+a (real: re-al)", () => {
+  it("hiatus between two strong vowels e+a (real: re-al)", () => {
     expect(countSyllables("real")).toBe(2);
   });
 
-  it("dois hiatos entre vogais fortes seguidos (aéreo: a-é-re-o)", () => {
+  it("two consecutive strong-vowel hiatuses (aéreo: a-é-re-o)", () => {
     expect(countSyllables("aéreo")).toBe(4);
   });
 
-  it("'i'/'u' átono antes de 'nh' é hiato (rainha: ra-i-nha)", () => {
+  it("an unstressed 'i'/'u' before 'nh' is a hiatus (rainha: ra-i-nha)", () => {
     expect(countSyllables("rainha")).toBe(3);
   });
 
-  it("'i'/'u' átono antes de 'nh' é hiato (moinho: mo-i-nho)", () => {
+  it("an unstressed 'i'/'u' before 'nh' is a hiatus (moinho: mo-i-nho)", () => {
     expect(countSyllables("moinho")).toBe(3);
   });
 
-  it("'nh' comum, sem vogal antes adjacente, não é afetado (caminho: ca-mi-nho)", () => {
+  it("ordinary 'nh', with no adjacent vowel before it, is unaffected (caminho: ca-mi-nho)", () => {
     expect(countSyllables("caminho")).toBe(3);
   });
 
-  it("exceção lexical documentada: 'ruim' (ru-im) não segue a regra padrão de ditongo", () => {
+  it("documented lexical exception: 'ruim' (ru-im) does not follow the standard diphthong rule", () => {
     expect(countSyllables("ruim")).toBe(2);
   });
 
-  it("exceção lexical documentada: 'cruel' (cru-el) não segue a regra padrão de ditongo", () => {
+  it("documented lexical exception: 'cruel' (cru-el) does not follow the standard diphthong rule", () => {
     expect(countSyllables("cruel")).toBe(2);
   });
 });
 
-describe("countSyllables — LIMITAÇÕES CONHECIDAS (não corrigidas, documentadas)", () => {
+describe("countSyllables — KNOWN LIMITATIONS (not fixed, documented)", () => {
 
-  it("'poesia' melhora com a regra de vogais fortes (2→3) mas ainda não chega a 4 (real: po-e-si-a)", () => {
+  it("'poesia' improves with the strong-vowel rule (2→3) but still falls short of 4 (real: po-e-si-a)", () => {
     expect(countSyllables("poesia")).toBe(3);
   });
 
-  it("'reunião' permanece incorreto (hiato de fronteira de prefixo/morfema, não detectável localmente)", () => {
+  it("'reunião' stays wrong (a prefix/morpheme boundary hiatus, not locally detectable)", () => {
     expect(countSyllables("reunião")).toBe(2);
   });
 });
 
-describe("countSyllables — terminações -ção / -são / -mente / -dade / -eiro", () => {
-  it("'nação' (-ção) tem 2 sílabas", () => {
+describe("countSyllables — endings -ção / -são / -mente / -dade / -eiro", () => {
+  it("'nação' (-ção) has 2 syllables", () => {
     expect(countSyllables("nação")).toBe(2);
   });
 
-  it("'profissão' (-são) tem 3 sílabas — confirma que a regra nova não quebra 'ão' nasal", () => {
+  it("'profissão' (-são) has 3 syllables — confirms the new rule does not break the nasal 'ão'", () => {
     expect(countSyllables("profissão")).toBe(3);
   });
 
-  it("'claramente' (-mente) tem 4 sílabas", () => {
+  it("'claramente' (-mente) has 4 syllables", () => {
     expect(countSyllables("claramente")).toBe(4);
   });
 
-  it("'cidade' (-dade) tem 3 sílabas", () => {
+  it("'cidade' (-dade) has 3 syllables", () => {
     expect(countSyllables("cidade")).toBe(3);
   });
 
-  it("'dinheiro' (-eiro) tem 3 sílabas", () => {
+  it("'dinheiro' (-eiro) has 3 syllables", () => {
     expect(countSyllables("dinheiro")).toBe(3);
   });
 });
 
-describe("countSyllables — ão / ãe / õe (ditongo nasal, nunca hiato)", () => {
+describe("countSyllables — ão / ãe / õe (nasal diphthong, never a hiatus)", () => {
   it.each([
     ["não", 1],
     ["mãe", 1],
     ["põe", 1],
-  ])("'%s' tem %i sílaba(s)", (palavra, esperado) => {
-    expect(countSyllables(palavra)).toBe(esperado);
+  ])("'%s' has %i syllable(s)", (word, expected) => {
+    expect(countSyllables(word)).toBe(expected);
   });
 });
 
-describe("countSyllables — palavras hifenizadas", () => {
-  it("'guarda-chuva' soma sílabas dos dois lados do hífen", () => {
+describe("countSyllables — hyphenated words", () => {
+  it("'guarda-chuva' adds up the syllables on both sides of the hyphen", () => {
     expect(countSyllables("guarda-chuva")).toBe(4);
   });
 
-  it("'arco-íris' soma sílabas dos dois lados do hífen", () => {
+  it("'arco-íris' adds up the syllables on both sides of the hyphen", () => {
     expect(countSyllables("arco-íris")).toBe(4);
   });
 });
 
-describe("countSyllables — apóstrofo (elisão)", () => {
-  it("'d'água' conta o fragmento consonantal como 0 e soma com 'água'", () => {
+describe("countSyllables — apostrophe (elision)", () => {
+  it("'d'água' counts the consonant fragment as 0 and adds it to 'água'", () => {
     expect(countSyllables("d'água")).toBe(2);
   });
 });
 
-describe("countSyllables — siglas pronunciáveis vs. soletradas", () => {
-  it("sigla pronunciável sem pontos internos ('ONU') conta como palavra normal", () => {
+describe("countSyllables — pronounceable vs. spelled-out acronyms", () => {
+  it("a pronounceable acronym with no internal periods ('ONU') counts as an ordinary word", () => {
     expect(countSyllables("ONU")).toBe(2);
   });
 
-  it("sigla grudada por pontos ('E.U.A', forma produzida pelo tokenizador) soma 1 por letra", () => {
+  it("an acronym joined by periods ('E.U.A', the form the tokenizer produces) adds 1 per letter", () => {
     expect(countSyllables("E.U.A")).toBe(3);
   });
 
-  it("sigla soletrada sem nenhuma vogal ('CPF') conta 1 unidade por letra", () => {
+  it("a spelled-out acronym with no vowel at all ('CPF') counts 1 unit per letter", () => {
     expect(countSyllables("CPF")).toBe(3);
   });
 
-  it("sigla soletrada sem nenhuma vogal ('FGTS') conta 1 unidade por letra", () => {
+  it("a spelled-out acronym with no vowel at all ('FGTS') counts 1 unit per letter", () => {
     expect(countSyllables("FGTS")).toBe(4);
   });
 
-  it("sigla soletrada sem nenhuma vogal ('RG') conta 1 unidade por letra", () => {
+  it("a spelled-out acronym with no vowel at all ('RG') counts 1 unit per letter", () => {
     expect(countSyllables("RG")).toBe(2);
   });
 
-  it("palavra maiúscula normal (não-sigla) não é afetada pela regra de soletração", () => {
+  it("an ordinary uppercase word (not an acronym) is unaffected by the spelling-out rule", () => {
     expect(countSyllables("A")).toBe(1);
   });
 });
 
 describe("countSyllables — Unicode NFC/NFD", () => {
-  it("produz o mesmo resultado para a mesma palavra em NFC e NFD", () => {
+  it("produces the same result for the same word in NFC and NFD", () => {
     const nfc = "política";
     const nfd = nfc.normalize("NFD");
     expect(countSyllables(nfd)).toBe(countSyllables(nfc));
   });
 
-  it("também vale para palavras com hiato por vogal forte (aéreo)", () => {
+  it("holds for words with a strong-vowel hiatus too (aéreo)", () => {
     const nfc = "aéreo";
     const nfd = nfc.normalize("NFD");
     expect(countSyllables(nfd)).toBe(countSyllables(nfc));
   });
 });
 
-describe("countSyllables — casos-limite", () => {
-  it("string vazia tem 0 sílabas", () => {
+describe("countSyllables — edge cases", () => {
+  it("an empty string has 0 syllables", () => {
     expect(countSyllables("")).toBe(0);
   });
 
-  it("fragmento só-consoante minúsculo (sem vogal) tem piso de 1 sílaba", () => {
+  it("a lowercase consonant-only fragment (no vowel) has a floor of 1 syllable", () => {
     expect(countSyllables("pfft")).toBe(1);
   });
 });
 
-describe("countSyllables — determinismo", () => {
-  it("execução repetida produz sempre o mesmo resultado", () => {
-    const palavra = "extraordinariamente";
-    const r1 = countSyllables(palavra);
-    const r2 = countSyllables(palavra);
+describe("countSyllables — determinism", () => {
+  it("repeated runs always produce the same result", () => {
+    const word = "extraordinariamente";
+    const r1 = countSyllables(word);
+    const r2 = countSyllables(word);
     expect(r2).toBe(r1);
   });
 });

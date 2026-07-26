@@ -8,8 +8,8 @@ import { runMetrics } from "./support/pt";
 import type { Config } from "../src/lucid/core/config";
 import type { Finding } from "../src/lucid/core/types";
 
-describe("analyze — documento vazio", () => {
-  it("texto vazio produz Diagnostic sem findings, placar zerado e métricas zeradas", () => {
+describe("analyze — empty document", () => {
+  it("empty text produces a Diagnostic with no findings, a zeroed scorecard and zeroed metrics", () => {
     const diagnostic = analyze("");
 
     expect(diagnostic.text).toBe("");
@@ -59,8 +59,8 @@ describe("analyze — documento vazio", () => {
   });
 });
 
-describe("analyze — documento sem findings", () => {
-  it("texto com frases curtas não gera findings, mas métricas e placar refletem o texto", () => {
+describe("analyze — document with no findings", () => {
+  it("text with short sentences yields no findings, but metrics and scorecard still reflect the text", () => {
     const diagnostic = analyze("O gato subiu. O cão correu.");
 
     expect(diagnostic.findings).toEqual([]);
@@ -75,8 +75,8 @@ describe("analyze — documento sem findings", () => {
   });
 });
 
-describe("analyze — documento com um finding", () => {
-  it("uma frase longa gera exatamente um finding com os campos corretos", () => {
+describe("analyze — document with one finding", () => {
+  it("a long sentence yields exactly one finding with the correct fields", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5, errorAbove: 100 } };
     const text = "Esta é uma frase propositalmente longa para ultrapassar o limite de alerta configurado no teste.";
 
@@ -96,8 +96,8 @@ describe("analyze — documento com um finding", () => {
   });
 });
 
-describe("analyze — múltiplos findings", () => {
-  it("várias frases longas geram um finding por frase, todos contabilizados no placar", () => {
+describe("analyze — multiple findings", () => {
+  it("several long sentences yield one finding per sentence, all counted in the scorecard", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
     const text = "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
     const diagnostic = analyze(text, config);
@@ -108,7 +108,7 @@ describe("analyze — múltiplos findings", () => {
   });
 });
 
-describe("sortFindings — ordenação canônica independente da ordem de entrada", () => {
+describe("sortFindings — canonical ordering independent of input order", () => {
   function finding(overrides: Partial<Finding>): Finding {
     return {
       criterion: "long_sentence",
@@ -124,29 +124,29 @@ describe("sortFindings — ordenação canônica independente da ordem de entrad
     };
   }
 
-  it("ordena por span.start, span.end e criterion, nessa ordem", () => {
+  it("sorts by span.start, span.end and criterion, in that order", () => {
     const a = finding({ span: { start: 10, end: 20, text: "a" } });
     const b = finding({ span: { start: 0, end: 5, text: "b" } });
     const c = finding({ span: { start: 0, end: 10, text: "c" } });
     const d = finding({ span: { start: 0, end: 5, text: "d" }, criterion: "aaa_criterion" });
 
-    const esperado = [d.span.text, b.span.text, c.span.text, a.span.text];
+    const expected = [d.span.text, b.span.text, c.span.text, a.span.text];
 
-    for (const entrada of permutations([a, b, c, d])) {
-      const resultado = sortFindings(entrada).map((f) => f.span.text);
-      expect(resultado).toEqual(esperado);
+    for (const input of permutations([a, b, c, d])) {
+      const result = sortFindings(input).map((f) => f.span.text);
+      expect(result).toEqual(expected);
     }
   });
 
-  it("não muta o array de entrada", () => {
+  it("does not mutate the input array", () => {
     const a = finding({ span: { start: 10, end: 20, text: "a" } });
     const b = finding({ span: { start: 0, end: 5, text: "b" } });
-    const entrada = [a, b];
-    const copiaOriginal = [...entrada];
+    const input = [a, b];
+    const originalCopy = [...input];
 
-    sortFindings(entrada);
+    sortFindings(input);
 
-    expect(entrada).toEqual(copiaOriginal);
+    expect(input).toEqual(originalCopy);
   });
 });
 
@@ -162,40 +162,40 @@ function permutations<T>(items: T[]): T[][] {
   return result;
 }
 
-describe("analyze — configuração customizada", () => {
-  it("limiares customizados mudam quais frases viram finding", () => {
+describe("analyze — custom configuration", () => {
+  it("custom thresholds change which sentences become findings", () => {
     const text = "Frase curta de teste aqui agora.";
 
-    const semFindings = analyze(text, DEFAULT_CONFIG);
-    const comFindings = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 1000 } });
+    const withoutFindings = analyze(text, DEFAULT_CONFIG);
+    const withFindings = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 1000 } });
 
-    expect(semFindings.findings).toHaveLength(0);
-    expect(comFindings.findings).toHaveLength(1);
+    expect(withoutFindings.findings).toHaveLength(0);
+    expect(withFindings.findings).toHaveLength(1);
   });
 
-  it("configs diferentes produzem configHash diferentes", () => {
+  it("different configs produce different configHashes", () => {
     const text = "Texto qualquer para o teste de hash.";
 
-    const padrao = analyze(text);
-    const customizado = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 4 } });
+    const standard = analyze(text);
+    const custom = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 4 } });
 
-    expect(customizado.meta.configHash).not.toBe(padrao.meta.configHash);
+    expect(custom.meta.configHash).not.toBe(standard.meta.configHash);
   });
 });
 
-describe("analyze — métricas integradas", () => {
-  it("Diagnostic.metrics é idêntico ao que runMetrics(buildDocument(texto)) produziria isoladamente", () => {
+describe("analyze — integrated metrics", () => {
+  it("Diagnostic.metrics is identical to what runMetrics(buildDocument(text)) would produce on its own", () => {
     const text = "O gato subiu no telhado rapidamente. O cachorro correu atrás dele por muito tempo.";
 
     const diagnostic = analyze(text);
-    const metricasIndependentes = runMetrics(buildDocument(text), DEFAULT_CONFIG);
+    const standaloneMetrics = runMetrics(buildDocument(text), DEFAULT_CONFIG);
 
-    expect(diagnostic.metrics).toEqual(metricasIndependentes);
+    expect(diagnostic.metrics).toEqual(standaloneMetrics);
   });
 });
 
-describe("analyze — offsets preservados", () => {
-  it("span de cada finding reconstrói exatamente o trecho via slice de Diagnostic.text", () => {
+describe("analyze — offsets preserved", () => {
+  it("each finding's span reconstructs the excerpt exactly by slicing Diagnostic.text", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
     const text = "Primeira frase bem longa para o teste. Segunda frase também bem longa aqui.";
 
@@ -208,8 +208,8 @@ describe("analyze — offsets preservados", () => {
   });
 });
 
-describe("analyze — execução repetida byte-idêntica", () => {
-  it("mesma entrada produz sempre o mesmo JSON (config default)", () => {
+describe("analyze — byte-identical on repeated runs", () => {
+  it("the same input always produces the same JSON (default config)", () => {
     const text =
       "O Sr. Dr. João A. Silva, nascido em 1.234, escreveu para contato@exemplo.com.br sobre um assunto qualquer. " +
       "Veja https://exemplo.com/pagina. Isso é ótimo! A saída foi rápida e a saúde, ótima.";
@@ -220,7 +220,7 @@ describe("analyze — execução repetida byte-idêntica", () => {
     expect(r2).toBe(r1);
   });
 
-  it("mesma entrada produz sempre o mesmo JSON (config customizada)", () => {
+  it("the same input always produces the same JSON (custom config)", () => {
     const text = "Primeira frase bem longa para o teste. Segunda frase também bem longa aqui.";
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 6 } };
 
@@ -231,8 +231,8 @@ describe("analyze — execução repetida byte-idêntica", () => {
   });
 });
 
-describe("analyze — ausência de findings nunca vira 'aprovado'", () => {
-  it("Diagnostic e Score não têm nenhum campo de aprovação, mesmo sem findings", () => {
+describe("analyze — the absence of findings never becomes 'approved'", () => {
+  it("Diagnostic and Score carry no approval field, even with no findings", () => {
     const diagnostic = analyze("Frase curta.");
 
     expect(Object.keys(diagnostic).sort()).toEqual(["findings", "meta", "metrics", "score", "text"]);
@@ -245,18 +245,18 @@ describe("analyze — ausência de findings nunca vira 'aprovado'", () => {
   });
 });
 
-describe("analyzer — ausência de imports proibidos", () => {
-  const arquivos = ["core/analyzer.ts", "core/score/index.ts", "core/document/model.ts", "core/metrics/index.ts"];
+describe("analyzer — absence of forbidden imports", () => {
+  const files = ["core/analyzer.ts", "core/score/index.ts", "core/document/model.ts", "core/metrics/index.ts"];
 
-  it.each(arquivos)("%s não importa probe/report/react/next/rede", (arquivoRelativo) => {
-    const caminho = path.join(__dirname, "..", "src", "lucid", arquivoRelativo);
-    const fonte = readFileSync(caminho, "utf-8");
+  it.each(files)("%s does not import probe/report/react/next/network", (relativeFile) => {
+    const filePath = path.join(__dirname, "..", "src", "lucid", relativeFile);
+    const source = readFileSync(filePath, "utf-8");
 
-    expect(fonte).not.toMatch(/from\s+["'].*\/probe/);
-    expect(fonte).not.toMatch(/from\s+["'].*\/report/);
-    expect(fonte).not.toMatch(/from\s+["']react/);
-    expect(fonte).not.toMatch(/from\s+["']next/);
-    expect(fonte).not.toMatch(/https?:\/\//);
-    expect(fonte).not.toMatch(/\bfetch\(/);
+    expect(source).not.toMatch(/from\s+["'].*\/probe/);
+    expect(source).not.toMatch(/from\s+["'].*\/report/);
+    expect(source).not.toMatch(/from\s+["']react/);
+    expect(source).not.toMatch(/from\s+["']next/);
+    expect(source).not.toMatch(/https?:\/\//);
+    expect(source).not.toMatch(/\bfetch\(/);
   });
 });

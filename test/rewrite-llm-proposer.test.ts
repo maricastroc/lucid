@@ -18,28 +18,28 @@ function span(text: string): Span {
   return { start: 0, end: text.length, text };
 }
 
-describe("parseRewrite — robustez do parse", () => {
-  it("JSON limpo", () => {
+describe("parseRewrite — parsing robustness", () => {
+  it("clean JSON", () => {
     expect(parseRewrite('{"reescrita": "texto claro"}')).toBe("texto claro");
   });
-  it("embrulhado em cerca ```json + texto ao redor", () => {
+  it("wrapped in a ```json fence plus surrounding text", () => {
     expect(parseRewrite('Claro!\n```json\n{"reescrita": "texto claro"}\n```')).toBe("texto claro");
   });
-  it("reescrita vazia → null (cai no original)", () => {
+  it("empty rewrite → null (falls back to the original)", () => {
     expect(parseRewrite('{"reescrita": "  "}')).toBeNull();
   });
-  it("JSON malformado → null", () => {
+  it("malformed JSON → null", () => {
     expect(parseRewrite("desculpe, não consigo")).toBeNull();
   });
 });
 
 describe("LlmRewriteProposer", () => {
-  it("id carrega provedor, modelo e versão do prompt (proveniência/anti-drift)", () => {
+  it("the id carries provider, model and prompt version (provenance/anti-drift)", () => {
     const proposer = new LlmRewriteProposer(new MockChatProvider("{}"), "m1");
     expect(proposer.id).toBe(`mock:m1+${REWRITE_PROMPT_VERSION}`);
   });
 
-  it("usa o trecho-alvo como original e a reescrita parseada como proposta", async () => {
+  it("uses the target excerpt as the original and the parsed rewrite as the proposal", async () => {
     const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
     const proposer = new LlmRewriteProposer(provider, "m1");
     const target = span("Um trecho longo e enrolado que precisa de ajuda.");
@@ -52,14 +52,14 @@ describe("LlmRewriteProposer", () => {
     expect(provider.lastPrompt).toContain(target.text);
   });
 
-  it("resposta ilegível → proposta = original (honesto, não fabrica)", async () => {
+  it("an unreadable response → proposal = original (honest, fabricates nothing)", async () => {
     const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
     const target = span("Trecho original intacto.");
     const proposal = await proposer.propose({ text: target.text, target });
     expect(proposal.proposed).toBe(target.text);
   });
 
-  it("resposta ilegível → parseOutcome sinaliza 'unparseable' (LUCID-012: não passa despercebido)", async () => {
+  it("an unreadable response → parseOutcome reports 'unparseable' (LUCID-012: it does not slip by)", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
     const target = span("Trecho original intacto.");
@@ -70,7 +70,7 @@ describe("LlmRewriteProposer", () => {
     warnSpy.mockRestore();
   });
 
-  it("resposta parseável → parseOutcome = 'ok', sem warning", async () => {
+  it("a parseable response → parseOutcome = 'ok', with no warning", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
     const proposer = new LlmRewriteProposer(provider, "m1");
@@ -81,7 +81,7 @@ describe("LlmRewriteProposer", () => {
     warnSpy.mockRestore();
   });
 
-  it("a estratégia entra no id e escolhe o prompt (correct minimiza, rewrite reorganiza)", async () => {
+  it("the strategy enters the id and picks the prompt (correct minimizes, rewrite reorganizes)", async () => {
     const t = span("Um trecho.");
     const correct = new MockChatProvider('{"reescrita":"x"}');
     const rewrite = new MockChatProvider('{"reescrita":"x"}');
@@ -96,15 +96,15 @@ describe("LlmRewriteProposer", () => {
   });
 });
 
-describe("GroqProvider — allow-list (sem rede)", () => {
-  it("rejeita modelo fora da allow-list antes de qualquer fetch", async () => {
-    const provider = new GroqProvider("chave-fake");
-    await expect(provider.complete("oi", { model: "modelo-inexistente", temperature: 0 })).rejects.toBeInstanceOf(
+describe("GroqProvider — allow-list (no network)", () => {
+  it("rejects a model outside the allow-list before any fetch", async () => {
+    const provider = new GroqProvider("fake-key");
+    await expect(provider.complete("oi", { model: "nonexistent-model", temperature: 0 })).rejects.toBeInstanceOf(
       ChatProviderError,
     );
   });
 
-  it("expõe a allow-list de modelos gratuitos do Groq", () => {
+  it("exposes the allow-list of Groq's free models", () => {
     expect(GROQ_MODELS.length).toBeGreaterThanOrEqual(3);
     expect(new GroqProvider("x").models).toEqual(GROQ_MODELS);
   });

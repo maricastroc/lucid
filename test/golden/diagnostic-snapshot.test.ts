@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { analyze } from "../../src/lucid";
 import { GOLDEN_INTEGRADO } from "./integrated-golden";
 
-const IDS_SNAPSHOT = [
+const SNAPSHOT_IDS = [
   "texto_vazio",
   "admin_simples_sem_finding",
   "frase_longa",
@@ -14,14 +14,14 @@ const IDS_SNAPSHOT = [
   "unicode_aspas_travessao",
 ] as const;
 
-const casosSnapshot = IDS_SNAPSHOT.map((id) => {
-  const caso = GOLDEN_INTEGRADO.find((c) => c.id === id);
-  if (!caso) throw new Error(`caso de snapshot inexistente no golden: ${id}`);
-  return caso;
+const snapshotCases = SNAPSHOT_IDS.map((id) => {
+  const testCase = GOLDEN_INTEGRADO.find((c) => c.id === id);
+  if (!testCase) throw new Error(`snapshot case missing from the golden set: ${id}`);
+  return testCase;
 });
 
-describe("estabilidade das âncoras de snapshot (antes de comparar retratos)", () => {
-  it("meta é composto só de constantes estáveis e hashes puros (Config + dados)", () => {
+describe("stability of the snapshot anchors (before comparing portraits)", () => {
+  it("meta is made only of stable constants and pure hashes (Config + data)", () => {
     const d = analyze("Um texto qualquer para checar o meta.");
     expect(d.meta.lucidVersion).toBe("0.1.0");
     expect(d.meta.localeId).toBe("pt-BR");
@@ -37,17 +37,17 @@ describe("estabilidade das âncoras de snapshot (antes de comparar retratos)", (
     ]);
   });
 
-  it("sem o localeId, o meta é byte-idêntico ao contrato anterior", () => {
+  it("without the localeId, meta is byte-identical to the previous contract", () => {
     const d = analyze("Um texto qualquer para checar o meta.");
-    const metaSemLocale: Record<string, unknown> = { ...d.meta };
-    delete metaSemLocale.localeId;
-    expect(Object.keys(metaSemLocale).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
+    const metaWithoutLocale: Record<string, unknown> = { ...d.meta };
+    delete metaWithoutLocale.localeId;
+    expect(Object.keys(metaWithoutLocale).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
   });
 });
 
-describe("snapshots do Diagnostic completo", () => {
-  it.each(casosSnapshot)("$id", (caso) => {
-    const diagnostic = analyze(caso.text);
+describe("snapshots of the full Diagnostic", () => {
+  it.each(snapshotCases)("$id", (testCase) => {
+    const diagnostic = analyze(testCase.text);
     expect(diagnostic).toMatchSnapshot();
   });
 });

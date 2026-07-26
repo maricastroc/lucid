@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 import type { Finding } from "../src/lucid/core/types";
 
-function assertProvenanciaCompleta(f: Finding, textoDiagnostico: string) {
+function assertCompleteProvenance(f: Finding, diagnosticText: string) {
   expect(f.criterion.length).toBeGreaterThan(0);
   expect(["lexical", "syntactic", "structural", "metric"]).toContain(f.category);
   expect(["iso-24495-1", "editorial-pt-br", "structural-heuristic"]).toContain(f.source);
@@ -17,49 +17,49 @@ function assertProvenanciaCompleta(f: Finding, textoDiagnostico: string) {
   expect(f.span.end).toBeGreaterThan(f.span.start);
 
   if (f.suggestion !== undefined) expect(f.requiresHuman).toBe(false);
-  expect(textoDiagnostico.slice(f.span.start, f.span.end)).toBe(f.span.text);
+  expect(diagnosticText.slice(f.span.start, f.span.end)).toBe(f.span.text);
 }
 
-describe("proveniência — todo finding integrado é completo e reconstrutível", () => {
-  const textos = [
+describe("provenance — every integrated finding is complete and reconstructible", () => {
+  const texts = [
     "O recurso foi negado em sede de apelação. O documento supracitado consta.",
     "É preciso fazer a análise de documentos pela comissão, doravante.",
     "As contas foram aprovadas pelo conselho.",
   ];
-  it.each(textos)("todos os campos de proveniência presentes e span reconstrói: %s", (texto) => {
-    const d = analyze(texto);
+  it.each(texts)("all provenance fields present and the span reconstructs: %s", (text) => {
+    const d = analyze(text);
     expect(d.findings.length).toBeGreaterThan(0);
-    for (const f of d.findings) assertProvenanciaCompleta(f, d.text);
+    for (const f of d.findings) assertCompleteProvenance(f, d.text);
   });
 });
 
-describe("proveniência — offsets sob Unicode e pontuação", () => {
-  it("acentos (á, ç, ã) não deslocam o span", () => {
+describe("provenance — offsets under Unicode and punctuation", () => {
+  it("accents (á, ç, ã) do not shift the span", () => {
     const d = analyze("A informação foi divulgada pela assessoria de comunicação.");
-    const passiva = d.findings.find((f) => f.criterion === "passive_voice");
-    expect(passiva).toBeDefined();
-    expect(d.text.slice(passiva!.span.start, passiva!.span.end)).toBe(passiva!.span.text);
+    const passive = d.findings.find((f) => f.criterion === "passive_voice");
+    expect(passive).toBeDefined();
+    expect(d.text.slice(passive!.span.start, passive!.span.end)).toBe(passive!.span.text);
   });
 
-  it("aspas curvas “ ” são reconhecidas e o span de um finding fora delas continua correto", () => {
+  it("curly quotes “ ” are recognized and the span of a finding outside them stays correct", () => {
     const d = analyze("A decisão foi publicada, “sem prejuízo de” recurso posterior.");
 
     expect(d.findings.some((f) => f.criterion === "jargon")).toBe(false);
-    const passiva = d.findings.find((f) => f.criterion === "passive_voice")!;
-    expect(d.text.slice(passiva.span.start, passiva.span.end)).toBe(passiva.span.text);
+    const passive = d.findings.find((f) => f.criterion === "passive_voice")!;
+    expect(d.text.slice(passive.span.start, passive.span.end)).toBe(passive.span.text);
   });
 
-  it("travessão (—) entre findings não corrompe offsets", () => {
+  it("an em dash (—) between findings does not corrupt offsets", () => {
     const d = analyze("O prazo foi prorrogado — o documento supracitado segue válido.");
     for (const f of d.findings) expect(d.text.slice(f.span.start, f.span.end)).toBe(f.span.text);
     expect(d.findings.some((f) => f.criterion === "jargon" && f.span.text === "supracitado")).toBe(true);
   });
 
-  it("emoji (par surrogate, 2 code units) antes de um finding desloca o offset em 2", () => {
-    const semEmoji = "Veja o documento supracitado agora.";
-    const comEmoji = "Veja 😀 o documento supracitado agora.";
-    const d1 = analyze(semEmoji);
-    const d2 = analyze(comEmoji);
+  it("an emoji (surrogate pair, 2 code units) before a finding shifts the offset by 2", () => {
+    const withoutEmoji = "Veja o documento supracitado agora.";
+    const withEmoji = "Veja 😀 o documento supracitado agora.";
+    const d1 = analyze(withoutEmoji);
+    const d2 = analyze(withEmoji);
     const j1 = d1.findings.find((f) => f.criterion === "jargon")!;
     const j2 = d2.findings.find((f) => f.criterion === "jargon")!;
 
@@ -69,15 +69,15 @@ describe("proveniência — offsets sob Unicode e pontuação", () => {
     expect("😀".length).toBe(2);
   });
 
-  it("quebras de linha e espaços repetidos preservam offsets globais entre parágrafos", () => {
+  it("line breaks and repeated spaces preserve global offsets across paragraphs", () => {
     const d = analyze("Primeiro parágrafo.\n\n\nSegundo com o termo supracitado no meio.");
     const j = d.findings.find((f) => f.criterion === "jargon")!;
     expect(d.text.slice(j.span.start, j.span.end)).toBe("supracitado");
   });
 });
 
-describe("proveniência — normalização NFC e a convenção de offset", () => {
-  it("entrada NFD é normalizada; offsets são relativos ao texto NFC exposto em Diagnostic.text", () => {
+describe("provenance — NFC normalization and the offset convention", () => {
+  it("NFD input is normalized; offsets are relative to the NFC text exposed in Diagnostic.text", () => {
     const nfd = "A conclus\u00e3o foi publicada.".normalize("NFD");
     expect(nfd.normalize("NFC")).not.toBe(nfd);
     const d = analyze(nfd);
@@ -85,12 +85,12 @@ describe("proveniência — normalização NFC e a convenção de offset", () =>
     expect(d.text).toBe(nfd.normalize("NFC"));
     expect(d.text.length).toBe(nfd.length - 1);
 
-    const passiva = d.findings.find((f) => f.criterion === "passive_voice")!;
-    expect(d.text.slice(passiva.span.start, passiva.span.end)).toBe(passiva.span.text);
-    expect(passiva.span.text).toBe("foi publicada");
+    const passive = d.findings.find((f) => f.criterion === "passive_voice")!;
+    expect(d.text.slice(passive.span.start, passive.span.end)).toBe(passive.span.text);
+    expect(passive.span.text).toBe("foi publicada");
   });
 
-  it("nominalização não carrega sugestão composta (ADR-054) — o verbo-base vive em meta, o span é citação", () => {
+  it("nominalization carries no composed suggestion (ADR-054) — the base verb lives in meta, the span is a quote", () => {
     const d = analyze("É preciso fazer a análise de documentos.");
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
     expect(nominal.suggestion).toBeUndefined();

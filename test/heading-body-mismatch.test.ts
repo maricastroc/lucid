@@ -13,7 +13,7 @@ function findingsFor(blocks: RawBlock[], config = DEFAULT_CONFIG): Finding[] {
 }
 
 describe("heading_body_mismatch", () => {
-  it("corpo ecoa uma palavra do título (mesma forma exata) → não marca", () => {
+  it("the body echoes a word from the heading (same exact form) → no finding", () => {
     const found = findingsFor([
       H("Prazos e documentos"),
       P("Os documentos exigidos devem ser entregues na secretaria até sexta-feira."),
@@ -21,14 +21,14 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("zero palavra de conteúdo em comum, corpo com substância suficiente → marca (info, requiresHuman, sem sugestão)", () => {
-    const titulo = "Prazos e documentos";
+  it("zero content words in common, body with enough substance → marks (info, requiresHuman, no suggestion)", () => {
+    const heading = "Prazos e documentos";
     const found = findingsFor([
-      H(titulo),
+      H(heading),
       P("A comissão avaliará os pedidos recebidos na reunião de sexta-feira."),
     ]);
     expect(found).toHaveLength(1);
-    expect(found[0].span.text).toBe(titulo);
+    expect(found[0].span.text).toBe(heading);
     expect(found[0].source).toBe("structural-heuristic");
     expect(found[0].principleGroup).toBe("findable");
     expect(found[0].category).toBe("structural");
@@ -39,17 +39,17 @@ describe("heading_body_mismatch", () => {
     expect(found[0].meta?.bodyContentWords).toBeGreaterThanOrEqual(DEFAULT_CONFIG.headingBodyMismatch.minBodyContentWords);
   });
 
-  it("corpo curto demais (abaixo do mínimo de palavras de conteúdo) → não marca, mesmo sem eco", () => {
+  it("a body that is too short (below the content-word minimum) → no finding, even with no echo", () => {
     const found = findingsFor([H("Prazos e documentos"), P("Leia com atenção.")]);
     expect(found).toHaveLength(0);
   });
 
-  it("título sem corpo (imediatamente seguido de outro título) → não marca — fora de escopo aqui", () => {
+  it("a heading with no body (immediately followed by another heading) → no finding — out of scope here", () => {
     const found = findingsFor([H("Introdução"), H("Regras gerais")]);
     expect(found).toHaveLength(0);
   });
 
-  it("título composto só de palavras função → não marca (nada para comparar)", () => {
+  it("a heading made only of function words → no finding (nothing to compare)", () => {
     const found = findingsFor([
       H("Isto ou aquilo"),
       P("A comissão avaliará os pedidos recebidos na reunião de sexta-feira."),
@@ -57,7 +57,7 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("título aninhado (H2) dentro da seção do H1 conta como eco do H1", () => {
+  it("a nested heading (H2) inside the H1 section counts as an echo of the H1", () => {
     const found = findingsFor([
       H("Recurso administrativo", 1),
       P("Esta seção descreve as regras gerais do processo."),
@@ -68,7 +68,7 @@ describe("heading_body_mismatch", () => {
     expect(found.find((f) => f.span.text === "Recurso administrativo")).toBeUndefined();
   });
 
-  it("plural/singular do mesmo termo conta como eco (normalização de número — Etapa 1)", () => {
+  it("plural/singular of the same term counts as an echo (number normalization — Step 1)", () => {
     const found = findingsFor([
       H("Documentos necessários"),
       P("Você deve entregar o documento na secretaria até o fim do prazo estabelecido pelo edital."),
@@ -76,7 +76,7 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("plural em -ções ecoa o singular em -ção (solicitações ≈ solicitação)", () => {
+  it("a -ções plural echoes the -ção singular (solicitações ≈ solicitação)", () => {
     const found = findingsFor([
       H("Solicitações de acesso"),
       P("Cada solicitação de acesso é analisada pela equipe responsável no prazo de cinco dias úteis."),
@@ -84,7 +84,7 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("caso do briefing: 'Solicitação de benefícios' × 'solicitar o benefício' não marca (eco via 'benefício')", () => {
+  it("the briefing case: 'Solicitação de benefícios' × 'solicitar o benefício' does not mark (echo via 'benefício')", () => {
     const found = findingsFor([
       H("Solicitação de benefícios"),
       P("Para solicitar o benefício, o interessado apresenta os documentos exigidos e aguarda a análise."),
@@ -92,7 +92,7 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("LIMITAÇÃO CONHECIDA: relação derivacional (substantivo × verbo) NÃO é reconhecida", () => {
+  it("KNOWN LIMITATION: a derivational relation (noun × verb) is NOT recognized", () => {
     const found = findingsFor([
       H("Solicitação"),
       P("Para solicitar, o interessado comparece à unidade e aguarda o atendimento presencial da equipe."),
@@ -101,7 +101,7 @@ describe("heading_body_mismatch", () => {
     expect(found[0].severity).toBe("info");
   });
 
-  it("títulos com raízes distintas NÃO são fundidos pela normalização (casamento ≠ casas)", () => {
+  it("headings with distinct stems are NOT merged by normalization (casamento ≠ casas)", () => {
     const found = findingsFor([
       H("Casamento civil"),
       P("As casas antigas do bairro foram tombadas pelo conselho municipal de patrimônio histórico."),
@@ -119,7 +119,7 @@ describe("heading_body_mismatch", () => {
     expect(found).toHaveLength(0);
   });
 
-  it("texto puro (sem títulos) nunca dispara", () => {
+  it("plain text (no headings) never triggers", () => {
     const found = analyze(
       "A comissão avaliará os pedidos recebidos na reunião de sexta-feira. Outro parágrafo qualquer aqui.",
     ).findings.filter((f) => f.criterion === "heading_body_mismatch");

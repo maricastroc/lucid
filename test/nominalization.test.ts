@@ -18,31 +18,31 @@ function nomFindings(text: string, config: Config = DEFAULT_CONFIG) {
   return nominalizationPass.run(ctxFor(text, config));
 }
 
-describe("nominalizationPass — cada verbo leve cadastrado", () => {
+describe("nominalizationPass — each curated light verb", () => {
   it.each([
     "É preciso fazer a análise de documentos.",
     "É preciso realizar o pagamento da taxa.",
     "É preciso efetuar a solicitação de acesso.",
     "É preciso promover a avaliação de riscos.",
     "É preciso proceder à verificação dos dados.",
-  ])("detecta a construção em '%s' — sem compor troca (ADR-054)", (text) => {
+  ])("detects the construction in '%s' — without composing a swap (ADR-054)", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].suggestion).toBeUndefined();
   });
 });
 
-describe("nominalizationPass — a engine nunca compõe a troca (ADR-054)", () => {
+describe("nominalizationPass — the engine never composes the swap (ADR-054)", () => {
   it.each([
     "É preciso fazer a análise de documentos.",
     "O comitê fez a análise de documentos.",
     "O comitê fez a análise ontem.",
     "É preciso promover a revisão dos autos.",
-  ])("'%s': nenhum finding carrega suggestion", (text) => {
+  ])("'%s': no finding carries a suggestion", (text) => {
     for (const f of nomFindings(text)) expect(f.suggestion).toBeUndefined();
   });
 
-  it("o verbo-base curado é informado via meta e justification — informação, não texto pronto", () => {
+  it("the curated base verb is reported via meta and justification — information, not ready-made text", () => {
     const [f] = nomFindings("É preciso fazer a análise de documentos.");
     expect(f.meta).toMatchObject({ lightVerb: "fazer", nominalization: "análise", baseVerb: "analisar" });
     expect(f.justification).toContain('"analisar"');
@@ -50,13 +50,13 @@ describe("nominalizationPass — a engine nunca compõe a troca (ADR-054)", () =
   });
 });
 
-describe("nominalizationPass — requiresHuman classifica a ambiguidade do mapeamento", () => {
+describe("nominalizationPass — requiresHuman classifies the mapping's ambiguity", () => {
   it.each([
     "É preciso fazer a análise de documentos.",
     "O comitê fez a análise ontem.",
     "Eles fazem a análise semanalmente.",
     "É bom que façam a análise.",
-  ])("mapeamento único ('%s' → analisar): requiresHuman=false — qualquer reescritor resolve sem informação nova", (text) => {
+  ])("single mapping ('%s' → analisar): requiresHuman=false — any rewriter resolves it with no new information", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].requiresHuman).toBe(false);
@@ -65,7 +65,7 @@ describe("nominalizationPass — requiresHuman classifica a ambiguidade do mapea
   it.each([
     "É preciso promover a revisão dos autos.",
     "É preciso fazer a revisão de documentos.",
-  ])("mapeamento ambíguo ('%s' → revisão): requiresHuman=true — a escolha do verbo é do autor", (text) => {
+  ])("ambiguous mapping ('%s' → revisão): requiresHuman=true — picking the verb is the author's call", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].requiresHuman).toBe(true);
@@ -73,107 +73,107 @@ describe("nominalizationPass — requiresHuman classifica a ambiguidade do mapea
   });
 });
 
-describe("nominalizationPass — artigos definidos e indefinidos", () => {
+describe("nominalizationPass — definite and indefinite articles", () => {
   it.each([
     ["fazer a análise", "a"],
     ["fazer o pagamento", "o"],
     ["fazer as análises", "as"],
     ["fazer os pagamentos", "os"],
     ["fazer uma análise", "uma"],
-  ])("aceita determinante '%s'", (fragmento) => {
-    const findings = nomFindings(`É preciso ${fragmento}.`);
+  ])("accepts the determiner in '%s'", (fragment) => {
+    const findings = nomFindings(`É preciso ${fragment}.`);
     expect(findings).toHaveLength(1);
   });
 
-  it("'um pagamento' também é aceito", () => {
+  it("'um pagamento' is accepted too", () => {
     const findings = nomFindings("É preciso fazer um pagamento.");
     expect(findings).toHaveLength(1);
   });
 });
 
-describe("nominalizationPass — contrações à/ao/às/aos", () => {
+describe("nominalizationPass — à/ao/às/aos contractions", () => {
   it.each([
     "É preciso proceder à verificação dos dados.",
     "É preciso proceder ao pagamento imediatamente.",
-  ])("'%s' casa com o padrão 'a' de 'proceder'", (text) => {
+  ])("'%s' matches the 'a' pattern of 'proceder'", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
   });
 
-  it("determinante 'direct' (o/a/os/as/um/uma) não casa com verbo de padrão 'a'", () => {
+  it("a 'direct' determiner (o/a/os/as/um/uma) does not match a verb with the 'a' pattern", () => {
     expect(nomFindings("É preciso proceder a verificação.")).toEqual([]);
   });
 });
 
-describe("nominalizationPass — nominalizações cadastradas", () => {
+describe("nominalizationPass — curated nominalizations", () => {
   it.each(["análise", "pagamento", "solicitação", "verificação", "avaliação", "aprovação", "correção", "atualização", "publicação", "cancelamento", "agendamento"])(
-    "'%s' é reconhecida",
-    (nominalizacao) => {
-      const findings = nomFindings(`É preciso fazer a ${nominalizacao}.`);
+    "'%s' is recognized",
+    (nominalization) => {
+      const findings = nomFindings(`É preciso fazer a ${nominalization}.`);
       expect(findings).toHaveLength(1);
     },
   );
 });
 
-describe("nominalizationPass — palavras não cadastradas", () => {
+describe("nominalizationPass — words outside the dataset", () => {
   it.each(["formação", "administração", "operação", "edição", "condução", "bolo", "presente", "tempo"])(
-    "'%s' não é reconhecida (fora do dataset)",
-    (palavra) => {
-      expect(nomFindings(`É preciso fazer a ${palavra}.`)).toEqual([]);
+    "'%s' is not recognized (outside the dataset)",
+    (word) => {
+      expect(nomFindings(`É preciso fazer a ${word}.`)).toEqual([]);
     },
   );
 });
 
-describe("nominalizationPass — verbo leve usado lexicalmente", () => {
+describe("nominalizationPass — a light verb used lexically", () => {
   it.each(["Fazer o bolo é fácil.", "Dar um presente é gentil.", "É preciso ter tempo."])(
-    "'%s' não gera finding (objeto não é nominalização cadastrada)",
+    "'%s' yields no finding (the object is not a curated nominalization)",
     (text) => {
       expect(nomFindings(text)).toEqual([]);
     },
   );
 
-  it("nominalização sem determinante não casa (nenhuma exceção documentada nesta etapa)", () => {
+  it("a nominalization with no determiner does not match (no documented exception at this stage)", () => {
     expect(nomFindings("É preciso fazer análise de documentos.")).toEqual([]);
   });
 });
 
-describe("nominalizationPass — nominalização sem verbo leve", () => {
+describe("nominalizationPass — a nominalization with no light verb", () => {
   it.each(["A análise foi publicada ontem.", "O pagamento venceu ontem."])(
-    "'%s' não gera finding",
+    "'%s' yields no finding",
     (text) => {
       expect(nomFindings(text)).toEqual([]);
     },
   );
 });
 
-describe("nominalizationPass — modificador entre determinante e nominalização", () => {
-  it("adjetivo entre determinante e nominalização impede o casamento do núcleo", () => {
+describe("nominalizationPass — a modifier between determiner and nominalization", () => {
+  it("an adjective between determiner and nominalization blocks the head from matching", () => {
     expect(nomFindings("É preciso fazer a boa análise.")).toEqual([]);
   });
 
-  it("possessivo entre determinante e nominalização impede o casamento do núcleo", () => {
+  it("a possessive between determiner and nominalization blocks the head from matching", () => {
     expect(nomFindings("É preciso fazer a nossa análise.")).toEqual([]);
   });
 });
 
-describe("nominalizationPass — span cobre sempre o núcleo de 3 tokens", () => {
+describe("nominalizationPass — the span always covers the 3-token head", () => {
   it.each([
     ["É preciso fazer a análise de documentos.", "fazer a análise"],
     ["O comitê fez a análise ontem.", "fez a análise"],
     ["É preciso fazer a análise e a revisão dos dados.", "fazer a análise"],
     ["É preciso realizar uma análise cuidadosa dos documentos.", "realizar uma análise"],
-  ])("'%s' → span '%s' (o complemento é do autor, não do finding)", (text, esperado) => {
+  ])("'%s' → span '%s' (the complement belongs to the author, not to the finding)", (text, expected) => {
     const doc = buildDocument(text);
     const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
 
     expect(findings).toHaveLength(1);
-    expect(findings[0].span.text).toBe(esperado);
+    expect(findings[0].span.text).toBe(expected);
     expect(doc.source.slice(findings[0].span.start, findings[0].span.end)).toBe(findings[0].span.text);
   });
 });
 
-describe("nominalizationPass — múltiplos findings", () => {
-  it("detecta construções em frases diferentes", () => {
+describe("nominalizationPass — multiple findings", () => {
+  it("detects constructions in different sentences", () => {
     const text = "É preciso fazer a análise de documentos. Depois, realizar o pagamento da taxa.";
     const findings = nomFindings(text);
     expect(findings).toHaveLength(2);
@@ -181,7 +181,7 @@ describe("nominalizationPass — múltiplos findings", () => {
     expect(findings[1].meta).toMatchObject({ baseVerb: "pagar" });
   });
 
-  it("detecta duas construções na mesma frase", () => {
+  it("detects two constructions in the same sentence", () => {
     const text = "Convém fazer a análise, mas também realizar a verificação.";
     const findings = nomFindings(text);
     expect(findings).toHaveLength(2);
@@ -189,14 +189,14 @@ describe("nominalizationPass — múltiplos findings", () => {
 });
 
 describe("nominalizationPass — config.nominalization", () => {
-  it("enabled:false desliga o pass inteiro", () => {
+  it("enabled:false switches off the whole pass", () => {
     const config: Config = { ...DEFAULT_CONFIG, nominalization: { enabled: false } };
     expect(nomFindings("É preciso fazer a análise de documentos.", config)).toEqual([]);
   });
 });
 
-describe("nominalizationPass — determinismo byte-idêntico", () => {
-  it("mesma entrada produz sempre o mesmo JSON", () => {
+describe("nominalizationPass — byte-identical determinism", () => {
+  it("the same input always produces the same JSON", () => {
     const text =
       "É preciso fazer a análise de documentos. O comitê fez a análise ontem. " +
       "Convém promover a revisão dos autos, mas também realizar o pagamento da taxa.";
@@ -210,14 +210,14 @@ describe("nominalizationPass — determinismo byte-idêntico", () => {
   });
 });
 
-describe("nominalizationPass — integração pelo registry e por analyze()", () => {
-  it("o pass está registrado em PASSES", () => {
+describe("nominalizationPass — integration through the registry and through analyze()", () => {
+  it("the pass is registered in PASSES", () => {
     expect(PASSES).toContain(nominalizationPass);
     expect(PASSES).toContain(sentenceLengthPass);
     expect(PASSES).toContain(passiveVoicePass);
   });
 
-  it("analyze() inclui findings de nominalização, corretamente ordenados", () => {
+  it("analyze() includes nominalization findings, correctly ordered", () => {
     const text = "É preciso fazer a análise de documentos. O comitê fez a análise ontem.";
     const diagnostic = analyze(text);
 
@@ -227,7 +227,7 @@ describe("nominalizationPass — integração pelo registry e por analyze()", ()
     expect(nominalizations[0].category).toBe("syntactic");
   });
 
-  it("analyze().score.byCriterion inclui uma entrada para nominalization", () => {
+  it("analyze().score.byCriterion includes an entry for nominalization", () => {
     const diagnostic = analyze("É preciso fazer a análise de documentos.");
     const entry = diagnostic.score.byCriterion.find((c) => c.criterion === "nominalization");
 

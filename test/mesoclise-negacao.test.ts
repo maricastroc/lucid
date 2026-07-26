@@ -7,8 +7,8 @@ const spans = (text: string, criterion: string): string[] =>
     .findings.filter((f) => f.criterion === criterion)
     .map((f) => f.span.text);
 
-describe("mesoclise — pronome no meio do verbo", () => {
-  it("marca formas de mesóclise (futuro e condicional)", () => {
+describe("mesoclise — pronoun in the middle of the verb", () => {
+  it("marks mesoclitic forms (future and conditional)", () => {
     expect(spans("O ato far-se-á público.", "mesoclise")).toEqual(["far-se-á"]);
     expect(spans("O relator dir-lhe-ia a decisão e recolher-se-ão os autos.", "mesoclise")).toEqual([
       "dir-lhe-ia",
@@ -16,18 +16,18 @@ describe("mesoclise — pronome no meio do verbo", () => {
     ]);
   });
 
-  it("finding exige decisão humana, sem sugestão", () => {
+  it("the finding requires a human decision, with no suggestion", () => {
     const f = analyze("O prazo contar-se-á em dias.").findings.find((x) => x.criterion === "mesoclise")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
     expect(f.source).toBe("editorial-pt-br");
   });
 
-  it("ênclise normal NÃO é mesóclise", () => {
+  it("ordinary enclisis is NOT mesoclisis", () => {
     expect(spans("O relator diz-se favorável e vai fazê-lo hoje.", "mesoclise")).toEqual([]);
   });
 
-  it("nomes com forma parecida (bem-te-vi) NÃO marcam", () => {
+  it("look-alike names (bem-te-vi) do NOT mark", () => {
     expect(spans("O bem-te-vi cantou no telhado.", "mesoclise")).toEqual([]);
   });
 
@@ -38,7 +38,7 @@ describe("mesoclise — pronome no meio do verbo", () => {
 });
 
 describe("dupla_negacao — litotes", () => {
-  it("marca duplas negações cadastradas", () => {
+  it("marks the curated double negatives", () => {
     expect(spans("Não é incomum que isso aconteça.", "dupla_negacao")).toEqual(["Não é incomum"]);
     expect(spans("O caso não é impossível e não deixa de ser relevante.", "dupla_negacao")).toEqual([
       "não é impossível",
@@ -46,7 +46,7 @@ describe("dupla_negacao — litotes", () => {
     ]);
   });
 
-  it("finding cita a forma direta, exige decisão humana", () => {
+  it("the finding cites the direct form and requires a human decision", () => {
     const f = analyze("Não é improvável que o pedido seja aceito.").findings.find(
       (x) => x.criterion === "dupla_negacao",
     )!;
@@ -55,7 +55,7 @@ describe("dupla_negacao — litotes", () => {
     expect(f.normativeReference?.section).toBe("5.3.3");
   });
 
-  it("negação simples / concordância negativa NÃO marca (é normal em PT)", () => {
+  it("plain negation / negative concord does NOT mark (it is normal in PT)", () => {
     expect(spans("O órgão não recebeu nenhum recurso e não viu ninguém.", "dupla_negacao")).toEqual([]);
   });
 

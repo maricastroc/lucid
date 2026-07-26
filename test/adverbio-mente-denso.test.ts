@@ -9,23 +9,23 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "adverbio_mente_denso")
     .map((f) => f.span.text);
 
-describe("adverbio_mente_denso — DESCONTINUADO (ADR-058)", () => {
-  it("desligado por padrão: DEFAULT_CONFIG não produz findings", () => {
+describe("adverbio_mente_denso — DISCONTINUED (ADR-058)", () => {
+  it("off by default: DEFAULT_CONFIG produces no findings", () => {
     const findings = analyze(
       "O processo foi conduzido rigorosamente, cuidadosamente e sistematicamente.",
     ).findings.filter((f) => f.criterion === "adverbio_mente_denso");
     expect(findings).toEqual([]);
   });
 
-  it("id preservado no placar (interpretabilidade histórica), com contagem zero por padrão", () => {
+  it("the id is kept in the scorecard (historical interpretability), with a zero count by default", () => {
     const entry = analyze("Texto qualquer.").score.byCriterion.find((c) => c.criterion === "adverbio_mente_denso");
     expect(entry).toBeDefined();
     expect(entry!.count).toEqual({ info: 0, warning: 0, error: 0 });
   });
 });
 
-describe("adverbio_mente_denso — comportamento legado (quando religado)", () => {
-  it("marca cada advérbio quando a frase concentra ≥3 em -mente", () => {
+describe("adverbio_mente_denso — legacy behavior (when switched back on)", () => {
+  it("marks each adverb when the sentence concentrates ≥3 in -mente", () => {
     expect(spans("O processo foi conduzido rigorosamente, cuidadosamente e sistematicamente.")).toEqual([
       "rigorosamente",
       "cuidadosamente",
@@ -33,11 +33,11 @@ describe("adverbio_mente_denso — comportamento legado (quando religado)", () =
     ]);
   });
 
-  it("abaixo do limiar (2 na frase) não marca", () => {
+  it("below the threshold (2 in the sentence) it does not mark", () => {
     expect(spans("O processo foi conduzido rigorosamente e cuidadosamente.")).toEqual([]);
   });
 
-  it("finding é info e exige decisão humana", () => {
+  it("the finding is info and requires a human decision", () => {
     const f = analyze("Foi feito rigorosamente, cuidadosamente e sistematicamente.", ENABLED).findings.find(
       (x) => x.criterion === "adverbio_mente_denso",
     )!;
@@ -47,7 +47,7 @@ describe("adverbio_mente_denso — comportamento legado (quando religado)", () =
     expect(f.normativeReference).toBeUndefined();
   });
 
-  it("palavras terminadas em -mente que não são advérbio não marcam", () => {
+  it("words ending in -mente that are not adverbs do not mark", () => {
     expect(spans("A semente na mente do juiz clemente permanece.")).toEqual([]);
   });
 });

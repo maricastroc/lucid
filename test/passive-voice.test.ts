@@ -17,53 +17,53 @@ function passiveFindings(text: string, config: Config = DEFAULT_CONFIG) {
   return passiveVoicePass.run(ctxFor(text, config));
 }
 
-describe("passiveVoicePass — formas simples de ser", () => {
+describe("passiveVoicePass — simple forms of ser", () => {
   it.each(["é", "são", "era", "eram", "foi", "foram", "será", "serão", "seria", "seriam", "seja", "sejam", "fosse", "fossem"])(
-    "detecta passiva com a forma '%s' + particípio regular",
-    (forma) => {
-      const findings = passiveFindings(`Isso ${forma} aprovado pela equipe.`);
+    "detects the passive with the form '%s' + a regular participle",
+    (form) => {
+      const findings = passiveFindings(`Isso ${form} aprovado pela equipe.`);
       expect(findings).toHaveLength(1);
     },
   );
 
-  it("detecta com o infinitivo 'ser' seguido diretamente do particípio", () => {
+  it("detects the infinitive 'ser' followed directly by the participle", () => {
     const findings = passiveFindings("O projeto vai ser analisado.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("ser analisado");
   });
 
-  it("detecta com 'sido' e o span cobre a locução inteira, incluindo o auxiliar (A-12e)", () => {
+  it("detects 'sido' and the span covers the whole phrase, including the auxiliary (A-12e)", () => {
     const findings = passiveFindings("O projeto tinha sido aprovado pelo conselho.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("tinha sido aprovado pelo conselho.");
   });
 
-  it("detecta com 'sendo' (gerúndio), incluindo o auxiliar no span (A-12e)", () => {
+  it("detects 'sendo' (gerund), including the auxiliary in the span (A-12e)", () => {
     const findings = passiveFindings("O prédio está sendo construído pela prefeitura.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("está sendo construído pela prefeitura.");
   });
 
-  it("o recuo só ocorre com auxiliar adjacente reconhecido — 'sido' solto mantém o span na âncora", () => {
+  it("the walk-back only happens with a recognized adjacent auxiliary — a loose 'sido' keeps the span at the anchor", () => {
     const findings = passiveFindings("O projeto, sido aprovado, seguiu adiante.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("sido aprovado");
   });
 });
 
-describe("passiveVoicePass — gênero e número do particípio regular", () => {
+describe("passiveVoicePass — gender and number of the regular participle", () => {
   it.each([
     ["O pedido foi aprovado.", "aprovado"],
     ["A proposta foi aprovada.", "aprovada"],
     ["Os pedidos foram aprovados.", "aprovados"],
     ["As propostas foram aprovadas.", "aprovadas"],
-  ])("detecta a forma flexionada em '%s'", (text) => {
+  ])("detects the inflected form in '%s'", (text) => {
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(1);
   });
 });
 
-describe("passiveVoicePass — particípios irregulares", () => {
+describe("passiveVoicePass — irregular participles", () => {
   it.each([
     ["O texto foi escrito pelo autor.", true],
     ["A carta foi feita ontem.", false],
@@ -72,126 +72,126 @@ describe("passiveVoicePass — particípios irregulares", () => {
     ["A conta foi paga.", false],
     ["O réu foi preso pela polícia.", true],
     ["O prazo foi dado pelo juiz.", true],
-  ])("detecta particípio irregular em '%s'", (text, hasAgent) => {
+  ])("detects the irregular participle in '%s'", (text, hasAgent) => {
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent });
   });
 });
 
-describe("passiveVoicePass — advérbio entre auxiliar e particípio", () => {
-  it("aceita advérbio em -mente", () => {
+describe("passiveVoicePass — an adverb between auxiliary and participle", () => {
+  it("accepts an -mente adverb", () => {
     const findings = passiveFindings("Os pedidos foram rapidamente aprovados.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("foram rapidamente aprovados");
   });
 
-  it("aceita advérbio da lista fechada de conectores seguros", () => {
+  it("accepts an adverb from the closed list of safe connectors", () => {
     const findings = passiveFindings("O pedido foi também aprovado.");
     expect(findings).toHaveLength(1);
   });
 
-  it("aceita até dois conectores em sequência", () => {
+  it("accepts up to two connectors in a row", () => {
     const findings = passiveFindings("O pedido foi ainda também aprovado.");
     expect(findings).toHaveLength(1);
   });
 });
 
-describe("passiveVoicePass — negação", () => {
-  it("'não' antes do auxiliar não afeta a detecção", () => {
+describe("passiveVoicePass — negation", () => {
+  it("'não' before the auxiliary does not affect detection", () => {
     const findings = passiveFindings("O relatório não foi entregue.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("foi entregue");
   });
 
-  it("'não' entre auxiliar e particípio é um conector aceito", () => {
+  it("'não' between auxiliary and participle is an accepted connector", () => {
     const findings = passiveFindings("O pedido foi não aprovado, mas sim rejeitado.");
     expect(findings.length).toBeGreaterThanOrEqual(1);
     expect(findings[0].span.text).toBe("foi não aprovado");
   });
 });
 
-describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
+describe("passiveVoicePass — agent with pelo/pela/pelos/pelas", () => {
   it.each([
     ["O pedido foi aprovado pelo diretor.", "pelo"],
     ["A proposta foi rejeitada pela comissão.", "pela"],
     ["Os relatórios foram entregues pelos servidores.", "pelos"],
     ["As contas foram analisadas pelas auditoras.", "pelas"],
-  ])("reconhece agente introduzido por '%s' em '%s'", (text) => {
+  ])("recognizes the agent introduced in '%s'", (text) => {
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent: true });
     expect(findings[0].requiresHuman).toBe(false);
   });
 
-  it("'por' + substantivo comum nu (adjunto) NÃO conta como agente", () => {
-    for (const texto of [
+  it("'por' + a bare common noun (an adjunct) does NOT count as an agent", () => {
+    for (const text of [
       "O pedido foi aprovado por conveniência.",
       "O pedido foi aprovado por unanimidade.",
       "A multa foi aplicada por lei.",
       "O relatório foi entregue por engano.",
     ]) {
-      const findings = passiveFindings(texto);
+      const findings = passiveFindings(text);
       expect(findings).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false });
-      expect(findings[0].requiresHuman, texto).toBe(true);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: false });
+      expect(findings[0].requiresHuman, text).toBe(true);
     }
   });
 
-  it("'por' + nome próprio/pronome/determinante indefinido É agente explícito (F2)", () => {
-    for (const texto of [
+  it("'por' + proper noun/pronoun/indefinite determiner IS an explicit agent (F2)", () => {
+    for (const text of [
       "O documento foi assinado por João.",
       "O pedido foi aprovado por ele.",
       "A carta foi escrita por mim.",
       "A decisão foi tomada por uma comissão.",
       "O contrato foi assinado por Maria Silva.",
     ]) {
-      const findings = passiveFindings(texto);
-      expect(findings, texto).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true });
-      expect(findings[0].requiresHuman, texto).toBe(false);
+      const findings = passiveFindings(text);
+      expect(findings, text).toHaveLength(1);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: true });
+      expect(findings[0].requiresHuman, text).toBe(false);
     }
   });
 
-  it("'por' + cabeça de adjunto conhecida ('por telefone') não é agente", () => {
+  it("'por' + a known adjunct head ('por telefone') is not an agent", () => {
     const findings = passiveFindings("O aviso foi transmitido por telefone.");
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent: false });
   });
 
-  it("idiomas 'pelo menos'/'pelo visto'/'pelo contrário' não contam como agente", () => {
-    for (const texto of [
+  it("the idioms 'pelo menos'/'pelo visto'/'pelo contrário' do not count as an agent", () => {
+    for (const text of [
       "O pedido foi aprovado pelo menos em parte.",
       "O pedido foi aprovado, pelo visto, sem ressalvas.",
       "O pedido não foi aprovado, pelo contrário.",
     ]) {
-      const findings = passiveFindings(texto);
+      const findings = passiveFindings(text);
       expect(findings.length).toBeGreaterThanOrEqual(1);
       expect(findings[0].meta).toMatchObject({ hasAgent: false });
     }
   });
 
-  it("adjuntos temporais/locativos/idiomáticos após 'pela/pelo' NÃO contam como agente (A4)", () => {
-    for (const texto of [
+  it("temporal/locative/idiomatic adjuncts after 'pela/pelo' do NOT count as an agent (A4)", () => {
+    for (const text of [
       "O documento foi assinado pela manhã.",
       "O carro foi visto pela janela.",
       "A obra foi concluída pela metade.",
     ]) {
-      const findings = passiveFindings(texto);
+      const findings = passiveFindings(text);
       expect(findings.length).toBeGreaterThanOrEqual(1);
       expect(findings[0].meta).toMatchObject({ hasAgent: false });
       expect(findings[0].requiresHuman).toBe(true);
     }
   });
 
-  it("agente institucional real continua reconhecido (não regrediu com o A4)", () => {
+  it("a real institutional agent is still recognized (no regression from A4)", () => {
     const findings = passiveFindings("O pedido foi aprovado pelo diretor.");
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent: true });
     expect(findings[0].requiresHuman).toBe(false);
   });
 
-  it("span do agente para no fim do sintagma nominal, sem engolir adjunto temporal seguinte (M2)", () => {
+  it("the agent span stops at the end of the noun phrase, without swallowing the following temporal adjunct (M2)", () => {
     const findings = passiveFindings("O contrato foi assinado pelo diretor ontem à tarde.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("foi assinado pelo diretor");
@@ -199,15 +199,15 @@ describe("passiveVoicePass — agente com pelo/pela/pelos/pelas", () => {
     expect(findings[0].requiresHuman).toBe(false);
   });
 
-  it("continuação genitiva do agente ('diretor da empresa') não é cortada pela fronteira de adjunto (M2)", () => {
+  it("a genitive continuation of the agent ('diretor da empresa') is not cut by the adjunct boundary (M2)", () => {
     const findings = passiveFindings("O contrato foi assinado pelo diretor da empresa ontem.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("foi assinado pelo diretor da empresa");
   });
 });
 
-describe("passiveVoicePass — agente omitido", () => {
-  it("sem 'pelo/pela/pelos/pelas', requiresHuman é true e não há suggestion", () => {
+describe("passiveVoicePass — omitted agent", () => {
+  it("with no 'pelo/pela/pelos/pelas', requiresHuman is true and there is no suggestion", () => {
     const findings = passiveFindings("O pedido foi aprovado.");
     expect(findings).toHaveLength(1);
     expect(findings[0].requiresHuman).toBe(true);
@@ -216,8 +216,8 @@ describe("passiveVoicePass — agente omitido", () => {
   });
 });
 
-describe("passiveVoicePass — offsets exatos", () => {
-  it("span reconstrói exatamente o trecho via slice do texto original", () => {
+describe("passiveVoicePass — exact offsets", () => {
+  it("the span reconstructs the excerpt exactly by slicing the original text", () => {
     const text = "O texto foi aprovado, mas o outro foi rejeitado.";
     const doc = buildDocument(text);
     const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
@@ -230,7 +230,7 @@ describe("passiveVoicePass — offsets exatos", () => {
     expect(findings[1].span).toEqual({ start: 34, end: 47, text: "foi rejeitado" });
   });
 
-  it("span com agente inclui a frase agentiva até a próxima barreira", () => {
+  it("a span with an agent includes the agentive phrase up to the next barrier", () => {
     const text = "Isso foi feito pelo comitê.";
     const doc = buildDocument(text);
     const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
@@ -241,59 +241,59 @@ describe("passiveVoicePass — offsets exatos", () => {
   });
 });
 
-describe("passiveVoicePass — mais de uma passiva no documento", () => {
-  it("detecta passivas em frases diferentes", () => {
+describe("passiveVoicePass — more than one passive in the document", () => {
+  it("detects passives in different sentences", () => {
     const text = "O pedido foi aprovado. A proposta foi rejeitada pela comissão.";
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(2);
     expect(findings.map((f) => f.meta?.hasAgent)).toEqual([false, true]);
   });
 
-  it("detecta duas passivas na mesma frase, separadas por conjunção", () => {
+  it("detects two passives in the same sentence, separated by a conjunction", () => {
     const text = "O texto foi aprovado, mas o outro foi rejeitado.";
     const findings = passiveFindings(text);
     expect(findings).toHaveLength(2);
   });
 });
 
-describe("passiveVoicePass — nenhuma detecção em frases ativas", () => {
+describe("passiveVoicePass — no detection in active sentences", () => {
   it.each(["O diretor aprovou o pedido.", "A comissão rejeitou a proposta.", "Os servidores entregaram os relatórios."])(
-    "'%s' não gera finding",
+    "'%s' yields no finding",
     (text) => {
       expect(passiveFindings(text)).toEqual([]);
     },
   );
 });
 
-describe("passiveVoicePass — nenhuma detecção com estar/ficar", () => {
+describe("passiveVoicePass — no detection with estar/ficar", () => {
   it.each(["A porta está fechada.", "O prédio ficou destruído.", "As contas estão pagas."])(
-    "'%s' não gera finding (estar/ficar fora de escopo)",
+    "'%s' yields no finding (estar/ficar are out of scope)",
     (text) => {
       expect(passiveFindings(text)).toEqual([]);
     },
   );
 });
 
-describe("passiveVoicePass — nenhuma detecção para substantivos -ado/-ido conhecidos", () => {
+describe("passiveVoicePass — no detection for known -ado/-ido nouns", () => {
   it.each([
     "O problema foi resultado de vários fatores.",
     "Isso foi pedido dela.",
     "O documento foi estado da arte na época.",
-  ])("'%s' não gera finding", (text) => {
+  ])("'%s' yields no finding", (text) => {
     expect(passiveFindings(text)).toEqual([]);
   });
 });
 
-describe("passiveVoicePass — nenhuma detecção para formas ambíguas do léxico", () => {
+describe("passiveVoicePass — no detection for ambiguous forms in the lexicon", () => {
   it.each(["Ela é dedicada ao trabalho.", "Ele é interessado no assunto.", "Ela é casada.", "Ele é formado em Direito."])(
-    "'%s' não gera finding",
+    "'%s' yields no finding",
     (text) => {
       expect(passiveFindings(text)).toEqual([]);
     },
   );
 });
 
-describe("passiveVoicePass — adjetivos proparoxítonos em -ido/-ada não são particípios (F1)", () => {
+describe("passiveVoicePass — proparoxytone -ido/-ada adjectives are not participles (F1)", () => {
   it.each([
     "O prazo é válido.",
     "O carro é rápido.",
@@ -303,11 +303,11 @@ describe("passiveVoicePass — adjetivos proparoxítonos em -ido/-ada não são 
     "O texto é lúcido.",
     "A regra é rígida.",
     "O líquido é ácido.",
-  ])("'%s' não gera finding (acento no radical delata adjetivo, não particípio)", (text) => {
+  ])("'%s' yields no finding (an accent on the stem gives away an adjective, not a participle)", (text) => {
     expect(passiveFindings(text)).toEqual([]);
   });
 
-  it("não regride o recall: particípio com hiato -ído (acento NO sufixo) segue detectado", () => {
+  it("recall does not regress: a hiatus participle in -ído (accent ON the suffix) is still detected", () => {
     const findings = passiveFindings("O documento foi distribuído pela secretaria.");
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ hasAgent: true });
@@ -317,115 +317,115 @@ describe("passiveVoicePass — adjetivos proparoxítonos em -ido/-ada não são 
     ["O prédio foi construído em dois anos.", "construído"],
     ["A tarefa foi concluída ontem.", "concluída"],
     ["O valor foi distribuído entre os sócios.", "distribuído"],
-  ])("particípio de hiato '%s' continua ancorando passiva", (text) => {
+  ])("the hiatus participle in '%s' still anchors a passive", (text) => {
     expect(passiveFindings(text)).toHaveLength(1);
   });
 });
 
-describe("passiveVoicePass — eventividade em quatro níveis (A-1)", () => {
-  it("agente explícito → eventiveness 'agent' (alta confiança), em qualquer tempo", () => {
-    for (const texto of ["O laudo foi assinado por João.", "O benefício é concedido pela plataforma."]) {
-      const findings = passiveFindings(texto);
-      expect(findings, texto).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true, eventiveness: "agent" });
-      expect(findings[0].severity, texto).toBe("warning");
+describe("passiveVoicePass — eventiveness at four levels (A-1)", () => {
+  it("an explicit agent → eventiveness 'agent' (high confidence), in any tense", () => {
+    for (const text of ["O laudo foi assinado por João.", "O benefício é concedido pela plataforma."]) {
+      const findings = passiveFindings(text);
+      expect(findings, text).toHaveLength(1);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: true, eventiveness: "agent" });
+      expect(findings[0].severity, text).toBe("warning");
     }
   });
 
-  it("tempo claramente eventivo sem agente → 'eventive_tense' (passiva plena)", () => {
-    for (const texto of [
+  it("a clearly eventive tense with no agent → 'eventive_tense' (a full passive)", () => {
+    for (const text of [
       "O pedido foi aprovado.",
       "O processo será encaminhado ao setor.",
       "O projeto tinha sido aprovado.",
       "A proposta era analisada todo mês.",
     ]) {
-      const findings = passiveFindings(texto);
-      expect(findings, texto).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false, eventiveness: "eventive_tense" });
-      expect(findings[0].severity, texto).toBe("warning");
+      const findings = passiveFindings(text);
+      expect(findings, text).toHaveLength(1);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: false, eventiveness: "eventive_tense" });
+      expect(findings[0].severity, text).toBe("warning");
     }
   });
 
-  it("presente sem agente → 'ambiguous_present': CONTINUA apontado (a ausência de agente não transforma a frase em estado)", () => {
-    for (const texto of [
+  it("present tense with no agent → 'ambiguous_present': it is STILL flagged (a missing agent does not turn the sentence into a state)", () => {
+    for (const text of [
       "O benefício é concedido após a análise.",
       "A inscrição é realizada exclusivamente pela internet.",
       "Os documentos são enviados diariamente.",
       "O servidor é qualificado.",
     ]) {
-      const findings = passiveFindings(texto);
-      expect(findings, texto).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: false, eventiveness: "ambiguous_present" });
-      expect(findings[0].requiresHuman, texto).toBe(true);
-      expect(findings[0].justification, texto).toContain("predicativo de estado");
+      const findings = passiveFindings(text);
+      expect(findings, text).toHaveLength(1);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: false, eventiveness: "ambiguous_present" });
+      expect(findings[0].requiresHuman, text).toBe(true);
+      expect(findings[0].justification, text).toContain("predicativo de estado");
     }
   });
 
-  it("a justificativa do presente ambíguo NÃO afirma passiva categoricamente", () => {
+  it("the justification for the ambiguous present does NOT assert a passive categorically", () => {
     const [f] = passiveFindings("O servidor é qualificado.");
     expect(f.justification).toContain("pode ser voz passiva");
     expect(f.justification).not.toContain("Frase na voz passiva,");
   });
 
-  it("deôntico 'ser obrigado a' SEM agente é excluído da passiva (coberto por leitor_terceira_pessoa)", () => {
-    for (const texto of [
+  it("the deontic 'ser obrigado a' WITHOUT an agent is excluded from the passive (covered by leitor_terceira_pessoa)", () => {
+    for (const text of [
       "Os candidatos são obrigados a comparecer.",
       "O contribuinte é obrigado a declarar os rendimentos.",
       "A empresa será obrigada a pagar a multa.",
     ]) {
-      expect(passiveFindings(texto), texto).toEqual([]);
+      expect(passiveFindings(text), text).toEqual([]);
     }
   });
 
-  it("'ser obrigado' COM agente explícito é passiva legítima de 'obrigar' e segue apontada (A-6)", () => {
-    for (const texto of [
+  it("'ser obrigado' WITH an explicit agent is a legitimate passive of 'obrigar' and is still flagged (A-6)", () => {
+    for (const text of [
       "A empresa foi obrigada pelo tribunal a devolver o valor.",
       "Ele foi obrigado por João a assinar.",
       "O município foi obrigado pela Justiça a refazer a obra.",
     ]) {
-      const findings = passiveFindings(texto);
-      expect(findings, texto).toHaveLength(1);
-      expect(findings[0].meta, texto).toMatchObject({ hasAgent: true, eventiveness: "agent" });
-      expect(findings[0].requiresHuman, texto).toBe(false);
+      const findings = passiveFindings(text);
+      expect(findings, text).toHaveLength(1);
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: true, eventiveness: "agent" });
+      expect(findings[0].requiresHuman, text).toBe(false);
     }
   });
 
-  it("integração: 'são obrigados a' gera SÓ leitor_terceira_pessoa, sem finding de passiva sobreposto", () => {
+  it("integration: 'são obrigados a' yields ONLY leitor_terceira_pessoa, with no overlapping passive finding", () => {
     const d = analyze("Os candidatos são obrigados a comparecer.");
     expect(d.findings.map((f) => f.criterion)).toEqual(["leitor_terceira_pessoa"]);
   });
 });
 
-describe("passiveVoicePass — barreiras de pontuação e conjunção", () => {
-  it("vírgula entre auxiliar e particípio aborta a busca (falso negativo aceito)", () => {
+describe("passiveVoicePass — punctuation and conjunction barriers", () => {
+  it("a comma between auxiliary and participle aborts the search (accepted false negative)", () => {
     expect(passiveFindings("Foi, sem dúvida, um erro grave.")).toEqual([]);
   });
 
-  it("conjunção entre auxiliar e um particípio de outra oração aborta a busca", () => {
+  it("a conjunction between the auxiliary and a participle from another clause aborts the search", () => {
     expect(passiveFindings("Foi quando ele chegou atrasado.")).toEqual([]);
   });
 });
 
-describe("passiveVoicePass — limite da janela", () => {
-  it("mais de dois conectores entre auxiliar e particípio excede a janela e não detecta", () => {
+describe("passiveVoicePass — window limit", () => {
+  it("more than two connectors between auxiliary and participle exceeds the window and is not detected", () => {
     expect(passiveFindings("O documento foi já ainda sempre aprovado.")).toEqual([]);
   });
 
-  it("exatamente dois conectores ainda está dentro da janela", () => {
+  it("exactly two connectors is still inside the window", () => {
     const findings = passiveFindings("O documento foi já ainda aprovado.");
     expect(findings).toHaveLength(1);
   });
 });
 
 describe("passiveVoicePass — config.passiveVoice.enabled", () => {
-  it("desligado via config não gera nenhum finding", () => {
+  it("switched off via config it yields no finding at all", () => {
     const config: Config = { ...DEFAULT_CONFIG, passiveVoice: { ...DEFAULT_CONFIG.passiveVoice, enabled: false } };
     expect(passiveFindings("O pedido foi aprovado pelo diretor.", config)).toEqual([]);
   });
 });
 
-describe("passiveVoicePass — determinismo byte-idêntico", () => {
-  it("mesma entrada produz sempre o mesmo JSON", () => {
+describe("passiveVoicePass — byte-identical determinism", () => {
+  it("the same input always produces the same JSON", () => {
     const text =
       "O pedido foi aprovado pelo diretor. A proposta foi rejeitada. " +
       "O documento tinha sido revisado pela equipe técnica, mas o outro foi recusado.";
@@ -439,13 +439,13 @@ describe("passiveVoicePass — determinismo byte-idêntico", () => {
   });
 });
 
-describe("passiveVoicePass — integração pelo registry e por analyze()", () => {
-  it("o pass está registrado em PASSES", () => {
+describe("passiveVoicePass — integration through the registry and through analyze()", () => {
+  it("the pass is registered in PASSES", () => {
     expect(PASSES).toContain(passiveVoicePass);
     expect(PASSES).toContain(sentenceLengthPass);
   });
 
-  it("analyze() inclui findings de voz passiva, corretamente ordenados", () => {
+  it("analyze() includes passive-voice findings, correctly ordered", () => {
     const text = "O pedido foi aprovado pelo diretor. A comissão rejeitou a outra proposta.";
     const diagnostic = analyze(text);
 
@@ -455,7 +455,7 @@ describe("passiveVoicePass — integração pelo registry e por analyze()", () =
     expect(passive[0].category).toBe("syntactic");
   });
 
-  it("analyze().score.byCriterion inclui uma entrada para passive_voice", () => {
+  it("analyze().score.byCriterion includes an entry for passive_voice", () => {
     const diagnostic = analyze("O pedido foi aprovado pelo diretor.");
     const entry = diagnostic.score.byCriterion.find((c) => c.criterion === "passive_voice");
 

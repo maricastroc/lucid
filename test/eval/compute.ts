@@ -1,13 +1,13 @@
 /**
- * Cálculo da eval — FONTE ÚNICA.
+ * Eval computation — SINGLE SOURCE.
  *
- * Os testes de eval assertam sobre o que este módulo devolve, e o artefato publicado é
- * a serialização do MESMO retorno. Não existe segunda implementação para a página
- * divergir do CI: se o número da página estiver errado, o teste quebra junto.
+ * The eval tests assert over what this module returns, and the published artifact is the
+ * serialization of that SAME return value. There is no second implementation for the page
+ * to diverge from CI: if the number on the page is wrong, the test breaks along with it.
  *
- * Puro por construção: sem vitest, sem fs, sem `Date`, sem rede. Duas chamadas com o
- * mesmo código e o mesmo dado devolvem o mesmo objeto — a promessa de determinismo da
- * Camada 1 estendida à própria medição dela.
+ * Pure by construction: no vitest, no fs, no `Date`, no network. Two calls with the same
+ * code and the same data return the same object — Layer 1's determinism promise extended
+ * to its own measurement.
  */
 import { DEFAULT_CONFIG, hashConfig } from "../../src/lucid/core/config";
 import { stableHash } from "../../src/lucid/core/hash";
@@ -41,15 +41,15 @@ import { GOLDEN_SILABAS } from "./silabas-golden";
 import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
 
 const ctx = () => ({ doc: buildDocument(""), config: DEFAULT_CONFIG, data: createDataView([]) });
-const runPass = (pass: { run: (c: ReturnType<typeof ctx>) => unknown[] }, texto: string): unknown[] =>
-  pass.run({ doc: buildDocument(texto), config: DEFAULT_CONFIG, data: createDataView([]) });
+const runPass = (pass: { run: (c: ReturnType<typeof ctx>) => unknown[] }, text: string): unknown[] =>
+  pass.run({ doc: buildDocument(text), config: DEFAULT_CONFIG, data: createDataView([]) });
 
 const round = (v: number, places = 4): number => {
   const f = 10 ** places;
   return Math.round(v * f) / f;
 };
 
-/* ─────────────────────────── contagem: TP/FP/FN ─────────────────────────── */
+/* ─────────────────────────── counting: TP/FP/FN ─────────────────────────── */
 
 export interface CountScore {
   tp: number;
@@ -58,10 +58,10 @@ export interface CountScore {
 }
 
 /**
- * Convenção de pontuação POR CONTAGEM (não por span): o golden declara quantos findings
- * o trecho deve produzir, e o excedente conta como FP, o faltante como FN. É mais frouxa
- * que casar posição — um FP que caia exatamente onde havia um FN se anularia — e está
- * declarada no artefato como limitação do método, não escondida.
+ * Scoring convention BY COUNT (not by span): the golden set declares how many findings the
+ * excerpt must produce; the surplus counts as FP and the shortfall as FN. It is looser than
+ * matching positions — an FP landing exactly where an FN was would cancel out — and it is
+ * declared in the artifact as a limitation of the method, not hidden.
  */
 export function scoreCounts(expectedCount: number, actualCount: number): CountScore {
   return {
@@ -95,12 +95,12 @@ export function summarize(results: readonly EntryResult[]): CountSummary {
   };
 }
 
-/** Formata taxa para leitura humana sem esconder a ausência de medida. */
+/** Formats a rate for human reading without hiding the absence of a measurement. */
 export function formatRate(value: number | null): string {
   return value === null ? "—" : `${(value * 100).toFixed(1)}%`;
 }
 
-/* ─────────────────────────────── avaliadores ─────────────────────────────── */
+/* ─────────────────────────────── evaluators ─────────────────────────────── */
 
 export interface JargonEntryResult extends EntryResult {
   categoria: string;
@@ -119,36 +119,36 @@ export function evaluateJargon(): {
   summary: CountSummary;
   suggestions: { expected: number; correct: number; unsafe: number; firedWithoutEntry: number };
 } {
-  const results = GOLDEN_JARGAO.map((entrada): JargonEntryResult => {
-    const findings = runPass(jargonPass, entrada.texto) as { suggestion?: string }[];
+  const results = GOLDEN_JARGAO.map((entry): JargonEntryResult => {
+    const findings = runPass(jargonPass, entry.texto) as { suggestion?: string }[];
     const actualCount = findings.length;
     const actualSuggestion = actualCount === 1 ? findings[0].suggestion : undefined;
 
-    const esperaSugestao = entrada.expectedCount === 1 && entrada.expectSuggestion === true;
-    const naoEsperaSugestao = entrada.expectedCount === 1 && entrada.expectSuggestion === false;
-    const sugestaoCorreta = esperaSugestao && actualCount === 1 && actualSuggestion === entrada.expectedSuggestion;
+    const expectsSuggestion = entry.expectedCount === 1 && entry.expectSuggestion === true;
+    const expectsNoSuggestion = entry.expectedCount === 1 && entry.expectSuggestion === false;
+    const sugestaoCorreta = expectsSuggestion && actualCount === 1 && actualSuggestion === entry.expectedSuggestion;
     const sugestaoInsegura =
-      (naoEsperaSugestao && actualCount === 1 && actualSuggestion !== undefined) ||
-      (esperaSugestao &&
+      (expectsNoSuggestion && actualCount === 1 && actualSuggestion !== undefined) ||
+      (expectsSuggestion &&
         actualCount === 1 &&
         actualSuggestion !== undefined &&
-        actualSuggestion !== entrada.expectedSuggestion);
+        actualSuggestion !== entry.expectedSuggestion);
 
     return {
-      texto: entrada.texto,
-      expectedCount: entrada.expectedCount,
+      texto: entry.texto,
+      expectedCount: entry.expectedCount,
       actualCount,
-      estado: entrada.estado,
-      motivo: entrada.motivo,
-      ...scoreCounts(entrada.expectedCount, actualCount),
-      categoria: entrada.categoria,
-      expectSuggestion: entrada.expectSuggestion,
-      expectedSuggestion: entrada.expectedSuggestion,
+      estado: entry.estado,
+      motivo: entry.motivo,
+      ...scoreCounts(entry.expectedCount, actualCount),
+      categoria: entry.categoria,
+      expectSuggestion: entry.expectSuggestion,
+      expectedSuggestion: entry.expectedSuggestion,
       actualSuggestion,
-      mustNotFire: entrada.mustNotFire === true,
+      mustNotFire: entry.mustNotFire === true,
       sugestaoCorreta,
       sugestaoInsegura,
-      disparouSemCadastro: entrada.mustNotFire === true && actualCount > 0,
+      disparouSemCadastro: entry.mustNotFire === true && actualCount > 0,
     };
   });
 
@@ -178,8 +178,8 @@ export function evaluateNominalization(): {
   summary: CountSummary;
   classification: { wrong: number; suggestionsEmitted: number };
 } {
-  const results = GOLDEN_NOMINALIZACAO.map((entrada): NominalizationEntryResult => {
-    const findings = runPass(nominalizationPass, entrada.texto) as {
+  const results = GOLDEN_NOMINALIZACAO.map((entry): NominalizationEntryResult => {
+    const findings = runPass(nominalizationPass, entry.texto) as {
       requiresHuman: boolean;
       suggestion?: string;
     }[];
@@ -187,20 +187,20 @@ export function evaluateNominalization(): {
     const actualRequiresHuman = actualCount === 1 ? findings[0].requiresHuman : undefined;
 
     return {
-      texto: entrada.texto,
-      expectedCount: entrada.expectedCount,
+      texto: entry.texto,
+      expectedCount: entry.expectedCount,
       actualCount,
-      estado: entrada.estado,
-      motivo: entrada.motivo,
-      ...scoreCounts(entrada.expectedCount, actualCount),
-      expectRequiresHuman: entrada.expectRequiresHuman,
+      estado: entry.estado,
+      motivo: entry.motivo,
+      ...scoreCounts(entry.expectedCount, actualCount),
+      expectRequiresHuman: entry.expectRequiresHuman,
       actualRequiresHuman,
       sugestaoEmitida: findings.some((f) => f.suggestion !== undefined),
       classificacaoErrada:
-        entrada.expectedCount === 1 &&
-        entrada.expectRequiresHuman !== undefined &&
+        entry.expectedCount === 1 &&
+        entry.expectRequiresHuman !== undefined &&
         actualCount === 1 &&
-        actualRequiresHuman !== entrada.expectRequiresHuman,
+        actualRequiresHuman !== entry.expectRequiresHuman,
     };
   });
 
@@ -220,15 +220,15 @@ export function evaluatePassiveVoice(): {
   results: EntryResult[];
   summary: CountSummary;
 } {
-  const results = GOLDEN_VOZ_PASSIVA.map((entrada): EntryResult => {
-    const actualCount = runPass(passiveVoicePass, entrada.texto).length;
+  const results = GOLDEN_VOZ_PASSIVA.map((entry): EntryResult => {
+    const actualCount = runPass(passiveVoicePass, entry.texto).length;
     return {
-      texto: entrada.texto,
-      expectedCount: entrada.expectedCount,
+      texto: entry.texto,
+      expectedCount: entry.expectedCount,
       actualCount,
-      estado: entrada.estado,
-      motivo: entrada.motivo,
-      ...scoreCounts(entrada.expectedCount, actualCount),
+      estado: entry.estado,
+      motivo: entry.motivo,
+      ...scoreCounts(entry.expectedCount, actualCount),
     };
   });
 
@@ -249,15 +249,15 @@ export function evaluateSyllables(): {
   results: SyllableEntryResult[];
   summary: SyllableSummary;
 } {
-  const results = GOLDEN_SILABAS.map((entrada): SyllableEntryResult => {
-    const atual = countSyllables(entrada.palavra);
+  const results = GOLDEN_SILABAS.map((entry): SyllableEntryResult => {
+    const atual = countSyllables(entry.palavra);
     return {
-      palavra: entrada.palavra,
-      real: entrada.real,
+      palavra: entry.palavra,
+      real: entry.real,
       atual,
-      estado: entrada.estado,
-      acertou: atual === entrada.real,
-      erroAbsoluto: Math.abs(atual - entrada.real),
+      estado: entry.estado,
+      acertou: atual === entry.real,
+      erroAbsoluto: Math.abs(atual - entry.real),
     };
   });
 
@@ -274,15 +274,15 @@ export function evaluateSyllables(): {
   };
 }
 
-/* ────────────── registro de avaliadores: a única lista da verdade ────────────── */
+/* ────────────── evaluator registry: the single list of record ────────────── */
 
 /**
- * REGISTRO ÚNICO dos detectores com eval de precisão/recall.
+ * SINGLE REGISTRY of the detectors that have a precision/recall eval.
  *
- * Antes havia duas listas para o mesmo fato (uma para a cobertura, outra para montar o
- * artefato) e a segunda podia esquecer o que a primeira dizia. Aqui, registrar o avaliador
- * é o mesmo ato que declará-lo medido: `criteriaCoverage` e `buildEvalArtifact` derivam
- * desta constante. O `criterion` é `CriterionId`, então um id inexistente não compila.
+ * There used to be two lists for the same fact (one for coverage, another to assemble the
+ * artifact) and the second could forget what the first said. Here, registering the evaluator
+ * is the same act as declaring it measured: `criteriaCoverage` and `buildEvalArtifact` both
+ * derive from this constant. `criterion` is a `CriterionId`, so a nonexistent id fails to compile.
  */
 export interface DetectorEvaluator {
   readonly criterion: CriterionId;
@@ -295,21 +295,21 @@ export const DETECTOR_EVALUATORS: readonly DetectorEvaluator[] = [
   { criterion: "passive_voice", evaluate: evaluatePassiveVoice },
 ];
 
-/* ──────────────────── cobertura: o que NÃO está medido ──────────────────── */
+/* ──────────────────── coverage: what is NOT measured ──────────────────── */
 
 export interface CoverageInputs {
-  /** Universo de critérios da engine. */
+  /** The engine's universe of criteria. */
   criterionIds: readonly string[];
-  /** Critérios com avaliador registrado. */
+  /** Criteria with a registered evaluator. */
   evaluated: readonly string[];
-  /** Critérios com finding rotulado no golden integrado. */
+  /** Criteria with a labelled finding in the integrated golden set. */
   labelled: readonly string[];
 }
 
 function defaultCoverageInputs(): CoverageInputs {
   const labelled = new Set<string>();
-  for (const caso of GOLDEN_INTEGRADO) {
-    for (const f of caso.expected.findings) labelled.add(f.criterion);
+  for (const testCase of GOLDEN_INTEGRADO) {
+    for (const f of testCase.expected.findings) labelled.add(f.criterion);
   }
   return {
     criterionIds: CRITERION_IDS,
@@ -319,11 +319,11 @@ function defaultCoverageInputs(): CoverageInputs {
 }
 
 /**
- * Derivada das entradas, nunca escrita à mão: critério sem avaliador registrado e sem
- * rótulo no golden cai em `unitTestsOnly` por construção. É o oposto de um teto silencioso.
+ * Derived from the inputs, never hand-written: a criterion with no registered evaluator and
+ * no golden label lands in `unitTestsOnly` by construction. The opposite of a silent ceiling.
  *
- * As entradas são injetáveis para o teste poder provar a DERIVAÇÃO com um universo
- * sintético, em vez de comparar a saída com uma lista escrita à mão (que não provaria nada).
+ * The inputs are injectable so the test can prove the DERIVATION with a synthetic universe
+ * instead of comparing the output against a hand-written list (which would prove nothing).
  */
 export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs()): Omit<CriteriaCoverage, "total"> {
   const evaluated = new Set(inputs.evaluated);
@@ -336,9 +336,9 @@ export function criteriaCoverage(inputs: CoverageInputs = defaultCoverageInputs(
   };
 }
 
-/* ────────────────────────────── o artefato ────────────────────────────── */
+/* ────────────────────────────── the artifact ────────────────────────────── */
 
-/** Hash do corpus de avaliação — muda quando qualquer entrada de golden muda. */
+/** Hash of the evaluation corpus — changes whenever any golden entry changes. */
 export function hashGoldens(
   goldens: {
     jargon: readonly unknown[];
@@ -377,12 +377,13 @@ export function evalStamp(): EvalStamp {
 }
 
 /**
- * Caveats do método, como DADO IDENTIFICADO — para a página poder endereçar cada um
- * (destacar, linkar, ordenar) e para o teste pinar o `id` em vez da redação.
+ * Method caveats as IDENTIFIED DATA — so the page can address each one (highlight, link,
+ * order) and so the test can pin the `id` instead of the wording.
  *
- * `Record<CaveatId, string>` + ordem explícita: caveat novo não compila sem texto, na
- * disciplina do ADR-037 (fim do fallback silencioso). Antes eram strings livres e o teste
- * assertava substring da prosa — reescrever a frase quebrava o teste sem mudar semântica.
+ * `Record<CaveatId, string>` + an explicit order: a new caveat does not compile without its
+ * text, following the discipline of ADR-037 (the end of the silent fallback). They used to be
+ * free strings and the test asserted a substring of the prose — rewording the sentence broke
+ * the test without changing any semantics.
  */
 const CAVEAT_ORDER: readonly CaveatId[] = [
   "count_scoring",
@@ -407,13 +408,14 @@ const CAVEAT_TEXT: Record<CaveatId, string> = {
 const METHOD_CAVEATS: readonly MethodCaveat[] = CAVEAT_ORDER.map((id) => ({ id, text: CAVEAT_TEXT[id] }));
 
 /**
- * Uma falha é ou LIMITAÇÃO DECLARADA (tem motivo escrito na curadoria) ou REGRESSÃO
- * (entrada `correto` que falhou, sem motivo porque ninguém escreveu um). Antes as duas
- * viviam numa lista só, distinguidas por `estado` — e quem consumisse teria que inferir a
- * diferença. Agora a distinção é do contrato: `regressions` é vazio em build verde.
+ * A failure is either a DECLARED LIMITATION (it has a reason written by the curator) or a
+ * REGRESSION (a `correto` entry that failed, with no reason because nobody wrote one). The
+ * two used to live in a single list, distinguished by `estado` — and any consumer would have
+ * had to infer the difference. Now the distinction belongs to the contract: `regressions` is
+ * empty on a green build.
  */
 function detectorReport(criterion: string, results: readonly EntryResult[], summary: CountSummary): DetectorReport {
-  const falhou = (r: EntryResult): boolean => r.fp > 0 || r.fn > 0;
+  const failed = (r: EntryResult): boolean => r.fp > 0 || r.fn > 0;
   return {
     criterion,
     coverage: coverageOf(criterion),
@@ -421,7 +423,7 @@ function detectorReport(criterion: string, results: readonly EntryResult[], summ
     knownLimitations: results
       .filter((r) => r.estado === "limitacao_conhecida")
       .map((r) => ({ texto: r.texto, motivo: r.motivo ?? "" })),
-    regressions: results.filter((r) => falhou(r) && r.estado === "correto").map(toRegression),
+    regressions: results.filter((r) => failed(r) && r.estado === "correto").map(toRegression),
   };
 }
 
@@ -432,11 +434,11 @@ const toRegression = (r: EntryResult): Regression => ({
 });
 
 /**
- * ORDEM CANÔNICA dos critérios: a de `CRITERION_IDS` (a declaração da engine).
+ * CANONICAL ORDER of the criteria: the one in `CRITERION_IDS` (the engine's declaration).
  *
- * Vale para `detectors` e para as três listas de `criteriaCoverage`, então a tabela e os
- * cartões de cobertura da página nunca discordam sobre a ordem dos mesmos critérios.
- * Antes `detectors` saía na ordem do registro de avaliadores e `measured` na da engine.
+ * It holds for `detectors` and for the three lists in `criteriaCoverage`, so the page's table
+ * and its coverage cards never disagree about the order of the same criteria. `detectors` used
+ * to come out in the evaluator-registry order while `measured` followed the engine's.
  */
 function canonicalRank(criterion: string): number {
   const i = (CRITERION_IDS as readonly string[]).indexOf(criterion);
@@ -461,7 +463,7 @@ export function buildEvalArtifact(): EvalArtifact {
   };
 }
 
-/** Serialização estável — sem timestamp, para o artefato ser byte-idêntico como a engine. */
+/** Stable serialization — no timestamp, so the artifact is byte-identical like the engine. */
 export function serializeEvalArtifact(artifact: EvalArtifact): string {
   return `${JSON.stringify(artifact, null, 2)}\n`;
 }

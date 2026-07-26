@@ -7,16 +7,16 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "sigla_sem_expansao")
     .map((f) => f.span.text);
 
-describe("sigla_sem_expansao — detecção", () => {
-  it("sigla usada sem definição prévia dispara na 1ª ocorrência", () => {
+describe("sigla_sem_expansao — detection", () => {
+  it("an acronym used without a prior definition triggers on the 1st occurrence", () => {
     expect(spans("A LGPD entrou em vigor e mudou tudo.")).toEqual(["LGPD"]);
   });
 
-  it("marca só a PRIMEIRA ocorrência não definida, não as repetições", () => {
+  it("marks only the FIRST undefined occurrence, not the repetitions", () => {
     expect(spans("O CADE analisou o caso. Depois, o CADE arquivou o processo. O CADE decidiu.")).toEqual(["CADE"]);
   });
 
-  it("proveniência e severidade corretas (warning, requiresHuman, sem sugestão, ISO 5.3.2)", () => {
+  it("correct provenance and severity (warning, requiresHuman, no suggestion, ISO 5.3.2)", () => {
     const f = analyze("A LGPD entrou em vigor.").findings.find((x) => x.criterion === "sigla_sem_expansao")!;
     expect(f.severity).toBe("warning");
     expect(f.requiresHuman).toBe(true);
@@ -27,32 +27,32 @@ describe("sigla_sem_expansao — detecção", () => {
   });
 });
 
-describe("sigla_sem_expansao — definição reconhecida (não marca)", () => {
-  it("padrão 'Nome Por Extenso (SIGLA)' define a sigla", () => {
+describe("sigla_sem_expansao — recognized definition (does not mark)", () => {
+  it("the 'Full Name (ACRONYM)' pattern defines the acronym", () => {
     expect(spans("A Lei Geral de Proteção de Dados (LGPD) entrou em vigor. A LGPD mudou tudo.")).toEqual([]);
   });
 
-  it("padrão 'SIGLA (Nome por extenso)' também define", () => {
+  it("the 'ACRONYM (Full name)' pattern also defines it", () => {
     expect(spans("O CADE (Conselho Administrativo de Defesa Econômica) foi acionado. O CADE decidiu.")).toEqual([]);
   });
 
-  it("uso ANTES da definição tardia ainda marca a primeira ocorrência", () => {
+  it("use BEFORE a late definition still marks the first occurrence", () => {
     expect(spans("A LGPD é recente. A Lei Geral de Proteção de Dados (LGPD) trata disso.")).toEqual(["LGPD"]);
   });
 });
 
-describe("sigla_sem_expansao — precisão (baixo falso positivo)", () => {
-  it("siglas universais/UFs/unidades não marcam (allowlist)", () => {
+describe("sigla_sem_expansao — precision (low false positive rate)", () => {
+  it("universal acronyms/state codes/units do not mark (allowlist)", () => {
     expect(spans("Informe o CPF e o CEP. O processo tramita em SP e no RJ.")).toEqual([]);
     expect(spans("O arquivo tem 10 MB e está em PDF.")).toEqual([]);
   });
 
-  it("numerais romanos BEM-FORMADOS não marcam", () => {
+  it("WELL-FORMED roman numerals do not mark", () => {
     expect(spans("O Capítulo II e o Título IV tratam do tema. A Guerra XII foi longa.")).toEqual([]);
     expect(spans("O item XXIV e a fase VIII do processo MMXXIV.")).toEqual([]);
   });
 
-  it("caixa-alta de ênfase/título (run de maiúsculas) não marca", () => {
+  it("all-caps for emphasis/headings (a run of capitals) does not mark", () => {
     expect(spans("REGRAS GERAIS DA EMPRESA")).toEqual([]);
     expect(spans("LEIA COM ATENÇÃO ANTES DE ASSINAR")).toEqual([]);
   });
@@ -63,24 +63,24 @@ describe("sigla_sem_expansao — precisão (baixo falso positivo)", () => {
   });
 });
 
-describe("sigla_sem_expansao — siglas só com letras romanas mas que NÃO são numeral (F5)", () => {
-  it("CID/DVD/LCD (letras de {IVXLCDM}, mas numeral romano malformado) voltam a marcar", () => {
+describe("sigla_sem_expansao — acronyms made only of roman letters that are NOT numerals (F5)", () => {
+  it("CID/DVD/LCD (letters from {IVXLCDM}, but a malformed roman numeral) mark again", () => {
     expect(spans("O CID informado estava errado.")).toEqual(["CID"]);
     expect(spans("Comprei um DVD novo ontem.")).toEqual(["DVD"]);
     expect(spans("A tela é um LCD antigo.")).toEqual(["LCD"]);
   });
 
-  it("mas o numeral romano válido (fora da allowlist) segue excluído", () => {
+  it("but a valid roman numeral (outside the allowlist) stays excluded", () => {
     expect(spans("O anexo MI e o item DL seguem no processo.")).toEqual([]);
   });
 });
 
-describe("sigla_sem_expansao — limitação conhecida: sigla colada a dígito (F5)", () => {
-  it("G20 (prefixo de 1 letra) não marca", () => {
+describe("sigla_sem_expansao — known limitation: acronym glued to a digit (F5)", () => {
+  it("G20 (a 1-letter prefix) does not mark", () => {
     expect(spans("A cúpula do G20 terminou.")).toEqual([]);
   });
 
-  it("MP3 marca só a parte de letras 'MP' (comportamento pré-existente, não introduzido aqui)", () => {
+  it("MP3 marks only the letter part 'MP' (pre-existing behavior, not introduced here)", () => {
     expect(spans("O arquivo é MP3.")).toEqual(["MP"]);
   });
 });

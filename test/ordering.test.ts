@@ -17,14 +17,14 @@ function finding(overrides: Partial<Finding>): Finding {
   };
 }
 
-describe("sortFindings — desempate por cada chave, na ordem certa", () => {
-  it("mesmo start, fim diferente → o de fim menor vem primeiro", () => {
+describe("sortFindings — tie-breaking on each key, in the right order", () => {
+  it("same start, different end → the shorter end comes first", () => {
     const a = finding({ span: { start: 5, end: 30, text: "a" } });
     const b = finding({ span: { start: 5, end: 10, text: "b" } });
     expect(sortFindings([a, b]).map((f) => f.span.text)).toEqual(["b", "a"]);
   });
 
-  it("span idêntico, critérios diferentes → ordem alfabética de critério (jargon < long_sentence < nominalization < passive_voice)", () => {
+  it("identical span, different criteria → alphabetical by criterion (jargon < long_sentence < nominalization < passive_voice)", () => {
     const span = { start: 3, end: 8, text: "s" };
     const p = finding({ span: { ...span }, criterion: "passive_voice" });
     const j = finding({ span: { ...span }, criterion: "jargon" });
@@ -38,7 +38,7 @@ describe("sortFindings — desempate por cada chave, na ordem certa", () => {
     ]);
   });
 
-  it("empate total (start/end/criterion) preserva a ordem de inserção (sort estável)", () => {
+  it("a full tie (start/end/criterion) preserves insertion order (stable sort)", () => {
     const base = { start: 0, end: 2, text: "t" };
     const a = finding({ span: { ...base }, justification: "A" });
     const b = finding({ span: { ...base }, justification: "B" });
@@ -48,21 +48,21 @@ describe("sortFindings — desempate por cada chave, na ordem certa", () => {
     expect(sortFindings([c, b, a]).map((f) => f.justification)).toEqual(["C", "B", "A"]);
   });
 
-  it("não muta o array de entrada", () => {
-    const entrada = [finding({ span: { start: 9, end: 10, text: "a" } }), finding({ span: { start: 1, end: 2, text: "b" } })];
-    const copia = [...entrada];
-    sortFindings(entrada);
-    expect(entrada).toEqual(copia);
+  it("does not mutate the input array", () => {
+    const input = [finding({ span: { start: 9, end: 10, text: "a" } }), finding({ span: { start: 1, end: 2, text: "b" } })];
+    const copy = [...input];
+    sortFindings(input);
+    expect(input).toEqual(copy);
   });
 });
 
-describe("sortFindings — estabilidade sobre findings reais de analyze()", () => {
-  const texto =
+describe("sortFindings — stability over real findings from analyze()", () => {
+  const text =
     "É preciso fazer a verificação do relatório supramencionado, que foi assinado pelo gestor " +
     "responsável, doravante, antes do prazo final estabelecido no edital publicado.";
 
-  it("findings reais estão em ordem canônica não-decrescente", () => {
-    const { findings } = analyze(texto);
+  it("real findings come in non-decreasing canonical order", () => {
+    const { findings } = analyze(text);
     for (let i = 1; i < findings.length; i++) {
       const a = findings[i - 1];
       const b = findings[i];
@@ -71,16 +71,16 @@ describe("sortFindings — estabilidade sobre findings reais de analyze()", () =
     }
   });
 
-  it("reordenar a entrada e reordenar de novo dá o mesmo resultado (idempotência de ordenação)", () => {
-    const { findings } = analyze(texto);
-    const embaralhado = [...findings].reverse();
-    expect(sortFindings(embaralhado)).toEqual(findings);
-    expect(sortFindings(sortFindings(embaralhado))).toEqual(findings);
+  it("reordering the input and sorting again gives the same result (sort idempotence)", () => {
+    const { findings } = analyze(text);
+    const shuffled = [...findings].reverse();
+    expect(sortFindings(shuffled)).toEqual(findings);
+    expect(sortFindings(sortFindings(shuffled))).toEqual(findings);
   });
 
-  it("no domínio real, cada (criterion, start) é único → a ordem é totalmente determinada", () => {
-    const { findings } = analyze(texto);
-    const chaves = findings.map((f) => `${f.criterion}@${f.span.start}`);
-    expect(new Set(chaves).size).toBe(chaves.length);
+  it("in the real domain each (criterion, start) is unique → the order is fully determined", () => {
+    const { findings } = analyze(text);
+    const keys = findings.map((f) => `${f.criterion}@${f.span.start}`);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });

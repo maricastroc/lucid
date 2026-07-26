@@ -1,34 +1,34 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/lucid";
 
-const QUATRO_NUMA_FRASE =
+const FOUR_IN_ONE_SENTENCE =
   "É preciso fazer a verificação do relatório supramencionado, que foi assinado pelo gestor " +
   "responsável, doravante, antes do prazo final estabelecido no edital publicado.";
 
-const PASSIVAS_E_JARGOES =
+const PASSIVES_AND_JARGON =
   "Foi realizada a análise pela comissão e, em sede de recurso, o documento supracitado foi arquivado.";
 
-describe("interação — quatro critérios na mesma frase", () => {
-  const d = analyze(QUATRO_NUMA_FRASE);
+describe("interaction — four criteria in the same sentence", () => {
+  const d = analyze(FOUR_IN_ONE_SENTENCE);
 
-  it("todos os quatro critérios aparecem, nenhum suprime o outro", () => {
-    const criterios = new Set(d.findings.map((f) => f.criterion));
-    expect(criterios).toEqual(new Set(["long_sentence", "passive_voice", "nominalization", "jargon"]));
+  it("all four criteria show up, none suppresses another", () => {
+    const criteria = new Set(d.findings.map((f) => f.criterion));
+    expect(criteria).toEqual(new Set(["long_sentence", "passive_voice", "nominalization", "jargon"]));
   });
 
-  it("o span de long_sentence engloba os findings internos, mas eles NÃO são deduplicados", () => {
-    const longo = d.findings.find((f) => f.criterion === "long_sentence")!;
-    const internos = d.findings.filter((f) => f.criterion !== "long_sentence");
-    expect(internos.length).toBeGreaterThan(0);
-    for (const f of internos) {
-      expect(f.span.start).toBeGreaterThanOrEqual(longo.span.start);
-      expect(f.span.end).toBeLessThanOrEqual(longo.span.end);
+  it("the long_sentence span encloses the inner findings, but they are NOT deduplicated", () => {
+    const long = d.findings.find((f) => f.criterion === "long_sentence")!;
+    const inner = d.findings.filter((f) => f.criterion !== "long_sentence");
+    expect(inner.length).toBeGreaterThan(0);
+    for (const f of inner) {
+      expect(f.span.start).toBeGreaterThanOrEqual(long.span.start);
+      expect(f.span.end).toBeLessThanOrEqual(long.span.end);
     }
 
     expect(d.findings.length).toBe(5);
   });
 
-  it("cada finding reconstrói seu próprio span; só jargão carrega equivalente curado (ADR-054)", () => {
+  it("each finding reconstructs its own span; only jargon carries a curated equivalent (ADR-054)", () => {
     for (const f of d.findings) {
       expect(d.text.slice(f.span.start, f.span.end)).toBe(f.span.text);
       if (f.suggestion !== undefined) {
@@ -38,20 +38,20 @@ describe("interação — quatro critérios na mesma frase", () => {
     }
   });
 
-  it("requiresHuman é individual: passiva com agente e nominalização de mapeamento único são false", () => {
-    const passiva = d.findings.find((f) => f.criterion === "passive_voice")!;
+  it("requiresHuman is per-finding: a passive with an agent and a single-mapping nominalization are false", () => {
+    const passive = d.findings.find((f) => f.criterion === "passive_voice")!;
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
-    expect(passiva.requiresHuman).toBe(false);
+    expect(passive.requiresHuman).toBe(false);
     expect(nominal.requiresHuman).toBe(false);
     expect(nominal.meta).toMatchObject({ baseVerb: "verificar" });
   });
 
-  it("não há findings duplicados (mesmo critério + mesmo span)", () => {
-    const chaves = d.findings.map((f) => `${f.criterion}@${f.span.start}:${f.span.end}`);
-    expect(new Set(chaves).size).toBe(chaves.length);
+  it("there are no duplicate findings (same criterion + same span)", () => {
+    const keys = d.findings.map((f) => `${f.criterion}@${f.span.start}:${f.span.end}`);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("os findings estão em ordem não-decrescente de (start, end)", () => {
+  it("the findings are in non-decreasing (start, end) order", () => {
     for (let i = 1; i < d.findings.length; i++) {
       const a = d.findings[i - 1].span;
       const b = d.findings[i].span;
@@ -59,30 +59,30 @@ describe("interação — quatro critérios na mesma frase", () => {
     }
   });
 
-  it("o score reflete todos os critérios ativos, com contagens coerentes", () => {
+  it("the score reflects every active criterion, with coherent counts", () => {
     expect(d.score.totalFindings).toBe(5);
     const jargon = d.score.byCriterion.find((c) => c.criterion === "jargon")!;
     const passive = d.score.byCriterion.find((c) => c.criterion === "passive_voice")!;
     const nominal = d.score.byCriterion.find((c) => c.criterion === "nominalization")!;
-    const longo = d.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
+    const long = d.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
     expect(jargon.count.warning).toBe(2);
     expect(passive.count.warning).toBe(1);
     expect(nominal.count.warning).toBe(1);
-    expect(longo.count.warning).toBe(1);
+    expect(long.count.warning).toBe(1);
   });
 });
 
-describe("interação — múltiplas passivas e jargões sem envelope de frase longa", () => {
-  const d = analyze(PASSIVAS_E_JARGOES);
+describe("interaction — several passives and jargon terms with no long-sentence envelope", () => {
+  const d = analyze(PASSIVES_AND_JARGON);
 
-  it("duas passivas e dois jargões coexistem, sem long_sentence", () => {
-    const contagem: Record<string, number> = {};
-    for (const f of d.findings) contagem[f.criterion] = (contagem[f.criterion] ?? 0) + 1;
-    expect(contagem).toEqual({ passive_voice: 2, jargon: 2 });
+  it("two passives and two jargon terms coexist, with no long_sentence", () => {
+    const counts: Record<string, number> = {};
+    for (const f of d.findings) counts[f.criterion] = (counts[f.criterion] ?? 0) + 1;
+    expect(counts).toEqual({ passive_voice: 2, jargon: 2 });
     expect(d.findings.some((f) => f.criterion === "long_sentence")).toBe(false);
   });
 
-  it("os spans são disjuntos e ordenados; cada trecho reconstrói", () => {
+  it("the spans are disjoint and ordered; every excerpt reconstructs", () => {
     for (let i = 1; i < d.findings.length; i++) {
       expect(d.findings[i].span.start).toBeGreaterThanOrEqual(d.findings[i - 1].span.start);
     }
@@ -91,7 +91,7 @@ describe("interação — múltiplas passivas e jargões sem envelope de frase l
     }
   });
 
-  it("jargões trazem sugestão; passivas nunca trazem", () => {
+  it("jargon findings carry a suggestion; passives never do", () => {
     for (const f of d.findings) {
       if (f.criterion === "jargon") expect(f.suggestion).toBeTruthy();
       if (f.criterion === "passive_voice") expect(f.suggestion).toBeUndefined();

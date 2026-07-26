@@ -5,7 +5,7 @@ import { attachTokens, tokenize } from "../src/lucid/core/document/tokenize";
 import { buildDocument } from "./support/pt";
 import type { Sentence, Token } from "../src/lucid/core/types";
 
-function resumo(source: string) {
+function summary(source: string) {
   return tokenize(source).map((t) => [t.text, t.isWord] as const);
 }
 
@@ -17,8 +17,8 @@ function attachTokensNaive(sentences: readonly Sentence[], tokens: readonly Toke
   });
 }
 
-describe("attachTokens — merge-walk O(n) equivale ao filtro ingênuo (F10)", () => {
-  const casos = [
+describe("attachTokens — the O(n) merge-walk matches the naive filter (F10)", () => {
+  const cases = [
     "O gato subiu. O cachorro latiu forte demais. As crianças riram.",
     'Ele disse: "Já chega." Todos concordaram, e foram embora sem pressa.',
     "Visite www.exemplo.com. Depois, escreva para a@b.com em 30 dias.",
@@ -27,17 +27,17 @@ describe("attachTokens — merge-walk O(n) equivale ao filtro ingênuo (F10)", (
     "",
     "Sem pontuação final e sem nada terminando a frase",
   ];
-  it.each(casos)("mesma saída (tokens + wordCount) para: %s", (texto) => {
-    const source = normalize(texto);
+  it.each(cases)("same output (tokens + wordCount) for: %s", (text) => {
+    const source = normalize(text);
     const tokens = tokenize(source);
     const sentences = segmentSentences(source);
     expect(attachTokens(sentences, tokens)).toEqual(attachTokensNaive(sentences, tokens));
   });
 });
 
-describe("tokenize — texto simples", () => {
-  it("tokeniza palavras e pontuação separadamente", () => {
-    expect(resumo("O gato subiu no telhado.")).toEqual([
+describe("tokenize — plain text", () => {
+  it("tokenizes words and punctuation separately", () => {
+    expect(summary("O gato subiu no telhado.")).toEqual([
       ["O", true],
       ["gato", true],
       ["subiu", true],
@@ -47,27 +47,27 @@ describe("tokenize — texto simples", () => {
     ]);
   });
 
-  it("não conta pontuação isolada como palavra", () => {
+  it("does not count standalone punctuation as a word", () => {
     const tokens = tokenize("Isso, sim; funciona: bem!");
-    const pontuacao = tokens.filter((t) => [",", ";", ":", "!"].includes(t.text));
-    expect(pontuacao).toHaveLength(4);
-    for (const t of pontuacao) expect(t.isWord).toBe(false);
+    const punctuation = tokens.filter((t) => [",", ";", ":", "!"].includes(t.text));
+    expect(punctuation).toHaveLength(4);
+    for (const t of punctuation) expect(t.isWord).toBe(false);
   });
 });
 
 describe("tokenize — Unicode NFC/NFD", () => {
-  it("produz o mesmo resultado para entrada NFC e NFD (após normalize)", () => {
+  it("produces the same result for NFC and NFD input (after normalize)", () => {
     const nfc = "A política é importante para a nação.";
     const nfd = nfc.normalize("NFD");
 
-    const doNfc = tokenize(normalize(nfc)).map((t) => t.text);
-    const doNfd = tokenize(normalize(nfd)).map((t) => t.text);
+    const fromNfc = tokenize(normalize(nfc)).map((t) => t.text);
+    const fromNfd = tokenize(normalize(nfd)).map((t) => t.text);
 
-    expect(doNfd).toEqual(doNfc);
+    expect(fromNfd).toEqual(fromNfc);
   });
 
-  it("mantém palavras acentuadas como um único token", () => {
-    expect(resumo("café político não é fácil")).toEqual([
+  it("keeps accented words as a single token", () => {
+    expect(summary("café político não é fácil")).toEqual([
       ["café", true],
       ["político", true],
       ["não", true],
@@ -77,9 +77,9 @@ describe("tokenize — Unicode NFC/NFD", () => {
   });
 });
 
-describe("tokenize — palavras hifenizadas", () => {
-  it("mantém hífen interno como parte da palavra", () => {
-    expect(resumo("Vimos um guarda-chuva e um arco-íris.")).toEqual([
+describe("tokenize — hyphenated words", () => {
+  it("keeps an internal hyphen as part of the word", () => {
+    expect(summary("Vimos um guarda-chuva e um arco-íris.")).toEqual([
       ["Vimos", true],
       ["um", true],
       ["guarda-chuva", true],
@@ -90,16 +90,16 @@ describe("tokenize — palavras hifenizadas", () => {
     ]);
   });
 
-  it("hífen solto (sem letra imediatamente depois) não vira parte da palavra", () => {
+  it("a loose hyphen (no letter right after it) does not become part of the word", () => {
     const tokens = tokenize("Item - descrição");
     expect(tokens.map((t) => t.text)).toEqual(["Item", "-", "descrição"]);
     expect(tokens[1].isWord).toBe(false);
   });
 });
 
-describe("tokenize — apóstrofos", () => {
-  it("mantém apóstrofo de elisão como parte da palavra", () => {
-    expect(resumo("A água d'água não é a mesma coisa.")).toEqual([
+describe("tokenize — apostrophes", () => {
+  it("keeps an elision apostrophe as part of the word", () => {
+    expect(summary("A água d'água não é a mesma coisa.")).toEqual([
       ["A", true],
       ["água", true],
       ["d'água", true],
@@ -112,24 +112,24 @@ describe("tokenize — apóstrofos", () => {
     ]);
   });
 
-  it("apóstrofo usado como aspas de fechamento não mescla com a palavra", () => {
+  it("an apostrophe used as a closing quote does not merge with the word", () => {
     const tokens = tokenize("Ele disse: 'Isso.'");
-    const textos = tokens.map((t) => t.text);
-    expect(textos).toEqual(["Ele", "disse", ":", "'", "Isso", ".", "'"]);
+    const texts = tokens.map((t) => t.text);
+    expect(texts).toEqual(["Ele", "disse", ":", "'", "Isso", ".", "'"]);
     expect(tokens[tokens.length - 1].isWord).toBe(false);
   });
 });
 
-describe("tokenize — números inteiros e decimais", () => {
-  it("tokeniza número inteiro como um único token, não-palavra", () => {
+describe("tokenize — integers and decimals", () => {
+  it("tokenizes an integer as a single, non-word token", () => {
     const tokens = tokenize("Em 1997 nasceu.");
-    const numero = tokens.find((t) => t.text === "1997");
-    expect(numero).toBeDefined();
-    expect(numero?.isWord).toBe(false);
+    const number = tokens.find((t) => t.text === "1997");
+    expect(number).toBeDefined();
+    expect(number?.isWord).toBe(false);
   });
 
-  it("mantém separador decimal/milhar dentro do número", () => {
-    expect(resumo("O produto custa 1.234,56 reais.")).toEqual([
+  it("keeps the decimal/thousands separator inside the number", () => {
+    expect(summary("O produto custa 1.234,56 reais.")).toEqual([
       ["O", true],
       ["produto", true],
       ["custa", true],
@@ -139,27 +139,27 @@ describe("tokenize — números inteiros e decimais", () => {
     ]);
   });
 
-  it("não confunde ponto final de frase com separador decimal", () => {
+  it("does not confuse a sentence-final period with a decimal separator", () => {
     const tokens = tokenize("Chegaram 42. Foram embora depois.");
     expect(tokens.map((t) => t.text)).toEqual(["Chegaram", "42", ".", "Foram", "embora", "depois", "."]);
   });
 });
 
-describe("tokenize — siglas e abreviações", () => {
-  it("mescla sigla grudada por pontos em um único token", () => {
+describe("tokenize — acronyms and abbreviations", () => {
+  it("merges an acronym joined by periods into a single token", () => {
     const tokens = tokenize("Nós moramos nos E.U.A. hoje.");
-    const sigla = tokens.find((t) => t.text.startsWith("E."));
-    expect(sigla?.text).toBe("E.U.A");
-    expect(sigla?.isWord).toBe(true);
+    const acronym = tokens.find((t) => t.text.startsWith("E."));
+    expect(acronym?.text).toBe("E.U.A");
+    expect(acronym?.isWord).toBe(true);
   });
 
-  it("iniciais separadas por espaço NÃO mesclam (cada uma é um token de 1 letra)", () => {
+  it("initials separated by a space do NOT merge (each is a 1-letter token)", () => {
     const tokens = tokenize("J. K. Rowling escreveu.");
     expect(tokens.map((t) => t.text)).toEqual(["J", ".", "K", ".", "Rowling", "escreveu", "."]);
   });
 
-  it("abreviação multiletra fica separada da pontuação (Sr., art., p.ex.)", () => {
-    expect(resumo("O Sr. chegou. Conforme o art. 5, tudo bem, p.ex. isso.")).toEqual([
+  it("a multi-letter abbreviation stays separate from its punctuation (Sr., art., p.ex.)", () => {
+    expect(summary("O Sr. chegou. Conforme o art. 5, tudo bem, p.ex. isso.")).toEqual([
       ["O", true],
       ["Sr", true],
       [".", false],
@@ -183,8 +183,8 @@ describe("tokenize — siglas e abreviações", () => {
     ]);
   });
 
-  it("sigla sem pontos internos é um token de palavra normal", () => {
-    expect(resumo("A ONU e a UNESCO.")).toEqual([
+  it("an acronym with no internal periods is an ordinary word token", () => {
+    expect(summary("A ONU e a UNESCO.")).toEqual([
       ["A", true],
       ["ONU", true],
       ["e", true],
@@ -195,8 +195,8 @@ describe("tokenize — siglas e abreviações", () => {
   });
 });
 
-describe("tokenize — URLs e e-mails", () => {
-  it("tokeniza URL com http/https como um único token, não-palavra", () => {
+describe("tokenize — URLs and e-mails", () => {
+  it("tokenizes an http/https URL as a single, non-word token", () => {
     const tokens = tokenize("Veja em https://exemplo.com/pagina. Isso é importante.");
     const url = tokens.find((t) => t.text.startsWith("http"));
     expect(url?.text).toBe("https://exemplo.com/pagina");
@@ -204,38 +204,38 @@ describe("tokenize — URLs e e-mails", () => {
     expect(tokens.map((t) => t.text)).toContain(".");
   });
 
-  it("tokeniza URL www. sem esquema como um único token", () => {
+  it("tokenizes a schemeless www. URL as a single token", () => {
     const tokens = tokenize("Acesse www.exemplo.com.br agora.");
     const url = tokens.find((t) => t.text.startsWith("www."));
     expect(url?.text).toBe("www.exemplo.com.br");
     expect(url?.isWord).toBe(false);
   });
 
-  it("tokeniza e-mail como um único token, não-palavra", () => {
+  it("tokenizes an e-mail as a single, non-word token", () => {
     const tokens = tokenize("Escreva para contato@exemplo.com.br para saber mais.");
     const email = tokens.find((t) => t.text.includes("@"));
     expect(email?.text).toBe("contato@exemplo.com.br");
     expect(email?.isWord).toBe(false);
   });
 
-  it("não inclui pontuação de fim de frase dentro da URL/e-mail", () => {
+  it("does not swallow sentence-final punctuation into the URL/e-mail", () => {
     const tokens = tokenize("Isso está em https://exemplo.com. Confirme.");
     const url = tokens.find((t) => t.text.startsWith("http"));
     expect(url?.text).toBe("https://exemplo.com");
-    const indiceUrl = tokens.indexOf(url!);
-    expect(tokens[indiceUrl + 1].text).toBe(".");
+    const urlIndex = tokens.indexOf(url!);
+    expect(tokens[urlIndex + 1].text).toBe(".");
   });
 });
 
-describe("tokenize — espaços e quebras de linha", () => {
-  it("não gera tokens para espaços múltiplos nem quebras de linha", () => {
+describe("tokenize — spaces and line breaks", () => {
+  it("produces no token for repeated spaces or line breaks", () => {
     const tokens = tokenize("Frase   um.\n\nFrase\tdois.");
     expect(tokens.map((t) => t.text)).toEqual(["Frase", "um", ".", "Frase", "dois", "."]);
   });
 });
 
-describe("tokenize — offsets exatos", () => {
-  it("start/end reconstroem exatamente o texto de cada token", () => {
+describe("tokenize — exact offsets", () => {
+  it("start/end reconstruct each token's text exactly", () => {
     const source = "O café custa 12,50 reais, ok?";
     const tokens = tokenize(source);
     expect(tokens.length).toBeGreaterThan(0);
@@ -244,28 +244,28 @@ describe("tokenize — offsets exatos", () => {
     }
   });
 
-  it("offsets específicos de um token no meio do texto", () => {
+  it("specific offsets for a token in the middle of the text", () => {
     const source = "Frase inicial aqui.";
     const tokens = tokenize(source);
-    const inicial = tokens.find((t) => t.text === "inicial")!;
-    expect(inicial.start).toBe(6);
-    expect(inicial.end).toBe(13);
-    expect(source.slice(inicial.start, inicial.end)).toBe("inicial");
+    const middle = tokens.find((t) => t.text === "inicial")!;
+    expect(middle.start).toBe(6);
+    expect(middle.end).toBe(13);
+    expect(source.slice(middle.start, middle.end)).toBe("inicial");
   });
 });
 
-describe("attachTokens / Document — contagem por frase e total", () => {
-  it("preenche Sentence.tokens e Sentence.wordCount corretamente", () => {
+describe("attachTokens / Document — per-sentence and total counts", () => {
+  it("fills Sentence.tokens and Sentence.wordCount correctly", () => {
     const source = "O gato subiu. O cachorro correu muito rápido.";
-    const sentencas = segmentSentences(source);
+    const sentences = segmentSentences(source);
     const tokens = tokenize(source);
-    const comTokens = attachTokens(sentencas, tokens);
+    const withTokens = attachTokens(sentences, tokens);
 
-    expect(comTokens).toHaveLength(2);
-    expect(comTokens[0].wordCount).toBe(3);
-    expect(comTokens[1].wordCount).toBe(5);
+    expect(withTokens).toHaveLength(2);
+    expect(withTokens[0].wordCount).toBe(3);
+    expect(withTokens[1].wordCount).toBe(5);
 
-    for (const s of comTokens) {
+    for (const s of withTokens) {
       for (const t of s.tokens) {
         expect(t.start).toBeGreaterThanOrEqual(s.start);
         expect(t.end).toBeLessThanOrEqual(s.end);
@@ -273,37 +273,37 @@ describe("attachTokens / Document — contagem por frase e total", () => {
     }
   });
 
-  it("wordCount não conta pontuação nem números", () => {
+  it("wordCount counts neither punctuation nor numbers", () => {
     const source = "Chegaram 42 pessoas hoje.";
-    const sentencas = attachTokens(segmentSentences(source), tokenize(source));
-    expect(sentencas[0].wordCount).toBe(3);
+    const sentences = attachTokens(segmentSentences(source), tokenize(source));
+    expect(sentences[0].wordCount).toBe(3);
   });
 
-  it("Document.tokens contém a soma de todos os tokens de todas as frases", () => {
+  it("Document.tokens holds the sum of all tokens across all sentences", () => {
     const source = "Primeira frase aqui. Segunda frase, maior, também aqui!";
     const doc = buildDocument(source);
 
-    const totalNasFrases = doc.sentences.reduce((acc, s) => acc + s.tokens.length, 0);
-    expect(doc.tokens.length).toBe(totalNasFrases);
+    const totalInSentences = doc.sentences.reduce((acc, s) => acc + s.tokens.length, 0);
+    expect(doc.tokens.length).toBe(totalInSentences);
 
-    const totalPalavras = doc.sentences.reduce((acc, s) => acc + s.wordCount, 0);
-    const totalPalavrasNoDoc = doc.tokens.filter((t) => t.isWord).length;
-    expect(totalPalavras).toBe(totalPalavrasNoDoc);
+    const totalWords = doc.sentences.reduce((acc, s) => acc + s.wordCount, 0);
+    const totalWordsInDoc = doc.tokens.filter((t) => t.isWord).length;
+    expect(totalWords).toBe(totalWordsInDoc);
   });
 });
 
-describe("tokenize/attachTokens — determinismo (execução repetida byte-idêntica)", () => {
-  it("mesma entrada produz sempre a mesma saída de tokenize", () => {
+describe("tokenize/attachTokens — determinism (byte-identical on repeated runs)", () => {
+  it("the same input always produces the same tokenize output", () => {
     const source =
       "O Sr. Dr. João A. Silva, nascido em 1.234, escreveu para contato@exemplo.com.br. " +
       "Veja https://exemplo.com/pagina. Isso é ótimo!";
 
-    const primeira = JSON.stringify(tokenize(source));
-    const segunda = JSON.stringify(tokenize(source));
-    expect(segunda).toBe(primeira);
+    const first = JSON.stringify(tokenize(source));
+    const second = JSON.stringify(tokenize(source));
+    expect(second).toBe(first);
   });
 
-  it("buildDocument (com tokens) é determinístico ponta a ponta", () => {
+  it("buildDocument (with tokens) is deterministic end to end", () => {
     const source = "Texto de teste. Com duas frases, números 1.234,56 e um e-mail a@b.com!";
     const doc1 = JSON.stringify(buildDocument(source));
     const doc2 = JSON.stringify(buildDocument(source));

@@ -17,26 +17,26 @@ function okResponse(content: string) {
   } as unknown as Response;
 }
 
-describe("DeepSeekProvider — allow-list (sem rede)", () => {
-  it("rejeita modelo fora da allow-list antes de qualquer fetch", async () => {
-    const provider = new DeepSeekProvider("chave-fake");
-    await expect(provider.complete("oi", { model: "modelo-inexistente", temperature: 0 })).rejects.toBeInstanceOf(
+describe("DeepSeekProvider — allow-list (no network)", () => {
+  it("rejects a model outside the allow-list before any fetch", async () => {
+    const provider = new DeepSeekProvider("fake-key");
+    await expect(provider.complete("oi", { model: "nonexistent-model", temperature: 0 })).rejects.toBeInstanceOf(
       ChatProviderError,
     );
   });
 
-  it("expõe a allow-list de modelos", () => {
+  it("exposes the model allow-list", () => {
     expect(DEEPSEEK_MODELS).toContain("deepseek-v4-flash");
     expect(new DeepSeekProvider("x").models).toEqual(DEEPSEEK_MODELS);
   });
 });
 
-describe("DeepSeekProvider — parse da resposta (fetch mockado)", () => {
-  it("extrai o texto da primeira choice e registra o uso de tokens", async () => {
+describe("DeepSeekProvider — response parsing (mocked fetch)", () => {
+  it("extracts the text of the first choice and records token usage", async () => {
     const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
     vi.stubGlobal("fetch", fetchMock);
 
-    const provider = new DeepSeekProvider("chave-fake");
+    const provider = new DeepSeekProvider("fake-key");
     const out = await provider.complete("prompt", { model: "deepseek-v4-flash", temperature: 0 });
 
     expect(out).toBe('{"reescrita":"clara"}');
@@ -44,22 +44,22 @@ describe("DeepSeekProvider — parse da resposta (fetch mockado)", () => {
 
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("https://api.deepseek.com/chat/completions");
-    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer chave-fake");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer fake-key");
     expect(JSON.parse(init.body as string).temperature).toBe(0);
   });
 
-  it("resposta sem conteúdo vira ChatProviderError", async () => {
+  it("a response with no content becomes a ChatProviderError", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ choices: [] }), headers: new Headers() }) as unknown as Response),
     );
-    const provider = new DeepSeekProvider("chave-fake");
+    const provider = new DeepSeekProvider("fake-key");
     await expect(provider.complete("p", { model: "deepseek-v4-flash", temperature: 0 })).rejects.toBeInstanceOf(
       ChatProviderError,
     );
   });
 
-  it("erro não-429 vira ChatProviderError sem retry", async () => {
+  it("a non-429 error becomes a ChatProviderError with no retry", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: false,
       status: 402,
@@ -68,7 +68,7 @@ describe("DeepSeekProvider — parse da resposta (fetch mockado)", () => {
     }) as unknown as Response);
     vi.stubGlobal("fetch", fetchMock);
 
-    const provider = new DeepSeekProvider("chave-fake");
+    const provider = new DeepSeekProvider("fake-key");
     await expect(provider.complete("p", { model: "deepseek-v4-flash", temperature: 0 })).rejects.toThrow(
       /Insufficient Balance/,
     );

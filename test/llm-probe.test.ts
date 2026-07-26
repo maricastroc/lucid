@@ -17,8 +17,8 @@ class MockChatProvider implements ChatProvider {
   }
 }
 
-describe("parseProbeResult — robusto e pessimista", () => {
-  it("JSON completo é lido fielmente", () => {
+describe("parseProbeResult — robust and pessimistic", () => {
+  it("a complete JSON is read faithfully", () => {
     const r = parseProbeResult(
       '{"pode_responder": true, "resposta_extraida": "o prazo é 30 dias", "onde_travou": [], "operacoes_de_leitura": ["integrar_entre_frases"], "precisou_inferir": false}',
     );
@@ -27,31 +27,31 @@ describe("parseProbeResult — robusto e pessimista", () => {
     expect(r.operacoesDeLeitura).toEqual(["integrar_entre_frases"]);
   });
 
-  it("desembrulha cerca ```json + texto ao redor", () => {
+  it("unwraps a ```json fence plus surrounding text", () => {
     const r = parseProbeResult('Aqui:\n```json\n{"pode_responder": false, "precisou_inferir": true}\n```');
     expect(r.podeResponder).toBe(false);
     expect(r.precisouInferir).toBe(true);
   });
 
-  it("lixo/JSON inválido → caso PESSIMISTA (não consegue responder)", () => {
+  it("garbage/invalid JSON → PESSIMISTIC case (cannot answer)", () => {
     const r = parseProbeResult("não sei");
     expect(r.podeResponder).toBe(false);
     expect(r.respostaExtraida).toBe("o texto não diz");
   });
 
-  it("descarta operações de leitura fora do enum fechado", () => {
+  it("discards reading operations outside the closed enum", () => {
     const r = parseProbeResult('{"pode_responder": true, "operacoes_de_leitura": ["inventada", "integrar_entre_frases"]}');
     expect(r.operacoesDeLeitura).toEqual(["integrar_entre_frases"]);
   });
 });
 
 describe("LlmComprehensionProbe", () => {
-  it("id carrega provedor, modelo e versão do prompt", () => {
+  it("the id carries provider, model and prompt version", () => {
     const probe = new LlmComprehensionProbe(new MockChatProvider("{}"), "m1");
     expect(probe.id).toBe(`mock:m1+${PROBE_PROMPT_VERSION}`);
   });
 
-  it("manda trecho+pergunta no prompt e devolve o ProbeResult parseado", async () => {
+  it("sends excerpt+question in the prompt and returns the parsed ProbeResult", async () => {
     const provider = new MockChatProvider('{"pode_responder": false, "precisou_inferir": true}');
     const probe = new LlmComprehensionProbe(provider, "m1");
     const result = await probe.probe({ trecho: "trecho X", pergunta: "quando começa?" });
@@ -61,7 +61,7 @@ describe("LlmComprehensionProbe", () => {
     expect(interpret(result).tipo).toBe("flag");
   });
 
-  it("repassa o AbortSignal ao provedor (M6: cancelamento tem que chegar até a chamada do LLM)", async () => {
+  it("forwards the AbortSignal to the provider (M6: cancellation has to reach the LLM call)", async () => {
     const provider = new MockChatProvider("{}");
     const probe = new LlmComprehensionProbe(provider, "m1");
     const controller = new AbortController();

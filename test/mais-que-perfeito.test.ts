@@ -7,14 +7,14 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "mais_que_perfeito_sintetico")
     .map((f) => f.span.text);
 
-describe("mais_que_perfeito_sintetico — detecção", () => {
-  it("marca formas regulares e irregulares de mais-que-perfeito sintético", () => {
+describe("mais_que_perfeito_sintetico — detection", () => {
+  it("marks regular and irregular synthetic pluperfect forms", () => {
     expect(spans("O órgão requerera o parecer.")).toEqual(["requerera"]);
     expect(spans("Ele já dissera que aprovara tudo.")).toEqual(["dissera", "aprovara"]);
     expect(spans("Ela fizera o pedido e coubera a ela decidir.")).toEqual(["fizera", "coubera"]);
   });
 
-  it("todo finding exige decisão humana e não sugere reescrita", () => {
+  it("every finding requires a human decision and suggests no rewrite", () => {
     const f = analyze("O servidor requerera o documento.").findings.find(
       (x) => x.criterion === "mais_que_perfeito_sintetico",
     )!;
@@ -25,26 +25,26 @@ describe("mais_que_perfeito_sintetico — detecção", () => {
   });
 });
 
-describe("mais_que_perfeito_sintetico — precisão (formas ambíguas NÃO marcam)", () => {
-  it("'fora' (advérbio) não é marcado como pluperfect", () => {
+describe("mais_que_perfeito_sintetico — precision (ambiguous forms do NOT mark)", () => {
+  it("'fora' (adverb) is not marked as a pluperfect", () => {
     expect(spans("O documento ficou fora da pasta.")).toEqual([]);
   });
 
-  it("'vira' (verbo virar) não é marcado", () => {
+  it("'vira' (the verb virar) is not marked", () => {
     expect(spans("O carro vira à esquerda no cruzamento.")).toEqual([]);
   });
 
-  it("'foram' (pretérito perfeito) não é marcado", () => {
+  it("'foram' (simple past) is not marked", () => {
     expect(spans("Os documentos foram entregues no prazo.")).toEqual([]);
   });
 
-  it("texto claro sem pluperfect não gera nada", () => {
+  it("clear text with no pluperfect yields nothing", () => {
     expect(spans("A comissão analisou o documento e comunicou a decisão.")).toEqual([]);
   });
 });
 
 describe("mais_que_perfeito_sintetico — kill switch", () => {
-  it("desligado não produz findings", () => {
+  it("produces no findings when switched off", () => {
     const config = { ...DEFAULT_CONFIG, maisQuePerfeito: { enabled: false } };
     const findings = analyze("O órgão requerera o parecer.", config).findings.filter(
       (f) => f.criterion === "mais_que_perfeito_sintetico",

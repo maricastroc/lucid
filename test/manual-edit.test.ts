@@ -7,52 +7,52 @@ import { isManualEditDirty, manualEditReplacement, spliceSpan } from "../src/app
 function manualEditTargetFor(text: string, criterion: string) {
   const d = analyze(text);
   const finding = d.findings.find((f) => f.criterion === criterion);
-  if (!finding) throw new Error(`sem finding '${criterion}' em: ${text}`);
+  if (!finding) throw new Error(`no '${criterion}' finding in: ${text}`);
   return { source: d.text, ...rewriteTargetAt(d.text, finding.span.start) };
 }
 
-describe("manualEditReplacement — apara as pontas, preserva o miolo", () => {
-  it("remove espaços/quebras das bordas", () => {
+describe("manualEditReplacement — trims the ends, preserves the middle", () => {
+  it("removes spaces/line breaks at the edges", () => {
     expect(manualEditReplacement("  minha versão  ")).toBe("minha versão");
     expect(manualEditReplacement("\n  texto \n")).toBe("texto");
   });
-  it("não mexe no espaçamento interno", () => {
+  it("leaves internal spacing alone", () => {
     expect(manualEditReplacement("uma  frase. Outra.")).toBe("uma  frase. Outra.");
   });
 });
 
-describe("isManualEditDirty — só aplica conteúdo real e diferente", () => {
+describe("isManualEditDirty — only applies real, different content", () => {
   const original = "A comissão analisou o documento.";
-  it("igual ao original (mesmo com espaços nas pontas) → não aplica", () => {
+  it("equal to the original (even with edge spaces) → does not apply", () => {
     expect(isManualEditDirty(original, original)).toBe(false);
     expect(isManualEditDirty(original, `  ${original}  `)).toBe(false);
   });
-  it("vazio ou só espaços → não aplica (não esvazia o trecho)", () => {
+  it("empty or spaces only → does not apply (it does not blank the excerpt)", () => {
     expect(isManualEditDirty(original, "")).toBe(false);
     expect(isManualEditDirty(original, "   \n ")).toBe(false);
   });
-  it("conteúdo diferente → aplica", () => {
+  it("different content → applies", () => {
     expect(isManualEditDirty(original, "A comissão leu o documento.")).toBe(true);
   });
 });
 
-describe("spliceSpan — substitui exatamente o span do alvo", () => {
-  it("troca o intervalo e conserva o resto", () => {
+describe("spliceSpan — replaces exactly the target span", () => {
+  it("swaps the range and keeps the rest", () => {
     const text = "Olá mundo cruel.";
     const target = { start: 4, end: 9, text: "mundo" };
     expect(spliceSpan(text, target, "planeta")).toBe("Olá planeta cruel.");
   });
 });
 
-describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
-  it("bloco contínuo (sem linha em branco) → a FRASE do finding", () => {
+describe("the ManualEdit target = the finding's rewrite unit", () => {
+  it("a continuous block (no blank line) → the finding's SENTENCE", () => {
     const text = "As contas foram aprovadas pelo conselho fiscal da autarquia federal competente.";
     const { source, span, unit } = manualEditTargetFor(text, "passive_voice");
     expect(unit).toBe("sentence");
     expect(span.text).toBe(source.trim());
   });
 
-  it("texto com parágrafos → o PARÁGRAFO do finding, e o resto fica intacto ao aplicar", () => {
+  it("text with paragraphs → the finding's PARAGRAPH, and the rest stays intact when applied", () => {
     const text =
       "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
     const { source, span, unit } = manualEditTargetFor(text, "passive_voice");
@@ -64,7 +64,7 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
     expect(next).toBe("O conselho aprovou as contas.\n\nO pagamento deve ser feito na hipótese de deferimento.");
   });
 
-  it("o loop fecha: a engine reanalisa o resultado da edição à mão", () => {
+  it("the loop closes: the engine re-analyzes the result of the hand edit", () => {
     const text =
       "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
     const { source, span } = manualEditTargetFor(text, "passive_voice");
@@ -77,11 +77,11 @@ describe("alvo do ManualEdit = unidade de reescrita do finding", () => {
   });
 });
 
-describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verificador", () => {
+describe("verifyManualEdit — the author's version is judged by the SAME verifier", () => {
   const text =
     "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
 
-  it("carimba a proveniência do autor, apara o rascunho e devolve PROVA + métricas, offline (sem sonda de sentido)", async () => {
+  it("stamps the author's provenance, trims the draft and returns PROOFS + metrics, offline (no meaning probe)", async () => {
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const { proposal, verification } = await verifyManualEdit(source, span, "  O conselho aprovou as contas.  ");
 
@@ -93,7 +93,7 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
     expect(verification.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
   });
 
-  it("não referenda o autor: fabricar 1ª pessoa ausente no original é VETADO (mesmo veto da IA)", async () => {
+  it("it does not rubber-stamp the author: inventing a 1st person absent from the original is VETOED (the same veto as the AI's)", async () => {
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const { verification } = await verifyManualEdit(source, span, "Nós aprovamos as contas na nossa reunião.");
 
@@ -102,7 +102,7 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
     expect(firstPerson?.passed).toBe(false);
   });
 
-  it("edição que só maquia a passiva (não resolve o critério) reprova quando o criterion é passado — regressão", async () => {
+  it("an edit that only papers over the passive (without resolving the criterion) fails when the criterion is passed — regression", async () => {
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const { verification } = await verifyManualEdit(
       source,
@@ -117,7 +117,7 @@ describe("verifyManualEdit — a versão do autor é julgada pelo MESMO verifica
   });
 });
 
-describe("verifyManualEdit — a declaração de agente vale para o autor também (ADR-055)", () => {
+describe("verifyManualEdit — the agent declaration applies to the author too (ADR-055)", () => {
   const text = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function agentlessPassive() {
@@ -127,7 +127,7 @@ describe("verifyManualEdit — a declaração de agente vale para o autor també
     return { source: d.text, span, finding };
   }
 
-  it("versão do autor que nomeia o agente declarado → prova declared_agent_present PASSA", async () => {
+  it("an author version naming the declared agent → the declared_agent_present proof PASSES", async () => {
     const { source, span, finding } = agentlessPassive();
     const { verification } = await verifyManualEdit(
       source,
@@ -141,7 +141,7 @@ describe("verifyManualEdit — a declaração de agente vale para o autor també
     expect(proof?.passed).toBe(true);
   });
 
-  it("o autor declarou um agente e escreveu OUTRO → a própria versão dele reprova (nenhuma fonte é privilegiada)", async () => {
+  it("the author declared one agent and wrote ANOTHER → their own version fails (no source is privileged)", async () => {
     const { source, span, finding } = agentlessPassive();
     const { verification } = await verifyManualEdit(
       source,
@@ -156,7 +156,7 @@ describe("verifyManualEdit — a declaração de agente vale para o autor també
     expect(verification.hasBlockingFailure).toBe(true);
   });
 
-  it("sem declaração, a prova não existe (comportamento anterior intacto)", async () => {
+  it("with no declaration, the proof does not exist (previous behavior intact)", async () => {
     const { source, span } = agentlessPassive();
     const { verification } = await verifyManualEdit(source, span, "A decisão foi comunicada ao interessado.");
     expect(verification.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();

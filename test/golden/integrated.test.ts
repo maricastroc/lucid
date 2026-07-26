@@ -36,24 +36,24 @@ function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding 
   );
 }
 
-describe("golden integrado — asserções semânticas por caso", () => {
-  describe.each(GOLDEN_INTEGRADO)("$id — $description", (caso: GoldenCase) => {
-    const diagnostic = analyze(caso.text);
+describe("integrated golden — semantic assertions per case", () => {
+  describe.each(GOLDEN_INTEGRADO)("$id — $description", (testCase: GoldenCase) => {
+    const diagnostic = analyze(testCase.text);
 
-    it("produz exatamente os findings esperados (contagem total)", () => {
-      expect(diagnostic.findings).toHaveLength(caso.expected.findings.length);
+    it("produces exactly the expected findings (total count)", () => {
+      expect(diagnostic.findings).toHaveLength(testCase.expected.findings.length);
     });
 
-    it("cada finding esperado existe com proveniência completa e correta", () => {
-      for (const esperado of caso.expected.findings) {
-        const actual = findActual(diagnostic, esperado);
-        expect(actual, `finding ausente: ${esperado.criterion} @[${esperado.start},${esperado.end}] "${esperado.spanText}"`).toBeDefined();
+    it("every expected finding exists with complete and correct provenance", () => {
+      for (const expected of testCase.expected.findings) {
+        const actual = findActual(diagnostic, expected);
+        expect(actual, `missing finding: ${expected.criterion} @[${expected.start},${expected.end}] "${expected.spanText}"`).toBeDefined();
         if (!actual) continue;
 
-        expect(actual.span.text).toBe(esperado.spanText);
-        expect(actual.severity).toBe(esperado.severity);
-        expect(actual.requiresHuman).toBe(esperado.requiresHuman);
-        expect(actual.suggestion).toBe(esperado.suggestion);
+        expect(actual.span.text).toBe(expected.spanText);
+        expect(actual.severity).toBe(expected.severity);
+        expect(actual.requiresHuman).toBe(expected.requiresHuman);
+        expect(actual.suggestion).toBe(expected.suggestion);
         expect(actual.source).toBeDefined();
         expect(actual.normativeReference !== undefined).toBe(actual.source === "iso-24495-1");
         expect(actual.category).toBeDefined();
@@ -62,30 +62,30 @@ describe("golden integrado — asserções semânticas por caso", () => {
       }
     });
 
-    it("nenhum finding inesperado aparece (sem falso positivo)", () => {
+    it("no unexpected finding shows up (no false positive)", () => {
       for (const actual of diagnostic.findings) {
-        const previsto = caso.expected.findings.some(
+        const predicted = testCase.expected.findings.some(
           (e) => e.criterion === actual.criterion && e.start === actual.span.start && e.end === actual.span.end,
         );
-        expect(previsto, `finding inesperado: ${actual.criterion} @[${actual.span.start},${actual.span.end}] "${actual.span.text}"`).toBe(true);
+        expect(predicted, `unexpected finding: ${actual.criterion} @[${actual.span.start},${actual.span.end}] "${actual.span.text}"`).toBe(true);
       }
     });
 
-    it("métricas principais conferem", () => {
-      expect(diagnostic.metrics.words).toBe(caso.expected.metrics.words);
-      expect(diagnostic.metrics.sentences).toBe(caso.expected.metrics.sentences);
+    it("the main metrics check out", () => {
+      expect(diagnostic.metrics.words).toBe(testCase.expected.metrics.words);
+      expect(diagnostic.metrics.sentences).toBe(testCase.expected.metrics.sentences);
     });
 
-    it("score é coerente com os findings (contagens derivadas, 4 critérios, sem aprovação)", () => {
+    it("the score is coherent with the findings (derived counts, 4 criteria, no approval)", () => {
       expect(diagnostic.score.byCriterion).toHaveLength(CRITERIA.length);
       expect(diagnostic.score.totalFindings).toBe(diagnostic.findings.length);
 
       for (const criterion of CRITERIA) {
         const entry = diagnostic.score.byCriterion.find((c) => c.criterion === criterion);
-        expect(entry, `critério ausente no placar: ${criterion}`).toBeDefined();
-        const esperadoNoCriterio = diagnostic.findings.filter((f) => f.criterion === criterion);
-        const somaContagem = entry!.count.info + entry!.count.warning + entry!.count.error;
-        expect(somaContagem).toBe(esperadoNoCriterio.length);
+        expect(entry, `criterion missing from the scorecard: ${criterion}`).toBeDefined();
+        const expectedForCriterion = diagnostic.findings.filter((f) => f.criterion === criterion);
+        const countSum = entry!.count.info + entry!.count.warning + entry!.count.error;
+        expect(countSum).toBe(expectedForCriterion.length);
       }
 
       const json = JSON.stringify(diagnostic.score).toLowerCase();
@@ -95,19 +95,19 @@ describe("golden integrado — asserções semânticas por caso", () => {
   });
 });
 
-describe("golden integrado — resumo integrado (métricas globais e por critério)", () => {
+describe("integrated golden — integrated summary (global and per-criterion metrics)", () => {
   interface Acc {
     tp: number;
     fp: number;
     fn: number;
-    sugEmitidas: number;
-    sugCorretas: number;
-    sugInseguras: number;
+    suggestionsEmitted: number;
+    suggestionsCorrect: number;
+    suggestionsUnsafe: number;
   }
-  const zero = (): Acc => ({ tp: 0, fp: 0, fn: 0, sugEmitidas: 0, sugCorretas: 0, sugInseguras: 0 });
+  const zero = (): Acc => ({ tp: 0, fp: 0, fn: 0, suggestionsEmitted: 0, suggestionsCorrect: 0, suggestionsUnsafe: 0 });
 
   const global = zero();
-  const porCriterio: Record<IntegratedCriterion, Acc> = {
+  const byCriterion: Record<IntegratedCriterion, Acc> = {
     long_sentence: zero(),
     passive_voice: zero(),
     passiva_sintetica: zero(),
@@ -132,16 +132,16 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
     single_item_list: zero(),
     heading_body_mismatch: zero(),
   };
-  let findingsSobreNaoPrevistos = 0;
-  let totalEsperado = 0;
+  let findingsOnUnforeseenTerms = 0;
+  let totalExpected = 0;
 
-  for (const caso of GOLDEN_INTEGRADO) {
-    const diagnostic = analyze(caso.text);
-    totalEsperado += caso.expected.findings.length;
+  for (const testCase of GOLDEN_INTEGRADO) {
+    const diagnostic = analyze(testCase.text);
+    totalExpected += testCase.expected.findings.length;
 
-    for (const esperado of caso.expected.findings) {
-      const actual = findActual(diagnostic, esperado);
-      const bucket = porCriterio[esperado.criterion];
+    for (const expected of testCase.expected.findings) {
+      const actual = findActual(diagnostic, expected);
+      const bucket = byCriterion[expected.criterion];
       if (actual) {
         global.tp++;
         bucket.tp++;
@@ -150,70 +150,70 @@ describe("golden integrado — resumo integrado (métricas globais e por critér
         bucket.fn++;
       }
 
-      if (esperado.suggestion !== undefined) {
-        if (actual?.suggestion === esperado.suggestion) {
-          global.sugEmitidas++;
-          global.sugCorretas++;
-          bucket.sugEmitidas++;
-          bucket.sugCorretas++;
+      if (expected.suggestion !== undefined) {
+        if (actual?.suggestion === expected.suggestion) {
+          global.suggestionsEmitted++;
+          global.suggestionsCorrect++;
+          bucket.suggestionsEmitted++;
+          bucket.suggestionsCorrect++;
         }
       }
     }
 
     for (const actual of diagnostic.findings) {
       const criterion = actual.criterion as IntegratedCriterion;
-      const esperado = caso.expected.findings.find(
+      const expected = testCase.expected.findings.find(
         (e) => e.criterion === actual.criterion && e.start === actual.span.start && e.end === actual.span.end,
       );
-      if (!esperado) {
+      if (!expected) {
         global.fp++;
-        porCriterio[criterion].fp++;
-        findingsSobreNaoPrevistos++;
+        byCriterion[criterion].fp++;
+        findingsOnUnforeseenTerms++;
         if (actual.suggestion !== undefined) {
-          global.sugInseguras++;
-          porCriterio[criterion].sugInseguras++;
+          global.suggestionsUnsafe++;
+          byCriterion[criterion].suggestionsUnsafe++;
         }
         continue;
       }
 
-      if (actual.suggestion !== undefined && actual.suggestion !== esperado.suggestion) {
-        global.sugInseguras++;
-        porCriterio[criterion].sugInseguras++;
+      if (actual.suggestion !== undefined && actual.suggestion !== expected.suggestion) {
+        global.suggestionsUnsafe++;
+        byCriterion[criterion].suggestionsUnsafe++;
       }
     }
   }
 
-  const precisao = global.tp + global.fp === 0 ? 1 : global.tp / (global.tp + global.fp);
+  const precision = global.tp + global.fp === 0 ? 1 : global.tp / (global.tp + global.fp);
   const recall = global.tp + global.fn === 0 ? 1 : global.tp / (global.tp + global.fn);
 
-  it("relatório integrado", () => {
-    const linhas: string[] = [
-      `\n[eval integrada] documentos=${GOLDEN_INTEGRADO.length} · findings esperados=${totalEsperado} · ` +
-        `TP=${global.tp} FP=${global.fp} FN=${global.fn} · precisão=${(precisao * 100).toFixed(1)}% · recall=${(recall * 100).toFixed(1)}%`,
-      `[eval integrada] sugestões: emitidas=${global.sugEmitidas} corretas=${global.sugCorretas} inseguras=${global.sugInseguras} · ` +
-        `findings sobre termos não previstos (deve ser 0)=${findingsSobreNaoPrevistos}`,
+  it("integrated report", () => {
+    const lines: string[] = [
+      `\n[integrated eval] documents=${GOLDEN_INTEGRADO.length} · expected findings=${totalExpected} · ` +
+        `TP=${global.tp} FP=${global.fp} FN=${global.fn} · precision=${(precision * 100).toFixed(1)}% · recall=${(recall * 100).toFixed(1)}%`,
+      `[integrated eval] suggestions: emitted=${global.suggestionsEmitted} correct=${global.suggestionsCorrect} unsafe=${global.suggestionsUnsafe} · ` +
+        `findings on unforeseen terms (must be 0)=${findingsOnUnforeseenTerms}`,
     ];
     for (const criterion of CRITERIA) {
-      const b = porCriterio[criterion];
-      linhas.push(
-        `[eval integrada]   ${criterion}: TP=${b.tp} FP=${b.fp} FN=${b.fn} · sugestões corretas=${b.sugCorretas}/${b.sugEmitidas} · inseguras=${b.sugInseguras}`,
+      const b = byCriterion[criterion];
+      lines.push(
+        `[integrated eval]   ${criterion}: TP=${b.tp} FP=${b.fp} FN=${b.fn} · correct suggestions=${b.suggestionsCorrect}/${b.suggestionsEmitted} · unsafe=${b.suggestionsUnsafe}`,
       );
     }
-    console.log(linhas.join("\n"));
+    console.log(lines.join("\n"));
     expect(GOLDEN_INTEGRADO.length).toBeGreaterThan(0);
   });
 
-  it("zero sugestões inseguras (prioridade 1)", () => {
-    expect(global.sugInseguras).toBe(0);
+  it("zero unsafe suggestions (priority 1)", () => {
+    expect(global.suggestionsUnsafe).toBe(0);
   });
 
-  it("precisão 100% e zero findings sobre termos não previstos (prioridade 2)", () => {
+  it("100% precision and zero findings on unforeseen terms (priority 2)", () => {
     expect(global.fp).toBe(0);
-    expect(findingsSobreNaoPrevistos).toBe(0);
-    expect(precisao).toBe(1);
+    expect(findingsOnUnforeseenTerms).toBe(0);
+    expect(precision).toBe(1);
   });
 
-  it("recall total sobre o golden de referência", () => {
+  it("full recall over the reference golden set", () => {
     expect(global.fn).toBe(0);
     expect(recall).toBe(1);
   });

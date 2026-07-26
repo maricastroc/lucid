@@ -14,16 +14,16 @@ function result(over: Partial<ProbeResult>): ProbeResult {
   };
 }
 
-describe("interpret — regra de piso (I5: nunca aprovação)", () => {
+describe("interpret — floor rule (I5: never an approval)", () => {
   it("podeResponder=false → flag", () => {
     expect(interpret(result({ podeResponder: false })).tipo).toBe("flag");
   });
 
-  it("precisouInferir=true → flag (mesmo podendo responder)", () => {
+  it("precisouInferir=true → flag (even when it can answer)", () => {
     expect(interpret(result({ precisouInferir: true })).tipo).toBe("flag");
   });
 
-  it("consegue responder sem inferir → neutro (o MELHOR caso possível, não aprovação)", () => {
+  it("answering without inferring → neutral (the BEST possible case, not an approval)", () => {
     const signal = interpret(result({}));
     expect(signal.tipo).toBe("neutro");
     if (signal.tipo === "neutro") {
@@ -31,26 +31,26 @@ describe("interpret — regra de piso (I5: nunca aprovação)", () => {
     }
   });
 
-  it("nenhum ProbeResult produz uma variante 'aprovado' — só 'flag' ou 'neutro'", () => {
+  it("no ProbeResult produces an 'approved' variant — only 'flag' or 'neutro'", () => {
     for (const r of [result({}), result({ podeResponder: false }), result({ precisouInferir: true })]) {
       expect(["flag", "neutro"]).toContain(interpret(r).tipo);
     }
   });
 
-  it("propaga as operações de leitura como proxy de carga estrutural", () => {
+  it("propagates the reading operations as a proxy for structural load", () => {
     const signal = interpret(result({ operacoesDeLeitura: ["segurar_sujeito_longo", "integrar_entre_frases"] }));
     expect(signal.operacoes).toEqual(["segurar_sujeito_longo", "integrar_entre_frases"]);
   });
 });
 
-describe("StubComprehensionProbe — determinístico", () => {
-  it("devolve o fixture do trecho; default pessimista fora dele", async () => {
+describe("StubComprehensionProbe — deterministic", () => {
+  it("returns the excerpt's fixture; pessimistic default outside it", async () => {
     const probe = new StubComprehensionProbe({ "trecho A": result({ podeResponder: true }) });
     expect((await probe.probe({ trecho: "trecho A", pergunta: "?" })).podeResponder).toBe(true);
     expect((await probe.probe({ trecho: "desconhecido", pergunta: "?" })).podeResponder).toBe(false);
   });
 
-  it("mesma entrada → mesma saída", async () => {
+  it("same input → same output", async () => {
     const probe = new StubComprehensionProbe({});
     const a = await probe.probe({ trecho: "x", pergunta: "?" });
     const b = await probe.probe({ trecho: "x", pergunta: "?" });

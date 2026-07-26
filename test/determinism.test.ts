@@ -9,18 +9,18 @@ import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 import type { Config } from "../src/lucid/core/config";
 import type { Pass } from "../src/lucid/core/types";
 
-const TEXTO_RICO =
+const RICH_TEXT =
   "O pedido foi analisado pela comissão, que decidiu fazer a verificação dos documentos " +
   "supracitados antes de conceder, em sede de procedimento administrativo, o benefício " +
   "pleiteado. Doravante, outrossim, o relatório supramencionado foi juntado aos autos.";
 
-const TEXTOS: readonly string[] = [
+const TEXTS: readonly string[] = [
   "",
   "     ",
   "O gato dorme.",
   "O recurso foi negado em sede de apelação.",
   "É preciso fazer a análise de documentos.",
-  TEXTO_RICO,
+  RICH_TEXT,
 ];
 
 function permutations<T>(items: readonly T[]): T[][] {
@@ -33,21 +33,21 @@ function permutations<T>(items: readonly T[]): T[][] {
   return result;
 }
 
-function projecaoCanonica(text: string, passes: readonly Pass[]) {
+function canonicalProjection(text: string, passes: readonly Pass[]) {
   const d = analyzeWithPasses(text, passes);
-  const byCriterionOrdenado = [...d.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1));
+  const sortedByCriterion = [...d.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1));
   return JSON.stringify({
     text: d.text,
     findings: d.findings,
     metrics: d.metrics,
     meta: d.meta,
     totalFindings: d.score.totalFindings,
-    byCriterion: byCriterionOrdenado,
+    byCriterion: sortedByCriterion,
   });
 }
 
-describe("determinismo — repetição byte-idêntica", () => {
-  it.each(TEXTOS)("mesma entrada produz JSON idêntico: %s", (text) => {
+describe("determinism — byte-identical repetition", () => {
+  it.each(TEXTS)("the same input produces identical JSON: %s", (text) => {
     const r1 = JSON.stringify(analyze(text));
     const r2 = JSON.stringify(analyze(text));
     const r3 = JSON.stringify(analyze(text));
@@ -55,30 +55,30 @@ describe("determinismo — repetição byte-idêntica", () => {
     expect(r3).toBe(r1);
   });
 
-  it("resultado é profundamente igual (não só serialização)", () => {
-    expect(analyze(TEXTO_RICO)).toEqual(analyze(TEXTO_RICO));
+  it("the result is deeply equal (not just its serialization)", () => {
+    expect(analyze(RICH_TEXT)).toEqual(analyze(RICH_TEXT));
   });
 });
 
-describe("determinismo — independência da ordem de execução dos passes (24 permutações)", () => {
-  const TODOS: readonly Pass[] = [sentenceLengthPass, passiveVoicePass, nominalizationPass, jargonPass];
-  const perms = permutations(TODOS);
+describe("determinism — independence from pass execution order (24 permutations)", () => {
+  const ALL: readonly Pass[] = [sentenceLengthPass, passiveVoicePass, nominalizationPass, jargonPass];
+  const perms = permutations(ALL);
 
-  it("são exatamente 24 permutações dos 4 passes", () => {
+  it("there are exactly 24 permutations of the 4 passes", () => {
     expect(perms).toHaveLength(24);
   });
 
-  it.each(TEXTOS)("a projeção canônica é idêntica em todas as 24 permutações: %s", (text) => {
-    const referencia = projecaoCanonica(text, TODOS);
+  it.each(TEXTS)("the canonical projection is identical across all 24 permutations: %s", (text) => {
+    const reference = canonicalProjection(text, ALL);
     for (const perm of perms) {
-      expect(projecaoCanonica(text, perm)).toBe(referencia);
+      expect(canonicalProjection(text, perm)).toBe(reference);
     }
   });
 
-  it("findings e métricas independem da ordem; só a ORDEM de byCriterion acompanha o registry", () => {
-    const invertido = [...TODOS].reverse();
-    const d1 = analyzeWithPasses(TEXTO_RICO, TODOS);
-    const d2 = analyzeWithPasses(TEXTO_RICO, invertido);
+  it("findings and metrics are order-independent; only the ORDER of byCriterion follows the registry", () => {
+    const reversed = [...ALL].reverse();
+    const d1 = analyzeWithPasses(RICH_TEXT, ALL);
+    const d2 = analyzeWithPasses(RICH_TEXT, reversed);
 
     expect(d2.findings).toEqual(d1.findings);
     expect(d2.metrics).toEqual(d1.metrics);
@@ -90,97 +90,97 @@ describe("determinismo — independência da ordem de execução dos passes (24 
   });
 });
 
-describe("determinismo — independência da ordem das entradas de dataset (longest-match-first do jargão)", () => {
-  const sintetico = [
+describe("determinism — independence from dataset entry order (jargon longest-match-first)", () => {
+  const synthetic = [
     { term: "em", kind: "word", domain: "legal", plain: "no", safeForSuggestion: true, reason: null },
     { term: "em sede de", kind: "phrase", domain: "legal", plain: "no âmbito de", safeForSuggestion: true, reason: null },
     { term: "em face de", kind: "phrase", domain: "legal", plain: "diante de", safeForSuggestion: true, reason: null },
   ] as const;
 
-  function ordemPorPrimeiraPalavra(entries: readonly (typeof sintetico)[number][]) {
+  function orderByFirstWord(entries: readonly (typeof synthetic)[number][]) {
     const compiled = compileJargonEntries(entries as never);
-    const lista = compiled.get("em")!;
-    return lista.map((c) => c.words.length);
+    const list = compiled.get("em")!;
+    return list.map((c) => c.words.length);
   }
 
-  it("mesma primeira palavra → sempre da mais longa para a mais curta, qualquer que seja a ordem de entrada", () => {
-    const direto = ordemPorPrimeiraPalavra(sintetico);
-    const invertido = ordemPorPrimeiraPalavra([...sintetico].reverse());
-    expect(direto).toEqual([3, 3, 1]);
-    expect(invertido).toEqual(direto);
+  it("same first word → always longest to shortest, whatever the input order", () => {
+    const direct = orderByFirstWord(synthetic);
+    const reversed = orderByFirstWord([...synthetic].reverse());
+    expect(direct).toEqual([3, 3, 1]);
+    expect(reversed).toEqual(direct);
   });
 
-  it("o conjunto de termos por primeira palavra independe da ordem de entrada", () => {
-    const termos = (entries: readonly (typeof sintetico)[number][]) =>
+  it("the set of terms per first word is independent of the input order", () => {
+    const terms = (entries: readonly (typeof synthetic)[number][]) =>
       new Set(compileJargonEntries(entries as never).get("em")!.map((c) => c.words.join(" ")));
-    expect(termos([...sintetico].reverse())).toEqual(termos(sintetico));
+    expect(terms([...synthetic].reverse())).toEqual(terms(synthetic));
   });
 
-  it("o dataset real produz o mesmo BY_FIRST_WORD com as entradas invertidas", () => {
+  it("the real dataset produces the same BY_FIRST_WORD with the entries reversed", () => {
     const entries = jargaoData.entries as never[];
-    const chavesDireto = [...compileJargonEntries(entries).keys()].sort();
-    const chavesInvertido = [...compileJargonEntries([...entries].reverse()).keys()].sort();
-    expect(chavesInvertido).toEqual(chavesDireto);
+    const directKeys = [...compileJargonEntries(entries).keys()].sort();
+    const reversedKeys = [...compileJargonEntries([...entries].reverse()).keys()].sort();
+    expect(reversedKeys).toEqual(directKeys);
   });
 });
 
-describe("determinismo — ausência de estado compartilhado (A, B, A)", () => {
-  it("analyze(A); analyze(B); analyze(A) — o 1º e o 3º A são idênticos", () => {
-    const A = TEXTO_RICO;
+describe("determinism — no shared state (A, B, A)", () => {
+  it("analyze(A); analyze(B); analyze(A) — the 1st and the 3rd A are identical", () => {
+    const A = RICH_TEXT;
     const B = "É preciso realizar o pagamento da taxa. O prazo foi prorrogado pelo diretor.";
-    const primeiroA = JSON.stringify(analyze(A));
+    const firstA = JSON.stringify(analyze(A));
     JSON.stringify(analyze(B));
-    const terceiroA = JSON.stringify(analyze(A));
-    expect(terceiroA).toBe(primeiroA);
+    const thirdA = JSON.stringify(analyze(A));
+    expect(thirdA).toBe(firstA);
   });
 
-  it("chamadas repetidas não acumulam findings", () => {
-    const antes = analyze(TEXTO_RICO).findings.length;
-    for (let i = 0; i < 5; i++) analyze(TEXTO_RICO);
-    expect(analyze(TEXTO_RICO).findings.length).toBe(antes);
+  it("repeated calls do not accumulate findings", () => {
+    const before = analyze(RICH_TEXT).findings.length;
+    for (let i = 0; i < 5; i++) analyze(RICH_TEXT);
+    expect(analyze(RICH_TEXT).findings.length).toBe(before);
   });
 
-  it("analyze não muta o objeto de Config recebido", () => {
+  it("analyze does not mutate the Config object it receives", () => {
     const config: Config = { ...DEFAULT_CONFIG, nominalization: { ...DEFAULT_CONFIG.nominalization } };
-    const copia = structuredClone(config);
-    analyze(TEXTO_RICO, config);
-    expect(config).toEqual(copia);
+    const copy = structuredClone(config);
+    analyze(RICH_TEXT, config);
+    expect(config).toEqual(copy);
   });
 
-  it("um mesmo objeto de Config reutilizado em várias chamadas produz resultados estáveis", () => {
+  it("the same Config object reused across several calls produces stable results", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 8, errorAbove: 20 } };
-    const r1 = JSON.stringify(analyze(TEXTO_RICO, config));
+    const r1 = JSON.stringify(analyze(RICH_TEXT, config));
     JSON.stringify(analyze("outro texto qualquer aqui", config));
-    const r2 = JSON.stringify(analyze(TEXTO_RICO, config));
+    const r2 = JSON.stringify(analyze(RICH_TEXT, config));
     expect(r2).toBe(r1);
   });
 });
 
-describe("determinismo — variações de Config", () => {
-  const variantes: Array<{ nome: string; config: Partial<Config> }> = [
-    { nome: "padrão", config: {} },
-    { nome: "long_sentence desligado (limiar altíssimo)", config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } } },
-    { nome: "passiva desligada", config: { passiveVoice: { enabled: false } } },
-    { nome: "nominalização desligada", config: { nominalization: { enabled: false } } },
-    { nome: "jargão desligado", config: { jargon: { enabled: false, suggestFromGlossary: true } } },
-    { nome: "jargão sem equivalente informativo", config: { jargon: { enabled: true, suggestFromGlossary: false } } },
-    { nome: "override parcial de limiar", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
+describe("determinism — Config variations", () => {
+  const variants: Array<{ name: string; config: Partial<Config> }> = [
+    { name: "default", config: {} },
+    { name: "long_sentence off (very high threshold)", config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } } },
+    { name: "passive off", config: { passiveVoice: { enabled: false } } },
+    { name: "nominalization off", config: { nominalization: { enabled: false } } },
+    { name: "jargon off", config: { jargon: { enabled: false, suggestFromGlossary: true } } },
+    { name: "jargon with no informative equivalent", config: { jargon: { enabled: true, suggestFromGlossary: false } } },
+    { name: "partial threshold override", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
   ];
 
-  it.each(variantes)("$nome — determinístico e byte-idêntico entre execuções", ({ config }) => {
-    const r1 = JSON.stringify(analyze(TEXTO_RICO, config));
-    const r2 = JSON.stringify(analyze(TEXTO_RICO, config));
+  it.each(variants)("$name — deterministic and byte-identical across runs", ({ config }) => {
+    const r1 = JSON.stringify(analyze(RICH_TEXT, config));
+    const r2 = JSON.stringify(analyze(RICH_TEXT, config));
     expect(r2).toBe(r1);
   });
 
-  it("cada pass desabilitado zera exatamente o seu critério, sem afetar os outros", () => {
-    const base = analyze(TEXTO_RICO);
-    const semJargao = analyze(TEXTO_RICO, { jargon: { enabled: false, suggestFromGlossary: true } });
+  it("each disabled pass zeroes exactly its own criterion, without affecting the others", () => {
+    const base = analyze(RICH_TEXT);
+    const withoutJargon = analyze(RICH_TEXT, { jargon: { enabled: false, suggestFromGlossary: true } });
 
-    expect(semJargao.findings.some((f) => f.criterion === "jargon")).toBe(false);
-    
+    expect(withoutJargon.findings.some((f) => f.criterion === "jargon")).toBe(false);
+
     for (const criterion of ["long_sentence", "passive_voice", "nominalization"] as const) {
-      expect(semJargao.findings.filter((f) => f.criterion === criterion)).toEqual(
+      expect(withoutJargon.findings.filter((f) => f.criterion === criterion)).toEqual(
         base.findings.filter((f) => f.criterion === criterion),
       );
     }

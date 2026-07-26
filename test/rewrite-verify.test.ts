@@ -14,7 +14,7 @@ import type { ComprehensionProbe, ProbeInput, ProbeResult } from "../src/lucid/p
 
 function spanFinding(text: string, sub: string, criterion = "long_sentence"): Finding {
   const start = text.indexOf(sub);
-  if (start < 0) throw new Error(`trecho não encontrado: ${sub}`);
+  if (start < 0) throw new Error(`no such excerpt: ${sub}`);
   return {
     criterion,
     category: "syntactic",
@@ -46,8 +46,8 @@ function propose(text: string, finding: Finding, proposer: StubRewriteProposer) 
   return proposeAndVerify(text, finding.span, proposer, { criterion: finding.criterion });
 }
 
-describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
-  it("dividir uma frase longa resolve o alvo e não aumenta o total de findings", async () => {
+describe("verifyRewrite — PROOF: the target violation is resolved", () => {
+  it("splitting a long sentence resolves the target and does not increase the total number of findings", async () => {
     const text =
       "O documento apresentado foi analisado com muito cuidado pela comissão competente responsável, " +
       "e o resultado final desse exame minucioso foi comunicado ao interessado dentro do prazo regular.";
@@ -65,7 +65,7 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
     expect(v.metrics.wordsAfter).toBeLessThan(v.metrics.wordsBefore);
   });
 
-  it("peso por severidade: trocar 1 erro por 2 avisos PASSA region_improved (contagem subiria)", async () => {
+  it("severity weighting: trading 1 error for 2 warnings PASSES region_improved (a raw count would go up)", async () => {
     const text =
       "A equipe da secretaria revisou com muita atenção todos os documentos que chegaram durante a semana " +
       "passada, para garantir que o relatório final destinado ao diretor ficasse realmente completo, bem claro e correto.";
@@ -83,7 +83,7 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
     expect(v.proofs.find((p) => p.check === "region_improved")!.detail).toMatch(/peso/);
   });
 
-  it("proposta que NÃO resolve o alvo falha em target_resolved (veto mecânico)", async () => {
+  it("a proposal that does NOT resolve the target fails target_resolved (mechanical veto)", async () => {
     const text =
       "O documento apresentado foi analisado com muito cuidado pela comissão competente responsável, " +
       "e o resultado final desse exame minucioso foi comunicado ao interessado dentro do prazo regular.";
@@ -98,19 +98,19 @@ describe("verifyRewrite — PROVA: violação-alvo resolvida", () => {
   });
 });
 
-describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) resolvido", () => {
+describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is resolved", () => {
   const PARAGRAPH =
     "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
     "administrativo destinado à verificação das condições supracitadas exigidas para a concessão do " +
     "benefício, e a decisão foi comunicada ao interessado no processo.";
 
-  it("verificação empírica: nenhuma passiva do parágrafo é mecanicamente pedível (ambas requiresHuman)", () => {
+  it("empirical check: no passive in the paragraph is mechanically askable (both requiresHuman)", () => {
     const passives = analyze(PARAGRAPH).findings.filter((f) => f.criterion === "passive_voice");
     expect(passives.length).toBeGreaterThan(0);
     expect(passives.every((f) => f.requiresHuman)).toBe(true);
   });
 
-  it("Groq 70B (ao vivo): resolveu jargão/frase longa; a voz passiva nunca era pedível aqui — PASSA (correção do achado original)", async () => {
+  it("Groq 70B (live): resolved jargon/long sentence; the passive was never askable here — PASSES (correcting the original finding)", async () => {
     const findings = analyze(PARAGRAPH).findings;
     const proposed =
       "Foi feita uma análise do documento. Isso foi feito para verificar as condições necessárias " +
@@ -123,7 +123,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
 
-  it("Gemini Flash (ao vivo): mesma conclusão — PASSA", async () => {
+  it("Gemini Flash (live): same conclusion — PASSES", async () => {
     const findings = analyze(PARAGRAPH).findings;
     const proposed =
       "A comissão analisou o documento. Ela verificou as condições necessárias para dar o benefício. " +
@@ -136,7 +136,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
 
-  it("uma reescrita que resolve TODOS os critérios PEDÍVEIS do briefing passa", async () => {
+  it("a rewrite that resolves ALL the ASKABLE criteria in the briefing passes", async () => {
     const findings = analyze(PARAGRAPH).findings;
     const proposed =
       "A comissão competente analisou o documento no procedimento administrativo. Ela verificou as " +
@@ -151,7 +151,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
 
   const RESOLVABLE_PASSIVE = "O documento foi analisado pela comissão.";
 
-  it("achado com AGENTE (mecanicamente resolvível) que a IA IGNORA — REPROVA, mesmo com jargão corrigido", async () => {
+  it("a finding WITH AN AGENT (mechanically solvable) that the AI IGNORES — FAILS, even with the jargon fixed", async () => {
     const text = `${RESOLVABLE_PASSIVE} O pagamento ocorre em sede de acordo prévio.`;
     const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice" || f.criterion === "jargon");
     expect(findings.some((f) => f.criterion === "passive_voice" && !f.requiresHuman)).toBe(true);
@@ -167,7 +167,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(detail).toContain("passive_voice");
   });
 
-  it("mistura: passiva COM agente é corrigida, passiva SEM agente (requiresHuman) é tolerada — PASSA", async () => {
+  it("mixed: the passive WITH an agent is fixed, the one WITHOUT (requiresHuman) is tolerated — PASSES", async () => {
     const text = `${RESOLVABLE_PASSIVE} A decisão foi comunicada ao interessado.`;
     const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
     const resolvableCount = findings.filter((f) => !f.requiresHuman).length;
@@ -182,7 +182,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
 
-  it("mistura: passiva SEM agente (tolerada) é 'corrigida', mas a COM agente (pedível) fica intacta — REPROVA (não paga por contagem)", async () => {
+  it("mixed: the tolerated agentless passive is 'fixed' while the askable one stays intact — FAILS (no paying by count)", async () => {
     const text = `${RESOLVABLE_PASSIVE} A decisão foi comunicada ao interessado.`;
     const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
     const resolvableCount = findings.filter((f) => !f.requiresHuman).length;
@@ -201,7 +201,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(detail).toContain("passive_voice");
   });
 
-  it("apaga o agente da passiva pedível em vez de corrigir — REPROVA (degradação para requiresHuman, não resolução)", async () => {
+  it("deleting the agent of the askable passive instead of fixing it — FAILS (degradation into requiresHuman, not a resolution)", async () => {
     const text = RESOLVABLE_PASSIVE;
     const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
     expect(findings.some((f) => !f.requiresHuman)).toBe(true);
@@ -217,7 +217,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(detail).toContain("degradou");
   });
 
-  it("com declaração explícita de 'sem agente conhecido', a mesma degradação NÃO reprova (decisão do autor, não deleção silenciosa)", async () => {
+  it("with an explicit 'no known agent' declaration, the same degradation does NOT fail (the author's decision, not a silent deletion)", async () => {
     const text = RESOLVABLE_PASSIVE;
     const findings = analyze(text).findings.filter((f) => f.criterion === "passive_voice");
     const passive = findings.find((f) => !f.requiresHuman)!;
@@ -232,13 +232,13 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
 
-  it("sem findings dirigidos, a prova é OMITIDA (não inventa uma checagem que ninguém pediu)", async () => {
+  it("with no directed findings the proof is OMITTED (it does not invent a check nobody asked for)", async () => {
     const finding = spanFinding("Um texto qualquer aqui.", "Um texto qualquer aqui.", "long_sentence");
     const v = await verify("Um texto qualquer aqui.", finding, proposal(finding, "Outro texto."));
     expect(v.proofs.find((p) => p.check === "directed_findings_resolved")).toBeUndefined();
   });
 
-  it("com agente declarado, a prova declared_agent_present coexiste com a dirigida", async () => {
+  it("with a declared agent, the declared_agent_present proof coexists with the directed one", async () => {
     const text = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
     const passive = analyze(text).findings.find((f) => f.criterion === "passive_voice")!;
     expect(passive.requiresHuman).toBe(true);
@@ -253,7 +253,7 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
   });
 
-  it("achados 100% requiresHuman (nada pedível) — a prova é OMITIDA, não vira um 'passou' vazio", async () => {
+  it("findings that are 100% requiresHuman (nothing askable) — the proof is OMITTED, it does not become an empty 'passed'", async () => {
     const passives = analyze(PARAGRAPH).findings.filter((f) => f.criterion === "passive_voice");
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
     const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "x", original: PARAGRAPH, proposed: PARAGRAPH }, {
@@ -263,12 +263,12 @@ describe("verifyRewrite — PROVA: briefing dirigido (múltiplos critérios) res
   });
 });
 
-describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, ADR-055)", () => {
+describe("verifyRewrite — PROOF: agent declared by the author (elicitation, ADR-055)", () => {
   const TEXT = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function passiveOf(text: string): Finding {
     const f = analyze(text).findings.find((x) => x.criterion === "passive_voice");
-    if (!f) throw new Error("sem passiva no texto de teste");
+    if (!f) throw new Error("no passive in the test text");
     return f;
   }
 
@@ -276,7 +276,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     return { start: 0, end: text.length, text };
   }
 
-  it("a reescrita nomeia o agente declarado (caixa diferente) → PASSA", async () => {
+  it("the rewrite names the declared agent (different case) → PASSES", async () => {
     const passive = passiveOf(TEXT);
     const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
     const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
@@ -287,7 +287,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
   });
 
-  it("a reescrita ativa com OUTRO agente → REPROVA (o requisito é o agente do autor, não um qualquer)", async () => {
+  it("an active rewrite with ANOTHER agent → FAILS (the requirement is the author's agent, not just any)", async () => {
     const passive = passiveOf(TEXT);
     const proposed = "O setor comunicou a decisão ao interessado no processo administrativo em curso.";
     const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
@@ -299,7 +299,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(v.hasBlockingFailure).toBe(true);
   });
 
-  it("a reescrita mantém a passiva sem nomear o agente declarado → REPROVA", async () => {
+  it("the rewrite keeps the passive without naming the declared agent → FAILS", async () => {
     const passive = passiveOf(TEXT);
     const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
       declarations: [{ span: passive.span, agent: "a comissão" }],
@@ -308,7 +308,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(proofPassed(v, "declared_agent_present")).toBe(false);
   });
 
-  it("decisão de manter impessoal (agent: null) → prova OMITIDA (a recusa é legítima, não exige ativação)", async () => {
+  it("the decision to stay impersonal (agent: null) → proof OMITTED (the refusal is legitimate, it demands no active voice)", async () => {
     const passive = passiveOf(TEXT);
     const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
       declarations: [{ span: passive.span, agent: null }],
@@ -317,12 +317,12 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
   });
 
-  it("sem declarações → prova OMITIDA (não inventa checagem que ninguém pediu)", async () => {
+  it("with no declarations → proof OMITTED (it does not invent a check nobody asked for)", async () => {
     const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {});
     expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
   });
 
-  it("declaração FORA do alvo → prova OMITIDA (não exige nada sobre trecho que não está sendo reescrito)", async () => {
+  it("a declaration OUTSIDE the target → proof OMITTED (it demands nothing about an excerpt that is not being rewritten)", async () => {
     const text = "O relatório segue em análise. A decisão foi comunicada ao interessado no processo.";
     const passive = passiveOf(text);
     const firstSentence = { start: 0, end: 29, text: text.slice(0, 29) };
@@ -338,7 +338,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
   });
 
-  it("isenção de 1ª pessoa: agente declarado «nós» não é fabricação (o autor forneceu o fato)", async () => {
+  it("1st-person exemption: the declared agent «nós» is not a fabrication (the author supplied the fact)", async () => {
     const text = "Foi verificada a documentação enviada pelo requerente ao protocolo geral.";
     const passive = passiveOf(text);
     const proposed = "Nós verificamos a documentação enviada pelo requerente ao protocolo geral.";
@@ -350,7 +350,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(proofPassed(v, "no_invented_first_person")).toBe(true);
   });
 
-  it("SEM a declaração, a mesma proposta em 1ª pessoa segue vetada (a isenção é da declaração, não geral)", async () => {
+  it("WITHOUT the declaration, the same 1st-person proposal stays vetoed (the exemption belongs to the declaration, it is not general)", async () => {
     const text = "Foi verificada a documentação enviada pelo requerente ao protocolo geral.";
     const proposed = "Nós verificamos a documentação enviada pelo requerente ao protocolo geral.";
     const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {});
@@ -358,7 +358,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(proofPassed(v, "no_invented_first_person")).toBe(false);
   });
 
-  it("isenção de 3ª pessoa: agente declarado «a comissão» não levanta possible_invented_agent", async () => {
+  it("3rd-person exemption: the declared agent «a comissão» does not raise possible_invented_agent", async () => {
     const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
     const passive = passiveOf(text);
     const proposed = "A comissão decidiu prorrogar o prazo até o fim do mês corrente.";
@@ -370,7 +370,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("a isenção é cirúrgica: agente NÃO declarado continua flagrado mesmo com outra declaração ativa", async () => {
+  it("the exemption is surgical: an UNdeclared agent is still flagged even with another declaration active", async () => {
     const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
     const passive = passiveOf(text);
     const proposed = "A equipe decidiu prorrogar o prazo até o fim do mês corrente.";
@@ -382,7 +382,7 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
     expect(signalFlagged(v, "possible_invented_agent")).toBe(true);
   });
 
-  it("determinístico: mesma declaração → mesmo JSON", async () => {
+  it("deterministic: same declaration → same JSON", async () => {
     const passive = passiveOf(TEXT);
     const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
     const opts: VerifyOptions = { declarations: [{ span: passive.span, agent: "a comissão" }] };
@@ -392,8 +392,8 @@ describe("verifyRewrite — PROVA: agente declarado pelo autor (elicitação, AD
   });
 });
 
-describe("verifyRewrite — PROVA: preservação mecânica", () => {
-  it("números perdidos reprovam numbers_preserved", async () => {
+describe("verifyRewrite — PROOF: mechanical preservation", () => {
+  it("lost numbers fail numbers_preserved", async () => {
     const text = "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias após o deferimento do pedido formal.";
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "O pagamento de R$ 1.500,00 deve ocorrer em alguns dias");
@@ -403,7 +403,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     expect(v.hasBlockingFailure).toBe(true);
   });
 
-  it("números mantidos passam numbers_preserved", async () => {
+  it("preserved numbers pass numbers_preserved", async () => {
     const text = "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias após o deferimento do pedido formal.";
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "Pague R$ 1.500,00 em 30 dias");
@@ -412,7 +412,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     expect(proofPassed(v, "numbers_preserved")).toBe(true);
   });
 
-  it("datas alteradas reprovam dates_preserved", async () => {
+  it("altered dates fail dates_preserved", async () => {
     const text = "A audiência foi marcada para 17/11/2025 no fórum central da comarca da capital do estado.";
     const finding = spanFinding(text, "A audiência foi marcada para 17/11/2025 no fórum central");
     const p = proposal(finding, "A audiência foi marcada para 18/11/2025 no fórum central");
@@ -421,7 +421,7 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
     expect(proofPassed(v, "dates_preserved")).toBe(false);
   });
 
-  it("jargão novo introduzido reprova no_new_jargon", async () => {
+  it("newly introduced jargon fails no_new_jargon", async () => {
     const text = "As regras foram aplicadas ao caso concreto sem qualquer margem para dúvida entre as partes.";
     const finding = spanFinding(text, "As regras foram aplicadas ao caso concreto");
     const p = proposal(finding, "As regras supracitadas foram aplicadas ao caso concreto");
@@ -432,8 +432,8 @@ describe("verifyRewrite — PROVA: preservação mecânica", () => {
   });
 });
 
-describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
-  it("texto impessoal reescrito com 'nós' inventado reprova (veto mecânico)", async () => {
+describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
+  it("impersonal text rewritten with an invented 'nós' fails (mechanical veto)", async () => {
     const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
     const p = proposal(finding, "Nós analisamos o documento com a nossa comissão competente");
@@ -443,7 +443,7 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
     expect(v.hasBlockingFailure).toBe(true);
   });
 
-  it("proposta sem 1ª pessoa passa", async () => {
+  it("a proposal with no 1st person passes", async () => {
     const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
     const p = proposal(finding, "A comissão competente analisou o documento");
@@ -451,7 +451,7 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
     expect(proofPassed(v, "no_invented_first_person")).toBe(true);
   });
 
-  it("1ª pessoa que JÁ existe no documento não é considerada fabricada", async () => {
+  it("a 1st person that ALREADY exists in the document is not considered fabricated", async () => {
     const text = "Nós recebemos o seu pedido. Foi realizada a análise do documento pela comissão antes da decisão.";
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão");
     const p = proposal(finding, "Nós analisamos o documento na comissão");
@@ -459,7 +459,7 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
     expect(proofPassed(v, "no_invented_first_person")).toBe(true);
   });
 
-  it("veta 'nós' pro-drop escondido no verbo (sem escrever o pronome)", async () => {
+  it("vetoes a pro-drop 'nós' hidden in the verb (without writing the pronoun)", async () => {
     const text = "Foi verificado se a documentação está em ordem. Os documentos serão examinados na decisão final.";
     const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
     const p = proposal(finding, "Verificamos a documentação. Vamos analisar mais e decidir depois.");
@@ -469,7 +469,7 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
     expect(v.hasBlockingFailure).toBe(true);
   });
 
-  it("reformulação impessoal (sem inventar agente) continua passando", async () => {
+  it("an impersonal reformulation (inventing no agent) still passes", async () => {
     const text = "Foi verificado se a documentação está em ordem. Os documentos serão examinados na decisão final.";
     const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
     const p = proposal(finding, "A documentação está em ordem");
@@ -478,8 +478,8 @@ describe("verifyRewrite — PROVA: 1ª pessoa fabricada (ADR-019)", () => {
   });
 });
 
-describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
-  it("nome próprio ausente na proposta levanta bandeira", async () => {
+describe("verifyRewrite — SIGNAL: entities (heuristic, not a proof)", () => {
+  it("a proper noun missing from the proposal raises a flag", async () => {
     const text = "O parecer foi assinado pela Comissão de Ética do órgão responsável pela decisão final.";
     const finding = spanFinding(text, "O parecer foi assinado pela Comissão de Ética");
     const p = proposal(finding, "O parecer foi assinado pela comissão");
@@ -489,7 +489,7 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
     expect(v.proofs.map((pr) => pr.check as string)).not.toContain("entities_preserved");
   });
 
-  it("nomes preservados não levantam bandeira", async () => {
+  it("preserved names raise no flag", async () => {
     const text = "O parecer foi assinado pela Comissão de Ética do órgão responsável pela decisão final.";
     const finding = spanFinding(text, "O parecer foi assinado pela Comissão de Ética");
     const p = proposal(finding, "A Comissão de Ética assinou o parecer");
@@ -498,7 +498,7 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
     expect(signalFlagged(v, "entities_preserved")).toBe(false);
   });
 
-  it("nome próprio com inicial acentuada ausente na proposta levanta bandeira (M7 — \\b é ASCII-only)", async () => {
+  it("a proper noun with an accented initial missing from the proposal raises a flag (M7 — \\b is ASCII-only)", async () => {
     const text = "O acordo envolveu autoridades da Índia e do Brasil antes da assinatura final do tratado.";
     const finding = spanFinding(text, "O acordo envolveu autoridades da Índia e do Brasil");
     const p = proposal(finding, "O acordo envolveu autoridades do Brasil");
@@ -510,8 +510,8 @@ describe("verifyRewrite — SINAL: entidades (heurística, não prova)", () => {
   });
 });
 
-describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado (LUCID-011)", () => {
-  it("agente institucional novo, ausente no original, levanta bandeira", async () => {
+describe("verifyRewrite — SIGNAL: possibly fabricated 3rd-person agent (LUCID-011)", () => {
+  it("a new institutional agent, absent from the original, raises a flag", async () => {
     const text = "Foi decidido que o prazo seria prorrogado depois de muita discussão entre os envolvidos.";
     const finding = spanFinding(text, "Foi decidido que o prazo seria prorrogado");
     const p = proposal(finding, "A comissão decidiu prorrogar o prazo");
@@ -524,7 +524,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(v.hasBlockingFailure).toBe(false);
   });
 
-  it("agente humano (cargo) novo, ausente no original, levanta bandeira", async () => {
+  it("a new human agent (a role), absent from the original, raises a flag", async () => {
     const text = "Foi realizada a análise do pedido antes de qualquer outra providência no processo.";
     const finding = spanFinding(text, "Foi realizada a análise do pedido");
     const p = proposal(finding, "O diretor realizou a análise do pedido");
@@ -535,7 +535,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(detail).toContain("diretor");
   });
 
-  it("agente já presente no original (como sujeito) não levanta bandeira", async () => {
+  it("an agent already present in the original (as the subject) raises no flag", async () => {
     const text = "A comissão recebeu o processo, que foi analisado no mesmo dia pelos membros presentes.";
     const finding = spanFinding(text, "que foi analisado no mesmo dia pelos membros presentes");
     const p = proposal(finding, "que a comissão analisou no mesmo dia");
@@ -544,7 +544,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("entidade presente no original em papel não-sujeito, promovida a sujeito na proposta, não levanta bandeira", async () => {
+  it("an entity present in the original in a non-subject role, promoted to subject in the proposal, raises no flag", async () => {
     const text = "O processo foi encaminhado para a comissão competente analisar antes da decisão final.";
     const finding = spanFinding(text, "O processo foi encaminhado para a comissão competente analisar");
     const p = proposal(finding, "A comissão competente analisou o processo");
@@ -553,7 +553,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("frase sem agente novo (reformulação impessoal) não levanta bandeira", async () => {
+  it("a sentence with no new agent (impersonal reformulation) raises no flag", async () => {
     const text = "Foi verificado se a documentação está em ordem antes do encaminhamento do processo.";
     const finding = spanFinding(text, "Foi verificado se a documentação está em ordem");
     const p = proposal(finding, "A documentação está em ordem");
@@ -562,7 +562,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("agente com inicial acentuada ('órgão') já presente no original não levanta bandeira (M7 — \\b é ASCII-only)", async () => {
+  it("an agent with an accented initial ('órgão') already present in the original raises no flag (M7 — \\b is ASCII-only)", async () => {
     const text = "O processo foi analisado pelo órgão competente antes da decisão final.";
     const finding = spanFinding(text, "O processo foi analisado pelo órgão competente");
     const p = proposal(finding, "O órgão competente analisou o processo");
@@ -571,7 +571,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("1ª pessoa fabricada continua vetada por no_invented_first_person, sem interferência do sinal novo", async () => {
+  it("a fabricated 1st person is still vetoed by no_invented_first_person, with no interference from the new signal", async () => {
     const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
     const p = proposal(finding, "Nós analisamos o documento com a nossa comissão competente");
@@ -582,7 +582,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
-  it("caso ambíguo — agente mencionado só como objeto oblíquo de preposição não-artigo — não levanta bandeira", async () => {
+  it("ambiguous case — an agent mentioned only as the oblique object of a non-article preposition — raises no flag", async () => {
     const text = "O relatório final foi lido com atenção antes de ser arquivado no fim do expediente.";
     const finding = spanFinding(text, "O relatório final foi lido com atenção");
     const p = proposal(finding, "O relatório fala sobre a equipe responsável pelo arquivamento");
@@ -592,7 +592,7 @@ describe("verifyRewrite — SINAL: agente de 3ª pessoa possivelmente fabricado 
   });
 });
 
-describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
+describe("verifyRewrite — SIGNAL: the probe as a NEGATIVE test", () => {
   const readable: ProbeResult = {
     podeResponder: true,
     respostaExtraida: "o fato",
@@ -608,7 +608,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     precisouInferir: false,
   };
 
-  it("original legível + proposta que trava → bandeira de perda de sentido", async () => {
+  it("a readable original + a proposal that gets stuck → a meaning-loss flag", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
@@ -618,7 +618,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     expect(signalFlagged(v, "meaning_preserved")).toBe(true);
   });
 
-  it("proposta que trava mas original também travava → SEM conclusão de perda (não bandeira)", async () => {
+  it("a proposal that gets stuck where the original also got stuck → NO loss conclusion (no flag)", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
@@ -628,7 +628,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
     expect(signalFlagged(v, "meaning_preserved")).toBe(false);
   });
 
-  it("sem sonda, o sinal de sentido é omitido (não inventado)", async () => {
+  it("with no probe, the meaning signal is omitted (not invented)", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
@@ -638,7 +638,7 @@ describe("verifyRewrite — SINAL: sonda como teste NEGATIVO", () => {
   });
 });
 
-describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", () => {
+describe("verifyRewrite — LUCID-013: the optional probe degrades gracefully", () => {
   const readable: ProbeResult = {
     podeResponder: true,
     respostaExtraida: "o fato",
@@ -651,12 +651,12 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     readonly id = "failing-probe@1";
     constructor(private readonly failOn: string) {}
     async probe(input: ProbeInput): Promise<ProbeResult> {
-      if (input.trecho === this.failOn) throw new Error("sonda indisponível (timeout simulado)");
+      if (input.trecho === this.failOn) throw new Error("probe unavailable (simulated timeout)");
       return readable;
     }
   }
 
-  it("sonda funcionando: meaning_preserved é emitido normalmente (comportamento inalterado)", async () => {
+  it("with a working probe: meaning_preserved is emitted normally (behavior unchanged)", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
@@ -666,7 +666,7 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(true);
   });
 
-  it("repassa o AbortSignal do verifyRewrite às DUAS chamadas da sonda (M6: cancelamento tem que propagar)", async () => {
+  it("forwards verifyRewrite's AbortSignal to BOTH probe calls (M6: cancellation has to propagate)", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
@@ -688,7 +688,7 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     expect(receivedSignals[1]).toBe(controller.signal);
   });
 
-  it("sonda falha no ORIGINAL: verifyRewrite resolve, provas e métricas seguem presentes, sem meaning_preserved, sem exceção", async () => {
+  it("the probe fails on the ORIGINAL: verifyRewrite resolves, proofs and metrics stay present, no meaning_preserved, no exception", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
@@ -706,7 +706,7 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     warnSpy.mockRestore();
   });
 
-  it("sonda falha na PROPOSTA: mesma degradação graciosa", async () => {
+  it("the probe fails on the PROPOSAL: the same graceful degradation", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
@@ -723,7 +723,7 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     warnSpy.mockRestore();
   });
 
-  it("sem sonda: comportamento permanece inalterado (nenhum warning, nenhum signal)", async () => {
+  it("with no probe: behavior stays unchanged (no warning, no signal)", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
@@ -736,7 +736,7 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
     warnSpy.mockRestore();
   });
 
-  it("falha determinística real (fora da sonda) continua propagando — o catch não engole erros alheios", async () => {
+  it("a real deterministic failure (outside the probe) still propagates — the catch does not swallow unrelated errors", async () => {
     const text = "O documento foi arquivado pelo setor competente.";
     const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
     const p: RewriteProposal = { ...proposal(finding, "O setor arquivou o documento."), localeId: "en-US" };
@@ -745,8 +745,8 @@ describe("verifyRewrite — LUCID-013: sonda opcional degrada graciosamente", ()
   });
 });
 
-describe("honestidade (I5): sem selo verde", () => {
-  it("a verificação não tem campo 'aprovado'/'ok'; tudo passar é ausência de falha, não aprovação", async () => {
+describe("honesty (I5): no green seal", () => {
+  it("the verification has no 'aprovado'/'ok' field; everything passing is the absence of failure, not an approval", async () => {
     const text = "As contas do setor foram conferidas com atenção pela equipe antes do fechamento mensal regular.";
     const finding = spanFinding(text, "As contas do setor foram conferidas");
     const p = proposal(finding, "A equipe conferiu as contas do setor");
@@ -759,7 +759,7 @@ describe("honestidade (I5): sem selo verde", () => {
     expect(keys.sort()).toEqual(["hasBlockingFailure", "metrics", "proofs", "signals"]);
   });
 
-  it("determinismo: mesma entrada → mesmo JSON", async () => {
+  it("determinism: same input → same JSON", async () => {
     const text = "O documento foi arquivado pelo setor competente após a conclusão do trâmite administrativo.";
     const finding = spanFinding(text, "O documento foi arquivado pelo setor competente");
     const p = proposal(finding, "O setor arquivou o documento");
@@ -770,8 +770,8 @@ describe("honestidade (I5): sem selo verde", () => {
   });
 });
 
-describe("proposeAndVerify — orquestrador com stub proposer", () => {
-  it("propõe (via fixture) e verifica num passo; nunca aplica sozinho", async () => {
+describe("proposeAndVerify — orchestrator with a stub proposer", () => {
+  it("proposes (via fixture) and verifies in one step; it never applies on its own", async () => {
     const text =
       "O documento apresentado foi analisado com muito cuidado pela comissão competente responsável, " +
       "e o resultado final desse exame minucioso foi comunicado ao interessado dentro do prazo regular.";
@@ -788,7 +788,7 @@ describe("proposeAndVerify — orquestrador com stub proposer", () => {
     expect(analyze(text).text).toBe(text);
   });
 
-  it("trecho fora do fixture: proposta = original → o verificador mostra o alvo não resolvido", async () => {
+  it("an excerpt outside the fixture: proposal = original → the verifier shows the target unresolved", async () => {
     const text = "O relatório foi entregue pelos servidores designados para a tarefa específica do mês.";
     const finding = analyze(text).findings.find((f) => f.criterion === "passive_voice" && f.meta?.hasAgent)!;
     const proposer = new StubRewriteProposer({});
@@ -799,8 +799,8 @@ describe("proposeAndVerify — orquestrador com stub proposer", () => {
   });
 });
 
-describe("applyProposal — substituição pura do trecho", () => {
-  it("troca só o span do finding, preservando o resto do texto", () => {
+describe("applyProposal — pure replacement of the excerpt", () => {
+  it("replaces only the finding's span, preserving the rest of the text", () => {
     const text = "Início. O documento foi arquivado pelo setor. Fim.";
     const finding = spanFinding(text, "O documento foi arquivado pelo setor", "passive_voice");
     expect(applyProposal(text, finding.span, proposal(finding, "O setor arquivou o documento"))).toBe(
@@ -809,20 +809,20 @@ describe("applyProposal — substituição pura do trecho", () => {
   });
 });
 
-describe("verifyRewrite — identidade de locale (anti-mistura, ADR-031)", () => {
+describe("verifyRewrite — locale identity (anti-mixing, ADR-031)", () => {
   const text = "O documento foi arquivado pelo setor competente.";
   const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
 
-  it("recusa verificar uma proposta de outro locale sob o locale default (pt-BR)", async () => {
+  it("refuses to verify a proposal from another locale under the default locale (pt-BR)", async () => {
     const p: RewriteProposal = { ...proposal(finding, "O setor arquivou o documento."), localeId: "en-US" };
     await expect(verify(text, finding, p)).rejects.toThrow(/locale/);
   });
 
-  it("aceita uma proposta sem localeId (compat) e uma com o localeId do locale", async () => {
-    const semLocale: RewriteProposal = proposal(finding, "O setor arquivou o documento.");
-    await expect(verify(text, finding, semLocale)).resolves.toBeDefined();
+  it("accepts a proposal with no localeId (compat) and one carrying the locale's localeId", async () => {
+    const withoutLocale: RewriteProposal = proposal(finding, "O setor arquivou o documento.");
+    await expect(verify(text, finding, withoutLocale)).resolves.toBeDefined();
 
-    const ptBR: RewriteProposal = { ...semLocale, localeId: "pt-BR" };
+    const ptBR: RewriteProposal = { ...withoutLocale, localeId: "pt-BR" };
     await expect(verify(text, finding, ptBR)).resolves.toBeDefined();
   });
 });

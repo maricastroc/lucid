@@ -5,8 +5,8 @@ import { DEFAULT_CONFIG } from "../src/lucid/core/config";
 const findingsOf = (text: string) => analyze(text).findings.filter((f) => f.criterion === "nominalizacao_encadeada");
 const spans = (text: string): string[] => findingsOf(text).map((f) => f.span.text);
 
-describe("nominalizacao_encadeada — cadeia", () => {
-  it("cabeça + de + cabeça (elo forte) marca a cadeia inteira como warning", () => {
+describe("nominalizacao_encadeada — chain", () => {
+  it("head + de + head (a strong link) marks the whole chain as a warning", () => {
     const [f] = findingsOf("A realização da atualização depende do gestor.");
     expect(f.span.text).toBe("realização da atualização");
     expect(f.severity).toBe("warning");
@@ -14,41 +14,41 @@ describe("nominalizacao_encadeada — cadeia", () => {
     expect(f.suggestion).toBeUndefined();
   });
 
-  it("elo só por sufixo deverbal (não está no léxico) marca como info", () => {
+  it("a link held only by a deverbal suffix (absent from the lexicon) marks as info", () => {
     const [f] = findingsOf("A confirmação dos documentos é rápida.");
     expect(f.span.text).toBe("confirmação dos documentos");
     expect(f.severity).toBe("info");
   });
 
-  it("admite UMA palavra intermediária entre o “de” e o elo", () => {
+  it("allows ONE intervening word between the “de” and the link", () => {
     expect(spans("Após a identificação de eventuais inconsistências, o pedido segue.")).toEqual([
       "identificação de eventuais inconsistências",
     ]);
   });
 
-  it("NÃO admite palavra entre a cabeça e o “de” (verbo ali seria falso positivo)", () => {
+  it("does NOT allow a word between the head and the “de” (a verb there would be a false positive)", () => {
     expect(spans("A verificação prévia das informações é necessária.")).toEqual([]);
     expect(spans("A análise depende da aprovação do chefe.")).toEqual([]);
   });
 
-  it("estende gulosamente: três elos viram UMA cadeia", () => {
+  it("extends greedily: three links become ONE chain", () => {
     const found = findingsOf("A realização da atualização da verificação atrasou.");
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe("realização da atualização da verificação");
     expect(found[0].meta?.links).toBe(2);
   });
 
-  it("pontuação quebra a cadeia", () => {
+  it("punctuation breaks the chain", () => {
     expect(spans("A realização, da atualização, depende do órgão.")).toEqual([]);
   });
 
-  it("substantivo lexicalizado fora do léxico não vira cabeça", () => {
+  it("a lexicalized noun outside the lexicon does not become a head", () => {
     expect(spans("O documento do departamento está no regulamento.")).toEqual([]);
   });
 });
 
-describe("nominalizacao_encadeada — densidade", () => {
-  it("≥3 cabeças na frase marcam as que não estão em cadeia", () => {
+describe("nominalizacao_encadeada — density", () => {
+  it("≥3 heads in the sentence mark the ones that are not in a chain", () => {
     expect(spans("A avaliação, a aferição e a validação seguem o rito.")).toEqual([
       "avaliação",
       "aferição",
@@ -56,11 +56,11 @@ describe("nominalizacao_encadeada — densidade", () => {
     ]);
   });
 
-  it("densidade é por frase, não pelo documento", () => {
+  it("density is per sentence, not per document", () => {
     expect(spans("A avaliação começou. A aferição e a validação continuam.")).toEqual([]);
   });
 
-  it("cabeças cobertas por cadeia não são marcadas de novo pela densidade", () => {
+  it("heads already covered by a chain are not marked again by density", () => {
     const found = findingsOf(
       "A realização da atualização cadastral depende da verificação prévia das informações apresentadas e da confirmação dos documentos exigidos.",
     );
@@ -69,19 +69,19 @@ describe("nominalizacao_encadeada — densidade", () => {
       "verificação",
       "confirmação dos documentos",
     ]);
-    const porTipo = new Map(found.map((f) => [f.span.text, f.meta?.kind]));
-    expect(porTipo.get("realização da atualização")).toBe("chain");
-    expect(porTipo.get("verificação")).toBe("density");
-    expect(porTipo.get("confirmação dos documentos")).toBe("chain");
+    const byKind = new Map(found.map((f) => [f.span.text, f.meta?.kind]));
+    expect(byKind.get("realização da atualização")).toBe("chain");
+    expect(byKind.get("verificação")).toBe("density");
+    expect(byKind.get("confirmação dos documentos")).toBe("chain");
   });
 
-  it("abaixo do limiar e sem cadeia, não marca", () => {
+  it("below the threshold and with no chain, it does not mark", () => {
     expect(spans("A avaliação e a aferição terminam hoje.")).toEqual([]);
   });
 });
 
-describe("nominalizacao_encadeada — contrato", () => {
-  it("todo finding cita 5.3.3, é sintático e exige decisão humana", () => {
+describe("nominalizacao_encadeada — contract", () => {
+  it("every finding cites 5.3.3, is syntactic and requires a human decision", () => {
     const found = findingsOf("A realização da atualização e a emissão da autorização de funcionamento atrasaram.");
     expect(found.length).toBeGreaterThan(0);
     for (const f of found) {
@@ -92,7 +92,7 @@ describe("nominalizacao_encadeada — contrato", () => {
     }
   });
 
-  it("span reconstrói do próprio texto", () => {
+  it("the span reconstructs from the text itself", () => {
     const d = analyze("A realização da atualização depende da anuência do órgão.");
     for (const f of d.findings.filter((x) => x.criterion === "nominalizacao_encadeada")) {
       expect(d.text.slice(f.span.start, f.span.end)).toBe(f.span.text);
@@ -101,7 +101,7 @@ describe("nominalizacao_encadeada — contrato", () => {
 });
 
 describe("nominalizacao_encadeada — kill switch", () => {
-  it("desligado não produz findings", () => {
+  it("produces no findings when switched off", () => {
     const config = { ...DEFAULT_CONFIG, nominalizacaoEncadeada: { enabled: false, minPorFrase: 3 } };
     const found = analyze("A realização da atualização depende da verificação.", config).findings.filter(
       (f) => f.criterion === "nominalizacao_encadeada",
