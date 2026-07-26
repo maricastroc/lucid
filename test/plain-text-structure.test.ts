@@ -85,11 +85,44 @@ describe("structure in pasted text (F4) — unmarked prose stays intact", () => 
     }
   });
 
+  it("a blank line separates paragraphs even with nothing punctuated (ADR-073)", () => {
+    const doc = buildDocument("Prazos e documentos\n\nO interessado deve entregar os documentos.");
+    expect(doc.blocks.map((b) => b.kind)).toEqual(["paragraph", "paragraph"]);
+    expect(doc.sentences.map((s) => s.wordCount)).toEqual([3, 6]);
+  });
+
   it("the prose path is byte-identical to the previous one (same paragraphs per sentence)", () => {
     const text = "Primeira frase. Segunda frase.\n\nTerceira, num novo bloco.";
     const doc = buildDocument(text);
     expect(doc.blocks.map((b) => b.kind)).toEqual(["paragraph", "paragraph"]);
     expect(doc.blocks[0].text).toBe("Primeira frase. Segunda frase.");
     expect(doc.blocks[1].text).toBe("Terceira, num novo bloco.");
+  });
+});
+
+/**
+ * A10: `hasStructuralMarkers` is a document-wide boolean, so one bullet sends the whole
+ * text through the block path. That only mattered while the two paths disagreed about
+ * where a sentence ends — which they did, until a blank line became a boundary in both
+ * (ADR-073). These are the property that makes the global switch harmless: the marker
+ * changes what the marked region becomes, never how the rest is read.
+ */
+describe("structure in pasted text (A10) — a marker in one place does not re-read the rest", () => {
+  const BASES = [
+    "Prazos e documentos\n\nO interessado deve entregar os documentos ate sexta.",
+    "Primeira frase. Segunda frase.\n\nOutro paragrafo aqui.",
+    "Isso é uma frase\nque continua na linha de baixo.",
+    "Foi realizada a analise do pedido pela comissao.\n\nO prazo e de dez dias.",
+  ];
+  const sentencesOf = (source: string): string[] => buildDocument(source).sentences.map((s) => s.text);
+
+  it.each(BASES)("appending a list leaves the sentences before it untouched: %s", (base) => {
+    const before = sentencesOf(base);
+    expect(sentencesOf(`${base}\n\n- item da lista`).slice(0, before.length)).toEqual(before);
+  });
+
+  it.each(BASES)("prepending an ATX heading leaves the sentences after it untouched: %s", (base) => {
+    const before = sentencesOf(base);
+    expect(sentencesOf(`# Aviso\n\n${base}`).slice(1)).toEqual(before);
   });
 });

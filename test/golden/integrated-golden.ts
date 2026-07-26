@@ -231,6 +231,21 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     notes: "'a análise que se fez' não é nominalização verbo-leve (não há verbo leve + determinante + nominalização adjacentes), mas É passiva sintética proclítica: 'que' força a próclise e o 'se' esconde quem fez a análise.",
   },
   {
+    id: "titulo_sem_marcador_com_linha_em_branco",
+    description: "título não-marcado sobre o corpo — a linha em branco fecha a frase (ADR-073)",
+    text:
+      "Prazos e documentos necessarios\n\n" +
+      "O interessado deve entregar na secretaria os documentos exigidos pelo edital antes do fim do prazo legal.",
+    expected: {
+      findings: [
+        { criterion: "leitor_terceira_pessoa", severity: "info", start: 33, end: 51, spanText: "O interessado deve", requiresHuman: true, suggestion: undefined },
+      ],
+      metrics: { words: 21, sentences: 2 },
+    },
+    notes:
+      "REGRESSÃO ANCORADA: antes do ADR-073 a linha em branco não fechava frase sem pontuação, então título e corpo viravam UMA frase de 21 palavras — acima do limiar 20 — e o documento recebia um long_sentence falso com o título dentro do span. Aqui as duas frases têm 4 e 17 palavras e nenhuma cruza o limiar. O texto não tem marcador algum: é o caminho de prosa, o mais comum ao colar.",
+  },
+  {
     id: "emoji_antes_do_finding",
     description: "emoji (par surrogate UTF-16) antes de um finding — desloca offsets em 2 code units",
     text: "Tudo certo 😀 mas o documento supracitado precisa de ajuste.",

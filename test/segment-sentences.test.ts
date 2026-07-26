@@ -211,6 +211,45 @@ describe("segmentSentences — line breaks", () => {
   });
 });
 
+describe("segmentSentences — a blank line closes a sentence even with no punctuation (ADR-073)", () => {
+  it("an unpunctuated title above its body no longer merges into it", () => {
+    const source = "Prazos e documentos\n\nO interessado deve entregar os documentos.";
+    expect(texts(source)).toEqual(["Prazos e documentos", "O interessado deve entregar os documentos."]);
+  });
+
+  it("the rule does not depend on the next line starting with a capital", () => {
+    const source = "Prazos e documentos\n\nos documentos vão para a secretaria.";
+    expect(texts(source)).toEqual(["Prazos e documentos", "os documentos vão para a secretaria."]);
+  });
+
+  it("spaces and tabs inside the blank line still make it blank", () => {
+    expect(texts("Título aqui\n \t \nCorpo do texto.")).toEqual(["Título aqui", "Corpo do texto."]);
+    expect(texts("Título aqui\n\r\nCorpo do texto.")).toEqual(["Título aqui", "Corpo do texto."]);
+  });
+
+  it("several blank lines in a row close one sentence, not several empty ones", () => {
+    expect(texts("Título\n\n\n\nCorpo.")).toEqual(["Título", "Corpo."]);
+  });
+
+  it("a LONE line break is still not a boundary — it wraps as often as it ends", () => {
+    expect(texts("Prazos e documentos\nO interessado deve entregar.")).toEqual([
+      "Prazos e documentos\nO interessado deve entregar.",
+    ]);
+  });
+
+  it("the boundary coincides with an existing punctuation boundary without splitting twice", () => {
+    expect(texts("Primeira frase.\n\nSegunda frase.")).toEqual(["Primeira frase.", "Segunda frase."]);
+  });
+
+  it("offsets still reconstruct, and the blank line belongs to no sentence", () => {
+    const source = "Prazos e documentos\n\nO interessado deve entregar os documentos.";
+    const sentences = segmentSentences(source);
+    for (const s of sentences) expect(source.slice(s.start, s.end)).toBe(s.text);
+    expect(sentences[0]).toMatchObject({ start: 0, end: 19 });
+    expect(sentences[1].start).toBe(21);
+  });
+});
+
 describe("segmentSentences — text with no final punctuation", () => {
   it("closes the last sentence at the end of the text even with no punctuation", () => {
     const source = "Primeira frase. Segunda frase sem ponto no final";

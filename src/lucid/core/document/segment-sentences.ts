@@ -114,6 +114,24 @@ function findBoundaries(source: string, lexicon: AbbreviationLexicon): number[] 
       continue;
     }
 
+    // A blank line always closes a sentence, punctuation or not: it is the one paragraph
+    // separator plain text has, and no sentence runs across it. Without this the whole
+    // structure below depends on the author having punctuated — a title pasted above its
+    // body merged into it, and the paragraph layer, which groups sentences by the gap
+    // between them, had a single sentence to group. A lone "\n" is NOT a boundary here:
+    // it wraps sentences as often as it ends them, and that ambiguity stays out.
+    if (ch === "\n") {
+      let j = i + 1;
+      while (j < length && (source[j] === " " || source[j] === "\t" || source[j] === "\r")) j++;
+      if (j < length && source[j] === "\n") {
+        if (boundaries[boundaries.length - 1] !== i) boundaries.push(i);
+        i = j + 1;
+        continue;
+      }
+      i++;
+      continue;
+    }
+
     i++;
   }
 
