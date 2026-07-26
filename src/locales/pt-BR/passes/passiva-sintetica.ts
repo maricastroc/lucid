@@ -35,7 +35,6 @@ export const passivaSinteticaPass: Pass = {
       }));
     }
 
-    // Proclitic arm: <attractor> "se" <verb>, inside one sentence, with nothing between.
     for (const sentence of ctx.doc.sentences) {
       const tokens = sentence.tokens;
       for (let i = 0; i + 2 < tokens.length; i++) {
@@ -44,12 +43,9 @@ export const passivaSinteticaPass: Pass = {
         const verb = tokens[i + 2];
 
         if (!attractor.isWord || !PROCLISIS_ATTRACTORS.has(attractor.lower)) continue;
-        // Adjacency is structural: punctuation is a token, so it would take one of these slots.
         if (!se.isWord || se.lower !== "se") continue;
         if (!verb.isWord) continue;
-        // A function word after the clitic means it is not attached to a verb here.
         if (stopwords.has(verb.lower)) continue;
-        // Same suppression as the enclitic arm, read through the lexicon's enclitic key.
         if (pronominais.has(`${verb.lower}-se`)) continue;
 
         const text = ctx.doc.source.slice(se.start, verb.end);

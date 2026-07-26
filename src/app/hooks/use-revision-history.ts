@@ -22,7 +22,6 @@ export function useRevisionHistory(
   const [canUndo, setCanUndo] = useState(false);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
 
-  // Guards against a second apply landing before the new text has been rendered back.
   const applying = useRef(false);
   useEffect(() => {
     applying.current = false;

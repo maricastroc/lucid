@@ -70,7 +70,6 @@ export const proseEnumerationPass: Pass = {
         }
       }
 
-      // Anchored at the first item: a run that starts at "(2)" is a reference, not a list.
       if (!ranks.has(1) || ranks.size < min) continue;
 
       const notation = markers > 0 && words > 0 ? "mista" : markers > 0 ? "marcador" : "ordinal";

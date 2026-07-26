@@ -18,15 +18,6 @@ import { RevisionSheet } from "./components/revision-sheet";
 import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 
-/**
- * The review desk: composes the document, the audit and the session's revisions.
- *
- * Every piece of state lives in a hook named after the question it answers — what is being
- * audited, what was changed, what is being looked at, what is being shown. What is left here
- * is the wiring between them, which is the only thing that genuinely belongs to no one else:
- * replacing the document resets the trail AND the selection; applying a change drops the
- * selection because the finding it pointed at no longer exists.
- */
 export function Studio() {
   const [mode, setMode] = useState<Mode>("audit");
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -89,7 +80,7 @@ export function Studio() {
         : null,
     [selectedFinding, diagnostic],
   );
-  
+
   const afterDocumentReplaced = useCallback(() => {
     clearSelection();
     resetHistory();
