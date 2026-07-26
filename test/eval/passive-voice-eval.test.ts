@@ -6,25 +6,25 @@ import { buildDocument } from "../support/pt";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 import { formatRate, evaluatePassiveVoice } from "./compute";
 
-describe("avaliação de passiveVoicePass — golden set", () => {
+describe("passiveVoicePass evaluation — golden set", () => {
 
-  const { results: resultados, summary } = evaluatePassiveVoice();
+  const { results, summary } = evaluatePassiveVoice();
 
-  const errados = resultados.filter((r) => r.fp > 0 || r.fn > 0);
+  const wrong = results.filter((r) => r.fp > 0 || r.fn > 0);
 
-  it("relatório: TP/FP/FN, precisão e recall no golden set completo", () => {
+  it("report: TP/FP/FN, precision and recall over the full golden set", () => {
     console.log(
-      `\n[eval voz-passiva] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
+      `\n[eval passive-voice] ${summary.cases} examples (${summary.negatives} negatives) · ` +
         `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · ` +
-        `precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)}`,
+        `precision=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)}`,
     );
-    if (errados.length > 0) {
+    if (wrong.length > 0) {
       console.log(
-        "[eval voz-passiva] erros:\n" +
-          errados
+        "[eval passive-voice] errors:\n" +
+          wrong
             .map(
               (r) =>
-                `  - "${r.texto}": esperado=${r.expectedCount}, atual=${r.actualCount} ` +
+                `  - "${r.texto}": expected=${r.expectedCount}, actual=${r.actualCount} ` +
                 `(fp=${r.fp}, fn=${r.fn}, ${r.estado})`,
             )
             .join("\n"),
@@ -34,28 +34,28 @@ describe("avaliação de passiveVoicePass — golden set", () => {
     expect(summary.cases).toBeGreaterThan(0);
   });
 
-  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+  it("the golden has NEGATIVE cases — without them precision would be 100% by construction", () => {
     expect(summary.negatives).toBeGreaterThan(0);
   });
 
-  it("toda entrada 'limitacao_conhecida' tem motivo documentado", () => {
-    for (const entrada of GOLDEN_VOZ_PASSIVA) {
-      if (entrada.estado === "limitacao_conhecida") {
-        expect(entrada.motivo, `"${entrada.texto}" está marcada como limitação mas não tem motivo`).toBeTruthy();
+  it("every 'limitacao_conhecida' entry has a documented motivo", () => {
+    for (const entry of GOLDEN_VOZ_PASSIVA) {
+      if (entry.estado === "limitacao_conhecida") {
+        expect(entry.motivo, `"${entry.texto}" is flagged as a limitation but has no motivo`).toBeTruthy();
       }
     }
   });
 
-  it("nenhuma entrada 'correto' está, na verdade, incorreta (regressão)", () => {
-    const corretasComErro = resultados.filter((r) => r.estado === "correto" && (r.fp > 0 || r.fn > 0));
-    expect(corretasComErro, `entradas "correto" que falharam: ${JSON.stringify(corretasComErro)}`).toEqual([]);
+  it("no 'correto' entry is actually incorrect (regression)", () => {
+    const correctButFailing = results.filter((r) => r.estado === "correto" && (r.fp > 0 || r.fn > 0));
+    expect(correctButFailing, `"correto" entries that failed: ${JSON.stringify(correctButFailing)}`).toEqual([]);
   });
 
-  describe.each(GOLDEN_VOZ_PASSIVA.filter((e) => e.estado === "correto"))("entrada correta: '$texto'", (entrada) => {
-    it(`produz exatamente ${entrada.expectedCount} finding(s)`, () => {
-      const doc = buildDocument(entrada.texto);
+  describe.each(GOLDEN_VOZ_PASSIVA.filter((e) => e.estado === "correto"))("correct entry: '$texto'", (entry) => {
+    it(`produces exactly ${entry.expectedCount} finding(s)`, () => {
+      const doc = buildDocument(entry.texto);
       const findings = passiveVoicePass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-      expect(findings).toHaveLength(entrada.expectedCount);
+      expect(findings).toHaveLength(entry.expectedCount);
     });
   });
 });

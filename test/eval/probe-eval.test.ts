@@ -48,8 +48,8 @@ function score(rows: readonly Row[]): Matrix {
   return { tp, fn, fp, tn, recall, precision, accuracy };
 }
 
-describe("meta-eval da sonda — golden + harness (offline)", () => {
-  it("golden bem-formado: ids únicos, campos preenchidos, DUAS classes presentes", () => {
+describe("probe meta-eval — golden + harness (offline)", () => {
+  it("well-formed golden: unique ids, filled fields, BOTH classes present", () => {
     const ids = GOLDEN_SONDA.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
     for (const c of GOLDEN_SONDA) {
@@ -63,7 +63,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     expect(GOLDEN_SONDA.some((c) => !c.humanoTrava)).toBe(true);
   });
 
-  it("harness: sonda-ORÁCULO (o piso perfeito derivado dos rótulos) → 100% de concordância", async () => {
+  it("harness: ORACLE probe (the perfect floor derived from the labels) → 100% agreement", async () => {
     const oracle = new StubComprehensionProbe(oracleFixtures(), { id: "oracle@golden" });
     const rows = await runAgreement(oracle, GOLDEN_SONDA);
     const m = score(rows);
@@ -73,7 +73,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     expect(m.accuracy).toBe(1);
   });
 
-  it("harness: sonda que SEMPRE neutraliza → recall 0 nos travamentos (o pior caso é detectável)", async () => {
+  it("harness: probe that ALWAYS neutralizes → recall 0 on stalls (the worst case is detectable)", async () => {
     const alwaysNeutral = new StubComprehensionProbe(
       {},
       {
@@ -88,7 +88,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     expect(m.fp).toBe(0);
   });
 
-  it("harness: sonda que SEMPRE trava → recall 1, precisão = taxa-base (piso pessimista tem custo)", async () => {
+  it("harness: probe that ALWAYS stalls → recall 1, precision = base rate (a pessimistic floor has a cost)", async () => {
     const alwaysFlag = new StubComprehensionProbe(
       {},
       { id: "always-flag@test", fallback: { podeResponder: false, respostaExtraida: "o texto não diz", ondeTravou: [], operacoesDeLeitura: [], precisouInferir: false } },
@@ -101,7 +101,7 @@ describe("meta-eval da sonda — golden + harness (offline)", () => {
     expect(m.precision).toBeCloseTo(travamentos / GOLDEN_SONDA.length);
   });
 
-  it("ponte rótulo→interpret: cada modo de falha do golden vira `flag`; cada caso claro vira `neutro`", () => {
+  it("label→interpret bridge: every golden failure mode becomes `flag`; every clear case becomes `neutro`", () => {
     for (const c of GOLDEN_SONDA) {
       const esperado = c.humanoTrava ? "flag" : "neutro";
       expect(interpret(oracleResult(c)).tipo).toBe(esperado);
@@ -138,35 +138,35 @@ function buildLiveProbe(): LlmComprehensionProbe {
 
 describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
   it(
-    "a sonda real trava onde o humano travou (matriz de confusão + piso de recall)",
+    "the real probe stalls where the human stalled (confusion matrix + recall floor)",
     async () => {
       const probe = buildLiveProbe();
       const rows = await runAgreement(probe, GOLDEN_SONDA);
       const m = score(rows);
 
-      const linhas: string[] = [];
-      linhas.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
-      linhas.push(`concordância=${(m.accuracy * 100).toFixed(0)}% · recall(travamentos)=${(m.recall * 100).toFixed(0)}% · precisão=${(m.precision * 100).toFixed(0)}%`);
-      linhas.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
+      const lines: string[] = [];
+      lines.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
+      lines.push(`agreement=${(m.accuracy * 100).toFixed(0)}% · recall(stalls)=${(m.recall * 100).toFixed(0)}% · precision=${(m.precision * 100).toFixed(0)}%`);
+      lines.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
 
       const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
-      linhas.push("\npor categoria:");
+      lines.push("\npor categoria:");
       for (const cat of categorias) {
         const sub = rows.filter((r) => r.categoria === cat);
         const concordantes = sub.filter((r) => r.concorda).length;
-        linhas.push(`  ${cat}: ${concordantes}/${sub.length} concordam`);
+        lines.push(`  ${cat}: ${concordantes}/${sub.length} concordam`);
       }
 
       for (const r of rows) {
-        const marca = r.concorda ? "ok " : "XX ";
-        linhas.push(`  ${marca}[${r.categoria}] ${r.id}: humano=${r.humanoTrava ? "trava" : "lê"} · sonda=${r.sondaFlag ? "flag" : "neutro"}`);
+        const mark = r.concorda ? "ok " : "XX ";
+        lines.push(`  ${mark}[${r.categoria}] ${r.id}: human=${r.humanoTrava ? "stalls" : "reads"} · probe=${r.sondaFlag ? "flag" : "neutro"}`);
       }
-      linhas.push(
-        "\nRessalva honesta (I5): golden pequeno, 1 corrida, temperature 0. Concordância é sinal de piso, não placar. " +
-          "Passar NUNCA é aprovação de compreensão — só ausência de violação de piso.",
+      lines.push(
+        "\nHonest caveat (I5): small golden, 1 run, temperature 0. Agreement is a floor signal, not a scoreboard. " +
+          "Passing is NEVER approval of comprehension — only the absence of a floor violation.",
       );
-      process.stdout.write(`${linhas.join("\n")}\n\n`);
-      if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${linhas.join("\n")}\n`);
+      process.stdout.write(`${lines.join("\n")}\n\n`);
+      if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${lines.join("\n")}\n`);
 
       expect(m.recall).toBeGreaterThanOrEqual(0.6);
       expect(m.precision).toBeGreaterThanOrEqual(0.7);

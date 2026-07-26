@@ -6,37 +6,37 @@ import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { formatRate, evaluateJargon } from "./compute";
 
-describe("avaliação de jargonPass — golden set", () => {
-  const { results: resultados, summary, suggestions } = evaluateJargon();
+describe("jargonPass evaluation — golden set", () => {
+  const { results, summary, suggestions } = evaluateJargon();
 
-  const sugestoesEsperadas = resultados.filter((r) => r.expectSuggestion === true);
-  const sugestoesCorretas = sugestoesEsperadas.filter((r) => r.sugestaoCorreta);
-  const sugestoesInseguras = resultados.filter((r) => r.sugestaoInsegura);
-  const disparosSemCadastro = resultados.filter((r) => r.disparouSemCadastro);
+  const expectedSuggestions = results.filter((r) => r.expectSuggestion === true);
+  const correctSuggestions = expectedSuggestions.filter((r) => r.sugestaoCorreta);
+  const unsafeSuggestions = results.filter((r) => r.sugestaoInsegura);
+  const firedWithoutEntry = results.filter((r) => r.disparouSemCadastro);
 
-  const errosDeteccao = resultados.filter((r) => r.fp > 0 || r.fn > 0);
+  const detectionErrors = results.filter((r) => r.fp > 0 || r.fn > 0);
 
-  it("relatório: TP/FP/FN, precisão, recall, sugestões e findings sem cadastro", () => {
+  it("report: TP/FP/FN, precision, recall, suggestions and findings without a glossary entry", () => {
     console.log(
-      `\n[eval jargão] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
-        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
-        `sugestões corretas=${sugestoesCorretas.length}/${sugestoesEsperadas.length} · ` +
-        `sugestões inseguras=${sugestoesInseguras.length} · ` +
-        `findings sem cadastro (deve ser 0)=${disparosSemCadastro.length}`,
+      `\n[eval jargon] ${summary.cases} examples (${summary.negatives} negatives) · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precision=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
+        `correct suggestions=${correctSuggestions.length}/${expectedSuggestions.length} · ` +
+        `unsafe suggestions=${unsafeSuggestions.length} · ` +
+        `findings without entry (must be 0)=${firedWithoutEntry.length}`,
     );
-    if (errosDeteccao.length > 0) {
+    if (detectionErrors.length > 0) {
       console.log(
-        "[eval jargão] erros de detecção:\n" +
-          errosDeteccao
-            .map((r) => `  - [${r.categoria}] "${r.texto}": esperado=${r.expectedCount}, atual=${r.actualCount} (${r.estado})`)
+        "[eval jargon] detection errors:\n" +
+          detectionErrors
+            .map((r) => `  - [${r.categoria}] "${r.texto}": expected=${r.expectedCount}, actual=${r.actualCount} (${r.estado})`)
             .join("\n"),
       );
     }
-    if (sugestoesInseguras.length > 0) {
+    if (unsafeSuggestions.length > 0) {
       console.log(
-        "[eval jargão] SUGESTÕES INSEGURAS (deveriam ser zero):\n" +
-          sugestoesInseguras
-            .map((r) => `  - "${r.texto}": esperado="${r.expectedSuggestion}", atual="${r.actualSuggestion}"`)
+        "[eval jargon] UNSAFE SUGGESTIONS (should be zero):\n" +
+          unsafeSuggestions
+            .map((r) => `  - "${r.texto}": expected="${r.expectedSuggestion}", actual="${r.actualSuggestion}"`)
             .join("\n"),
       );
     }
@@ -44,43 +44,43 @@ describe("avaliação de jargonPass — golden set", () => {
     expect(summary.cases).toBeGreaterThan(0);
   });
 
-  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+  it("the golden has NEGATIVE cases — without them precision would be 100% by construction", () => {
     expect(summary.negatives).toBeGreaterThan(0);
     expect(suggestions.firedWithoutEntry).toBe(0);
   });
 
-  it("nenhuma sugestão insegura é emitida (métrica prioritária 1)", () => {
-    expect(sugestoesInseguras, `sugestões inseguras: ${JSON.stringify(sugestoesInseguras)}`).toEqual([]);
+  it("no unsafe suggestion is emitted (priority metric 1)", () => {
+    expect(unsafeSuggestions, `unsafe suggestions: ${JSON.stringify(unsafeSuggestions)}`).toEqual([]);
   });
 
-  it("nenhum finding dispara sobre texto sem termo cadastrado (métrica prioritária 3)", () => {
-    expect(disparosSemCadastro, `findings indevidos: ${JSON.stringify(disparosSemCadastro)}`).toEqual([]);
+  it("no finding fires on text without a registered term (priority metric 3)", () => {
+    expect(firedWithoutEntry, `undue findings: ${JSON.stringify(firedWithoutEntry)}`).toEqual([]);
   });
 
-  it("toda entrada 'limitacao_conhecida' tem motivo documentado", () => {
-    for (const entrada of GOLDEN_JARGAO) {
-      if (entrada.estado === "limitacao_conhecida") {
-        expect(entrada.motivo, `"${entrada.texto}" está marcada como limitação mas não tem motivo`).toBeTruthy();
+  it("every 'limitacao_conhecida' entry has a documented motivo", () => {
+    for (const entry of GOLDEN_JARGAO) {
+      if (entry.estado === "limitacao_conhecida") {
+        expect(entry.motivo, `"${entry.texto}" is flagged as a limitation but has no motivo`).toBeTruthy();
       }
     }
   });
 
-  it("nenhuma entrada 'correto' está, na verdade, incorreta (regressão)", () => {
-    const corretasComErro = resultados.filter(
+  it("no 'correto' entry is actually incorrect (regression)", () => {
+    const correctButFailing = results.filter(
       (r) => r.estado === "correto" && (r.fp > 0 || r.fn > 0 || r.sugestaoInsegura || r.disparouSemCadastro),
     );
-    expect(corretasComErro, `entradas "correto" que falharam: ${JSON.stringify(corretasComErro)}`).toEqual([]);
+    expect(correctButFailing, `"correto" entries that failed: ${JSON.stringify(correctButFailing)}`).toEqual([]);
   });
 
-  describe.each(GOLDEN_JARGAO.filter((e) => e.estado === "correto"))("entrada correta: '$texto'", (entrada) => {
-    it(`produz exatamente ${entrada.expectedCount} finding(s) e sugestão consistente`, () => {
-      const doc = buildDocument(entrada.texto);
+  describe.each(GOLDEN_JARGAO.filter((e) => e.estado === "correto"))("correct entry: '$texto'", (entry) => {
+    it(`produces exactly ${entry.expectedCount} finding(s) with a consistent suggestion`, () => {
+      const doc = buildDocument(entry.texto);
       const findings = jargonPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-      expect(findings).toHaveLength(entrada.expectedCount);
+      expect(findings).toHaveLength(entry.expectedCount);
 
-      if (entrada.expectedCount === 1 && entrada.expectSuggestion !== undefined) {
-        if (entrada.expectSuggestion) {
-          expect(findings[0].suggestion).toBe(entrada.expectedSuggestion);
+      if (entry.expectedCount === 1 && entry.expectSuggestion !== undefined) {
+        if (entry.expectSuggestion) {
+          expect(findings[0].suggestion).toBe(entry.expectedSuggestion);
           expect(findings[0].requiresHuman).toBe(false);
         } else {
           expect(findings[0].suggestion).toBeUndefined();

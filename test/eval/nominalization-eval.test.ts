@@ -6,24 +6,24 @@ import { buildDocument } from "../support/pt";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { formatRate, evaluateNominalization } from "./compute";
 
-describe("avaliação de nominalizationPass — golden set", () => {
-  const { results: resultados, summary } = evaluateNominalization();
+describe("nominalizationPass evaluation — golden set", () => {
+  const { results, summary } = evaluateNominalization();
 
-  const sugestoesEmitidas = resultados.filter((r) => r.sugestaoEmitida);
-  const classificacoesErradas = resultados.filter((r) => r.classificacaoErrada);
-  const errosDeteccao = resultados.filter((r) => r.fp > 0 || r.fn > 0);
+  const emittedSuggestions = results.filter((r) => r.sugestaoEmitida);
+  const wrongClassifications = results.filter((r) => r.classificacaoErrada);
+  const detectionErrors = results.filter((r) => r.fp > 0 || r.fn > 0);
 
-  it("relatório: TP/FP/FN, precisão, recall, classificação do mapeamento", () => {
+  it("report: TP/FP/FN, precision, recall, mapping classification", () => {
     console.log(
-      `\n[eval nominalização] ${summary.cases} exemplos (${summary.negatives} negativos) · ` +
-        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precisão=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
-        `classificações erradas=${classificacoesErradas.length} · sugestões emitidas=${sugestoesEmitidas.length} (deve ser 0)`,
+      `\n[eval nominalization] ${summary.cases} examples (${summary.negatives} negatives) · ` +
+        `TP=${summary.tp} FP=${summary.fp} FN=${summary.fn} · precision=${formatRate(summary.precision)} · recall=${formatRate(summary.recall)} · ` +
+        `wrong classifications=${wrongClassifications.length} · suggestions emitted=${emittedSuggestions.length} (must be 0)`,
     );
-    if (errosDeteccao.length > 0) {
+    if (detectionErrors.length > 0) {
       console.log(
-        "[eval nominalização] erros de detecção:\n" +
-          errosDeteccao
-            .map((r) => `  - "${r.texto}": esperado=${r.expectedCount}, atual=${r.actualCount} (${r.estado})`)
+        "[eval nominalization] detection errors:\n" +
+          detectionErrors
+            .map((r) => `  - "${r.texto}": expected=${r.expectedCount}, actual=${r.actualCount} (${r.estado})`)
             .join("\n"),
       );
     }
@@ -31,42 +31,42 @@ describe("avaliação de nominalizationPass — golden set", () => {
     expect(summary.cases).toBeGreaterThan(0);
   });
 
-  it("o golden tem casos NEGATIVOS — sem eles a precisão seria 100% por construção", () => {
+  it("the golden has NEGATIVE cases — without them precision would be 100% by construction", () => {
     expect(summary.negatives).toBeGreaterThan(0);
   });
 
-  it("a engine nunca emite sugestão composta — invariante dura do ADR-054", () => {
-    expect(sugestoesEmitidas, `sugestões emitidas: ${JSON.stringify(sugestoesEmitidas)}`).toEqual([]);
+  it("the engine never emits a composed suggestion — hard invariant of ADR-054", () => {
+    expect(emittedSuggestions, `suggestions emitted: ${JSON.stringify(emittedSuggestions)}`).toEqual([]);
   });
 
-  it("a classificação do mapeamento (requiresHuman) confere com a curadoria", () => {
-    expect(classificacoesErradas, `classificações erradas: ${JSON.stringify(classificacoesErradas)}`).toEqual([]);
+  it("the mapping classification (requiresHuman) matches the curation", () => {
+    expect(wrongClassifications, `wrong classifications: ${JSON.stringify(wrongClassifications)}`).toEqual([]);
   });
 
-  it("toda entrada 'limitacao_conhecida' tem motivo documentado", () => {
-    for (const entrada of GOLDEN_NOMINALIZACAO) {
-      if (entrada.estado === "limitacao_conhecida") {
-        expect(entrada.motivo, `"${entrada.texto}" está marcada como limitação mas não tem motivo`).toBeTruthy();
+  it("every 'limitacao_conhecida' entry has a documented motivo", () => {
+    for (const entry of GOLDEN_NOMINALIZACAO) {
+      if (entry.estado === "limitacao_conhecida") {
+        expect(entry.motivo, `"${entry.texto}" is flagged as a limitation but has no motivo`).toBeTruthy();
       }
     }
   });
 
-  it("nenhuma entrada 'correto' está, na verdade, incorreta (regressão)", () => {
-    const corretasComErro = resultados.filter(
+  it("no 'correto' entry is actually incorrect (regression)", () => {
+    const correctButFailing = results.filter(
       (r) => r.estado === "correto" && (r.fp > 0 || r.fn > 0 || r.sugestaoEmitida || r.classificacaoErrada),
     );
-    expect(corretasComErro, `entradas "correto" que falharam: ${JSON.stringify(corretasComErro)}`).toEqual([]);
+    expect(correctButFailing, `"correto" entries that failed: ${JSON.stringify(correctButFailing)}`).toEqual([]);
   });
 
-  describe.each(GOLDEN_NOMINALIZACAO.filter((e) => e.estado === "correto"))("entrada correta: '$texto'", (entrada) => {
-    it(`produz exatamente ${entrada.expectedCount} finding(s), sem sugestão e com classificação certa`, () => {
-      const doc = buildDocument(entrada.texto);
+  describe.each(GOLDEN_NOMINALIZACAO.filter((e) => e.estado === "correto"))("correct entry: '$texto'", (entry) => {
+    it(`produces exactly ${entry.expectedCount} finding(s), with no suggestion and the right classification`, () => {
+      const doc = buildDocument(entry.texto);
       const findings = nominalizationPass.run({ doc, config: DEFAULT_CONFIG, data: createDataView([]) });
-      expect(findings).toHaveLength(entrada.expectedCount);
+      expect(findings).toHaveLength(entry.expectedCount);
       for (const f of findings) expect(f.suggestion).toBeUndefined();
 
-      if (entrada.expectedCount === 1 && entrada.expectRequiresHuman !== undefined) {
-        expect(findings[0].requiresHuman).toBe(entrada.expectRequiresHuman);
+      if (entry.expectedCount === 1 && entry.expectRequiresHuman !== undefined) {
+        expect(findings[0].requiresHuman).toBe(entry.expectRequiresHuman);
       }
     });
   });

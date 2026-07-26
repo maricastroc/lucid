@@ -4,17 +4,17 @@ import { SUPPORTED_SCHEMA_VERSION } from "../src/app/avaliacao/page";
 import artifact from "../eval/report.json";
 
 /**
- * A página de avaliação é APRESENTAÇÃO: ela lê `eval/report.json` e não recalcula nada.
- * O único acoplamento que pode apodrecer em silêncio é a versão do esquema — se o artefato
- * mudar de forma e a página não for atualizada, o usuário veria o estado de
- * incompatibilidade em produção. Este teste faz esse descompasso quebrar o build.
+ * The evaluation page is PRESENTATION: it reads `eval/report.json` and recalculates nothing.
+ * The only coupling that can rot silently is the schema version — if the artifact changes
+ * shape and the page is not updated, the user would see the incompatibility state in
+ * production. This test makes that mismatch break the build.
  */
-describe("página de avaliação — compatibilidade com o contrato do artefato", () => {
-  it("a página suporta a versão de esquema que o artefato declara", () => {
+describe("evaluation page — compatibility with the artifact contract", () => {
+  it("the page supports the schema version the artifact declares", () => {
     expect(SUPPORTED_SCHEMA_VERSION).toBe(artifact.schemaVersion);
   });
 
-  it("a página suporta a versão que o emissor produz hoje", () => {
+  it("the page supports the version the emitter produces today", () => {
     expect(SUPPORTED_SCHEMA_VERSION).toBe(EVAL_SCHEMA_VERSION);
   });
 });

@@ -20,16 +20,16 @@ import { GOLDEN_SILABAS } from "./silabas-golden";
 import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
 
 /**
- * Invariantes do artefato — SEM flag, roda no CI.
+ * Artifact invariants — NO flag, runs in CI.
  *
- * O que este arquivo protege não é o valor dos números (isso é trabalho dos evals), e sim
- * as propriedades que fazem o artefato publicável: estampa presente, nenhum critério
- * sumindo em silêncio, limitação conhecida contando contra a métrica, e determinismo.
+ * What this file protects is not the value of the numbers (that is the evals' job), but the
+ * properties that make the artifact publishable: stamp present, no criterion silently
+ * disappearing, known limitations counting against the metric, and determinism.
  */
-describe("artefato de eval — invariantes de publicação", () => {
+describe("eval artifact — publication invariants", () => {
   const artifact = buildEvalArtifact();
 
-  it("carrega a estampa completa: sem ela o número é alegação, não medida", () => {
+  it("carries the complete stamp: without it the number is a claim, not a measurement", () => {
     const { stamp } = artifact;
     expect(stamp.lucidVersion).toMatch(/^\d+\.\d+\.\d+$/);
     expect(stamp.localeId).toBe("pt-BR");
@@ -39,10 +39,10 @@ describe("artefato de eval — invariantes de publicação", () => {
     expect(stamp.goldenHash.length).toBeGreaterThan(0);
   });
 
-  it("o goldenHash muda quando o corpus muda — a medição depende do golden, não só do motor", () => {
+  it("goldenHash changes when the corpus changes — measurement depends on the golden, not only on the engine", () => {
     const base = hashGoldens();
-    const comEntradaNova = hashGoldens({
-      jargon: [...GOLDEN_JARGAO, { texto: "entrada sintética", expectedCount: 1 }],
+    const withExtraEntry = hashGoldens({
+      jargon: [...GOLDEN_JARGAO, { texto: "synthetic entry", expectedCount: 1 }],
       nominalization: GOLDEN_NOMINALIZACAO,
       passiveVoice: GOLDEN_VOZ_PASSIVA,
       syllables: GOLDEN_SILABAS,
@@ -50,122 +50,122 @@ describe("artefato de eval — invariantes de publicação", () => {
     });
 
     expect(base).toBe(artifact.stamp.goldenHash);
-    expect(comEntradaNova).not.toBe(base);
+    expect(withExtraEntry).not.toBe(base);
   });
 
-  it("a estampa de dado cobre TODOS os datasets, não só os usados pelos evals", () => {
-    const todos = Object.keys(REGISTRY).sort() as DatasetId[];
-    expect(artifact.stamp.dataHash).toBe(dataHashFor(todos));
-    expect(todos.length).toBeGreaterThan(20);
+  it("the data stamp covers ALL datasets, not only those used by the evals", () => {
+    const all = Object.keys(REGISTRY).sort() as DatasetId[];
+    expect(artifact.stamp.dataHash).toBe(dataHashFor(all));
+    expect(all.length).toBeGreaterThan(20);
   });
 
-  it("todo critério da engine aparece em exatamente UMA camada de cobertura", () => {
+  it("every engine criterion appears in exactly ONE coverage layer", () => {
     const { measured, goldenLabelledOnly, unitTestsOnly } = artifact.criteriaCoverage;
-    const todos = [...measured, ...goldenLabelledOnly, ...unitTestsOnly];
+    const all = [...measured, ...goldenLabelledOnly, ...unitTestsOnly];
 
-    expect(todos.length).toBe(CRITERION_IDS.length);
-    expect(new Set(todos).size).toBe(CRITERION_IDS.length);
-    expect([...todos].sort()).toEqual([...CRITERION_IDS].sort());
+    expect(all.length).toBe(CRITERION_IDS.length);
+    expect(new Set(all).size).toBe(CRITERION_IDS.length);
+    expect([...all].sort()).toEqual([...CRITERION_IDS].sort());
   });
 
-  it("a cobertura é DERIVADA das entradas — provado com universo sintético, não com lista fixa", () => {
-    const cobertura = criteriaCoverage({
+  it("coverage is DERIVED from the inputs — proven with a synthetic universe, not a fixed list", () => {
+    const coverage = criteriaCoverage({
       criterionIds: ["com_eval", "so_rotulado", "so_unitario", "eval_e_rotulado"],
       evaluated: ["com_eval", "eval_e_rotulado"],
       labelled: ["so_rotulado", "eval_e_rotulado"],
     });
 
-    expect(cobertura.measured).toEqual(["com_eval", "eval_e_rotulado"]);
-    expect(cobertura.goldenLabelledOnly).toEqual(["so_rotulado"]);
-    expect(cobertura.unitTestsOnly).toEqual(["so_unitario"]);
+    expect(coverage.measured).toEqual(["com_eval", "eval_e_rotulado"]);
+    expect(coverage.goldenLabelledOnly).toEqual(["so_rotulado"]);
+    expect(coverage.unitTestsOnly).toEqual(["so_unitario"]);
   });
 
-  it("critério novo sem avaliador registrado aparece como NÃO medido (fail-safe)", () => {
-    const real = artifact.criteriaCoverage;
-    const comCriterioNovo = criteriaCoverage({
+  it("a new criterion with no registered evaluator shows up as NOT measured (fail-safe)", () => {
+    const actual = artifact.criteriaCoverage;
+    const withNewCriterion = criteriaCoverage({
       criterionIds: [...CRITERION_IDS, "criterio_recem_criado"],
-      evaluated: real.measured,
-      labelled: real.goldenLabelledOnly,
+      evaluated: actual.measured,
+      labelled: actual.goldenLabelledOnly,
     });
 
-    expect(comCriterioNovo.unitTestsOnly).toContain("criterio_recem_criado");
-    expect(comCriterioNovo.measured).not.toContain("criterio_recem_criado");
+    expect(withNewCriterion.unitTestsOnly).toContain("criterio_recem_criado");
+    expect(withNewCriterion.measured).not.toContain("criterio_recem_criado");
   });
 
-  it("os critérios medidos vêm do REGISTRO de avaliadores, não de uma segunda lista", () => {
+  it("measured criteria come from the evaluator REGISTRY, not from a second list", () => {
     expect(artifact.criteriaCoverage.measured).toEqual(
       CRITERION_IDS.filter((c) => DETECTOR_EVALUATORS.some((e) => e.criterion === c)),
     );
   });
 
-  it("ORDEM CANÔNICA única: `detectors` e `measured` listam os mesmos critérios na mesma ordem", () => {
+  it("single CANONICAL ORDER: `detectors` and `measured` list the same criteria in the same order", () => {
     expect(artifact.detectors.map((d) => d.criterion)).toEqual([...artifact.criteriaCoverage.measured]);
     const ranks = artifact.detectors.map((d) => (CRITERION_IDS as readonly string[]).indexOf(d.criterion));
     expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
   });
 
-  it("cada detector declara cobertura léxica, casos negativos e limitações conhecidas", () => {
+  it("every detector declares lexical coverage, negative cases and known limitations", () => {
     expect(artifact.detectors.length).toBeGreaterThan(0);
     for (const d of artifact.detectors) {
       expect(["curated", "productive"]).toContain(d.coverage);
-      expect(d.summary.negatives, `${d.criterion} sem casos negativos`).toBeGreaterThan(0);
-      for (const taxa of [d.summary.precision, d.summary.recall]) {
-        expect(taxa, `${d.criterion} sem denominador`).not.toBeNull();
-        expect(taxa!).toBeGreaterThan(0);
-        expect(taxa!).toBeLessThanOrEqual(1);
+      expect(d.summary.negatives, `${d.criterion} has no negative cases`).toBeGreaterThan(0);
+      for (const rateValue of [d.summary.precision, d.summary.recall]) {
+        expect(rateValue, `${d.criterion} has no denominator`).not.toBeNull();
+        expect(rateValue!).toBeGreaterThan(0);
+        expect(rateValue!).toBeLessThanOrEqual(1);
       }
       for (const lim of d.knownLimitations) {
-        expect(lim.motivo, `limitação sem motivo em ${d.criterion}`).not.toBe("");
+        expect(lim.motivo, `limitation without motivo in ${d.criterion}`).not.toBe("");
       }
     }
   });
 
-  it("sem denominador o valor é null, NUNCA 1 — não se fabrica 100% (coerência com ADR-066)", () => {
-    const vazio = summarize([]);
-    expect(vazio.precision).toBeNull();
-    expect(vazio.recall).toBeNull();
-    expect(vazio.cases).toBe(0);
+  it("with no denominator the value is null, NEVER 1 — 100% is not fabricated (consistent with ADR-066)", () => {
+    const empty = summarize([]);
+    expect(empty.precision).toBeNull();
+    expect(empty.recall).toBeNull();
+    expect(empty.cases).toBe(0);
 
-    const soNegativos = summarize([
+    const negativesOnly = summarize([
       { texto: "a", expectedCount: 0, actualCount: 0, estado: "correto", tp: 0, fp: 0, fn: 0 },
     ]);
-    expect(soNegativos.precision).toBeNull();
-    expect(soNegativos.recall).toBeNull();
+    expect(negativesOnly.precision).toBeNull();
+    expect(negativesOnly.recall).toBeNull();
 
-    const umFP = summarize([
+    const oneFP = summarize([
       { texto: "b", expectedCount: 0, actualCount: 1, estado: "correto", tp: 0, fp: 1, fn: 0 },
     ]);
-    expect(umFP.precision).toBe(0);
-    expect(umFP.recall).toBeNull();
+    expect(oneFP.precision).toBe(0);
+    expect(oneFP.recall).toBeNull();
 
     expect(formatRate(null)).toBe("—");
     expect(formatRate(0.9628)).toBe("96.3%");
   });
 
-  it("o artefato declara schemaVersion — o consumidor externo não quebra em silêncio", () => {
+  it("the artifact declares schemaVersion — the external consumer does not break silently", () => {
     expect(artifact.schemaVersion).toBe(EVAL_SCHEMA_VERSION);
     expect(Number.isInteger(artifact.schemaVersion)).toBe(true);
     expect(artifact.schemaVersion).toBeGreaterThanOrEqual(1);
     expect(Object.keys(artifact)[0]).toBe("schemaVersion");
   });
 
-  it("limitação conhecida NÃO é excluída da métrica — a precisão publicada é a honesta", () => {
-    const comLimitacao = artifact.detectors.filter((d) => d.knownLimitations.length > 0);
-    expect(comLimitacao.length).toBeGreaterThan(0);
-    expect(comLimitacao.some((d) => d.summary.fp + d.summary.fn > 0)).toBe(true);
+  it("a known limitation is NOT excluded from the metric — the published precision is the honest one", () => {
+    const withLimitation = artifact.detectors.filter((d) => d.knownLimitations.length > 0);
+    expect(withLimitation.length).toBeGreaterThan(0);
+    expect(withLimitation.some((d) => d.summary.fp + d.summary.fn > 0)).toBe(true);
 
     for (const d of artifact.detectors) {
-      expect(d.knownLimitations.length, `${d.criterion}: lista ≠ contador`).toBe(d.summary.limitations);
+      expect(d.knownLimitations.length, `${d.criterion}: list ≠ counter`).toBe(d.summary.limitations);
     }
   });
 
-  it("REGRESSÃO é categoria separada de limitação, e em build verde está vazia", () => {
+  it("REGRESSION is a category separate from limitation, and it is empty on a green build", () => {
     for (const d of artifact.detectors) {
-      expect(d.regressions, `${d.criterion} tem falha NÃO declarada`).toEqual([]);
+      expect(d.regressions, `${d.criterion} has an UNDECLARED failure`).toEqual([]);
     }
   });
 
-  it("os caveats viajam identificados por id — o teste pina o id, não a redação", () => {
+  it("caveats travel identified by id — the test pins the id, not the wording", () => {
     const ids = artifact.method.caveats.map((c) => c.id);
     expect(artifact.method.scoring).toBe("count-per-passage");
     expect(ids).toEqual([
@@ -177,23 +177,23 @@ describe("artefato de eval — invariantes de publicação", () => {
     ]);
 
     for (const c of artifact.method.caveats) {
-      expect(c.text.length, `caveat ${c.id} sem texto`).toBeGreaterThan(40);
+      expect(c.text.length, `caveat ${c.id} has no text`).toBeGreaterThan(40);
     }
 
     expect(ids).toContain("circular_recall_curated");
   });
 
-  it("determinístico: duas construções produzem serialização byte-idêntica", () => {
+  it("deterministic: two builds produce byte-identical serialization", () => {
     expect(serializeEvalArtifact(buildEvalArtifact())).toBe(serializeEvalArtifact(buildEvalArtifact()));
   });
 
-  it("sem timestamp: a identidade da rodada é a tripla (versão, config, dado)", () => {
+  it("no timestamp: the run identity is the triple (version, config, data)", () => {
     const json = serializeEvalArtifact(artifact);
     expect(json).not.toMatch(/generatedAt|timestamp/i);
     expect(json).not.toMatch(/20\d\d-\d\d-\d\dT/);
   });
 
-  it("a convenção de pontuação é a mesma dos evals (contagem por trecho)", () => {
+  it("the scoring convention is the same as the evals' (count per passage)", () => {
     expect(scoreCounts(1, 1)).toEqual({ tp: 1, fp: 0, fn: 0 });
     expect(scoreCounts(0, 2)).toEqual({ tp: 0, fp: 2, fn: 0 });
     expect(scoreCounts(2, 0)).toEqual({ tp: 0, fp: 0, fn: 2 });

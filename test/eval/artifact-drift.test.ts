@@ -4,44 +4,45 @@ import { resolve } from "node:path";
 import { buildEvalArtifact, serializeEvalArtifact } from "./compute";
 
 /**
- * GUARD DE DRIFT — o artefato publicado tem que ser o do código atual.
+ * DRIFT GUARD — the published artifact must be the one the current code produces.
  *
- * Sem isto, mudar um golden e rodar `npm test` passa verde (os evals não fixam valores),
- * e `eval/report.json` fica descrevendo um estado que não existe mais — a página publicaria
- * número que não é o do HEAD, que é exatamente o modo de falha que transforma eval em
- * marketing. O `goldenHash` torna a divergência detectável; este teste a DETECTA.
+ * Without this, changing a golden and running `npm test` passes green (the evals pin no
+ * values), and `eval/report.json` ends up describing a state that no longer exists — the
+ * page would publish a number that is not HEAD's, which is exactly the failure mode that
+ * turns an eval into marketing. The `goldenHash` makes the divergence detectable; this
+ * test DETECTS it.
  *
- * É um teste da suíte normal (sem flag e sem git) de propósito: quem mexer no golden ou no
- * motor descobre na hora, não no code review.
+ * It deliberately runs in the normal suite (no flag, no git): whoever touches a golden or
+ * the engine finds out right away, not in code review.
  */
 const ARTIFACT_PATH = resolve(__dirname, "../../eval/report.json");
 const REGENERATE = "npm run eval";
 
-describe("eval/report.json — guard de drift", () => {
-  it("o artefato existe no repositório", () => {
-    expect(existsSync(ARTIFACT_PATH), `eval/report.json não encontrado — rode \`${REGENERATE}\``).toBe(true);
+describe("eval/report.json — drift guard", () => {
+  it("the artifact exists in the repository", () => {
+    expect(existsSync(ARTIFACT_PATH), `eval/report.json not found — run \`${REGENERATE}\``).toBe(true);
   });
 
-  it("o artefato committado é byte-idêntico ao que o código produz agora", () => {
-    const emDisco = readFileSync(ARTIFACT_PATH, "utf8");
-    const atual = serializeEvalArtifact(buildEvalArtifact());
+  it("the committed artifact is byte-identical to what the code produces now", () => {
+    const onDisk = readFileSync(ARTIFACT_PATH, "utf8");
+    const current = serializeEvalArtifact(buildEvalArtifact());
 
-    if (emDisco !== atual) {
-      const doDisco = JSON.parse(emDisco) as { stamp?: Record<string, string> };
-      const doCodigo = JSON.parse(atual) as { stamp?: Record<string, string> };
-      const diffEstampa = Object.keys(doCodigo.stamp ?? {}).filter(
-        (k) => doDisco.stamp?.[k] !== doCodigo.stamp?.[k],
-      );
+    // Message before comparing giant strings: vitest's diff is unreadable here, so what
+    // must reach the author is the instruction, not the whole JSON.
+    if (onDisk !== current) {
+      const fromDisk = JSON.parse(onDisk) as { stamp?: Record<string, string> };
+      const fromCode = JSON.parse(current) as { stamp?: Record<string, string> };
+      const stampDiff = Object.keys(fromCode.stamp ?? {}).filter((k) => fromDisk.stamp?.[k] !== fromCode.stamp?.[k]);
       expect.fail(
-        `eval/report.json está DESATUALIZADO em relação ao código/golden atual — rode \`${REGENERATE}\` e commite o resultado.` +
-          (diffEstampa.length > 0
-            ? ` Estampa divergente em: ${diffEstampa
-                .map((k) => `${k} (disco ${doDisco.stamp?.[k]} ≠ código ${doCodigo.stamp?.[k]})`)
+        `eval/report.json is STALE with respect to the current code/golden — run \`${REGENERATE}\` and commit the result.` +
+          (stampDiff.length > 0
+            ? ` Stamp diverges in: ${stampDiff
+                .map((k) => `${k} (disk ${fromDisk.stamp?.[k]} ≠ code ${fromCode.stamp?.[k]})`)
                 .join(", ")}.`
-            : " A estampa é igual, então o que mudou é conteúdo medido (contagem, precisão, recall ou cobertura)."),
+            : " The stamp is identical, so what changed is measured content (counts, precision, recall or coverage)."),
       );
     }
 
-    expect(emDisco).toBe(atual);
+    expect(onDisk).toBe(current);
   });
 });

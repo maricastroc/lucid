@@ -4,18 +4,18 @@ import { dirname, resolve } from "node:path";
 import { buildEvalArtifact, formatRate, serializeEvalArtifact } from "./compute";
 
 /**
- * Emissor do artefato de eval — GATEADO, roda só via `npm run eval`.
+ * Eval artifact emitter — GATED, runs only through `npm run eval`.
  *
- * Fica atrás de um flag pelo mesmo motivo do benchmark (`BENCHMARK=1`): escrever arquivo
- * em toda rodada de `npm test` sujaria o working tree e transformaria o artefato em ruído
- * de git. As INVARIANTES do artefato são cobertas sem flag em `artifact.test.ts`, então o
- * CI valida o conteúdo mesmo sem gravar.
+ * It sits behind a flag for the same reason as the benchmark (`BENCHMARK=1`): writing a
+ * file on every `npm test` run would dirty the working tree and turn the artifact into git
+ * noise. The artifact INVARIANTS are covered without a flag in `artifact.test.ts`, so CI
+ * validates the content even without writing it.
  */
 const RUN = process.env.EVAL_ARTIFACT === "1";
 const OUT = resolve(__dirname, "../../eval/report.json");
 
-describe.skipIf(!RUN)("emissão do artefato de eval", () => {
-  it("escreve eval/report.json com a estampa da rodada", () => {
+describe.skipIf(!RUN)("eval artifact emission", () => {
+  it("writes eval/report.json with the stamp of this run", () => {
     const artifact = buildEvalArtifact();
     const serialized = serializeEvalArtifact(artifact);
 
@@ -24,19 +24,19 @@ describe.skipIf(!RUN)("emissão do artefato de eval", () => {
 
     const { stamp, detectors, criteriaCoverage } = artifact;
     console.log(
-      `\n[eval] artefato escrito em eval/report.json\n` +
+      `\n[eval] artifact written to eval/report.json\n` +
         `  lucid ${stamp.lucidVersion} · locale ${stamp.localeId} · config ${stamp.configHash} · data ${stamp.dataHash}\n` +
         detectors
           .map(
             (d) =>
-              `  ${d.criterion} (${d.coverage}): ${d.summary.cases} casos, ${d.summary.negatives} negativos · ` +
-              `precisão ${formatRate(d.summary.precision)} · recall ${formatRate(d.summary.recall)} · ` +
-              `${d.summary.limitations} limitação(ões)`,
+              `  ${d.criterion} (${d.coverage}): ${d.summary.cases} cases, ${d.summary.negatives} negatives · ` +
+              `precision ${formatRate(d.summary.precision)} · recall ${formatRate(d.summary.recall)} · ` +
+              `${d.summary.limitations} limitation(s)`,
           )
           .join("\n") +
-        `\n  cobertura: ${criteriaCoverage.measured.length} medidos · ` +
-        `${criteriaCoverage.goldenLabelledOnly.length} só rotulados · ` +
-        `${criteriaCoverage.unitTestsOnly.length} só teste unitário (de ${criteriaCoverage.total})`,
+        `\n  coverage: ${criteriaCoverage.measured.length} measured · ` +
+        `${criteriaCoverage.goldenLabelledOnly.length} labelled only · ` +
+        `${criteriaCoverage.unitTestsOnly.length} unit tests only (of ${criteriaCoverage.total})`,
     );
 
     expect(serialized.length).toBeGreaterThan(0);
