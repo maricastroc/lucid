@@ -12,6 +12,7 @@ export const COPY_PT: UiCopy = {
     copy: "Copiar",
     copied: "Copiado",
     words: "palavras",
+    engineOutputSuffix: "",
   },
 
   language: {
@@ -202,6 +203,9 @@ export const COPY_PT: UiCopy = {
     aiLeadStrongDiagnostic: "diagnóstico acima não depende disto",
     aiTarget: (unit) => `A IA vai reescrever ${unit} (destacada no documento).`,
     aiModelLabel: "Modelo gerador",
+    modelNoteStrongGenerator: "gerador forte",
+    modelNotePaid: "pago, ~$0,14/1M",
+    proposerManual: "sua edição",
     aiRun: "Gerar e verificar",
     aiRunning: "Gerando e verificando…",
     aiFailed: (message) => `Não deu para gerar: ${message}`,

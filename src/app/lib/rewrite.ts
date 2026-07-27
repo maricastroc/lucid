@@ -10,23 +10,33 @@ import {
 } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { manualEditReplacement } from "./text-edit";
+import { copyFor } from "../i18n/copy";
+import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 const ACTIVE_LOCALE_ID = "pt-BR";
 
 export interface RewriteModel {
   providerId: "stub" | "groq" | "gemini" | "deepseek";
   model: string;
-  label: string;
+  /** Nome do modelo — não se traduz. */
+  name: string;
+  /** Qualificador editorial do nome, esse sim traduzido. */
+  noteKey?: "modelNoteStrongGenerator" | "modelNotePaid";
 }
 
 export const REWRITE_MODELS: readonly RewriteModel[] = [
-  { providerId: "gemini", model: GEMINI_MODELS[0], label: "Gemini · 2.5 Flash (gerador forte)" },
-  { providerId: "deepseek", model: DEEPSEEK_MODELS[0], label: "DeepSeek · V4 Flash (pago, ~$0,14/1M)" },
-  { providerId: "groq", model: GROQ_MODELS[0], label: "Groq · Llama 3.3 70B" },
-  { providerId: "groq", model: GROQ_MODELS[1], label: "Groq · Llama 3.1 8B" },
-  { providerId: "groq", model: GROQ_MODELS[2], label: "Groq · GPT-OSS 120B" },
-  { providerId: "groq", model: GROQ_MODELS[3], label: "Groq · GPT-OSS 20B" },
+  { providerId: "gemini", model: GEMINI_MODELS[0], name: "Gemini · 2.5 Flash", noteKey: "modelNoteStrongGenerator" },
+  { providerId: "deepseek", model: DEEPSEEK_MODELS[0], name: "DeepSeek · V4 Flash", noteKey: "modelNotePaid" },
+  { providerId: "groq", model: GROQ_MODELS[0], name: "Groq · Llama 3.3 70B" },
+  { providerId: "groq", model: GROQ_MODELS[1], name: "Groq · Llama 3.1 8B" },
+  { providerId: "groq", model: GROQ_MODELS[2], name: "Groq · GPT-OSS 120B" },
+  { providerId: "groq", model: GROQ_MODELS[3], name: "Groq · GPT-OSS 20B" },
 ];
+
+export function modelLabel(choice: RewriteModel, lang: UiLang = DEFAULT_UI_LANG): string {
+  if (choice.noteKey === undefined) return choice.name;
+  return `${choice.name} (${copyFor(lang).note[choice.noteKey]})`;
+}
 
 const SAMPLE_FIXTURES: Record<string, string> = {
   [`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo destinado à verificação das condições supracitadas exigidas para a concessão do benefício, e a decisão foi comunicada ao interessado no processo.`]:
@@ -98,9 +108,10 @@ export async function verifyManualEdit(
   draft: string,
   criterion?: string,
   declarations?: readonly AgentDeclaration[],
+  lang: UiLang = DEFAULT_UI_LANG,
 ): Promise<VerifiedRewrite> {
   const proposal = {
-    proposerId: "sua edição",
+    proposerId: copyFor(lang).note.proposerManual,
     original: target.text,
     proposed: manualEditReplacement(draft),
   };

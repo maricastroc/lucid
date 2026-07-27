@@ -12,6 +12,7 @@ export const COPY_EN: UiCopy = {
     copy: "Copy",
     copied: "Copied",
     words: "words",
+    engineOutputSuffix: " · pt-BR",
   },
 
   language: {
@@ -203,6 +204,9 @@ export const COPY_EN: UiCopy = {
     aiLeadStrongDiagnostic: "diagnosis above does not depend on this",
     aiTarget: (unit) => `The AI will rewrite ${unit} (highlighted in the document).`,
     aiModelLabel: "Generator model",
+    modelNoteStrongGenerator: "strong generator",
+    modelNotePaid: "paid, ~$0.14/1M",
+    proposerManual: "your edit",
     aiRun: "Generate and verify",
     aiRunning: "Generating and verifying…",
     aiFailed: (message) => `Could not generate: ${message}`,

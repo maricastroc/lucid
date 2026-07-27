@@ -147,13 +147,16 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
       >
         <p className="text-[12.5px] font-medium" style={{ color: "var(--sev-warn)" }}>
           {t.stuck}
+          <span className="u-sublabel ml-1.5 font-normal text-ink-3">{c.common.engineOutputSuffix}</span>
         </p>
-        <p className="mt-1 text-[12px] text-ink-2">{signal.motivo}.</p>
+        <p className="mt-1 text-[12px] text-ink-2" lang="pt-BR">
+          {signal.motivo}.
+        </p>
 
         {result.ondeTravou.length > 0 && (
           <ul className="mt-2 space-y-1.5">
             {result.ondeTravou.map((stop, i) => (
-              <li key={i} className="text-[12px] text-ink-2">
+              <li key={i} className="text-[12px] text-ink-2" lang="pt-BR">
                 <span className="text-ink-3">{t.excerpt}</span> “{stop.frase}” — {stop.motivo}
               </li>
             ))}
@@ -161,7 +164,10 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
         )}
 
         <p className="mt-2 text-[12px] text-ink-3">
-          {t.extracted} <span className="text-ink-2">“{result.respostaExtraida}”</span>
+          {t.extracted}{" "}
+          <span className="text-ink-2" lang="pt-BR">
+            “{result.respostaExtraida}”
+          </span>
         </p>
 
         <Operacoes operacoes={operacoes} />
@@ -171,11 +177,19 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
 
   return (
     <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2 px-3 py-3">
-      <p className="text-[12.5px] text-ink-2">{t.noFloorViolation}</p>
-      <p className="mt-1 text-[12px] text-ink-3">{signal.nota}</p>
+      <p className="text-[12.5px] text-ink-2">
+        {t.noFloorViolation}
+        <span className="u-sublabel ml-1.5 text-ink-3">{c.common.engineOutputSuffix}</span>
+      </p>
+      <p className="mt-1 text-[12px] text-ink-3" lang="pt-BR">
+        {signal.nota}
+      </p>
 
       <p className="mt-2 text-[12px] text-ink-3">
-        {t.extracted} <span className="text-ink-2">“{result.respostaExtraida}”</span>
+        {t.extracted}{" "}
+        <span className="text-ink-2" lang="pt-BR">
+          “{result.respostaExtraida}”
+        </span>
       </p>
 
       <Operacoes operacoes={operacoes} />

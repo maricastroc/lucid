@@ -15,6 +15,8 @@ export interface UiCopy {
     readonly copy: string;
     readonly copied: string;
     readonly words: string;
+    /** Sufixo que marca saída de máquina em pt-BR dentro da UI em inglês; vazio em pt-BR. */
+    readonly engineOutputSuffix: string;
   };
 
   readonly language: {
@@ -169,6 +171,9 @@ export interface UiCopy {
     readonly aiLeadStrongDiagnostic: string;
     readonly aiTarget: (unit: string) => string;
     readonly aiModelLabel: string;
+    readonly modelNoteStrongGenerator: string;
+    readonly modelNotePaid: string;
+    readonly proposerManual: string;
     readonly aiRun: string;
     readonly aiRunning: string;
     readonly aiFailed: (message: string) => string;

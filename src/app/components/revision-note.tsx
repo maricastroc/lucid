@@ -7,7 +7,7 @@ import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, 
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
-import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
+import { generateRewrite, modelLabel, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
@@ -104,7 +104,7 @@ function ManualEdit({
   declaration: AgentDeclaration | null;
   onManualEdit: (target: Span, replacement: string) => void;
 }) {
-  const { c } = useCopy();
+  const { c, lang } = useCopy();
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
   const original = target.text;
@@ -141,7 +141,7 @@ function ManualEdit({
     setChecking(true);
     try {
       setResult(
-        await verifyManualEdit(source, target, draft, finding.criterion, declaration ? [declaration] : undefined),
+        await verifyManualEdit(source, target, draft, finding.criterion, declaration ? [declaration] : undefined, lang),
       );
     } finally {
       setChecking(false);
@@ -334,7 +334,7 @@ function GeneratedRewrite({
   declaration: AgentDeclaration | null;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
-  const { c } = useCopy();
+  const { c, lang } = useCopy();
   const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
   const [directed, setDirected] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -405,7 +405,7 @@ function GeneratedRewrite({
             const found = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === next);
             if (found) setChoice(found);
           }}
-          options={REWRITE_MODELS.map((m) => ({ value: `${m.providerId}:${m.model}`, label: m.label }))}
+          options={REWRITE_MODELS.map((m) => ({ value: `${m.providerId}:${m.model}`, label: modelLabel(m, lang) }))}
         />
         <button
           type="button"
@@ -502,7 +502,10 @@ function RewriteResult({
       </div>
 
       <div className="px-4 py-3">
-        <p className="u-sublabel mb-2 text-ink-3">{c.note.proofLabel}</p>
+        <p className="u-sublabel mb-2 text-ink-3">
+          {c.note.proofLabel}
+          {c.common.engineOutputSuffix}
+        </p>
         <ul className="flex flex-col gap-1.5">
           {verification.proofs.map((p) => (
             <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
@@ -512,7 +515,10 @@ function RewriteResult({
 
       {verification.signals.length > 0 && (
         <div className="border-t border-rule-1 px-4 py-3">
-          <p className="u-sublabel mb-2 text-ink-3">{c.note.signalLabel}</p>
+          <p className="u-sublabel mb-2 text-ink-3">
+            {c.note.signalLabel}
+            {c.common.engineOutputSuffix}
+          </p>
           <ul className="flex flex-col gap-1.5">
             {verification.signals.map((s) => (
               <CheckLine key={s.check} ok={!s.flagged} kind="signal" detail={s.detail} />
@@ -566,7 +572,9 @@ function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"
       <span className={`shrink-0 font-semibold ${tone}`} aria-hidden>
         {mark}
       </span>
-      <span className="text-ink-2">{detail}</span>
+      <span className="text-ink-2" lang="pt-BR">
+        {detail}
+      </span>
     </li>
   );
 }
