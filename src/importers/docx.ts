@@ -76,7 +76,16 @@ export function htmlToRawBlocks(html: string): RawBlock[] {
   return blocks;
 }
 
-export async function importDocx(bytes: ArrayBuffer, services: DocumentBuildServices): Promise<Document> {
-  const { value: html } = await mammoth.convertToHtml({ arrayBuffer: bytes });
+function zipSource(bytes: ArrayBuffer | Uint8Array): { arrayBuffer: ArrayBuffer; buffer: Uint8Array } {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const arrayBuffer = view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength) as ArrayBuffer;
+  return { arrayBuffer, buffer: view };
+}
+
+export async function importDocx(
+  bytes: ArrayBuffer | Uint8Array,
+  services: DocumentBuildServices,
+): Promise<Document> {
+  const { value: html } = await mammoth.convertToHtml(zipSource(bytes));
   return buildStructuredDocument(htmlToRawBlocks(html), services);
 }

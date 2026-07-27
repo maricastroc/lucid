@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".stryker-tmp/**",
     "reports/**",
+    "dist/**",
   ]),
   {
     files: ["src/lucid/core/**/*.ts", "src/lucid/core/**/*.tsx"],
