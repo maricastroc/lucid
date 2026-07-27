@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import type { Diagnostic, Finding } from "@/lucid";
 import { CRITERION_ORDER, findingId, isSafe, metaFor, provenanceTag } from "../lib/criteria";
+import { useCopy } from "../i18n/use-copy";
+import type { UiLang } from "../i18n/types";
 import { ActionBadge, CriterionMark, SeverityDot } from "./badges";
 import { ChevronDownIcon, EyeIcon, EyeOffIcon } from "./icons";
 
@@ -41,9 +43,9 @@ function countOf(diagnostic: Diagnostic, criterion: string): number {
   return s ? s.count.info + s.count.warning + s.count.error : 0;
 }
 
-function tagFor(diagnostic: Diagnostic, criterion: string) {
+function tagFor(diagnostic: Diagnostic, criterion: string, lang: UiLang) {
   const f = diagnostic.findings.find((x) => x.criterion === criterion);
-  return f ? provenanceTag(f) : null;
+  return f ? provenanceTag(f, lang) : null;
 }
 
 function ProvenanceTag({ tag }: { tag: { text: string; title: string } | null }) {
@@ -70,6 +72,7 @@ export function RevisionList({
   onSelect,
   onToggleCriterion,
 }: Props) {
+  const { c, lang } = useCopy();
   const listRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   const [coverageOpen, setCoverageOpen] = useState(false);
@@ -99,19 +102,19 @@ export function RevisionList({
   };
 
   const buckets: Array<[Bucket, string, number]> = [
-    ["all", "Todas", findings.length],
-    ["safe", "Troca direta", safeCount],
-    ["human", "Decisão sua", humanCount],
+    ["all", c.revisionList.bucketAll, findings.length],
+    ["safe", c.revisionList.bucketSafe, safeCount],
+    ["human", c.revisionList.bucketHuman, humanCount],
   ];
 
   return (
-    <section aria-label="Índice da auditoria" className="border-t border-rule-1">
+    <section aria-label={c.revisionList.regionLabel} className="border-t border-rule-1">
       <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-5">
-        <h2 className="u-label text-ink-3">Índice da auditoria</h2>
-        {groups.length > 0 && <span className="text-[10.5px] text-ink-3">por gravidade</span>}
+        <h2 className="u-label text-ink-3">{c.revisionList.title}</h2>
+        {groups.length > 0 && <span className="text-[10.5px] text-ink-3">{c.revisionList.bySeverity}</span>}
       </div>
 
-      <div role="tablist" aria-label="Filtrar anotações" className="flex items-center gap-1.5 px-6 pb-3">
+      <div role="tablist" aria-label={c.revisionList.filterLabel} className="flex items-center gap-1.5 px-6 pb-3">
         {buckets.map(([b, labelText, n]) => (
           <button
             key={b}
@@ -133,11 +136,11 @@ export function RevisionList({
       <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1.5 px-3 pb-3">
         {groups.length === 0 ? (
           <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">
-            {findings.length === 0 ? "Nenhuma anotação disparada." : "Nenhuma anotação neste filtro."}
+            {findings.length === 0 ? c.revisionList.empty : c.revisionList.emptyInFilter}
           </p>
         ) : (
           groups.map((g) => {
-            const meta = metaFor(g.criterion);
+            const meta = metaFor(g.criterion, lang);
             const isCollapsed = collapsed.has(g.criterion);
             const panelId = `revgrp-${g.criterion}`;
             return (
@@ -157,13 +160,13 @@ export function RevisionList({
                     />
                     <CriterionMark criterion={g.criterion} />
                     <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
-                    <ProvenanceTag tag={tagFor(diagnostic, g.criterion)} />
+                    <ProvenanceTag tag={tagFor(diagnostic, g.criterion, lang)} />
                     <span className="tabular-nums text-[13px] text-ink-1">{g.items.length}</span>
                   </button>
                   <button
                     type="button"
-                    aria-label={`Ocultar “${meta.label}” no documento`}
-                    title="Ocultar no documento"
+                    aria-label={c.revisionList.hideNamed(meta.label)}
+                    title={c.revisionList.hideInDocument}
                     onClick={() => onToggleCriterion(g.criterion)}
                     className="mr-1.5 grid size-7 shrink-0 place-items-center rounded-md text-ink-dim transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
                   >
@@ -218,27 +221,27 @@ export function RevisionList({
               className={`size-3.5 shrink-0 transition-transform duration-150 ${coverageOpen ? "" : "-rotate-90"}`}
             />
             <span className="min-w-0 flex-1 text-[12px]">
-              {clean.length} {clean.length === 1 ? "critério verificado, sem ocorrência" : "critérios verificados, sem ocorrência"}
-              {hidden.length > 0 && ` · ${hidden.length} ${hidden.length === 1 ? "oculto" : "ocultos"}`}
+              {c.revisionList.cleanCriteria(clean.length)}
+              {hidden.length > 0 && ` · ${c.revisionList.hiddenCriteria(hidden.length)}`}
             </span>
-            <span className="u-sublabel">Cobertura</span>
+            <span className="u-sublabel">{c.revisionList.coverage}</span>
           </button>
 
           {coverageOpen && (
             <div className="mt-1 flex flex-col gap-0.5">
-              {hidden.map((c) => {
-                const meta = metaFor(c);
+              {hidden.map((criterion) => {
+                const meta = metaFor(criterion, lang);
                 return (
-                  <div key={c} className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 opacity-60">
-                    <CriterionMark criterion={c} />
+                  <div key={criterion} className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 opacity-60">
+                    <CriterionMark criterion={criterion} />
                     <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-1">{meta.label}</span>
-                    <ProvenanceTag tag={tagFor(diagnostic, c)} />
-                    <span className="tabular-nums text-[12px] text-ink-3">{countOf(diagnostic, c)}</span>
+                    <ProvenanceTag tag={tagFor(diagnostic, criterion, lang)} />
+                    <span className="tabular-nums text-[12px] text-ink-3">{countOf(diagnostic, criterion)}</span>
                     <button
                       type="button"
-                      aria-label={`Mostrar “${meta.label}” no documento`}
-                      title="Mostrar no documento"
-                      onClick={() => onToggleCriterion(c)}
+                      aria-label={c.revisionList.showNamed(meta.label)}
+                      title={c.revisionList.showInDocument}
+                      onClick={() => onToggleCriterion(criterion)}
                       className="grid size-6 shrink-0 place-items-center rounded-md text-ink-3 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
                     >
                       <EyeOffIcon className="size-3.5" />
@@ -246,18 +249,18 @@ export function RevisionList({
                   </div>
                 );
               })}
-              {clean.map((c) => {
-                const meta = metaFor(c);
+              {clean.map((criterion) => {
+                const meta = metaFor(criterion, lang);
                 return (
-                  <div key={c} className="flex items-center gap-2.5 px-3 py-1.5">
-                    <CriterionMark criterion={c} className="opacity-45" />
+                  <div key={criterion} className="flex items-center gap-2.5 px-3 py-1.5">
+                    <CriterionMark criterion={criterion} className="opacity-45" />
                     <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-3">{meta.label}</span>
                     <span className="tabular-nums text-[12px] text-ink-dim">0</span>
                   </div>
                 );
               })}
               <p className="px-3 pt-1.5 text-[11px] italic leading-relaxed text-ink-3">
-                A ausência de anotações não é atestado de clareza — é a cobertura da auditoria.
+                {c.revisionList.absenceCaveat}
               </p>
             </div>
           )}

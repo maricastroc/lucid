@@ -17,6 +17,8 @@ import {
 import { SAMPLE_TEXT } from "../lib/sample";
 import { type WorkspaceSnapshot } from "../lib/workspace";
 
+export type ImportError = "unreadable";
+
 export interface DocumentSource {
   text: string;
   setText: (value: string) => void;
@@ -28,7 +30,7 @@ export interface DocumentSource {
   structureLost: boolean;
 
   importing: boolean;
-  importError: string | null;
+  importError: ImportError | null;
   dismissImportError: () => void;
 
   loadExample: () => void;
@@ -45,7 +47,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
   const [structureLost, setStructureLost] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [importError, setImportError] = useState<string | null>(null);
+  const [importError, setImportError] = useState<ImportError | null>(null);
 
   const setText = useCallback((value: string) => {
     setImportedDoc((current) => {
@@ -90,7 +92,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
       setTextState(doc.source);
       return true;
     } catch {
-      setImportError("Não foi possível ler o arquivo. Confirme que é um .docx válido.");
+      setImportError("unreadable");
       return false;
     } finally {
       setImporting(false);

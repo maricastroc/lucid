@@ -1,24 +1,27 @@
 import type { Finding } from "@/lucid";
 import { totalBurden } from "@/report/rewrite";
+import { copyFor } from "../i18n/copy";
+import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 export type LedgerSource = "manual" | "ai";
 
 export interface LedgerEntry {
   source: LedgerSource;
   label: string;
+  proposerId?: string;
   before?: string;
   after?: string;
   burdenBefore: number;
   burdenAfter: number;
 }
 
-const SOURCE_LABEL: Record<LedgerSource, string> = {
-  manual: "Edição do autor",
-  ai: "Reescrita por IA",
-};
+export function sourceLabel(source: LedgerSource, lang: UiLang = DEFAULT_UI_LANG): string {
+  return copyFor(lang).ledger[source];
+}
 
-export function sourceLabel(source: LedgerSource): string {
-  return SOURCE_LABEL[source];
+export function entryLabel(entry: LedgerEntry, lang: UiLang = DEFAULT_UI_LANG): string {
+  const base = sourceLabel(entry.source, lang);
+  return entry.proposerId === undefined ? base : `${base} · ${entry.proposerId}`;
 }
 
 export function documentBurden(findings: readonly Finding[]): number {

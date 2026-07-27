@@ -5,6 +5,7 @@ import { configDeviations, DEFAULT_CONFIG, type Config } from "@/lucid";
 import {
   criterionLabelFor,
   describeDeviation,
+  knobLabel,
   KNOBS,
   readEnabled,
   readNumber,
@@ -12,6 +13,7 @@ import {
   withEnabled,
   withNumber,
 } from "../lib/profile";
+import { useCopy } from "../i18n/use-copy";
 import { Checkbox } from "./ui/checkbox";
 import { Stepper } from "./ui/stepper";
 
@@ -21,31 +23,32 @@ interface Props {
 }
 
 export function ProfilePanel({ config, onChange }: Props) {
+  const { c, lang } = useCopy();
+  const p = c.profile;
   const deviations = configDeviations(config);
   const [open, setOpen] = useState(false);
 
   return (
     <section className="border-t border-rule-1 px-6 py-5">
-      <span className="u-label text-ink-3">Perfil editorial</span>
+      <span className="u-label text-ink-3">{p.label}</span>
 
       <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-1">
-        {deviations.length === 0
-          ? "Limiares padrão do Lucid."
-          : `${deviations.length} ${deviations.length === 1 ? "ajuste seu" : "ajustes seus"} sobre o padrão.`}
+        {deviations.length === 0 ? p.defaults : p.adjustments(deviations.length)}
       </p>
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        A norma não fixa números — o limiar de frase longa é escolha editorial, e o seu manual pode divergir do padrão
-        daqui. Ajustar é legítimo; <strong className="font-medium text-ink-2">esconder o ajuste não é</strong>. Todo
-        desvio aparece abaixo, entra no relatório exportado e muda o <span className="tabular-nums">configHash</span> que
-        carimba a auditoria.
+        {p.rationaleBefore}
+        <strong className="font-medium text-ink-2">{p.rationaleStrong}</strong>
+        {p.rationaleAfter}
+        <span className="tabular-nums">configHash</span>
+        {p.rationaleTail}
       </p>
 
       {deviations.length > 0 && (
         <ul className="mt-3 flex flex-col gap-1">
           {deviations.map((deviation) => (
             <li key={`${deviation.section}.${deviation.field}`} className="text-[12.5px] text-ink-1">
-              <span className="text-ink-3">·</span> {describeDeviation(deviation)}
+              <span className="text-ink-3">·</span> {describeDeviation(deviation, lang)}
             </li>
           ))}
         </ul>
@@ -57,7 +60,7 @@ export function ProfilePanel({ config, onChange }: Props) {
           onClick={() => setOpen(!open)}
           className="inline-flex items-center gap-2 rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
         >
-          {open ? "Fechar perfil" : "Ajustar perfil"}
+          {open ? p.closeAdjust : p.openAdjust}
         </button>
         {deviations.length > 0 && (
           <button
@@ -65,20 +68,20 @@ export function ProfilePanel({ config, onChange }: Props) {
             onClick={() => onChange(DEFAULT_CONFIG)}
             className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[12.5px] font-medium text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
           >
-            Voltar ao padrão
+            {p.resetDefaults}
           </button>
         )}
       </div>
 
       {open && (
         <div className="mt-4">
-          <span className="u-label text-ink-3">Limiares</span>
+          <span className="u-label text-ink-3">{p.thresholdsLabel}</span>
           <div className="mt-2 flex flex-col gap-2">
             {KNOBS.map((knob) => (
               <div key={`${knob.section}.${knob.field}`} className="flex items-center justify-between gap-3">
-                <span className="min-w-0 text-[12.5px] text-ink-1">{knob.label}</span>
+                <span className="min-w-0 text-[12.5px] text-ink-1">{knobLabel(knob, lang)}</span>
                 <Stepper
-                  label={knob.label}
+                  label={knobLabel(knob, lang)}
                   min={knob.min}
                   max={knob.max}
                   value={readNumber(config, knob.section, knob.field)}
@@ -88,11 +91,8 @@ export function ProfilePanel({ config, onChange }: Props) {
             ))}
           </div>
 
-          <span className="u-label mt-5 block text-ink-3">Critérios da política</span>
-          <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">
-            Desligar um critério faz o pass não rodar. O silêncio dele deixa de significar “não encontrei” e passa a
-            significar “não procurei” — por isso cada desligamento é listado acima e no relatório.
-          </p>
+          <span className="u-label mt-5 block text-ink-3">{p.policyLabel}</span>
+          <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">{p.policyNote}</p>
           <div className="mt-2 flex flex-col divide-y divide-rule-1">
             {TOGGLEABLE_SECTIONS.map((section) => (
               <label
@@ -100,7 +100,7 @@ export function ProfilePanel({ config, onChange }: Props) {
                 htmlFor={`criterio-${section}`}
                 className="flex cursor-pointer items-center justify-between gap-3 py-2"
               >
-                <span className="min-w-0 text-[12.5px] text-ink-1">{criterionLabelFor(section)}</span>
+                <span className="min-w-0 text-[12.5px] text-ink-1">{criterionLabelFor(section, lang)}</span>
                 <Checkbox
                   id={`criterio-${section}`}
                   checked={readEnabled(config, section)}

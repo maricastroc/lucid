@@ -37,6 +37,7 @@ function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (!isRecord(value)) return false;
   if (value.source !== "manual" && value.source !== "ai") return false;
   if (typeof value.label !== "string") return false;
+  if (value.proposerId !== undefined && typeof value.proposerId !== "string") return false;
   if (typeof value.burdenBefore !== "number" || typeof value.burdenAfter !== "number") return false;
   if (value.before !== undefined && typeof value.before !== "string") return false;
   if (value.after !== undefined && typeof value.after !== "string") return false;

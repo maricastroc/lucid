@@ -3,11 +3,12 @@
 import { useRef, useState } from "react";
 import { type Finding, type Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
-import { isSafe, metaFor, principleGroupLabel, provenanceLabel, SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
+import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, severityLabel } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
+import { useCopy } from "../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
 import { Select } from "./ui/select";
@@ -23,10 +24,11 @@ export interface RevisionNoteProps {
 }
 
 export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: RevisionNoteProps) {
-  const meta = metaFor(finding.criterion);
+  const { c, lang } = useCopy();
+  const meta = metaFor(finding.criterion, lang);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
-  const group = principleGroupLabel(finding.principleGroup);
+  const group = principleGroupLabel(finding.principleGroup, lang);
 
   const [declaration, setDeclaration] = useState<AgentDeclaration | null>(null);
 
@@ -37,20 +39,20 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
         <span className="text-ink-3">·</span>
         <span className="inline-flex items-center gap-1.5 text-ink-2">
           <span className="size-1.75 rounded-full" style={{ background: ink }} aria-hidden />
-          {SEVERITY_LABEL[finding.severity]}
+          {severityLabel(finding.severity, lang)}
         </span>
       </div>
 
-      <h3 className="mt-2 font-serif text-[23px] leading-[1.2] text-ink-0">{detectionHeadline(finding)}</h3>
+      <h3 className="mt-2 font-serif text-[23px] leading-[1.2] text-ink-0">{detectionHeadline(finding, lang)}</h3>
 
       <p className="mt-2 text-[12.5px] text-ink-2">
         <span className="text-ink-1">{group}</span> · {meta.principleName}
         <span className="ml-2 rounded-[5px] border border-rule-1 bg-surface-2 px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3">
-          {provenanceLabel(finding)}
+          {provenanceLabel(finding, lang)}
         </span>
       </p>
 
-      <Block label="Trecho">
+      <Block label={c.note.excerpt}>
         <blockquote className="border-l-2 pl-4" style={{ borderColor: ink }}>
           <span className="font-serif text-[17px] leading-snug text-ink-0">
             <span
@@ -63,13 +65,13 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
         </blockquote>
       </Block>
 
-      <Block label="O que encontramos">
-        <Prose>{detectedProse(finding)}</Prose>
+      <Block label={c.note.whatWeFound}>
+        <Prose>{detectedProse(finding, lang)}</Prose>
       </Block>
 
-      <Block label="Por que afeta a clareza">
+      <Block label={c.note.whyItMatters}>
         <Prose>{meta.why}</Prose>
-        <Prose className="mt-2 text-ink-2">{finding.justification}</Prose>
+        <EngineJustification finding={finding} />
       </Block>
 
       <div className="mt-7">
@@ -102,8 +104,9 @@ function ManualEdit({
   declaration: AgentDeclaration | null;
   onManualEdit: (target: Span, replacement: string) => void;
 }) {
+  const { c } = useCopy();
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
-  const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
+  const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
   const original = target.text;
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(original);
@@ -129,7 +132,7 @@ function ManualEdit({
         className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
       >
         <PenNibIcon className="size-3.5" />
-        Editar ou colar minha versão
+        {c.note.manualOpen}
       </button>
     );
   }
@@ -149,14 +152,14 @@ function ManualEdit({
     <div className="mt-4 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
       <div className="flex items-center justify-between border-b border-rule-1 px-3.5 py-2.5">
         <span className="u-sublabel text-ink-3">
-          Sua versão · {unitLabel}
+          {c.note.manualTitle} · {unitLabel}
         </span>
         <button
           type="button"
           onClick={() => setOpen(false)}
           className="rounded-md px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2"
         >
-          Fechar
+          {c.common.close}
         </button>
       </div>
       <div className="px-3.5 py-3">
@@ -167,7 +170,7 @@ function ManualEdit({
             setResult(null);
           }}
           spellCheck={false}
-          aria-label={`Editar ${unitLabel}`}
+          aria-label={c.note.manualEditAria(unitLabel)}
           className="block max-h-[46vh] min-h-28 w-full resize-y rounded-lg border border-rule-2 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
           style={{ caretColor: "var(--accent)" }}
         />
@@ -178,7 +181,7 @@ function ManualEdit({
             onClick={check}
             className={APPLY_BUTTON_CLASS}
           >
-            {checking ? "Verificando…" : "Verificar minha versão"}
+            {checking ? c.note.manualVerifying : c.note.manualVerify}
           </button>
           <button
             type="button"
@@ -189,7 +192,7 @@ function ManualEdit({
             }}
             className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Restaurar
+            {c.common.restore}
           </button>
         </div>
 
@@ -201,20 +204,18 @@ function ManualEdit({
           />
         )}
 
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          Você escreve ou cola; a engine julga a sua versão com as mesmas provas da IA — nenhuma fonte é privilegiada.
-          Aplicar vira um rascunho e a engine re-audita.
-        </p>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.manualNote}</p>
       </div>
     </div>
   );
 }
 
 function SafeEquivalent({ finding }: { finding: Finding }) {
+  const { c, lang } = useCopy();
   const [copied, setCopied] = useState(false);
   const before = finding.span.text.replace(/\s+/g, " ").trim();
   const after = finding.suggestion!;
-  const rationale = buildConfidence(finding).rationale;
+  const rationale = buildConfidence(finding, lang).rationale;
 
   const copy = async () => {
     try {
@@ -230,19 +231,19 @@ function SafeEquivalent({ finding }: { finding: Finding }) {
     <div className="overflow-hidden rounded-xl border border-safe-line bg-safe-weak">
       <div className="flex items-center gap-2 px-4 pt-3.5 text-[12.5px] font-semibold text-safe">
         <CheckIcon className="size-4" />
-        Troca direta · equivalente curado
+        {c.note.safeHeader}
       </div>
 
       <div className="px-4 py-3">
         <div className="rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)">
-          <DiffRow label="Termo">
+          <DiffRow label={c.note.safeTerm}>
             <span className="font-serif text-[15.5px] text-ink-2 line-through decoration-ink-3">{before}</span>
           </DiffRow>
           <div className="flex items-center gap-2 border-t border-rule-1 px-3.5 py-1">
             <ArrowDownIcon className="size-3.5 text-safe" />
-            <span className="u-sublabel text-ink-3">equivalente 1:1 do glossário</span>
+            <span className="u-sublabel text-ink-3">{c.note.safeEquivalent}</span>
           </div>
-          <DiffRow label="Comum" tone="safe">
+          <DiffRow label={c.note.safePlain} tone="safe">
             <span className="font-serif text-[15.5px] font-medium text-ink-0">{after}</span>
           </DiffRow>
         </div>
@@ -253,15 +254,12 @@ function SafeEquivalent({ finding }: { finding: Finding }) {
             onClick={copy}
             className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
           >
-            {copied ? "Copiado" : "Copiar"}
+            {copied ? c.common.copied : c.common.copy}
           </button>
         </div>
 
         <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          A ferramenta indica o equivalente; ela não altera o texto. Faça a troca em “Editar ou colar minha versão”
-          abaixo — a engine re-audita o resultado.
-        </p>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.safeNote}</p>
       </div>
     </div>
   );
@@ -299,24 +297,23 @@ function HumanDecision({
   onDeclare: (d: AgentDeclaration | null) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
-  const rationale = buildConfidence(finding).rationale;
+  const { c, lang } = useCopy();
+  const rationale = buildConfidence(finding, lang).rationale;
   return (
     <div className="overflow-hidden rounded-xl border border-human-line bg-human-weak">
       <div className="flex items-center gap-2 px-4 pt-3.5 text-[12.5px] font-semibold text-human">
         <PenNibIcon className="size-4" />
-        Exige decisão humana
+        {c.note.humanHeader}
       </div>
       <div className="px-4 py-3">
         <p className="text-[12.5px] leading-relaxed text-ink-1">
-          A ferramenta identificou a construção, mas não existe reescrita segura sem conhecer a intenção do autor —
-          então ela prefere <span className="text-ink-0">apontar a inventar</span>.
+          {c.note.humanLead}
+          <span className="text-ink-0">{c.note.humanLeadStrong}</span>.
         </p>
         <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
 
         <div className="mt-4 border-t border-human-line pt-4">
-          <p className="u-sublabel mb-2.5 text-ink-3">
-            Como seguir
-          </p>
+          <p className="u-sublabel mb-2.5 text-ink-3">{c.note.howToProceed}</p>
           <Guidance finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />
         </div>
 
@@ -337,6 +334,7 @@ function GeneratedRewrite({
   declaration: AgentDeclaration | null;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
+  const { c } = useCopy();
   const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
   const [directed, setDirected] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -352,7 +350,7 @@ function GeneratedRewrite({
   }
 
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
-  const unitLabel = unit === "sentence" ? "esta frase" : "este parágrafo";
+  const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
 
   const run = async () => {
     const controller = new AbortController();
@@ -371,7 +369,7 @@ function GeneratedRewrite({
       );
     } catch (e) {
       if (!controller.signal.aborted) {
-        setError(e instanceof Error ? e.message : "falha ao gerar a reescrita");
+        setError(e instanceof Error ? e.message : c.note.aiFailedGeneric);
       }
     } finally {
       abortRef.current = null;
@@ -386,21 +384,22 @@ function GeneratedRewrite({
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
       <div className="flex items-center border-b border-rule-1 px-4 py-2.5">
-        <span className="u-sublabel text-ink-2">Reescrita por IA</span>
+        <span className="u-sublabel text-ink-2">{c.note.aiTitle}</span>
       </div>
       <div className="px-4 py-3">
         <p className="text-[12px] leading-relaxed text-ink-2">
-          Uma das formas de propor uma nova versão — a IA reescreve; você também pode{" "}
-          <span className="text-ink-1">editar ou colar a sua</span>. A engine julga qualquer uma delas do mesmo jeito.
-          Opcional: o <span className="text-ink-1">diagnóstico acima não depende disto</span>.
+          {c.note.aiLead}
+          <span className="text-ink-1">{c.note.aiLeadStrongYours}</span>
+          {c.note.aiLeadMiddle}
+          <span className="text-ink-1">{c.note.aiLeadStrongDiagnostic}</span>.
         </p>
         <p className="mt-2 rounded-lg border border-human-line bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
-          A IA vai reescrever <span className="font-semibold text-ink-0">{unitLabel}</span> (destacada no documento).
+          {c.note.aiTarget(unitLabel)}
         </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Select
-          ariaLabel="Modelo gerador"
+          ariaLabel={c.note.aiModelLabel}
           value={`${choice.providerId}:${choice.model}`}
           onValueChange={(next) => {
             const found = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === next);
@@ -414,7 +413,7 @@ function GeneratedRewrite({
           disabled={loading}
           className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
         >
-          {loading ? "Gerando e verificando…" : "Gerar e verificar"}
+          {loading ? c.note.aiRunning : c.note.aiRun}
         </button>
         {loading && (
           <button
@@ -422,14 +421,14 @@ function GeneratedRewrite({
             onClick={cancel}
             className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
           >
-            Cancelar
+            {c.common.cancel}
           </button>
         )}
       </div>
 
       {error !== null && (
         <p className="mt-3 rounded-lg border border-human-line bg-human-weak px-3 py-2.5 text-[12px] leading-relaxed text-ink-1">
-          Não deu para gerar: {error}
+          {c.note.aiFailed(error)}
         </p>
       )}
 
@@ -442,8 +441,7 @@ function GeneratedRewrite({
           />
         ) : (
           <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
-            O modelo não devolveu uma reescrita diferente do trecho — nada a propor. O verificador não fabrica uma; a
-            decisão continua sua.
+            {c.note.aiNoProposal}
           </p>
         ))}
       </div>
@@ -460,6 +458,7 @@ function RewriteResult({
   currentOriginal: string;
   onApplyRewrite: () => void;
 }) {
+  const { c } = useCopy();
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
 
@@ -480,14 +479,14 @@ function RewriteResult({
       >
         <div className="flex items-center justify-between gap-2">
           <span className="u-sublabel" style={{ color: blocked ? "var(--human)" : "var(--safe)" }}>
-            A engine verificou
+            {c.note.verdictLabel}
           </span>
           <span className="tabular-nums text-[11px] text-ink-3">
-            {passed}/{verification.proofs.length} provas
+            {c.note.verdictProofs(passed, verification.proofs.length)}
           </span>
         </div>
         <p className="mt-1.5 font-serif text-[19px] leading-tight text-ink-0">
-          {blocked ? "Uma prova falhou — a ferramenta não atesta este trecho." : "Nenhuma falha de piso neste trecho."}
+          {blocked ? c.note.verdictBlocked : c.note.verdictClear}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-2">
           <span>
@@ -495,15 +494,15 @@ function RewriteResult({
           </span>
           <span className="text-ink-3">·</span>
           <span>
-            palavras <span className="tabular-nums text-ink-1">{fmtDelta(dWords, 0)}</span>
+            {c.note.verdictWords} <span className="tabular-nums text-ink-1">{fmtDelta(dWords, 0)}</span>
           </span>
           <span className="text-ink-3">·</span>
-          <span className="text-ink-3">medição, não aprovação</span>
+          <span className="text-ink-3">{c.note.verdictMeasureNotApproval}</span>
         </div>
       </div>
 
       <div className="px-4 py-3">
-        <p className="u-sublabel mb-2 text-ink-3">Prova · determinística</p>
+        <p className="u-sublabel mb-2 text-ink-3">{c.note.proofLabel}</p>
         <ul className="flex flex-col gap-1.5">
           {verification.proofs.map((p) => (
             <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
@@ -513,9 +512,7 @@ function RewriteResult({
 
       {verification.signals.length > 0 && (
         <div className="border-t border-rule-1 px-4 py-3">
-          <p className="u-sublabel mb-2 text-ink-3">
-            Sinal · heurístico (não é prova)
-          </p>
+          <p className="u-sublabel mb-2 text-ink-3">{c.note.signalLabel}</p>
           <ul className="flex flex-col gap-1.5">
             {verification.signals.map((s) => (
               <CheckLine key={s.check} ok={!s.flagged} kind="signal" detail={s.detail} />
@@ -526,8 +523,8 @@ function RewriteResult({
 
       <div className="border-t border-rule-1 px-4 py-3">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
-          <p className="u-sublabel text-ink-3">Trecho avaliado</p>
-          <span className="font-mono text-[10px] text-ink-3" title="modelo + versão do prompt">
+          <p className="u-sublabel text-ink-3">{c.note.evaluatedExcerpt}</p>
+          <span className="font-mono text-[10px] text-ink-3" title={c.note.proposerTitle}>
             {proposal.proposerId}
           </span>
         </div>
@@ -545,14 +542,10 @@ function RewriteResult({
                 : { background: "var(--accent)", color: "var(--accent-ink)" }
             }
           >
-            {stale ? "Trecho mudou — gere de novo" : blocked ? "Usar mesmo assim como rascunho" : "Usar como rascunho"}
+            {stale ? c.note.applyStale : blocked ? c.note.applyBlocked : c.note.apply}
           </button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            {stale
-              ? "O trecho foi editado depois que esta versão foi gerada. Para não perder sua edição, gere de novo antes de aplicar."
-              : blocked
-                ? "Se você entende o motivo acima e ainda quer, aplique como rascunho — a engine re-audita."
-                : "Reveja antes de usar — a decisão de aplicar é sua."}
+            {stale ? c.note.applyStaleNote : blocked ? c.note.applyBlockedNote : c.note.applyNote}
           </p>
         </div>
       </div>
@@ -575,6 +568,21 @@ function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"
       </span>
       <span className="text-ink-2">{detail}</span>
     </li>
+  );
+}
+
+function EngineJustification({ finding }: { finding: Finding }) {
+  const { c, lang } = useCopy();
+  if (lang === "pt-BR") return <Prose className="mt-2 text-ink-2">{finding.justification}</Prose>;
+  return (
+    <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2/50 px-3 py-2.5">
+      <p className="u-sublabel text-ink-3" title={c.note.engineOutputHint}>
+        {c.note.engineOutput}
+      </p>
+      <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-2" lang="pt-BR">
+        {finding.justification}
+      </p>
+    </div>
   );
 }
 

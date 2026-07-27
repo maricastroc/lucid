@@ -8,6 +8,7 @@ import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
+import { useCopy } from "./i18n/use-copy";
 import { useCriterionFilter } from "./hooks/use-criterion-filter";
 import { useDocumentSource } from "./hooks/use-document-source";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
@@ -20,6 +21,7 @@ import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 
 export function Studio() {
+  const { c } = useCopy();
   const [restored] = useState(readWorkspace);
   const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
   const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
@@ -120,11 +122,11 @@ export function Studio() {
 
   const goHome = useCallback(() => {
     if (isEmpty && mode === "audit") return;
-    if (!isEmpty && !window.confirm("Voltar ao início? O texto e a trilha de revisão serão descartados.")) return;
+    if (!isEmpty && !window.confirm(c.studio.goHomeConfirm)) return;
     clearWorkspace();
     clearDocument();
     afterDocumentReplaced();
-  }, [isEmpty, mode, clearDocument, afterDocumentReplaced]);
+  }, [isEmpty, mode, clearDocument, afterDocumentReplaced, c]);
 
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
@@ -145,7 +147,13 @@ export function Studio() {
   const applyRewrite = useCallback(
     (target: Span, proposal: RewriteProposal) =>
       applyChange(
-        { source: "ai", label: `${sourceLabel("ai")} · ${proposal.proposerId}`, before: target.text, after: proposal.proposed },
+        {
+          source: "ai",
+          label: `${sourceLabel("ai")} · ${proposal.proposerId}`,
+          proposerId: proposal.proposerId,
+          before: target.text,
+          after: proposal.proposed,
+        },
         spliceSpan(diagnostic.text, target, proposal.proposed),
       ),
     [diagnostic, applyChange],
@@ -203,9 +211,9 @@ export function Studio() {
           role="alert"
           className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
-          <span>{importError}</span>
+          <span>{c.studio.importUnreadable}</span>
           <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
-            Fechar
+            {c.common.close}
           </button>
         </div>
       )}
@@ -215,10 +223,7 @@ export function Studio() {
           role="status"
           className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
-          <span>
-            A edição mudou o documento além do que a estrutura importada acompanha. Títulos e listas deixaram de ser
-            reconhecidos, então os critérios do Princípio 2 não estão sendo aplicados a partir daqui.
-          </span>
+          <span>{c.studio.structureLost}</span>
         </div>
       )}
 
@@ -227,10 +232,7 @@ export function Studio() {
           role="alert"
           className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
-          <span>
-            Não foi possível salvar este trabalho no navegador — ele será perdido se você fechar a aba. Exporte o
-            relatório para não depender disto.
-          </span>
+          <span>{c.studio.saveFailed}</span>
         </div>
       )}
 
@@ -267,7 +269,7 @@ export function Studio() {
           onClick={revealSheet}
           className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-pop) lg:hidden"
         >
-          {findings.length} {findings.length === 1 ? "revisão" : "revisões"}
+          {c.studio.revisions(findings.length)}
         </button>
       )}
 
@@ -286,14 +288,14 @@ export function Studio() {
           <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
             <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
               <ArrowDownIcon className="size-4 text-safe" aria-hidden />
-              Alteração aplicada ao texto.
+              {c.studio.changeApplied}
             </span>
             <button
               type="button"
               onClick={undo}
               className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
             >
-              Desfazer
+              {c.studio.undo}
             </button>
           </div>
         </div>

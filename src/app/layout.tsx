@@ -38,13 +38,16 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      data-lang="pt-BR"
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('lucid-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}`,
+            __html:
+              `try{var t=localStorage.getItem('lucid-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}` +
+              `try{var l=localStorage.getItem('lucid-lang');if(l==='en'||l==='pt-BR'){var d=document.documentElement;d.setAttribute('data-lang',l);d.setAttribute('lang',l);}}catch(e){}`,
           }}
         />
       </head>

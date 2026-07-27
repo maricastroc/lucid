@@ -1,5 +1,7 @@
 import type { Metrics, ReadabilityAnomaly, ReadabilityReading, ReadabilityUnmeasurableCause } from "@/lucid";
 import { localePtBR, READABILITY_REFERENCE_RANGE } from "@/lucid";
+import { copyFor } from "../i18n/copy";
+import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 export interface ReadabilityDisplay {
   measured: boolean;
@@ -12,37 +14,31 @@ const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(
 
 const RANGE = `${READABILITY_REFERENCE_RANGE.min}–${READABILITY_REFERENCE_RANGE.max}`;
 
-const UNMEASURABLE_NOTE: Record<ReadabilityUnmeasurableCause, string> = {
-  no_words: "Não há palavras para medir — nenhum valor foi calculado (não é zero).",
-  no_sentences: "Não há frase delimitada para medir — nenhum valor foi calculado (não é zero).",
-};
+function unmeasurableNote(cause: ReadabilityUnmeasurableCause, lang: UiLang): string {
+  const r = copyFor(lang).readability;
+  return cause === "no_words" ? r.noWords : r.noSentences;
+}
 
-function anomalyNote(a: ReadabilityAnomaly): string {
+function anomalyNote(a: ReadabilityAnomaly, lang: UiLang): string {
+  const r = copyFor(lang).readability;
   switch (a.cause) {
     case "small_sample":
-      return (
-        `Amostra pequena: ${a.words} ${a.words === 1 ? "palavra" : "palavras"}. A fórmula é calibrada para ` +
-        `texto corrido; abaixo de ${a.threshold} palavras uma única palavra move o índice dezenas de pontos.`
-      );
+      return r.smallSample(a.words, a.threshold);
     case "sentence_boundary_missing":
-      return (
-        `${fmt(a.wordsPerSentence)} palavras por frase, acima do máximo plausível de ${a.threshold}: ` +
-        `a segmentação não encontrou fronteira de frase — provável pontuação ausente no texto colado.`
-      );
+      return r.sentenceBoundaryMissing(fmt(a.wordsPerSentence), a.threshold);
     case "syllables_per_word_impossible":
-      return (
-        `${fmt(a.syllablesPerWord)} sílabas por palavra, acima do máximo plausível de ${a.threshold}: ` +
-        `a palavra mais longa do português tem 18 sílabas, então há token que não é palavra do idioma.`
-      );
+      return r.syllablesImpossible(fmt(a.syllablesPerWord), a.threshold);
   }
 }
 
-export function describeReadability(reading: ReadabilityReading): ReadabilityDisplay {
+export function describeReadability(reading: ReadabilityReading, lang: UiLang = DEFAULT_UI_LANG): ReadabilityDisplay {
+  const r = copyFor(lang).readability;
+
   if (reading.kind === "unmeasurable") {
-    return { measured: false, value: "—", qualifier: "sem medida", notes: [UNMEASURABLE_NOTE[reading.cause]] };
+    return { measured: false, value: "—", qualifier: r.noMeasure, notes: [unmeasurableNote(reading.cause, lang)] };
   }
 
-  const notes = reading.anomalies.map(anomalyNote);
+  const notes = reading.anomalies.map((a) => anomalyNote(a, lang));
   const value = fmt(reading.value);
 
   switch (reading.position) {
@@ -51,17 +47,17 @@ export function describeReadability(reading: ReadabilityReading): ReadabilityDis
         measured: true,
         value,
         qualifier: reading.band
-          ? `faixa ${reading.band.label} (${reading.band.min}–${reading.band.max})`
-          : `dentro do intervalo de referência (${RANGE})`,
+          ? r.band(r.bandLabel[reading.band.id] ?? reading.band.label, reading.band.min, reading.band.max)
+          : r.inRange(RANGE),
         notes,
       };
     case "above_range":
-      return { measured: true, value, qualifier: `acima do intervalo de referência (${RANGE})`, notes };
+      return { measured: true, value, qualifier: r.aboveRange(RANGE), notes };
     case "below_range":
-      return { measured: true, value, qualifier: `abaixo do intervalo de referência (${RANGE})`, notes };
+      return { measured: true, value, qualifier: r.belowRange(RANGE), notes };
   }
 }
 
-export function readabilityOf(metrics: Metrics): ReadabilityDisplay {
-  return describeReadability(localePtBR.metrics.readability.interpret(metrics));
+export function readabilityOf(metrics: Metrics, lang: UiLang = DEFAULT_UI_LANG): ReadabilityDisplay {
+  return describeReadability(localePtBR.metrics.readability.interpret(metrics), lang);
 }

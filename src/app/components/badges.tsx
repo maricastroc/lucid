@@ -2,9 +2,11 @@
 
 import type { Finding, Severity } from "@/lucid";
 import { actionStateOf, metaFor, severityInkVar } from "../lib/criteria";
+import { useCopy } from "../i18n/use-copy";
 import { CheckIcon, PenNibIcon } from "./icons";
 
 export function ActionBadge({ finding, size = "sm" }: { finding: Finding; size?: "sm" | "md" }) {
+  const { c } = useCopy();
   const state = actionStateOf(finding);
   const pad = size === "md" ? "gap-1.5 px-2.5 py-1 text-[12px]" : "gap-1 px-2 py-0.5 text-[11px]";
   const icon = size === "md" ? "size-3.5" : "size-3";
@@ -15,7 +17,7 @@ export function ActionBadge({ finding, size = "sm" }: { finding: Finding; size?:
         className={`inline-flex shrink-0 items-center rounded-full border border-safe-line bg-safe-weak font-medium text-safe ${pad}`}
       >
         <CheckIcon className={icon} />
-        {size === "md" ? "Troca direta indicada" : "Troca direta"}
+        {size === "md" ? c.badges.safeLong : c.badges.safeShort}
       </span>
     );
   }
@@ -24,7 +26,7 @@ export function ActionBadge({ finding, size = "sm" }: { finding: Finding; size?:
       className={`inline-flex shrink-0 items-center rounded-full border border-human-line bg-human-weak font-medium text-human ${pad}`}
     >
       <PenNibIcon className={icon} />
-      {size === "md" ? "Exige decisão humana" : "Decisão sua"}
+      {size === "md" ? c.badges.humanLong : c.badges.humanShort}
     </span>
   );
 }
@@ -40,7 +42,8 @@ export function SeverityDot({ severity, className = "" }: { severity: Severity; 
 }
 
 export function CriterionMark({ criterion, className = "" }: { criterion: string; className?: string }) {
-  const meta = metaFor(criterion);
+  const { lang } = useCopy();
+  const meta = metaFor(criterion, lang);
   if (meta.channel === "passage") {
     return (
       <span

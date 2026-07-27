@@ -15,7 +15,7 @@ describe("ledger — provenance trail", () => {
 
   it("only two legitimate authors exist: the human and the AI — the engine is never a source (ADR-054)", () => {
     const sources: LedgerEntry["source"][] = ["manual", "ai"];
-    expect(sources.map(sourceLabel)).toEqual(["Edição do autor", "Reescrita por IA"]);
+    expect(sources.map((source) => sourceLabel(source))).toEqual(["Edição do autor", "Reescrita por IA"]);
   });
 
   it("documentBurden uses the canonical severity scale (not a raw count)", () => {

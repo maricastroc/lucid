@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { BriefingCheck, ReaderBriefing } from "@/lucid";
+import { useCopy } from "../i18n/use-copy";
+import type { UiCopy } from "../i18n/copy";
 import { CheckIcon, CloseIcon } from "./icons";
 
 interface Props {
@@ -10,26 +12,14 @@ interface Props {
   onChange: (briefing: ReaderBriefing) => void;
 }
 
-const QUESTIONS = [
-  {
-    key: "audience" as const,
-    label: "Quem é o leitor?",
-    hint: "Descreva quem vai ler de verdade — não o cargo que assina.",
-    placeholder: "Ex.: cidadão sem formação jurídica que pede o benefício pela primeira vez",
-  },
-  {
-    key: "purpose" as const,
-    label: "O que ele precisa fazer depois de ler?",
-    hint: "A ação ou decisão concreta que o texto tem que viabilizar.",
-    placeholder: "Ex.: saber se tem direito e reunir os documentos no prazo",
-  },
-  {
-    key: "priorKnowledge" as const,
-    label: "O que ele já sabe?",
-    hint: "O que se pode pressupor — e, por consequência, o que precisa ser explicado.",
-    placeholder: "Ex.: sabe que existe um benefício; não conhece o vocabulário do processo",
-  },
-];
+function questionsFor(c: UiCopy) {
+  const b = c.briefing;
+  return [
+    { key: "audience" as const, label: b.audienceLabel, hint: b.audienceHint, placeholder: b.audiencePlaceholder },
+    { key: "purpose" as const, label: b.purposeLabel, hint: b.purposeHint, placeholder: b.purposePlaceholder },
+    { key: "priorKnowledge" as const, label: b.priorLabel, hint: b.priorHint, placeholder: b.priorPlaceholder },
+  ];
+}
 
 function Field({
   label,
@@ -60,6 +50,8 @@ function Field({
 }
 
 export function BriefingPanel({ briefing, check, onChange }: Props) {
+  const { c } = useCopy();
+  const b = c.briefing;
   const [open, setOpen] = useState(check.declared);
   const [draft, setDraft] = useState("");
 
@@ -78,19 +70,20 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
   return (
     <section className="border-t border-rule-1 px-6 py-5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="u-label text-ink-3">Princípio 1 · Relevante</span>
+        <span className="u-label text-ink-3">{b.label}</span>
         <span className="text-[11.5px] text-ink-3">ABNT NBR ISO 24495-1 · 5.1</span>
       </div>
 
       <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-1">
-        {check.declared ? "Briefing do leitor declarado por você." : "Briefing do leitor não declarado."}
+        {check.declared ? b.declared : b.notDeclared}
       </p>
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        A norma pede que você modele o leitor <em>antes</em> de escrever: quem lê, o que precisa fazer, o que entra e o
-        que sai. <strong className="font-medium text-ink-2">Nenhuma regra automática decide o que é relevante para o
-        seu leitor</strong> — por isso o Lucid não pontua este princípio e não o dá por cumprido. Ele pergunta, registra
-        a sua resposta e confere só o que é literalmente conferível.
+        {b.rationaleBefore}
+        <em>{b.rationaleEmphasis}</em>
+        {b.rationaleMiddle}
+        <strong className="font-medium text-ink-2">{b.rationaleStrong}</strong>
+        {b.rationaleAfter}
       </p>
 
       <button
@@ -98,12 +91,12 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
         onClick={() => setOpen(!open)}
         className="mt-3 inline-flex items-center gap-2 rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
       >
-        {open ? "Fechar briefing" : check.declared ? "Rever briefing" : "Declarar o briefing do leitor"}
+        {open ? b.closeBriefing : check.declared ? b.openReview : b.openDeclare}
       </button>
 
       {open && (
         <div className="mt-1">
-          {QUESTIONS.map((question) => (
+          {questionsFor(c).map((question) => (
             <Field
               key={question.key}
               label={question.label}
@@ -115,12 +108,11 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
           ))}
 
           <div className="mt-4">
-            <span className="block text-[12.5px] font-medium text-ink-1">
-              O que o leitor precisa encontrar no texto?
-            </span>
+            <span className="block text-[12.5px] font-medium text-ink-1">{b.mustFindLabel}</span>
             <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-3">
-              Uma expressão por item. A ferramenta procura cada uma <strong className="font-medium">literalmente</strong>{" "}
-              e diz onde está — ela não julga se o assunto foi coberto.
+              {b.mustFindHintBefore}
+              <strong className="font-medium">{b.mustFindHintStrong}</strong>
+              {b.mustFindHintAfter}
             </span>
             <div className="mt-1.5 flex gap-2">
               <input
@@ -132,7 +124,7 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
                     addExpression();
                   }
                 }}
-                placeholder="Ex.: prazo de recurso"
+                placeholder={b.mustFindPlaceholder}
                 className="min-w-0 flex-1 rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[13px] text-ink-0 placeholder:text-ink-dim focus:border-accent focus:outline-none"
               />
               <button
@@ -140,7 +132,7 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
                 onClick={addExpression}
                 className="shrink-0 rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
               >
-                Adicionar
+                {c.common.add}
               </button>
             </div>
           </div>
@@ -149,7 +141,7 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
 
       {check.coverage.length > 0 && (
         <div className="mt-4">
-          <span className="u-label text-ink-3">Presença literal</span>
+          <span className="u-label text-ink-3">{b.presenceLabel}</span>
           <ul className="mt-2 flex flex-col gap-1.5">
             {check.coverage.map((item) => {
               const found = item.occurrences.length > 0;
@@ -164,9 +156,7 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
                     <span className="min-w-0 break-words text-ink-1">
                       “{item.expression}”
                       <span className="text-ink-3">
-                        {found
-                          ? ` — aparece ${item.occurrences.length}×`
-                          : " — não aparece com essas palavras"}
+                        {found ? b.occurrences(item.occurrences.length) : b.notFound}
                       </span>
                     </span>
                   </span>
@@ -174,21 +164,17 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
                     <button
                       type="button"
                       onClick={() => removeExpression(item.expression)}
-                      aria-label={`Remover “${item.expression}”`}
+                      aria-label={b.removeNamed(item.expression)}
                       className="shrink-0 text-[11.5px] text-ink-3 transition-colors duration-150 hover:text-ink-0"
                     >
-                      remover
+                      {c.common.remove}
                     </button>
                   )}
                 </li>
               );
             })}
           </ul>
-          <p className="mt-2.5 text-[11.5px] leading-relaxed text-ink-3">
-            Busca literal, sensível a acento. Encontrar não prova que o leitor vai entender; não encontrar não prova que
-            o assunto está ausente — pode estar dito com outras palavras. Esta lista é a sua, não um critério da norma:
-            ela não entra no placar.
-          </p>
+          <p className="mt-2.5 text-[11.5px] leading-relaxed text-ink-3">{b.literalCaveat}</p>
         </div>
       )}
     </section>

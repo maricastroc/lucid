@@ -39,12 +39,12 @@ describe("audit report — the editorial profile travels with the audit", () => 
 describe("describeDeviation — every deviation reads as prose, in the criterion's own name", () => {
   it("uses the criterion label for a toggle", () => {
     const config = { ...DEFAULT_CONFIG, mesoclise: { enabled: false } };
-    expect(configDeviations(config).map(describeDeviation)).toEqual(["Mesóclise: desligado (padrão: ligado)"]);
+    expect(configDeviations(config).map((d) => describeDeviation(d))).toEqual(["Mesóclise: desligado (padrão: ligado)"]);
   });
 
   it("uses the knob label for a threshold", () => {
     const config = { ...DEFAULT_CONFIG, paragraphLength: { enabled: true, maxSentences: 9 } };
-    expect(configDeviations(config).map(describeDeviation)).toEqual([
+    expect(configDeviations(config).map((d) => describeDeviation(d))).toEqual([
       "Parágrafo longo — acima de (frases) 9 (padrão: 5)",
     ]);
   });

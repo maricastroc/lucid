@@ -1,6 +1,9 @@
-import type { Category, CriterionId, Finding, PrincipleGroup, Severity } from "@/lucid";
+import type { CriterionId, Finding, PrincipleGroup, Severity } from "@/lucid";
 import { isCriterionId } from "@/lucid";
 import type { CriterionCoverage } from "@/report/eval/contract";
+import { copyFor } from "../i18n/copy";
+import { CRITERION_TEXT_EN } from "../i18n/criteria-meta.en";
+import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 export type Criterion = CriterionId;
 export type Channel = "inline" | "passage";
@@ -15,6 +18,8 @@ export interface CriterionMeta {
   signal: string;
   why: string;
 }
+
+export type CriterionText = Pick<CriterionMeta, "label" | "kind" | "principleName" | "signal" | "why">;
 
 export const CRITERION_ORDER: readonly Criterion[] = [
   "passive_voice",
@@ -275,11 +280,19 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
   },
 };
 
+const META_BY_LANG: Record<UiLang, Record<Criterion, CriterionMeta>> = {
+  "pt-BR": CRITERION_META,
+  en: Object.fromEntries(
+    (Object.keys(CRITERION_META) as Criterion[]).map((c) => [c, { ...CRITERION_META[c], ...CRITERION_TEXT_EN[c] }]),
+  ) as Record<Criterion, CriterionMeta>,
+};
+
 export function isCriterion(value: string): value is Criterion {
   return isCriterionId(value);
 }
-export function metaFor(criterion: string): CriterionMeta {
-  return isCriterion(criterion) ? CRITERION_META[criterion] : CRITERION_META.jargon;
+export function metaFor(criterion: string, lang: UiLang = DEFAULT_UI_LANG): CriterionMeta {
+  const meta = META_BY_LANG[lang];
+  return isCriterion(criterion) ? meta[criterion] : meta.jargon;
 }
 
 export type { CriterionCoverage };
@@ -298,17 +311,12 @@ const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([
   "leitor_terceira_pessoa",
 ]);
 
-const COVERAGE_LABEL: Record<CriterionCoverage, string> = {
-  curated: "curada",
-  productive: "produtiva",
-};
-
 export function coverageOf(criterion: string): CriterionCoverage {
   return isCriterion(criterion) && CURATED_COVERAGE.has(criterion) ? "curated" : "productive";
 }
 
-export function coverageLabel(coverage: CriterionCoverage): string {
-  return COVERAGE_LABEL[coverage];
+export function coverageLabel(coverage: CriterionCoverage, lang: UiLang = DEFAULT_UI_LANG): string {
+  return copyFor(lang).taxonomy.coverage[coverage];
 }
 
 export function findingId(f: Finding): string {
@@ -333,18 +341,11 @@ export function severityInkVar(sev: Severity): string {
   return "var(--sev-info)";
 }
 
-export const SEVERITY_LABEL: Record<Severity, string> = {
-  info: "Observação",
-  warning: "Atenção",
-  error: "Prioritário",
-};
+export function severityLabel(sev: Severity, lang: UiLang = DEFAULT_UI_LANG): string {
+  return copyFor(lang).taxonomy.severity[sev];
+}
 
-export const CATEGORY_LABEL: Record<Category, string> = {
-  lexical: "léxico",
-  syntactic: "sintaxe",
-  structural: "estrutura",
-  metric: "métrica",
-};
+export const SEVERITY_LABEL: Record<Severity, string> = copyFor("pt-BR").taxonomy.severity;
 
 export type ActionState = "safe" | "human";
 
@@ -355,26 +356,21 @@ export function isSafe(f: Finding): boolean {
   return actionStateOf(f) === "safe";
 }
 
-const PRINCIPLE_GROUP_LABEL: Record<PrincipleGroup, string> = {
-  relevant: "Relevante",
-  findable: "Localizável",
-  understandable: "Compreensível",
-  usable: "Usável",
-};
-
-export function principleGroupLabel(group: PrincipleGroup): string {
-  return PRINCIPLE_GROUP_LABEL[group];
+export function principleGroupLabel(group: PrincipleGroup, lang: UiLang = DEFAULT_UI_LANG): string {
+  return copyFor(lang).taxonomy.principleGroup[group];
 }
 
-export function provenanceLabel(f: Finding): string {
+export function provenanceLabel(f: Finding, lang: UiLang = DEFAULT_UI_LANG): string {
+  const t = copyFor(lang).taxonomy;
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return `${f.normativeReference.standard} · ${f.normativeReference.section}`;
   }
-  if (f.source === "editorial-pt-br") return "Extensão editorial PT-BR";
-  return "Heurística estrutural";
+  if (f.source === "editorial-pt-br") return t.editorialExtension;
+  return t.structuralHeuristic;
 }
 
-export function provenanceTag(f: Finding): { text: string; title: string } {
+export function provenanceTag(f: Finding, lang: UiLang = DEFAULT_UI_LANG): { text: string; title: string } {
+  const t = copyFor(lang).taxonomy;
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return {
       text: f.normativeReference.section,
@@ -382,9 +378,9 @@ export function provenanceTag(f: Finding): { text: string; title: string } {
     };
   }
   if (f.source === "editorial-pt-br") {
-    return { text: "PT-BR", title: "Extensão editorial PT-BR — fora da norma ISO" };
+    return { text: t.editorialExtensionTag, title: t.editorialExtensionTitle };
   }
-  return { text: "estrut.", title: "Heurística estrutural — fora da norma ISO" };
+  return { text: t.structuralHeuristicTag, title: t.structuralHeuristicTitle };
 }
 
 export function orderFindingsForIndex(findings: readonly Finding[]): Finding[] {

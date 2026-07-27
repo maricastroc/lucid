@@ -1,5 +1,6 @@
 "use client";
 
+import { useCopy } from "../../i18n/use-copy";
 import { MinusIcon, PlusIcon } from "../icons";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function Stepper({ value, min, max, label, onChange }: Props) {
+  const { c } = useCopy();
   const clamp = (next: number) => Math.min(Math.max(Math.trunc(next), min), max);
   const step = (delta: number) => onChange(clamp(value + delta));
 
@@ -18,7 +20,7 @@ export function Stepper({ value, min, max, label, onChange }: Props) {
     <div className="inline-flex h-8 shrink-0 items-stretch overflow-hidden rounded-lg border border-rule-2 bg-sheet">
       <button
         type="button"
-        aria-label={`Diminuir ${label}`}
+        aria-label={c.profile.decrease(label)}
         disabled={value <= min}
         onClick={() => step(-1)}
         className="grid w-7 place-items-center text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0 disabled:cursor-not-allowed disabled:text-ink-dim disabled:hover:bg-transparent"
@@ -42,7 +44,7 @@ export function Stepper({ value, min, max, label, onChange }: Props) {
 
       <button
         type="button"
-        aria-label={`Aumentar ${label}`}
+        aria-label={c.profile.increase(label)}
         disabled={value >= max}
         onClick={() => step(1)}
         className="grid w-7 place-items-center text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0 disabled:cursor-not-allowed disabled:text-ink-dim disabled:hover:bg-transparent"

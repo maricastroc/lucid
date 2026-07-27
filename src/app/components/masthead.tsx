@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Mode } from "./document-view";
 import { useTheme } from "../hooks/use-theme";
+import { useUiLang } from "../i18n/lang";
+import { useCopy } from "../i18n/use-copy";
 import { MoonIcon, SunIcon } from "./icons";
 
 interface Props {
@@ -17,6 +19,7 @@ interface Props {
 
 export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }: Props) {
   const { theme, toggle } = useTheme();
+  const { c } = useCopy();
   const fileInput = useRef<HTMLInputElement>(null);
 
   return (
@@ -24,14 +27,14 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
       <button
         type="button"
         onClick={onGoHome}
-        aria-label="Voltar ao início"
+        aria-label={c.masthead.home}
         className="flex items-center gap-3 rounded-lg transition-opacity duration-150 hover:opacity-80"
       >
         <Logo />
         <div className="flex items-baseline gap-2.5">
           <span className="font-serif text-[19px] font-semibold leading-none tracking-[-0.01em] text-ink-0">Lucid</span>
           <span className="hidden h-3 w-px bg-rule-2 sm:block" aria-hidden />
-          <span className="hidden text-[12.5px] text-ink-2 sm:block">Auditor de linguagem simples</span>
+          <span className="hidden text-[12.5px] text-ink-2 sm:block">{c.masthead.tagline}</span>
         </div>
       </button>
 
@@ -53,24 +56,24 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
           disabled={importing}
           className="hidden items-center gap-1.5 rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60 sm:inline-flex"
         >
-          {importing ? "Abrindo…" : "Abrir .docx"}
+          {importing ? c.masthead.opening : c.masthead.openDocx}
         </button>
         <Link
           href="/avaliacao"
           className="hidden items-center rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 sm:inline-flex"
         >
-          Avaliação
+          {c.masthead.evaluation}
         </Link>
 
         <div
           role="tablist"
-          aria-label="Modo de trabalho"
+          aria-label={c.masthead.workMode}
           className="flex items-center rounded-full border border-rule-2 bg-surface p-0.5"
         >
           {(
             [
-              ["audit", "Revisar"],
-              ["edit", "Escrever"],
+              ["audit", c.masthead.review],
+              ["edit", c.masthead.write],
             ] as const
           ).map(([m, labelText]) => (
             <button
@@ -89,16 +92,37 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
           ))}
         </div>
 
+        <LanguageToggle />
+
         <button
           type="button"
           onClick={toggle}
-          aria-label={theme === "light" ? "Ativar tema escuro" : "Ativar tema claro"}
+          aria-label={theme === "light" ? c.masthead.darkTheme : c.masthead.lightTheme}
           className="grid size-9 place-items-center rounded-full border border-rule-2 text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
         >
           {theme === "light" ? <MoonIcon className="size-4.25" /> : <SunIcon className="size-4.25" />}
         </button>
       </div>
     </header>
+  );
+}
+
+/** Mostra o idioma-alvo, como o botão de tema mostra o tema-alvo. */
+function LanguageToggle() {
+  const { lang, toggle } = useUiLang();
+  const { c } = useCopy();
+  const target = lang === "pt-BR" ? "en" : "pt-BR";
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={c.language.switchTo[target]}
+      title={c.language.switchTo[target]}
+      className="u-label grid size-9 place-items-center rounded-full border border-rule-2 text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
+    >
+      {c.language.short[target]}
+    </button>
   );
 }
 

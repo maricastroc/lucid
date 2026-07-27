@@ -5,6 +5,8 @@ import { isCriterionId, passiveScaffold, type Finding, type SplitPoint } from "@
 import type { AgentDeclaration } from "@/report/rewrite";
 import { Checkbox } from "./ui/checkbox";
 import { longSentenceGuidance } from "../lib/narrative";
+import { useCopy } from "../i18n/use-copy";
+import type { UiCopy } from "../i18n/copy";
 
 export interface GuidanceProps {
   finding: Finding;
@@ -14,247 +16,164 @@ export interface GuidanceProps {
 }
 
 export function Guidance({ finding, source, declaration, onDeclare }: GuidanceProps) {
-  const c = finding.criterion;
-  if (!isCriterionId(c)) return <GenericGuide />;
-  switch (c) {
+  const { c } = useCopy();
+  const g = c.guidance;
+  const criterion = finding.criterion;
+  if (!isCriterionId(criterion)) return <GuideText>{g.generic}</GuideText>;
+  switch (criterion) {
     case "long_sentence":
       return <LongSentenceGuide finding={finding} source={source} />;
     case "passive_voice":
       return <PassiveGuide finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />;
     case "passiva_sintetica":
-      return (
-        <GuideText>
-          O “se” esconde quem age. Se quiser deixar o agente claro, reescreva com sujeito explícito (“a multa é aplicada
-          pelo órgão” ou “o órgão aplica a multa”). Se o “se” for reflexivo, ignore — só você sabe qual é o caso.
-        </GuideText>
-      );
+      return <GuideText>{g.passivaSintetica}</GuideText>;
     case "nominalization":
       return <NominalizationGuide finding={finding} />;
     case "nominalizacao_encadeada":
-      return (
-        <GuideText>
-          Procure o verbo escondido no substantivo e devolva a ação a ele (“a verificação das informações” → “verificar as
-          informações”). Quem pratica a ação — e qual nominalização vale desfazer — é decisão sua.
-        </GuideText>
-      );
+      return <GuideText>{g.nominalizacaoEncadeada}</GuideText>;
     case "jargon":
-      return <JargonGuide />;
+      return <GuideText>{g.jargon}</GuideText>;
     case "sigla_sem_expansao":
-      return (
-        <GuideText>
-          Na primeira vez que a sigla aparece, escreva o nome por extenso seguido dela entre parênteses — “Nome Por
-          Extenso (SIGLA)”. Depois disso, use só a sigla. A expansão é sua; a ferramenta não a conhece.
-        </GuideText>
-      );
+      return <GuideText>{g.siglaSemExpansao}</GuideText>;
     case "subordinacao_densa":
       return <SubordinacaoGuide finding={finding} />;
     case "leitor_terceira_pessoa":
       return <LeitorGuide finding={finding} />;
     case "redundancia":
-      return (
-        <GuideText>
-          Corte o termo que repete o sentido do outro — a forma enxuta está na justificativa acima. Qual dos dois remover é
-          decisão sua.
-        </GuideText>
-      );
+      return <GuideText>{g.redundancia}</GuideText>;
     case "perifrase_inflada":
-      return (
-        <GuideText>
-          Troque a locução pela forma enxuta equivalente (na justificativa). Confira só se a regência do que vem depois
-          continua certa.
-        </GuideText>
-      );
+      return <GuideText>{g.perifraseInflada}</GuideText>;
     case "dupla_negacao":
-      return (
-        <GuideText>
-          Diga direto o que a dupla negação afirma — a forma direta está na justificativa. Confirme que a nuance que você
-          quis dar não se perde.
-        </GuideText>
-      );
+      return <GuideText>{g.duplaNegacao}</GuideText>;
     case "mais_que_perfeito_sintetico":
-      return (
-        <GuideText>
-          Prefira a forma composta, mais clara: “tinha feito” no lugar de “fizera”. A troca pede reconjugar com o
-          auxiliar — a frase final é sua.
-        </GuideText>
-      );
+      return <GuideText>{g.maisQuePerfeito}</GuideText>;
     case "gerundismo":
-      return (
-        <GuideText>
-          Troque o gerúndio encadeado pelo futuro simples ou o presente: “enviaremos” / “enviamos” no lugar de “vamos
-          estar enviando”.
-        </GuideText>
-      );
+      return <GuideText>{g.gerundismo}</GuideText>;
     case "adverbio_mente_denso":
-      return (
-        <GuideText>
-          Corte ou substitua parte dos advérbios em -mente — o excesso pesa a leitura. Quais tirar depende da ênfase que
-          você quer. (Critério descontinuado — ver “Advérbios vagos”.)
-        </GuideText>
-      );
+      return <GuideText>{g.adverbioMenteDenso}</GuideText>;
     case "adverbios_vagos":
-      return (
-        <GuideText>
-          Tente ler a frase sem este advérbio (“basicamente”, “efetivamente”, “realmente”…): se o sentido não muda, ele
-          era só reforço e pode sair. Manter ou cortar é decisão sua.
-        </GuideText>
-      );
+      return <GuideText>{g.adverbiosVagos}</GuideText>;
     case "mesoclise":
-      return (
-        <GuideText>
-          Reescreva sem a mesóclise: “será feito” ou “vai fazer” no lugar de “far-se-á”. Muda a construção, então a frase
-          final é sua.
-        </GuideText>
-      );
+      return <GuideText>{g.mesoclise}</GuideText>;
     case "paragraph_length":
-      return (
-        <GuideText>
-          Quebre o parágrafo em blocos menores, um grupo de ideias por vez. Onde cortar depende da organização do texto —
-          decisão sua.
-        </GuideText>
-      );
+      return <GuideText>{g.paragraphLength}</GuideText>;
     case "prose_enumeration":
-      return (
-        <GuideText>
-          Transforme os itens embutidos no texto numa lista com marcadores — fica mais fácil localizar cada um. É uma
-          decisão de formatação sua.
-        </GuideText>
-      );
+      return <GuideText>{g.proseEnumeration}</GuideText>;
     case "salto_de_nivel_titulo":
-      return (
-        <GuideText>
-          A hierarquia de títulos pulou um nível. Rebaixe este título para o nível logo abaixo do anterior, ou crie o
-          título intermediário que falta — assim o sumário e a leitura por estrutura ficam previsíveis.
-        </GuideText>
-      );
+      return <GuideText>{g.saltoDeNivelTitulo}</GuideText>;
     case "long_heading":
-      return (
-        <GuideText>
-          Encurte o título até virar um rótulo que o leitor use para localizar a seção — e, se ele fechou como frase,
-          tire o ponto final e reduza à etiqueta essencial. O corte é seu.
-        </GuideText>
-      );
+      return <GuideText>{g.longHeading}</GuideText>;
     case "single_item_list":
-      return (
-        <GuideText>
-          Uma lista de um item só não separa nada: acrescente os itens que faltam, ou traga o conteúdo de volta para o
-          texto corrido. A escolha depende do conteúdo — sua.
-        </GuideText>
-      );
+      return <GuideText>{g.singleItemList}</GuideText>;
     case "heading_body_mismatch":
-      return (
-        <GuideText>
-          Releia o título e a seção juntos: ele antecipa o que o leitor vai encontrar aqui? Se não, ajuste o título ou
-          confirme que a palavra em comum só mudou de forma (plural/singular) — a ferramenta não decide por você.
-        </GuideText>
-      );
+      return <GuideText>{g.headingBodyMismatch}</GuideText>;
     default:
-      return assertNever(c);
+      return assertNever(criterion);
   }
 }
 
 function assertNever(value: never): never {
-  throw new Error(`critério sem guia de orientação: ${String(value)}`);
+  throw new Error(`criterion with no guidance entry: ${String(value)}`);
 }
 
 function GuideText({ children }: { children: ReactNode }) {
   return <p className="text-[12.5px] leading-relaxed text-ink-1">{children}</p>;
 }
 
-function GenericGuide() {
-  return (
-    <GuideText>
-      A ferramenta apontou a construção, mas a correção depende de julgamento seu — ela não reescreve por conta própria.
-    </GuideText>
-  );
-}
-
 function LeitorGuide({ finding }: { finding: Finding }) {
+  const { c } = useCopy();
+  const g = c.guidance;
   const noun = typeof finding.meta?.readerNoun === "string" ? finding.meta.readerNoun : null;
   return (
     <p className="text-[12.5px] leading-relaxed text-ink-1">
-      O texto fala {noun ? <>de “<span className="text-ink-0">{noun}</span>” </> : "do leitor "}em terceira pessoa. Para
-      aproximar, <span className="text-ink-0">fale com o leitor</span>: troque por “você deve…” ou use o imperativo
-      (“apresente…”, “compareça…”). A ferramenta não faz a troca porque mudar a pessoa muda o registro — a escolha é sua.
+      {noun ? g.readerNamed(noun) : g.readerUnnamed}
+      <span className="text-ink-0">{g.readerBodyStrong}</span>
+      {g.readerBody}
     </p>
   );
 }
 
 function SubordinacaoGuide({ finding }: { finding: Finding }) {
+  const { c } = useCopy();
+  const g = c.guidance;
   const clauses = typeof finding.meta?.clauses === "number" ? finding.meta.clauses : null;
   return (
     <p className="text-[12.5px] leading-relaxed text-ink-1">
       {clauses != null && (
         <>
-          <span className="font-medium text-ink-0">{clauses} orações subordinadas</span> presas numa frase só.{" "}
+          <span className="font-medium text-ink-0">{g.subordinationCount(clauses)}</span>
+          {g.subordinationTrapped}
         </>
       )}
-      Separe em frases mais curtas, uma ideia por vez — o começo de cada oração subordinada costuma ser o corte natural. A
-      ferramenta não reescreve: decidir o que vira frase própria e reconjugar é decisão sua.
+      {g.subordinationBody}
     </p>
   );
 }
 
-function boundaryLabel(c: SplitPoint): string {
-  switch (c.kind) {
+function boundaryLabel(point: SplitPoint, c: UiCopy): string {
+  switch (point.kind) {
     case "semicolon":
-      return "ponto-e-vírgula";
+      return c.guidance.boundarySemicolon;
     case "dash":
-      return "travessão";
+      return c.guidance.boundaryDash;
     case "comma_conjunction":
-      return `vírgula antes de “${c.marker}”`;
+      return c.guidance.boundaryCommaConjunction(point.marker);
   }
 }
 
 function LongSentenceGuide({ finding, source }: { finding: Finding; source: string }) {
-  const g = longSentenceGuidance(finding, source);
-  const hasCuts = g.candidates.length > 0;
+  const { c } = useCopy();
+  const t = c.guidance;
+  const guide = longSentenceGuidance(finding, source);
+  const hasCuts = guide.candidates.length > 0;
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        A ferramenta não reescreve — <span className="text-ink-0">mede o esforço</span> da frase
+        {t.longSentenceLead}
+        <span className="text-ink-0">{t.longSentenceLeadStrong}</span>
         {hasCuts ? (
           <>
-            {" "}
-            e <span className="text-ink-0">aponta abaixo onde ela se separa</span>. Recompor cada lado é decisão sua.
+            {t.longSentenceWithCuts}
+            <span className="text-ink-0">{t.longSentenceWithCutsStrong}</span>
+            {t.longSentenceWithCutsTail}
           </>
         ) : (
-          <>. Onde dividir e como recompor é decisão sua.</>
+          <>{t.longSentenceNoCuts}</>
         )}
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        <Stat label="palavras" value={g.words != null ? String(g.words) : "—"} />
-        <Stat label="acima de" value={g.over != null ? `+${g.over}` : "—"} />
-        <Stat label="meta" value={g.targetSentences != null ? `${g.targetSentences} frases` : "—"} />
+        <Stat label={t.statWords} value={guide.words != null ? String(guide.words) : "—"} />
+        <Stat label={t.statOver} value={guide.over != null ? `+${guide.over}` : "—"} />
+        <Stat
+          label={t.statTarget}
+          value={guide.targetSentences != null ? t.statTargetValue(guide.targetSentences) : "—"}
+        />
       </div>
 
       {hasCuts && (
         <div className="mt-4">
           <p className="u-sublabel mb-2 text-ink-3">
-            {g.candidates.length === 1 ? "1 corte possível" : `${g.candidates.length} cortes possíveis`} · informação,
-            não ação
+            {t.cutsAvailable(guide.candidates.length)} · {t.cutsInformationNotAction}
           </p>
           <ul className="flex flex-col gap-2">
-            {g.candidates.map((c, i) => (
+            {guide.candidates.map((point, i) => (
               <li
-                key={c.offset}
+                key={point.offset}
                 className="overflow-hidden rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)"
               >
-                <p className="px-3 pt-2 pb-1.5 font-serif text-[13px] leading-snug text-ink-1">…{c.before}</p>
+                <p className="px-3 pt-2 pb-1.5 font-serif text-[13px] leading-snug text-ink-1">…{point.before}</p>
                 <div className="flex items-center gap-2 px-3">
                   <span className="h-px flex-1 bg-human-line" aria-hidden />
                   <span className="u-sublabel whitespace-nowrap text-human">
-                    corte {i + 1} · {boundaryLabel(c)}
+                    {t.cutLabel(i + 1, boundaryLabel(point, c))}
                   </span>
                   <span className="h-px flex-1 bg-human-line" aria-hidden />
                 </div>
-                <p className="px-3 pt-1.5 pb-2 font-serif text-[13px] leading-snug text-ink-1">{c.after}…</p>
+                <p className="px-3 pt-1.5 pb-2 font-serif text-[13px] leading-snug text-ink-1">{point.after}…</p>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            A ferramenta aponta a fronteira, não divide. A frase nova é sua.
-          </p>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{t.cutsNote}</p>
         </div>
       )}
     </div>
@@ -272,25 +191,21 @@ function PassiveGuide({
   declaration?: AgentDeclaration | null;
   onDeclare?: (d: AgentDeclaration | null) => void;
 }) {
+  const { c } = useCopy();
+  const g = c.guidance;
   const scaffold = passiveScaffold(finding, source);
 
   if (!scaffold) {
     if (finding.meta?.hasAgent === true) {
-      return (
-        <GuideText>
-          O agente está no texto, então a informação existe — reordene para “quem faz → ação → o quê” e reconjugue o
-          verbo. A ferramenta não monta a frase: reescreva abaixo ou peça a reescrita à IA; a engine verifica o
-          resultado.
-        </GuideText>
-      );
+      return <GuideText>{g.passiveWithAgent}</GuideText>;
     }
     return (
       <div>
         <p className="text-[12.5px] leading-relaxed text-ink-1">
-          <span className="font-medium text-ink-0">O texto não diz quem praticou a ação.</span> Essa informação só
-          você tem — a ferramenta não a inventa, nem monta a frase por você. Responda abaixo e a resposta vira{" "}
-          <span className="text-ink-0">requisito</span>: entra no briefing da reescrita por IA e a engine cobra que a
-          versão final (sua ou da IA) nomeie esse agente.
+          <span className="font-medium text-ink-0">{g.passiveNoAgentLead}</span>
+          {g.passiveNoAgentBody}
+          <span className="text-ink-0">{g.passiveNoAgentStrong}</span>
+          {g.passiveNoAgentRequirement}
         </p>
         {onDeclare && <PassiveElicitation finding={finding} declaration={declaration ?? null} onDeclare={onDeclare} />}
       </div>
@@ -300,25 +215,28 @@ function PassiveGuide({
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
-        A ferramenta identifica os papéis no texto para você montar a voz ativa. É um{" "}
-        <span className="text-ink-0">andaime, não a frase</span> — confira cada campo; a versão final é sua.
+        {g.scaffoldLead}
+        <span className="text-ink-0">{g.scaffoldLeadStrong}</span>
+        {g.scaffoldLeadTail}
       </p>
 
       <div className="mt-3 flex flex-col gap-1.5">
-        <RoleRow label="Agente" hint="vira o sujeito" value={scaffold.agent} />
+        <RoleRow label={g.scaffoldAgent} hint={g.scaffoldAgentHint} value={scaffold.agent} />
         <RoleRow
-          label="Ação"
-          hint="vira o verbo"
+          label={g.scaffoldAction}
+          hint={g.scaffoldActionHint}
           value={scaffold.action.participle}
-          note={scaffold.action.baseVerb ? `→ ${scaffold.action.baseVerb}` : "→ escolha o verbo"}
+          note={scaffold.action.baseVerb ? `→ ${scaffold.action.baseVerb}` : g.scaffoldPickVerb}
         />
-        <RoleRow label="Objeto" hint="o que sofreu a ação" value={scaffold.object} placeholder="você preenche" />
+        <RoleRow
+          label={g.scaffoldObject}
+          hint={g.scaffoldObjectHint}
+          value={scaffold.object}
+          placeholder={g.scaffoldObjectPlaceholder}
+        />
       </div>
 
-      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        Estrutura identificada · confira. A ferramenta não vira a frase: reordenar e reconjugar é escrever — e quem
-        escreve é você (ou a IA, que a engine então verifica).
-      </p>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{g.scaffoldNote}</p>
     </div>
   );
 }
@@ -332,6 +250,8 @@ function PassiveElicitation({
   declaration: AgentDeclaration | null;
   onDeclare: (d: AgentDeclaration | null) => void;
 }) {
+  const { c } = useCopy();
+  const g = c.guidance;
   const [raw, setRaw] = useState(declaration?.agent ?? "");
   const keep = declaration !== null && declaration.agent === null;
 
@@ -347,7 +267,7 @@ function PassiveElicitation({
   return (
     <div className="mt-3">
       <label className="u-sublabel block text-ink-3" htmlFor="agent-declaration">
-        Quem pratica essa ação?
+        {g.agentQuestion}
       </label>
       <input
         id="agent-declaration"
@@ -357,18 +277,16 @@ function PassiveElicitation({
           setRaw(e.target.value);
           emit(e.target.value, false);
         }}
-        placeholder="ex.: a comissão"
+        placeholder={g.agentPlaceholder}
         className="mt-1.5 w-full rounded-lg border border-rule-2 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 shadow-(--shadow-card) outline-none transition-colors focus:border-human-line disabled:opacity-50"
       />
       <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2">
         <Checkbox checked={keep} onCheckedChange={(c) => emit(raw, c === true)} />
-        O agente não deve ser nomeado (manter impessoal)
+        {g.agentKeepImpersonal}
       </label>
       {declaration && (
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          {keep
-            ? "Registrado: manter a construção impessoal é uma decisão sua. O briefing instrui a IA a não inventar agente, e a verificação não cobra a ativação."
-            : `Registrado como requisito: a versão final deve nomear «${declaration.agent}». A ferramenta não monta a frase — ela verifica quem montou.`}
+          {keep ? g.agentRecordedKeep : g.agentRecorded(declaration.agent ?? "")}
         </p>
       )}
     </div>
@@ -405,25 +323,17 @@ function RoleRow({
 }
 
 function NominalizationGuide({ finding }: { finding: Finding }) {
+  const { c } = useCopy();
+  const g = c.guidance;
   const base = typeof finding.meta?.baseVerb === "string" ? finding.meta.baseVerb : null;
   return (
     <p className="text-[12.5px] leading-relaxed text-ink-1">
       {base && (
         <>
-          <span className="font-medium text-ink-0">Verbo-base: “{base}”.</span>{" "}
+          <span className="font-medium text-ink-0">{g.nominalizationBaseVerb(base)}</span>{" "}
         </>
       )}
-      Reescreva com o verbo direto (ex.: “fazer a análise” → “analisar”). A troca automática exigiria reconjugar o verbo
-      ou ajustar o complemento — passos que só você deve decidir.
-    </p>
-  );
-}
-
-function JargonGuide() {
-  return (
-    <p className="text-[12.5px] leading-relaxed text-ink-1">
-      Há um equivalente mais simples no glossário, mas a troca depende do que vem a seguir. Confirme que o contexto é um
-      sintagma nominal (não uma oração) antes de substituir.
+      {g.nominalizationBody}
     </p>
   );
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { OperacaoLeitura, ProbeResult, ProbeSignal } from "@/lucid/probe/types";
+import { useCopy } from "../i18n/use-copy";
+import type { UiCopy } from "../i18n/copy";
 
 interface ProbeResponse {
   signal: ProbeSignal;
@@ -9,18 +11,11 @@ interface ProbeResponse {
   probeId: string;
 }
 
-const OPERACAO_LABEL: Record<OperacaoLeitura, string> = {
-  resolver_referente_a_distancia: "resolver a quem um pronome se refere, à distância",
-  integrar_entre_frases: "juntar informação de mais de uma frase",
-  decodificar_termo_tecnico: "decodificar um termo técnico",
-  inferir_agente_omitido: "inferir um agente que o texto não diz",
-  segurar_sujeito_longo: "segurar um sujeito longo antes do verbo",
-  desfazer_negacao_aninhada: "desfazer uma negação aninhada",
-};
-
 type Status = "idle" | "loading" | "done" | "error";
 
 export function ProbePanel({ text, suggestedQuestion }: { text: string; suggestedQuestion: string }) {
+  const { c } = useCopy();
+  const t = c.probe;
   const [pergunta, setPergunta] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<ProbeResponse | null>(null);
@@ -50,7 +45,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
       });
       const json = (await res.json().catch(() => null)) as ProbeResponse | { error?: string } | null;
       if (!res.ok || json === null || !("signal" in json)) {
-        setError((json && "error" in json && json.error) || `falha (HTTP ${res.status})`);
+        setError((json && "error" in json && json.error) || t.httpFailure(res.status));
         setStatus("error");
         return;
       }
@@ -69,13 +64,16 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
   return (
     <section className="border-t border-rule-1 px-6 py-5">
       <div className="flex items-baseline justify-between">
-        <h3 className="u-label text-ink-3">Sonda de compreensão</h3>
-        <span className="u-sublabel font-medium text-ink-3">Camada 2 · opt-in</span>
+        <h3 className="u-label text-ink-3">{t.title}</h3>
+        <span className="u-sublabel font-medium text-ink-3">{t.tier}</span>
       </div>
 
       <p className="mt-2 text-[12px] leading-relaxed text-ink-3">
-        Um leitor sintético de piso lê <em>só</em> o texto acima e tenta responder à pergunta. É um teste{" "}
-        <strong className="text-ink-2">negativo</strong>: pode achar uma falha, nunca aprovar.
+        {t.leadBefore}
+        <em>{t.leadEmphasis}</em>
+        {t.leadMiddle}
+        <strong className="text-ink-2">{t.leadStrong}</strong>
+        {t.leadAfter}
       </p>
 
       {suggestedQuestion.trim() !== "" && pergunta.trim() === "" && (
@@ -84,18 +82,17 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
           onClick={() => setPergunta(suggestedQuestion.trim())}
           className="mt-3 block w-full rounded-lg border border-dashed border-rule-2 px-3 py-2 text-left text-[12px] leading-relaxed text-ink-2 transition-colors duration-150 hover:bg-surface-2"
         >
-          Usar o propósito do leitor que você declarou no Princípio 1:{" "}
-          <span className="text-ink-1">“{suggestedQuestion.trim()}”</span>
+          {t.useBriefingPurpose} <span className="text-ink-1">“{suggestedQuestion.trim()}”</span>
         </button>
       )}
 
       <label className="mt-3 block">
-        <span className="text-[12px] text-ink-2">O que você quer encontrar no texto?</span>
+        <span className="text-[12px] text-ink-2">{t.questionLabel}</span>
         <textarea
           value={pergunta}
           onChange={(e) => setPergunta(e.target.value)}
           rows={2}
-          placeholder="Ex.: quando o prazo começa a contar?"
+          placeholder={t.questionPlaceholder}
           className="mt-1.5 w-full resize-none rounded-lg border border-rule-2 bg-sheet px-3 py-2 text-[13px] text-ink-0 shadow-(--shadow-card) transition-colors placeholder:text-ink-3 focus:border-accent-line focus:outline-none"
         />
       </label>
@@ -106,7 +103,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
         disabled={!canRun}
         className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {status === "loading" ? "Testando o piso…" : "Testar o piso de compreensão"}
+        {status === "loading" ? t.running : t.run}
       </button>
 
       {status === "error" && <p className="mt-3 text-[12px]" style={{ color: "var(--sev-error)" }}>{error}</p>}
@@ -115,7 +112,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
         <>
           {stale && (
             <p className="mt-3 text-[12px] font-medium" style={{ color: "var(--sev-warn)" }}>
-              O texto mudou depois deste teste — o resultado abaixo é do trecho anterior. Teste de novo.
+              {t.staleWarning}
             </p>
           )}
           <ProbeResultView data={data} />
@@ -123,15 +120,19 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
       )}
 
       <p className="mt-4 text-[11px] leading-relaxed text-ink-3">
-        Camada 2 usa um modelo de linguagem: <strong className="text-ink-2">não é determinística</strong> como o
-        restante da auditoria. Passar no piso é a ausência de uma falha, <strong className="text-ink-2">nunca prova de
-        clareza</strong> — para isso, só teste com leitores reais (Princípio 4 da norma).
+        {t.caveatBefore}
+        <strong className="text-ink-2">{t.caveatStrongOne}</strong>
+        {t.caveatMiddle}
+        <strong className="text-ink-2">{t.caveatStrongTwo}</strong>
+        {t.caveatAfter}
       </p>
     </section>
   );
 }
 
 function ProbeResultView({ data }: { data: ProbeResponse }) {
+  const { c } = useCopy();
+  const t = c.probe;
   const { signal, result } = data;
   const operacoes = signal.operacoes;
 
@@ -145,22 +146,22 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
         }}
       >
         <p className="text-[12.5px] font-medium" style={{ color: "var(--sev-warn)" }}>
-          O leitor de piso travou.
+          {t.stuck}
         </p>
         <p className="mt-1 text-[12px] text-ink-2">{signal.motivo}.</p>
 
         {result.ondeTravou.length > 0 && (
           <ul className="mt-2 space-y-1.5">
-            {result.ondeTravou.map((t, i) => (
+            {result.ondeTravou.map((stop, i) => (
               <li key={i} className="text-[12px] text-ink-2">
-                <span className="text-ink-3">trecho:</span> “{t.frase}” — {t.motivo}
+                <span className="text-ink-3">{t.excerpt}</span> “{stop.frase}” — {stop.motivo}
               </li>
             ))}
           </ul>
         )}
 
         <p className="mt-2 text-[12px] text-ink-3">
-          Resposta que ele conseguiu extrair: <span className="text-ink-2">“{result.respostaExtraida}”</span>
+          {t.extracted} <span className="text-ink-2">“{result.respostaExtraida}”</span>
         </p>
 
         <Operacoes operacoes={operacoes} />
@@ -170,11 +171,11 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
 
   return (
     <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2 px-3 py-3">
-      <p className="text-[12.5px] text-ink-2">Sem violação de piso detectada.</p>
+      <p className="text-[12.5px] text-ink-2">{t.noFloorViolation}</p>
       <p className="mt-1 text-[12px] text-ink-3">{signal.nota}</p>
 
       <p className="mt-2 text-[12px] text-ink-3">
-        Resposta que ele extraiu: <span className="text-ink-2">“{result.respostaExtraida}”</span>
+        {t.extracted} <span className="text-ink-2">“{result.respostaExtraida}”</span>
       </p>
 
       <Operacoes operacoes={operacoes} />
@@ -183,17 +184,22 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
 }
 
 function Operacoes({ operacoes }: { operacoes: readonly OperacaoLeitura[] }) {
+  const { c } = useCopy();
   if (operacoes.length === 0) return null;
   return (
     <div className="mt-3">
-      <p className="u-sublabel text-ink-3">Carga de leitura</p>
+      <p className="u-sublabel text-ink-3">{c.probe.loadLabel}</p>
       <ul className="mt-1.5 space-y-1">
         {operacoes.map((op) => (
           <li key={op} className="text-[12px] text-ink-2">
-            · {OPERACAO_LABEL[op]}
+            · {operationLabel(c, op)}
           </li>
         ))}
       </ul>
     </div>
   );
+}
+
+function operationLabel(c: UiCopy, op: OperacaoLeitura): string {
+  return c.probe.operations[op];
 }

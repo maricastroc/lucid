@@ -3,7 +3,9 @@
 import { forwardRef, useMemo } from "react";
 import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
-import { findingId, metaFor, severityInkVar, severityRank, SEVERITY_LABEL } from "../lib/criteria";
+import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
+import { severityRank } from "../lib/criteria";
+import { useCopy } from "../i18n/use-copy";
 import { PenNibIcon } from "./icons";
 
 export type Mode = "audit" | "edit";
@@ -30,6 +32,7 @@ interface SegmentContext {
 }
 
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
+  const { c, lang } = useCopy();
   const { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding } = ctx;
   return (
     <>
@@ -50,7 +53,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
         const target = inline ?? passage!;
         const id = findingId(target);
         const selected = selectedId === id;
-        const meta = metaFor(target.criterion);
+        const meta = metaFor(target.criterion, lang);
         const classes = ["seg"];
         if (inTarget) classes.push("rewrite-target");
         if (inline) classes.push("mark", meta.markStyleClass);
@@ -68,7 +71,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
             className={classes.join(" ")}
             style={ink ? ({ "--mark-ink": ink } as React.CSSProperties) : undefined}
             aria-pressed={selected}
-            aria-label={`${meta.label}: “${seg.text.trim()}”. ${SEVERITY_LABEL[target.severity]}.`}
+            aria-label={c.documentView.segmentLabel(meta.label, seg.text.trim(), severityLabel(target.severity, lang))}
             onClick={() => onSelectFinding(target)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -127,6 +130,7 @@ function BlockView({
   ctx: SegmentContext;
   isFocused: boolean;
 }) {
+  const { c } = useCopy();
   const markersIn = (start: number, end: number): Finding[] =>
     diagnostic.findings.filter(
       (f) => activeCriteria.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
@@ -143,9 +147,7 @@ function BlockView({
           return (
             <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
               {tick}
-              <div className="u-sublabel mb-1 text-ink-3">
-                Título · nível {block.level}
-              </div>
+              <div className="u-sublabel mb-1 text-ink-3">{c.documentView.headingLevel(block.level)}</div>
               <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
                 <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end)} ctx={ctx} />
               </Tag>
@@ -159,8 +161,8 @@ function BlockView({
             <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
               {tick}
               <div className="u-sublabel mb-1.5 text-ink-3">
-                {block.ordered ? "Lista numerada" : "Lista"}
-                {block.items.length === 1 ? " · 1 item" : ` · ${block.items.length} itens`}
+                {block.ordered ? c.documentView.orderedList : c.documentView.list}
+                {c.documentView.listItems(block.items.length)}
               </div>
               <ListTag className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}>
                 {block.items.map((item, ii) => (
@@ -188,6 +190,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   { mode, text, diagnostic, blocks, selectedId, flashId, activeCriteria, rewriteTarget, onChangeText, onSelectFinding },
   scrollRef,
 ) {
+  const { c } = useCopy();
   const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings), [diagnostic]);
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
@@ -197,15 +200,21 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   const ctx: SegmentContext = { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding };
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label="Documento em revisão">
+    <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label={c.documentView.regionLabel}>
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
           <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
             <div className="flex items-center justify-between border-b border-rule-1 px-6 py-3.5 sm:px-14">
               <span className="u-sublabel text-ink-3">
-                {mode === "edit" ? "Rascunho" : structured ? "Documento estruturado" : "Documento em revisão"}
+                {mode === "edit"
+                  ? c.documentView.draft
+                  : structured
+                    ? c.documentView.structured
+                    : c.documentView.underReview}
               </span>
-              <span className="text-[12px] tabular-nums text-ink-3">{words} palavras</span>
+              <span className="text-[12px] tabular-nums text-ink-3">
+                {words} {c.common.words}
+              </span>
             </div>
 
             {mode === "edit" ? (
@@ -215,7 +224,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   onChange={(e) => onChangeText(e.target.value)}
                   spellCheck={false}
                   autoFocus
-                  aria-label="Texto do documento"
+                  aria-label={c.documentView.textareaLabel}
                   className={`prose-doc block min-h-[58vh] w-full resize-none border-0 bg-transparent p-0 outline-none transition-opacity duration-200 ${
                     text === "" ? "opacity-0" : "opacity-100"
                   }`}
@@ -227,12 +236,9 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                       <PenNibIcon className="size-5" />
                     </span>
                     <p className="mt-4 font-serif text-[21px] leading-snug text-ink-1">
-                      Comece o seu rascunho
+                      {c.documentView.emptyTitle}
                     </p>
-                    <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">
-                      Escreva ou cole o seu texto. A auditoria roda em tempo real, critério por critério —
-                      sem reescrever no seu lugar.
-                    </p>
+                    <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">{c.documentView.emptyBody}</p>
                     <span
                       aria-hidden
                       className="caret-blink mt-5 h-[1.4em] w-[3px] rounded-full bg-accent"

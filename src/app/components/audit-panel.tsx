@@ -9,6 +9,7 @@ import type { LedgerEntry } from "../lib/ledger";
 import { AuditOverview, ReadingSection } from "./audit-overview";
 import { RevisionList, type Bucket } from "./revision-list";
 import { RevisionNote } from "./revision-note";
+import { useCopy } from "../i18n/use-copy";
 import { ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "./icons";
 
 export interface AuditPanelProps {
@@ -113,16 +114,17 @@ export function NoteNav({
   onNext: () => void;
   onClose: () => void;
 }) {
+  const { c } = useCopy();
   return (
     <div className="flex h-12 shrink-0 items-center justify-between border-b border-rule-1 px-3">
       <div className="flex items-center gap-0.5">
-        <IconBtn label="Anterior (k)" onClick={onPrev}>
+        <IconBtn label={c.note.navPrev} onClick={onPrev}>
           <ChevronLeftIcon className="size-4" />
         </IconBtn>
         <span className="min-w-14 text-center text-[12px] tabular-nums text-ink-2">
-          {index} <span className="text-ink-3">de</span> {total}
+          {index} <span className="text-ink-3">{c.note.navOf}</span> {total}
         </span>
-        <IconBtn label="Próximo (j)" onClick={onNext}>
+        <IconBtn label={c.note.navNext} onClick={onNext}>
           <ChevronRightIcon className="size-4" />
         </IconBtn>
       </div>
@@ -132,18 +134,19 @@ export function NoteNav({
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
       >
         <CloseIcon className="size-3.5" />
-        Fechar
+        {c.common.close}
       </button>
     </div>
   );
 }
 
 export function AuditPanelFooter({ diagnostic }: { diagnostic: Diagnostic }) {
+  const { c } = useCopy();
   return (
     <div className="flex shrink-0 items-center gap-2 border-t border-rule-1 px-6 py-3 text-[11px] text-ink-3">
       <span className="inline-flex items-center gap-1.5 text-ink-2">
         <span className="size-1.5 rounded-full bg-accent" aria-hidden />
-        Análise determinística
+        {c.note.footerDeterministic}
       </span>
       <span aria-hidden>·</span>
       <span
