@@ -36,8 +36,8 @@ export type {
 export type { CriterionId } from "../locales/pt-BR/criteria";
 export { CRITERION_IDS, isCriterionId } from "../locales/pt-BR/criteria";
 
-export type { Config } from "./core/config";
-export { DEFAULT_CONFIG, hashConfig } from "./core/config";
+export type { Config, ConfigDeviation, ConfigValue } from "./core/config";
+export { configDeviations, DEFAULT_CONFIG, hashConfig, isDefaultConfig } from "./core/config";
 
 export type {
   LocaleBundle,

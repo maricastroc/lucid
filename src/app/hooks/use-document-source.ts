@@ -9,6 +9,7 @@ import {
   spliceStructuredDocument,
   toRawBlocks,
   type Block,
+  type Config,
   type Diagnostic,
   type Document,
   type RawBlock,
@@ -39,7 +40,7 @@ function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
   return blocks === null ? null : buildStructuredDocument(blocks, ptDocumentServices);
 }
 
-export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSource {
+export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Config): DocumentSource {
   const [text, setTextState] = useState(() => initial?.text ?? "");
   const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
   const [structureLost, setStructureLost] = useState(false);
@@ -60,8 +61,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSo
   const structured = importedDoc !== null && deferredText === importedDoc.source;
 
   const diagnostic = useMemo(
-    () => (structured ? analyzeDocument(importedDoc!) : analyze(deferredText)),
-    [structured, importedDoc, deferredText],
+    () => (structured ? analyzeDocument(importedDoc!, config) : analyze(deferredText, config)),
+    [structured, importedDoc, deferredText, config],
   );
 
   const loadExample = useCallback(() => {

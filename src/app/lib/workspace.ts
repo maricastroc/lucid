@@ -1,10 +1,10 @@
-import { EMPTY_BRIEFING, type RawBlock, type ReaderBriefing } from "@/lucid";
+import { DEFAULT_CONFIG, EMPTY_BRIEFING, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 2;
-const READABLE_VERSIONS: readonly number[] = [1, 2];
+const SCHEMA_VERSION = 3;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
@@ -12,6 +12,7 @@ export interface WorkspaceSnapshot {
   readonly ledger: readonly LedgerEntry[];
   readonly mode: Mode;
   readonly briefing: ReaderBriefing;
+  readonly config: Config;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -51,6 +52,28 @@ function parseBriefing(value: unknown): ReaderBriefing | null {
   return { audience, purpose, priorKnowledge, mustFind: mustFind as string[] };
 }
 
+function parseConfig(value: unknown): Config | null {
+  if (value === undefined) return DEFAULT_CONFIG;
+  if (!isRecord(value)) return null;
+  const merged = { ...DEFAULT_CONFIG } as unknown as Record<string, Record<string, unknown>>;
+  const base = DEFAULT_CONFIG as unknown as Record<string, Record<string, unknown>>;
+  for (const [section, defaults] of Object.entries(base)) {
+    const incoming = (value as Record<string, unknown>)[section];
+    if (incoming === undefined) continue;
+    if (!isRecord(incoming)) return null;
+    const next: Record<string, unknown> = { ...defaults };
+    for (const [field, fallback] of Object.entries(defaults)) {
+      const candidate = incoming[field];
+      if (candidate === undefined) continue;
+      if (typeof candidate !== typeof fallback) return null;
+      if (typeof candidate === "number" && !Number.isFinite(candidate)) return null;
+      next[field] = candidate;
+    }
+    merged[section] = next;
+  }
+  return merged as unknown as Config;
+}
+
 function parse(raw: string): WorkspaceSnapshot | null {
   let value: unknown;
   try {
@@ -71,7 +94,10 @@ function parse(raw: string): WorkspaceSnapshot | null {
   const briefing = parseBriefing(value.briefing);
   if (briefing === null) return null;
 
-  return { text: value.text, blocks, ledger: value.ledger as LedgerEntry[], mode: value.mode, briefing };
+  const config = parseConfig(value.config);
+  if (config === null) return null;
+
+  return { text: value.text, blocks, ledger: value.ledger as LedgerEntry[], mode: value.mode, briefing, config };
 }
 
 export function readWorkspace(): WorkspaceSnapshot | null {

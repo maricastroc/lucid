@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { checkBriefing, EMPTY_BRIEFING, type Finding, type ReaderBriefing, type Span } from "@/lucid";
+import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, isDefaultConfig, type Config, type Finding, type ReaderBriefing, type Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
@@ -23,6 +23,7 @@ export function Studio() {
   const [restored] = useState(readWorkspace);
   const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
   const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
+  const [config, setConfig] = useState<Config>(restored?.config ?? DEFAULT_CONFIG);
   const [sheetOpen, setSheetOpen] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -42,7 +43,7 @@ export function Studio() {
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocx: importDocxFile,
-  } = useDocumentSource(restored);
+  } = useDocumentSource(restored, config);
 
   const {
     ledger,
@@ -55,12 +56,12 @@ export function Studio() {
 
   useEffect(() => {
     if (!isSettled) return;
-    if (isEmpty && ledger.length === 0 && briefing === EMPTY_BRIEFING) {
+    if (isEmpty && ledger.length === 0 && briefing === EMPTY_BRIEFING && isDefaultConfig(config)) {
       clearWorkspace();
       return;
     }
-    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing });
-  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing]);
+    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing, config });
+  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing, config]);
 
   const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
 
@@ -180,6 +181,8 @@ export function Studio() {
     briefing,
     briefingCheck,
     onBriefingChange: setBriefing,
+    config,
+    onConfigChange: setConfig,
     activeCriteria,
     bucket,
     onToggleCriterion: toggleCriterion,

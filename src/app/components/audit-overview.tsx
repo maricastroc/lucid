@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { Block, BriefingCheck, Diagnostic, Finding, ReaderBriefing, Severity } from "@/lucid";
+import { configDeviations, type Block, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
 import { SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks, hasRecoverableStructure } from "../lib/export-document";
+import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
 import type { LedgerEntry } from "../lib/ledger";
 import { ArrowDownIcon } from "./icons";
@@ -30,13 +31,16 @@ interface Props {
   blocks: readonly Block[] | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
+  config: Config;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, briefing, briefingCheck }: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, briefing, briefingCheck, config }: Props) {
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
   const [docxError, setDocxError] = useState<string | null>(null);
+  const deviations = configDeviations(config);
+  const offCount = disabledCriteria(config).length;
 
   const exportDocx = async () => {
     setDocxError(null);
@@ -58,6 +62,14 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
               <span className="text-[14px] text-ink-1">{total === 1 ? "anotação" : "anotações"}</span>
             </div>
             <p className="mt-1 text-[12.5px] text-ink-2">nesta revisão editorial</p>
+            {deviations.length > 0 && (
+              <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
+                Placar produzido com <strong className="font-semibold">perfil ajustado</strong> ({deviations.length}{" "}
+                {deviations.length === 1 ? "desvio" : "desvios"} do padrão
+                {offCount > 0 ? `, ${offCount} ${offCount === 1 ? "critério desligado" : "critérios desligados"}` : ""}
+                ). Não é comparável a um placar padrão.
+              </p>
+            )}
           </div>
         </div>
 
@@ -95,10 +107,14 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
           onClick={() =>
             download(
               "auditoria-lucid.md",
-              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }, ledger, {
-                briefing,
-                check: briefingCheck,
-              }),
+              buildAuditReport(
+                diagnostic,
+                findings,
+                { generatedAt: new Date().toLocaleString("pt-BR") },
+                ledger,
+                { briefing, check: briefingCheck },
+                config,
+              ),
               "text/markdown;charset=utf-8",
             )
           }

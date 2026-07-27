@@ -1,4 +1,5 @@
-import type { BriefingCheck, Diagnostic, Finding, ReaderBriefing, Severity } from "@/lucid";
+import { configDeviations, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
+import { describeDeviation, disabledCriteria } from "./profile";
 import { CRITERION_ORDER, coverageLabel, coverageOf, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 import { readabilityOf } from "./readability";
@@ -62,12 +63,43 @@ function renderBriefingMarkdown(briefing: BriefingReport | null): string {
   return out.join("\n");
 }
 
+function renderProfileMarkdown(config: Config | null): string {
+  if (config === null) return "";
+  const deviations = configDeviations(config);
+  if (deviations.length === 0) return "";
+
+  const off = disabledCriteria(config);
+  const out: string[] = ["## Perfil editorial", ""];
+  out.push(
+    `Esta auditoria **não** rodou com os limiares padrão do Lucid. ${deviations.length} ` +
+      `${deviations.length === 1 ? "ajuste foi declarado" : "ajustes foram declarados"} por quem auditou:`,
+  );
+  out.push("");
+  for (const deviation of deviations) out.push(`- ${describeDeviation(deviation)}`);
+  out.push("");
+  if (off.length > 0) {
+    out.push(
+      `> **${off.length} ${off.length === 1 ? "critério foi desligado" : "critérios foram desligados"}** ` +
+        `(${off.join(", ")}). Onde eles calam, o silêncio significa **"não procurei"**, não "não encontrei". ` +
+        "Um placar produzido com critérios desligados não é comparável a um placar padrão.",
+    );
+    out.push("");
+  }
+  out.push(
+    "_A norma não fixa números; o limiar é escolha editorial. O `configHash` acima identifica exatamente este " +
+      "perfil — dois relatórios só são comparáveis se o hash for o mesmo._",
+  );
+  out.push("");
+  return out.join("\n");
+}
+
 export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
   meta: AuditReportMeta,
   ledger: readonly LedgerEntry[] = [],
   briefing: BriefingReport | null = null,
+  config: Config | null = null,
 ): string {
   const m = diagnostic.metrics;
   const total = findings.length;
@@ -180,6 +212,11 @@ export function buildAuditReport(
       }
       out.push("");
     });
+  }
+
+  const profileSection = renderProfileMarkdown(config);
+  if (profileSection) {
+    out.push(profileSection);
   }
 
   const briefingSection = renderBriefingMarkdown(briefing);

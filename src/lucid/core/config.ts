@@ -172,3 +172,35 @@ export const DEFAULT_CONFIG: Config = {
 export function hashConfig(config: Config): string {
   return stableHash(config);
 }
+
+export type ConfigValue = number | boolean;
+
+export interface ConfigDeviation {
+  readonly section: string;
+  readonly field: string;
+  readonly value: ConfigValue;
+  readonly fallback: ConfigValue;
+}
+
+export function configDeviations(config: Config): ConfigDeviation[] {
+  const deviations: ConfigDeviation[] = [];
+  const base = DEFAULT_CONFIG as unknown as Record<string, Record<string, ConfigValue>>;
+  const current = config as unknown as Record<string, Record<string, ConfigValue>>;
+
+  for (const section of Object.keys(base)) {
+    const defaults = base[section];
+    const values = current[section];
+    if (values === undefined) continue;
+    for (const field of Object.keys(defaults)) {
+      const value = values[field];
+      if (value === undefined || value === defaults[field]) continue;
+      deviations.push({ section, field, value, fallback: defaults[field] });
+    }
+  }
+
+  return deviations;
+}
+
+export function isDefaultConfig(config: Config): boolean {
+  return configDeviations(config).length === 0;
+}
