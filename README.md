@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>20 detectors</strong>, <strong>1011 tests</strong>, and a hard fence between the two layers that the build enforces.
+  Not a "make it simpler" button — an <strong>honest instrument</strong>. Lucid measures a text against Plain Language and shows exactly <em>where</em> and <em>why</em> it fails, then hands the hard calls back to you. Its core (<strong>Layer 1</strong>) is a <strong>100% deterministic</strong> linter — zero LLM, zero network, same input → <strong>byte-identical</strong> output — that stamps each finding with the <strong>ABNT NBR ISO 24495-1</strong> subsection it violates. A second, opt-in layer runs a synthetic floor-reader that can only ever <em>fail</em> a passage, <strong>never approve it</strong> — because passing a floor test is the absence of a failure, not proof of clarity. <strong>23 detectors</strong>, <strong>1370 tests</strong>, and a hard fence between the two layers that the build enforces.
 </p>
 
 <p align="center">
@@ -47,18 +47,22 @@
 | **🏷️ Per-criterion provenance**    | Every finding cites the exact **ABNT NBR ISO 24495-1** subsection it violates (e.g. `5.3.4`) plus a plain-Portuguese justification. The `principle` is never invented — it maps to the norm.                                                                 |
 | **✋ Marks, never invents**         | Anything that needs judgment — a hidden agent, a multi-sense word, cutting the superfluous — is flagged `requiresHuman` and left to the author, **with the reason**. The tool refuses to fake it.                                                            |
 | **✅ Indicates, never applies**    | A curated 1:1 glossary equivalent is surfaced **as information** — never as an applied edit. The engine composes no text and touches no document (ADR-054): every change comes from the author, or from an AI proposal the engine then verifies.               |
-| **🧩 20 detectors, per principle** | Long sentences, passive voice, nominalization, chained nominalization, jargon, synthetic pluperfect, gerundism, `-mente` adverb pile-ups, redundancy, inflated periphrasis, mesoclisis, double-negation, dense subordination and third-person address (**Principle 3**); long paragraphs, prose-enumeration, heading-hierarchy skips, over-long headings and single-item lists (**Principle 2**); heading↔body mismatch (**Principle 1**). |
+| **🧩 23 detectors, per principle** | **17 for Principle 3 (Understandable)**: long sentences, passive voice, synthetic passive (`aplica-se a multa`), nominalization, chained nominalization, jargon, unexpanded acronyms, redundancy, inflated periphrasis, double negation, dense subordination, third-person address, synthetic pluperfect, gerundism, mesoclisis, vague adverbs, `-mente` pile-ups. **6 for Principle 2 (Findable)**: long paragraphs, prose-enumeration, heading-hierarchy skips, over-long headings, single-item lists, heading↔body mismatch. **Principle 1 has none — on purpose** (see below). |
 | **🇧🇷 Built for bureaucratese**    | The detectors target exactly what plagues official Brazilian Portuguese — and what no English tool covers: mesoclisis (`far-se-á`), gerundism (`vai estar enviando`), synthetic pluperfect (`requerera`), litotes (`não é incomum`), latinisms.             |
 | **🧪 The comprehension probe**     | An opt-in floor-reader (**Layer 2**, LLM) reads *only* the passage and tries to answer the reader's question. It is a **negative test**: it can flag where a real reader would stall, but it **never returns a green check**.                                 |
 | **♻️ Verified AI rewrites**        | When a model *does* rewrite, the **deterministic engine is the judge**: separated **PROOF** (target violation gone, numbers/dates preserved, no fabricated first person) vs. **SIGNAL** (meaning preserved via the probe) — never a seal. The author decides. |
 | **🧾 Reproducible to the data**    | Every diagnostic carries a `configHash` **and** a `dataHash`. Change a lexicon and the hash changes and the golden snapshot breaks on purpose. Reproducibility = `(version, config, data)`.                                                                  |
-| **🗂️ Format-independent by design** | Detectors run over a canonical `AnnotatedDocument`. Plain text today; DOCX / PDF / HTML importers later produce **the same model** — without a single detector changing.                                                                                    |
+| **🗂️ Format-independent by design** | Detectors run over a canonical document model. Plain text, Markdown and **DOCX import** already produce the same model — no detector changes. Structure **survives editing**: a localized edit is re-applied to the block model and reconciled byte-for-byte; when it cannot be, the UI **says so** instead of silently dropping the Principle-2 criteria (ADR-080). |
+| **🙋 Principle 1 by elicitation**   | "Relevant *to whom?*" is not decidable by rule, so Lucid **will never score it**. Instead it asks the norm's questions — who reads this, what must they do, what do they already know, what must they find — records the answers as the **author's declaration**, and verifies only what is literally verifiable: the presence of the expressions the author said the reader needs. Undeclared reads **"not declared"**, never "compliant" (ADR-079). |
+| **⌨️ CLI for batch and CI**         | `lucid <files…> --format json` runs Layer 1 offline over `.txt` / `.md` / `.docx` / stdin. Exit `0` means *the audit ran* — **never** "approved": findings only change the exit code when **you** declare a threshold with `--fail-on`. The cut is yours, never the tool's (ADR-078).                                                                              |
+| **💾 Work that survives a refresh** | Document, imported structure, revision trail and reader briefing persist locally in the browser — never on a server, because the texts audited here are usually unpublished official drafts. If the browser refuses to store it, the UI **says so** rather than pretending the work is safe (ADR-076).                                                             |
+| **📤 Export that admits its loss**  | The revised document exports to `.docx` (headings, paragraphs, lists) or `.txt` — written by a dependency-free, **deterministic** ZIP/OOXML writer, and proved by re-importing it through Lucid's own importer. It is **not** a round-trip and the UI says so: the original file's bold, tables and images never enter the audit, so they cannot come back (ADR-077). |
 | **📊 A score that measures**       | Per-criterion counts and density — deliberately **with no overall grade and no "OK."** The absence of findings is not a certificate of clarity, and the UI says so.                                                                                          |
 | **🧰 Informational scaffolds**     | For findings that need judgment, Lucid shows its work instead of doing yours: it **locates** where a long sentence can split (boundaries as information, no button that edits), **labels** the roles of a passive (Agent / Action / Object, with the curated base verb), and — when the agent is missing — **asks the reader's question**: *who does this action?* The answer is yours; so is the sentence (ADR-054). |
 | **✍️ The review studio**           | A two-mode editor (**Write / Review**) with inline annotations, an audit rail that groups by criterion and severity, curated-equivalent cards (copy, not apply), and the probe panel — all fed by a single client-side `analyze()`.                           |
 | **🔒 A fence the build enforces**  | Layer 1 never imports Layer 2 (or React, or the network). Checked by **dependency-cruiser** + boundary tests: if Layer 2 falls, the product stands whole.                                                                                                    |
 | **🌍 Language-pluggable core**     | The engine is **language-neutral**; Portuguese is the first explicit `Locale`. A `LocaleBundle` carries the passes, lexicons, syllable counter, readability metric and criteria; `core` never imports a locale (a fence enforces it), so a second locale slots in **without touching the pipeline**. A synthetic test locale proves the seam.                    |
-| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **1011 Vitest tests** and byte-identical golden snapshots; any non-determinism is a failing build.                 |
+| **🧵 Deterministic & tested**      | Same text + same config + same data → identical diagnostic, byte for byte. The pure engine and its curated lexicon/rule facts are locked by **1370 Vitest tests** and byte-identical golden snapshots, with the strength of those tests measured by **mutation testing** (Stryker); any non-determinism is a failing build.                 |
 
 <br/>
 
@@ -76,7 +80,7 @@ The whole of Layer 1 is a fixed, pure pipeline ([`src/lucid/core/analyzer.ts`](s
 ```
 analyze(text):
   buildDocument   normalize (NFC) → segment sentences → tokenize → group paragraphs
-  passes          20 deterministic detectors, each emitting Findings with provenance
+  passes          23 deterministic detectors, each emitting Findings with provenance
   score           per-criterion counts + density — measures, never approves
   → Diagnostic    { text, findings, score, metrics, meta(localeId, configHash, dataHash) }
 ```
@@ -124,8 +128,8 @@ The architecture is the code itself: a pure `src/lucid/core` (language-neutral) 
 | **LLM layer (opt-in)** | Groq + Google Gemini via raw `fetch` (no SDK), `temperature 0`, versioned prompts — behind an interface, off by default |
 | **Standard**           | ABNT NBR ISO 24495-1:2024 (Plain Language) — the sole authority for every `principle`                |
 | **Reused data**        | PortiLexicon-UD (CC-BY 4.0) morphology; Flesch-PT (Martins et al., 1996)                            |
-| **Testing**            | Vitest — unit + byte-identical golden snapshots; **dependency-cruiser** enforces the layer fence     |
-| **Tooling**            | ESLint                                                                                               |
+| **Testing**            | Vitest — unit + byte-identical golden snapshots; **Stryker** mutation testing measures test strength; **dependency-cruiser** enforces the layer fence |
+| **Tooling**            | ESLint; **esbuild** bundles the CLI                                                                  |
 
 <br/>
 
@@ -136,7 +140,7 @@ Lucid is a Plain-Language auditor built around a strict separation: a **pure, de
 The authority for what counts as a violation is the **ABNT NBR ISO 24495-1:2024** standard (Plain Language). The norm itself says clarity rests on *reader success*, not on mechanical formulas — and that defines Lucid's division of labor:
 
 - **Layer 1** covers **Principles 2 (Findable) and 3 (Understandable)** — the mechanically checkable ones. This is where the rules are strong.
-- **`requiresHuman` flags** cover **Principle 1 (Relevant)** — author work *before* writing, which no rule can guess.
+- **Principle 1 (Relevant) has no detector, and never will** — "relevant to whom?" depends on the reader, the purpose and what the author chose to cut. Lucid handles it by **elicitation**: it asks the norm's questions, records the answers as the author's declaration, and checks only the literal presence of what the author said the reader must find. `requiresHuman` flags do **not** cover Principle 1 — they sit on Principle 2/3 findings and mean "this occurrence needs judgment".
 - **The comprehension probe** is the cheap floor-proxy for **Principle 4 (Usable)** — the norm's "test with real readers," run as a negative check *before* the human test. Being only a floor is alignment with the norm, not an excuse.
 
 The market context is concrete: Brazil's **Lei 15.263/2025** made Plain Language a federal obligation across all three branches — so public bodies will need to *prove* conformance, criterion by criterion, not just claim it. A deterministic, per-criterion, norm-anchored diagnostic is exactly that evidence, and it is exactly what a language model — non-deterministic and unauditable by construction — cannot be.
@@ -186,9 +190,17 @@ npm run test        # Vitest unit + golden snapshots
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint
 npm run depcheck    # dependency-cruiser — the layer fence
+npm run mutation:passes   # Stryker over the 23 criteria (~26 min, off CI)
 ```
 
 > ⏩ Open [http://localhost:3000](http://localhost:3000) to use the studio.
+
+> Or audit from the terminal — Layer 1 only, offline:
+
+```bash
+npm run build:cli
+node dist/cli/lucid.mjs documento.docx --format json
+```
 
 <br/>
 

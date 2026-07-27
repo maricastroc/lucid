@@ -38,6 +38,76 @@ export function segmentAt(
   return { sentences, tokens, wordCount };
 }
 
+interface EditableUnit {
+  readonly blockIndex: number;
+  readonly itemIndex: number | null;
+  readonly start: number;
+  readonly end: number;
+  readonly text: string;
+}
+
+function editableUnits(blocks: readonly Block[]): EditableUnit[] {
+  const units: EditableUnit[] = [];
+  blocks.forEach((block, blockIndex) => {
+    if (block.kind === "list") {
+      block.items.forEach((item, itemIndex) =>
+        units.push({ blockIndex, itemIndex, start: item.start, end: item.end, text: item.text }),
+      );
+      return;
+    }
+    units.push({ blockIndex, itemIndex: null, start: block.start, end: block.end, text: block.text });
+  });
+  return units;
+}
+
+function affixSplice(before: string, after: string): { start: number; end: number; replacement: string } {
+  const max = Math.min(before.length, after.length);
+  let prefix = 0;
+  while (prefix < max && before[prefix] === after[prefix]) prefix++;
+
+  let suffix = 0;
+  while (suffix < max - prefix && before[before.length - 1 - suffix] === after[after.length - 1 - suffix]) suffix++;
+
+  return {
+    start: prefix,
+    end: before.length - suffix,
+    replacement: after.slice(prefix, after.length - suffix),
+  };
+}
+
+function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string): RawBlock[] {
+  return toRawBlocks(blocks).map((raw, index) => {
+    if (index !== unit.blockIndex) return raw;
+    if (raw.kind === "list" && unit.itemIndex !== null) {
+      return { ...raw, items: raw.items.map((item, i) => (i === unit.itemIndex ? text : item)) };
+    }
+    if (raw.kind === "heading") return { ...raw, text };
+    if (raw.kind === "paragraph") return { ...raw, text };
+    return raw;
+  });
+}
+
+export function spliceStructuredDocument(
+  doc: Document,
+  nextText: string,
+  services: DocumentBuildServices,
+): Document | null {
+  const target = normalize(nextText);
+  if (target === doc.source) return doc;
+
+  const { start, end, replacement } = affixSplice(doc.source, target);
+  if (replacement.includes("\n")) return null;
+
+  const unit = editableUnits(doc.blocks).find((candidate) => candidate.start <= start && end <= candidate.end);
+  if (unit === undefined) return null;
+
+  const local = unit.text.slice(0, start - unit.start) + replacement + unit.text.slice(end - unit.start);
+  if (local.trim() === "") return null;
+
+  const rebuilt = buildStructuredDocument(withUnitText(doc.blocks, unit, local), services);
+  return rebuilt.source === target ? rebuilt : null;
+}
+
 export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services: DocumentBuildServices): Document {
   let source = "";
   const blocks: Block[] = [];

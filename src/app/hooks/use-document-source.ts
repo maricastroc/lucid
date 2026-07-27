@@ -6,6 +6,7 @@ import {
   analyzeDocument,
   buildStructuredDocument,
   ptDocumentServices,
+  spliceStructuredDocument,
   toRawBlocks,
   type Block,
   type Diagnostic,
@@ -23,6 +24,7 @@ export interface DocumentSource {
   rawBlocks: readonly RawBlock[] | null;
   isEmpty: boolean;
   isSettled: boolean;
+  structureLost: boolean;
 
   importing: boolean;
   importError: string | null;
@@ -38,10 +40,21 @@ function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
 }
 
 export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSource {
-  const [text, setText] = useState(() => initial?.text ?? "");
+  const [text, setTextState] = useState(() => initial?.text ?? "");
   const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
+  const [structureLost, setStructureLost] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+
+  const setText = useCallback((value: string) => {
+    setImportedDoc((current) => {
+      if (current === null) return null;
+      const next = spliceStructuredDocument(current, value, ptDocumentServices);
+      if (next === null) setStructureLost(true);
+      return next;
+    });
+    setTextState(value);
+  }, []);
 
   const deferredText = useDeferredValue(text);
   const structured = importedDoc !== null && deferredText === importedDoc.source;
@@ -53,12 +66,14 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSo
 
   const loadExample = useCallback(() => {
     setImportedDoc(null);
-    setText(SAMPLE_TEXT);
+    setStructureLost(false);
+    setTextState(SAMPLE_TEXT);
   }, []);
 
   const clear = useCallback(() => {
     setImportedDoc(null);
-    setText("");
+    setStructureLost(false);
+    setTextState("");
   }, []);
 
   const openDocx = useCallback(async (file: File): Promise<boolean> => {
@@ -70,7 +85,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSo
       const { importDocx } = await import("@/importers/docx");
       const doc = await importDocx(bytes, ptDocumentServices);
       setImportedDoc(doc);
-      setText(doc.source);
+      setStructureLost(false);
+      setTextState(doc.source);
       return true;
     } catch {
       setImportError("Não foi possível ler o arquivo. Confirme que é um .docx válido.");
@@ -93,6 +109,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSo
     rawBlocks,
     isEmpty: text.trim() === "" && importedDoc === null,
     isSettled: deferredText === text,
+    structureLost,
     importing,
     importError,
     dismissImportError: useCallback(() => setImportError(null), []),

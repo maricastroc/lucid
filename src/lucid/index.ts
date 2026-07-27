@@ -51,7 +51,7 @@ export type {
 export { asLocaleId } from "./core/contracts/locale";
 
 export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
-export { buildStructuredDocument, toRawBlocks } from "./core/document/structured";
+export { buildStructuredDocument, spliceStructuredDocument, toRawBlocks } from "./core/document/structured";
 export type { RawBlock } from "./core/document/structured";
 
 export { checkBriefing, isBriefingDeclared } from "./core/briefing/check";

@@ -38,6 +38,7 @@ export function Studio() {
     importing,
     importError,
     dismissImportError,
+    structureLost,
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocx: importDocxFile,
@@ -203,6 +204,18 @@ export function Studio() {
           <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
             Fechar
           </button>
+        </div>
+      )}
+
+      {structureLost && (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
+        >
+          <span>
+            A edição mudou o documento além do que a estrutura importada acompanha. Títulos e listas deixaram de ser
+            reconhecidos, então os critérios do Princípio 2 não estão sendo aplicados a partir daqui.
+          </span>
         </div>
       )}
 
