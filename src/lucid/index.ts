@@ -54,6 +54,10 @@ export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindi
 export { buildStructuredDocument, toRawBlocks } from "./core/document/structured";
 export type { RawBlock } from "./core/document/structured";
 
+export { checkBriefing, isBriefingDeclared } from "./core/briefing/check";
+export { EMPTY_BRIEFING } from "./core/briefing/types";
+export type { BriefingCheck, BriefingCoverage, ReaderBriefing } from "./core/briefing/types";
+
 export {
   analyze,
   analyzeDocument,

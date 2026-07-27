@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { buildStructuredDocument, toRawBlocks, type RawBlock } from "@/lucid";
+import { buildStructuredDocument, EMPTY_BRIEFING, toRawBlocks, type RawBlock } from "@/lucid";
 import { clearWorkspace, getSaveFailed, readWorkspace, writeWorkspace } from "../src/app/lib/workspace";
 import { ptDocumentServices } from "@/lucid";
 
@@ -30,8 +30,8 @@ describe("workspace — round trip through storage", () => {
   });
 
   it("restores a plain-text document with no structure", () => {
-    writeWorkspace({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit" });
-    expect(readWorkspace()).toEqual({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit" });
+    writeWorkspace({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING });
+    expect(readWorkspace()).toEqual({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING });
   });
 
   it("restores the revision trail and the working mode", () => {
@@ -39,7 +39,7 @@ describe("workspace — round trip through storage", () => {
       { source: "manual" as const, label: "Edição do autor", before: "em sede de", after: "no âmbito de", burdenBefore: 15.9, burdenAfter: 12.4 },
       { source: "ai" as const, label: "Reescrita por IA · directed@4", burdenBefore: 12.4, burdenAfter: 9.1 },
     ];
-    writeWorkspace({ text: "Texto revisado.", blocks: null, ledger, mode: "edit" });
+    writeWorkspace({ text: "Texto revisado.", blocks: null, ledger, mode: "edit", briefing: EMPTY_BRIEFING });
     const restored = readWorkspace();
     expect(restored?.ledger).toEqual(ledger);
     expect(restored?.mode).toBe("edit");
@@ -47,13 +47,64 @@ describe("workspace — round trip through storage", () => {
 
   it("rebuilds the imported .docx structure byte-identically", () => {
     const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
-    writeWorkspace({ text: imported.source, blocks: toRawBlocks(imported.blocks), ledger: [], mode: "audit" });
+    writeWorkspace({ text: imported.source, blocks: toRawBlocks(imported.blocks), ledger: [], mode: "audit", briefing: EMPTY_BRIEFING });
 
     const restored = readWorkspace();
     expect(restored?.blocks).toEqual(BLOCKS);
 
     const rebuilt = buildStructuredDocument(restored!.blocks!, ptDocumentServices);
     expect(JSON.stringify(rebuilt)).toBe(JSON.stringify(imported));
+  });
+});
+
+describe("workspace — the reader briefing (ADR-079)", () => {
+  beforeEach(() => {
+    installStorage();
+    clearWorkspace();
+  });
+
+  it("restores the declared briefing", () => {
+    const briefing = {
+      audience: "Cidadão sem formação jurídica",
+      purpose: "Saber se tem direito e reunir os documentos",
+      priorKnowledge: "Não conhece o vocabulário do processo",
+      mustFind: ["prazo de recurso", "valor da taxa"],
+    };
+    writeWorkspace({ text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing });
+    expect(readWorkspace()?.briefing).toEqual(briefing);
+  });
+
+  it("reads a version 1 payload — saved work is never thrown away by the upgrade", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 1, text: "Texto antigo.", blocks: null, ledger: [], mode: "audit" }),
+    );
+    const restored = readWorkspace();
+    expect(restored?.text).toBe("Texto antigo.");
+    expect(restored?.briefing).toEqual(EMPTY_BRIEFING);
+  });
+
+  it("rejects a malformed briefing instead of restoring half of it", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 2, text: "a", blocks: null, ledger: [], mode: "audit", briefing: { audience: 42 } }),
+    );
+    expect(readWorkspace()).toBeNull();
+  });
+
+  it("rejects a briefing whose mustFind is not a list of strings", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        text: "a",
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        briefing: { audience: "", purpose: "", priorKnowledge: "", mustFind: [1, 2] },
+      }),
+    );
+    expect(readWorkspace()).toBeNull();
   });
 });
 
@@ -97,13 +148,13 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
         throw new Error("QuotaExceededError");
       },
     });
-    writeWorkspace({ text: "Documento grande.", blocks: null, ledger: [], mode: "audit" });
+    writeWorkspace({ text: "Documento grande.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING });
     expect(getSaveFailed()).toBe(true);
   });
 
   it("clears the flag once a write succeeds again", () => {
     installStorage();
-    writeWorkspace({ text: "Documento pequeno.", blocks: null, ledger: [], mode: "audit" });
+    writeWorkspace({ text: "Documento pequeno.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING });
     expect(getSaveFailed()).toBe(false);
   });
 

@@ -1,15 +1,17 @@
-import type { RawBlock } from "@/lucid";
+import { EMPTY_BRIEFING, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
+const READABLE_VERSIONS: readonly number[] = [1, 2];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
   readonly blocks: readonly RawBlock[] | null;
   readonly ledger: readonly LedgerEntry[];
   readonly mode: Mode;
+  readonly briefing: ReaderBriefing;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -40,6 +42,15 @@ function isLedgerEntry(value: unknown): value is LedgerEntry {
   return true;
 }
 
+function parseBriefing(value: unknown): ReaderBriefing | null {
+  if (value === undefined) return EMPTY_BRIEFING;
+  if (!isRecord(value)) return null;
+  const { audience, purpose, priorKnowledge, mustFind } = value;
+  if (typeof audience !== "string" || typeof purpose !== "string" || typeof priorKnowledge !== "string") return null;
+  if (!Array.isArray(mustFind) || !mustFind.every((item) => typeof item === "string")) return null;
+  return { audience, purpose, priorKnowledge, mustFind: mustFind as string[] };
+}
+
 function parse(raw: string): WorkspaceSnapshot | null {
   let value: unknown;
   try {
@@ -48,7 +59,7 @@ function parse(raw: string): WorkspaceSnapshot | null {
     return null;
   }
   if (!isRecord(value)) return null;
-  if (value.version !== SCHEMA_VERSION) return null;
+  if (typeof value.version !== "number" || !READABLE_VERSIONS.includes(value.version)) return null;
   if (typeof value.text !== "string") return null;
   if (value.mode !== "audit" && value.mode !== "edit") return null;
 
@@ -57,7 +68,10 @@ function parse(raw: string): WorkspaceSnapshot | null {
 
   if (!Array.isArray(value.ledger) || !value.ledger.every(isLedgerEntry)) return null;
 
-  return { text: value.text, blocks, ledger: value.ledger as LedgerEntry[], mode: value.mode };
+  const briefing = parseBriefing(value.briefing);
+  if (briefing === null) return null;
+
+  return { text: value.text, blocks, ledger: value.ledger as LedgerEntry[], mode: value.mode, briefing };
 }
 
 export function readWorkspace(): WorkspaceSnapshot | null {

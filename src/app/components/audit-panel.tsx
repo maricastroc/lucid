@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { Block, Diagnostic, Finding, Span } from "@/lucid";
+import type { Block, BriefingCheck, Diagnostic, Finding, ReaderBriefing, Span } from "@/lucid";
+import { BriefingPanel } from "./briefing-panel";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import { AuditOverview, ReadingSection } from "./audit-overview";
@@ -20,6 +21,9 @@ export interface AuditPanelProps {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   blocks: readonly Block[] | null;
+  briefing: ReaderBriefing;
+  briefingCheck: BriefingCheck;
+  onBriefingChange: (briefing: ReaderBriefing) => void;
   activeCriteria: ReadonlySet<string>;
   bucket: Bucket;
   onToggleCriterion: (criterion: string) => void;
@@ -68,6 +72,8 @@ export function AuditPanel(props: AuditPanelProps) {
           humanCount={props.humanCount}
           ledger={props.ledger}
           blocks={props.blocks}
+          briefing={props.briefing}
+          briefingCheck={props.briefingCheck}
         />
         <RevisionList
           diagnostic={props.diagnostic}
@@ -81,6 +87,7 @@ export function AuditPanel(props: AuditPanelProps) {
           onSelect={props.onSelect}
           onToggleCriterion={props.onToggleCriterion}
         />
+        <BriefingPanel briefing={props.briefing} check={props.briefingCheck} onChange={props.onBriefingChange} />
         <ReadingSection diagnostic={props.diagnostic} />
         {props.probe}
       </div>

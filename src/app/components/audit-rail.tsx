@@ -20,7 +20,7 @@ export function AuditRail({ text, ...panel }: RailProps) {
             <span className="u-label text-ink-3">Auditoria</span>
           </div>
         }
-        probe={<ProbePanel text={text} />}
+        probe={<ProbePanel text={text} suggestedQuestion={panel.briefing.purpose} />}
       />
       <AuditPanelFooter diagnostic={panel.diagnostic} />
     </aside>

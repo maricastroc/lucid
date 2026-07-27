@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { Finding, Span } from "@/lucid";
+import { checkBriefing, EMPTY_BRIEFING, type Finding, type ReaderBriefing, type Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
@@ -22,6 +22,7 @@ import { ArrowDownIcon } from "./components/icons";
 export function Studio() {
   const [restored] = useState(readWorkspace);
   const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
+  const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
   const [sheetOpen, setSheetOpen] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -53,12 +54,14 @@ export function Studio() {
 
   useEffect(() => {
     if (!isSettled) return;
-    if (isEmpty && ledger.length === 0) {
+    if (isEmpty && ledger.length === 0 && briefing === EMPTY_BRIEFING) {
       clearWorkspace();
       return;
     }
-    writeWorkspace({ text, blocks: rawBlocks, ledger, mode });
-  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode]);
+    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing });
+  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing]);
+
+  const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
 
   const { activeCriteria, toggleCriterion, bucket, setBucket } = useCriterionFilter();
 
@@ -97,6 +100,7 @@ export function Studio() {
   const afterDocumentReplaced = useCallback(() => {
     clearSelection();
     resetHistory();
+    setBriefing(EMPTY_BRIEFING);
     setMode("audit");
   }, [clearSelection, resetHistory]);
 
@@ -172,6 +176,9 @@ export function Studio() {
     humanCount,
     ledger,
     blocks,
+    briefing,
+    briefingCheck,
+    onBriefingChange: setBriefing,
     activeCriteria,
     bucket,
     onToggleCriterion: toggleCriterion,

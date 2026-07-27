@@ -1,4 +1,4 @@
-import type { Diagnostic, Finding, Severity } from "@/lucid";
+import type { BriefingCheck, Diagnostic, Finding, ReaderBriefing, Severity } from "@/lucid";
 import { CRITERION_ORDER, coverageLabel, coverageOf, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 import { readabilityOf } from "./readability";
@@ -6,6 +6,11 @@ import { readabilityOf } from "./readability";
 export interface AuditReportMeta {
   generatedAt: string;
   documentTitle?: string;
+}
+
+export interface BriefingReport {
+  briefing: ReaderBriefing;
+  check: BriefingCheck;
 }
 
 const fmtNum = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
@@ -17,11 +22,52 @@ function bySeverityThenPosition(a: Finding, b: Finding): number {
   return s !== 0 ? s : a.span.start - b.span.start;
 }
 
+function renderBriefingMarkdown(briefing: BriefingReport | null): string {
+  if (briefing === null || !briefing.check.declared) {
+    return [
+      "## Princípio 1 — Relevante (5.1)",
+      "",
+      "**Não declarado.** A norma pede que o autor modele o leitor antes de escrever: quem lê, o que precisa fazer, " +
+        "o que entra e o que sai. Nenhuma regra automática decide o que é relevante para um leitor específico — por " +
+        "isso este princípio **não tem critério no placar** e **não é dado por cumprido**. A ausência aqui é ausência " +
+        "de declaração, não conformidade.",
+      "",
+    ].join("\n");
+  }
+
+  const { briefing: declared, check } = briefing;
+  const out: string[] = ["## Princípio 1 — Relevante (5.1)", ""];
+  out.push("_Briefing declarado pelo autor. É registro de decisão humana, não medição da ferramenta._");
+  out.push("");
+  if (declared.audience.trim() !== "") out.push(`- **Quem é o leitor:** ${collapse(declared.audience)}`);
+  if (declared.purpose.trim() !== "") out.push(`- **O que precisa fazer depois de ler:** ${collapse(declared.purpose)}`);
+  if (declared.priorKnowledge.trim() !== "") out.push(`- **O que já sabe:** ${collapse(declared.priorKnowledge)}`);
+  out.push("");
+
+  if (check.coverage.length > 0) {
+    out.push("### O que o leitor precisa encontrar");
+    out.push("");
+    for (const item of check.coverage) {
+      const found = item.occurrences.length > 0;
+      out.push(`- ${found ? "✓" : "✗"} “${item.expression}” — ${found ? `aparece ${item.occurrences.length}×` : "não aparece com essas palavras"}`);
+    }
+    out.push("");
+    out.push(
+      "_Busca literal, sensível a acento. Encontrar não prova que o leitor vai entender; não encontrar não prova que o " +
+        "assunto está ausente — pode estar dito com outras palavras. Esta lista é do autor e não entra no placar._",
+    );
+    out.push("");
+  }
+
+  return out.join("\n");
+}
+
 export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
   meta: AuditReportMeta,
   ledger: readonly LedgerEntry[] = [],
+  briefing: BriefingReport | null = null,
 ): string {
   const m = diagnostic.metrics;
   const total = findings.length;
@@ -134,6 +180,11 @@ export function buildAuditReport(
       }
       out.push("");
     });
+  }
+
+  const briefingSection = renderBriefingMarkdown(briefing);
+  if (briefingSection) {
+    out.push(briefingSection);
   }
 
   const trail = renderLedgerMarkdown(ledger);

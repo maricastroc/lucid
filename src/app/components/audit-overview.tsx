@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Block, Diagnostic, Finding, Severity } from "@/lucid";
+import type { Block, BriefingCheck, Diagnostic, Finding, ReaderBriefing, Severity } from "@/lucid";
 import { SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks, hasRecoverableStructure } from "../lib/export-document";
@@ -28,9 +28,11 @@ interface Props {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   blocks: readonly Block[] | null;
+  briefing: ReaderBriefing;
+  briefingCheck: BriefingCheck;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks }: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, briefing, briefingCheck }: Props) {
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
@@ -93,7 +95,10 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
           onClick={() =>
             download(
               "auditoria-lucid.md",
-              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }, ledger),
+              buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }, ledger, {
+                briefing,
+                check: briefingCheck,
+              }),
               "text/markdown;charset=utf-8",
             )
           }

@@ -20,7 +20,7 @@ const OPERACAO_LABEL: Record<OperacaoLeitura, string> = {
 
 type Status = "idle" | "loading" | "done" | "error";
 
-export function ProbePanel({ text }: { text: string }) {
+export function ProbePanel({ text, suggestedQuestion }: { text: string; suggestedQuestion: string }) {
   const [pergunta, setPergunta] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [data, setData] = useState<ProbeResponse | null>(null);
@@ -77,6 +77,17 @@ export function ProbePanel({ text }: { text: string }) {
         Um leitor sintético de piso lê <em>só</em> o texto acima e tenta responder à pergunta. É um teste{" "}
         <strong className="text-ink-2">negativo</strong>: pode achar uma falha, nunca aprovar.
       </p>
+
+      {suggestedQuestion.trim() !== "" && pergunta.trim() === "" && (
+        <button
+          type="button"
+          onClick={() => setPergunta(suggestedQuestion.trim())}
+          className="mt-3 block w-full rounded-lg border border-dashed border-rule-2 px-3 py-2 text-left text-[12px] leading-relaxed text-ink-2 transition-colors duration-150 hover:bg-surface-2"
+        >
+          Usar o propósito do leitor que você declarou no Princípio 1:{" "}
+          <span className="text-ink-1">“{suggestedQuestion.trim()}”</span>
+        </button>
+      )}
 
       <label className="mt-3 block">
         <span className="text-[12px] text-ink-2">O que você quer encontrar no texto?</span>
