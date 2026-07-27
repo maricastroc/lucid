@@ -15,7 +15,6 @@ export interface UiCopy {
     readonly copy: string;
     readonly copied: string;
     readonly words: string;
-    /** Sufixo que marca saída de máquina em pt-BR dentro da UI em inglês; vazio em pt-BR. */
     readonly engineOutputSuffix: string;
   };
 
@@ -64,7 +63,11 @@ export interface UiCopy {
   };
 
   readonly studio: {
-    readonly goHomeConfirm: string;
+    readonly goHome: {
+      readonly title: string;
+      readonly body: string;
+      readonly confirm: string;
+    };
     readonly structureLost: string;
     readonly saveFailed: string;
     readonly importUnreadable: string;

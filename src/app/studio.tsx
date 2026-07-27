@@ -19,6 +19,7 @@ import { AuditRail } from "./components/audit-rail";
 import { RevisionSheet } from "./components/revision-sheet";
 import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
+import { ConfirmDialog } from "./components/ui/confirm-dialog";
 
 export function Studio() {
   const { c } = useCopy();
@@ -27,6 +28,7 @@ export function Studio() {
   const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
   const [config, setConfig] = useState<Config>(restored?.config ?? DEFAULT_CONFIG);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [goHomeOpen, setGoHomeOpen] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -120,13 +122,20 @@ export function Studio() {
     [importDocxFile, afterDocumentReplaced],
   );
 
-  const goHome = useCallback(() => {
-    if (isEmpty && mode === "audit") return;
-    if (!isEmpty && !window.confirm(c.studio.goHomeConfirm)) return;
+  const discardAndGoHome = useCallback(() => {
     clearWorkspace();
     clearDocument();
     afterDocumentReplaced();
-  }, [isEmpty, mode, clearDocument, afterDocumentReplaced, c]);
+  }, [clearDocument, afterDocumentReplaced]);
+
+  const goHome = useCallback(() => {
+    if (isEmpty && mode === "audit") return;
+    if (!isEmpty) {
+      setGoHomeOpen(true);
+      return;
+    }
+    discardAndGoHome();
+  }, [isEmpty, mode, discardAndGoHome]);
 
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
@@ -282,6 +291,15 @@ export function Studio() {
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={goHomeOpen}
+        onOpenChange={setGoHomeOpen}
+        title={c.studio.goHome.title}
+        body={c.studio.goHome.body}
+        confirmLabel={c.studio.goHome.confirm}
+        onConfirm={discardAndGoHome}
+      />
 
       {canUndo && (
         <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-4">

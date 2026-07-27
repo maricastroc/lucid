@@ -107,7 +107,6 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
   );
 }
 
-/** Mostra o idioma-alvo, como o botão de tema mostra o tema-alvo. */
 function LanguageToggle() {
   const { lang, toggle } = useUiLang();
   const { c } = useCopy();

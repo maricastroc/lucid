@@ -18,9 +18,7 @@ const ACTIVE_LOCALE_ID = "pt-BR";
 export interface RewriteModel {
   providerId: "stub" | "groq" | "gemini" | "deepseek";
   model: string;
-  /** Nome do modelo — não se traduz. */
   name: string;
-  /** Qualificador editorial do nome, esse sim traduzido. */
   noteKey?: "modelNoteStrongGenerator" | "modelNotePaid";
 }
 

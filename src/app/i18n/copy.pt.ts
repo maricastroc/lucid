@@ -71,7 +71,11 @@ export const COPY_PT: UiCopy = {
   },
 
   studio: {
-    goHomeConfirm: "Voltar ao início? O texto e a trilha de revisão serão descartados.",
+    goHome: {
+      title: "Voltar ao início?",
+      body: "O texto em revisão e a trilha de alterações serão descartados. Esta ação não pode ser desfeita — exporte o relatório antes se quiser guardar a auditoria.",
+      confirm: "Descartar e voltar",
+    },
     structureLost:
       "A edição mudou o documento além do que a estrutura importada acompanha. Títulos e listas deixaram de ser " +
       "reconhecidos, então os critérios do Princípio 2 não estão sendo aplicados a partir daqui.",

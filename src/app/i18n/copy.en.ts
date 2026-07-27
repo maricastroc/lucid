@@ -71,7 +71,11 @@ export const COPY_EN: UiCopy = {
   },
 
   studio: {
-    goHomeConfirm: "Back to start? The text and the revision trail will be discarded.",
+    goHome: {
+      title: "Back to start?",
+      body: "The text under review and the trail of changes will be discarded. This cannot be undone — export the report first if you want to keep the audit.",
+      confirm: "Discard and go back",
+    },
     structureLost:
       "Your edits moved the document beyond what the imported structure can track. Headings and lists are no longer " +
       "recognized, so the Principle 2 criteria are not being applied from here on.",
