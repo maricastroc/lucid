@@ -12,6 +12,8 @@ import {
   withEnabled,
   withNumber,
 } from "../lib/profile";
+import { Checkbox } from "./ui/checkbox";
+import { Stepper } from "./ui/stepper";
 
 interface Props {
   config: Config;
@@ -73,21 +75,16 @@ export function ProfilePanel({ config, onChange }: Props) {
           <span className="u-label text-ink-3">Limiares</span>
           <div className="mt-2 flex flex-col gap-2">
             {KNOBS.map((knob) => (
-              <label key={`${knob.section}.${knob.field}`} className="flex items-center justify-between gap-3">
+              <div key={`${knob.section}.${knob.field}`} className="flex items-center justify-between gap-3">
                 <span className="min-w-0 text-[12.5px] text-ink-1">{knob.label}</span>
-                <input
-                  type="number"
+                <Stepper
+                  label={knob.label}
                   min={knob.min}
                   max={knob.max}
                   value={readNumber(config, knob.section, knob.field)}
-                  onChange={(e) => {
-                    const next = Number(e.target.value);
-                    if (!Number.isFinite(next)) return;
-                    onChange(withNumber(config, knob.section, knob.field, Math.min(Math.max(Math.trunc(next), knob.min), knob.max)));
-                  }}
-                  className="w-20 shrink-0 rounded-lg border border-rule-2 bg-sheet px-2 py-1.5 text-right text-[13px] tabular-nums text-ink-0 focus:border-accent focus:outline-none"
+                  onChange={(next) => onChange(withNumber(config, knob.section, knob.field, next))}
                 />
-              </label>
+              </div>
             ))}
           </div>
 
@@ -98,13 +95,16 @@ export function ProfilePanel({ config, onChange }: Props) {
           </p>
           <div className="mt-2 flex flex-col divide-y divide-rule-1">
             {TOGGLEABLE_SECTIONS.map((section) => (
-              <label key={section} className="flex items-center justify-between gap-3 py-1.5">
+              <label
+                key={section}
+                htmlFor={`criterio-${section}`}
+                className="flex cursor-pointer items-center justify-between gap-3 py-2"
+              >
                 <span className="min-w-0 text-[12.5px] text-ink-1">{criterionLabelFor(section)}</span>
-                <input
-                  type="checkbox"
+                <Checkbox
+                  id={`criterio-${section}`}
                   checked={readEnabled(config, section)}
-                  onChange={(e) => onChange(withEnabled(config, section, e.target.checked))}
-                  className="size-4 shrink-0 accent-[var(--accent)]"
+                  onCheckedChange={(next) => onChange(withEnabled(config, section, next))}
                 />
               </label>
             ))}
