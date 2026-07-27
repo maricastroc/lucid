@@ -51,13 +51,14 @@ export type {
 export { asLocaleId } from "./core/contracts/locale";
 
 export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
-export { buildStructuredDocument } from "./core/document/structured";
+export { buildStructuredDocument, toRawBlocks } from "./core/document/structured";
 export type { RawBlock } from "./core/document/structured";
 
 export {
   analyze,
   analyzeDocument,
   analyzeWithPasses,
+  buildDocument,
   localePtBR,
   ptDocumentServices,
   READABILITY_REFERENCE_RANGE,

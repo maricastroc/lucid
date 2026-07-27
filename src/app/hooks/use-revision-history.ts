@@ -17,10 +17,11 @@ export function useRevisionHistory(
   text: string,
   setText: (value: string) => void,
   isSettled: boolean,
+  initialLedger: readonly LedgerEntry[] = [],
 ): RevisionHistory {
   const undoStack = useRef<string[]>([]);
   const [canUndo, setCanUndo] = useState(false);
-  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
+  const [ledger, setLedger] = useState<LedgerEntry[]>(() => [...initialLedger]);
 
   const applying = useRef(false);
   useEffect(() => {

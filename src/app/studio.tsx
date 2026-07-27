@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Finding, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { sourceLabel, type LedgerEntry } from "./lib/ledger";
+import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
 import { useCriterionFilter } from "./hooks/use-criterion-filter";
 import { useDocumentSource } from "./hooks/use-document-source";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
@@ -19,8 +20,10 @@ import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 
 export function Studio() {
-  const [mode, setMode] = useState<Mode>("audit");
+  const [restored] = useState(readWorkspace);
+  const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -28,6 +31,7 @@ export function Studio() {
     setText,
     diagnostic,
     blocks,
+    rawBlocks,
     isEmpty,
     isSettled,
     importing,
@@ -36,7 +40,7 @@ export function Studio() {
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocx: importDocxFile,
-  } = useDocumentSource();
+  } = useDocumentSource(restored);
 
   const {
     ledger,
@@ -45,7 +49,16 @@ export function Studio() {
     undo,
     noteFreeEdit,
     reset: resetHistory,
-  } = useRevisionHistory(text, setText, isSettled);
+  } = useRevisionHistory(text, setText, isSettled, restored?.ledger);
+
+  useEffect(() => {
+    if (!isSettled) return;
+    if (isEmpty && ledger.length === 0) {
+      clearWorkspace();
+      return;
+    }
+    writeWorkspace({ text, blocks: rawBlocks, ledger, mode });
+  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode]);
 
   const { activeCriteria, toggleCriterion, bucket, setBucket } = useCriterionFilter();
 
@@ -101,7 +114,8 @@ export function Studio() {
 
   const goHome = useCallback(() => {
     if (isEmpty && mode === "audit") return;
-    if (!isEmpty && !window.confirm("Voltar ao início? O texto atual não fica salvo.")) return;
+    if (!isEmpty && !window.confirm("Voltar ao início? O texto e a trilha de revisão serão descartados.")) return;
+    clearWorkspace();
     clearDocument();
     afterDocumentReplaced();
   }, [isEmpty, mode, clearDocument, afterDocumentReplaced]);
@@ -157,6 +171,7 @@ export function Studio() {
     safeCount,
     humanCount,
     ledger,
+    blocks,
     activeCriteria,
     bucket,
     onToggleCriterion: toggleCriterion,
@@ -181,6 +196,18 @@ export function Studio() {
           <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
             Fechar
           </button>
+        </div>
+      )}
+
+      {saveFailed && (
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
+        >
+          <span>
+            Não foi possível salvar este trabalho no navegador — ele será perdido se você fechar a aba. Exporte o
+            relatório para não depender disto.
+          </span>
         </div>
       )}
 

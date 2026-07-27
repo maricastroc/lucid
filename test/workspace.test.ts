@@ -1,0 +1,118 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { buildStructuredDocument, toRawBlocks, type RawBlock } from "@/lucid";
+import { clearWorkspace, getSaveFailed, readWorkspace, writeWorkspace } from "../src/app/lib/workspace";
+import { ptDocumentServices } from "@/lucid";
+
+const STORAGE_KEY = "lucid-workspace";
+
+function installStorage(overrides: Partial<Storage> = {}): Map<string, string> {
+  const map = new Map<string, string>();
+  const storage = {
+    getItem: (key: string) => map.get(key) ?? null,
+    setItem: (key: string, value: string) => void map.set(key, value),
+    removeItem: (key: string) => void map.delete(key),
+    ...overrides,
+  } as Storage;
+  Object.defineProperty(globalThis, "localStorage", { value: storage, configurable: true, writable: true });
+  return map;
+}
+
+const BLOCKS: RawBlock[] = [
+  { kind: "heading", level: 1, text: "Prazos e documentos" },
+  { kind: "paragraph", text: "O interessado deve entregar os documentos." },
+  { kind: "list", ordered: true, items: ["Requerimento assinado", "Comprovante de residência"] },
+];
+
+describe("workspace — round trip through storage", () => {
+  beforeEach(() => {
+    installStorage();
+    clearWorkspace();
+  });
+
+  it("restores a plain-text document with no structure", () => {
+    writeWorkspace({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit" });
+    expect(readWorkspace()).toEqual({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit" });
+  });
+
+  it("restores the revision trail and the working mode", () => {
+    const ledger = [
+      { source: "manual" as const, label: "Edição do autor", before: "em sede de", after: "no âmbito de", burdenBefore: 15.9, burdenAfter: 12.4 },
+      { source: "ai" as const, label: "Reescrita por IA · directed@4", burdenBefore: 12.4, burdenAfter: 9.1 },
+    ];
+    writeWorkspace({ text: "Texto revisado.", blocks: null, ledger, mode: "edit" });
+    const restored = readWorkspace();
+    expect(restored?.ledger).toEqual(ledger);
+    expect(restored?.mode).toBe("edit");
+  });
+
+  it("rebuilds the imported .docx structure byte-identically", () => {
+    const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
+    writeWorkspace({ text: imported.source, blocks: toRawBlocks(imported.blocks), ledger: [], mode: "audit" });
+
+    const restored = readWorkspace();
+    expect(restored?.blocks).toEqual(BLOCKS);
+
+    const rebuilt = buildStructuredDocument(restored!.blocks!, ptDocumentServices);
+    expect(JSON.stringify(rebuilt)).toBe(JSON.stringify(imported));
+  });
+});
+
+describe("workspace — a corrupt payload is discarded, never half-restored", () => {
+  beforeEach(() => {
+    installStorage();
+    clearWorkspace();
+  });
+
+  const REJECTED: Record<string, unknown> = {
+    "wrong schema version": { version: 99, text: "a", blocks: null, ledger: [], mode: "audit" },
+    "missing text": { version: 1, blocks: null, ledger: [], mode: "audit" },
+    "unknown mode": { version: 1, text: "a", blocks: null, ledger: [], mode: "revisar" },
+    "block of unknown kind": { version: 1, text: "a", blocks: [{ kind: "quote", text: "a" }], ledger: [], mode: "audit" },
+    "heading with no level": { version: 1, text: "a", blocks: [{ kind: "heading", text: "a" }], ledger: [], mode: "audit" },
+    "ledger entry with unknown source": { version: 1, text: "a", blocks: null, ledger: [{ source: "bot", label: "x", burdenBefore: 1, burdenAfter: 0 }], mode: "audit" },
+    "ledger entry with no burden": { version: 1, text: "a", blocks: null, ledger: [{ source: "manual", label: "x" }], mode: "audit" },
+  };
+
+  for (const [name, payload] of Object.entries(REJECTED)) {
+    it(`rejects: ${name}`, () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      expect(readWorkspace()).toBeNull();
+    });
+  }
+
+  it("rejects text that is not valid JSON", () => {
+    localStorage.setItem(STORAGE_KEY, "{nope");
+    expect(readWorkspace()).toBeNull();
+  });
+
+  it("returns null when nothing was ever stored", () => {
+    expect(readWorkspace()).toBeNull();
+  });
+});
+
+describe("workspace — a storage that refuses to write is reported, not hidden", () => {
+  it("flags the failure instead of pretending the work is safe", () => {
+    installStorage({
+      setItem: () => {
+        throw new Error("QuotaExceededError");
+      },
+    });
+    writeWorkspace({ text: "Documento grande.", blocks: null, ledger: [], mode: "audit" });
+    expect(getSaveFailed()).toBe(true);
+  });
+
+  it("clears the flag once a write succeeds again", () => {
+    installStorage();
+    writeWorkspace({ text: "Documento pequeno.", blocks: null, ledger: [], mode: "audit" });
+    expect(getSaveFailed()).toBe(false);
+  });
+
+  it("survives a storage that throws on read", () => {
+    installStorage({
+      getItem: () => {
+        throw new Error("SecurityError");
+      },
+    });
+    expect(readWorkspace()).toBeNull();
+  });
+});

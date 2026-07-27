@@ -8,6 +8,16 @@ export type RawBlock =
   | { readonly kind: "heading"; readonly level: number; readonly text: string }
   | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] };
 
+export function toRawBlocks(blocks: readonly Block[]): RawBlock[] {
+  return blocks.map((block) => {
+    if (block.kind === "heading") return { kind: "heading", level: block.level, text: block.text };
+    if (block.kind === "list") {
+      return { kind: "list", ordered: block.ordered, items: block.items.map((item) => item.text) };
+    }
+    return { kind: "paragraph", text: block.text };
+  });
+}
+
 function shiftToken(t: Token, off: number): Token {
   return { ...t, start: t.start + off, end: t.end + off };
 }

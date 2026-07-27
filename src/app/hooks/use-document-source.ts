@@ -1,14 +1,26 @@
 "use client";
 
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
-import { analyze, analyzeDocument, ptDocumentServices, type Block, type Diagnostic, type Document } from "@/lucid";
+import {
+  analyze,
+  analyzeDocument,
+  buildStructuredDocument,
+  ptDocumentServices,
+  toRawBlocks,
+  type Block,
+  type Diagnostic,
+  type Document,
+  type RawBlock,
+} from "@/lucid";
 import { SAMPLE_TEXT } from "../lib/sample";
+import { type WorkspaceSnapshot } from "../lib/workspace";
 
 export interface DocumentSource {
   text: string;
   setText: (value: string) => void;
   diagnostic: Diagnostic;
   blocks: readonly Block[] | null;
+  rawBlocks: readonly RawBlock[] | null;
   isEmpty: boolean;
   isSettled: boolean;
 
@@ -21,9 +33,13 @@ export interface DocumentSource {
   openDocx: (file: File) => Promise<boolean>;
 }
 
-export function useDocumentSource(): DocumentSource {
-  const [text, setText] = useState("");
-  const [importedDoc, setImportedDoc] = useState<Document | null>(null);
+function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
+  return blocks === null ? null : buildStructuredDocument(blocks, ptDocumentServices);
+}
+
+export function useDocumentSource(initial: WorkspaceSnapshot | null): DocumentSource {
+  const [text, setText] = useState(() => initial?.text ?? "");
+  const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -64,11 +80,17 @@ export function useDocumentSource(): DocumentSource {
     }
   }, []);
 
+  const rawBlocks = useMemo(
+    () => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)),
+    [importedDoc],
+  );
+
   return {
     text,
     setText,
     diagnostic,
     blocks: structured ? importedDoc!.blocks : null,
+    rawBlocks,
     isEmpty: text.trim() === "" && importedDoc === null,
     isSettled: deferredText === text,
     importing,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { Mode } from "./document-view";
 import { useTheme } from "../hooks/use-theme";
@@ -104,10 +105,12 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
 function Logo() {
   const { theme } = useTheme();
   return (
-    <img
+    <Image
       src={theme === "light" ? "/icon-light.svg" : "/icon-dark.svg"}
       alt=""
       aria-hidden
+      width={32}
+      height={32}
       className="size-8 rounded-[9px] shadow-[0_0_0_1px_rgb(31_29_24/0.06),0_1px_2px_rgb(31_29_24/0.14)]"
     />
   );

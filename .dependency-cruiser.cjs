@@ -58,6 +58,22 @@ module.exports = {
       to: { path: "^src/importers" },
     },
     {
+      name: "core-e-locale-nao-importam-exporter",
+      severity: "error",
+      comment:
+        "Fronteira de formato (ADR-077), espelho da regra dos importadores: exportadores (src/exporters) " +
+        "são o único lugar que escreve OOXML/ZIP. A dependência é sempre exporter/app -> lucid.",
+      from: { path: "^src/(lucid/core|locales)" },
+      to: { path: "^src/exporters" },
+    },
+    {
+      name: "exporter-nao-importa-app-nem-rede",
+      severity: "error",
+      comment: "Um exportador é puro: transforma blocos em bytes. Sem React/Next, sem rede, sem app.",
+      from: { path: "^src/exporters" },
+      to: { path: "^(src/app|src/llm|react|react-dom|next|(node:)?https?)($|/)" },
+    },
+    {
       name: "locale-e-puro-como-o-core",
       severity: "error",
       comment:

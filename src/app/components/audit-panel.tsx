@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import type { Diagnostic, Finding, Span } from "@/lucid";
+import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import { AuditOverview, ReadingSection } from "./audit-overview";
@@ -19,6 +19,7 @@ export interface AuditPanelProps {
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
+  blocks: readonly Block[] | null;
   activeCriteria: ReadonlySet<string>;
   bucket: Bucket;
   onToggleCriterion: (criterion: string) => void;
@@ -66,6 +67,7 @@ export function AuditPanel(props: AuditPanelProps) {
           safeCount={props.safeCount}
           humanCount={props.humanCount}
           ledger={props.ledger}
+          blocks={props.blocks}
         />
         <RevisionList
           diagnostic={props.diagnostic}

@@ -1,5 +1,5 @@
-import { Studio } from "./studio";
+import { StudioClient } from "./studio-client";
 
 export default function Home() {
-  return <Studio />;
+  return <StudioClient />;
 }

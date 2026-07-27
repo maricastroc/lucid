@@ -1,13 +1,15 @@
 "use client";
 
-import type { Diagnostic, Finding, Severity } from "@/lucid";
+import { useState } from "react";
+import type { Block, Diagnostic, Finding, Severity } from "@/lucid";
 import { SEVERITY_LABEL, severityInkVar } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
+import { documentToDocx, exportableBlocks, hasRecoverableStructure } from "../lib/export-document";
 import { readabilityOf } from "../lib/readability";
 import type { LedgerEntry } from "../lib/ledger";
 import { ArrowDownIcon } from "./icons";
 
-function downloadTextFile(filename: string, content: string, mime: string) {
+function download(filename: string, content: BlobPart, mime: string) {
   const blob = new Blob([content], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -25,12 +27,24 @@ interface Props {
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
+  blocks: readonly Block[] | null;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger }: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks }: Props) {
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
+  const [docxError, setDocxError] = useState<string | null>(null);
+
+  const exportDocx = async () => {
+    setDocxError(null);
+    try {
+      const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks));
+      download("documento-revisado.docx", bytes as BlobPart, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    } catch {
+      setDocxError("Não foi possível gerar o .docx. Use a exportação em .txt.");
+    }
+  };
 
   return (
     <div className="fade-in flex flex-col">
@@ -77,7 +91,7 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
         <button
           type="button"
           onClick={() =>
-            downloadTextFile(
+            download(
               "auditoria-lucid.md",
               buildAuditReport(diagnostic, findings, { generatedAt: new Date().toLocaleString("pt-BR") }, ledger),
               "text/markdown;charset=utf-8",
@@ -88,6 +102,40 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
           <ArrowDownIcon className="size-4" />
           Exportar auditoria (.md)
         </button>
+
+        <div className="mt-2 flex gap-2">
+          <button
+            type="button"
+            onClick={exportDocx}
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+          >
+            <ArrowDownIcon className="size-4" />
+            Documento (.docx)
+          </button>
+          <button
+            type="button"
+            onClick={() => download("documento-revisado.txt", diagnostic.text, "text/plain;charset=utf-8")}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+          >
+            <ArrowDownIcon className="size-4" />
+            .txt
+          </button>
+        </div>
+
+        {docxError !== null && (
+          <p role="alert" className="mt-2 text-[12px] leading-relaxed text-sev-error">
+            {docxError}
+          </p>
+        )}
+
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          O .docx exportado é um documento novo, com o texto revisado e a estrutura que o Lucid enxerga
+          {hasRecoverableStructure(exportableBlocks(diagnostic.text, blocks))
+            ? " (títulos, parágrafos e listas)"
+            : " (parágrafos)"}
+          . Formatação do arquivo original — negrito, tabelas, imagens, cabeçalho — não entra na auditoria e por isso
+          não volta na exportação.
+        </p>
 
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">
           O placar mede, não aprova. A ausência de anotações não é atestado de clareza.
