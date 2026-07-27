@@ -1,3 +1,31 @@
+# Curated data for the `pt-BR` locale
+
+> **In English, for visitors.** This directory holds the curated linguistic data that Lucid's
+> deterministic engine consults at runtime — jargon glossaries, participle lists, verb morphology,
+> subordinating conjunctions. Every dataset is loaded as static data: **no network, no async I/O**.
+>
+> Two things make this directory worth a look even if you don't read Portuguese:
+>
+> 1. **No data enters without a recorded origin.** Each file below documents its provenance, its
+>    curation criteria, and — crucially — **what was deliberately left out and why**. The project's
+>    rule that a criterion may never invent its authority has a counterpart here: a lexicon may
+>    never grow by convenience.
+> 2. **The data is part of reproducibility.** Every dataset is registered with a stable
+>    `fingerprint`; `analyze()` stamps a `meta.dataHash` derived from the datasets that actually
+>    influenced the run. Editing one entry in one JSON changes the hash and **breaks the golden
+>    snapshot on purpose** — governance over the data, not just the code.
+>
+> **Required attribution.** `mais-que-perfeito.pt.json` and `adverbios-mente.pt.json` are derivative
+> works of **PortiLexicon-UD** (Lucelene Lopes, Magali Duran, Paulo Fernandes, Thiago Pardo),
+> licensed **CC-BY 4.0**. Any redistribution must credit the source — see the dedicated section
+> below. All other datasets are original curation by this project.
+>
+> The per-file notes that follow are in Portuguese: they are curation arguments *about Portuguese
+> linguistic facts* (why `consoante` is excluded, why `fora` is pruned, why the subordination count
+> deliberately underestimates), addressed to whoever maintains this locale.
+
+---
+
 # Dados versionados de `src/locales/pt-BR/datasets`
 
 Cada dataset aqui é consumido pela Camada 1 (`core`) como dado estático, carregado sem

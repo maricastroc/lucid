@@ -1,81 +1,86 @@
-# Eval do Lucid — o instrumento medindo a si mesmo
+# Lucid's evaluation — the instrument measuring itself
 
-`report.json` é o artefato de avaliação do motor determinístico, gerado por:
+`report.json` is the evaluation artifact for the deterministic engine, produced by:
 
 ```bash
 npm run eval
 ```
 
-O cálculo mora em [`test/eval/compute.ts`](../test/eval/compute.ts) e é **fonte única**: os testes
-de eval assertam sobre o mesmo retorno que este arquivo serializa. Não existe segunda
-implementação para uma página divergir do CI — se o número publicado estiver errado, o teste
-quebra junto.
+The computation lives in [`test/eval/compute.ts`](../test/eval/compute.ts) and is the **single
+source**: the eval tests assert over the very same return value this file serializes. There is no
+second implementation for a page to diverge from CI — if a published number is wrong, the test
+breaks with it.
 
-A **forma** é declarada em [`src/report/eval/contract.ts`](../src/report/eval/contract.ts), o
-contrato do qual dependem os dois lados: o tooling que produz o artefato e a página
-[`/avaliacao`](../src/app/avaliacao/page.tsx) que o apresenta.
+The **shape** is declared in [`src/report/eval/contract.ts`](../src/report/eval/contract.ts), the
+contract both sides depend on: the tooling that produces the artifact and the
+[`/avaliacao`](../src/app/avaliacao/page.tsx) page that presents it.
 
-## Como ler
+## How to read it
 
-- **`schemaVersion`** — versão da FORMA deste arquivo (não do motor; esse é `stamp.lucidVersion`).
-  Quem consome lê isto antes de interpretar o resto: mudança incompatível de forma incrementa o
-  número, em vez de quebrar o consumidor em silêncio.
-- **`stamp`** — `(lucidVersion, localeId, configHash, dataHash, goldenHash)`. Sem ela o número é
-  alegação, não medida: é o que permite reproduzir. O `dataHash` cobre **todos** os datasets do
-  registro, não só os usados pelos critérios avaliados. O `goldenHash` cobre o corpus: a medição
-  depende do golden tanto quanto do motor — declarar uma limitação nova muda o recall publicado
-  sem tocar em config nem em dado, e sem esse hash dois artefatos discordantes seriam
-  indistinguíveis.
+- **`schemaVersion`** — the version of this file's SHAPE (not of the engine; that is
+  `stamp.lucidVersion`). A consumer reads this before interpreting anything else: an incompatible
+  change to the shape increments the number instead of silently breaking the consumer.
 
-  **Limite conhecido da estampa:** nenhum dos hashes cobre o **código-fonte** dos passes.
-  `lucidVersion` é declarada à mão, então duas rodadas de código diferente sob a mesma versão têm
-  estampa idêntica (verificado empiricamente). É por isso que o guard de drift compara **byte a
-  byte** em vez de confiar na estampa.
+- **`stamp`** — `(lucidVersion, localeId, configHash, dataHash, goldenHash)`. Without it a number is
+  a claim, not a measurement: this is what makes it reproducible. `dataHash` covers **all** datasets
+  in the registry, not only those used by the evaluated criteria. `goldenHash` covers the corpus:
+  the measurement depends on the golden as much as on the engine — declaring a new known limitation
+  changes published recall without touching config or data, and without that hash two disagreeing
+  artifacts would be indistinguishable.
 
-- **`precision` / `recall` / `exactRate`** — `null` quando não há denominador (o detector não teve
-  oportunidade de acertar nem de errar). **Nunca `1`**: fabricar 100% seria o mesmo erro do
-  `fleschPt: 0` corrigido no ADR-066, e no melhor ponto da escala. `tp`/`fp`/`fn` estão sempre lá
-  para o número ser recalculável.
-- **`detectors[]`** — precisão/recall por critério, na **ordem canônica** de `CRITERION_IDS` (a
-  mesma de `criteriaCoverage`, para nenhum consumidor ver duas ordens do mesmo conjunto), com
-  `negatives` (quantos casos exigem que o detector **não** dispare) e duas listas de falha
-  deliberadamente separadas:
-  - `knownLimitations` — falha **declarada**, com `motivo` escrito na curadoria. Conta contra a
-    métrica em vez de ser excluída.
-  - `regressions` — falha de entrada marcada `correto`, **sem motivo, porque ninguém escreveu um**.
-    Vazio em build verde (o eval assere que nenhuma entrada `correto` falha); existe para o caso
-    impossível ficar visível em vez de se disfarçar de limitação. Quem exibe **não deve inferir
-    motivo**.
-- **`criteriaCoverage`** — as três camadas de evidência, **derivadas dos dados**: critério novo
-  sem eval aparece automaticamente em `unitTestsOnly`.
-  - `measured` — precisão/recall contra golden com casos negativos.
-  - `goldenLabelledOnly` — findings exatos rotulados no golden integrado, sem métrica agregada.
-  - `unitTestsOnly` — só teste unitário. Teste unitário é escrito a partir da implementação e
-    **não mede recall** sobre texto que ninguém antecipou. Ausência de número não é ausência de
-    defeito.
-- **`method.caveats`** — os limites do método, como dado **endereçável** (`{ id, text }`), para a
-  página poder destacar ou linkar cada um. O mais importante é `circular_recall_curated`: **recall
-  de critério de cobertura `curated` é circular** (os positivos do golden vêm do mesmo léxico que o
-  detector consulta), então ele mede "o código lê a própria lista", não "o instrumento acha o
-  fenômeno na língua".
+  **Known limit of the stamp:** none of the hashes covers the **source code** of the passes.
+  `lucidVersion` is declared by hand, so two runs of different code under the same version carry an
+  identical stamp (verified empirically). That is why the drift guard compares **byte for byte**
+  instead of trusting the stamp.
 
-## O artefato não pode ficar velho
+- **`precision` / `recall` / `exactRate`** — `null` when there is no denominator (the detector had
+  no opportunity to be right or wrong). **Never `1`**: fabricating 100% would be the same mistake as
+  the `fleschPt: 0` corrected in ADR-066, and at the best point of the scale. `tp`/`fp`/`fn` are
+  always present so the number can be recomputed.
 
-[`test/eval/artifact-drift.test.ts`](../test/eval/artifact-drift.test.ts) roda na suíte normal
-(sem flag, sem git) e falha se este arquivo divergir do que o código produz agora — dizendo qual
-campo da estampa mudou, ou que a estampa é igual e o que mudou foi conteúdo medido. Mexeu em golden
-ou em pass? Rode `npm run eval` e commite o resultado.
+- **`detectors[]`** — precision/recall per criterion, in the **canonical order** of `CRITERION_IDS`
+  (the same order as `criteriaCoverage`, so no consumer ever sees two orderings of one set), with
+  `negatives` (how many cases require the detector **not** to fire) and two deliberately separate
+  failure lists:
+  - `knownLimitations` — a **declared** failure, with a curated reason. It counts *against* the
+    metric instead of being excluded.
+  - `regressions` — a failure on an entry marked `correto`, **with no reason, because nobody wrote
+    one**. Empty on a green build (the eval asserts that no `correto` entry fails); it exists so
+    that the impossible case is visible instead of disguising itself as a limitation. A consumer
+    **must not infer a reason** for these.
 
-Em CI, o equivalente de uma linha é:
+- **`criteriaCoverage`** — the three tiers of evidence, **derived from the data**: a new criterion
+  with no eval shows up in `unitTestsOnly` automatically.
+  - `measured` — precision/recall against a golden corpus that includes negative cases.
+  - `goldenLabelledOnly` — exact findings labelled in the integrated golden, without an aggregate
+    metric.
+  - `unitTestsOnly` — unit tests only. A unit test is written *from* the implementation and
+    therefore **does not measure recall** over text nobody anticipated. Absence of a number is not
+    absence of a defect.
+
+- **`method.caveats`** — the limits of the method, as **addressable** data (`{ id, text }`), so the
+  page can highlight or link each one. The most important is `circular_recall_curated`: **recall for
+  a `curated`-coverage criterion is circular** (the golden's positives come from the same lexicon
+  the detector consults), so it measures "the code reads its own list," not "the instrument finds
+  the phenomenon in the language."
+
+## The artifact cannot go stale
+
+[`test/eval/artifact-drift.test.ts`](../test/eval/artifact-drift.test.ts) runs in the normal suite
+(no flag, no git) and fails if this file diverges from what the code produces now — telling you
+which stamp field changed, or that the stamp is identical and what changed was measured content.
+Touched a golden or a pass? Run `npm run eval` and commit the result.
+
+In CI, the one-line equivalent is:
 
 ```bash
 npm run eval && git diff --exit-code eval/report.json
 ```
 
-## Sem timestamp
+## No timestamp
 
-O artefato é **byte-idêntico** para o mesmo código e o mesmo dado — a promessa de determinismo da
-Camada 1 estendida à própria medição. A identidade da rodada é a tripla da estampa, não o relógio;
-a data está no histórico do git.
+The artifact is **byte-identical** for the same code and the same data — Layer 1's determinism
+promise extended to the measurement itself. A run's identity is the stamp triple, not the clock; the
+date lives in git history.
 
-Nada aqui vem da Camada 2 (sonda/LLM): é tudo determinístico e offline.
+Nothing here comes from Layer 2 (the probe/LLM): it is all deterministic and offline.
