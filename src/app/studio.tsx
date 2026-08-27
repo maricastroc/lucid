@@ -37,6 +37,9 @@ export function Studio() {
     setText,
     diagnostic,
     blocks,
+    silentCriteria,
+    missingBlockKinds,
+    importNotes,
     rawBlocks,
     isEmpty,
     isSettled,
@@ -195,6 +198,9 @@ export function Studio() {
     humanCount,
     ledger,
     blocks,
+    silentCriteria,
+    missingBlockKinds,
+    importNotes,
     briefing,
     briefingCheck,
     onBriefingChange: setBriefing,
@@ -220,7 +226,7 @@ export function Studio() {
           role="alert"
           className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
-          <span>{c.studio.importUnreadable}</span>
+          <span>{c.studio.importRefusal[importError]}</span>
           <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
             {c.common.close}
           </button>

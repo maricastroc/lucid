@@ -5,6 +5,7 @@ const CRITERION = "salto_de_nivel_titulo";
 export const hierarquiaTitulosPass: Pass = {
   criterion: CRITERION,
   category: "structural",
+  requires: ["heading"],
 
   run(ctx) {
     if (!ctx.config.hierarquiaTitulos.enabled) return [];

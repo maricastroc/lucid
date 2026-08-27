@@ -25,7 +25,6 @@ export interface ProbeOptions {
 }
 
 export interface ComprehensionProbe {
-  /** "modelo@versão + prompt@versão" — proveniência para eval e anti-drift */
   readonly id: string;
   probe(input: ProbeInput, options?: ProbeOptions): Promise<ProbeResult>;
 }

@@ -82,15 +82,22 @@ export const COPY_EN: UiCopy = {
     saveFailed:
       "This work could not be saved in the browser — it will be lost if you close the tab. Export the report so you " +
       "do not depend on it.",
-    importUnreadable: "The file could not be read. Check that it is a valid .docx.",
+    importRefusal: {
+      unreadable: "The file could not be read. Check that it is a valid .docx.",
+      tracked_changes:
+        "This file has tracked changes that were never resolved. While they are there, the file itself does " +
+        "not say what its text is — auditing it would mean auditing a version nobody approved. Accept or " +
+        "reject the changes in your editor and import it again.",
+      no_readable_content:
+        "This file has no readable content to audit. That is not a clean document: it is an empty one.",
+    },
     revisions: (n) => `${n} ${plural(n, "revision", "revisions")}`,
     changeApplied: "Change applied to the text.",
     undo: "Undo",
   },
 
   overview: {
-    annotations: (n) => plural(n, "annotation", "annotations"),
-    inThisReview: "in this editorial review",
+    annotations: (n) => plural(n, "point to review", "points to review"),
     adjustedProfileBefore: "Score produced with an ",
     adjustedProfileStrong: "adjusted profile",
     adjustedProfile: (deviations, disabled) =>
@@ -102,24 +109,37 @@ export const COPY_EN: UiCopy = {
     splitAriaLabel: (safe, human) => `${safe} direct swaps, ${human} require a human decision`,
     legendSafe: "direct swap available",
     legendHuman: "author's decision",
-    exportAudit: "Export audit (.md)",
-    exportDocx: "Document (.docx)",
-    exportTxt: ".txt",
+    exportAudit: "Download audit (.md)",
+    exportDocx: "Download revised text (.docx)",
+    exportTxt: "Download text (.txt)",
     docxError: "The .docx could not be generated. Use the .txt export instead.",
-    docxNote: (structured) =>
-      "The exported .docx is a new document, carrying the revised text and the structure Lucid can see" +
-      (structured ? " (headings, paragraphs and lists)" : " (paragraphs)") +
-      ". Formatting from the original file — bold, tables, images, headers — is not part of the audit and therefore " +
-      "does not come back in the export.",
-    scoreCaveat: "The score measures; it does not approve. No annotations is not a certificate of clarity.",
+    docxNote:
+      "The .docx file contains the revised text, but does not preserve the original formatting, such as " +
+      "bold, tables, images and headers.",
+    importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
+    importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
+    importAnd: " and ",
+    importRecovered: (styles: string) =>
+      `We recognised the headings in the file (${styles}). Without that, they would come in as ordinary paragraphs.`,
+    importFlattened: (what: string) =>
+      `${what} became paragraphs. The content is audited, but the original arrangement is not.`,
+    structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
+    structureMissingJoin: " or ",
+    structureCaveat: (missing: string, count: number) =>
+      `We found no ${missing} in this document, so ${count} ` +
+      `${plural(count, "criterion", "criteria")} could not be assessed. ` +
+      "To include them in the audit, upload a .docx with that structure, or use # for headings and " +
+      "- for list items.",
+    scoreCaveat:
+      "The score summarizes the criteria that were assessed. It does not approve the document or guarantee " +
+      "the text is clear.",
     lexiconCaveat:
-      "Lexical criteria (jargon, nominalization, redundancy…) check curated lists: a low or zero count does not prove " +
-      "the phenomenon is absent — only that nothing on the list matched here.",
+      "Some criteria check for specific patterns, such as jargon, nominalizations and redundancy. They help " +
+      "with the review, but do not replace the judgment of whoever wrote the text.",
     readingLabel: "Reading",
     readingCaveat:
-      "Readability and cohesion are supporting descriptors, never approval: a high or low value is not, on its own, " +
-      "good or bad (high cohesion may be repetition; low may be variation). The readability value is never clamped — " +
-      "the number shown is the one computed, and the band is a reading placed beside it.",
+      "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
+      "text is clear.",
     trailLabel: "Revision trail",
     trailWeight: (before, after, changes) =>
       `Audit weight ${before} → ${after} · ${changes} ${plural(changes, "change", "changes")}`,
@@ -222,7 +242,7 @@ export const COPY_EN: UiCopy = {
     verdictLabel: "The engine verified",
     verdictProofs: (passed, total) => `${passed}/${total} proofs`,
     verdictBlocked: "A proof failed — the tool does not vouch for this passage.",
-    verdictClear: "No floor failure in this passage.",
+    verdictClear: "No failure found in this passage.",
     verdictWords: "words",
     verdictMeasureNotApproval: "measurement, not approval",
     proofLabel: "Proof · deterministic",
@@ -374,18 +394,14 @@ export const COPY_EN: UiCopy = {
 
   briefing: {
     label: "Principle 1 · Relevant",
-    declared: "Reader briefing declared by you.",
-    notDeclared: "Reader briefing not declared.",
-    rationaleBefore: "The standard asks you to model the reader ",
-    rationaleEmphasis: "before",
-    rationaleMiddle: " writing: who reads it, what they need to do, what goes in and what stays out. ",
-    rationaleStrong: "No automatic rule decides what is relevant to your reader",
-    rationaleAfter:
-      " — which is why Lucid does not score this principle and does not treat it as met. It asks, records your answer, " +
-      "and checks only what is literally checkable.",
-    openDeclare: "Declare the reader briefing",
-    openReview: "Review briefing",
-    closeBriefing: "Close briefing",
+    declared: "Reader defined.",
+    notDeclared: "Reader not defined.",
+    rationale:
+      "Say who will read the document and what that person needs to know or do. Lucid records this, but does " +
+      "not automatically judge whether the content is relevant.",
+    openDeclare: "Define the reader",
+    openReview: "Review reader",
+    closeBriefing: "Close",
     audienceLabel: "Who is the reader?",
     audienceHint: "Describe who will actually read it — not the official who signs it.",
     audiencePlaceholder: "e.g. a citizen with no legal training applying for the benefit for the first time",
@@ -411,17 +427,14 @@ export const COPY_EN: UiCopy = {
   },
 
   profile: {
-    label: "Editorial profile",
-    defaults: "Lucid's default thresholds.",
+    label: "Analysis criteria",
+    defaults: "Default limits.",
     adjustments: (n) => `${n} ${plural(n, "adjustment of yours", "adjustments of yours")} over the default.`,
-    rationaleBefore:
-      "The standard fixes no numbers — the long-sentence threshold is an editorial choice, and your style guide may " +
-      "differ from the default here. Adjusting is legitimate; ",
-    rationaleStrong: "hiding the adjustment is not",
-    rationaleAfter: ". Every deviation appears below, enters the exported report, and changes the ",
-    rationaleTail: " that stamps the audit.",
-    openAdjust: "Adjust profile",
-    closeAdjust: "Close profile",
+    rationale:
+      "Lucid uses default limits to flag long sentences and other points of attention. You can adjust them to " +
+      "your organisation's rules. Any change is recorded in the audit.",
+    openAdjust: "Adjust criteria",
+    closeAdjust: "Close",
     resetDefaults: "Back to defaults",
     thresholdsLabel: "Thresholds",
     policyLabel: "Policy criteria",
@@ -442,32 +455,43 @@ export const COPY_EN: UiCopy = {
     knobProseEnumeration: "Enumeration in prose — from (items)",
   },
 
+  send: {
+    always: (purpose: string) =>
+      `To ${purpose}, the document will be sent to an external artificial-intelligence service. ` +
+      "The main audit does not depend on that service.",
+    found: (named: string) => `We found ${named} in this document.`,
+    limit:
+      "Lucid identifies only CPF, CNPJ and e-mail addresses. Review the document before continuing, since " +
+      "other personal data may not be detected.",
+    kinds: {
+      cpf: (n: number) => `${n} ${n === 1 ? "CPF" : "CPFs"}`,
+      cnpj: (n: number) => `${n} ${n === 1 ? "CNPJ" : "CNPJs"}`,
+      email: (n: number) => `${n} ${n === 1 ? "e-mail address" : "e-mail addresses"}`,
+    },
+    join: ", ",
+    lastJoin: " and ",
+    probePurpose: "run the test",
+    rewritePurpose: "generate the rewrite",
+  },
   probe: {
-    title: "Comprehension probe",
-    tier: "Layer 2 · opt-in",
-    leadBefore: "A floor-level synthetic reader reads ",
-    leadEmphasis: "only",
-    leadMiddle: " the text above and tries to answer the question. It is a ",
-    leadStrong: "negative",
-    leadAfter: " test: it can find a failure, never approve.",
-    useBriefingPurpose: "Use the reader's purpose you declared under Principle 1:",
-    questionLabel: "What do you want to find in the text?",
-    questionPlaceholder: "e.g. when does the deadline start counting?",
-    run: "Test the comprehension floor",
+    title: "Comprehension test",
+    lead: "Ask a question about the document. Lucid checks whether the answer can be found in the text.",
+    useBriefingPurpose: "Use what you defined as the reader's purpose:",
+    questionLabel: "What does the reader need to find in the text?",
+    questionPlaceholder: "e.g. When does the deadline start?",
+    run: "Run comprehension test",
     httpFailure: (status) => `failed (HTTP ${status})`,
-    running: "Testing the floor…",
+    running: "Testing…",
     staleWarning:
       "The text changed after this test — the result below is for the previous passage. Run it again.",
-    stuck: "The floor reader got stuck.",
+    stuck: "The answer was not found in the text.",
     excerpt: "passage:",
-    extracted: "The answer it extracted:",
-    noFloorViolation: "No floor violation detected.",
+    extracted: "Answer found:",
+    noFloorViolation: "The answer was found in the text.",
     loadLabel: "Reading load",
-    caveatBefore: "Layer 2 uses a language model: it is ",
-    caveatStrongOne: "not deterministic",
-    caveatMiddle: " like the rest of the audit. Passing the floor is the absence of one failure, ",
-    caveatStrongTwo: "never proof of clarity",
-    caveatAfter: " — for that, only testing with real readers (Principle 4 of the standard).",
+    caveat:
+      "This test uses artificial intelligence and can be wrong. Finding the answer in the text does not " +
+      "guarantee the text is clear. To confirm comprehension, test with real readers.",
     operations: {
       resolver_referente_a_distancia: "resolve what a pronoun refers to, at a distance",
       integrar_entre_frases: "join information from more than one sentence",

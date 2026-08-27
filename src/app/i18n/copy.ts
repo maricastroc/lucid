@@ -70,7 +70,11 @@ export interface UiCopy {
     };
     readonly structureLost: string;
     readonly saveFailed: string;
-    readonly importUnreadable: string;
+    readonly importRefusal: {
+      readonly unreadable: string;
+      readonly tracked_changes: string;
+      readonly no_readable_content: string;
+    };
     readonly revisions: (n: number) => string;
     readonly changeApplied: string;
     readonly undo: string;
@@ -78,7 +82,6 @@ export interface UiCopy {
 
   readonly overview: {
     readonly annotations: (n: number) => string;
-    readonly inThisReview: string;
     readonly adjustedProfileBefore: string;
     readonly adjustedProfileStrong: string;
     readonly adjustedProfile: (deviations: number, disabled: number) => string;
@@ -90,7 +93,15 @@ export interface UiCopy {
     readonly exportDocx: string;
     readonly exportTxt: string;
     readonly docxError: string;
-    readonly docxNote: (structured: boolean) => string;
+    readonly docxNote: string;
+    readonly importTables: (n: number) => string;
+    readonly importTextBoxes: (n: number) => string;
+    readonly importAnd: string;
+    readonly importRecovered: (styles: string) => string;
+    readonly importFlattened: (what: string) => string;
+    readonly structureMissing: Record<string, string>;
+    readonly structureMissingJoin: string;
+    readonly structureCaveat: (missing: string, count: number) => string;
     readonly scoreCaveat: string;
     readonly lexiconCaveat: string;
     readonly readingLabel: string;
@@ -280,11 +291,7 @@ export interface UiCopy {
     readonly label: string;
     readonly declared: string;
     readonly notDeclared: string;
-    readonly rationaleBefore: string;
-    readonly rationaleEmphasis: string;
-    readonly rationaleMiddle: string;
-    readonly rationaleStrong: string;
-    readonly rationaleAfter: string;
+    readonly rationale: string;
     readonly openDeclare: string;
     readonly openReview: string;
     readonly closeBriefing: string;
@@ -313,10 +320,7 @@ export interface UiCopy {
     readonly label: string;
     readonly defaults: string;
     readonly adjustments: (n: number) => string;
-    readonly rationaleBefore: string;
-    readonly rationaleStrong: string;
-    readonly rationaleAfter: string;
-    readonly rationaleTail: string;
+    readonly rationale: string;
     readonly openAdjust: string;
     readonly closeAdjust: string;
     readonly resetDefaults: string;
@@ -337,14 +341,20 @@ export interface UiCopy {
     readonly knobProseEnumeration: string;
   };
 
+  readonly send: {
+    readonly always: (purpose: string) => string;
+    readonly found: (named: string) => string;
+    readonly limit: string;
+    readonly kinds: Record<"cpf" | "cnpj" | "email", (n: number) => string>;
+    readonly join: string;
+    readonly lastJoin: string;
+    readonly probePurpose: string;
+    readonly rewritePurpose: string;
+  };
+
   readonly probe: {
     readonly title: string;
-    readonly tier: string;
-    readonly leadBefore: string;
-    readonly leadEmphasis: string;
-    readonly leadMiddle: string;
-    readonly leadStrong: string;
-    readonly leadAfter: string;
+    readonly lead: string;
     readonly useBriefingPurpose: string;
     readonly questionLabel: string;
     readonly questionPlaceholder: string;
@@ -357,11 +367,7 @@ export interface UiCopy {
     readonly extracted: string;
     readonly noFloorViolation: string;
     readonly loadLabel: string;
-    readonly caveatBefore: string;
-    readonly caveatStrongOne: string;
-    readonly caveatMiddle: string;
-    readonly caveatStrongTwo: string;
-    readonly caveatAfter: string;
+    readonly caveat: string;
     readonly operations: {
       readonly resolver_referente_a_distancia: string;
       readonly integrar_entre_frases: string;

@@ -1,4 +1,4 @@
-import type { Severity } from "@/lucid";
+import type { ClauseStatus, CoverageReport, Severity } from "@/lucid";
 import type { AuditedFile } from "./audit";
 import { SEVERITY_ORDER } from "./audit";
 
@@ -34,10 +34,57 @@ function summaryLine(file: AuditedFile): string {
   return `${file.name}: ${total} ${plural(total, "achado", "achados")} (${parts.join(", ")})`;
 }
 
+function importLines(file: AuditedFile): string[] {
+  const notes = file.importNotes;
+  if (notes === null) return [];
+
+  const out: string[] = [];
+  if (notes.headingStylesRecovered.length > 0) {
+    out.push(
+      `${file.name}: títulos reconstruídos a partir do nível de estrutura que o próprio arquivo declara — ` +
+        `${notes.headingStylesRecovered.join(", ")}.`,
+    );
+  }
+  const flattened: string[] = [];
+  if (notes.tablesFlattened > 0) {
+    flattened.push(`${notes.tablesFlattened} ${plural(notes.tablesFlattened, "tabela", "tabelas")}`);
+  }
+  if (notes.textBoxesInlined > 0) {
+    flattened.push(`${notes.textBoxesInlined} ${plural(notes.textBoxesInlined, "caixa de texto", "caixas de texto")}`);
+  }
+  if (flattened.length > 0) {
+    out.push(
+      `${file.name}: ${flattened.join(" e ")} ${plural(flattened.length, "foi achatada", "foram achatadas")} em parágrafos — ` +
+        "o conteúdo entra na auditoria, a disposição não. Célula e prosa são medidas com a mesma régua.",
+    );
+  }
+  return out;
+}
+
+const MISSING_LABEL: Record<string, string> = { heading: "títulos", list: "listas" };
+
+export function missingPhrase(kinds: readonly string[]): string {
+  const labels = kinds.map((kind) => MISSING_LABEL[kind] ?? kind);
+  return labels.length <= 1 ? (labels[0] ?? "") : `${labels.slice(0, -1).join(", ")} nem ${labels[labels.length - 1]}`;
+}
+
+function silenceLines(file: AuditedFile): string[] {
+  if (file.silent.length === 0) return [];
+  const n = file.silent.length;
+  return [
+    `${file.name}: não encontramos ${missingPhrase(file.missingBlockKinds)} neste documento. Por isso, ${n} ` +
+      `${plural(n, "critério não pôde", "critérios não puderam")} ser ${plural(n, "avaliado", "avaliados")}.`,
+    `  ${file.silent.join(", ")}`,
+    "  Para incluí-los na auditoria, use um .docx com essa estrutura ou marcadores no texto (# título, - item).",
+  ];
+}
+
 export function renderText(files: readonly AuditedFile[], quiet: boolean): string {
   const out: string[] = [];
 
   for (const file of files) {
+    out.push(...importLines(file));
+    out.push(...silenceLines(file));
     out.push(summaryLine(file));
 
     if (!quiet) {
@@ -82,6 +129,8 @@ export function renderJson(files: readonly AuditedFile[]): string {
       name: file.name,
       counts: file.counts,
       totalFindings: file.findings.length,
+      criteriaWithoutObject: file.silent,
+      import: file.importNotes,
       metrics: file.diagnostic.metrics,
       score: file.diagnostic.score,
       findings: file.findings.map((finding, i) => ({
@@ -100,4 +149,65 @@ export function renderJson(files: readonly AuditedFile[]): string {
     })),
   };
   return `${JSON.stringify(payload, null, 2)}\n`;
+}
+
+const STATUS_LABEL: Record<ClauseStatus, string> = {
+  detected: "com detector",
+  partial: "parcial",
+  unbuilt: "não construído",
+  out_of_reach: "fora de alcance",
+  unreachable: "sem objeto aqui",
+};
+
+const CAVEAT_NO_SHARE =
+  "Nenhum percentual de cobertura é publicado — sem árvore completa não há denominador, e um percentual sobre denominador desconhecido seria número inventado.";
+const CAVEAT_OUT_OF_REACH =
+  "«fora de alcance» não é pendência: é cláusula que nenhum detector futuro resolve, porque não se verifica a partir do texto.";
+
+export function renderCoverage(report: CoverageReport, quiet: boolean): string {
+  const out: string[] = [];
+  out.push(`Cobertura por cláusula — ${report.standard}`);
+  out.push("");
+
+  for (const clause of report.clauses) {
+    const depth = clause.parent === null ? 0 : 2;
+    const derived = clause.derived ? " (derivada das subcláusulas)" : "";
+    const provisional = clause.provisional ? " · título provisório" : "";
+    out.push(
+      `${" ".repeat(depth)}${clause.section.padEnd(7 - depth)} ${STATUS_LABEL[clause.status].padEnd(15)} ${clause.title}${derived}${provisional}`,
+    );
+
+    if (quiet) continue;
+
+    if (clause.criteria.length > 0) {
+      out.push(`${" ".repeat(depth + 8)}detectores: ${clause.criteria.join(", ")}`);
+    }
+    if (clause.instruments.length > 0) {
+      out.push(`${" ".repeat(depth + 8)}instrumentos: ${clause.instruments.join(", ")}`);
+    }
+    if (clause.reason) {
+      out.push(`${" ".repeat(depth + 8)}${collapse(clause.reason)}`);
+    }
+  }
+
+  out.push("");
+  out.push(
+    `${report.byStatus.detected} com detector · ${report.byStatus.partial} parcial · ` +
+      `${report.byStatus.unbuilt} não construído · ${report.byStatus.out_of_reach} fora de alcance`,
+  );
+
+  if (report.outsideStandard.length > 0) {
+    out.push("");
+    out.push(`Fora da norma (${report.outsideStandard.length}) — nenhum recebe número de cláusula:`);
+    for (const entry of report.outsideStandard) {
+      out.push(`  ${entry.criterion.padEnd(28)} ${entry.source}`);
+    }
+  }
+
+  out.push("");
+  out.push(`  ${collapse(report.transcription)}`);
+  out.push(`  ${CAVEAT_NO_SHARE}`);
+  out.push(`  ${CAVEAT_OUT_OF_REACH}`);
+
+  return out.join("\n");
 }

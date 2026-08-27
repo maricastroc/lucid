@@ -11,6 +11,7 @@ function endsAsStatement(text: string): boolean {
 export const longHeadingPass: Pass = {
   criterion: CRITERION,
   category: "structural",
+  requires: ["heading"],
 
   run(ctx) {
     if (!ctx.config.longHeading.enabled) return [];

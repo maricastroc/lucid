@@ -9,6 +9,7 @@ export interface CliOptions {
   readonly failOn: FailOn;
   readonly criteria: readonly CriterionId[];
   readonly quiet: boolean;
+  readonly coverage: boolean;
   readonly help: boolean;
   readonly version: boolean;
 }
@@ -24,6 +25,7 @@ export function parseArgs(argv: readonly string[]): ParseResult {
   let format: OutputFormat = "text";
   let failOn: FailOn = "never";
   let quiet = false;
+  let coverage = false;
   let help = false;
   let version = false;
 
@@ -40,6 +42,10 @@ export function parseArgs(argv: readonly string[]): ParseResult {
     }
     if (arg === "--quiet" || arg === "-q") {
       quiet = true;
+      continue;
+    }
+    if (arg === "--coverage") {
+      coverage = true;
       continue;
     }
     if (arg === "--format" || arg === "--fail-on" || arg === "--criterion") {
@@ -69,7 +75,7 @@ export function parseArgs(argv: readonly string[]): ParseResult {
     paths.push(arg);
   }
 
-  return { ok: true, options: { paths, format, failOn, criteria, quiet, help, version } };
+  return { ok: true, options: { paths, format, failOn, criteria, quiet, coverage, help, version } };
 }
 
 export const HELP = `Lucid — auditor determinístico de Linguagem Simples (ABNT NBR ISO 24495-1)
@@ -84,12 +90,15 @@ OPÇÕES
                          achado nessa gravidade ou acima (padrão: never)
   --criterion <id>       audita só este critério; pode repetir
   -q, --quiet            só o resumo por arquivo
+  --coverage             mapa de cobertura por cláusula da norma e sai;
+                         não audita arquivo nenhum
   -v, --version          versão da engine e dos dados
   -h, --help             esta ajuda
 
 CÓDIGOS DE SAÍDA
   0  a auditoria rodou
-  1  falha de execução (arquivo ilegível, opção inválida)
+  1  nada foi auditado (opção inválida, arquivo ilegível, ou recusa —
+     .docx com alterações rastreadas não resolvidas, ou sem conteúdo legível)
   2  o limite declarado em --fail-on foi cruzado
 
   Sair com 0 significa que a medição terminou — NÃO que o texto foi aprovado.

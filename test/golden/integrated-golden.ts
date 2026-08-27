@@ -322,4 +322,73 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     notes:
       "sujeito ('O interessado') + verbo deôntico ('deverá') em janela local → fala SOBRE o leitor. info, requiresHuman, sem sugestão.",
   },
+  {
+    id: "estrutura_declarada_titulos_e_lista",
+    description: "documento que declara estrutura: título longo, salto de nível, lista de item único, jargão e passiva",
+    text: "# Da concessão do auxílio e das obrigações do requerente perante a administração pública estadual\n\n### Quem pode pedir\n\nO documento supracitado foi juntado aos autos.\n\n- Servidor efetivo",
+    expected: {
+      findings: [
+        {
+          criterion: "heading_body_mismatch",
+          severity: "info",
+          start: 2,
+          end: 97,
+          spanText: "Da concessão do auxílio e das obrigações do requerente perante a administração pública estadual",
+          requiresHuman: true,
+        },
+        {
+          criterion: "long_heading",
+          severity: "warning",
+          start: 2,
+          end: 97,
+          spanText: "Da concessão do auxílio e das obrigações do requerente perante a administração pública estadual",
+          requiresHuman: true,
+        },
+        {
+          criterion: "heading_body_mismatch",
+          severity: "info",
+          start: 103,
+          end: 118,
+          spanText: "Quem pode pedir",
+          requiresHuman: true,
+        },
+        {
+          criterion: "salto_de_nivel_titulo",
+          severity: "warning",
+          start: 103,
+          end: 118,
+          spanText: "Quem pode pedir",
+          requiresHuman: true,
+        },
+        {
+          criterion: "jargon",
+          severity: "warning",
+          start: 132,
+          end: 143,
+          spanText: "supracitado",
+          requiresHuman: false,
+          suggestion: "citado acima",
+        },
+        {
+          criterion: "passive_voice",
+          severity: "warning",
+          start: 144,
+          end: 155,
+          spanText: "foi juntado",
+          requiresHuman: true,
+        },
+        {
+          criterion: "single_item_list",
+          severity: "info",
+          start: 170,
+          end: 186,
+          spanText: "Servidor efetivo",
+          requiresHuman: true,
+        },
+      ],
+      metrics: { words: 26, sentences: 4 },
+    },
+    notes:
+      "único caso do corpus que declara estrutura (experimento 001 / ADR-084): sem ele os quatro critérios estruturais nunca eram exercitados sobre texto. Exercita também jargon e passive_voice, para provar que a estrutura não desloca os critérios de texto.",
+  },
 ];

@@ -31,6 +31,7 @@ function contentWords(
 export const headingBodyMismatchPass: Pass = {
   criterion: CRITERION,
   category: "structural",
+  requires: ["heading"],
   dataDeps: ["stopwords.pt", "nominalizacoes.pt"],
 
   run(ctx) {

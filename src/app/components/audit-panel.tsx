@@ -1,5 +1,6 @@
 "use client";
 
+import type { DocxNotes } from "@/importers/docx";
 import type { ReactNode } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing, Span } from "@/lucid";
 import { BriefingPanel } from "./briefing-panel";
@@ -23,6 +24,9 @@ export interface AuditPanelProps {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   blocks: readonly Block[] | null;
+  silentCriteria: readonly string[];
+  missingBlockKinds: readonly string[];
+  importNotes: DocxNotes | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
   onBriefingChange: (briefing: ReaderBriefing) => void;
@@ -76,6 +80,9 @@ export function AuditPanel(props: AuditPanelProps) {
           humanCount={props.humanCount}
           ledger={props.ledger}
           blocks={props.blocks}
+          silentCriteria={props.silentCriteria}
+          missingBlockKinds={props.missingBlockKinds}
+          importNotes={props.importNotes}
           briefing={props.briefing}
           briefingCheck={props.briefingCheck}
           config={props.config}

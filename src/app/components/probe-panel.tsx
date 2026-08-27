@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { OperacaoLeitura, ProbeResult, ProbeSignal } from "@/lucid/probe/types";
 import { useCopy } from "../i18n/use-copy";
+import { SendNotice } from "./send-notice";
 import type { UiCopy } from "../i18n/copy";
 
 interface ProbeResponse {
@@ -63,18 +64,9 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
 
   return (
     <section className="border-t border-rule-1 px-6 py-5">
-      <div className="flex items-baseline justify-between">
-        <h3 className="u-label text-ink-3">{t.title}</h3>
-        <span className="u-sublabel font-medium text-ink-3">{t.tier}</span>
-      </div>
+      <h3 className="u-label text-ink-3">{t.title}</h3>
 
-      <p className="mt-2 text-[12px] leading-relaxed text-ink-3">
-        {t.leadBefore}
-        <em>{t.leadEmphasis}</em>
-        {t.leadMiddle}
-        <strong className="text-ink-2">{t.leadStrong}</strong>
-        {t.leadAfter}
-      </p>
+      <p className="mt-2 text-[12px] leading-relaxed text-ink-3">{t.lead}</p>
 
       {suggestedQuestion.trim() !== "" && pergunta.trim() === "" && (
         <button
@@ -96,6 +88,8 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
           className="mt-1.5 w-full resize-none rounded-lg border border-rule-2 bg-sheet px-3 py-2 text-[13px] text-ink-0 shadow-(--shadow-card) transition-colors placeholder:text-ink-3 focus:border-accent-line focus:outline-none"
         />
       </label>
+
+      <SendNotice text={text} destination={c.send.probePurpose} />
 
       <button
         type="button"
@@ -119,13 +113,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
         </>
       )}
 
-      <p className="mt-4 text-[11px] leading-relaxed text-ink-3">
-        {t.caveatBefore}
-        <strong className="text-ink-2">{t.caveatStrongOne}</strong>
-        {t.caveatMiddle}
-        <strong className="text-ink-2">{t.caveatStrongTwo}</strong>
-        {t.caveatAfter}
-      </p>
+      <p className="mt-4 text-[11px] leading-relaxed text-ink-3">{t.caveat}</p>
     </section>
   );
 }

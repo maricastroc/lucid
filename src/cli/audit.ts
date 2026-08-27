@@ -1,4 +1,6 @@
-import { analyze, analyzeDocument, sortFindings, type CriterionId, type Diagnostic, type Document, type Finding, type Severity } from "@/lucid";
+import type { DocxNotes } from "@/importers/docx";
+import type { BlockKind } from "@/lucid";
+import { analyzeDocument, buildDocument, coverageReport, missingBlockKindsIn, sortFindings, type CriterionId, type Diagnostic, type Document, type Finding, type Severity } from "@/lucid";
 
 export interface Position {
   readonly line: number;
@@ -11,6 +13,9 @@ export interface AuditedFile {
   readonly findings: readonly Finding[];
   readonly positions: readonly Position[];
   readonly counts: Record<Severity, number>;
+  readonly silent: readonly string[];
+  readonly missingBlockKinds: readonly BlockKind[];
+  readonly importNotes: DocxNotes | null;
 }
 
 export const SEVERITY_ORDER: readonly Severity[] = ["info", "warning", "error"];
@@ -28,24 +33,44 @@ export function positionAt(text: string, offset: number): Position {
 }
 
 export function auditText(name: string, text: string, criteria: readonly CriterionId[]): AuditedFile {
-  return finish(name, analyze(text), criteria);
+  return auditDocument(name, buildDocument(text), criteria);
 }
 
-export function auditDocument(name: string, doc: Document, criteria: readonly CriterionId[]): AuditedFile {
-  return finish(name, analyzeDocument(doc), criteria);
+export function auditDocument(
+  name: string,
+  doc: Document,
+  criteria: readonly CriterionId[],
+  importNotes: DocxNotes | null = null,
+): AuditedFile {
+  return finish(name, analyzeDocument(doc), criteria, doc, importNotes);
 }
 
-function finish(name: string, diagnostic: Diagnostic, criteria: readonly CriterionId[]): AuditedFile {
+function finish(
+  name: string,
+  diagnostic: Diagnostic,
+  criteria: readonly CriterionId[],
+  doc: Document,
+  importNotes: DocxNotes | null,
+): AuditedFile {
   const selected = criteria.length === 0 ? diagnostic.findings : diagnostic.findings.filter((f) => (criteria as readonly string[]).includes(f.criterion));
   const findings = sortFindings(selected);
   const counts: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const finding of findings) counts[finding.severity]++;
+  const silent = coverageReport(doc).silentCriteria.filter(
+    (criterion) => criteria.length === 0 || (criteria as readonly string[]).includes(criterion),
+  );
+
+  const missingBlockKinds: readonly BlockKind[] = silent.length === 0 ? [] : missingBlockKindsIn(doc.blocks);
+
   return {
     name,
     diagnostic,
     findings,
     positions: findings.map((f) => positionAt(diagnostic.text, f.span.start)),
     counts,
+    silent,
+    missingBlockKinds,
+    importNotes,
   };
 }
 

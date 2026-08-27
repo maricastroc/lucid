@@ -4,14 +4,22 @@ import { useState } from "react";
 import { configDeviations, type Block, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
 import { severityInkVar, severityLabel } from "../lib/criteria";
 import { buildAuditReport } from "../lib/audit-report";
-import { documentToDocx, exportableBlocks, hasRecoverableStructure } from "../lib/export-document";
+import { documentToDocx, exportableBlocks } from "../lib/export-document";
 import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
 import { entryLabel, type LedgerEntry } from "../lib/ledger";
 import { copyFor } from "../i18n/copy";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
+import type { DocxNotes } from "@/importers/docx";
 import { ArrowDownIcon } from "./icons";
+
+function flattenedLabel(notes: DocxNotes, c: ReturnType<typeof copyFor>): string | null {
+  const parts: string[] = [];
+  if (notes.tablesFlattened > 0) parts.push(c.overview.importTables(notes.tablesFlattened));
+  if (notes.textBoxesInlined > 0) parts.push(c.overview.importTextBoxes(notes.textBoxesInlined));
+  return parts.length === 0 ? null : parts.join(c.overview.importAnd);
+}
 
 function download(filename: string, content: BlobPart, mime: string) {
   const blob = new Blob([content], { type: mime });
@@ -32,12 +40,15 @@ interface Props {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   blocks: readonly Block[] | null;
+  silentCriteria: readonly string[];
+  missingBlockKinds: readonly string[];
+  importNotes: DocxNotes | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
   config: Config;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, briefing, briefingCheck, config }: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, silentCriteria, missingBlockKinds, importNotes, briefing, briefingCheck, config }: Props) {
   const { c, lang } = useCopy();
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
@@ -65,13 +76,20 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
               <span className="font-serif text-[40px] leading-none tabular-nums text-ink-0">{total}</span>
               <span className="text-[14px] text-ink-1">{c.overview.annotations(total)}</span>
             </div>
-            <p className="mt-1 text-[12.5px] text-ink-2">{c.overview.inThisReview}</p>
             {deviations.length > 0 && (
               <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
                 {c.overview.adjustedProfileBefore}
                 <strong className="font-semibold">{c.overview.adjustedProfileStrong}</strong> (
                 {c.overview.adjustedProfile(deviations.length, offCount)}).{" "}
                 {c.overview.adjustedProfileAfter}
+              </p>
+            )}
+            {silentCriteria.length > 0 && (
+              <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
+                {c.overview.structureCaveat(
+                  missingBlockKinds.map((kind) => c.overview.structureMissing[kind] ?? kind).join(c.overview.structureMissingJoin),
+                  silentCriteria.length,
+                )}
               </p>
             )}
           </div>
@@ -154,8 +172,19 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
         )}
 
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          {c.overview.docxNote(hasRecoverableStructure(exportableBlocks(diagnostic.text, blocks)))}
+          {c.overview.docxNote}
         </p>
+
+        {importNotes !== null && importNotes.headingStylesRecovered.length > 0 && (
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+            {c.overview.importRecovered(importNotes.headingStylesRecovered.join(", "))}
+          </p>
+        )}
+        {importNotes !== null && flattenedLabel(importNotes, c) !== null && (
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+            {c.overview.importFlattened(flattenedLabel(importNotes, c) as string)}
+          </p>
+        )}
 
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">{c.overview.scoreCaveat}</p>
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.overview.lexiconCaveat}</p>

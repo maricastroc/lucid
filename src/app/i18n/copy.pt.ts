@@ -82,15 +82,22 @@ export const COPY_PT: UiCopy = {
     saveFailed:
       "Não foi possível salvar este trabalho no navegador — ele será perdido se você fechar a aba. Exporte o " +
       "relatório para não depender disto.",
-    importUnreadable: "Não foi possível ler o arquivo. Confirme que é um .docx válido.",
+    importRefusal: {
+      unreadable: "Não foi possível ler o arquivo. Confirme que é um .docx válido.",
+      tracked_changes:
+        "Este arquivo tem alterações rastreadas ainda não resolvidas. Enquanto elas existirem, o próprio " +
+        "arquivo não diz qual é o seu texto — auditar aqui seria auditar uma versão que ninguém aprovou. " +
+        "Aceite ou rejeite as alterações no editor e importe de novo.",
+      no_readable_content:
+        "Este arquivo não tem conteúdo legível para auditar. Não é um documento limpo: é um documento vazio.",
+    },
     revisions: (n) => `${n} ${plural(n, "revisão", "revisões")}`,
     changeApplied: "Alteração aplicada ao texto.",
     undo: "Desfazer",
   },
 
   overview: {
-    annotations: (n) => plural(n, "anotação", "anotações"),
-    inThisReview: "nesta revisão editorial",
+    annotations: (n) => plural(n, "ponto para revisar", "pontos para revisar"),
     adjustedProfileBefore: "Placar produzido com ",
     adjustedProfileStrong: "perfil ajustado",
     adjustedProfile: (deviations, disabled) =>
@@ -100,24 +107,36 @@ export const COPY_PT: UiCopy = {
     splitAriaLabel: (safe, human) => `${safe} de troca direta, ${human} exigem decisão humana`,
     legendSafe: "troca direta indicada",
     legendHuman: "decisão do autor",
-    exportAudit: "Exportar auditoria (.md)",
-    exportDocx: "Documento (.docx)",
-    exportTxt: ".txt",
+    exportAudit: "Baixar auditoria (.md)",
+    exportDocx: "Baixar texto revisado (.docx)",
+    exportTxt: "Baixar texto (.txt)",
     docxError: "Não foi possível gerar o .docx. Use a exportação em .txt.",
-    docxNote: (structured) =>
-      "O .docx exportado é um documento novo, com o texto revisado e a estrutura que o Lucid enxerga" +
-      (structured ? " (títulos, parágrafos e listas)" : " (parágrafos)") +
-      ". Formatação do arquivo original — negrito, tabelas, imagens, cabeçalho — não entra na auditoria e por isso " +
-      "não volta na exportação.",
-    scoreCaveat: "O placar mede, não aprova. A ausência de anotações não é atestado de clareza.",
+    docxNote:
+      "O arquivo .docx contém o texto revisado, mas não preserva a formatação original, como negrito, " +
+      "tabelas, imagens e cabeçalhos.",
+    importTables: (n: number) => `${n} ${n === 1 ? "tabela achatada" : "tabelas achatadas"}`,
+    importTextBoxes: (n: number) => `${n} ${n === 1 ? "caixa de texto embutida" : "caixas de texto embutidas"}`,
+    importAnd: " e ",
+    importRecovered: (styles: string) =>
+      `Reconhecemos os títulos do arquivo (${styles}). Sem isso, eles entrariam como parágrafo comum.`,
+    importFlattened: (what: string) =>
+      `${what} viraram parágrafos. O conteúdo entra na auditoria, mas a disposição original não.`,
+    structureMissing: { heading: "títulos", list: "listas" } as Record<string, string>,
+    structureMissingJoin: " nem ",
+    structureCaveat: (missing: string, count: number) =>
+      `Não encontramos ${missing} neste documento. Por isso, ${count} ` +
+      `${plural(count, "critério não pôde", "critérios não puderam")} ser ` +
+      `${plural(count, "avaliado", "avaliados")}. ` +
+      "Para incluí-los na auditoria, envie um arquivo .docx com essa estrutura ou use # para títulos e " +
+      "- para itens de lista.",
+    scoreCaveat:
+      "O placar resume os critérios avaliados. Ele não aprova o documento nem garante que o texto esteja claro.",
     lexiconCaveat:
-      "Critérios de léxico (jargão, nominalização, redundância…) checam listas curadas: contagem baixa ou zero não " +
-      "prova ausência do fenômeno — só que nada da lista casou aqui.",
+      "Alguns critérios verificam padrões específicos, como jargões, nominalizações e redundâncias. Eles ajudam " +
+      "na revisão, mas não substituem a análise de quem escreveu.",
     readingLabel: "Leitura",
     readingCaveat:
-      "Legibilidade e coesão são descritores de apoio, nunca aprovação: valor alto ou baixo não é, sozinho, bom nem " +
-      "ruim (coesão alta pode ser repetição; baixa pode ser variação). O valor da legibilidade nunca é truncado — o " +
-      "número exibido é o calculado, e a faixa é leitura ao lado dele.",
+      "Os indicadores de legibilidade e coesão ajudam na revisão, mas não determinam sozinhos se o texto está claro.",
     trailLabel: "Trilha de revisão",
     trailWeight: (before, after, changes) =>
       `Peso da auditoria ${before} → ${after} · ${changes} ${plural(changes, "alteração", "alterações")}`,
@@ -221,7 +240,7 @@ export const COPY_PT: UiCopy = {
     verdictLabel: "A engine verificou",
     verdictProofs: (passed, total) => `${passed}/${total} provas`,
     verdictBlocked: "Uma prova falhou — a ferramenta não atesta este trecho.",
-    verdictClear: "Nenhuma falha de piso neste trecho.",
+    verdictClear: "Nenhuma falha encontrada neste trecho.",
     verdictWords: "palavras",
     verdictMeasureNotApproval: "medição, não aprovação",
     proofLabel: "Prova · determinística",
@@ -366,18 +385,14 @@ export const COPY_PT: UiCopy = {
 
   briefing: {
     label: "Princípio 1 · Relevante",
-    declared: "Briefing do leitor declarado por você.",
-    notDeclared: "Briefing do leitor não declarado.",
-    rationaleBefore: "A norma pede que você modele o leitor ",
-    rationaleEmphasis: "antes",
-    rationaleMiddle: " de escrever: quem lê, o que precisa fazer, o que entra e o que sai. ",
-    rationaleStrong: "Nenhuma regra automática decide o que é relevante para o seu leitor",
-    rationaleAfter:
-      " — por isso o Lucid não pontua este princípio e não o dá por cumprido. Ele pergunta, registra a sua resposta e " +
-      "confere só o que é literalmente conferível.",
-    openDeclare: "Declarar o briefing do leitor",
-    openReview: "Rever briefing",
-    closeBriefing: "Fechar briefing",
+    declared: "Leitor definido.",
+    notDeclared: "Leitor não definido.",
+    rationale:
+      "Informe quem vai ler o documento e o que essa pessoa precisa saber ou fazer. A Lucid registra essa " +
+      "informação, mas não avalia automaticamente se o conteúdo é relevante.",
+    openDeclare: "Definir o leitor",
+    openReview: "Rever leitor",
+    closeBriefing: "Fechar",
     audienceLabel: "Quem é o leitor?",
     audienceHint: "Descreva quem vai ler de verdade — não o cargo que assina.",
     audiencePlaceholder: "Ex.: cidadão sem formação jurídica que pede o benefício pela primeira vez",
@@ -403,17 +418,14 @@ export const COPY_PT: UiCopy = {
   },
 
   profile: {
-    label: "Perfil editorial",
-    defaults: "Limiares padrão do Lucid.",
+    label: "Critérios de análise",
+    defaults: "Limites padrão.",
     adjustments: (n) => `${n} ${plural(n, "ajuste seu", "ajustes seus")} sobre o padrão.`,
-    rationaleBefore:
-      "A norma não fixa números — o limiar de frase longa é escolha editorial, e o seu manual pode divergir do padrão " +
-      "daqui. Ajustar é legítimo; ",
-    rationaleStrong: "esconder o ajuste não é",
-    rationaleAfter: ". Todo desvio aparece abaixo, entra no relatório exportado e muda o ",
-    rationaleTail: " que carimba a auditoria.",
-    openAdjust: "Ajustar perfil",
-    closeAdjust: "Fechar perfil",
+    rationale:
+      "A Lucid usa limites padrão para identificar frases longas e outros pontos de atenção. Você pode " +
+      "ajustá-los às regras da sua organização. As alterações ficam registradas na auditoria.",
+    openAdjust: "Ajustar critérios",
+    closeAdjust: "Fechar",
     resetDefaults: "Voltar ao padrão",
     thresholdsLabel: "Limiares",
     policyLabel: "Critérios da política",
@@ -434,31 +446,42 @@ export const COPY_PT: UiCopy = {
     knobProseEnumeration: "Enumeração em prosa — a partir de (itens)",
   },
 
+  send: {
+    always: (purpose: string) =>
+      `Para ${purpose}, o documento será enviado a um serviço externo de inteligência artificial. ` +
+      "A auditoria principal não depende desse serviço.",
+    found: (named: string) => `Encontramos ${named} neste documento.`,
+    limit:
+      "A Lucid identifica apenas CPF, CNPJ e e-mail. Revise o documento antes de continuar, pois outros dados " +
+      "pessoais podem não ser detectados.",
+    kinds: {
+      cpf: (n: number) => `${n} ${n === 1 ? "CPF" : "CPFs"}`,
+      cnpj: (n: number) => `${n} ${n === 1 ? "CNPJ" : "CNPJs"}`,
+      email: (n: number) => `${n} ${n === 1 ? "e-mail" : "e-mails"}`,
+    },
+    join: ", ",
+    lastJoin: " e ",
+    probePurpose: "fazer o teste",
+    rewritePurpose: "gerar a reescrita",
+  },
   probe: {
-    title: "Sonda de compreensão",
-    tier: "Camada 2 · opt-in",
-    leadBefore: "Um leitor sintético de piso lê ",
-    leadEmphasis: "só",
-    leadMiddle: " o texto acima e tenta responder à pergunta. É um teste ",
-    leadStrong: "negativo",
-    leadAfter: ": pode achar uma falha, nunca aprovar.",
+    title: "Teste de compreensão",
+    lead: "Faça uma pergunta sobre o documento. A Lucid verifica se a resposta pode ser encontrada no texto.",
     useBriefingPurpose: "Usar o propósito do leitor que você declarou no Princípio 1:",
-    questionLabel: "O que você quer encontrar no texto?",
-    questionPlaceholder: "Ex.: quando o prazo começa a contar?",
-    run: "Testar o piso de compreensão",
+    questionLabel: "O que o leitor precisa encontrar no texto?",
+    questionPlaceholder: "Ex.: Quando o prazo começa?",
+    run: "Testar compreensão",
     httpFailure: (status) => `falha (HTTP ${status})`,
-    running: "Testando o piso…",
+    running: "Testando…",
     staleWarning: "O texto mudou depois deste teste — o resultado abaixo é do trecho anterior. Teste de novo.",
-    stuck: "O leitor de piso travou.",
+    stuck: "A resposta não foi encontrada no texto.",
     excerpt: "trecho:",
-    extracted: "Resposta que ele extraiu:",
-    noFloorViolation: "Sem violação de piso detectada.",
+    extracted: "Resposta encontrada:",
+    noFloorViolation: "A resposta foi encontrada no texto.",
     loadLabel: "Carga de leitura",
-    caveatBefore: "Camada 2 usa um modelo de linguagem: ",
-    caveatStrongOne: "não é determinística",
-    caveatMiddle: " como o restante da auditoria. Passar no piso é a ausência de uma falha, ",
-    caveatStrongTwo: "nunca prova de clareza",
-    caveatAfter: " — para isso, só teste com leitores reais (Princípio 4 da norma).",
+    caveat:
+      "Este teste usa inteligência artificial e pode errar. Encontrar a resposta no texto não garante que ele " +
+      "esteja claro. Para confirmar a compreensão, faça testes com leitores reais.",
     operations: {
       resolver_referente_a_distancia: "resolver a quem um pronome se refere, à distância",
       integrar_entre_frases: "juntar informação de mais de uma frase",

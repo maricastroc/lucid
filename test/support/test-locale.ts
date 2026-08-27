@@ -77,4 +77,10 @@ export const testLocale: LocaleBundle = {
   data,
   criteria: { ids: ["test_marker"] },
   taxonomy: { test_marker: { source: "structural-heuristic", principleGroup: "understandable" } },
+  clauses: {
+    standard: "TEST-STD",
+    transcription: "árvore sintética (somente teste)",
+    exhaustive: false,
+    nodes: [],
+  },
 };

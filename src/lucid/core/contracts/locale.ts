@@ -10,6 +10,7 @@ import type {
   Sentence,
 } from "../types";
 import type { DataView } from "../data/types";
+import type { ClauseTree } from "../coverage/types";
 
 export type LocaleId = string & { readonly __localeBrand: unique symbol };
 export function asLocaleId(id: string): LocaleId {
@@ -54,4 +55,5 @@ export interface LocaleBundle {
   readonly data: LocaleDataRegistry;
   readonly criteria: LocaleCriteria;
   readonly taxonomy: CriterionTaxonomy;
+  readonly clauses: ClauseTree;
 }

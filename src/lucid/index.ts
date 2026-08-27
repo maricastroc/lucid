@@ -1,5 +1,6 @@
 export type {
   Block,
+  BlockKind,
   Category,
   CohesionMetrics,
   ConnectiveClass,
@@ -54,16 +55,36 @@ export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindi
 export { buildStructuredDocument, spliceStructuredDocument, toRawBlocks } from "./core/document/structured";
 export type { RawBlock } from "./core/document/structured";
 
+export { buildCoverageReport, criteriaWithoutObject, missingBlockKinds } from "./core/coverage/build";
+export type { CoverageOptions } from "./core/coverage/build";
+export type {
+  ClauseCoverage,
+  ClauseLimit,
+  ClauseLimitKind,
+  ClauseNode,
+  ClauseStatus,
+  ClauseTree,
+  CoverageReport,
+  CoverageScope,
+  OutsideStandardCriterion,
+} from "./core/coverage/types";
+
 export { checkBriefing, isBriefingDeclared } from "./core/briefing/check";
 export { EMPTY_BRIEFING } from "./core/briefing/types";
 export type { BriefingCheck, BriefingCoverage, ReaderBriefing } from "./core/briefing/types";
+
+export { countPii, isValidCnpj, isValidCpf } from "../locales/pt-BR/privacy/pii";
+export type { PiiCount, PiiKind } from "../locales/pt-BR/privacy/pii";
 
 export {
   analyze,
   analyzeDocument,
   analyzeWithPasses,
   buildDocument,
+  coverageReport,
   localePtBR,
+  missingBlockKindsIn,
+  silentCriteriaIn,
   ptDocumentServices,
   READABILITY_REFERENCE_RANGE,
 } from "../locales/pt-BR";

@@ -5,6 +5,7 @@ const CRITERION = "single_item_list";
 export const singleItemListPass: Pass = {
   criterion: CRITERION,
   category: "structural",
+  requires: ["list"],
 
   run(ctx) {
     if (!ctx.config.singleItemList.enabled) return [];

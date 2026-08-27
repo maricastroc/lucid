@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { parseArgs } from "../src/cli/args";
 import { auditText, crossesThreshold, positionAt } from "../src/cli/audit";
-import { renderJson, renderText } from "../src/cli/render";
+import { missingPhrase, renderCoverage, renderJson, renderText } from "../src/cli/render";
+import { coverageReport } from "../src/lucid";
 
 const JURIDIQUES =
   "Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.";
@@ -140,5 +141,109 @@ describe("render — determinism, the property the CLI exists to sell", () => {
     const b = renderJson([auditText("doc.txt", JURIDIQUES, [])]);
     expect(b).toBe(a);
     expect(a).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+  });
+});
+
+describe("--coverage — the map of what the engine does not look at", () => {
+  it("is off by default and turns on by flag, without consuming a path", () => {
+    expect(parseArgs(["doc.txt"])).toMatchObject({ ok: true, options: { coverage: false } });
+    expect(parseArgs(["--coverage"])).toMatchObject({ ok: true, options: { coverage: true, paths: [] } });
+  });
+
+  it("names every clause and every criterion that has no clause", () => {
+    const report = coverageReport();
+    const out = renderCoverage(report, false);
+
+    for (const clause of report.clauses) expect(out).toContain(clause.section);
+    for (const entry of report.outsideStandard) expect(out).toContain(entry.criterion);
+  });
+
+  it("publishes no coverage percentage while the clause tree is incomplete", () => {
+    const out = renderCoverage(coverageReport(), false);
+    expect(out).not.toMatch(/\d+\s?%/);
+  });
+
+  it("separates a clause out of reach from a clause merely unbuilt", () => {
+    const out = renderCoverage(coverageReport(), false);
+    expect(out).toContain("fora de alcance");
+    expect(out).toContain("não é pendência");
+  });
+
+  it("renders byte-identically across runs", () => {
+    expect(renderCoverage(coverageReport(), false)).toBe(renderCoverage(coverageReport(), false));
+  });
+});
+
+describe("silence — the audit says what it could not look at", () => {
+  const PROSE = "O documento supracitado foi juntado aos autos.";
+  const MARKED = "# Título curto\n\nO documento supracitado foi juntado aos autos.\n\n- Um item\n- Outro item";
+
+  it("names the criteria that had no object in a prose document", () => {
+    expect(auditText("prosa.txt", PROSE, []).silent).toEqual([
+      "heading_body_mismatch",
+      "long_heading",
+      "salto_de_nivel_titulo",
+      "single_item_list",
+    ]);
+  });
+
+  it("stays quiet when the document declares structure", () => {
+    expect(auditText("estrutura.txt", MARKED, []).silent).toEqual([]);
+  });
+
+  it("only mentions silence about criteria the author actually asked for", () => {
+    expect(auditText("prosa.txt", PROSE, ["jargon"]).silent).toEqual([]);
+    expect(auditText("prosa.txt", PROSE, ["long_heading"]).silent).toEqual(["long_heading"]);
+  });
+
+  it("puts the warning before the summary, so absence never reads as an all-clear", () => {
+    const out = renderText([auditText("prosa.txt", PROSE, [])], true);
+    const warning = out.indexOf("não encontramos");
+    const summary = out.indexOf("prosa.txt: 2 achados");
+    expect(warning).toBeGreaterThanOrEqual(0);
+    expect(warning).toBeLessThan(summary);
+    expect(out).toContain("não puderam ser avaliados");
+    expect(out).toContain("Para incluí-los na auditoria");
+  });
+
+  it("carries the same fact into the json output", () => {
+    const payload = JSON.parse(renderJson([auditText("prosa.txt", PROSE, [])]));
+    expect(payload.files[0].criteriaWithoutObject).toHaveLength(4);
+  });
+});
+
+describe("import — what the audit says about the file it was handed", () => {
+  const notes = {
+    tablesFlattened: 0,
+    textBoxesInlined: 0,
+    headingStylesRecovered: [] as readonly string[],
+    unrecognisedParagraphStyles: [] as readonly string[],
+  };
+  const audited = (over: Partial<typeof notes>) => ({
+    ...auditText("doc.docx", "# Título curto\n\nO documento supracitado foi juntado aos autos.\n\n- Um\n- Dois", []),
+    importNotes: { ...notes, ...over },
+  });
+
+  it("says nothing when nothing was rebuilt or flattened", () => {
+    expect(renderText([audited({})], true)).not.toContain("achatada");
+    expect(renderText([audited({})], true)).not.toContain("reconstruídos");
+  });
+
+  it("names the styles whose headings it rebuilt", () => {
+    const out = renderText([audited({ headingStylesRecovered: ["Título 1", "Título 3"] })], true);
+    expect(out).toContain("Título 1, Título 3");
+    expect(out).toContain("o próprio arquivo declara");
+  });
+
+  it("counts what it flattened and says the arrangement did not survive", () => {
+    const out = renderText([audited({ tablesFlattened: 2, textBoxesInlined: 1 })], true);
+    expect(out).toContain("2 tabelas e 1 caixa de texto");
+    expect(out).toContain("a disposição não");
+  });
+
+  it("names only the structure that is actually absent", () => {
+    expect(missingPhrase(["list"])).toBe("listas");
+    expect(missingPhrase(["heading"])).toBe("títulos");
+    expect(missingPhrase(["heading", "list"])).toBe("títulos nem listas");
   });
 });

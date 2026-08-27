@@ -8,6 +8,7 @@ import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrat
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, modelLabel, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
+import { SendNotice } from "./send-notice";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
@@ -396,6 +397,8 @@ function GeneratedRewrite({
         <p className="mt-2 rounded-lg border border-human-line bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
           {c.note.aiTarget(unitLabel)}
         </p>
+
+      {choice.providerId !== "stub" && <SendNotice text={source} destination={c.send.rewritePurpose} />}
 
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <Select

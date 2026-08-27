@@ -78,13 +78,7 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
         {check.declared ? b.declared : b.notDeclared}
       </p>
 
-      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        {b.rationaleBefore}
-        <em>{b.rationaleEmphasis}</em>
-        {b.rationaleMiddle}
-        <strong className="font-medium text-ink-2">{b.rationaleStrong}</strong>
-        {b.rationaleAfter}
-      </p>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{b.rationale}</p>
 
       <button
         type="button"

@@ -6,7 +6,7 @@
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
     "configHash": "ebb6dee9",
     "dataHash": "91c09d7d",
-    "goldenHash": "66e96322"
+    "goldenHash": "4c975a74"
   },
   "method": {
     "scoring": "count-per-passage",
@@ -141,7 +141,11 @@
       "passiva_sintetica",
       "nominalizacao_encadeada",
       "subordinacao_densa",
-      "leitor_terceira_pessoa"
+      "leitor_terceira_pessoa",
+      "salto_de_nivel_titulo",
+      "long_heading",
+      "single_item_list",
+      "heading_body_mismatch"
     ],
     "unitTestsOnly": [
       "sigla_sem_expansao",
@@ -154,11 +158,7 @@
       "paragraph_length",
       "prose_enumeration",
       "mesoclise",
-      "dupla_negacao",
-      "salto_de_nivel_titulo",
-      "long_heading",
-      "single_item_list",
-      "heading_body_mismatch"
+      "dupla_negacao"
     ],
     "total": 23
   }

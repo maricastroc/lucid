@@ -95,6 +95,8 @@ export interface ListBlock extends BlockBase {
 }
 
 export type Block = ParagraphBlock | HeadingBlock | ListBlock;
+
+export type BlockKind = Block["kind"];
 export interface Document {
   readonly source: string;
   readonly sentences: readonly Sentence[];
@@ -112,6 +114,7 @@ export interface Pass {
   readonly criterion: string;
   readonly category: Category;
   readonly dataDeps?: readonly string[];
+  readonly requires?: readonly BlockKind[];
   run(ctx: PassContext): PassFinding[];
 }
 

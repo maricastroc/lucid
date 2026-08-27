@@ -36,13 +36,7 @@ export function ProfilePanel({ config, onChange }: Props) {
         {deviations.length === 0 ? p.defaults : p.adjustments(deviations.length)}
       </p>
 
-      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-        {p.rationaleBefore}
-        <strong className="font-medium text-ink-2">{p.rationaleStrong}</strong>
-        {p.rationaleAfter}
-        <span className="tabular-nums">configHash</span>
-        {p.rationaleTail}
-      </p>
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{p.rationale}</p>
 
       {deviations.length > 0 && (
         <ul className="mt-3 flex flex-col gap-1">

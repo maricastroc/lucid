@@ -2,14 +2,17 @@ import type { Config } from "@/lucid/core/config";
 import type { Diagnostic, Pass } from "@/lucid/core/types";
 import type { LocaleBundle, LocaleDataRegistry, ReadabilityMetric } from "@/lucid/core/contracts/locale";
 import { asLocaleId } from "@/lucid/core/contracts/locale";
-import type { Document, Span } from "@/lucid/core/types";
+import type { Block, BlockKind, Document, Span } from "@/lucid/core/types";
 import { analyzeDocumentWithLocale, analyzeWithLocale } from "@/lucid/core/analyzer";
+import { buildCoverageReport, criteriaWithoutObject, missingBlockKinds } from "@/lucid/core/coverage/build";
+import type { CoverageReport } from "@/lucid/core/coverage/types";
 import { DEFAULT_CONFIG } from "@/lucid/core/config";
 import { segmentSentences } from "@/lucid/core/document/segment-sentences";
 import { buildDocument as buildDocumentCore } from "@/lucid/core/document/model";
 import { sentenceSpanAt as sentenceSpanAtCore } from "@/lucid/core/document/locate";
 import { CRITERION_IDS } from "./criteria";
 import { CRITERION_TAXONOMY } from "./taxonomy";
+import { CLAUSE_TREE } from "./clauses";
 import { PASSES } from "./passes/registry";
 import { countSyllables } from "./services/syllables";
 import { calculateFleschPt, interpretFleschPt } from "./readability/flesch-pt";
@@ -47,6 +50,7 @@ export const localePtBR: LocaleBundle = {
   data,
   criteria: { ids: CRITERION_IDS },
   taxonomy: CRITERION_TAXONOMY,
+  clauses: CLAUSE_TREE,
 };
 
 export function analyze(text: string, configOverrides?: Partial<Config>): Diagnostic {
@@ -77,3 +81,22 @@ export function buildDocument(text: string): Document {
 export function sentenceSpanAt(text: string, offset: number): Span {
   return sentenceSpanAtCore(text, offset, localePtBR.data.abbreviations);
 }
+
+export function coverageReport(doc?: Document): CoverageReport {
+  return buildCoverageReport(
+    localePtBR.clauses,
+    localePtBR.taxonomy,
+    doc ? { passes: localePtBR.passes, doc } : {},
+  );
+}
+
+export function silentCriteriaIn(blocks: readonly Block[]): string[] {
+  return criteriaWithoutObject(localePtBR.passes, blocks);
+}
+
+export function missingBlockKindsIn(blocks: readonly Block[]): BlockKind[] {
+  return missingBlockKinds(localePtBR.passes, blocks);
+}
+
+export { countPii, isValidCnpj, isValidCpf } from "./privacy/pii";
+export type { PiiCount, PiiKind } from "./privacy/pii";
