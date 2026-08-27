@@ -90,6 +90,22 @@ module.exports = {
       from: { path: "^src/locales" },
       to: { path: "^(node:)?(https?)$" },
     },
+    {
+      name: "rotulagem-nao-ve-o-detector",
+      severity: "error",
+      comment:
+        "Cerca da avaliação assistida (ADR-087 §4.1). O mundo da rotulagem — coleta, segmentação, " +
+        "rotulador, conciliação — não pode importar o detector nem o léxico que ele consulta. Se o " +
+        "rotulador visse a saída do detector, só saberia contestar o que ele achou e nunca apontar o " +
+        "que ele perdeu: o recall viraria inmensurável por construção. O detector só encontra o corpus " +
+        "no estágio de medição (test/eval/corpus-measure.test.ts), depois de os rótulos estarem fechados. " +
+        "src/locales/pt-BR/privacy e src/llm ficam de fora da proibição de propósito: privacidade é " +
+        "triagem da coleta e o LLM é o próprio rotulador.",
+      from: { path: "^scripts/corpus" },
+      to: {
+        path: "^src/(lucid|report|app|exporters|importers|locales/pt-BR/(passes|datasets|metrics|services|readability))",
+      },
+    },
   ],
   options: {
     tsPreCompilationDeps: true,

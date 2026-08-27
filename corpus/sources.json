@@ -1,0 +1,55 @@
+{
+  "_comentario": "Catálogo de fontes públicas do corpus de avaliação (ADR-087). Recorte da v1: FEDERAL apenas. Base legal única: Lei 9.610/98, art. 8º, IV — leis, decretos, regulamentos e demais atos oficiais NÃO são objeto de proteção como direitos autorais. Não é uso justo nem tolerância: está fora do regime autoral. Toda fonte aqui precisa ser ato oficial publicado. Ato de PESSOAL (nomeação, exoneração, aposentadoria, concessão de benefício) é excluído por 'denyPattern' porque é onde mora CPF, nome e matrícula de pessoa real — ver ADR-087 §3.",
+  "schemaVersion": 1,
+  "license": {
+    "basis": "lei-9610-art-8-IV",
+    "label": "ato oficial — sem proteção autoral",
+    "reference": "Lei 9.610/1998, art. 8º, IV"
+  },
+  "politeness": {
+    "userAgent": "Mozilla/5.0 (compatible; lucid-corpus/1.0; +https://lucid.marianacastro.dev)",
+    "minIntervalMs": 2000,
+    "respectRobotsTxt": true,
+    "maxRedirects": 3,
+    "timeoutMs": 30000,
+    "_uaComentario": "Formato 'compatible' de crawler: identifica a ferramenta e dá URL de contato. O prefixo Mozilla/5.0 é necessário porque o WAF do Planalto reseta a conexão para UA sem ele — não é imitação de navegador, é o formato padrão de robô identificado. O host não publica robots.txt (devolve página de erro)."
+  },
+  "sources": [
+    {
+      "id": "planalto-leis",
+      "label": "Leis ordinárias federais — Planalto",
+      "docType": "lei",
+      "extractor": "html@1",
+      "seeds": [
+        "https://www.planalto.gov.br/ccivil_03/leis/quadro/1990.htm",
+        "https://www.planalto.gov.br/ccivil_03/leis/quadro/2000.htm"
+      ],
+      "allowPattern": "^https://www\\.planalto\\.gov\\.br/ccivil_03/.+/(l|L)[0-9]+.*\\.htm$",
+      "denyPattern": "(nomeia|exonera|aposenta|pensao|pensão|concede-benef)",
+      "maxDocs": 120,
+      "_seedsComentario": "Páginas-índice por década, verificadas em 27/08/2026. Links relativos do tipo ../1989_1994/L7992.htm."
+    },
+    {
+      "id": "planalto-decretos",
+      "label": "Decretos federais — Planalto",
+      "docType": "decreto",
+      "extractor": "html@1",
+      "seeds": [],
+      "allowPattern": "^https://www\\.planalto\\.gov\\.br/ccivil_03/.+/(d|D)[0-9]+.*\\.htm$",
+      "denyPattern": "(nomeia|exonera|aposenta|pensao|pensão)",
+      "maxDocs": 120,
+      "_seedsComentario": "Vazio: não achei página-índice de decreto que responda 200. Fica para quando houver — não é escopo da v1."
+    },
+    {
+      "id": "gov-br-editais",
+      "label": "Editais e chamadas públicas em domínios .gov.br",
+      "docType": "edital",
+      "extractor": "html@1",
+      "seeds": [],
+      "_seedsComentario": "Preencher com páginas-índice de edital de órgão federal. Deixado VAZIO de propósito: cada órgão publica de um jeito, e semear às cegas coleta lixo. Ver README do corpus.",
+      "allowPattern": "^https://[a-z0-9.-]+\\.gov\\.br/.*(edital|chamada-publica|selecao)",
+      "denyPattern": "(resultado-final|homologa|classificacao|nomeia|convocacao)",
+      "maxDocs": 120
+    }
+  ]
+}

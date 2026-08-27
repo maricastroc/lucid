@@ -1,0 +1,44 @@
+{
+  "corpusVersion": "v1",
+  "schemaVersion": 1,
+  "createdAt": "2026-08-27",
+  "supersedes": null,
+  "sealed": false,
+  "splitSeed": "lucid-corpus-v1",
+  "testFraction": 0.3,
+  "criteria": [
+    "sigla_sem_expansao",
+    "prose_enumeration",
+    "perifrase_inflada"
+  ],
+  "counts": {
+    "documents": 16,
+    "passages": 149,
+    "labelled": 0,
+    "humanReviewed": 0
+  },
+  "hashes": {
+    "documents": "822e122ccd4a1cda9c3c8291534556d18806bb91b88cd871978b37e4d1ae9f6a",
+    "passages": "33a8b1ca633e1d6243bf5214122a14e1d3beb71de8c5533ee229bbc66b930ee6",
+    "labels": {}
+  },
+  "labelers": [
+    {
+      "id": "gemini",
+      "model": "gemini-2.5-flash",
+      "promptVersion": "sigla@1",
+      "temperature": 0
+    },
+    {
+      "id": "groq",
+      "model": "openai/gpt-oss-120b",
+      "promptVersion": "sigla@1",
+      "temperature": 0
+    }
+  ],
+  "policy": {
+    "consensusAuditRate": 0.05,
+    "lowConfidenceRoutes": true,
+    "agreementFloor": 0.7
+  }
+}

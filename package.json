@@ -35,13 +35,20 @@
     "test": "vitest run",
     "eval": "EVAL_ARTIFACT=1 vitest run test/eval/artifact.emit.test.ts",
     "test:watch": "vitest",
-    "depcheck": "depcruise src --config .dependency-cruiser.cjs",
+    "depcheck": "depcruise src scripts --config .dependency-cruiser.cjs",
     "mutation": "stryker run",
     "mutation:core": "stryker run --mutate \"src/lucid/**/*.ts\"",
     "mutation:passes": "stryker run --mutate \"src/locales/pt-BR/passes/**/*.ts\"",
     "mutation:report": "stryker run --mutate \"src/report/**/*.ts\"",
     "build:cli": "esbuild src/cli/bin.ts --bundle --platform=node --format=esm --target=node20 --external:mammoth --outfile=dist/cli/lucid.mjs --banner:js=\"#!/usr/bin/env node\"",
-    "lucid": "npm run build:cli --silent && node dist/cli/lucid.mjs"
+    "lucid": "npm run build:cli --silent && node dist/cli/lucid.mjs",
+    "corpus:collect": "node scripts/corpus/run.mjs collect",
+    "corpus:extract": "node scripts/corpus/run.mjs extract",
+    "corpus:segment": "node scripts/corpus/run.mjs segment",
+    "corpus:label": "node --env-file-if-exists=.env scripts/corpus/run.mjs label",
+    "corpus:reconcile": "node scripts/corpus/run.mjs reconcile",
+    "corpus:review": "node scripts/corpus/run.mjs review",
+    "corpus:measure": "vitest run test/eval/corpus-measure.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.23",
