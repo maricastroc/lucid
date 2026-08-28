@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { BriefingCheck, ReaderBriefing } from "@/lucid";
 import { useCopy } from "../i18n/use-copy";
-import type { UiCopy } from "../i18n/copy";
 import { CheckIcon, CloseIcon } from "./icons";
 
 interface Props {
@@ -12,50 +11,11 @@ interface Props {
   onChange: (briefing: ReaderBriefing) => void;
 }
 
-function questionsFor(c: UiCopy) {
-  const b = c.briefing;
-  return [
-    { key: "audience" as const, label: b.audienceLabel, hint: b.audienceHint, placeholder: b.audiencePlaceholder },
-    { key: "purpose" as const, label: b.purposeLabel, hint: b.purposeHint, placeholder: b.purposePlaceholder },
-    { key: "priorKnowledge" as const, label: b.priorLabel, hint: b.priorHint, placeholder: b.priorPlaceholder },
-  ];
-}
-
-function Field({
-  label,
-  hint,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  hint: string;
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="mt-3.5 block">
-      <span className="block text-[12.5px] font-medium text-ink-1">{label}</span>
-      <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-3">{hint}</span>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={2}
-        placeholder={placeholder}
-        className="mt-1.5 w-full resize-y rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[13px] leading-relaxed text-ink-0 placeholder:text-ink-dim focus:border-accent focus:outline-none"
-      />
-    </label>
-  );
-}
-
 export function BriefingPanel({ briefing, check, onChange }: Props) {
   const { c } = useCopy();
   const b = c.briefing;
   const [open, setOpen] = useState(check.declared);
   const [draft, setDraft] = useState("");
-
-  const set = (key: keyof ReaderBriefing, value: string) => onChange({ ...briefing, [key]: value });
 
   const addExpression = () => {
     const trimmed = draft.trim();
@@ -80,6 +40,8 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{b.rationale}</p>
 
+      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{b.optionalNote}</p>
+
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -90,18 +52,12 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
 
       {open && (
         <div className="mt-1">
-          {questionsFor(c).map((question) => (
-            <Field
-              key={question.key}
-              label={question.label}
-              hint={question.hint}
-              placeholder={question.placeholder}
-              value={briefing[question.key]}
-              onChange={(value) => set(question.key, value)}
-            />
-          ))}
+          <div className="mt-4 border-t border-rule-1 pt-3.5">
+            <h4 className="u-label text-ink-3">{b.verifiedLabel}</h4>
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">{b.verifiedUse}</p>
+          </div>
 
-          <div className="mt-4">
+          <div className="mt-3.5">
             <span className="block text-[12.5px] font-medium text-ink-1">{b.mustFindLabel}</span>
             <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-3">
               {b.mustFindHintBefore}
@@ -132,6 +88,11 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
           </div>
         </div>
       )}
+
+      <div className="mt-4 border-t border-rule-1 pt-3.5">
+        <h4 className="u-label text-ink-3">{b.recordMovedLabel}</h4>
+        <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">{b.recordMoved}</p>
+      </div>
 
       {check.coverage.length > 0 && (
         <div className="mt-4">

@@ -356,6 +356,10 @@ export function isSafe(f: Finding): boolean {
   return actionStateOf(f) === "safe";
 }
 
+export function requiresHumanThroughout(findings: readonly Finding[]): boolean {
+  return findings.length > 0 && findings.every((f) => f.requiresHuman);
+}
+
 export function principleGroupLabel(group: PrincipleGroup, lang: UiLang = DEFAULT_UI_LANG): string {
   return copyFor(lang).taxonomy.principleGroup[group];
 }

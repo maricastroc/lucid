@@ -1,32 +1,34 @@
 "use client";
 
 import type { Finding, Severity } from "@/lucid";
-import { actionStateOf, metaFor, severityInkVar } from "../lib/criteria";
+import { isSafe, metaFor, requiresHumanThroughout, severityInkVar } from "../lib/criteria";
 import { useCopy } from "../i18n/use-copy";
-import { CheckIcon, PenNibIcon } from "./icons";
+import { ArrowRightIcon, PenNibIcon } from "./icons";
 
-export function ActionBadge({ finding, size = "sm" }: { finding: Finding; size?: "sm" | "md" }) {
+export function ActionBadge({ finding }: { finding: Finding }) {
   const { c } = useCopy();
-  const state = actionStateOf(finding);
-  const pad = size === "md" ? "gap-1.5 px-2.5 py-1 text-[12px]" : "gap-1 px-2 py-0.5 text-[11px]";
-  const icon = size === "md" ? "size-3.5" : "size-3";
+  if (!isSafe(finding) || finding.suggestion === undefined) return null;
 
-  if (state === "safe") {
-    return (
-      <span
-        className={`inline-flex shrink-0 items-center rounded-full border border-safe-line bg-safe-weak font-medium text-safe ${pad}`}
-      >
-        <CheckIcon className={icon} />
-        {size === "md" ? c.badges.safeLong : c.badges.safeShort}
-      </span>
-    );
-  }
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full border border-human-line bg-human-weak font-medium text-human ${pad}`}
+      title={c.badges.safeLong}
+      className="inline-flex max-w-[45%] items-center gap-1 rounded-full border border-safe-line bg-safe-weak px-2 py-0.5 text-[11px] font-medium text-safe"
     >
-      <PenNibIcon className={icon} />
-      {size === "md" ? c.badges.humanLong : c.badges.humanShort}
+      <ArrowRightIcon className="size-3 shrink-0" />
+      <span className="sr-only">{c.badges.safeShort}: </span>
+      <span className="truncate">{finding.suggestion}</span>
+    </span>
+  );
+}
+
+export function HumanScopeNote({ items }: { items: readonly Finding[] }) {
+  const { c } = useCopy();
+  if (!requiresHumanThroughout(items)) return null;
+
+  return (
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-human-line bg-human-weak px-2 py-0.5 text-[11px] font-medium text-human">
+      <PenNibIcon className="size-3" />
+      {c.badges.humanLong}
     </span>
   );
 }

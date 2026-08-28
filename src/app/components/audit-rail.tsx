@@ -23,6 +23,7 @@ export function AuditRail({ probeExcerpt, onClearProbeExcerpt, ...panel }: RailP
         blocks={panel.blocks}
         briefing={panel.briefing}
         briefingCheck={panel.briefingCheck}
+        onBriefingChange={panel.onBriefingChange}
         config={panel.config}
       />
       <AuditPanel {...panel} probeExcerpt={probeExcerpt} onClearProbeExcerpt={onClearProbeExcerpt} />

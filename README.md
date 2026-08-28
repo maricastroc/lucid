@@ -231,7 +231,7 @@ Lucid implements the **Brazilian adoption** (`ABNT NBR ISO 24495-1:2024`), which
 
 - **Principles 2 and 3 → 23 deterministic detectors.** These are the mechanically checkable ones. This is where rules are strong.
 - **Principle 1 → no detector, and there never will be one.** "Relevant *to whom?*" depends on the reader, the purpose, and what the author chose to cut. So Lucid **asks** instead: it poses the standard's own questions, records the answers as the author's declaration, and verifies only what is literally verifiable. Undeclared reads **"not declared"** — never "compliant."
-- **Principle 4 → the comprehension probe**, a synthetic floor-reader that reads *only* the passage, may never use outside knowledge, and reports where it stalls. It can fail a text. It cannot pass one. The standard's real answer here is testing with human readers; the probe is the cheap floor *before* that, and says so.
+- **Principle 4 → testing with real readers. Lucid does not cover it.** A synthetic floor-reader (the comprehension probe) was built as the cheap floor *before* human testing: it reads *only* the passage, may never use outside knowledge, and reports where it stalls — it can fail a text, never pass one. It is **not exposed in the product**: re-run against the model currently wired in, it failed the recall floor this repo already had (it read "the text does not say" and still reported that it could answer), so shipping it would have implied a coverage nobody validated. The code, the labelled golden set and the harness stay in the tree; the section comes back only when a live meta-eval clears both floors. Until then Principle 4 is answered the way the standard answers it — with human readers.
 
 **Two of four principles are covered by rules, and the README says so** — because a tool that claimed all four would be lying about the two that need a person.
 
@@ -260,7 +260,7 @@ Readability likewise reuses rather than rebuilds: **Flesch adapted to Brazilian 
 
 ## 💻 Run it
 
-**Layer 1 needs no keys and no network.** It is pure and offline. Only the opt-in probe and the AI rewrite read `GROQ_API_KEY` or `GEMINI_API_KEY`.
+**Layer 1 needs no keys and no network.** It is pure and offline. Only the AI rewrite reads `GROQ_API_KEY` or `GEMINI_API_KEY` (the comprehension probe does too, but it is currently hidden from the interface — see Principle 4 above).
 
 ```bash
 git clone https://github.com/maricastroc/lucid

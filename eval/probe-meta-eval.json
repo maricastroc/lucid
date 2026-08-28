@@ -1,0 +1,137 @@
+{
+  "gerado": "2026-08-28",
+  "adr": "ADR-090",
+  "sonda": {
+    "provider": "groq",
+    "modelo": "openai/gpt-oss-120b",
+    "prompt": "probe@1",
+    "temperature": 0
+  },
+  "golden": {
+    "arquivo": "test/eval/probe-golden.ts",
+    "casos": 27
+  },
+  "pisos": {
+    "recall": 0.6,
+    "precision": 0.7,
+    "fonte": "test/eval/probe-eval.test.ts (ADR-043 + ADR-046)"
+  },
+  "baseline": {
+    "modelo": "llama-3.3-70b-versatile",
+    "fonte": "ADR-046",
+    "agreement": 1,
+    "recall": 1,
+    "precision": 1,
+    "nota": "não re-rodável: llama-3.3-70b-versatile foi removido de GROQ_MODELS em src/llm/groq.ts"
+  },
+  "corridas": {
+    "producao-como-esta (max_tokens=512)": {
+      "casos": 27,
+      "validos": 23,
+      "erros": 4,
+      "tp": 0,
+      "fn": 3,
+      "fp": 0,
+      "tn": 20,
+      "recall": 0,
+      "precision": null,
+      "accuracy": 0.8696,
+      "nota": "config de produção hoje; 4 casos morrem em HTTP 400 (JSON truncado pelos tokens de raciocínio)"
+    },
+    "adaptado-mecanicamente-1 (max_tokens=2048)": {
+      "casos": 27,
+      "validos": 27,
+      "erros": 0,
+      "tp": 3,
+      "fn": 3,
+      "fp": 1,
+      "tn": 20,
+      "recall": 0.5,
+      "precision": 0.75,
+      "accuracy": 0.8519
+    },
+    "adaptado-mecanicamente-2 (max_tokens=2048)": {
+      "casos": 27,
+      "validos": 27,
+      "erros": 0,
+      "tp": 3,
+      "fn": 3,
+      "fp": 1,
+      "tn": 20,
+      "recall": 0.5,
+      "precision": 0.75,
+      "accuracy": 0.8519
+    }
+  },
+  "veredito": "REPROVOU — recall 0,50 < piso 0,60",
+  "divergencias": [
+    {
+      "id": "carga-integracao",
+      "categoria": "carga_extraivel",
+      "rotuloHumano": "lê",
+      "sonda": "flag",
+      "podeResponder": false,
+      "precisouInferir": true,
+      "respostaExtraida": "o texto não diz",
+      "ondeTravou": [
+        {
+          "frase": "Nesse dia, o valor cai direto na conta do beneficiário.",
+          "motivo": "pronome 'Nesse dia' requer resolução de referência ao dia 5"
+        }
+      ]
+    },
+    {
+      "id": "fato-ausente",
+      "categoria": "fato_ausente",
+      "rotuloHumano": "trava",
+      "sonda": "neutro",
+      "podeResponder": true,
+      "precisouInferir": false,
+      "respostaExtraida": "o texto não diz",
+      "ondeTravou": []
+    },
+    {
+      "id": "casos-nao-enumerados",
+      "categoria": "fato_ausente",
+      "rotuloHumano": "trava",
+      "sonda": "neutro",
+      "podeResponder": true,
+      "precisouInferir": false,
+      "respostaExtraida": "o texto não diz",
+      "ondeTravou": []
+    },
+    {
+      "id": "inferencia-validade",
+      "categoria": "inferencia_exigida",
+      "rotuloHumano": "trava",
+      "sonda": "neutro",
+      "podeResponder": true,
+      "precisouInferir": false,
+      "respostaExtraida": "o texto não diz",
+      "ondeTravou": [
+        {
+          "frase": "Meu comprovante ainda é válido?",
+          "motivo": "necessário resolver pronome 'Meu' para 'O comprovante emitido'"
+        }
+      ]
+    }
+  ],
+  "erros_producao": [
+    {
+      "id": "carga-integracao",
+      "erro": "HTTP 400: Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more detai"
+    },
+    {
+      "id": "agente-omitido",
+      "erro": "HTTP 400: Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more detai"
+    },
+    {
+      "id": "referente-ambiguo",
+      "erro": "HTTP 400: Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more detai"
+    },
+    {
+      "id": "inferencia-validade",
+      "erro": "HTTP 400: Failed to validate JSON. Please adjust your prompt. See 'failed_generation' for more detai"
+    }
+  ]
+}

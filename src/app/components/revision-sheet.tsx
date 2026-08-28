@@ -32,6 +32,7 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           blocks={panel.blocks}
           briefing={panel.briefing}
           briefingCheck={panel.briefingCheck}
+        onBriefingChange={panel.onBriefingChange}
           config={panel.config}
         />
         <AuditPanel {...panel} />

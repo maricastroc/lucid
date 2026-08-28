@@ -117,6 +117,9 @@ export const COPY_EN: UiCopy = {
     settingsSummaryProfile: (deviations) =>
       deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "deviation", "deviations")}`,
     settingsSummaryJoin: " · ",
+    goToFindings: "Go to the audit findings",
+    goToFindingsHint:
+      "These settings produce no findings. The review happens in the Findings tab.",
     metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence`,
     probeSummary: "optional AI test",
     exportLabel: "Export",
@@ -453,8 +456,21 @@ export const COPY_EN: UiCopy = {
     declared: "Reader defined.",
     notDeclared: "Reader not defined.",
     rationale:
-      "Say who will read the document and what that person needs to know or do. Lucid records this, but does " +
-      "not automatically judge whether the content is relevant.",
+      "No rule decides what is relevant to a specific reader, so this principle has no automatic criterion " +
+      "and is never marked as met. Lucid checks one literal thing here: the expressions you declare as " +
+      "essential.",
+    optionalNote:
+      "Optional and saved automatically in this browser. Filling it in or leaving it blank changes neither the " +
+      "number of findings nor the score — Principle 1 has no automatic criterion.",
+    verifiedLabel: "What the tool checks",
+    verifiedUse:
+      "This list is the only part of Principle 1 that produces a verification: Lucid looks for each expression " +
+      "literally in the text and says where it is, or that it is not there.",
+    recordMovedLabel: "Context on record",
+    recordMoved:
+      "Who the reader is, what they need to do and what they already know are an optional record: Lucid keeps " +
+      "them and publishes them in the report, but does not verify them or use them to rewrite. So they live " +
+      "outside the review, under Export › Report data.",
     openDeclare: "Define the reader",
     openReview: "Review reader",
     closeBriefing: "Close",
@@ -480,6 +496,44 @@ export const COPY_EN: UiCopy = {
       "Literal, accent-sensitive search. Finding it does not prove the reader will understand; not finding it does not " +
       "prove the topic is absent — it may be said in other words. This list is yours, not a criterion of the standard: " +
       "it does not enter the score.",
+  },
+
+  reportRecord: {
+    menuItem: "Report data",
+    menuNote: "Optional record of the context — goes into the .md, not into the audit.",
+    title: "Report data",
+    optionalTag: "Optional record",
+    lead:
+      "The questions the standard puts to the author (ABNT NBR ISO 24495-1 · 5.1). What you write here is kept " +
+      "and published in the exported report as your decision.",
+    caveat:
+      "Lucid does not verify these answers, does not score them and does not use them to rewrite anything. " +
+      "Filling them in does not prove the text honours what was declared — it is a record, not a measurement.",
+    done: "Close",
+  },
+
+  startHere: {
+    label: "Start here",
+    volume: (total, criteria) =>
+      `${total} ${plural(total, "occurrence", "occurrences")} across ${criteria} ${plural(criteria, "criterion", "criteria")}.`,
+    lead: (hasSwaps) =>
+      hasSwaps
+        ? "Reading it all at once does not work. An order that does: the mechanical ones first, then one " +
+          "criterion at a time."
+        : "Reading it all at once does not work. There are no direct swaps to make here, so the order that " +
+          "works is one criterion at a time.",
+    safeStep: "Direct swaps",
+    safeBody:
+      "These carry a curated 1:1 equivalent. They are the quickest calls and they cut the volume — the swap is " +
+      "yours to make, the tool only points at it.",
+    safeAction: (n) => `See the ${n} direct ${plural(n, "swap", "swaps")}`,
+    criterionStep: "One criterion at a time",
+    criterionBody:
+      "The same problem repeated takes the same frame of mind. Walking one whole criterion is less tiring than " +
+      "switching criterion at every finding.",
+    criterionAction: (label, n) => `Walk “${label}” (${n})`,
+    caveat:
+      "A suggested order, not a rule: the findings are the same in any sequence, and order never changes the score.",
   },
 
   profile: {

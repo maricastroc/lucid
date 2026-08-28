@@ -94,6 +94,8 @@ export interface UiCopy {
     readonly settingsSummaryReader: (declared: boolean) => string;
     readonly settingsSummaryProfile: (deviations: number) => string;
     readonly settingsSummaryJoin: string;
+    readonly goToFindings: string;
+    readonly goToFindingsHint: string;
     readonly metricsSummary: (words: string, perSentence: string) => string;
     readonly probeSummary: string;
     readonly exportLabel: string;
@@ -347,6 +349,11 @@ export interface UiCopy {
     readonly openDeclare: string;
     readonly openReview: string;
     readonly closeBriefing: string;
+    readonly optionalNote: string;
+    readonly verifiedLabel: string;
+    readonly verifiedUse: string;
+    readonly recordMovedLabel: string;
+    readonly recordMoved: string;
     readonly audienceLabel: string;
     readonly audienceHint: string;
     readonly audiencePlaceholder: string;
@@ -366,6 +373,29 @@ export interface UiCopy {
     readonly notFound: string;
     readonly removeNamed: (expression: string) => string;
     readonly literalCaveat: string;
+  };
+
+  readonly reportRecord: {
+    readonly menuItem: string;
+    readonly menuNote: string;
+    readonly title: string;
+    readonly optionalTag: string;
+    readonly lead: string;
+    readonly caveat: string;
+    readonly done: string;
+  };
+
+  readonly startHere: {
+    readonly label: string;
+    readonly volume: (total: number, criteria: number) => string;
+    readonly lead: (hasSwaps: boolean) => string;
+    readonly safeStep: string;
+    readonly safeBody: string;
+    readonly safeAction: (n: number) => string;
+    readonly criterionStep: string;
+    readonly criterionBody: string;
+    readonly criterionAction: (label: string, n: number) => string;
+    readonly caveat: string;
   };
 
   readonly profile: {

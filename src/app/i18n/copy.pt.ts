@@ -117,6 +117,9 @@ export const COPY_PT: UiCopy = {
     settingsSummaryProfile: (deviations) =>
       deviations === 0 ? "limites padrão" : `${deviations} ${plural(deviations, "desvio", "desvios")}`,
     settingsSummaryJoin: " · ",
+    goToFindings: "Ir para os pontos da auditoria",
+    goToFindingsHint:
+      "Estes ajustes não geram pontos. A revisão acontece na aba Pontos.",
     metricsSummary: (words, perSentence) => `${words} palavras · ${perSentence} por frase`,
     probeSummary: "teste opcional com IA",
     exportLabel: "Exportar",
@@ -444,8 +447,21 @@ export const COPY_PT: UiCopy = {
     declared: "Leitor definido.",
     notDeclared: "Leitor não definido.",
     rationale:
-      "Informe quem vai ler o documento e o que essa pessoa precisa saber ou fazer. A Lucid registra essa " +
-      "informação, mas não avalia automaticamente se o conteúdo é relevante.",
+      "Nenhuma regra decide o que é relevante para um leitor específico, então este princípio não tem " +
+      "critério automático e nunca é dado por cumprido. A Lucid confere aqui uma única coisa literal: as " +
+      "expressões que você declarar como essenciais.",
+    optionalNote:
+      "Opcional e salvo automaticamente neste navegador. Preencher ou deixar em branco não altera o " +
+      "número de pontos da auditoria nem o placar — o Princípio 1 não tem critério automático.",
+    verifiedLabel: "O que a ferramenta confere",
+    verifiedUse:
+      "Esta lista é a única parte do Princípio 1 que produz verificação: a Lucid procura cada expressão " +
+      "literalmente no texto e diz onde ela está ou que não está.",
+    recordMovedLabel: "Registro do contexto",
+    recordMoved:
+      "Quem é o leitor, o que ele precisa fazer e o que já sabe são registro opcional: a Lucid guarda e " +
+      "publica no relatório, mas não verifica nem usa para reescrever. Por isso ficam fora da revisão, " +
+      "em Exportar › Dados do relatório.",
     openDeclare: "Definir o leitor",
     openReview: "Rever leitor",
     closeBriefing: "Fechar",
@@ -471,6 +487,44 @@ export const COPY_PT: UiCopy = {
       "Busca literal, sensível a acento. Encontrar não prova que o leitor vai entender; não encontrar não prova que o " +
       "assunto está ausente — pode estar dito com outras palavras. Esta lista é a sua, não um critério da norma: ela " +
       "não entra no placar.",
+  },
+
+  reportRecord: {
+    menuItem: "Dados do relatório",
+    menuNote: "Registro opcional do contexto — entra no .md, não na auditoria.",
+    title: "Dados do relatório",
+    optionalTag: "Registro opcional",
+    lead:
+      "As perguntas que a norma faz ao autor (ABNT NBR ISO 24495-1 · 5.1). O que você escrever aqui é " +
+      "guardado e publicado no relatório exportado como decisão sua.",
+    caveat:
+      "A Lucid não verifica estas respostas, não as pontua e não as usa para reescrever nada. Preencher " +
+      "não prova que o texto respeita o que foi declarado — é registro, não medição.",
+    done: "Fechar",
+  },
+
+  startHere: {
+    label: "Comece por aqui",
+    volume: (total, criteria) =>
+      `${total} ${plural(total, "ocorrência", "ocorrências")} em ${criteria} ${plural(criteria, "critério", "critérios")}.`,
+    lead: (hasSwaps) =>
+      hasSwaps
+        ? "Ler tudo de uma vez não funciona. Uma ordem que funciona: primeiro o que é mecânico, depois um " +
+          "critério de cada vez."
+        : "Ler tudo de uma vez não funciona. Aqui não há troca direta a fazer, então a ordem que funciona é " +
+          "um critério de cada vez.",
+    safeStep: "Trocas diretas",
+    safeBody:
+      "Têm equivalente 1:1 do glossário. São as decisões mais rápidas e derrubam volume — a troca é sua, " +
+      "a ferramenta só indica.",
+    safeAction: (n) => `Ver as ${n} ${plural(n, "troca direta", "trocas diretas")}`,
+    criterionStep: "Um critério de cada vez",
+    criterionBody:
+      "O mesmo problema repetido se resolve com a mesma cabeça. Percorrer um critério inteiro cansa menos " +
+      "do que trocar de critério a cada ponto.",
+    criterionAction: (label, n) => `Percorrer “${label}” (${n})`,
+    caveat:
+      "Sugestão de ordem, não regra: os pontos são os mesmos em qualquer sequência, e a ordem não altera o placar.",
   },
 
   profile: {

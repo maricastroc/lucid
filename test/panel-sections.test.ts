@@ -10,6 +10,7 @@ import {
   sectionHeadingId,
   type SectionOffset,
 } from "../src/app/lib/panel-sections";
+import { PROBE_SECTION_ENABLED } from "../src/app/lib/probe-availability";
 import { COPY } from "../src/app/i18n/copy";
 
 const c = COPY["pt-BR"];
@@ -18,12 +19,14 @@ const en = COPY.en;
 describe("panel sections — what the nav offers", () => {
   it("lists the audit hierarchy in order: state, findings, then the secondary sections", () => {
     const sections = buildPanelSections({ findingCount: 16, hasProbe: true }, c);
-    expect(sections.map((s) => s.id)).toEqual(["summary", "findings", "settings", "metrics", "probe"]);
+    const expected = ["summary", "findings", "settings", "metrics"];
+    expect(sections.map((s) => s.id)).toEqual(PROBE_SECTION_ENABLED ? [...expected, "probe"] : expected);
   });
 
   it("only the findings entry carries a count — the number has to mean something", () => {
     const sections = buildPanelSections({ findingCount: 16, hasProbe: true }, c);
-    expect(sections.map((s) => s.count)).toEqual([undefined, 16, undefined, undefined, undefined]);
+    expect(sections.filter((s) => s.count !== undefined).map((s) => s.id)).toEqual(["findings"]);
+    expect(sections.find((s) => s.id === "findings")?.count).toBe(16);
   });
 
   it("keeps the findings count at zero rather than dropping it (an empty index is a state)", () => {
@@ -38,7 +41,8 @@ describe("panel sections — what the nav offers", () => {
 
   it("summary and findings never collapse; the secondary sections do", () => {
     const sections = buildPanelSections({ findingCount: 3, hasProbe: true }, c);
-    expect(collapsibleSections(sections)).toEqual(["settings", "metrics", "probe"]);
+    const expected = ["settings", "metrics"];
+    expect(collapsibleSections(sections)).toEqual(PROBE_SECTION_ENABLED ? [...expected, "probe"] : expected);
   });
 
   it("labels every section in both interface languages", () => {

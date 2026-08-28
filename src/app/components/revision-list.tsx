@@ -5,9 +5,10 @@ import type { Diagnostic, Finding } from "@/lucid";
 import { CRITERION_ORDER, findingId, metaFor, provenanceTag, severityInkVar } from "../lib/criteria";
 import { distinctTexts, type Bucket, type FindingGroup, type FindingQuery, type SortOrder, type StateFilter } from "../lib/finding-query";
 import { reviewStateOf, tally, type ReviewMark, type ReviewMarks } from "../lib/review-marks";
+import { startHerePlan, type StartHerePlan } from "../lib/start-here";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
-import { ActionBadge, CriterionMark, SeverityDot } from "./badges";
+import { ActionBadge, CriterionMark, HumanScopeNote, SeverityDot } from "./badges";
 import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, CloseIcon, EyeIcon, EyeOffIcon } from "./icons";
 
 export type { Bucket } from "../lib/finding-query";
@@ -68,6 +69,80 @@ function contextAfter(text: string, finding: Finding): string {
 
 const FILTER_THRESHOLD = 10;
 
+function StartHere({
+  plan,
+  onBucket,
+  onCriterion,
+}: {
+  plan: StartHerePlan | null;
+  onBucket: (b: Bucket) => void;
+  onCriterion: (criterion: string | null) => void;
+}) {
+  const { c, lang } = useCopy();
+  if (plan === null) return null;
+  const first = plan.firstCriterion;
+
+  const steps: Array<{
+    title: string;
+    body: string;
+    action: string;
+    primary: boolean;
+    onClick: () => void;
+  }> = [];
+  if (plan.safe > 0) {
+    steps.push({
+      title: c.startHere.safeStep,
+      body: c.startHere.safeBody,
+      action: c.startHere.safeAction(plan.safe),
+      primary: true,
+      onClick: () => onBucket("safe"),
+    });
+  }
+  if (first !== null) {
+    steps.push({
+      title: c.startHere.criterionStep,
+      body: c.startHere.criterionBody,
+      action: c.startHere.criterionAction(metaFor(first.criterion, lang).label, first.count),
+      primary: steps.length === 0,
+      onClick: () => onCriterion(first.criterion),
+    });
+  }
+
+  return (
+    <div className="mx-4 mb-3 rounded-xl border border-rule-2 bg-surface-2 p-3.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h4 className="u-label text-ink-2">{c.startHere.label}</h4>
+        <span className="text-[11.5px] tabular-nums text-ink-3">{c.startHere.volume(plan.total, plan.criteria)}</span>
+      </div>
+
+      <p className="mt-2 text-[12px] leading-relaxed text-ink-1">{c.startHere.lead(plan.safe > 0)}</p>
+
+      {steps.map((step, i) => (
+        <div key={step.title} className="mt-3">
+          <span className="block text-[12px] font-medium text-ink-1">
+            <span className="tabular-nums text-ink-3">{i + 1} · </span>
+            {step.title}
+          </span>
+          <p className="mt-0.5 text-[11.5px] leading-relaxed text-ink-3">{step.body}</p>
+          <button
+            type="button"
+            onClick={step.onClick}
+            className={
+              step.primary
+                ? "mt-1.5 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90"
+                : "mt-1.5 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3 py-1.5 text-[12px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+            }
+          >
+            {step.action}
+          </button>
+        </div>
+      ))}
+
+      <p className="mt-3 text-[11px] leading-relaxed text-ink-3">{c.startHere.caveat}</p>
+    </div>
+  );
+}
+
 export function RevisionList({
   diagnostic,
   groups,
@@ -95,6 +170,7 @@ export function RevisionList({
   const [moreFilters, setMoreFilters] = useState(false);
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
+  const plan = startHerePlan(allFindings, marks, filtered);
 
   const hidden = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) > 0 && !query.activeCriteria.has(id));
   const clean = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) === 0);
@@ -131,6 +207,8 @@ export function RevisionList({
 
   return (
     <div>
+      <StartHere plan={plan} onBucket={onBucket} onCriterion={onCriterion} />
+
       {query.criterion !== null && (
         <div className="mb-2.5 flex items-center gap-2 border-b border-rule-1 px-4 pb-2.5">
           <button
@@ -420,7 +498,10 @@ function Group({
         <div id={panelId} className="flex flex-col gap-0.5 pl-2">
           <div className="flex items-start justify-between gap-2 px-3 pb-1 pt-0.5">
             <p className="min-w-0 flex-1 text-[11.5px] leading-snug text-ink-3">{meta.why}</p>
-            <ProvenanceTag tag={tagFor(diagnostic, group.criterion, lang)} />
+            <span className="flex shrink-0 items-center gap-1.5">
+              <HumanScopeNote items={diagnostic.findings.filter((f) => f.criterion === group.criterion)} />
+              <ProvenanceTag tag={tagFor(diagnostic, group.criterion, lang)} />
+            </span>
           </div>
           <div className="flex flex-wrap items-center gap-2 px-3 pb-1.5">
             <button

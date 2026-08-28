@@ -1,4 +1,5 @@
 import type { UiCopy } from "../i18n/copy";
+import { PROBE_SECTION_ENABLED } from "./probe-availability";
 
 export const PANEL_SECTION_IDS = ["summary", "findings", "settings", "metrics", "probe"] as const;
 
@@ -27,7 +28,10 @@ export function buildPanelSections(input: PanelSectionInput, c: UiCopy): readonl
     { id: "settings", label: c.panel.sections.settings, collapsible: true },
     { id: "metrics", label: c.panel.sections.metrics, collapsible: true },
   ];
-  if (input.hasProbe) sections.push({ id: "probe", label: c.panel.sections.probe, collapsible: true });
+
+  if (input.hasProbe && PROBE_SECTION_ENABLED) {
+    sections.push({ id: "probe", label: c.panel.sections.probe, collapsible: true });
+  }
   return sections;
 }
 

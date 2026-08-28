@@ -6,7 +6,8 @@ import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks } from "../lib/export-document";
 import type { LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
-import { ArrowDownIcon, ChevronDownIcon } from "./icons";
+import { ReportRecordDialog } from "./report-record-dialog";
+import { ArrowDownIcon, ChevronDownIcon, PenNibIcon } from "./icons";
 
 export interface ExportMenuProps {
   diagnostic: Diagnostic;
@@ -15,6 +16,7 @@ export interface ExportMenuProps {
   blocks: readonly Block[] | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
+  onBriefingChange: (briefing: ReaderBriefing) => void;
   config: Config;
 }
 
@@ -30,10 +32,11 @@ function download(filename: string, content: BlobPart, mime: string) {
   URL.revokeObjectURL(url);
 }
 
-export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, briefingCheck, config }: ExportMenuProps) {
+export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, briefingCheck, onBriefingChange, config }: ExportMenuProps) {
   const { c } = useCopy();
   const [open, setOpen] = useState(false);
   const [docxError, setDocxError] = useState<string | null>(null);
+  const [recordOpen, setRecordOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -139,13 +142,43 @@ export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, bri
               {docxError}
             </p>
           )}
+
+          <div className="mt-1.5 border-t border-rule-1 pt-1.5">
+            <MenuItem
+              icon={<PenNibIcon className="size-3.5 text-ink-3" />}
+              onClick={() => {
+                setOpen(false);
+                setRecordOpen(true);
+              }}
+              note={c.reportRecord.menuNote}
+            >
+              {c.reportRecord.menuItem}
+            </MenuItem>
+          </div>
         </div>
       )}
+
+      <ReportRecordDialog
+        open={recordOpen}
+        onOpenChange={setRecordOpen}
+        briefing={briefing}
+        onChange={onBriefingChange}
+      />
     </div>
   );
 }
 
-function MenuItem({ onClick, note, children }: { onClick: () => void; note?: string; children: React.ReactNode }) {
+function MenuItem({
+  onClick,
+  note,
+  icon,
+  children,
+}: {
+  onClick: () => void;
+  note?: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -154,7 +187,7 @@ function MenuItem({ onClick, note, children }: { onClick: () => void; note?: str
       className="row-hit flex w-full flex-col items-start gap-0.5 rounded-md px-2.5 py-2 text-left hover:bg-surface-2"
     >
       <span className="inline-flex items-center gap-2 text-[12.5px] font-medium text-ink-1">
-        <ArrowDownIcon className="size-3.5 text-ink-3" />
+        {icon ?? <ArrowDownIcon className="size-3.5 text-ink-3" />}
         {children}
       </span>
       {note !== undefined && <span className="text-[11px] leading-relaxed text-ink-3">{note}</span>}
