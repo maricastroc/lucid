@@ -57,6 +57,15 @@ function ProvenanceTag({ tag }: { tag: { text: string; title: string } | null })
 
 const excerptOf = (f: Finding): string => f.span.text.replace(/\s+/g, " ").trim();
 
+const CONTEXT_WORDS = 6;
+
+function contextAfter(text: string, finding: Finding): string {
+  const tail = text.slice(finding.span.end, finding.span.end + 160).replace(/\s+/gu, " ").trim();
+  if (tail === "") return "";
+  const words = tail.split(" ").slice(0, CONTEXT_WORDS);
+  return `${words.join(" ")}${tail.split(" ").length > CONTEXT_WORDS ? "…" : ""}`;
+}
+
 const FILTER_THRESHOLD = 10;
 
 export function RevisionList({
@@ -83,6 +92,7 @@ export function RevisionList({
   const listRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [coverageOpen, setCoverageOpen] = useState(false);
+  const [moreFilters, setMoreFilters] = useState(false);
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
 
@@ -111,6 +121,8 @@ export function RevisionList({
     ["safe", c.revisionList.bucketSafe],
     ["human", c.revisionList.bucketHuman],
   ];
+  const showStates = sifting && (moreFilters || query.state !== "all");
+
   const states: Array<[StateFilter, string]> = [
     ["pending", c.revisionList.statePending],
     ["seen", c.revisionList.stateSeen],
@@ -120,7 +132,7 @@ export function RevisionList({
   return (
     <div>
       {query.criterion !== null && (
-        <div className="mb-2.5 flex items-center gap-2 border-b border-rule-1 px-6 pb-2.5">
+        <div className="mb-2.5 flex items-center gap-2 border-b border-rule-1 px-4 pb-2.5">
           <button
             type="button"
             onClick={() => onCriterion(null)}
@@ -134,7 +146,7 @@ export function RevisionList({
       )}
 
       {sifting && (
-      <div className="px-6 pb-2.5">
+      <div className="px-4 pb-2.5">
         <input
           type="search"
           value={query.search}
@@ -149,15 +161,27 @@ export function RevisionList({
       <div
         role="group"
         aria-label={c.revisionList.filterLabel}
-        className="flex flex-wrap items-center gap-1.5 px-6 pb-2.5"
+        className="flex flex-wrap items-center gap-1.5 px-4 pb-2.5"
       >
         {buckets.map(([b, labelText]) => (
           <Pill key={b} active={query.bucket === b} onClick={() => onBucket(b)}>
             {labelText}
           </Pill>
         ))}
-        {sifting && <span className="mx-0.5 h-4 w-px bg-rule-2" aria-hidden />}
-        {sifting &&
+        {sifting && (
+          <button
+            type="button"
+            aria-expanded={showStates}
+            onClick={() => setMoreFilters((v) => !v)}
+            className="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+          >
+            <ChevronDownIcon
+              className={`size-3 shrink-0 transition-transform duration-150 ${showStates ? "" : "-rotate-90"}`}
+            />
+            {showStates ? c.revisionList.fewerFilters : c.revisionList.moreFilters}
+          </button>
+        )}
+        {showStates &&
           states.map(([s, labelText]) => (
             <Pill
               key={s}
@@ -171,7 +195,7 @@ export function RevisionList({
       </div>
 
       {(sifting || filtered) && (
-      <div className="flex items-center justify-between gap-3 px-6 pb-3">
+      <div className="flex items-center justify-between gap-3 px-4 pb-3">
         <span className="min-w-0 truncate text-[11.5px] text-ink-3">
           {filtered
             ? c.revisionList.showingFiltered(visible.length, allFindings.length)
@@ -296,7 +320,7 @@ export function RevisionList({
         </div>
       )}
 
-      <p className="px-6 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
+      <p className="px-4 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
     </div>
   );
 }
@@ -331,6 +355,12 @@ function Group({
   const { c, lang } = useCopy();
   const meta = metaFor(group.criterion, lang);
   const counts = tally(marks, group.items);
+
+  const repeated = new Set(
+    group.items
+      .map(excerptOf)
+      .filter((text, index, all) => all.indexOf(text) !== index),
+  );
   const distinct = distinctTexts(group.items);
   const panelId = `revgrp-${group.criterion}`;
 
@@ -415,10 +445,12 @@ function Group({
               </button>
             )}
           </div>
-          {group.items.map((f) => (
+          {group.items.map((f, index) => (
             <Row
               key={findingId(f)}
               finding={f}
+              ordinal={index + 1}
+              context={repeated.has(excerptOf(f)) ? contextAfter(diagnostic.text, f) : ""}
               state={reviewStateOf(marks, f)}
               selected={selectedId === findingId(f)}
               onSelect={() => onSelect(f)}
@@ -433,12 +465,16 @@ function Group({
 
 function Row({
   finding,
+  ordinal,
+  context,
   state,
   selected,
   onSelect,
   onMark,
 }: {
   finding: Finding;
+  ordinal: number;
+  context: string;
   state: "pending" | ReviewMark;
   selected: boolean;
   onSelect: () => void;
@@ -460,6 +496,7 @@ function Row({
         onClick={onSelect}
         className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left ${marked ? "opacity-55" : ""}`}
       >
+        <span className="w-6 shrink-0 text-right tabular-nums text-[11px] text-ink-dim">{ordinal}</span>
         <SeverityDot severity={finding.severity} />
         <span
           className={`min-w-0 flex-1 truncate font-serif text-[13.5px] text-ink-1 ${
@@ -467,25 +504,26 @@ function Row({
           }`}
         >
           “{excerpt}”
+          {context !== "" && <span className="font-sans text-[11.5px] text-ink-3"> {context}</span>}
         </span>
         <ActionBadge finding={finding} />
       </button>
       <MarkButton
         pressed={state === "seen"}
-        label={c.revisionList.markSeenNamed(excerpt)}
-        title={state === "seen" ? c.revisionList.unmark : c.revisionList.markSeen}
+        label={c.revisionList.markSeenNamed(`${ordinal}. ${excerpt}`)}
+        title={state === "seen" ? c.revisionList.unmarkHint : c.revisionList.markSeenHint}
         onClick={() => onMark(state === "seen" ? null : "seen")}
       >
-        <CheckIcon className="size-3.5" />
+        <CheckIcon className="size-4" />
       </MarkButton>
       <MarkButton
         pressed={state === "dismissed"}
-        label={c.revisionList.dismissNamed(excerpt)}
-        title={state === "dismissed" ? c.revisionList.unmark : c.revisionList.dismiss}
+        label={c.revisionList.dismissNamed(`${ordinal}. ${excerpt}`)}
+        title={state === "dismissed" ? c.revisionList.unmarkHint : c.revisionList.dismissHint}
         onClick={() => onMark(state === "dismissed" ? null : "dismissed")}
         className="mr-1.5"
       >
-        <CloseIcon className="size-3.5" />
+        <CloseIcon className="size-4" />
       </MarkButton>
     </div>
   );
@@ -513,8 +551,8 @@ function MarkButton({
       aria-label={label}
       title={title}
       onClick={onClick}
-      className={`grid size-7 shrink-0 place-items-center rounded-md transition-colors duration-150 ${
-        pressed ? "bg-surface-3 text-ink-1" : "text-ink-dim hover:bg-surface-3 hover:text-ink-1"
+      className={`grid size-8 shrink-0 place-items-center rounded-md transition-colors duration-150 ${
+        pressed ? "bg-surface-3 text-ink-0" : "text-ink-2 hover:bg-surface-3 hover:text-ink-0"
       } ${className}`}
     >
       {children}

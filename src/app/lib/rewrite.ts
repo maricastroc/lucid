@@ -1,5 +1,5 @@
 import { analyze, type Finding, type Span } from "@/lucid";
-import { DEEPSEEK_MODELS, GEMINI_MODELS, GROQ_MODELS } from "@/llm";
+import { GEMINI_MODELS } from "@/llm";
 import {
   proposeAndVerify,
   StubRewriteProposer,
@@ -19,20 +19,11 @@ export interface RewriteModel {
   providerId: "stub" | "groq" | "gemini" | "deepseek";
   model: string;
   name: string;
-  noteKey?: "modelNoteStrongGenerator" | "modelNotePaid";
 }
 
 export const REWRITE_MODELS: readonly RewriteModel[] = [
-  { providerId: "gemini", model: GEMINI_MODELS[0], name: "Gemini · 2.5 Flash", noteKey: "modelNoteStrongGenerator" },
-  { providerId: "deepseek", model: DEEPSEEK_MODELS[0], name: "DeepSeek · V4 Flash", noteKey: "modelNotePaid" },
-  { providerId: "groq", model: GROQ_MODELS[0], name: "Groq · GPT-OSS 120B" },
-  { providerId: "groq", model: GROQ_MODELS[1], name: "Groq · GPT-OSS 20B" },
+  { providerId: "gemini", model: GEMINI_MODELS[0], name: "Gemini · 2.5 Flash" },
 ];
-
-export function modelLabel(choice: RewriteModel, lang: UiLang = DEFAULT_UI_LANG): string {
-  if (choice.noteKey === undefined) return choice.name;
-  return `${choice.name} (${copyFor(lang).note[choice.noteKey]})`;
-}
 
 const SAMPLE_FIXTURES: Record<string, string> = {
   [`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo destinado à verificação das condições supracitadas exigidas para a concessão do benefício, e a decisão foi comunicada ao interessado no processo.`]:

@@ -206,6 +206,8 @@ export const COPY_EN: UiCopy = {
     searchPlaceholder: "Search excerpt…",
     showingAll: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
     showingFiltered: (shown, total) => `${shown} of ${total} ${plural(total, "occurrence", "occurrences")}`,
+    moreFilters: "More filters",
+    fewerFilters: "Fewer filters",
     clearFilters: "clear filters",
     orderBySeverity: "by severity",
     orderByDocument: "by position",
@@ -216,10 +218,13 @@ export const COPY_EN: UiCopy = {
     scopeOn: "Step through this criterion",
     scopeOff: "Leave this criterion",
     markSeen: "Mark as seen",
+    markSeenHint: "Mark as seen — you looked at this occurrence",
     markSeenNamed: (excerpt) => `Mark “${excerpt}” as seen`,
     dismiss: "Dismiss",
+    dismissHint: "Dismiss — you will not act on this occurrence",
     dismissNamed: (excerpt) => `Dismiss “${excerpt}”`,
     unmark: "Unmark",
+    unmarkHint: "Unmark — back to pending",
     progress: (done, total) => `${done} of ${total} marked`,
     pendingCount: (n) => `${n} pending`,
     progressCaveat: "The author's own mark on their review — it does not change the score or approve the text.",
@@ -280,14 +285,7 @@ export const COPY_EN: UiCopy = {
       "privileged. Applying it creates a draft and the engine re-audits.",
 
     aiTitle: "AI rewrite",
-    aiLead: "One way of proposing a new version — the AI rewrites; you can also ",
-    aiLeadStrongYours: "edit or paste your own",
-    aiLeadMiddle: ". The engine judges either one the same way. Optional: the ",
-    aiLeadStrongDiagnostic: "diagnosis above does not depend on this",
-    aiTarget: (unit) => `The AI will rewrite ${unit} (highlighted in the document).`,
-    aiModelLabel: "Generator model",
-    modelNoteStrongGenerator: "strong generator",
-    modelNotePaid: "paid, ~$0.14/1M",
+    aiTarget: (unit) => `The AI will rewrite ${unit} highlighted in the document and verify the result.`,
     proposerManual: "your edit",
     aiRun: "Generate and verify",
     aiRunning: "Generating and verifying…",
@@ -488,17 +486,15 @@ export const COPY_EN: UiCopy = {
     label: "Analysis criteria",
     defaults: "Default limits.",
     adjustments: (n) => `${n} ${plural(n, "adjustment of yours", "adjustments of yours")} over the default.`,
-    rationale:
-      "Lucid uses default limits to flag long sentences and other points of attention. You can adjust them to " +
-      "your organisation's rules. Any change is recorded in the audit.",
+    rationale: "Adjust the limits to your organisation's rules. Every change is recorded in the audit.",
     openAdjust: "Adjust criteria",
     closeAdjust: "Close",
     resetDefaults: "Back to defaults",
     thresholdsLabel: "Thresholds",
     policyLabel: "Policy criteria",
     policyNote:
-      "Switching a criterion off stops its pass from running. Its silence stops meaning “I found nothing” and starts " +
-      "meaning “I did not look” — which is why every switch-off is listed above and in the report.",
+      "A criterion that is off does not run: its silence starts meaning “I did not look”, not “I found nothing”. " +
+      "Every switch-off is listed above and in the report.",
     deviationOff: (label) => `${label}: off (default: on)`,
     deviationOn: (label) => `${label}: on (default: off)`,
     deviationValue: (what, value, fallback) => `${what} ${value} (default: ${fallback})`,
@@ -514,13 +510,9 @@ export const COPY_EN: UiCopy = {
   },
 
   send: {
-    always: (purpose: string) =>
-      `To ${purpose}, the document will be sent to an external artificial-intelligence service. ` +
-      "The main audit does not depend on that service.",
-    found: (named: string) => `We found ${named} in this document.`,
-    limit:
-      "Lucid identifies only CPF, CNPJ and e-mail addresses. Review the document before continuing, since " +
-      "other personal data may not be detected.",
+    always: "On continuing, the document will be sent to an external AI service.",
+    found: (named: string) => `We found ${named} in the document.`,
+    limit: "Review the content: other personal data may not be detected.",
     kinds: {
       cpf: (n: number) => `${n} ${n === 1 ? "CPF" : "CPFs"}`,
       cnpj: (n: number) => `${n} ${n === 1 ? "CNPJ" : "CNPJs"}`,
@@ -528,18 +520,15 @@ export const COPY_EN: UiCopy = {
     },
     join: ", ",
     lastJoin: " and ",
-    probePurpose: "run the test",
-    rewritePurpose: "generate the rewrite",
   },
   probe: {
     title: "Comprehension test",
-    lead: "Ask a question about the document. Lucid checks whether the answer can be found in the text.",
+    lead: "Check whether the answer the reader is after is really in the passage.",
     selectPrompt:
       "Select a passage in the document. The probe reads only the excerpt you choose — not the whole document.",
     excerptLabel: "Excerpt that will be sent",
     clearExcerpt: "clear",
-    onlyThisExcerpt:
-      "The question will be answered from this excerpt alone. Anything outside it is not read by the probe.",
+    onlyThisExcerpt: "The probe answers only from what is in this excerpt.",
     excerptTooLong: (chars, max) =>
       `Excerpt with ${chars.toLocaleString("en-US")} characters — above the ${max.toLocaleString("en-US")} limit. Select a shorter passage.`,
     useBriefingPurpose: "Use what you defined as the reader's purpose:",
@@ -556,8 +545,8 @@ export const COPY_EN: UiCopy = {
     noFloorViolation: "The answer was found in the text.",
     loadLabel: "Reading load",
     caveat:
-      "This test uses artificial intelligence and can be wrong. Finding the answer in the text does not " +
-      "guarantee the text is clear. To confirm comprehension, test with real readers.",
+      "This test uses AI and can be wrong. Finding the answer does not guarantee the text is clear — only " +
+      "testing with real readers confirms that.",
     operations: {
       resolver_referente_a_distancia: "resolve what a pronoun refers to, at a distance",
       integrar_entre_frases: "join information from more than one sentence",

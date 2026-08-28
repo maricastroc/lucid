@@ -53,6 +53,7 @@ export function Studio() {
     refusedEdit,
     acceptAsPlainText,
     discardRefusedEdit,
+    previewText,
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocx: importDocxFile,
@@ -95,6 +96,9 @@ export function Studio() {
     mark,
     markMany,
     shiftForEdit,
+    snapshot: snapshotMarks,
+    restore: restoreMarks,
+    forgetHistory: forgetMarkHistory,
     reset: resetMarks,
   } = useReviewMarks(diagnostic.findings, isSettled, restored?.reviewMarks ?? EMPTY_MARKS);
 
@@ -180,20 +184,32 @@ export function Studio() {
     [recordChange, clearSelection],
   );
 
+  const moveMarks = useCallback(
+    (target: Span, nextText: string) => {
+      const canonical = previewText(nextText);
+      if (canonical === null) return;
+      snapshotMarks(marks);
+      shiftForEdit(target, canonical.length - diagnostic.text.length);
+    },
+    [diagnostic, marks, previewText, snapshotMarks, shiftForEdit],
+  );
+
   const applyManualEdit = useCallback(
     (target: Span, replacement: string) => {
-      shiftForEdit(target, replacement);
+      const nextText = spliceSpan(diagnostic.text, target, replacement);
+      moveMarks(target, nextText);
       applyChange(
         { source: "manual", label: sourceLabel("manual"), before: target.text, after: replacement },
-        spliceSpan(diagnostic.text, target, replacement),
+        nextText,
       );
     },
-    [diagnostic, applyChange, shiftForEdit],
+    [diagnostic, applyChange, moveMarks],
   );
 
   const applyRewrite = useCallback(
     (target: Span, proposal: RewriteProposal) => {
-      shiftForEdit(target, proposal.proposed);
+      const nextText = spliceSpan(diagnostic.text, target, proposal.proposed);
+      moveMarks(target, nextText);
       applyChange(
         {
           source: "ai",
@@ -202,11 +218,16 @@ export function Studio() {
           before: target.text,
           after: proposal.proposed,
         },
-        spliceSpan(diagnostic.text, target, proposal.proposed),
+        nextText,
       );
     },
-    [diagnostic, applyChange, shiftForEdit],
+    [diagnostic, applyChange, moveMarks],
   );
+
+  const undoChange = useCallback(() => {
+    restoreMarks();
+    undo();
+  }, [restoreMarks, undo]);
 
   const selectFinding = useCallback(
     (finding: Finding) => {
@@ -220,9 +241,10 @@ export function Studio() {
   const onFreeTypeText = useCallback(
     (value: string) => {
       noteFreeEdit();
+      forgetMarkHistory();
       setText(value);
     },
-    [noteFreeEdit, setText],
+    [noteFreeEdit, forgetMarkHistory, setText],
   );
 
   const panelProps = {
@@ -389,7 +411,7 @@ export function Studio() {
             </span>
             <button
               type="button"
-              onClick={undo}
+              onClick={undoChange}
               className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
             >
               {c.studio.undo}

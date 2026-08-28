@@ -48,6 +48,8 @@ interface Applied {
   readonly inside: readonly Finding[];
   readonly after: readonly Finding[];
   readonly all: readonly Finding[];
+  readonly naiveDelta: number;
+  readonly realDelta: number;
   readonly survivors: ReviewMarks;
   readonly afterUndo: ReviewMarks;
 }
@@ -59,23 +61,33 @@ function applyWithMarks(replacement: string): Applied {
   const target: Span = { start: block.start, end: block.end, text: block.text };
 
   const marks: ReviewMarks = Object.fromEntries(findings.map((f) => [findingId(f), "seen" as const]));
-  const shifted = reanchorMarks(marks, target, replacement);
 
   const next = doc.source.slice(0, target.start) + replacement + doc.source.slice(target.end);
   const result = spliceStructuredDocument(doc, next, ptDocumentServices);
   if (!result.ok) throw new Error(`splice recusado: ${result.reason}`);
+
+  const realDelta = result.document.source.length - doc.source.length;
+  const shifted = reanchorMarks(marks, target, realDelta);
 
   return {
     before: findings.filter((f) => f.span.end <= target.start),
     inside: findings.filter((f) => f.span.start < target.end && f.span.end > target.start),
     after: findings.filter((f) => f.span.start >= target.end),
     all: findings,
+    naiveDelta: replacement.length - (target.end - target.start),
+    realDelta,
     survivors: pruneMarks(shifted, analyzeDocument(result.document).findings),
-    afterUndo: pruneMarks(shifted, findings),
+    afterUndo: pruneMarks(marks, findings),
   };
 }
 
 const count = (marks: ReviewMarks): number => Object.keys(marks).length;
+
+function shiftKey(key: string, delta: number): string {
+  const end = key.lastIndexOf(":");
+  const start = key.lastIndexOf(":", end - 1);
+  return `${key.slice(0, start)}:${Number(key.slice(start + 1, end)) + delta}:${Number(key.slice(end + 1)) + delta}`;
+}
 
 describe("review marks across an applied rewrite", () => {
   it("the fixture really has marks on all three sides of the target", () => {
@@ -87,24 +99,26 @@ describe("review marks across an applied rewrite", () => {
 
   it("a single-line rewrite costs only the marks inside the edited excerpt", () => {
     const applied = applyWithMarks(AS_ONE_LINE);
+    expect(applied.realDelta).toBe(applied.naiveDelta);
     expect(count(applied.survivors)).toBe(applied.all.length - applied.inside.length);
     for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toBe("seen");
   });
 
-  it("a structural expansion costs every mark from the edit to the end of the document", () => {
+  it("a structural expansion also costs only the marks inside the edited excerpt", () => {
     const applied = applyWithMarks(AS_LIST);
-
+    expect(applied.realDelta).not.toBe(applied.naiveDelta);
+    expect(count(applied.survivors)).toBe(applied.all.length - applied.inside.length);
     for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toBe("seen");
-
-    expect(count(applied.survivors)).toBe(applied.before.length);
     expect(applied.after.length).toBeGreaterThan(0);
+    for (const finding of applied.after) {
+      expect(applied.survivors[shiftKey(findingId(finding), applied.realDelta)]).toBe("seen");
+    }
   });
 
-  it("undo brings the text back but never the marks", () => {
+  it("undoing restores every mark the edit moved or dropped", () => {
     for (const replacement of [AS_ONE_LINE, AS_LIST]) {
       const applied = applyWithMarks(replacement);
-      expect(count(applied.afterUndo)).toBe(applied.before.length);
-      expect(count(applied.afterUndo)).toBeLessThan(applied.all.length);
+      expect(count(applied.afterUndo)).toBe(applied.all.length);
     }
   });
 });

@@ -166,6 +166,8 @@ export interface UiCopy {
     readonly searchPlaceholder: string;
     readonly showingAll: (n: number) => string;
     readonly showingFiltered: (shown: number, total: number) => string;
+    readonly moreFilters: string;
+    readonly fewerFilters: string;
     readonly clearFilters: string;
     readonly orderBySeverity: string;
     readonly orderByDocument: string;
@@ -176,10 +178,13 @@ export interface UiCopy {
     readonly scopeOn: string;
     readonly scopeOff: string;
     readonly markSeen: string;
+    readonly markSeenHint: string;
     readonly markSeenNamed: (excerpt: string) => string;
     readonly dismiss: string;
+    readonly dismissHint: string;
     readonly dismissNamed: (excerpt: string) => string;
     readonly unmark: string;
+    readonly unmarkHint: string;
     readonly progress: (done: number, total: number) => string;
     readonly pendingCount: (n: number) => string;
     readonly progressCaveat: string;
@@ -233,14 +238,7 @@ export interface UiCopy {
     readonly manualNote: string;
 
     readonly aiTitle: string;
-    readonly aiLead: string;
-    readonly aiLeadStrongYours: string;
-    readonly aiLeadMiddle: string;
-    readonly aiLeadStrongDiagnostic: string;
     readonly aiTarget: (unit: string) => string;
-    readonly aiModelLabel: string;
-    readonly modelNoteStrongGenerator: string;
-    readonly modelNotePaid: string;
     readonly proposerManual: string;
     readonly aiRun: string;
     readonly aiRunning: string;
@@ -396,14 +394,12 @@ export interface UiCopy {
   };
 
   readonly send: {
-    readonly always: (purpose: string) => string;
+    readonly always: string;
     readonly found: (named: string) => string;
     readonly limit: string;
     readonly kinds: Record<"cpf" | "cnpj" | "email", (n: number) => string>;
     readonly join: string;
     readonly lastJoin: string;
-    readonly probePurpose: string;
-    readonly rewritePurpose: string;
   };
 
   readonly probe: {

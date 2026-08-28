@@ -44,7 +44,7 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
 
   return (
     <div className="fade-in flex flex-col">
-      <div className="px-6 pb-5">
+      <div className="px-4 pb-5">
         <div className="flex items-baseline gap-2">
           <span className="font-serif text-[40px] leading-none tabular-nums text-ink-0">{total}</span>
           <span className="text-[14px] text-ink-1">{c.overview.annotations(total)}</span>
@@ -133,7 +133,7 @@ export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
   const { c, lang } = useCopy();
   const readingNotes = readabilityOf(diagnostic.metrics, lang).notes;
   return (
-    <div className="px-6 pb-5">
+    <div className="px-4 pb-5">
       <dl className="flex flex-col divide-y divide-rule-1">
         {metricRows(diagnostic, lang).map((r) => (
           <div key={r.label} className="flex items-baseline justify-between py-2">
@@ -199,7 +199,7 @@ function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
   const first = entries[0];
   const last = entries[entries.length - 1];
   return (
-    <div className="border-t border-rule-1 px-6 py-5">
+    <div className="border-t border-rule-1 px-4 py-5">
       <h3 className="u-label text-ink-3">{c.overview.trailLabel}</h3>
       <p className="mt-2 text-[12px] text-ink-2">
         {c.overview.trailWeight(fmtBurden(first.burdenBefore), fmtBurden(last.burdenAfter), entries.length)}

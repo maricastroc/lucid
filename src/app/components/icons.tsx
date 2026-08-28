@@ -13,6 +13,7 @@ import {
   PenTool,
   Plus,
   Quote,
+  ShieldAlert,
   Sun,
   Wand2,
   X,
@@ -39,6 +40,7 @@ export const SunIcon = icon(Sun, "SunIcon");
 export const MoonIcon = icon(Moon, "MoonIcon");
 export const WandIcon = icon(Wand2, "WandIcon");
 export const QuoteIcon = icon(Quote, "QuoteIcon");
+export const ShieldAlertIcon = icon(ShieldAlert, "ShieldAlertIcon");
 export const EyeIcon = icon(Eye, "EyeIcon");
 export const EyeOffIcon = icon(EyeOff, "EyeOffIcon");
 export const MinusIcon = icon(Minus, "MinusIcon");

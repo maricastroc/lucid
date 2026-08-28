@@ -36,7 +36,9 @@
   --human-weak: rgb(74 79 138 / 0.08);
   --human-line: rgb(74 79 138 / 0.26);
 
-  --mark-passage: rgb(146 98 15 / 0.1);
+  --mark-passage: rgb(146 98 15 / 0.055);
+  --mark-passage-dim: rgb(146 98 15 / 0.03);
+  --mark-active: rgb(58 70 145 / 0.16);
 
   --radius-sm: 5px;
   --radius-md: 9px;
@@ -92,7 +94,9 @@
     --human: #9a9fd6;
     --human-weak: rgb(154 159 214 / 0.13);
     --human-line: rgb(154 159 214 / 0.3);
-    --mark-passage: rgb(217 169 79 / 0.12);
+    --mark-passage: rgb(217 169 79 / 0.07);
+    --mark-passage-dim: rgb(217 169 79 / 0.04);
+    --mark-active: rgb(152 162 238 / 0.2);
     --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
     --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
     --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35);
@@ -131,7 +135,9 @@
   --human: #4a4f8a;
   --human-weak: rgb(74 79 138 / 0.08);
   --human-line: rgb(74 79 138 / 0.26);
-  --mark-passage: rgb(146 98 15 / 0.1);
+  --mark-passage: rgb(146 98 15 / 0.055);
+  --mark-passage-dim: rgb(146 98 15 / 0.03);
+  --mark-active: rgb(58 70 145 / 0.16);
   --shadow-sheet:
     0 1px 2px rgb(31 29 24 / 0.04),
     0 10px 24px -16px rgb(31 29 24 / 0.1),
@@ -175,7 +181,9 @@
   --human: #9a9fd6;
   --human-weak: rgb(154 159 214 / 0.13);
   --human-line: rgb(154 159 214 / 0.3);
-  --mark-passage: rgb(217 169 79 / 0.12);
+  --mark-passage: rgb(217 169 79 / 0.07);
+  --mark-passage-dim: rgb(217 169 79 / 0.04);
+  --mark-active: rgb(152 162 238 / 0.2);
   --shadow-sheet: 0 1px 0 rgb(255 255 255 / 0.02), 0 32px 70px -40px rgb(0 0 0 / 0.7);
   --shadow-pop: 0 24px 60px -20px rgb(0 0 0 / 0.66), 0 2px 6px rgb(0 0 0 / 0.4);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35);
@@ -281,6 +289,11 @@ button {
   border-radius: 4px;
 }
 
+.focus-inset:focus-visible {
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
 textarea.prose-doc:focus-visible {
   outline: none;
 }
@@ -337,7 +350,7 @@ textarea.prose-doc:focus-visible {
 }
 
 .prose-doc.is-focused .passage:not(.is-lit) {
-  background: transparent;
+  background: var(--mark-passage-dim);
 }
 
 .mark {
@@ -384,12 +397,15 @@ textarea.prose-doc:focus-visible {
 }
 
 .seg-selected {
-  background: var(--accent-weak);
-  box-shadow: 0 0 0 1px var(--accent-line) inset;
+  background: var(--mark-active);
+  box-shadow: 0 0 0 1.5px var(--accent-line) inset;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
   border-radius: 4px;
   padding: 0.06em 0.14em;
+}
+.prose-doc.is-focused .seg-selected {
+  color: var(--ink-0);
 }
 @keyframes finding-flash {
   0% {
@@ -483,6 +499,30 @@ textarea.prose-doc:focus-visible {
     box-shadow 0.14s var(--ease-standard);
 }
 
+@keyframes indeterminate-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+.progress-track {
+  position: relative;
+  overflow: hidden;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--rule-2);
+}
+.progress-sweep {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 34%;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: indeterminate-sweep 1.15s var(--ease-standard) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -491,5 +531,12 @@ textarea.prose-doc:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .progress-sweep {
+    position: static;
+    inline-size: 100%;
+    block-size: 100%;
+    background: var(--accent-line);
   }
 }

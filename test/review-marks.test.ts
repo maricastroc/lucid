@@ -12,6 +12,10 @@ import {
   withMarks,
 } from "../src/app/lib/review-marks";
 
+const delta = (span: { start: number; end: number }, replacement: string): number =>
+  replacement.length - (span.end - span.start);
+
+
 function finding(criterion: string, start: number, end: number, text = "x"): Finding {
   return {
     criterion,
@@ -67,34 +71,34 @@ describe("review marks — surviving an applied edit", () => {
   it("leaves marks before the edit untouched", () => {
     const before = finding("jargon", 10, 20);
     const marks = withMark(EMPTY_MARKS, before, "seen");
-    expect(reanchorMarks(marks, target, "abc")).toEqual({ [findingId(before)]: "seen" });
+    expect(reanchorMarks(marks, target, delta(target, "abc"))).toEqual({ [findingId(before)]: "seen" });
   });
 
   it("shifts marks after the edit by the exact length delta", () => {
     const after = finding("jargon", 200, 210);
     const marks = withMark(EMPTY_MARKS, after, "dismissed");
 
-    expect(reanchorMarks(marks, target, "abc")).toEqual({ "jargon:193:203": "dismissed" });
+    expect(reanchorMarks(marks, target, delta(target, "abc"))).toEqual({ "jargon:193:203": "dismissed" });
   });
 
   it("shifts forward when the replacement is longer", () => {
     const after = finding("passive_voice", 200, 210);
     const marks = withMark(EMPTY_MARKS, after, "seen");
-    expect(reanchorMarks(marks, target, "0123456789abcde")).toEqual({ "passive_voice:205:215": "seen" });
+    expect(reanchorMarks(marks, target, delta(target, "0123456789abcde"))).toEqual({ "passive_voice:205:215": "seen" });
   });
 
   it("drops a mark whose text was inside the edit — a decision must not follow text nobody read", () => {
     const inside = finding("jargon", 102, 108);
     const straddling = finding("jargon", 95, 105);
     const marks = withMarks(EMPTY_MARKS, [inside, straddling], "seen");
-    expect(reanchorMarks(marks, target, "abc")).toEqual({});
+    expect(reanchorMarks(marks, target, delta(target, "abc"))).toEqual({});
   });
 
   it("keeps a mark that ends exactly where the edit begins, and one that begins where it ends", () => {
     const touchingBefore = finding("jargon", 90, 100);
     const touchingAfter = finding("jargon", 110, 120);
     const marks = withMarks(EMPTY_MARKS, [touchingBefore, touchingAfter], "seen");
-    expect(reanchorMarks(marks, target, "abc")).toEqual({
+    expect(reanchorMarks(marks, target, delta(target, "abc"))).toEqual({
       "jargon:90:100": "seen",
       "jargon:103:113": "seen",
     });
@@ -103,14 +107,14 @@ describe("review marks — surviving an applied edit", () => {
   it("keeps the criterion when the offsets move, even for ids containing separators", () => {
     const f = finding("sigla_sem_expansao", 200, 205);
     const marks = withMark(EMPTY_MARKS, f, "seen");
-    expect(reanchorMarks(marks, target, "abc")).toEqual({ "sigla_sem_expansao:193:198": "seen" });
+    expect(reanchorMarks(marks, target, delta(target, "abc"))).toEqual({ "sigla_sem_expansao:193:198": "seen" });
   });
 
   it("survives a sequence of edits without drifting", () => {
     const f = finding("jargon", 500, 510);
     let marks = withMark(EMPTY_MARKS, f, "seen");
-    marks = reanchorMarks(marks, { start: 0, end: 10, text: "0123456789" }, "01234");
-    marks = reanchorMarks(marks, { start: 20, end: 25, text: "01234" }, "0123456789");
+    marks = reanchorMarks(marks, { start: 0, end: 10, text: "0123456789" }, -5);
+    marks = reanchorMarks(marks, { start: 20, end: 25, text: "01234" }, 5);
     expect(marks).toEqual({ "jargon:500:510": "seen" });
   });
 });

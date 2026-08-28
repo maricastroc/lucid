@@ -29,7 +29,7 @@ export function ProfilePanel({ config, onChange }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-t border-rule-1 px-6 py-5">
+    <div className="border-t border-rule-1 px-4 py-5">
       <h3 className="u-label text-ink-3">{p.label}</h3>
 
       <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-1">

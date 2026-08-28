@@ -76,8 +76,7 @@ function parseKey(key: string): { criterion: string; start: number; end: number 
   return { criterion: key.slice(0, start), start: startOffset, end: endOffset };
 }
 
-export function reanchorMarks(marks: ReviewMarks, target: Span, replacement: string): ReviewMarks {
-  const delta = replacement.length - (target.end - target.start);
+export function reanchorMarks(marks: ReviewMarks, target: Span, delta: number): ReviewMarks {
   const next: Record<string, ReviewMark> = {};
   for (const [key, mark] of Object.entries(marks)) {
     const parsed = parseKey(key);

@@ -21,7 +21,7 @@ export function PanelSection({ id, title, summary, collapsible, open, onToggle, 
   if (!collapsible) {
     return (
       <section id={sectionDomId(id)} aria-labelledby={headingId} className="border-t border-rule-1 first:border-t-0">
-        <div className="px-6 pb-3 pt-5">
+        <div className="px-4 pb-3 pt-5">
           <h2 id={headingId} tabIndex={-1} className="u-label text-ink-3">
             {title}
           </h2>
@@ -39,7 +39,7 @@ export function PanelSection({ id, title, summary, collapsible, open, onToggle, 
           aria-expanded={open}
           aria-controls={bodyId}
           onClick={() => onToggle(id)}
-          className="row-hit flex w-full items-center gap-2.5 px-6 py-3.5 text-left hover:bg-surface-2"
+          className="focus-inset row-hit flex w-full items-center gap-2.5 px-4 py-3.5 text-left hover:bg-surface-2"
         >
           <ChevronDownIcon
             className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}

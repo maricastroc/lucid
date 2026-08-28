@@ -7,12 +7,11 @@ import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, 
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
 import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
-import { generateRewrite, modelLabel, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
+import { generateRewrite, REWRITE_MODELS, verifyManualEdit } from "../lib/rewrite";
 import { SendNotice } from "./send-notice";
 import { useCopy } from "../i18n/use-copy";
-import { ArrowDownIcon, CheckIcon, ChevronDownIcon, PenNibIcon } from "./icons";
+import { ArrowDownIcon, CheckIcon, ChevronDownIcon, PenNibIcon, WandIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
-import { Select } from "./ui/select";
 
 export const APPLY_BUTTON_CLASS =
   "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
@@ -34,7 +33,7 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
   const [declaration, setDeclaration] = useState<AgentDeclaration | null>(null);
 
   return (
-    <div className="note-in flex flex-col px-6 py-6">
+    <div className="note-in flex flex-col px-4 py-6">
       <div className="flex items-center gap-2 text-[11.5px]">
         <span className="u-label text-ink-3">{meta.kind}</span>
         <span className="text-ink-3">·</span>
@@ -130,7 +129,7 @@ function Disclosure({
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="row-hit flex w-full items-center gap-2 rounded-md py-1 text-left"
+        className="focus-inset row-hit flex w-full items-center gap-2 rounded-md py-1 text-left"
       >
         <ChevronDownIcon
           className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
@@ -272,18 +271,17 @@ function SafeEquivalent({ finding }: { finding: Finding }) {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch {
-      //
     }
   };
 
   return (
     <div className="overflow-hidden rounded-xl border border-safe-line bg-safe-weak">
-      <div className="flex items-center gap-2 px-4 pt-3.5 text-[12.5px] font-semibold text-safe">
+      <div className="flex items-center gap-2 px-3 pt-3.5 text-[12.5px] font-semibold text-safe">
         <CheckIcon className="size-4" />
         {c.note.safeHeader}
       </div>
 
-      <div className="px-4 py-3">
+      <div className="px-3 py-3">
         <div className="rounded-lg border border-rule-1 bg-sheet shadow-(--shadow-card)">
           <DiffRow label={c.note.safeTerm}>
             <span className="font-serif text-[15.5px] text-ink-2 line-through decoration-ink-3">{before}</span>
@@ -349,12 +347,12 @@ function HumanDecision({
   const { c, lang } = useCopy();
   const rationale = buildConfidence(finding, lang).rationale;
   return (
-    <div className="overflow-hidden rounded-xl border border-human-line bg-human-weak">
-      <div className="flex items-center gap-2 px-4 pt-3.5 text-[12.5px] font-semibold text-human">
+    <div className="overflow-hidden rounded-xl border border-human-line border-l-[3px] border-l-human bg-human-weak">
+      <div className="flex items-center gap-2 px-3 pt-3.5 text-[12.5px] font-semibold text-human">
         <PenNibIcon className="size-4" />
         {c.note.humanHeader}
       </div>
-      <div className="px-4 py-3">
+      <div className="px-3 py-3">
         <p className="text-[12.5px] leading-relaxed text-ink-1">
           {c.note.humanLead}
           <span className="text-ink-0">{c.note.humanLeadStrong}</span>.
@@ -383,8 +381,8 @@ function GeneratedRewrite({
   declaration: AgentDeclaration | null;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
-  const { c, lang } = useCopy();
-  const [choice, setChoice] = useState<RewriteModel>(REWRITE_MODELS[0]);
+  const { c } = useCopy();
+  const choice = REWRITE_MODELS[0];
   const [directed, setDirected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
@@ -432,80 +430,77 @@ function GeneratedRewrite({
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
+    <div className="mt-5 overflow-hidden rounded-xl border border-rule-2 bg-sheet shadow-(--shadow-card)">
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="row-hit flex w-full items-center gap-2 border-b border-rule-1 px-4 py-2.5 text-left"
+        className="focus-inset row-hit flex w-full items-center gap-2 px-3 py-2.5 text-left"
       >
         <ChevronDownIcon
           className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
         />
-        <span className="u-sublabel text-ink-2">{c.note.aiTitle}</span>
+        <WandIcon className="size-4 shrink-0 text-accent" />
+        <span className="u-sublabel text-ink-1">{c.note.aiTitle}</span>
       </button>
       {open && (
-      <div className="px-4 py-3">
-        <p className="text-[12px] leading-relaxed text-ink-2">
-          {c.note.aiLead}
-          <span className="text-ink-1">{c.note.aiLeadStrongYours}</span>
-          {c.note.aiLeadMiddle}
-          <span className="text-ink-1">{c.note.aiLeadStrongDiagnostic}</span>.
-        </p>
-        <p className="mt-2 rounded-lg border border-human-line bg-human-weak px-3 py-2 text-[12px] leading-relaxed text-ink-1">
-          {c.note.aiTarget(unitLabel)}
-        </p>
-
-      {choice.providerId !== "stub" && <SendNotice text={source} destination={c.send.rewritePurpose} />}
-
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <Select
-          ariaLabel={c.note.aiModelLabel}
-          value={`${choice.providerId}:${choice.model}`}
-          onValueChange={(next) => {
-            const found = REWRITE_MODELS.find((m) => `${m.providerId}:${m.model}` === next);
-            if (found) setChoice(found);
-          }}
-          options={REWRITE_MODELS.map((m) => ({ value: `${m.providerId}:${m.model}`, label: modelLabel(m, lang) }))}
-        />
-        <button
-          type="button"
-          onClick={run}
-          disabled={loading}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
-        >
-          {loading ? c.note.aiRunning : c.note.aiRun}
-        </button>
-        {loading && (
-          <button
-            type="button"
-            onClick={cancel}
-            className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-          >
-            {c.common.cancel}
-          </button>
-        )}
-      </div>
-
-      {error !== null && (
-        <p className="mt-3 rounded-lg border border-human-line bg-human-weak px-3 py-2.5 text-[12px] leading-relaxed text-ink-1">
-          {c.note.aiFailed(error)}
-        </p>
-      )}
-
-      {result !== null &&
-        (hasProposal ? (
-          <RewriteResult
-            result={result}
-            currentOriginal={target.text}
-            onApplyRewrite={() => onApplyRewrite(target, result.proposal)}
-          />
-        ) : (
-          <p className="mt-3 rounded-lg border border-rule-1 bg-sheet px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
-            {c.note.aiNoProposal}
+        <div className="border-t border-rule-1 px-3 pt-3 pb-3.5">
+          <p className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-1">
+            {c.note.aiTarget(unitLabel)}
           </p>
-        ))}
-      </div>
+
+          {choice.providerId !== "stub" && <SendNotice text={source} />}
+
+          {loading && (
+            <div className="mt-3.5">
+              <div className="progress-track" aria-hidden>
+                <div className="progress-sweep" />
+              </div>
+              <p role="status" className="mt-1.5 text-[12px] leading-relaxed text-ink-2">
+                {c.note.aiRunning}
+              </p>
+            </div>
+          )}
+
+          <div className="mt-3.5 flex items-center justify-end gap-2">
+            {loading && (
+              <button
+                type="button"
+                onClick={cancel}
+                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-rule-2 px-3.5 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+              >
+                {c.common.cancel}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={run}
+              disabled={loading}
+              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
+            >
+              {c.note.aiRun}
+            </button>
+          </div>
+
+          {error !== null && (
+            <p className="mt-3 rounded-lg border border-human-line bg-human-weak px-3 py-2.5 text-[12px] leading-relaxed text-ink-1">
+              {c.note.aiFailed(error)}
+            </p>
+          )}
+
+          {result !== null &&
+            (hasProposal ? (
+              <RewriteResult
+                result={result}
+                currentOriginal={target.text}
+                onApplyRewrite={() => onApplyRewrite(target, result.proposal)}
+              />
+            ) : (
+              <p className="mt-3 rounded-lg border border-rule-1 bg-surface px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">
+                {c.note.aiNoProposal}
+              </p>
+            ))}
+        </div>
       )}
     </div>
   );
@@ -531,9 +526,9 @@ function RewriteResult({
   const passed = verification.proofs.filter((p) => p.passed).length;
 
   return (
-    <div className="mt-3 overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-card)">
+    <div className="-mx-3 mt-3.5 border-t border-rule-1">
       <div
-        className="px-4 py-3.5"
+        className="px-3 py-3.5"
         style={{
           borderBottom: "1px solid var(--rule-1)",
           background: blocked ? "var(--human-weak)" : "var(--safe-weak)",
@@ -563,7 +558,7 @@ function RewriteResult({
         </div>
       </div>
 
-      <div className="px-4 py-3">
+      <div className="px-3 py-3">
         <p className="u-sublabel mb-2 text-ink-3">
           {c.note.proofLabel}
           {c.common.engineOutputSuffix}
@@ -576,7 +571,7 @@ function RewriteResult({
       </div>
 
       {verification.signals.length > 0 && (
-        <div className="border-t border-rule-1 px-4 py-3">
+        <div className="border-t border-rule-1 px-3 py-3">
           <p className="u-sublabel mb-2 text-ink-3">
             {c.note.signalLabel}
             {c.common.engineOutputSuffix}
@@ -589,7 +584,7 @@ function RewriteResult({
         </div>
       )}
 
-      <div className="border-t border-rule-1 px-4 py-3">
+      <div className="border-t border-rule-1 px-3 py-3">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
           <p className="u-sublabel text-ink-3">{c.note.evaluatedExcerpt}</p>
           <span className="font-mono text-[10px] text-ink-3" title={c.note.proposerTitle}>

@@ -103,10 +103,12 @@ function MarginTick({
   return (
     <span
       aria-hidden
-      className="margin-tick absolute -left-4 top-[0.5em] hidden h-[1.1em] w-0.75 rounded-full sm:block"
+      className={`margin-tick absolute top-[0.5em] hidden rounded-full sm:block ${
+        holdsSelected ? "-left-5 h-[1.35em] w-1" : "-left-4 h-[1.1em] w-0.75"
+      }`}
       style={{
         background: holdsSelected ? "var(--accent)" : severityInkVar(tick.severity),
-        opacity: holdsSelected ? 1 : isFocused ? 0.18 : 0.4,
+        opacity: holdsSelected ? 1 : isFocused ? 0.22 : 0.4,
         transform: holdsSelected ? "scaleY(1.15)" : "scaleY(1)",
       }}
     />

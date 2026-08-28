@@ -37,6 +37,7 @@ export interface DocumentSource {
   refusedEdit: { reason: SpliceRefusal; text: string } | null;
   acceptAsPlainText: () => void;
   discardRefusedEdit: () => void;
+  previewText: (value: string) => string | null;
 
   importing: boolean;
   importError: ImportError | null;
@@ -85,6 +86,13 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
     adopt(result.document, result.document.source);
   }, [adopt]);
+
+  const previewText = useCallback((value: string): string | null => {
+    const current = importedRef.current;
+    if (current === null) return value;
+    const result = spliceStructuredDocument(current, value, ptDocumentServices);
+    return result.ok ? result.document.source : null;
+  }, []);
 
   const acceptAsPlainText = useCallback(() => {
     const pending = refusedRef.current;
@@ -163,6 +171,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     refusedEdit,
     acceptAsPlainText,
     discardRefusedEdit,
+    previewText,
     importing,
     importError,
     dismissImportError: useCallback(() => setImportError(null), []),

@@ -46,16 +46,17 @@ describe("the pre-flight lives only where content actually leaves the machine", 
 
 describe("what the notice says, in both languages", () => {
   for (const lang of ["pt-BR", "en"] as const) {
-    it(`warns about the whole document every time, naming where it goes — ${lang}`, () => {
+    it(`warns that the whole document leaves, every time — ${lang}`, () => {
       const t = copyFor(lang).send;
-      expect(t.always("PROVEDOR")).toContain("PROVEDOR");
-      expect(t.always("x").length).toBeGreaterThan(60);
+      expect(t.always).toMatch(lang === "pt-BR" ? /documento/ : /document/);
+      expect(t.always).not.toMatch(lang === "pt-BR" ? /\btrecho\b/ : /\bpassage\b|\bexcerpt\b/);
+      expect(t.always).toMatch(lang === "pt-BR" ? /serviço externo/ : /external/);
     });
 
     it(`declares the check is partial, so silence is never read as safety — ${lang}`, () => {
       const t = copyFor(lang).send;
-      for (const term of ["CPF", "CNPJ"]) expect(t.limit).toContain(term);
       expect(t.limit).toMatch(lang === "pt-BR" ? /podem não ser detectados/ : /may not be detected/);
+      expect(t.limit).toMatch(lang === "pt-BR" ? /outros dados pessoais/ : /other personal data/);
     });
 
     it(`names each kind with its count — ${lang}`, () => {

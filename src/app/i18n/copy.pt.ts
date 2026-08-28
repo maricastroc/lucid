@@ -204,6 +204,8 @@ export const COPY_PT: UiCopy = {
     searchPlaceholder: "Buscar trecho…",
     showingAll: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
     showingFiltered: (shown, total) => `${shown} de ${total} ${plural(total, "ocorrência", "ocorrências")}`,
+    moreFilters: "Mais filtros",
+    fewerFilters: "Menos filtros",
     clearFilters: "limpar filtros",
     orderBySeverity: "por gravidade",
     orderByDocument: "por posição",
@@ -214,10 +216,13 @@ export const COPY_PT: UiCopy = {
     scopeOn: "Percorrer este critério",
     scopeOff: "Sair deste critério",
     markSeen: "Marcar como vista",
+    markSeenHint: "Marcar como vista — você olhou esta ocorrência",
     markSeenNamed: (excerpt) => `Marcar “${excerpt}” como vista`,
     dismiss: "Dispensar",
+    dismissHint: "Dispensar — você não vai mexer nesta ocorrência",
     dismissNamed: (excerpt) => `Dispensar “${excerpt}”`,
     unmark: "Desmarcar",
+    unmarkHint: "Desmarcar — volta a pendente",
     progress: (done, total) => `${done} de ${total} marcadas`,
     pendingCount: (n) => `${n} ${plural(n, "pendente", "pendentes")}`,
     progressCaveat: "Marca do autor sobre a própria revisão — não altera o placar nem aprova o texto.",
@@ -278,14 +283,7 @@ export const COPY_PT: UiCopy = {
       "Aplicar vira um rascunho e a engine re-audita.",
 
     aiTitle: "Reescrita por IA",
-    aiLead: "Uma das formas de propor uma nova versão — a IA reescreve; você também pode ",
-    aiLeadStrongYours: "editar ou colar a sua",
-    aiLeadMiddle: ". A engine julga qualquer uma delas do mesmo jeito. Opcional: o ",
-    aiLeadStrongDiagnostic: "diagnóstico acima não depende disto",
-    aiTarget: (unit) => `A IA vai reescrever ${unit} (destacada no documento).`,
-    aiModelLabel: "Modelo gerador",
-    modelNoteStrongGenerator: "gerador forte",
-    modelNotePaid: "pago, ~$0,14/1M",
+    aiTarget: (unit) => `A IA vai reescrever ${unit} em destaque no documento e verificar o resultado.`,
     proposerManual: "sua edição",
     aiRun: "Gerar e verificar",
     aiRunning: "Gerando e verificando…",
@@ -479,17 +477,15 @@ export const COPY_PT: UiCopy = {
     label: "Critérios de análise",
     defaults: "Limites padrão.",
     adjustments: (n) => `${n} ${plural(n, "ajuste seu", "ajustes seus")} sobre o padrão.`,
-    rationale:
-      "A Lucid usa limites padrão para identificar frases longas e outros pontos de atenção. Você pode " +
-      "ajustá-los às regras da sua organização. As alterações ficam registradas na auditoria.",
+    rationale: "Ajuste os limites às regras da sua organização. Toda alteração fica registrada na auditoria.",
     openAdjust: "Ajustar critérios",
     closeAdjust: "Fechar",
     resetDefaults: "Voltar ao padrão",
     thresholdsLabel: "Limiares",
     policyLabel: "Critérios da política",
     policyNote:
-      "Desligar um critério faz o pass não rodar. O silêncio dele deixa de significar “não encontrei” e passa a " +
-      "significar “não procurei” — por isso cada desligamento é listado acima e no relatório.",
+      "Critério desligado não roda: o silêncio dele passa a significar “não procurei”, não “não encontrei”. " +
+      "Cada desligamento é listado acima e no relatório.",
     deviationOff: (label) => `${label}: desligado (padrão: ligado)`,
     deviationOn: (label) => `${label}: ligado (padrão: desligado)`,
     deviationValue: (what, value, fallback) => `${what} ${value} (padrão: ${fallback})`,
@@ -505,13 +501,9 @@ export const COPY_PT: UiCopy = {
   },
 
   send: {
-    always: (purpose: string) =>
-      `Para ${purpose}, o documento será enviado a um serviço externo de inteligência artificial. ` +
-      "A auditoria principal não depende desse serviço.",
-    found: (named: string) => `Encontramos ${named} neste documento.`,
-    limit:
-      "A Lucid identifica apenas CPF, CNPJ e e-mail. Revise o documento antes de continuar, pois outros dados " +
-      "pessoais podem não ser detectados.",
+    always: "Ao continuar, o documento será enviado a um serviço externo de IA.",
+    found: (named: string) => `Encontramos ${named} no documento.`,
+    limit: "Revise o conteúdo: outros dados pessoais podem não ser detectados.",
     kinds: {
       cpf: (n: number) => `${n} ${n === 1 ? "CPF" : "CPFs"}`,
       cnpj: (n: number) => `${n} ${n === 1 ? "CNPJ" : "CNPJs"}`,
@@ -519,18 +511,15 @@ export const COPY_PT: UiCopy = {
     },
     join: ", ",
     lastJoin: " e ",
-    probePurpose: "fazer o teste",
-    rewritePurpose: "gerar a reescrita",
   },
   probe: {
     title: "Teste de compreensão",
-    lead: "Faça uma pergunta sobre o documento. A Lucid verifica se a resposta pode ser encontrada no texto.",
+    lead: "Verifique se a resposta que o leitor procura está mesmo no trecho.",
     selectPrompt:
       "Selecione um trecho no documento ao lado. A sonda lê só o recorte que você escolher — não o documento inteiro.",
     excerptLabel: "Trecho que será enviado",
     clearExcerpt: "limpar",
-    onlyThisExcerpt:
-      "A pergunta será respondida apenas com base neste trecho. O que estiver fora dele não é lido pela sonda.",
+    onlyThisExcerpt: "A sonda responde só com o que está neste trecho.",
     excerptTooLong: (chars, max) =>
       `Trecho com ${chars.toLocaleString("pt-BR")} caracteres — acima do limite de ${max.toLocaleString("pt-BR")}. Selecione um recorte menor.`,
     useBriefingPurpose: "Usar o propósito do leitor que você declarou no Princípio 1:",
@@ -546,8 +535,8 @@ export const COPY_PT: UiCopy = {
     noFloorViolation: "A resposta foi encontrada no texto.",
     loadLabel: "Carga de leitura",
     caveat:
-      "Este teste usa inteligência artificial e pode errar. Encontrar a resposta no texto não garante que ele " +
-      "esteja claro. Para confirmar a compreensão, faça testes com leitores reais.",
+      "Este teste usa IA e pode errar. Encontrar a resposta não garante que o texto esteja claro — só teste " +
+      "com leitores reais confirma.",
     operations: {
       resolver_referente_a_distancia: "resolver a quem um pronome se refere, à distância",
       integrar_entre_frases: "juntar informação de mais de uma frase",

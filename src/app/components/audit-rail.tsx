@@ -14,7 +14,7 @@ export function AuditRail({ probeExcerpt, onClearProbeExcerpt, ...panel }: RailP
   return (
     <aside
       aria-label={c.note.panelLabel}
-      className="hidden w-99 shrink-0 flex-col border-l border-rule-1 bg-surface lg:flex xl:w-110"
+      className="hidden shrink-0 flex-col border-l border-rule-1 bg-surface lg:flex lg:w-[35%] lg:min-w-[26rem] lg:max-w-[40rem]"
     >
       <PanelHeader
         diagnostic={panel.diagnostic}

@@ -73,7 +73,7 @@ export function ProbePanel({
   }
 
   return (
-    <div className="px-6 pb-5">
+    <div className="px-4 pb-5">
       <p className="text-[12px] leading-relaxed text-ink-3">{t.lead}</p>
 
       <ExcerptBox excerpt={excerpt} onClear={onClearExcerpt} />
@@ -99,7 +99,7 @@ export function ProbePanel({
         />
       </label>
 
-      <SendNotice text={excerpt.text} destination={c.send.probePurpose} />
+      <SendNotice text={excerpt.text} />
 
       <button
         type="button"
