@@ -1,9 +1,10 @@
 "use client";
 
-import { AuditPanel, AuditPanelFooter, type AuditPanelProps } from "./audit-panel";
+import { AuditPanel, type AuditPanelProps } from "./audit-panel";
+import { PanelHeader } from "./panel-header";
 import { useCopy } from "../i18n/use-copy";
 
-export interface RevisionSheetProps extends Omit<AuditPanelProps, "header" | "probe"> {
+export interface RevisionSheetProps extends Omit<AuditPanelProps, "probeExcerpt" | "onClearProbeExcerpt"> {
   onDismiss: () => void;
 }
 
@@ -24,8 +25,16 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           onClick={onDismiss}
           className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-rule-3"
         />
-        <AuditPanel {...panel} probe={null} />
-        <AuditPanelFooter diagnostic={panel.diagnostic} />
+        <PanelHeader
+          diagnostic={panel.diagnostic}
+          findings={panel.findings}
+          ledger={panel.ledger}
+          blocks={panel.blocks}
+          briefing={panel.briefing}
+          briefingCheck={panel.briefingCheck}
+          config={panel.config}
+        />
+        <AuditPanel {...panel} />
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ export class LlmRewriteProposer implements RewriteProposer {
     const prompt = buildRewritePrompt(request.text, request.target, {
       strategy,
       criterion: request.criterion,
-      findings: request.findings,
+      findings: request.briefing ?? request.findings,
       declarations: request.declarations,
     });
     const raw = await this.provider.complete(prompt, {

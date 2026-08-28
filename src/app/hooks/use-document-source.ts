@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import {
   analyzeDocument,
   missingBlockKindsIn,
@@ -11,6 +11,7 @@ import {
   spliceStructuredDocument,
   toRawBlocks,
   type Block,
+  type SpliceRefusal,
   type Config,
   type Diagnostic,
   type Document,
@@ -33,7 +34,9 @@ export interface DocumentSource {
   rawBlocks: readonly RawBlock[] | null;
   isEmpty: boolean;
   isSettled: boolean;
-  structureLost: boolean;
+  refusedEdit: { reason: SpliceRefusal; text: string } | null;
+  acceptAsPlainText: () => void;
+  discardRefusedEdit: () => void;
 
   importing: boolean;
   importError: ImportError | null;
@@ -51,19 +54,51 @@ function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
 export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Config): DocumentSource {
   const [text, setTextState] = useState(() => initial?.text ?? "");
   const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
-  const [structureLost, setStructureLost] = useState(false);
+  const importedRef = useRef<Document | null>(importedDoc);
+  const refusedRef = useRef<{ reason: SpliceRefusal; text: string } | null>(null);
+  const [refusedEdit, setRefusedEdit] = useState<{ reason: SpliceRefusal; text: string } | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<ImportError | null>(null);
   const [importNotes, setImportNotes] = useState<DocxNotes | null>(null);
 
-  const setText = useCallback((value: string) => {
-    setImportedDoc((current) => {
-      if (current === null) return null;
-      const next = spliceStructuredDocument(current, value, ptDocumentServices);
-      if (next === null) setStructureLost(true);
-      return next;
-    });
+  const adopt = useCallback((doc: Document | null, value: string) => {
+    importedRef.current = doc;
+    refusedRef.current = null;
+    setImportedDoc(doc);
+    setRefusedEdit(null);
     setTextState(value);
+  }, []);
+
+  const setText = useCallback((value: string) => {
+    const current = importedRef.current;
+    if (current === null) {
+      setTextState(value);
+      return;
+    }
+
+    const result = spliceStructuredDocument(current, value, ptDocumentServices);
+    if (!result.ok) {
+      refusedRef.current = { reason: result.reason, text: value };
+      setRefusedEdit(refusedRef.current);
+      return;
+    }
+
+    adopt(result.document, result.document.source);
+  }, [adopt]);
+
+  const acceptAsPlainText = useCallback(() => {
+    const pending = refusedRef.current;
+    if (pending === null) return;
+    refusedRef.current = null;
+    importedRef.current = null;
+    setImportedDoc(null);
+    setRefusedEdit(null);
+    setTextState(pending.text);
+  }, []);
+
+  const discardRefusedEdit = useCallback(() => {
+    refusedRef.current = null;
+    setRefusedEdit(null);
   }, []);
 
   const deferredText = useDeferredValue(text);
@@ -82,17 +117,9 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     [doc, silentCriteria],
   );
 
-  const loadExample = useCallback(() => {
-    setImportedDoc(null);
-    setStructureLost(false);
-    setTextState(SAMPLE_TEXT);
-  }, []);
+  const loadExample = useCallback(() => adopt(null, SAMPLE_TEXT), [adopt]);
 
-  const clear = useCallback(() => {
-    setImportedDoc(null);
-    setStructureLost(false);
-    setTextState("");
-  }, []);
+  const clear = useCallback(() => adopt(null, ""), [adopt]);
 
   const openDocx = useCallback(async (file: File): Promise<boolean> => {
     setImporting(true);
@@ -106,10 +133,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         setImportError(result.refusal);
         return false;
       }
-      setImportedDoc(result.value.doc);
       setImportNotes(result.value.notes);
-      setStructureLost(false);
-      setTextState(result.value.doc.source);
+      adopt(result.value.doc, result.value.doc.source);
       return true;
     } catch {
       setImportError("unreadable");
@@ -117,7 +142,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     } finally {
       setImporting(false);
     }
-  }, []);
+  }, [adopt]);
 
   const rawBlocks = useMemo(
     () => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)),
@@ -135,7 +160,9 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     rawBlocks,
     isEmpty: text.trim() === "" && importedDoc === null,
     isSettled: deferredText === text,
-    structureLost,
+    refusedEdit,
+    acceptAsPlainText,
+    discardRefusedEdit,
     importing,
     importError,
     dismissImportError: useCallback(() => setImportError(null), []),

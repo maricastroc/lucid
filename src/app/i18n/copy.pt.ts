@@ -76,9 +76,16 @@ export const COPY_PT: UiCopy = {
       body: "O texto em revisão e a trilha de alterações serão descartados. Esta ação não pode ser desfeita — exporte o relatório antes se quiser guardar a auditoria.",
       confirm: "Descartar e voltar",
     },
-    structureLost:
-      "A edição mudou o documento além do que a estrutura importada acompanha. Títulos e listas deixaram de ser " +
-      "reconhecidos, então os critérios do Princípio 2 não estão sendo aplicados a partir daqui.",
+    spliceRefused: {
+      crosses_units: "Esta alteração atravessa mais de um bloco do documento importado.",
+      unsupported_unit: "Ainda não sabemos aplicar uma alteração em várias linhas dentro de um título ou de um item de lista.",
+      introduces_heading: "Esta alteração criaria um título novo, o que mudaria a estrutura do documento.",
+      empty_unit: "Esta alteração deixaria o bloco vazio.",
+      rebuild_mismatch: "Não foi possível reconstruir o documento preservando os outros blocos.",
+    },
+    spliceRefusedKept: "O documento continua como estava — nada foi alterado.",
+    spliceAcceptPlain: "Aplicar como texto simples",
+    spliceDiscard: "Descartar",
     saveFailed:
       "Não foi possível salvar este trabalho no navegador — ele será perdido se você fechar a aba. Exporte o " +
       "relatório para não depender disto.",
@@ -96,6 +103,27 @@ export const COPY_PT: UiCopy = {
     undo: "Desfazer",
   },
 
+  panel: {
+    navLabel: "Seções do painel",
+    sections: {
+      summary: "Resumo",
+      findings: "Pontos",
+      settings: "Ajustes",
+      metrics: "Métricas",
+      probe: "Compreensão",
+    },
+    settingsTitle: "Ajustes da análise",
+    settingsSummaryReader: (declared) => (declared ? "leitor definido" : "leitor não definido"),
+    settingsSummaryProfile: (deviations) =>
+      deviations === 0 ? "limites padrão" : `${deviations} ${plural(deviations, "desvio", "desvios")}`,
+    settingsSummaryJoin: " · ",
+    metricsSummary: (words, perSentence) => `${words} palavras · ${perSentence} por frase`,
+    probeSummary: "teste opcional com IA",
+    exportLabel: "Exportar",
+    exportMenuLabel: "Formatos de exportação",
+    provenanceTitle: (configHash, version) => `config ${configHash} · lucid ${version}`,
+  },
+
   overview: {
     annotations: (n) => plural(n, "ponto para revisar", "pontos para revisar"),
     adjustedProfileBefore: "Placar produzido com ",
@@ -111,9 +139,7 @@ export const COPY_PT: UiCopy = {
     exportDocx: "Baixar texto revisado (.docx)",
     exportTxt: "Baixar texto (.txt)",
     docxError: "Não foi possível gerar o .docx. Use a exportação em .txt.",
-    docxNote:
-      "O arquivo .docx contém o texto revisado, mas não preserva a formatação original, como negrito, " +
-      "tabelas, imagens e cabeçalhos.",
+    docxNote: "Contém o texto revisado, sem a formatação original: negrito, tabelas, imagens e cabeçalhos.",
     importTables: (n: number) => `${n} ${n === 1 ? "tabela achatada" : "tabelas achatadas"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "caixa de texto embutida" : "caixas de texto embutidas"}`,
     importAnd: " e ",
@@ -131,10 +157,7 @@ export const COPY_PT: UiCopy = {
       "- para itens de lista.",
     scoreCaveat:
       "O placar resume os critérios avaliados. Ele não aprova o documento nem garante que o texto esteja claro.",
-    lexiconCaveat:
-      "Alguns critérios verificam padrões específicos, como jargões, nominalizações e redundâncias. Eles ajudam " +
-      "na revisão, mas não substituem a análise de quem escreveu.",
-    readingLabel: "Leitura",
+    readingLabel: "Métricas de leitura",
     readingCaveat:
       "Os indicadores de legibilidade e coesão ajudam na revisão, mas não determinam sozinhos se o texto está claro.",
     trailLabel: "Trilha de revisão",
@@ -155,7 +178,6 @@ export const COPY_PT: UiCopy = {
   revisionList: {
     regionLabel: "Índice da auditoria",
     title: "Índice da auditoria",
-    bySeverity: "por gravidade",
     filterLabel: "Filtrar anotações",
     bucketAll: "Todas",
     bucketSafe: "Troca direta",
@@ -170,6 +192,36 @@ export const COPY_PT: UiCopy = {
     cleanCriteria: (n) =>
       `${n} ${plural(n, "critério verificado, sem ocorrência", "critérios verificados, sem ocorrência")}`,
     hiddenCriteria: (n) => `${n} ${plural(n, "oculto", "ocultos")}`,
+    lexiconCaveat:
+      "Os critérios verificam padrões específicos. Ajudam na revisão, mas não substituem a análise de quem escreveu.",
+    occurrences: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
+    distinct: (n) => `${n} ${plural(n, "trecho distinto", "trechos distintos")}`,
+    hiddenByFilter: (n) => `${n} fora do filtro`,
+    statePending: "Pendentes",
+    stateSeen: "Vistas",
+    stateDismissed: "Dispensadas",
+    searchLabel: "Buscar trecho nos achados",
+    searchPlaceholder: "Buscar trecho…",
+    showingAll: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
+    showingFiltered: (shown, total) => `${shown} de ${total} ${plural(total, "ocorrência", "ocorrências")}`,
+    clearFilters: "limpar filtros",
+    orderBySeverity: "por gravidade",
+    orderByDocument: "por posição",
+    batchLabel: "Em lote",
+    batchClear: (n) => `Limpar as marcas destas ${n}`,
+    batchCaveat: "Marcar como vista é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
+    clearGroupMarks: (n) => `Limpar ${n} ${plural(n, "marca", "marcas")}`,
+    scopeOn: "Percorrer este critério",
+    scopeOff: "Sair deste critério",
+    markSeen: "Marcar como vista",
+    markSeenNamed: (excerpt) => `Marcar “${excerpt}” como vista`,
+    dismiss: "Dispensar",
+    dismissNamed: (excerpt) => `Dispensar “${excerpt}”`,
+    unmark: "Desmarcar",
+    progress: (done, total) => `${done} de ${total} marcadas`,
+    pendingCount: (n) => `${n} ${plural(n, "pendente", "pendentes")}`,
+    progressCaveat: "Marca do autor sobre a própria revisão — não altera o placar nem aprova o texto.",
+    progressTitle: (done, total) => `${done} de ${total} marcadas`,
     absenceCaveat: "A ausência de anotações não é atestado de clareza — é a cobertura da auditoria.",
   },
 
@@ -184,6 +236,9 @@ export const COPY_PT: UiCopy = {
     excerpt: "Trecho",
     whatWeFound: "O que encontramos",
     whyItMatters: "Por que afeta a clareza",
+    understandCriterion: "Entenda este critério",
+    excerptMore: "Ver o trecho completo",
+    excerptLess: "Recolher o trecho",
     engineOutput: "Saída da engine · pt-BR",
     engineOutputHint:
       "A justificativa vem do motor de análise, que audita português — ela não é traduzida junto com a interface.",
@@ -191,6 +246,9 @@ export const COPY_PT: UiCopy = {
     navNext: "Próximo (j)",
     navOf: "de",
     panelLabel: "Auditoria",
+    crumbAll: "Todos os critérios",
+    crumbBackTo: (criterion) => `Voltar para a lista de ${criterion}`,
+    backToList: "Voltar à lista",
     footerDeterministic: "Análise determinística",
 
     safeHeader: "Troca direta · equivalente curado",
@@ -467,6 +525,14 @@ export const COPY_PT: UiCopy = {
   probe: {
     title: "Teste de compreensão",
     lead: "Faça uma pergunta sobre o documento. A Lucid verifica se a resposta pode ser encontrada no texto.",
+    selectPrompt:
+      "Selecione um trecho no documento ao lado. A sonda lê só o recorte que você escolher — não o documento inteiro.",
+    excerptLabel: "Trecho que será enviado",
+    clearExcerpt: "limpar",
+    onlyThisExcerpt:
+      "A pergunta será respondida apenas com base neste trecho. O que estiver fora dele não é lido pela sonda.",
+    excerptTooLong: (chars, max) =>
+      `Trecho com ${chars.toLocaleString("pt-BR")} caracteres — acima do limite de ${max.toLocaleString("pt-BR")}. Selecione um recorte menor.`,
     useBriefingPurpose: "Usar o propósito do leitor que você declarou no Princípio 1:",
     questionLabel: "O que o leitor precisa encontrar no texto?",
     questionPlaceholder: "Ex.: Quando o prazo começa?",

@@ -68,9 +68,9 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
     onChange({ ...briefing, mustFind: briefing.mustFind.filter((item) => item !== expression) });
 
   return (
-    <section className="border-t border-rule-1 px-6 py-5">
+    <div className="px-6 pb-5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="u-label text-ink-3">{b.label}</span>
+        <h3 className="u-label text-ink-3">{b.label}</h3>
         <span className="text-[11.5px] text-ink-3">ABNT NBR ISO 24495-1 · 5.1</span>
       </div>
 
@@ -171,6 +171,6 @@ export function BriefingPanel({ briefing, check, onChange }: Props) {
           <p className="mt-2.5 text-[11.5px] leading-relaxed text-ink-3">{b.literalCaveat}</p>
         </div>
       )}
-    </section>
+    </div>
   );
 }

@@ -20,6 +20,7 @@ export interface RewriteRequest {
   target: Span;
   criterion?: string;
   strategy?: RewriteStrategy;
+  briefing?: readonly Finding[];
   findings?: readonly Finding[];
   declarations?: readonly AgentDeclaration[];
   localeId?: string;

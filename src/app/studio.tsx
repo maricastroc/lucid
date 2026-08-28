@@ -4,13 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, isDefaultConfig, type Config, type Finding, type ReaderBriefing, type Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
+import { queryFindings } from "./lib/finding-query";
+import { EMPTY_MARKS } from "./lib/review-marks";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { spliceSpan } from "./lib/text-edit";
 import { sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
 import { useCopy } from "./i18n/use-copy";
-import { useCriterionFilter } from "./hooks/use-criterion-filter";
+import { useFindingQuery } from "./hooks/use-finding-query";
+import { useReviewMarks } from "./hooks/use-review-marks";
 import { useDocumentSource } from "./hooks/use-document-source";
+import { useDocumentSelection } from "./hooks/use-document-selection";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
@@ -46,7 +50,9 @@ export function Studio() {
     importing,
     importError,
     dismissImportError,
-    structureLost,
+    refusedEdit,
+    acceptAsPlainText,
+    discardRefusedEdit,
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocx: importDocxFile,
@@ -61,25 +67,50 @@ export function Studio() {
     reset: resetHistory,
   } = useRevisionHistory(text, setText, isSettled, restored?.ledger);
 
+  const { excerpt: probeExcerpt, clear: clearProbeExcerpt } = useDocumentSelection(scrollRef);
+
+  const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
+
+  const {
+    query,
+    toggleCriterion,
+    setCriterion,
+    setBucket,
+    setState,
+    setSearch,
+    setOrder,
+    clearFilters,
+    filtered,
+  } = useFindingQuery();
+
+  const findings = useMemo(
+    () => orderFindingsForIndex(diagnostic.findings.filter((f) => query.activeCriteria.has(f.criterion))),
+    [diagnostic, query.activeCriteria],
+  );
+  const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
+  const humanCount = findings.length - safeCount;
+
+  const {
+    marks,
+    mark,
+    markMany,
+    shiftForEdit,
+    reset: resetMarks,
+  } = useReviewMarks(diagnostic.findings, isSettled, restored?.reviewMarks ?? EMPTY_MARKS);
+
+  const { groups, visible } = useMemo(
+    () => queryFindings(diagnostic.findings, query, marks),
+    [diagnostic, query, marks],
+  );
+
   useEffect(() => {
     if (!isSettled) return;
     if (isEmpty && ledger.length === 0 && briefing === EMPTY_BRIEFING && isDefaultConfig(config)) {
       clearWorkspace();
       return;
     }
-    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing, config });
-  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing, config]);
-
-  const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
-
-  const { activeCriteria, toggleCriterion, bucket, setBucket } = useCriterionFilter();
-
-  const findings = useMemo(
-    () => orderFindingsForIndex(diagnostic.findings.filter((f) => activeCriteria.has(f.criterion))),
-    [diagnostic, activeCriteria],
-  );
-  const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
-  const humanCount = findings.length - safeCount;
+    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing, config, reviewMarks: marks });
+  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing, config, marks]);
 
   const revealSheet = useCallback(() => setSheetOpen(true), []);
   const {
@@ -91,7 +122,7 @@ export function Studio() {
     clear: clearSelection,
     goTo,
   } = useFindingNavigation({
-    findings,
+    findings: visible,
     scrollRef,
     diagnostic,
     enabled: mode === "audit",
@@ -111,7 +142,9 @@ export function Studio() {
     resetHistory();
     setBriefing(EMPTY_BRIEFING);
     setMode("audit");
-  }, [clearSelection, resetHistory]);
+    resetMarks();
+    clearFilters();
+  }, [clearSelection, resetHistory, resetMarks, clearFilters]);
 
   const loadExample = useCallback(() => {
     loadExampleDocument();
@@ -148,16 +181,19 @@ export function Studio() {
   );
 
   const applyManualEdit = useCallback(
-    (target: Span, replacement: string) =>
+    (target: Span, replacement: string) => {
+      shiftForEdit(target, replacement);
       applyChange(
         { source: "manual", label: sourceLabel("manual"), before: target.text, after: replacement },
         spliceSpan(diagnostic.text, target, replacement),
-      ),
-    [diagnostic, applyChange],
+      );
+    },
+    [diagnostic, applyChange, shiftForEdit],
   );
 
   const applyRewrite = useCallback(
-    (target: Span, proposal: RewriteProposal) =>
+    (target: Span, proposal: RewriteProposal) => {
+      shiftForEdit(target, proposal.proposed);
       applyChange(
         {
           source: "ai",
@@ -167,16 +203,18 @@ export function Studio() {
           after: proposal.proposed,
         },
         spliceSpan(diagnostic.text, target, proposal.proposed),
-      ),
-    [diagnostic, applyChange],
+      );
+    },
+    [diagnostic, applyChange, shiftForEdit],
   );
 
   const selectFinding = useCallback(
     (finding: Finding) => {
       setMode("audit");
+      setCriterion(finding.criterion);
       select(finding);
     },
-    [select],
+    [select, setCriterion],
   );
 
   const onFreeTypeText = useCallback(
@@ -193,7 +231,7 @@ export function Studio() {
     selectedFinding,
     selectedId,
     index: selectedIndex + 1,
-    total: findings.length,
+    total: visible.length,
     safeCount,
     humanCount,
     ledger,
@@ -206,16 +244,30 @@ export function Studio() {
     onBriefingChange: setBriefing,
     config,
     onConfigChange: setConfig,
-    activeCriteria,
-    bucket,
+    groups,
+    visible,
+    query,
+    marks,
+    filtered,
     onToggleCriterion: toggleCriterion,
     onBucket: setBucket,
+    onState: setState,
+    onSearch: setSearch,
+    onOrder: setOrder,
+    onCriterion: setCriterion,
+    onClearFilters: clearFilters,
+    onMark: mark,
+    onMarkMany: markMany,
     onSelect: selectFinding,
+    onBackToList: clearSelection,
+    onBackToOverview: () => {
+      clearSelection();
+      setCriterion(null);
+    },
     onApplyRewrite: applyRewrite,
     onManualEdit: applyManualEdit,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
-    onClose: clearSelection,
   };
 
   return (
@@ -233,12 +285,31 @@ export function Studio() {
         </div>
       )}
 
-      {structureLost && (
+      {refusedEdit !== null && (
         <div
-          role="status"
-          className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2.5 text-[12.5px] text-ink-1"
         >
-          <span>{c.studio.structureLost}</span>
+          <span className="min-w-0">
+            {c.studio.spliceRefused[refusedEdit.reason]}{" "}
+            <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
+          </span>
+          <span className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={acceptAsPlainText}
+              className="rounded-lg border border-rule-2 bg-sheet px-3 py-1.5 text-[12px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+            >
+              {c.studio.spliceAcceptPlain}
+            </button>
+            <button
+              type="button"
+              onClick={discardRefusedEdit}
+              className="rounded-lg px-2.5 py-1.5 text-[12px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+            >
+              {c.studio.spliceDiscard}
+            </button>
+          </span>
         </div>
       )}
 
@@ -268,23 +339,25 @@ export function Studio() {
             blocks={blocks}
             selectedId={selectedId}
             flashId={flashId}
-            activeCriteria={activeCriteria}
+            activeCriteria={query.activeCriteria}
             rewriteTarget={rewriteTarget}
             onChangeText={onFreeTypeText}
             onSelectFinding={selectFinding}
           />
         )}
 
-        {!isEmpty && <AuditRail {...panelProps} text={text} />}
+        {!isEmpty && (
+          <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />
+        )}
       </div>
 
-      {mode === "audit" && findings.length > 0 && !sheetOpen && (
+      {mode === "audit" && visible.length > 0 && !sheetOpen && (
         <button
           type="button"
           onClick={revealSheet}
           className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-pop) lg:hidden"
         >
-          {c.studio.revisions(findings.length)}
+          {c.studio.revisions(visible.length)}
         </button>
       )}
 

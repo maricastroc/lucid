@@ -10,7 +10,7 @@ import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
 import { generateRewrite, modelLabel, REWRITE_MODELS, verifyManualEdit, type RewriteModel } from "../lib/rewrite";
 import { SendNotice } from "./send-notice";
 import { useCopy } from "../i18n/use-copy";
-import { ArrowDownIcon, CheckIcon, PenNibIcon } from "./icons";
+import { ArrowDownIcon, CheckIcon, ChevronDownIcon, PenNibIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
 import { Select } from "./ui/select";
 
@@ -54,25 +54,11 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
       </p>
 
       <Block label={c.note.excerpt}>
-        <blockquote className="border-l-2 pl-4" style={{ borderColor: ink }}>
-          <span className="font-serif text-[17px] leading-snug text-ink-0">
-            <span
-              className={meta.channel === "inline" ? `mark ${meta.markStyleClass}` : "passage"}
-              style={{ "--mark-ink": ink } as React.CSSProperties}
-            >
-              {finding.span.text.replace(/\s+/g, " ").trim()}
-            </span>
-          </span>
-        </blockquote>
+        <Excerpt finding={finding} ink={ink} channelClass={meta.channel === "inline" ? `mark ${meta.markStyleClass}` : "passage"} />
       </Block>
 
       <Block label={c.note.whatWeFound}>
         <Prose>{detectedProse(finding, lang)}</Prose>
-      </Block>
-
-      <Block label={c.note.whyItMatters}>
-        <Prose>{meta.why}</Prose>
-        <EngineJustification finding={finding} />
       </Block>
 
       <div className="mt-7">
@@ -90,6 +76,68 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
       </div>
 
       <ManualEdit finding={finding} source={source} declaration={declaration} onManualEdit={onManualEdit} />
+
+      <Disclosure label={c.note.understandCriterion}>
+        <Prose>{meta.why}</Prose>
+        <EngineJustification finding={finding} />
+      </Disclosure>
+    </div>
+  );
+}
+
+function Excerpt({ finding, ink, channelClass }: { finding: Finding; ink: string; channelClass: string }) {
+  const { c } = useCopy();
+  const [full, setFull] = useState(false);
+  const text = finding.span.text.replace(/\s+/g, " ").trim();
+  const long = text.length > 260;
+
+  return (
+    <>
+      <blockquote className="border-l-2 pl-4" style={{ borderColor: ink }}>
+        <span className={`font-serif text-[17px] leading-snug text-ink-0 ${long && !full ? "line-clamp-4" : "block"}`}>
+          <span className={channelClass} style={{ "--mark-ink": ink } as React.CSSProperties}>
+            {text}
+          </span>
+        </span>
+      </blockquote>
+      {long && (
+        <button
+          type="button"
+          aria-expanded={full}
+          onClick={() => setFull(!full)}
+          className="mt-1.5 rounded-md text-[11.5px] text-accent transition-colors duration-150 hover:underline"
+        >
+          {full ? c.note.excerptLess : c.note.excerptMore}
+        </button>
+      )}
+    </>
+  );
+}
+
+function Disclosure({
+  label,
+  children,
+  defaultOpen = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="mt-5 border-t border-rule-1 pt-3">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="row-hit flex w-full items-center gap-2 rounded-md py-1 text-left"
+      >
+        <ChevronDownIcon
+          className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
+        />
+        <span className="u-sublabel text-ink-3">{label}</span>
+      </button>
+      {open && <div className="mt-2.5">{children}</div>}
     </div>
   );
 }
@@ -311,12 +359,12 @@ function HumanDecision({
           {c.note.humanLead}
           <span className="text-ink-0">{c.note.humanLeadStrong}</span>.
         </p>
-        <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
-
-        <div className="mt-4 border-t border-human-line pt-4">
-          <p className="u-sublabel mb-2.5 text-ink-3">{c.note.howToProceed}</p>
-          <Guidance finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />
-        </div>
+        <Disclosure label={c.note.howToProceed}>
+          <p className="text-[12px] leading-relaxed text-ink-2">{rationale}</p>
+          <div className="mt-3">
+            <Guidance finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />
+          </div>
+        </Disclosure>
 
         <GeneratedRewrite finding={finding} source={source} declaration={declaration} onApplyRewrite={onApplyRewrite} />
       </div>
@@ -341,6 +389,7 @@ function GeneratedRewrite({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifiedRewrite | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const [prevDeclaration, setPrevDeclaration] = useState<AgentDeclaration | null>(declaration);
@@ -384,9 +433,18 @@ function GeneratedRewrite({
 
   return (
     <div className="mt-5 overflow-hidden rounded-xl border border-dashed border-rule-3 bg-surface-2">
-      <div className="flex items-center border-b border-rule-1 px-4 py-2.5">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="row-hit flex w-full items-center gap-2 border-b border-rule-1 px-4 py-2.5 text-left"
+      >
+        <ChevronDownIcon
+          className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
+        />
         <span className="u-sublabel text-ink-2">{c.note.aiTitle}</span>
-      </div>
+      </button>
+      {open && (
       <div className="px-4 py-3">
         <p className="text-[12px] leading-relaxed text-ink-2">
           {c.note.aiLead}
@@ -448,6 +506,7 @@ function GeneratedRewrite({
           </p>
         ))}
       </div>
+      )}
     </div>
   );
 }

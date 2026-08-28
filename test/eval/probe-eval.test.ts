@@ -131,7 +131,7 @@ function buildLiveProbe(): LlmComprehensionProbe {
     if (!groq) throw new Error(`GROQ_API_KEY ausente para ${override}`);
     return new LlmComprehensionProbe(new GroqProvider(groq), override);
   }
-  if (groq) return new LlmComprehensionProbe(new GroqProvider(groq), "llama-3.3-70b-versatile");
+  if (groq) return new LlmComprehensionProbe(new GroqProvider(groq), "openai/gpt-oss-120b");
   if (gemini) return new LlmComprehensionProbe(new GeminiProvider(gemini), "gemini-2.5-flash");
   throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
 }

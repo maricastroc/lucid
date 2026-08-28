@@ -1,6 +1,7 @@
 import type { Block, Document, ListItemBlock, Sentence, Token } from "../types";
 import type { DocumentBuildServices } from "./model";
 import { normalize } from "./normalize";
+import { buildTextDocument } from "./text-blocks";
 import { attachTokens, tokenize } from "./tokenize";
 
 export type RawBlock =
@@ -87,25 +88,81 @@ function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string
   });
 }
 
+export type SpliceRefusal =
+  | "crosses_units"
+  | "unsupported_unit"
+  | "introduces_heading"
+  | "empty_unit"
+  | "rebuild_mismatch";
+
+export type StructuredSplice =
+  | { readonly ok: true; readonly document: Document }
+  | { readonly ok: false; readonly reason: SpliceRefusal };
+
+function expandParagraph(local: string, services: DocumentBuildServices): RawBlock[] | null {
+  const raw = toRawBlocks(buildTextDocument(normalize(local), services).blocks);
+  if (raw.length === 0) return null;
+  if (raw.some((block) => block.kind === "heading")) return null;
+  return raw;
+}
+
+function replaceBlockAt(blocks: readonly Block[], index: number, replacement: readonly RawBlock[]): RawBlock[] {
+  const raw = toRawBlocks(blocks);
+  return [...raw.slice(0, index), ...replacement, ...raw.slice(index + 1)];
+}
+
+function untouchedBlocksSurvived(
+  before: readonly RawBlock[],
+  after: readonly RawBlock[],
+  index: number,
+  grownBy: number,
+): boolean {
+  const same = (a: RawBlock, b: RawBlock): boolean => JSON.stringify(a) === JSON.stringify(b);
+  if (after.length !== before.length - 1 + grownBy) return false;
+  for (let i = 0; i < index; i++) if (!same(before[i], after[i])) return false;
+  for (let i = index + 1; i < before.length; i++) {
+    if (!same(before[i], after[i - 1 + grownBy])) return false;
+  }
+  return true;
+}
+
 export function spliceStructuredDocument(
   doc: Document,
   nextText: string,
   services: DocumentBuildServices,
-): Document | null {
+): StructuredSplice {
   const target = normalize(nextText);
-  if (target === doc.source) return doc;
+  if (target === doc.source) return { ok: true, document: doc };
 
   const { start, end, replacement } = affixSplice(doc.source, target);
-  if (replacement.includes("\n")) return null;
 
   const unit = editableUnits(doc.blocks).find((candidate) => candidate.start <= start && end <= candidate.end);
-  if (unit === undefined) return null;
+  if (unit === undefined) return { ok: false, reason: "crosses_units" };
 
   const local = unit.text.slice(0, start - unit.start) + replacement + unit.text.slice(end - unit.start);
-  if (local.trim() === "") return null;
+  if (local.trim() === "") return { ok: false, reason: "empty_unit" };
 
-  const rebuilt = buildStructuredDocument(withUnitText(doc.blocks, unit, local), services);
-  return rebuilt.source === target ? rebuilt : null;
+  if (!replacement.includes("\n")) {
+    const rebuilt = buildStructuredDocument(withUnitText(doc.blocks, unit, local), services);
+    return rebuilt.source === target ? { ok: true, document: rebuilt } : { ok: false, reason: "rebuild_mismatch" };
+  }
+
+  const block = doc.blocks[unit.blockIndex];
+  if (unit.itemIndex !== null || block.kind !== "paragraph") {
+    return { ok: false, reason: "unsupported_unit" };
+  }
+
+  const expanded = expandParagraph(local, services);
+  if (expanded === null) return { ok: false, reason: "introduces_heading" };
+
+  const before = toRawBlocks(doc.blocks);
+  const nextBlocks = replaceBlockAt(doc.blocks, unit.blockIndex, expanded);
+  const rebuilt = buildStructuredDocument(nextBlocks, services);
+
+  if (!untouchedBlocksSurvived(before, toRawBlocks(rebuilt.blocks), unit.blockIndex, expanded.length)) {
+    return { ok: false, reason: "rebuild_mismatch" };
+  }
+  return { ok: true, document: rebuilt };
 }
 
 export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services: DocumentBuildServices): Document {

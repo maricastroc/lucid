@@ -14,7 +14,13 @@ function build(): Document {
 }
 
 function splice(doc: Document, from: string, to: string): Document | null {
-  return spliceStructuredDocument(doc, doc.source.replace(from, to), ptDocumentServices);
+  const result = spliceStructuredDocument(doc, doc.source.replace(from, to), ptDocumentServices);
+  return result.ok ? result.document : null;
+}
+
+function refusal(doc: Document, next: string): string | null {
+  const result = spliceStructuredDocument(doc, next, ptDocumentServices);
+  return result.ok ? null : result.reason;
 }
 
 function kinds(doc: Document): string[] {
@@ -60,7 +66,8 @@ describe("spliceStructuredDocument — the structure survives an edit", () => {
 
   it("returns the same document when nothing changed", () => {
     const doc = build();
-    expect(spliceStructuredDocument(doc, doc.source, ptDocumentServices)).toBe(doc);
+    const result = spliceStructuredDocument(doc, doc.source, ptDocumentServices);
+    expect(result.ok && result.document).toBe(doc);
   });
 
   it("rebuilds offsets that still slice back to their own text", () => {
@@ -85,13 +92,24 @@ describe("spliceStructuredDocument — the structure survives an edit", () => {
 describe("spliceStructuredDocument — it gives up instead of guessing", () => {
   it("refuses an edit that crosses a block boundary", () => {
     const doc = build();
-    const next = spliceStructuredDocument(doc, doc.source.replace("documentos\n\nFoi", "documentos. Foi"), ptDocumentServices);
-    expect(next).toBeNull();
+    expect(refusal(doc, doc.source.replace("documentos\n\nFoi", "documentos. Foi"))).toBe("crosses_units");
   });
 
-  it("refuses a replacement that introduces a line break", () => {
+  it("ACCEPTS a line break inside a paragraph, keeping it one paragraph (ADR-088)", () => {
     const doc = build();
-    expect(splice(doc, "análise", "análise\nnova")).toBeNull();
+    const next = splice(doc, "análise", "análise\nnova");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "paragraph", "heading2", "list"]);
+  });
+
+  it("still refuses a line break inside a HEADING — only paragraphs may expand", () => {
+    const doc = build();
+    expect(refusal(doc, doc.source.replace("Prazos e documentos", "Prazos\ne documentos"))).toBe("unsupported_unit");
+  });
+
+  it("still refuses a line break inside a LIST ITEM", () => {
+    const doc = build();
+    expect(refusal(doc, doc.source.replace("Servidor efetivo", "Servidor\nefetivo"))).toBe("unsupported_unit");
   });
 
   it("refuses an edit that would empty a block", () => {
@@ -101,7 +119,7 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
 
   it("refuses a wholesale rewrite of the text", () => {
     const doc = build();
-    expect(spliceStructuredDocument(doc, "Um texto completamente diferente.", ptDocumentServices)).toBeNull();
+    expect(refusal(doc, "Um texto completamente diferente.")).toBe("crosses_units");
   });
 
   it("never returns a document whose source disagrees with the requested text", () => {
@@ -109,8 +127,8 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
     const cases = ["em sede de", "Prazos", "Servidor efetivo", "análise", "administrativo"];
     for (const from of cases) {
       const requested = doc.source.replace(from, `${from} X`);
-      const next = spliceStructuredDocument(doc, requested, ptDocumentServices);
-      if (next !== null) expect(next.source).toBe(requested);
+      const result = spliceStructuredDocument(doc, requested, ptDocumentServices);
+      if (result.ok) expect(result.document.source).toBe(requested);
     }
   });
 });
@@ -127,8 +145,11 @@ describe("spliceStructuredDocument — the Principle 2 criteria stop going silen
     const before = analyzeDocument(doc).findings.filter((f) => f.criterion === "salto_de_nivel_titulo");
     expect(before).toHaveLength(1);
 
-    const next = spliceStructuredDocument(doc, doc.source.replace("em sede de", "no âmbito de"), ptDocumentServices);
-    const after = analyzeDocument(next!).findings.filter((f) => f.criterion === "salto_de_nivel_titulo");
+    const result = spliceStructuredDocument(doc, doc.source.replace("em sede de", "no âmbito de"), ptDocumentServices);
+    expect(result.ok).toBe(true);
+    const after = analyzeDocument(result.ok ? result.document : doc).findings.filter(
+      (f) => f.criterion === "salto_de_nivel_titulo",
+    );
     expect(after).toHaveLength(1);
   });
 });

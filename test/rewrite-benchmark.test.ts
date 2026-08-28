@@ -15,7 +15,7 @@ import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-const PROBE_GROQ_MODEL = "llama-3.3-70b-versatile";
+const PROBE_GROQ_MODEL = "openai/gpt-oss-120b";
 const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
 interface Keys {
@@ -171,7 +171,7 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
         throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
       }
 
-      const models = (process.env.BENCHMARK_MODELS ?? "llama-3.3-70b-versatile,gemini-2.5-flash")
+      const models = (process.env.BENCHMARK_MODELS ?? "openai/gpt-oss-120b,gemini-2.5-flash")
         .split(",")
         .map((m) => m.trim())
         .filter(Boolean);

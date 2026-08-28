@@ -1,36 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import { configDeviations, type Block, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
 import { severityInkVar, severityLabel } from "../lib/criteria";
-import { buildAuditReport } from "../lib/audit-report";
-import { documentToDocx, exportableBlocks } from "../lib/export-document";
 import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
 import { entryLabel, type LedgerEntry } from "../lib/ledger";
+import { tally, type ReviewMarks } from "../lib/review-marks";
 import { copyFor } from "../i18n/copy";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import type { DocxNotes } from "@/importers/docx";
-import { ArrowDownIcon } from "./icons";
 
 function flattenedLabel(notes: DocxNotes, c: ReturnType<typeof copyFor>): string | null {
   const parts: string[] = [];
   if (notes.tablesFlattened > 0) parts.push(c.overview.importTables(notes.tablesFlattened));
   if (notes.textBoxesInlined > 0) parts.push(c.overview.importTextBoxes(notes.textBoxesInlined));
   return parts.length === 0 ? null : parts.join(c.overview.importAnd);
-}
-
-function download(filename: string, content: BlobPart, mime: string) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 }
 
 interface Props {
@@ -46,54 +31,40 @@ interface Props {
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
   config: Config;
+  marks: ReviewMarks;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, blocks, silentCriteria, missingBlockKinds, importNotes, briefing, briefingCheck, config }: Props) {
+export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, silentCriteria, missingBlockKinds, importNotes, config, marks }: Props) {
   const { c, lang } = useCopy();
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
-  const [docxError, setDocxError] = useState<string | null>(null);
   const deviations = configDeviations(config);
   const offCount = disabledCriteria(config, lang).length;
 
-  const exportDocx = async () => {
-    setDocxError(null);
-    try {
-      const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks));
-      download("documento-revisado.docx", bytes as BlobPart, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-    } catch {
-      setDocxError(c.overview.docxError);
-    }
-  };
-
   return (
     <div className="fade-in flex flex-col">
-      <section className="px-6 pb-6 pt-6">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-serif text-[40px] leading-none tabular-nums text-ink-0">{total}</span>
-              <span className="text-[14px] text-ink-1">{c.overview.annotations(total)}</span>
-            </div>
-            {deviations.length > 0 && (
-              <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
-                {c.overview.adjustedProfileBefore}
-                <strong className="font-semibold">{c.overview.adjustedProfileStrong}</strong> (
-                {c.overview.adjustedProfile(deviations.length, offCount)}).{" "}
-                {c.overview.adjustedProfileAfter}
-              </p>
-            )}
-            {silentCriteria.length > 0 && (
-              <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
-                {c.overview.structureCaveat(
-                  missingBlockKinds.map((kind) => c.overview.structureMissing[kind] ?? kind).join(c.overview.structureMissingJoin),
-                  silentCriteria.length,
-                )}
-              </p>
-            )}
-          </div>
+      <div className="px-6 pb-5">
+        <div className="flex items-baseline gap-2">
+          <span className="font-serif text-[40px] leading-none tabular-nums text-ink-0">{total}</span>
+          <span className="text-[14px] text-ink-1">{c.overview.annotations(total)}</span>
         </div>
+
+        {deviations.length > 0 && (
+          <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
+            {c.overview.adjustedProfileBefore}
+            <strong className="font-semibold">{c.overview.adjustedProfileStrong}</strong> (
+            {c.overview.adjustedProfile(deviations.length, offCount)}). {c.overview.adjustedProfileAfter}
+          </p>
+        )}
+        {silentCriteria.length > 0 && (
+          <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
+            {c.overview.structureCaveat(
+              missingBlockKinds.map((kind) => c.overview.structureMissing[kind] ?? kind).join(c.overview.structureMissingJoin),
+              silentCriteria.length,
+            )}
+          </p>
+        )}
 
         {total > 0 && (
           <>
@@ -121,62 +92,12 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
                 )}
               </div>
             )}
+            <ReviewProgress marks={marks} findings={findings} />
           </>
         )}
 
-        <button
-          type="button"
-          onClick={() =>
-            download(
-              "auditoria-lucid.md",
-              buildAuditReport(
-                diagnostic,
-                findings,
-                { generatedAt: new Date().toLocaleString("pt-BR") },
-                ledger,
-                { briefing, check: briefingCheck },
-                config,
-              ),
-              "text/markdown;charset=utf-8",
-            )
-          }
-          className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-        >
-          <ArrowDownIcon className="size-4" />
-          {c.overview.exportAudit}
-        </button>
-
-        <div className="mt-2 flex gap-2">
-          <button
-            type="button"
-            onClick={exportDocx}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-          >
-            <ArrowDownIcon className="size-4" />
-            {c.overview.exportDocx}
-          </button>
-          <button
-            type="button"
-            onClick={() => download("documento-revisado.txt", diagnostic.text, "text/plain;charset=utf-8")}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-rule-2 px-3 py-2.5 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-          >
-            <ArrowDownIcon className="size-4" />
-            {c.overview.exportTxt}
-          </button>
-        </div>
-
-        {docxError !== null && (
-          <p role="alert" className="mt-2 text-[12px] leading-relaxed text-sev-error">
-            {docxError}
-          </p>
-        )}
-
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          {c.overview.docxNote}
-        </p>
-
         {importNotes !== null && importNotes.headingStylesRecovered.length > 0 && (
-          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          <p className="mt-3 text-[11.5px] leading-relaxed text-ink-3">
             {c.overview.importRecovered(importNotes.headingStylesRecovered.join(", "))}
           </p>
         )}
@@ -187,8 +108,21 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
         )}
 
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">{c.overview.scoreCaveat}</p>
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.overview.lexiconCaveat}</p>
-      </section>
+
+        <p className="mt-3 flex items-center gap-2 text-[11px] text-ink-3">
+          <span className="inline-flex items-center gap-1.5 text-ink-2">
+            <span className="size-1.5 rounded-full bg-accent" aria-hidden />
+            {c.note.footerDeterministic}
+          </span>
+          <span aria-hidden>·</span>
+          <span
+            className="truncate"
+            title={c.panel.provenanceTitle(diagnostic.meta.configHash, diagnostic.meta.lucidVersion)}
+          >
+            {diagnostic.meta.standardVersion}
+          </span>
+        </p>
+      </div>
 
       {ledger.length > 0 && <TrailSection entries={ledger} />}
     </div>
@@ -199,9 +133,8 @@ export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
   const { c, lang } = useCopy();
   const readingNotes = readabilityOf(diagnostic.metrics, lang).notes;
   return (
-    <section className="border-t border-rule-1 px-6 py-5">
-      <SectionLabel>{c.overview.readingLabel}</SectionLabel>
-      <dl className="mt-2 flex flex-col divide-y divide-rule-1">
+    <div className="px-6 pb-5">
+      <dl className="flex flex-col divide-y divide-rule-1">
         {metricRows(diagnostic, lang).map((r) => (
           <div key={r.label} className="flex items-baseline justify-between py-2">
             <dt className="text-[12.5px] text-ink-2">{r.label}</dt>
@@ -222,7 +155,30 @@ export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
         </ul>
       )}
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.overview.readingCaveat}</p>
-    </section>
+    </div>
+  );
+}
+
+function ReviewProgress({ marks, findings }: { marks: ReviewMarks; findings: readonly Finding[] }) {
+  const { c } = useCopy();
+  const t = tally(marks, findings);
+  if (t.total === 0 || t.pending === t.total) return null;
+  const done = t.total - t.pending;
+  return (
+    <div className="mt-4 border-t border-rule-1 pt-3">
+      <div className="flex items-baseline justify-between gap-3 text-[12px]">
+        <span className="text-ink-2">{c.revisionList.progress(done, t.total)}</span>
+        <span className="tabular-nums text-ink-3">{c.revisionList.pendingCount(t.pending)}</span>
+      </div>
+      <div
+        className="mt-1.5 h-1 overflow-hidden rounded-full bg-surface-3"
+        role="img"
+        aria-label={c.revisionList.progress(done, t.total)}
+      >
+        <span className="block h-full rounded-full bg-ink-2" style={{ width: `${(done / t.total) * 100}%` }} />
+      </div>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-ink-3">{c.revisionList.progressCaveat}</p>
+    </div>
   );
 }
 
@@ -236,10 +192,6 @@ function Legend({ swatch, label, value }: { swatch: string; label: string; value
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <h2 className="u-label text-ink-3">{children}</h2>;
-}
-
 const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
 function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
@@ -247,8 +199,8 @@ function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
   const first = entries[0];
   const last = entries[entries.length - 1];
   return (
-    <section className="border-t border-rule-1 px-6 py-5">
-      <SectionLabel>{c.overview.trailLabel}</SectionLabel>
+    <div className="border-t border-rule-1 px-6 py-5">
+      <h3 className="u-label text-ink-3">{c.overview.trailLabel}</h3>
       <p className="mt-2 text-[12px] text-ink-2">
         {c.overview.trailWeight(fmtBurden(first.burdenBefore), fmtBurden(last.burdenAfter), entries.length)}
       </p>
@@ -274,7 +226,7 @@ function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
         })}
       </ol>
       <p className="mt-2 text-[11.5px] italic leading-relaxed text-ink-3">{c.overview.trailCaveat}</p>
-    </section>
+    </div>
   );
 }
 

@@ -22,7 +22,7 @@ import type { ComprehensionProbe } from "@/lucid/probe/types";
 
 export const runtime = "nodejs";
 
-const MAX_TEXT_LENGTH = 20_000;
+const MAX_TEXT_LENGTH = 200_000;
 
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
 
@@ -31,6 +31,7 @@ interface RewriteRequestBody {
   target?: unknown;
   criterion?: unknown;
   strategy?: unknown;
+  briefing?: unknown;
   findings?: unknown;
   declarations?: unknown;
   providerId?: unknown;
@@ -40,7 +41,7 @@ interface RewriteRequestBody {
 
 const MAX_DECLARED_AGENT_LENGTH = 200;
 
-const VALID_STRATEGIES: ReadonlySet<string> = new Set<RewriteStrategy>(["correct", "rewrite", "directed"]);
+const VALID_STRATEGIES: ReadonlySet<string> = new Set<RewriteStrategy>(["correct", "rewrite", "rewrite2", "directed"]);
 
 function isFindingLike(value: unknown): value is Finding {
   if (typeof value !== "object" || value === null) return false;
@@ -95,9 +96,11 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
+const PROBE_GROQ_MODEL = "openai/gpt-oss-120b";
+
 function buildProbe(): ComprehensionProbe | null {
   if (process.env.GROQ_API_KEY) {
-    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), "llama-3.3-70b-versatile");
+    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), PROBE_GROQ_MODEL);
   }
   if (process.env.GEMINI_API_KEY) {
     return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
@@ -113,9 +116,20 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
   }
 
-  const { text, target, criterion, strategy, findings, declarations, providerId, model, localeId } = body;
-  if (typeof text !== "string" || text.length === 0 || text.length > MAX_TEXT_LENGTH) {
-    return NextResponse.json({ error: "texto ausente ou longo demais" }, { status: 400 });
+  const { text, target, criterion, strategy, briefing, findings, declarations, providerId, model, localeId } = body;
+  if (typeof text !== "string" || text.length === 0) {
+    return NextResponse.json({ error: "texto ausente" }, { status: 400 });
+  }
+  if (text.length > MAX_TEXT_LENGTH) {
+    return NextResponse.json(
+      {
+        error:
+          `documento com ${text.length.toLocaleString("pt-BR")} caracteres — acima do limite de ` +
+          `${MAX_TEXT_LENGTH.toLocaleString("pt-BR")} para a proposta por IA. A auditoria determinística ` +
+          "não depende disso e segue completa.",
+      },
+      { status: 413 },
+    );
   }
   if (typeof providerId !== "string" || typeof model !== "string") {
     return NextResponse.json({ error: "providerId e model são obrigatórios" }, { status: 400 });
@@ -141,6 +155,7 @@ export async function POST(request: Request): Promise<Response> {
       locale,
       criterion: typeof criterion === "string" ? criterion : undefined,
       strategy: typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
+      briefing: Array.isArray(briefing) ? briefing.filter(isFindingLike) : undefined,
       findings: Array.isArray(findings) ? findings.filter(isFindingLike) : undefined,
       declarations: Array.isArray(declarations)
         ? declarations.filter((d): d is AgentDeclaration => isDeclarationLike(d, text.length))

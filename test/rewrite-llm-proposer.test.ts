@@ -89,10 +89,20 @@ describe("LlmRewriteProposer", () => {
     await new LlmRewriteProposer(rewrite, "m1", "rewrite").propose({ text: t.text, target: t });
 
     expect(new LlmRewriteProposer(correct, "m1", "correct").id).toBe("mock:m1+correct@1");
-    expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@2");
+    expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@3");
 
     expect(correct.lastPrompt).toMatch(/MENOR alteração/);
-    expect(rewrite.lastPrompt).toMatch(/DOCUMENTO INTEIRO/);
+    expect(rewrite.lastPrompt).toMatch(/CONTEXTO DO DOCUMENTO/);
+  });
+
+  it("rewrite2 still builds the previous prompt, byte for byte", async () => {
+    const t = span("Um trecho.");
+    const previous = new MockChatProvider('{"reescrita":"x"}');
+    await new LlmRewriteProposer(previous, "m1", "rewrite2").propose({ text: t.text, target: t });
+
+    expect(new LlmRewriteProposer(previous, "m1", "rewrite2").id).toBe("mock:m1+rewrite@2");
+    expect(previous.lastPrompt).toMatch(/DOCUMENTO INTEIRO/);
+    expect(previous.lastPrompt).not.toMatch(/PRINCÍPIO INVIOLÁVEL/);
   });
 });
 
@@ -104,8 +114,9 @@ describe("GroqProvider — allow-list (no network)", () => {
     );
   });
 
-  it("exposes the allow-list of Groq's free models", () => {
-    expect(GROQ_MODELS.length).toBeGreaterThanOrEqual(3);
+  it("exposes exactly the allow-list, and the allow-list is not empty", () => {
+    expect(GROQ_MODELS.length).toBeGreaterThan(0);
     expect(new GroqProvider("x").models).toEqual(GROQ_MODELS);
+    expect(new Set(GROQ_MODELS).size).toBe(GROQ_MODELS.length);
   });
 });

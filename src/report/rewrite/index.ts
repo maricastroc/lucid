@@ -2,7 +2,8 @@ import type { Span } from "../../lucid";
 import type { RewriteProposer, RewriteRequest, VerifiedRewrite } from "./types";
 import { verifyRewrite, type VerifyOptions } from "./verify";
 
-export type ProposeAndVerifyOptions = VerifyOptions & Pick<RewriteRequest, "strategy" | "findings" | "signal">;
+export type ProposeAndVerifyOptions = VerifyOptions &
+  Pick<RewriteRequest, "strategy" | "briefing" | "findings" | "signal">;
 
 export async function proposeAndVerify(
   text: string,
@@ -16,6 +17,7 @@ export async function proposeAndVerify(
     criterion: options.criterion,
     localeId: options.locale?.id,
     strategy: options.strategy,
+    briefing: options.briefing,
     findings: options.findings,
     declarations: options.declarations,
     signal: options.signal,
@@ -27,6 +29,17 @@ export async function proposeAndVerify(
 export { StubRewriteProposer } from "./proposer";
 export { LlmRewriteProposer, parseRewrite } from "./llm-proposer";
 export { buildRewritePrompt, REWRITE_PROMPT_VERSION, STRATEGY_VERSION } from "./prompt";
+export {
+  buildRewritePromptV3,
+  composePrompt,
+  IARIS_SOURCE,
+  INCOMPATIBLE,
+  PATCHED,
+  PROMPT_PARTS,
+  VERBATIM_RANGES,
+  withFirstBullet,
+} from "./prompt-v3";
+export { criterionLabel, renderBriefing } from "./briefing";
 export type { RewriteStrategy } from "./prompt";
 export { applyProposal, totalBurden, verifyRewrite } from "./verify";
 export type { VerifyOptions } from "./verify";

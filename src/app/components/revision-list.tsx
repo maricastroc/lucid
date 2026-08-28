@@ -2,40 +2,35 @@
 
 import { useRef, useState } from "react";
 import type { Diagnostic, Finding } from "@/lucid";
-import { CRITERION_ORDER, findingId, isSafe, metaFor, provenanceTag } from "../lib/criteria";
+import { CRITERION_ORDER, findingId, metaFor, provenanceTag, severityInkVar } from "../lib/criteria";
+import { distinctTexts, type Bucket, type FindingGroup, type FindingQuery, type SortOrder, type StateFilter } from "../lib/finding-query";
+import { reviewStateOf, tally, type ReviewMark, type ReviewMarks } from "../lib/review-marks";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import { ActionBadge, CriterionMark, SeverityDot } from "./badges";
-import { ChevronDownIcon, EyeIcon, EyeOffIcon } from "./icons";
+import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, CloseIcon, EyeIcon, EyeOffIcon } from "./icons";
 
-export type Bucket = "all" | "safe" | "human";
+export type { Bucket } from "../lib/finding-query";
 
 interface Props {
   diagnostic: Diagnostic;
-  findings: readonly Finding[];
+  groups: readonly FindingGroup[];
+  visible: readonly Finding[];
+  allFindings: readonly Finding[];
+  query: FindingQuery;
+  marks: ReviewMarks;
+  filtered: boolean;
   selectedId: string | null;
-  bucket: Bucket;
-  safeCount: number;
-  humanCount: number;
-  activeCriteria: ReadonlySet<string>;
   onBucket: (b: Bucket) => void;
+  onState: (s: StateFilter) => void;
+  onSearch: (s: string) => void;
+  onOrder: (o: SortOrder) => void;
+  onCriterion: (criterion: string | null) => void;
+  onClearFilters: () => void;
   onSelect: (finding: Finding) => void;
   onToggleCriterion: (criterion: string) => void;
-}
-
-interface Group {
-  criterion: string;
-  items: Finding[];
-}
-
-function groupByCriterion(findings: readonly Finding[]): Group[] {
-  const groups: Group[] = [];
-  for (const f of findings) {
-    const last = groups[groups.length - 1];
-    if (last && last.criterion === f.criterion) last.items.push(f);
-    else groups.push({ criterion: f.criterion, items: [f] });
-  }
-  return groups;
+  onMark: (finding: Finding, mark: ReviewMark | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
 }
 
 function countOf(diagnostic: Diagnostic, criterion: string): number {
@@ -60,32 +55,42 @@ function ProvenanceTag({ tag }: { tag: { text: string; title: string } | null })
   );
 }
 
+const excerptOf = (f: Finding): string => f.span.text.replace(/\s+/g, " ").trim();
+
+const FILTER_THRESHOLD = 10;
+
 export function RevisionList({
   diagnostic,
-  findings,
+  groups,
+  visible,
+  allFindings,
+  query,
+  marks,
+  filtered,
   selectedId,
-  bucket,
-  safeCount,
-  humanCount,
-  activeCriteria,
   onBucket,
+  onState,
+  onSearch,
+  onOrder,
+  onCriterion,
+  onClearFilters,
   onSelect,
   onToggleCriterion,
+  onMark,
+  onMarkMany,
 }: Props) {
   const { c, lang } = useCopy();
   const listRef = useRef<HTMLDivElement>(null);
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [coverageOpen, setCoverageOpen] = useState(false);
 
-  const shown =
-    bucket === "safe" ? findings.filter(isSafe) : bucket === "human" ? findings.filter((f) => !isSafe(f)) : findings;
-  const groups = groupByCriterion(shown);
+  const sifting = allFindings.length >= FILTER_THRESHOLD;
 
-  const hidden = CRITERION_ORDER.filter((c) => countOf(diagnostic, c) > 0 && !activeCriteria.has(c));
-  const clean = CRITERION_ORDER.filter((c) => countOf(diagnostic, c) === 0);
+  const hidden = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) > 0 && !query.activeCriteria.has(id));
+  const clean = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) === 0);
 
-  const toggle = (criterion: string) =>
-    setCollapsed((prev) => {
+  const toggleGroup = (criterion: string) =>
+    setOpen((prev) => {
       const next = new Set(prev);
       if (next.has(criterion)) next.delete(criterion);
       else next.add(criterion);
@@ -101,111 +106,135 @@ export function RevisionList({
     rows[next]?.focus();
   };
 
-  const buckets: Array<[Bucket, string, number]> = [
-    ["all", c.revisionList.bucketAll, findings.length],
-    ["safe", c.revisionList.bucketSafe, safeCount],
-    ["human", c.revisionList.bucketHuman, humanCount],
+  const buckets: Array<[Bucket, string]> = [
+    ["all", c.revisionList.bucketAll],
+    ["safe", c.revisionList.bucketSafe],
+    ["human", c.revisionList.bucketHuman],
+  ];
+  const states: Array<[StateFilter, string]> = [
+    ["pending", c.revisionList.statePending],
+    ["seen", c.revisionList.stateSeen],
+    ["dismissed", c.revisionList.stateDismissed],
   ];
 
   return (
-    <section aria-label={c.revisionList.regionLabel} className="border-t border-rule-1">
-      <div className="flex items-center justify-between gap-2 px-6 pb-3 pt-5">
-        <h2 className="u-label text-ink-3">{c.revisionList.title}</h2>
-        {groups.length > 0 && <span className="text-[10.5px] text-ink-3">{c.revisionList.bySeverity}</span>}
-      </div>
-
-      <div role="tablist" aria-label={c.revisionList.filterLabel} className="flex items-center gap-1.5 px-6 pb-3">
-        {buckets.map(([b, labelText, n]) => (
+    <div>
+      {query.criterion !== null && (
+        <div className="mb-2.5 flex items-center gap-2 border-b border-rule-1 px-6 pb-2.5">
           <button
-            key={b}
-            role="tab"
-            aria-selected={bucket === b}
-            onClick={() => onBucket(b)}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium transition-colors duration-150 ${
-              bucket === b
-                ? "border-transparent bg-ink-0 text-sheet"
-                : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-1"
-            }`}
+            type="button"
+            onClick={() => onCriterion(null)}
+            className="row-hit inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] text-accent transition-colors duration-150 hover:bg-accent-weak"
           >
-            {labelText}
-            <span className={`tabular-nums ${bucket === b ? "opacity-70" : "text-ink-3"}`}>{n}</span>
+            <ChevronLeftIcon className="size-3.5" />
+            {c.note.crumbAll}
           </button>
+          <span className="min-w-0 truncate text-[12px] text-ink-2">{metaFor(query.criterion, lang).label}</span>
+        </div>
+      )}
+
+      {sifting && (
+      <div className="px-6 pb-2.5">
+        <input
+          type="search"
+          value={query.search}
+          onChange={(e) => onSearch(e.target.value)}
+          placeholder={c.revisionList.searchPlaceholder}
+          aria-label={c.revisionList.searchLabel}
+          className="w-full rounded-lg border border-rule-2 bg-sheet px-2.5 py-1.5 text-[12.5px] text-ink-0 placeholder:text-ink-dim focus:border-accent focus:outline-none"
+        />
+      </div>
+      )}
+
+      <div
+        role="group"
+        aria-label={c.revisionList.filterLabel}
+        className="flex flex-wrap items-center gap-1.5 px-6 pb-2.5"
+      >
+        {buckets.map(([b, labelText]) => (
+          <Pill key={b} active={query.bucket === b} onClick={() => onBucket(b)}>
+            {labelText}
+          </Pill>
         ))}
+        {sifting && <span className="mx-0.5 h-4 w-px bg-rule-2" aria-hidden />}
+        {sifting &&
+          states.map(([s, labelText]) => (
+            <Pill
+              key={s}
+              tone="quiet"
+              active={query.state === s}
+              onClick={() => onState(query.state === s ? "all" : s)}
+            >
+              {labelText}
+            </Pill>
+          ))}
       </div>
 
-      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1.5 px-3 pb-3">
+      {(sifting || filtered) && (
+      <div className="flex items-center justify-between gap-3 px-6 pb-3">
+        <span className="min-w-0 truncate text-[11.5px] text-ink-3">
+          {filtered
+            ? c.revisionList.showingFiltered(visible.length, allFindings.length)
+            : c.revisionList.showingAll(visible.length)}
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          {filtered && (
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="rounded-md px-1.5 py-0.5 text-[11.5px] text-accent transition-colors duration-150 hover:bg-accent-weak"
+            >
+              {c.revisionList.clearFilters}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onOrder(query.order === "severity" ? "document" : "severity")}
+            className="rounded-md px-1.5 py-0.5 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+          >
+            {query.order === "severity" ? c.revisionList.orderBySeverity : c.revisionList.orderByDocument}
+          </button>
+        </div>
+      </div>
+      )}
+
+      {filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
+        <div className="mx-6 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-rule-1 bg-surface-2/60 px-2.5 py-2">
+          <span className="u-sublabel text-ink-3">{c.revisionList.batchLabel}</span>
+          <button
+            type="button"
+            onClick={() => onMarkMany(visible, null)}
+            className="rounded-md border border-rule-2 bg-sheet px-2 py-1 text-[11.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+          >
+            {c.revisionList.batchClear(visible.length)}
+          </button>
+          <p className="w-full text-[11px] leading-relaxed text-ink-3">{c.revisionList.batchCaveat}</p>
+        </div>
+      )}
+
+      <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1 px-3 pb-3">
         {groups.length === 0 ? (
           <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">
-            {findings.length === 0 ? c.revisionList.empty : c.revisionList.emptyInFilter}
+            {allFindings.length === 0 ? c.revisionList.empty : c.revisionList.emptyInFilter}
           </p>
         ) : (
-          groups.map((g) => {
-            const meta = metaFor(g.criterion, lang);
-            const isCollapsed = collapsed.has(g.criterion);
-            const panelId = `revgrp-${g.criterion}`;
-            return (
-              <div key={g.criterion} className="flex flex-col">
-                <div className="row-hit flex w-full items-center rounded-lg hover:bg-surface-2">
-                  <button
-                    type="button"
-                    aria-expanded={!isCollapsed}
-                    aria-controls={panelId}
-                    onClick={() => toggle(g.criterion)}
-                    className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2 text-left"
-                  >
-                    <ChevronDownIcon
-                      className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${
-                        isCollapsed ? "-rotate-90" : ""
-                      }`}
-                    />
-                    <CriterionMark criterion={g.criterion} />
-                    <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
-                    <ProvenanceTag tag={tagFor(diagnostic, g.criterion, lang)} />
-                    <span className="tabular-nums text-[13px] text-ink-1">{g.items.length}</span>
-                  </button>
-                  <button
-                    type="button"
-                    aria-label={c.revisionList.hideNamed(meta.label)}
-                    title={c.revisionList.hideInDocument}
-                    onClick={() => onToggleCriterion(g.criterion)}
-                    className="mr-1.5 grid size-7 shrink-0 place-items-center rounded-md text-ink-dim transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
-                  >
-                    <EyeIcon className="size-3.5" />
-                  </button>
-                </div>
-
-                {!isCollapsed && (
-                  <div id={panelId} className="flex flex-col gap-0.5 pl-2">
-                    <p className="px-3 pb-1 pt-0.5 text-[11.5px] leading-snug text-ink-3">{meta.why}</p>
-                    {g.items.map((f) => {
-                      const id = findingId(f);
-                      const selected = selectedId === id;
-                      return (
-                        <button
-                          key={id}
-                          data-row
-                          type="button"
-                          aria-current={selected}
-                          onClick={() => onSelect(f)}
-                          className={`row-hit flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left ${
-                            selected
-                              ? "bg-accent-weak shadow-[inset_0_0_0_1px_var(--accent-line)]"
-                              : "hover:bg-surface-2"
-                          }`}
-                        >
-                          <SeverityDot severity={f.severity} />
-                          <span className="min-w-0 flex-1 truncate font-serif text-[13.5px] text-ink-1">
-                            “{f.span.text.replace(/\s+/g, " ").trim()}”
-                          </span>
-                          <ActionBadge finding={f} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })
+          groups.map((group) => (
+            <Group
+              key={group.criterion}
+              group={group}
+              diagnostic={diagnostic}
+              marks={marks}
+              open={open.has(group.criterion) || query.criterion === group.criterion}
+              scoped={query.criterion === group.criterion}
+              selectedId={selectedId}
+              onToggle={() => toggleGroup(group.criterion)}
+              onScope={() => onCriterion(query.criterion === group.criterion ? null : group.criterion)}
+              onHide={() => onToggleCriterion(group.criterion)}
+              onSelect={onSelect}
+              onMark={onMark}
+              onMarkMany={onMarkMany}
+            />
+          ))
         )}
       </div>
 
@@ -215,7 +244,7 @@ export function RevisionList({
             type="button"
             aria-expanded={coverageOpen}
             onClick={() => setCoverageOpen((v) => !v)}
-            className="row-hit flex w-full items-center gap-2.5 rounded-lg border-t border-dashed border-rule-2 px-3 pt-3.5 pb-2 text-left text-ink-3 hover:text-ink-2"
+            className="row-hit flex w-full items-center gap-2.5 rounded-lg border-t border-dashed border-rule-2 px-3 pb-2 pt-3.5 text-left text-ink-3 hover:text-ink-2"
           >
             <ChevronDownIcon
               className={`size-3.5 shrink-0 transition-transform duration-150 ${coverageOpen ? "" : "-rotate-90"}`}
@@ -266,6 +295,268 @@ export function RevisionList({
           )}
         </div>
       )}
-    </section>
+
+      <p className="px-6 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
+    </div>
+  );
+}
+
+function Group({
+  group,
+  diagnostic,
+  marks,
+  open,
+  scoped,
+  selectedId,
+  onToggle,
+  onScope,
+  onHide,
+  onSelect,
+  onMark,
+  onMarkMany,
+}: {
+  group: FindingGroup;
+  diagnostic: Diagnostic;
+  marks: ReviewMarks;
+  open: boolean;
+  scoped: boolean;
+  selectedId: string | null;
+  onToggle: () => void;
+  onScope: () => void;
+  onHide: () => void;
+  onSelect: (finding: Finding) => void;
+  onMark: (finding: Finding, mark: ReviewMark | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+}) {
+  const { c, lang } = useCopy();
+  const meta = metaFor(group.criterion, lang);
+  const counts = tally(marks, group.items);
+  const distinct = distinctTexts(group.items);
+  const panelId = `revgrp-${group.criterion}`;
+
+  return (
+    <div className="flex flex-col">
+      <div className="row-hit flex w-full items-center rounded-lg hover:bg-surface-2">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left"
+        >
+          <ChevronDownIcon
+            className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
+          />
+          <CriterionMark criterion={group.criterion} />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-2">
+              <span className="min-w-0 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
+              <span
+                className="size-1.5 shrink-0 rounded-full"
+                style={{ background: severityInkVar(group.maxSeverity) }}
+                aria-hidden
+              />
+            </span>
+            <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-ink-3">
+              <span className="tabular-nums">{c.revisionList.occurrences(group.items.length)}</span>
+              {distinct < group.items.length && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="tabular-nums">{c.revisionList.distinct(distinct)}</span>
+                </>
+              )}
+              {group.filteredOut > 0 && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="tabular-nums">{c.revisionList.hiddenByFilter(group.filteredOut)}</span>
+                </>
+              )}
+            </span>
+          </span>
+          <GroupProgress pending={counts.pending} total={counts.total} />
+        </button>
+        <button
+          type="button"
+          aria-label={c.revisionList.hideNamed(meta.label)}
+          title={c.revisionList.hideInDocument}
+          onClick={onHide}
+          className="mr-1.5 grid size-7 shrink-0 place-items-center rounded-md text-ink-dim transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
+        >
+          <EyeIcon className="size-3.5" />
+        </button>
+      </div>
+
+      {open && (
+        <div id={panelId} className="flex flex-col gap-0.5 pl-2">
+          <div className="flex items-start justify-between gap-2 px-3 pb-1 pt-0.5">
+            <p className="min-w-0 flex-1 text-[11.5px] leading-snug text-ink-3">{meta.why}</p>
+            <ProvenanceTag tag={tagFor(diagnostic, group.criterion, lang)} />
+          </div>
+          <div className="flex flex-wrap items-center gap-2 px-3 pb-1.5">
+            <button
+              type="button"
+              aria-pressed={scoped}
+              onClick={onScope}
+              className={`rounded-md border px-2 py-1 text-[11.5px] transition-colors duration-150 ${
+                scoped
+                  ? "border-accent-line bg-accent-weak text-accent"
+                  : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-0"
+              }`}
+            >
+              {scoped ? c.revisionList.scopeOff : c.revisionList.scopeOn}
+            </button>
+            {counts.total - counts.pending > 0 && (
+              <button
+                type="button"
+                onClick={() => onMarkMany(group.items, null)}
+                className="rounded-md border border-rule-2 px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+              >
+                {c.revisionList.clearGroupMarks(counts.total - counts.pending)}
+              </button>
+            )}
+          </div>
+          {group.items.map((f) => (
+            <Row
+              key={findingId(f)}
+              finding={f}
+              state={reviewStateOf(marks, f)}
+              selected={selectedId === findingId(f)}
+              onSelect={() => onSelect(f)}
+              onMark={(mark) => onMark(f, mark)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Row({
+  finding,
+  state,
+  selected,
+  onSelect,
+  onMark,
+}: {
+  finding: Finding;
+  state: "pending" | ReviewMark;
+  selected: boolean;
+  onSelect: () => void;
+  onMark: (mark: ReviewMark | null) => void;
+}) {
+  const { c } = useCopy();
+  const excerpt = excerptOf(finding);
+  const marked = state !== "pending";
+  return (
+    <div
+      className={`row-hit flex w-full items-center rounded-lg ${
+        selected ? "bg-accent-weak shadow-[inset_0_0_0_1px_var(--accent-line)]" : "hover:bg-surface-2"
+      }`}
+    >
+      <button
+        data-row
+        type="button"
+        aria-current={selected}
+        onClick={onSelect}
+        className={`flex min-w-0 flex-1 items-center gap-2 rounded-lg px-3 py-2 text-left ${marked ? "opacity-55" : ""}`}
+      >
+        <SeverityDot severity={finding.severity} />
+        <span
+          className={`min-w-0 flex-1 truncate font-serif text-[13.5px] text-ink-1 ${
+            state === "dismissed" ? "line-through decoration-ink-3" : ""
+          }`}
+        >
+          “{excerpt}”
+        </span>
+        <ActionBadge finding={finding} />
+      </button>
+      <MarkButton
+        pressed={state === "seen"}
+        label={c.revisionList.markSeenNamed(excerpt)}
+        title={state === "seen" ? c.revisionList.unmark : c.revisionList.markSeen}
+        onClick={() => onMark(state === "seen" ? null : "seen")}
+      >
+        <CheckIcon className="size-3.5" />
+      </MarkButton>
+      <MarkButton
+        pressed={state === "dismissed"}
+        label={c.revisionList.dismissNamed(excerpt)}
+        title={state === "dismissed" ? c.revisionList.unmark : c.revisionList.dismiss}
+        onClick={() => onMark(state === "dismissed" ? null : "dismissed")}
+        className="mr-1.5"
+      >
+        <CloseIcon className="size-3.5" />
+      </MarkButton>
+    </div>
+  );
+}
+
+function MarkButton({
+  pressed,
+  label,
+  title,
+  onClick,
+  className = "",
+  children,
+}: {
+  pressed: boolean;
+  label: string;
+  title: string;
+  onClick: () => void;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      aria-label={label}
+      title={title}
+      onClick={onClick}
+      className={`grid size-7 shrink-0 place-items-center rounded-md transition-colors duration-150 ${
+        pressed ? "bg-surface-3 text-ink-1" : "text-ink-dim hover:bg-surface-3 hover:text-ink-1"
+      } ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function GroupProgress({ pending, total }: { pending: number; total: number }) {
+  const { c } = useCopy();
+  const done = total - pending;
+  if (done === 0) return <span className="shrink-0 tabular-nums text-[13px] text-ink-1">{total}</span>;
+  return (
+    <span className="shrink-0 tabular-nums text-[12px] text-ink-2" title={c.revisionList.progressTitle(done, total)}>
+      {done}
+      <span className="text-ink-3">/{total}</span>
+    </span>
+  );
+}
+
+function Pill({
+  active,
+  onClick,
+  tone = "strong",
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  tone?: "strong" | "quiet";
+  children: React.ReactNode;
+}) {
+  const activeClass =
+    tone === "strong" ? "border-transparent bg-ink-0 text-sheet" : "border-accent-line bg-accent-weak text-accent";
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors duration-150 ${
+        active ? activeClass : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-1"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

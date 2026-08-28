@@ -1,4 +1,5 @@
 import type { PrincipleGroup, Severity } from "@/lucid";
+import type { PanelSectionId } from "../lib/panel-sections";
 import type { CriterionCoverage } from "@/report/eval/contract";
 import type { LedgerSource } from "../lib/ledger";
 import type { UiLang } from "./types";
@@ -68,7 +69,13 @@ export interface UiCopy {
       readonly body: string;
       readonly confirm: string;
     };
-    readonly structureLost: string;
+    readonly spliceRefused: Record<
+      "crosses_units" | "unsupported_unit" | "introduces_heading" | "empty_unit" | "rebuild_mismatch",
+      string
+    >;
+    readonly spliceRefusedKept: string;
+    readonly spliceAcceptPlain: string;
+    readonly spliceDiscard: string;
     readonly saveFailed: string;
     readonly importRefusal: {
       readonly unreadable: string;
@@ -78,6 +85,20 @@ export interface UiCopy {
     readonly revisions: (n: number) => string;
     readonly changeApplied: string;
     readonly undo: string;
+  };
+
+  readonly panel: {
+    readonly navLabel: string;
+    readonly sections: Record<PanelSectionId, string>;
+    readonly settingsTitle: string;
+    readonly settingsSummaryReader: (declared: boolean) => string;
+    readonly settingsSummaryProfile: (deviations: number) => string;
+    readonly settingsSummaryJoin: string;
+    readonly metricsSummary: (words: string, perSentence: string) => string;
+    readonly probeSummary: string;
+    readonly exportLabel: string;
+    readonly exportMenuLabel: string;
+    readonly provenanceTitle: (configHash: string, version: string) => string;
   };
 
   readonly overview: {
@@ -103,7 +124,6 @@ export interface UiCopy {
     readonly structureMissingJoin: string;
     readonly structureCaveat: (missing: string, count: number) => string;
     readonly scoreCaveat: string;
-    readonly lexiconCaveat: string;
     readonly readingLabel: string;
     readonly readingCaveat: string;
     readonly trailLabel: string;
@@ -122,7 +142,6 @@ export interface UiCopy {
   readonly revisionList: {
     readonly regionLabel: string;
     readonly title: string;
-    readonly bySeverity: string;
     readonly filterLabel: string;
     readonly bucketAll: string;
     readonly bucketSafe: string;
@@ -137,6 +156,35 @@ export interface UiCopy {
     readonly cleanCriteria: (n: number) => string;
     readonly hiddenCriteria: (n: number) => string;
     readonly absenceCaveat: string;
+    readonly occurrences: (n: number) => string;
+    readonly distinct: (n: number) => string;
+    readonly hiddenByFilter: (n: number) => string;
+    readonly statePending: string;
+    readonly stateSeen: string;
+    readonly stateDismissed: string;
+    readonly searchLabel: string;
+    readonly searchPlaceholder: string;
+    readonly showingAll: (n: number) => string;
+    readonly showingFiltered: (shown: number, total: number) => string;
+    readonly clearFilters: string;
+    readonly orderBySeverity: string;
+    readonly orderByDocument: string;
+    readonly batchLabel: string;
+    readonly batchClear: (n: number) => string;
+    readonly batchCaveat: string;
+    readonly clearGroupMarks: (n: number) => string;
+    readonly scopeOn: string;
+    readonly scopeOff: string;
+    readonly markSeen: string;
+    readonly markSeenNamed: (excerpt: string) => string;
+    readonly dismiss: string;
+    readonly dismissNamed: (excerpt: string) => string;
+    readonly unmark: string;
+    readonly progress: (done: number, total: number) => string;
+    readonly pendingCount: (n: number) => string;
+    readonly progressCaveat: string;
+    readonly progressTitle: (done: number, total: number) => string;
+    readonly lexiconCaveat: string;
   };
 
   readonly badges: {
@@ -150,12 +198,18 @@ export interface UiCopy {
     readonly excerpt: string;
     readonly whatWeFound: string;
     readonly whyItMatters: string;
+    readonly understandCriterion: string;
+    readonly excerptMore: string;
+    readonly excerptLess: string;
     readonly engineOutput: string;
     readonly engineOutputHint: string;
     readonly navPrev: string;
     readonly navNext: string;
     readonly navOf: string;
     readonly panelLabel: string;
+    readonly crumbAll: string;
+    readonly crumbBackTo: (criterion: string) => string;
+    readonly backToList: string;
     readonly footerDeterministic: string;
 
     readonly safeHeader: string;
@@ -355,6 +409,11 @@ export interface UiCopy {
   readonly probe: {
     readonly title: string;
     readonly lead: string;
+    readonly selectPrompt: string;
+    readonly excerptLabel: string;
+    readonly clearExcerpt: string;
+    readonly onlyThisExcerpt: string;
+    readonly excerptTooLong: (chars: number, max: number) => string;
     readonly useBriefingPurpose: string;
     readonly questionLabel: string;
     readonly questionPlaceholder: string;

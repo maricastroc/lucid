@@ -29,8 +29,8 @@ export function ProfilePanel({ config, onChange }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="border-t border-rule-1 px-6 py-5">
-      <span className="u-label text-ink-3">{p.label}</span>
+    <div className="border-t border-rule-1 px-6 py-5">
+      <h3 className="u-label text-ink-3">{p.label}</h3>
 
       <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-1">
         {deviations.length === 0 ? p.defaults : p.adjustments(deviations.length)}
@@ -105,6 +105,6 @@ export function ProfilePanel({ config, onChange }: Props) {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

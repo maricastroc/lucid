@@ -25,10 +25,8 @@ export interface RewriteModel {
 export const REWRITE_MODELS: readonly RewriteModel[] = [
   { providerId: "gemini", model: GEMINI_MODELS[0], name: "Gemini · 2.5 Flash", noteKey: "modelNoteStrongGenerator" },
   { providerId: "deepseek", model: DEEPSEEK_MODELS[0], name: "DeepSeek · V4 Flash", noteKey: "modelNotePaid" },
-  { providerId: "groq", model: GROQ_MODELS[0], name: "Groq · Llama 3.3 70B" },
-  { providerId: "groq", model: GROQ_MODELS[1], name: "Groq · Llama 3.1 8B" },
-  { providerId: "groq", model: GROQ_MODELS[2], name: "Groq · GPT-OSS 120B" },
-  { providerId: "groq", model: GROQ_MODELS[3], name: "Groq · GPT-OSS 20B" },
+  { providerId: "groq", model: GROQ_MODELS[0], name: "Groq · GPT-OSS 120B" },
+  { providerId: "groq", model: GROQ_MODELS[1], name: "Groq · GPT-OSS 20B" },
 ];
 
 export function modelLabel(choice: RewriteModel, lang: UiLang = DEFAULT_UI_LANG): string {
@@ -62,12 +60,15 @@ export async function generateRewrite(
 ): Promise<VerifiedRewrite> {
   const { criterion, directed, declarations, signal } = options;
   const strategy: RewriteStrategy | undefined = directed ? "directed" : undefined;
-  const findings = directed ? analyze(text).findings.filter((f) => overlapsTarget(f, target)) : undefined;
+  const crossing = analyze(text).findings.filter((f) => overlapsTarget(f, target));
+  const briefing = crossing;
+  const findings = directed ? crossing : undefined;
 
   if (choice.providerId === "stub") {
     return proposeAndVerify(text, target, stubProposer, {
       criterion,
       strategy,
+      briefing,
       findings,
       declarations,
       locale: rewriteLocalePtBR,
@@ -83,6 +84,7 @@ export async function generateRewrite(
       target,
       criterion,
       strategy,
+      briefing,
       findings,
       declarations,
       providerId: choice.providerId,

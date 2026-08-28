@@ -1,10 +1,11 @@
 import { DEFAULT_CONFIG, EMPTY_BRIEFING, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
+import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 3;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3];
+const SCHEMA_VERSION = 4;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
@@ -13,6 +14,7 @@ export interface WorkspaceSnapshot {
   readonly mode: Mode;
   readonly briefing: ReaderBriefing;
   readonly config: Config;
+  readonly reviewMarks: ReviewMarks;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -98,7 +100,18 @@ function parse(raw: string): WorkspaceSnapshot | null {
   const config = parseConfig(value.config);
   if (config === null) return null;
 
-  return { text: value.text, blocks, ledger: value.ledger as LedgerEntry[], mode: value.mode, briefing, config };
+  const reviewMarks = parseStoredMarks(value.reviewMarks);
+  if (reviewMarks === null) return null;
+
+  return {
+    text: value.text,
+    blocks,
+    ledger: value.ledger as LedgerEntry[],
+    mode: value.mode,
+    briefing,
+    config,
+    reviewMarks,
+  };
 }
 
 export function readWorkspace(): WorkspaceSnapshot | null {

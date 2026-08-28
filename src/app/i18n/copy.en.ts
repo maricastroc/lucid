@@ -76,9 +76,16 @@ export const COPY_EN: UiCopy = {
       body: "The text under review and the trail of changes will be discarded. This cannot be undone — export the report first if you want to keep the audit.",
       confirm: "Discard and go back",
     },
-    structureLost:
-      "Your edits moved the document beyond what the imported structure can track. Headings and lists are no longer " +
-      "recognized, so the Principle 2 criteria are not being applied from here on.",
+    spliceRefused: {
+      crosses_units: "This change spans more than one block of the imported document.",
+      unsupported_unit: "Applying a multi-line change inside a heading or a list item is not supported yet.",
+      introduces_heading: "This change would create a new heading, altering the document's outline.",
+      empty_unit: "This change would leave the block empty.",
+      rebuild_mismatch: "The document could not be rebuilt while preserving the other blocks.",
+    },
+    spliceRefusedKept: "The document is unchanged — nothing was applied.",
+    spliceAcceptPlain: "Apply as plain text",
+    spliceDiscard: "Discard",
     saveFailed:
       "This work could not be saved in the browser — it will be lost if you close the tab. Export the report so you " +
       "do not depend on it.",
@@ -94,6 +101,27 @@ export const COPY_EN: UiCopy = {
     revisions: (n) => `${n} ${plural(n, "revision", "revisions")}`,
     changeApplied: "Change applied to the text.",
     undo: "Undo",
+  },
+
+  panel: {
+    navLabel: "Panel sections",
+    sections: {
+      summary: "Summary",
+      findings: "Points",
+      settings: "Settings",
+      metrics: "Metrics",
+      probe: "Comprehension",
+    },
+    settingsTitle: "Analysis settings",
+    settingsSummaryReader: (declared) => (declared ? "reader defined" : "reader not defined"),
+    settingsSummaryProfile: (deviations) =>
+      deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "deviation", "deviations")}`,
+    settingsSummaryJoin: " · ",
+    metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence`,
+    probeSummary: "optional AI test",
+    exportLabel: "Export",
+    exportMenuLabel: "Export formats",
+    provenanceTitle: (configHash, version) => `config ${configHash} · lucid ${version}`,
   },
 
   overview: {
@@ -113,9 +141,7 @@ export const COPY_EN: UiCopy = {
     exportDocx: "Download revised text (.docx)",
     exportTxt: "Download text (.txt)",
     docxError: "The .docx could not be generated. Use the .txt export instead.",
-    docxNote:
-      "The .docx file contains the revised text, but does not preserve the original formatting, such as " +
-      "bold, tables, images and headers.",
+    docxNote: "Contains the revised text, without the original formatting: bold, tables, images and headers.",
     importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
     importAnd: " and ",
@@ -133,10 +159,7 @@ export const COPY_EN: UiCopy = {
     scoreCaveat:
       "The score summarizes the criteria that were assessed. It does not approve the document or guarantee " +
       "the text is clear.",
-    lexiconCaveat:
-      "Some criteria check for specific patterns, such as jargon, nominalizations and redundancy. They help " +
-      "with the review, but do not replace the judgment of whoever wrote the text.",
-    readingLabel: "Reading",
+    readingLabel: "Reading metrics",
     readingCaveat:
       "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
       "text is clear.",
@@ -158,7 +181,6 @@ export const COPY_EN: UiCopy = {
   revisionList: {
     regionLabel: "Audit index",
     title: "Audit index",
-    bySeverity: "by severity",
     filterLabel: "Filter annotations",
     bucketAll: "All",
     bucketSafe: "Direct swap",
@@ -172,6 +194,36 @@ export const COPY_EN: UiCopy = {
     coverage: "Coverage",
     cleanCriteria: (n) => `${n} ${plural(n, "criterion checked, no occurrence", "criteria checked, no occurrence")}`,
     hiddenCriteria: (n) => `${n} hidden`,
+    lexiconCaveat:
+      "The criteria check for specific patterns. They help with the review, but do not replace the judgment of whoever wrote the text.",
+    occurrences: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
+    distinct: (n) => `${n} distinct ${plural(n, "excerpt", "excerpts")}`,
+    hiddenByFilter: (n) => `${n} outside the filter`,
+    statePending: "Pending",
+    stateSeen: "Seen",
+    stateDismissed: "Dismissed",
+    searchLabel: "Search the excerpts",
+    searchPlaceholder: "Search excerpt…",
+    showingAll: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
+    showingFiltered: (shown, total) => `${shown} of ${total} ${plural(total, "occurrence", "occurrences")}`,
+    clearFilters: "clear filters",
+    orderBySeverity: "by severity",
+    orderByDocument: "by position",
+    batchLabel: "In bulk",
+    batchClear: (n) => `Clear the marks on these ${n}`,
+    batchCaveat: "Marking as seen is one at a time on purpose: the mark only means something if someone looked. In bulk you can only clear.",
+    clearGroupMarks: (n) => `Clear ${n} ${plural(n, "mark", "marks")}`,
+    scopeOn: "Step through this criterion",
+    scopeOff: "Leave this criterion",
+    markSeen: "Mark as seen",
+    markSeenNamed: (excerpt) => `Mark “${excerpt}” as seen`,
+    dismiss: "Dismiss",
+    dismissNamed: (excerpt) => `Dismiss “${excerpt}”`,
+    unmark: "Unmark",
+    progress: (done, total) => `${done} of ${total} marked`,
+    pendingCount: (n) => `${n} pending`,
+    progressCaveat: "The author's own mark on their review — it does not change the score or approve the text.",
+    progressTitle: (done, total) => `${done} of ${total} marked`,
     absenceCaveat: "No annotations is not a certificate of clarity — it is the coverage of the audit.",
   },
 
@@ -186,6 +238,9 @@ export const COPY_EN: UiCopy = {
     excerpt: "Passage",
     whatWeFound: "What we found",
     whyItMatters: "Why it affects clarity",
+    understandCriterion: "Understand this criterion",
+    excerptMore: "Show the full excerpt",
+    excerptLess: "Collapse the excerpt",
     engineOutput: "Engine output · pt-BR",
     engineOutputHint:
       "The justification comes from the analysis engine, which audits Portuguese — it is not translated along with the interface.",
@@ -193,6 +248,9 @@ export const COPY_EN: UiCopy = {
     navNext: "Next (j)",
     navOf: "of",
     panelLabel: "Audit",
+    crumbAll: "All criteria",
+    crumbBackTo: (criterion) => `Back to the ${criterion} list`,
+    backToList: "Back to list",
     footerDeterministic: "Deterministic analysis",
 
     safeHeader: "Direct swap · curated equivalent",
@@ -476,6 +534,14 @@ export const COPY_EN: UiCopy = {
   probe: {
     title: "Comprehension test",
     lead: "Ask a question about the document. Lucid checks whether the answer can be found in the text.",
+    selectPrompt:
+      "Select a passage in the document. The probe reads only the excerpt you choose — not the whole document.",
+    excerptLabel: "Excerpt that will be sent",
+    clearExcerpt: "clear",
+    onlyThisExcerpt:
+      "The question will be answered from this excerpt alone. Anything outside it is not read by the probe.",
+    excerptTooLong: (chars, max) =>
+      `Excerpt with ${chars.toLocaleString("en-US")} characters — above the ${max.toLocaleString("en-US")} limit. Select a shorter passage.`,
     useBriefingPurpose: "Use what you defined as the reader's purpose:",
     questionLabel: "What does the reader need to find in the text?",
     questionPlaceholder: "e.g. When does the deadline start?",

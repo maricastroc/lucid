@@ -14,13 +14,17 @@
   "counts": {
     "documents": 16,
     "passages": 149,
-    "labelled": 0,
+    "labelled": 75,
     "humanReviewed": 0
   },
   "hashes": {
     "documents": "822e122ccd4a1cda9c3c8291534556d18806bb91b88cd871978b37e4d1ae9f6a",
     "passages": "33a8b1ca633e1d6243bf5214122a14e1d3beb71de8c5533ee229bbc66b930ee6",
-    "labels": {}
+    "labels": {
+      "sigla_sem_expansao": "f30e11ef48ec33f7a5f5dd807c403ab930abb86dcb2b19bf835469c81e960557",
+      "prose_enumeration": "01b28fa782258e88e2a9e0de5e915dac78b103eaaefb4c233eee40da8193f909",
+      "perifrase_inflada": "92eaa68a6bc495b1d414cba38c5dd332d0c6b7df08da5e8e49aee908bf8bee3b"
+    }
   },
   "labelers": [
     {
@@ -33,6 +37,30 @@
       "id": "groq",
       "model": "openai/gpt-oss-120b",
       "promptVersion": "sigla@1",
+      "temperature": 0
+    },
+    {
+      "id": "gemini",
+      "model": "gemini-2.5-flash",
+      "promptVersion": "enum@1",
+      "temperature": 0
+    },
+    {
+      "id": "groq",
+      "model": "openai/gpt-oss-120b",
+      "promptVersion": "enum@1",
+      "temperature": 0
+    },
+    {
+      "id": "gemini",
+      "model": "gemini-2.5-flash",
+      "promptVersion": "perifrase@1",
+      "temperature": 0
+    },
+    {
+      "id": "groq",
+      "model": "openai/gpt-oss-120b",
+      "promptVersion": "perifrase@1",
       "temperature": 0
     }
   ],

@@ -48,7 +48,10 @@
     "corpus:label": "node --env-file-if-exists=.env scripts/corpus/run.mjs label",
     "corpus:reconcile": "node scripts/corpus/run.mjs reconcile",
     "corpus:review": "node scripts/corpus/run.mjs review",
-    "corpus:measure": "vitest run test/eval/corpus-measure.test.ts"
+    "corpus:measure": "vitest run test/eval/corpus-measure.test.ts",
+    "measure:rewrite-context": "CONTEXT_MEASURE=1 vitest run test/eval/rewrite-context.test.ts",
+    "ab:plan": "AB_PLAN=1 vitest run test/eval/rewrite-ab/ab.test.ts",
+    "ab:report": "AB_REPORT=1 vitest run test/eval/rewrite-ab/ab.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.23",

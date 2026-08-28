@@ -1,0 +1,492 @@
+[
+  {
+    "target": "planalto-leis__1989-1994-l7992.txt#322-529",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "D",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "E",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-C@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l7993.txt#114-275",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "C",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "F",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "G",
+        "candidate": "iaris@v20-porta"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l7994.txt#445-692",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "C",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "D",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "E",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-C@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l7999.txt#2654-2823",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-C@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8000.txt#6934-7435",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "C",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "G",
+        "candidate": "iaris@v20-porta"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8002.txt#436-598",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "C",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-B@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8006.txt#879-1050",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "B",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "D",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "E",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-B@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8007.txt#529-1098",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "C",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-C@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8010.txt#1119-1451",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "D",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "E",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-B@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8013.txt#844-1221",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "E",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "G",
+        "candidate": "iaris@v20+briefing+lista@2"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8014.txt#325-604",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "C",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "F",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "G",
+        "candidate": "rewrite@2"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8016.txt#2059-2437",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "G",
+        "candidate": "iaris@v20+briefing"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8017.txt#237-517",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "B",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "D",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "E",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "G",
+        "candidate": "ab-A@1"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l8018.txt#794-963",
+    "model": "gemini-2.5-flash",
+    "relevant": true,
+    "versions": [
+      {
+        "letter": "A",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "B",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "iaris@v20+briefing"
+      },
+      {
+        "letter": "D",
+        "candidate": "iaris@v20-porta"
+      },
+      {
+        "letter": "E",
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "F",
+        "candidate": "iaris@v20+briefing+lista@2"
+      },
+      {
+        "letter": "G",
+        "candidate": "rewrite@2"
+      }
+    ]
+  }
+]

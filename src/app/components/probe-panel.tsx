@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { OperacaoLeitura, ProbeResult, ProbeSignal } from "@/lucid/probe/types";
 import { useCopy } from "../i18n/use-copy";
+import { excerptState, PROBE_MAX_EXCERPT } from "../lib/probe-excerpt";
 import { SendNotice } from "./send-notice";
 import type { UiCopy } from "../i18n/copy";
 
@@ -14,7 +15,15 @@ interface ProbeResponse {
 
 type Status = "idle" | "loading" | "done" | "error";
 
-export function ProbePanel({ text, suggestedQuestion }: { text: string; suggestedQuestion: string }) {
+export function ProbePanel({
+  excerpt: rawExcerpt,
+  onClearExcerpt,
+  suggestedQuestion,
+}: {
+  excerpt: string;
+  onClearExcerpt: () => void;
+  suggestedQuestion: string;
+}) {
   const { c } = useCopy();
   const t = c.probe;
   const [pergunta, setPergunta] = useState("");
@@ -24,8 +33,9 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
   const [resultText, setResultText] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const canRun = pergunta.trim() !== "" && text.trim() !== "" && status !== "loading";
-  const stale = data !== null && resultText !== null && resultText !== text;
+  const excerpt = excerptState(rawExcerpt);
+  const canRun = pergunta.trim() !== "" && excerpt.sendable && status !== "loading";
+  const stale = data !== null && resultText !== null && resultText !== excerpt.text;
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
@@ -41,7 +51,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
       const res = await fetch("/api/probe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, pergunta }),
+        body: JSON.stringify({ text: excerpt.text, pergunta }),
         signal: controller.signal,
       });
       const json = (await res.json().catch(() => null)) as ProbeResponse | { error?: string } | null;
@@ -51,7 +61,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
         return;
       }
       setData(json);
-      setResultText(text);
+      setResultText(excerpt.text);
       setStatus("done");
     } catch (cause) {
       if (controller.signal.aborted) return;
@@ -63,10 +73,10 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
   }
 
   return (
-    <section className="border-t border-rule-1 px-6 py-5">
-      <h3 className="u-label text-ink-3">{t.title}</h3>
+    <div className="px-6 pb-5">
+      <p className="text-[12px] leading-relaxed text-ink-3">{t.lead}</p>
 
-      <p className="mt-2 text-[12px] leading-relaxed text-ink-3">{t.lead}</p>
+      <ExcerptBox excerpt={excerpt} onClear={onClearExcerpt} />
 
       {suggestedQuestion.trim() !== "" && pergunta.trim() === "" && (
         <button
@@ -89,7 +99,7 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
         />
       </label>
 
-      <SendNotice text={text} destination={c.send.probePurpose} />
+      <SendNotice text={excerpt.text} destination={c.send.probePurpose} />
 
       <button
         type="button"
@@ -114,7 +124,50 @@ export function ProbePanel({ text, suggestedQuestion }: { text: string; suggeste
       )}
 
       <p className="mt-4 text-[11px] leading-relaxed text-ink-3">{t.caveat}</p>
-    </section>
+    </div>
+  );
+}
+
+function ExcerptBox({
+  excerpt,
+  onClear,
+}: {
+  excerpt: ReturnType<typeof excerptState>;
+  onClear: () => void;
+}) {
+  const { c } = useCopy();
+  const t = c.probe;
+
+  if (excerpt.empty) {
+    return (
+      <p className="mt-3 rounded-lg border border-dashed border-rule-2 px-3 py-2.5 text-[12px] leading-relaxed text-ink-3">
+        {t.selectPrompt}
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="u-sublabel text-ink-3">{t.excerptLabel}</span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="rounded-md px-1.5 py-0.5 text-[11px] text-ink-3 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-1"
+        >
+          {t.clearExcerpt}
+        </button>
+      </div>
+      <blockquote className="mt-1.5 max-h-40 overflow-y-auto rounded-lg border border-rule-2 bg-sheet px-3 py-2.5">
+        <span className="whitespace-pre-wrap font-serif text-[13.5px] leading-snug text-ink-1">{excerpt.text}</span>
+      </blockquote>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-ink-2">{t.onlyThisExcerpt}</p>
+      {excerpt.tooLong && (
+        <p role="alert" className="mt-1.5 text-[11.5px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
+          {t.excerptTooLong(excerpt.chars, PROBE_MAX_EXCERPT)}
+        </p>
+      )}
+    </div>
   );
 }
 
