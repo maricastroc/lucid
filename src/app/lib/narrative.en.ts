@@ -15,10 +15,8 @@ export const NARRATIVE_EN: NarrativeSet = {
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      const over = w != null && th != null ? w - th : null;
-      return `A single sentence piles up ${w ?? "many"} words${
-        over != null ? ` — ${over} over the ${th} limit` : ""
-      }. The detector does not interpret content: it counts the words in the sentence and compares them to the limit.`;
+      if (w == null || th == null) return "This sentence is too long to read comfortably.";
+      return `This sentence has ${w} words. For easier reading, we recommend sentences of up to ${th} words.`;
     },
     confidence: (f) => {
       const w = metaNum(f, "words");

@@ -7,7 +7,6 @@ export type StateFilter = "all" | "pending" | "seen" | "dismissed";
 export type SortOrder = "severity" | "document";
 
 export interface FindingQuery {
-  readonly activeCriteria: ReadonlySet<string>;
   readonly criterion: string | null;
   readonly bucket: Bucket;
   readonly state: StateFilter;
@@ -60,7 +59,6 @@ export function queryFindings(
 
   const byCriterion = new Map<string, { kept: Finding[]; filteredOut: number; maxRank: number; first: number }>();
   for (const finding of all) {
-    if (!query.activeCriteria.has(finding.criterion)) continue;
     const entry = byCriterion.get(finding.criterion) ?? {
       kept: [],
       filteredOut: 0,

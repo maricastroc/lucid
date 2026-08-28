@@ -18,10 +18,7 @@ function finding(criterion: string, start: number, text: string, over: Partial<F
   } as Finding;
 }
 
-const ALL_CRITERIA = new Set(["jargon", "passive_voice", "long_sentence"]);
-
 const baseQuery: FindingQuery = {
-  activeCriteria: ALL_CRITERIA,
   criterion: null,
   bucket: "all",
   state: "all",
@@ -67,16 +64,6 @@ describe("finding query — grouping and order", () => {
 });
 
 describe("finding query — filters", () => {
-  it("filters by criterion visibility, dropping the group entirely", () => {
-    const { groups, visible } = queryFindings(
-      CORPUS,
-      { ...baseQuery, activeCriteria: new Set(["jargon"]) },
-      EMPTY_MARKS,
-    );
-    expect(groups.map((g) => g.criterion)).toEqual(["jargon"]);
-    expect(visible).toHaveLength(3);
-  });
-
   it("scopes to a single criterion without hiding that the others exist", () => {
     const { groups } = queryFindings(CORPUS, { ...baseQuery, criterion: "passive_voice" }, EMPTY_MARKS);
     expect(groups.map((g) => g.criterion)).toEqual(["passive_voice"]);

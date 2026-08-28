@@ -187,14 +187,16 @@ export const COPY_PT: UiCopy = {
     bucketHuman: "Decisão sua",
     empty: "Nenhuma anotação disparada.",
     emptyInFilter: "Nenhuma anotação neste filtro.",
-    hideInDocument: "Ocultar no documento",
-    hideNamed: (label) => `Ocultar “${label}” no documento`,
-    showInDocument: "Mostrar no documento",
-    showNamed: (label) => `Mostrar “${label}” no documento`,
+    hideInDocument: "Ocultar realces no documento",
+    hideNamed: (label) => `Ocultar os realces de “${label}” no documento`,
+    showInDocument: "Mostrar realces no documento",
+    showNamed: (label) => `Mostrar os realces de “${label}” no documento`,
     coverage: "Cobertura",
     cleanCriteria: (n) =>
       `${n} ${plural(n, "critério verificado, sem ocorrência", "critérios verificados, sem ocorrência")}`,
-    hiddenCriteria: (n) => `${n} ${plural(n, "oculto", "ocultos")}`,
+    hiddenCriteria: (n) =>
+      `${n} ${plural(n, "critério com realces ocultos", "critérios com realces ocultos")} — continuam na auditoria`,
+    highlightsOff: "realces ocultos no documento",
     lexiconCaveat:
       "Os critérios verificam padrões específicos. Ajudam na revisão, mas não substituem a análise de quem escreveu.",
     occurrences: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
@@ -269,9 +271,13 @@ export const COPY_PT: UiCopy = {
 
     humanHeader: "Exige decisão humana",
     humanLead:
-      "A ferramenta identificou a construção, mas não existe reescrita segura sem conhecer a intenção do autor — " +
-      "então ela prefere ",
-    humanLeadStrong: "apontar a inventar",
+      "Este ponto exige uma análise do contexto. Revise o trecho e escolha a alteração que melhor preserve o " +
+      "sentido original.",
+    humanLeadByCriterion: {
+      long_sentence:
+        "Há mais de uma forma de dividir esta frase. Revise o trecho e escolha a divisão que melhor " +
+        "preserve o sentido original.",
+    },
     howToProceed: "Como seguir",
 
     manualOpen: "Editar ou colar minha versão",
@@ -282,8 +288,8 @@ export const COPY_PT: UiCopy = {
     manualVerify: "Verificar minha versão",
     manualVerifying: "Verificando…",
     manualNote:
-      "Você escreve ou cola; a engine julga a sua versão com as mesmas provas da IA — nenhuma fonte é privilegiada. " +
-      "Aplicar vira um rascunho e a engine re-audita.",
+      "Escreva ou cole sua versão. Ao aplicar, ela será salva como rascunho e analisada pelos mesmos critérios " +
+      "usados na reescrita por IA.",
 
     aiTitle: "Reescrita por IA",
     aiTarget: (unit) => `A IA vai reescrever ${unit} em destaque no documento e verificar o resultado.`,

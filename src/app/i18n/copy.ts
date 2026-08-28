@@ -1,4 +1,4 @@
-import type { PrincipleGroup, Severity } from "@/lucid";
+import type { CriterionId, PrincipleGroup, Severity } from "@/lucid";
 import type { PanelSectionId } from "../lib/panel-sections";
 import type { CriterionCoverage } from "@/report/eval/contract";
 import type { LedgerSource } from "../lib/ledger";
@@ -157,6 +157,7 @@ export interface UiCopy {
     readonly coverage: string;
     readonly cleanCriteria: (n: number) => string;
     readonly hiddenCriteria: (n: number) => string;
+    readonly highlightsOff: string;
     readonly absenceCaveat: string;
     readonly occurrences: (n: number) => string;
     readonly distinct: (n: number) => string;
@@ -227,7 +228,8 @@ export interface UiCopy {
 
     readonly humanHeader: string;
     readonly humanLead: string;
-    readonly humanLeadStrong: string;
+
+    readonly humanLeadByCriterion: Partial<Record<CriterionId, string>>;
     readonly howToProceed: string;
 
     readonly manualOpen: string;

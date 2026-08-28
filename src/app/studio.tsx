@@ -12,6 +12,7 @@ import { sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
 import { useCopy } from "./i18n/use-copy";
 import { useFindingQuery } from "./hooks/use-finding-query";
+import { useHighlightVisibility } from "./hooks/use-highlight-visibility";
 import { useReviewMarks } from "./hooks/use-review-marks";
 import { useDocumentSource } from "./hooks/use-document-source";
 import { useDocumentSelection } from "./hooks/use-document-selection";
@@ -74,7 +75,6 @@ export function Studio() {
 
   const {
     query,
-    toggleCriterion,
     setCriterion,
     setBucket,
     setState,
@@ -84,10 +84,8 @@ export function Studio() {
     filtered,
   } = useFindingQuery();
 
-  const findings = useMemo(
-    () => orderFindingsForIndex(diagnostic.findings.filter((f) => query.activeCriteria.has(f.criterion))),
-    [diagnostic, query.activeCriteria],
-  );
+  const findings = useMemo(() => orderFindingsForIndex(diagnostic.findings), [diagnostic]);
+  const { hiddenHighlights, toggleHighlights } = useHighlightVisibility();
   const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
   const humanCount = findings.length - safeCount;
 
@@ -271,7 +269,8 @@ export function Studio() {
     query,
     marks,
     filtered,
-    onToggleCriterion: toggleCriterion,
+    hiddenHighlights,
+    onToggleHighlights: toggleHighlights,
     onBucket: setBucket,
     onState: setState,
     onSearch: setSearch,
@@ -361,7 +360,7 @@ export function Studio() {
             blocks={blocks}
             selectedId={selectedId}
             flashId={flashId}
-            activeCriteria={query.activeCriteria}
+            hiddenHighlights={hiddenHighlights}
             rewriteTarget={rewriteTarget}
             onChangeText={onFreeTypeText}
             onSelectFinding={selectFinding}

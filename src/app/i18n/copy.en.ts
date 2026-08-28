@@ -190,13 +190,15 @@ export const COPY_EN: UiCopy = {
     bucketHuman: "Your call",
     empty: "No annotations fired.",
     emptyInFilter: "No annotations under this filter.",
-    hideInDocument: "Hide in the document",
-    hideNamed: (label) => `Hide “${label}” in the document`,
-    showInDocument: "Show in the document",
-    showNamed: (label) => `Show “${label}” in the document`,
+    hideInDocument: "Hide highlights in the document",
+    hideNamed: (label) => `Hide the “${label}” highlights in the document`,
+    showInDocument: "Show highlights in the document",
+    showNamed: (label) => `Show the “${label}” highlights in the document`,
     coverage: "Coverage",
     cleanCriteria: (n) => `${n} ${plural(n, "criterion checked, no occurrence", "criteria checked, no occurrence")}`,
-    hiddenCriteria: (n) => `${n} hidden`,
+    hiddenCriteria: (n) =>
+      `${n} ${plural(n, "criterion with highlights hidden", "criteria with highlights hidden")} — still in the audit`,
+    highlightsOff: "highlights hidden in the document",
     lexiconCaveat:
       "The criteria check for specific patterns. They help with the review, but do not replace the judgment of whoever wrote the text.",
     occurrences: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
@@ -271,9 +273,13 @@ export const COPY_EN: UiCopy = {
 
     humanHeader: "Requires a human decision",
     humanLead:
-      "The tool identified the construction, but there is no safe rewrite without knowing the author's intent — so it " +
-      "would rather ",
-    humanLeadStrong: "point than invent",
+      "This point calls for reading the context. Review the passage and choose the change that best preserves the " +
+      "original meaning.",
+    humanLeadByCriterion: {
+      long_sentence:
+        "There is more than one way to split this sentence. Review the passage and choose the split that best " +
+        "preserves the original meaning.",
+    },
     howToProceed: "How to proceed",
 
     manualOpen: "Edit or paste my version",
@@ -284,8 +290,8 @@ export const COPY_EN: UiCopy = {
     manualVerify: "Verify my version",
     manualVerifying: "Verifying…",
     manualNote:
-      "You write or paste; the engine judges your version with the same proofs it applies to the AI — no source is " +
-      "privileged. Applying it creates a draft and the engine re-audits.",
+      "Write or paste your version. When you apply it, it is saved as a draft and checked against the same " +
+      "criteria used for the AI rewrite.",
 
     aiTitle: "AI rewrite",
     aiTarget: (unit) => `The AI will rewrite ${unit} highlighted in the document and verify the result.`,

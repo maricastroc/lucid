@@ -17,7 +17,7 @@ interface Props {
   blocks: readonly Block[] | null;
   selectedId: string | null;
   flashId: string | null;
-  activeCriteria: ReadonlySet<string>;
+  hiddenHighlights: ReadonlySet<string>;
   rewriteTarget: Span | null;
   onChangeText: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
@@ -26,19 +26,19 @@ interface Props {
 interface SegmentContext {
   selectedId: string | null;
   flashId: string | null;
-  activeCriteria: ReadonlySet<string>;
+  hiddenHighlights: ReadonlySet<string>;
   rewriteTarget: Span | null;
   onSelectFinding: (finding: Finding) => void;
 }
 
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
   const { c, lang } = useCopy();
-  const { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding } = ctx;
+  const { selectedId, flashId, hiddenHighlights, rewriteTarget, onSelectFinding } = ctx;
   return (
     <>
       {segments.map((seg, i) => {
-        const inline = seg.inline && activeCriteria.has(seg.inline.criterion) ? seg.inline : undefined;
-        const passage = seg.passage && activeCriteria.has(seg.passage.criterion) ? seg.passage : undefined;
+        const inline = seg.inline && !hiddenHighlights.has(seg.inline.criterion) ? seg.inline : undefined;
+        const passage = seg.passage && !hiddenHighlights.has(seg.passage.criterion) ? seg.passage : undefined;
         const inTarget =
           rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
 
@@ -122,20 +122,20 @@ function headingSize(level: number): string {
 function BlockView({
   blocks,
   diagnostic,
-  activeCriteria,
+  hiddenHighlights,
   ctx,
   isFocused,
 }: {
   blocks: readonly Block[];
   diagnostic: Diagnostic;
-  activeCriteria: ReadonlySet<string>;
+  hiddenHighlights: ReadonlySet<string>;
   ctx: SegmentContext;
   isFocused: boolean;
 }) {
   const { c } = useCopy();
   const markersIn = (start: number, end: number): Finding[] =>
     diagnostic.findings.filter(
-      (f) => activeCriteria.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
+      (f) => !hiddenHighlights.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
     );
 
   return (
@@ -189,7 +189,7 @@ function BlockView({
 }
 
 export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentView(
-  { mode, text, diagnostic, blocks, selectedId, flashId, activeCriteria, rewriteTarget, onChangeText, onSelectFinding },
+  { mode, text, diagnostic, blocks, selectedId, flashId, hiddenHighlights, rewriteTarget, onChangeText, onSelectFinding },
   scrollRef,
 ) {
   const { c } = useCopy();
@@ -199,7 +199,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   const isFocused = mode === "audit" && selectedId !== null;
 
   const structured = blocks !== null && blocks.some((b) => b.kind !== "paragraph");
-  const ctx: SegmentContext = { selectedId, flashId, activeCriteria, rewriteTarget, onSelectFinding };
+  const ctx: SegmentContext = { selectedId, flashId, hiddenHighlights, rewriteTarget, onSelectFinding };
 
   return (
     <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label={c.documentView.regionLabel}>
@@ -254,7 +254,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   <BlockView
                     blocks={blocks!}
                     diagnostic={diagnostic}
-                    activeCriteria={activeCriteria}
+                    hiddenHighlights={hiddenHighlights}
                     ctx={ctx}
                     isFocused={isFocused}
                   />
@@ -262,7 +262,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   paragraphs.map((para) => (
                     <p key={para.number} className="relative">
                       <MarginTick
-                        markers={para.markers.filter((m) => activeCriteria.has(m.criterion))}
+                        markers={para.markers.filter((m) => !hiddenHighlights.has(m.criterion))}
                         selectedId={selectedId}
                         isFocused={isFocused}
                       />

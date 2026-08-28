@@ -15,10 +15,8 @@ export const NARRATIVE_PT: NarrativeSet = {
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      const over = w != null && th != null ? w - th : null;
-      return `Uma única frase acumula ${w ?? "muitas"} palavras${
-        over != null ? ` — ${over} acima do limite de ${th}` : ""
-      }. O detector não interpreta o conteúdo: conta as palavras da frase e compara com o limite.`;
+      if (w == null || th == null) return "Esta frase é longa demais para uma leitura fácil.";
+      return `Esta frase tem ${w} palavras. Para facilitar a leitura, recomendamos frases com até ${th} palavras.`;
     },
     confidence: (f) => {
       const w = metaNum(f, "words");

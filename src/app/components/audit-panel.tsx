@@ -45,7 +45,8 @@ export interface AuditPanelProps {
   query: FindingQuery;
   marks: ReviewMarks;
   filtered: boolean;
-  onToggleCriterion: (criterion: string) => void;
+  hiddenHighlights: ReadonlySet<string>;
+  onToggleHighlights: (criterion: string) => void;
   onBucket: (b: Bucket) => void;
   onState: (s: StateFilter) => void;
   onSearch: (s: string) => void;
@@ -142,7 +143,8 @@ export function AuditPanel(props: AuditPanelProps) {
             onCriterion={props.onCriterion}
             onClearFilters={props.onClearFilters}
             onSelect={props.onSelect}
-            onToggleCriterion={props.onToggleCriterion}
+            hiddenHighlights={props.hiddenHighlights}
+            onToggleHighlights={props.onToggleHighlights}
             onMark={props.onMark}
             onMarkMany={props.onMarkMany}
           />

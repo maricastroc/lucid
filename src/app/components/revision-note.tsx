@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { type Finding, type Span } from "@/lucid";
+import { isCriterionId, type Finding, type Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, severityLabel } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
@@ -346,6 +346,7 @@ function HumanDecision({
 }) {
   const { c, lang } = useCopy();
   const rationale = buildConfidence(finding, lang).rationale;
+  const humanLead = isCriterionId(finding.criterion) ? c.note.humanLeadByCriterion[finding.criterion] : undefined;
   return (
     <div className="overflow-hidden rounded-xl border border-human-line border-l-[3px] border-l-human bg-human-weak">
       <div className="flex items-center gap-2 px-3 pt-3.5 text-[12.5px] font-semibold text-human">
@@ -354,8 +355,7 @@ function HumanDecision({
       </div>
       <div className="px-3 py-3">
         <p className="text-[12.5px] leading-relaxed text-ink-1">
-          {c.note.humanLead}
-          <span className="text-ink-0">{c.note.humanLeadStrong}</span>.
+          {humanLead ?? c.note.humanLead}
         </p>
         <Disclosure label={c.note.howToProceed}>
           <p className="text-[12px] leading-relaxed text-ink-2">{rationale}</p>

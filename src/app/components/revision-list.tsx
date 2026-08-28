@@ -29,7 +29,8 @@ interface Props {
   onCriterion: (criterion: string | null) => void;
   onClearFilters: () => void;
   onSelect: (finding: Finding) => void;
-  onToggleCriterion: (criterion: string) => void;
+  hiddenHighlights: ReadonlySet<string>;
+  onToggleHighlights: (criterion: string) => void;
   onMark: (finding: Finding, mark: ReviewMark | null) => void;
   onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
 }
@@ -159,7 +160,8 @@ export function RevisionList({
   onCriterion,
   onClearFilters,
   onSelect,
-  onToggleCriterion,
+  hiddenHighlights,
+  onToggleHighlights,
   onMark,
   onMarkMany,
 }: Props) {
@@ -171,8 +173,8 @@ export function RevisionList({
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
   const plan = startHerePlan(allFindings, marks, filtered);
+  const hiddenHighlightCount = groups.filter((g) => hiddenHighlights.has(g.criterion)).length;
 
-  const hidden = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) > 0 && !query.activeCriteria.has(id));
   const clean = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) === 0);
 
   const toggleGroup = (criterion: string) =>
@@ -278,6 +280,7 @@ export function RevisionList({
           {filtered
             ? c.revisionList.showingFiltered(visible.length, allFindings.length)
             : c.revisionList.showingAll(visible.length)}
+          {hiddenHighlightCount > 0 && ` · ${c.revisionList.hiddenCriteria(hiddenHighlightCount)}`}
         </span>
         <div className="flex shrink-0 items-center gap-1">
           {filtered && (
@@ -331,7 +334,8 @@ export function RevisionList({
               selectedId={selectedId}
               onToggle={() => toggleGroup(group.criterion)}
               onScope={() => onCriterion(query.criterion === group.criterion ? null : group.criterion)}
-              onHide={() => onToggleCriterion(group.criterion)}
+              highlightsHidden={hiddenHighlights.has(group.criterion)}
+              onToggleHighlights={() => onToggleHighlights(group.criterion)}
               onSelect={onSelect}
               onMark={onMark}
               onMarkMany={onMarkMany}
@@ -340,7 +344,7 @@ export function RevisionList({
         )}
       </div>
 
-      {(clean.length > 0 || hidden.length > 0) && (
+      {clean.length > 0 && (
         <div className="px-3 pb-4">
           <button
             type="button"
@@ -353,33 +357,12 @@ export function RevisionList({
             />
             <span className="min-w-0 flex-1 text-[12px]">
               {c.revisionList.cleanCriteria(clean.length)}
-              {hidden.length > 0 && ` · ${c.revisionList.hiddenCriteria(hidden.length)}`}
             </span>
             <span className="u-sublabel">{c.revisionList.coverage}</span>
           </button>
 
           {coverageOpen && (
             <div className="mt-1 flex flex-col gap-0.5">
-              {hidden.map((criterion) => {
-                const meta = metaFor(criterion, lang);
-                return (
-                  <div key={criterion} className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 opacity-60">
-                    <CriterionMark criterion={criterion} />
-                    <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-1">{meta.label}</span>
-                    <ProvenanceTag tag={tagFor(diagnostic, criterion, lang)} />
-                    <span className="tabular-nums text-[12px] text-ink-3">{countOf(diagnostic, criterion)}</span>
-                    <button
-                      type="button"
-                      aria-label={c.revisionList.showNamed(meta.label)}
-                      title={c.revisionList.showInDocument}
-                      onClick={() => onToggleCriterion(criterion)}
-                      className="grid size-6 shrink-0 place-items-center rounded-md text-ink-3 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
-                    >
-                      <EyeOffIcon className="size-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
               {clean.map((criterion) => {
                 const meta = metaFor(criterion, lang);
                 return (
@@ -412,7 +395,8 @@ function Group({
   selectedId,
   onToggle,
   onScope,
-  onHide,
+  highlightsHidden,
+  onToggleHighlights,
   onSelect,
   onMark,
   onMarkMany,
@@ -425,7 +409,8 @@ function Group({
   selectedId: string | null;
   onToggle: () => void;
   onScope: () => void;
-  onHide: () => void;
+  highlightsHidden: boolean;
+  onToggleHighlights: () => void;
   onSelect: (finding: Finding) => void;
   onMark: (finding: Finding, mark: ReviewMark | null) => void;
   onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
@@ -450,7 +435,9 @@ function Group({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left"
+          className={`flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-opacity duration-150 ${
+            highlightsHidden ? "opacity-55" : ""
+          }`}
         >
           <ChevronDownIcon
             className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
@@ -467,6 +454,12 @@ function Group({
             </span>
             <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-ink-3">
               <span className="tabular-nums">{c.revisionList.occurrences(group.items.length)}</span>
+              {highlightsHidden && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>{c.revisionList.highlightsOff}</span>
+                </>
+              )}
               {distinct < group.items.length && (
                 <>
                   <span aria-hidden>·</span>
@@ -485,12 +478,15 @@ function Group({
         </button>
         <button
           type="button"
-          aria-label={c.revisionList.hideNamed(meta.label)}
-          title={c.revisionList.hideInDocument}
-          onClick={onHide}
-          className="mr-1.5 grid size-7 shrink-0 place-items-center rounded-md text-ink-dim transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1"
+          aria-pressed={highlightsHidden}
+          aria-label={highlightsHidden ? c.revisionList.showNamed(meta.label) : c.revisionList.hideNamed(meta.label)}
+          title={highlightsHidden ? c.revisionList.showInDocument : c.revisionList.hideInDocument}
+          onClick={onToggleHighlights}
+          className={`mr-1.5 grid size-7 shrink-0 place-items-center rounded-md transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1 ${
+            highlightsHidden ? "text-ink-2" : "text-ink-dim"
+          }`}
         >
-          <EyeIcon className="size-3.5" />
+          {highlightsHidden ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
         </button>
       </div>
 
