@@ -110,21 +110,15 @@ export function distinctTexts(items: readonly Finding[]): number {
   return new Set(items.map((f) => normalize(f.span.text))).size;
 }
 
-/** How many occurrences the audit found for one criterion, whatever the current filter shows. */
 export function occurrenceCount(diagnostic: Diagnostic, criterion: string): number {
   const score = diagnostic.score.byCriterion.find((entry) => entry.criterion === criterion);
   return score ? score.count.info + score.count.warning + score.count.error : 0;
 }
 
-/**
- * The criteria that ran and found nothing, in the order the index presents criteria. Their silence
- * is the coverage of the audit, so it is listed rather than left implicit.
- */
 export function cleanCriteria(diagnostic: Diagnostic): readonly string[] {
   return CRITERION_ORDER.filter((criterion) => occurrenceCount(diagnostic, criterion) === 0);
 }
 
-/** How many of the groups on screen had their highlights hidden in the document. */
 export function hiddenHighlightCount(
   groups: readonly FindingGroup[],
   hidden: ReadonlySet<string>,

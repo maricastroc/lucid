@@ -7,11 +7,6 @@ import type { UiLang } from "../../i18n/types";
 import { verifyManualEdit } from "../../lib/rewrite";
 import { isManualEditDirty } from "../../lib/text-edit";
 
-/**
- * Closed carries no text at all: there was no draft to speak of before the author opened the
- * editor. Editing and checking are the two states the open editor can be in, and a verification
- * may sit under either — re-checking keeps the previous verdict on screen, as it did before.
- */
 export type ManualEditDraft =
   | { readonly status: "closed" }
   | { readonly status: "editing"; readonly text: string }
@@ -19,7 +14,6 @@ export type ManualEditDraft =
 
 interface StampedVerification {
   readonly result: VerifiedRewrite;
-  /** What the author had declared when this verdict was produced. */
   readonly forDeclaration: AgentDeclaration | null;
 }
 
@@ -38,7 +32,6 @@ export interface ManualEditDraftOptions {
 
 export interface ManualEditDraftControls {
   readonly draft: ManualEditDraft;
-  /** The verdict to show, already retired when the declaration it was made under changed. */
   readonly verification: VerifiedRewrite | null;
   readonly dirty: boolean;
   readonly open: () => void;
@@ -57,7 +50,6 @@ export function useManualEditDraft({
 }: ManualEditDraftOptions): ManualEditDraftControls {
   const original = target.text;
   const [state, setState] = useState<State>({ status: "closed" });
-  // Only the newest check may write a verdict, so a slow answer cannot land on a newer draft.
   const checkIdRef = useRef(0);
 
   const open = useCallback(
@@ -67,7 +59,6 @@ export function useManualEditDraft({
 
   const close = useCallback(() => setState({ status: "closed" }), []);
 
-  // Editing retires the verdict: it was about text that no longer exists.
   const edit = useCallback(
     (text: string) => setState({ status: "editing", text, verification: null }),
     [],
@@ -98,8 +89,6 @@ export function useManualEditDraft({
         setState({ status: "editing", text, verification: { result, forDeclaration: declaration } });
       }
     } finally {
-      // A failure leaves the editor open with the previous verdict, and the error keeps travelling
-      // — the same as before this was a hook.
       if (checkIdRef.current === checkId) {
         setState((now) =>
           now.status === "checking" ? { status: "editing", text: now.text, verification: now.verification } : now,

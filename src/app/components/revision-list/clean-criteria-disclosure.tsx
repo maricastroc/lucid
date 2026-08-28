@@ -6,7 +6,6 @@ import { useCopy } from "../../i18n/use-copy";
 import { CriterionMark } from "../badges";
 import { ChevronDownIcon } from "../icons";
 
-/** The criteria that ran and found nothing — the coverage of the audit, stated rather than implied. */
 export function CleanCriteriaDisclosure({ criteria }: { criteria: readonly string[] }) {
   const { c, lang } = useCopy();
   const [coverageOpen, setCoverageOpen] = useState(false);

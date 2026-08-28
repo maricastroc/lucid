@@ -12,10 +12,6 @@ import {
   REWRITE_LOSING_THE_NUMBER,
 } from "./support/documents";
 
-/**
- * The panel talks to /api/rewrite. The response is built here by the real proposer and the real
- * verifier, so the verdict under test is the engine's own — only the network hop is replaced.
- */
 async function answerWith(proposed: string): Promise<VerifiedRewrite> {
   const finding = analyze(PASSIVE_AND_JARGON).findings[0];
   const target = rewriteTargetAt(PASSIVE_AND_JARGON, finding.span.start).span;

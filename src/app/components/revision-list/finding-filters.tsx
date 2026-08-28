@@ -6,7 +6,6 @@ import type { Bucket, FindingQuery, SortOrder, StateFilter } from "../../lib/fin
 import { useCopy } from "../../i18n/use-copy";
 import { ChevronDownIcon, ChevronLeftIcon } from "../icons";
 
-/** Everything the reader can do to narrow the index, in one place and in one domain. */
 export interface QueryActions {
   bucket: (bucket: Bucket) => void;
   state: (state: StateFilter) => void;
@@ -18,7 +17,6 @@ export interface QueryActions {
 
 interface Props {
   query: FindingQuery;
-  /** True once the index is big enough to be worth sifting — search and state filters appear. */
   sifting: boolean;
   filtered: boolean;
   visibleCount: number;

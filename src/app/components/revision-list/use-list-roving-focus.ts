@@ -3,16 +3,10 @@
 import { useRef, type KeyboardEvent, type RefObject } from "react";
 
 export interface ListRovingFocus {
-  /** Goes on the container that holds the rows. */
   ref: RefObject<HTMLDivElement | null>;
   onKeyDown: (event: KeyboardEvent) => void;
 }
 
-/**
- * Up and down walk the rows of the index without the reader having to tab through the mark and
- * dismiss buttons of every row on the way. Rows are found by `data-row` rather than by component,
- * so the list can be recomposed without the keys changing meaning.
- */
 export function useListRovingFocus(): ListRovingFocus {
   const ref = useRef<HTMLDivElement>(null);
 
