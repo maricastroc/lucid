@@ -21,7 +21,7 @@ describe("the pre-flight lives only where content actually leaves the machine", 
     const mounted = importersOf("SendNotice", "src/app").filter((p) => !p.endsWith("send-notice.tsx"));
     expect(mounted.sort()).toEqual([
       "src/app/components/probe-panel.tsx",
-      "src/app/components/revision-note.tsx",
+      "src/app/components/revision-note/ai-rewrite-panel.tsx",
     ]);
   });
 
