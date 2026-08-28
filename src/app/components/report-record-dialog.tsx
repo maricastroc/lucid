@@ -72,6 +72,9 @@ export function ReportRecordDialog({
               </label>
             ))}
             <p className="mt-4 text-[11.5px] leading-relaxed text-ink-3">{r.caveat}</p>
+            <p className="mt-3 text-[11px] text-ink-dim" title={r.isoTitle}>
+              {r.isoNote}
+            </p>
           </div>
 
           <div className="shrink-0 px-6 pb-6 pt-5">

@@ -112,14 +112,24 @@ export const COPY_PT: UiCopy = {
       metrics: "Métricas",
       probe: "Compreensão",
     },
-    settingsTitle: "Ajustes da análise",
-    settingsSummaryReader: (declared) => (declared ? "leitor definido" : "leitor não definido"),
+    settingsTitle: "Personalizar análise",
+    settingsLead: "Personalize os critérios de acordo com as regras do documento ou da sua organização.",
+    settingsSummaryExpressions: (n) =>
+      n === 0 ? "nenhuma expressão" : `${n} ${plural(n, "expressão", "expressões")}`,
     settingsSummaryProfile: (deviations) =>
-      deviations === 0 ? "limites padrão" : `${deviations} ${plural(deviations, "desvio", "desvios")}`,
+      deviations === 0
+        ? "limites padrão"
+        : `${deviations} ${plural(deviations, "limite alterado", "limites alterados")}`,
     settingsSummaryJoin: " · ",
-    goToFindings: "Ir para os pontos da auditoria",
+    settingsRecordPointer:
+      "Informações sobre o leitor e o objetivo do documento ficam em Exportar › Informações do relatório.",
+    settingsIsoNote: "Baseado na ABNT NBR ISO 24495-1",
+    settingsIsoTitle:
+      "Esta seção ajuda a aplicar as orientações da seção 5.1 sobre relevância para o leitor. " +
+      "Os demais limites correspondem aos critérios de frase, parágrafo e título.",
+    goToFindings: "Ver pontos da auditoria",
     goToFindingsHint:
-      "Estes ajustes não geram pontos. A revisão acontece na aba Pontos.",
+      "Esses ajustes não são pontos da auditoria, mas mudam como alguns pontos são identificados.",
     metricsSummary: (words, perSentence) => `${words} palavras · ${perSentence} por frase`,
     probeSummary: "teste opcional com IA",
     exportLabel: "Exportar",
@@ -218,8 +228,10 @@ export const COPY_PT: UiCopy = {
     batchClear: (n) => `Limpar as marcas destas ${n}`,
     batchCaveat: "Marcar como vista é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
     clearGroupMarks: (n) => `Limpar ${n} ${plural(n, "marca", "marcas")}`,
-    scopeOn: "Percorrer este critério",
-    scopeOff: "Sair deste critério",
+    scopeOn: "Filtrar por este critério",
+    scopeOff: "Ver todos os critérios",
+    scopeHint: (n) =>
+      `A lista e a navegação ‹ › passam a percorrer só as ${n} ${plural(n, "ocorrência", "ocorrências")} deste critério.`,
     markSeen: "Marcar como vista",
     markSeenHint: "Marcar como vista — você olhou esta ocorrência",
     markSeenNamed: (excerpt) => `Marcar “${excerpt}” como vista`,
@@ -449,63 +461,53 @@ export const COPY_PT: UiCopy = {
   },
 
   briefing: {
-    label: "Princípio 1 · Relevante",
-    declared: "Leitor definido.",
-    notDeclared: "Leitor não definido.",
-    rationale:
-      "Nenhuma regra decide o que é relevante para um leitor específico, então este princípio não tem " +
-      "critério automático e nunca é dado por cumprido. A Lucid confere aqui uma única coisa literal: as " +
-      "expressões que você declarar como essenciais.",
-    optionalNote:
-      "Opcional e salvo automaticamente neste navegador. Preencher ou deixar em branco não altera o " +
-      "número de pontos da auditoria nem o placar — o Princípio 1 não tem critério automático.",
-    verifiedLabel: "O que a ferramenta confere",
-    verifiedUse:
-      "Esta lista é a única parte do Princípio 1 que produz verificação: a Lucid procura cada expressão " +
-      "literalmente no texto e diz onde ela está ou que não está.",
-    recordMovedLabel: "Registro do contexto",
-    recordMoved:
-      "Quem é o leitor, o que ele precisa fazer e o que já sabe são registro opcional: a Lucid guarda e " +
-      "publica no relatório, mas não verifica nem usa para reescrever. Por isso ficam fora da revisão, " +
-      "em Exportar › Dados do relatório.",
-    openDeclare: "Definir o leitor",
-    openReview: "Rever leitor",
-    closeBriefing: "Fechar",
-    audienceLabel: "Quem é o leitor?",
-    audienceHint: "Descreva quem vai ler de verdade — não o cargo que assina.",
+    label: "Palavras e expressões obrigatórias",
+    chip: "A Lucid procura no texto",
+    lead:
+      "Adicione palavras ou expressões que precisam ser encontradas exatamente como você escrever. " +
+      "A Lucid mostra onde cada uma aparece — ou avisa quando não encontra.",
+    audienceLabel: "Para quem este texto foi escrito?",
+    audienceHint: "Quem vai ler de verdade, não quem assina.",
     audiencePlaceholder: "Ex.: cidadão sem formação jurídica que pede o benefício pela primeira vez",
-    purposeLabel: "O que ele precisa fazer depois de ler?",
-    purposeHint: "A ação ou decisão concreta que o texto tem que viabilizar.",
+    purposeLabel: "O que essa pessoa precisa fazer?",
+    purposeHint: "A ação concreta que o texto tem que viabilizar.",
     purposePlaceholder: "Ex.: saber se tem direito e reunir os documentos no prazo",
-    priorLabel: "O que ele já sabe?",
-    priorHint: "O que se pode pressupor — e, por consequência, o que precisa ser explicado.",
+    priorLabel: "O que ela já sabe sobre o assunto?",
+    priorHint: "O que dá para pressupor — e, portanto, o que precisa ser explicado.",
     priorPlaceholder: "Ex.: sabe que existe um benefício; não conhece o vocabulário do processo",
-    mustFindLabel: "O que o leitor precisa encontrar no texto?",
-    mustFindHintBefore: "Uma expressão por item. A ferramenta procura cada uma ",
-    mustFindHintStrong: "literalmente",
-    mustFindHintAfter: " e diz onde está — ela não julga se o assunto foi coberto.",
-    mustFindPlaceholder: "Ex.: prazo de recurso",
-    presenceLabel: "Presença literal",
-    occurrences: (n) => ` — aparece ${n}×`,
-    notFound: " — não aparece com essas palavras",
+    mustFindLabel: "Qual palavra ou expressão deve aparecer?",
+    mustFindHint:
+      "Adicione uma expressão por vez. A busca ignora maiúsculas e minúsculas, mas considera os acentos.",
+    mustFindPlaceholder: "Ex.: prazo para recurso",
+    addExpression: "Adicionar expressão",
+    presenceLabel: "Ocorrências no documento",
+    occurrences: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
+    notFound: "Não encontrada",
+    showOccurrences: (expression, n) =>
+      `Ver “${expression}” no documento — ${n} ${plural(n, "ocorrência", "ocorrências")}`,
+    occurrencePosition: (index, total) => `${index} de ${total}`,
+    occurrenceNav: (expression) => `Ocorrências de “${expression}”`,
+    prevOccurrence: (expression) => `Ocorrência anterior de “${expression}”`,
+    nextOccurrence: (expression) => `Próxima ocorrência de “${expression}”`,
     removeNamed: (expression) => `Remover “${expression}”`,
     literalCaveat:
-      "Busca literal, sensível a acento. Encontrar não prova que o leitor vai entender; não encontrar não prova que o " +
-      "assunto está ausente — pode estar dito com outras palavras. Esta lista é a sua, não um critério da norma: ela " +
-      "não entra no placar.",
+      "Encontrar não garante que o leitor vai entender; não encontrar pode significar só que o texto diz " +
+      "de outro jeito. Esta lista é sua e não altera a pontuação.",
   },
 
   reportRecord: {
-    menuItem: "Dados do relatório",
-    menuNote: "Registro opcional do contexto — entra no .md, não na auditoria.",
-    title: "Dados do relatório",
-    optionalTag: "Registro opcional",
+    menuItem: "Informações do relatório",
+    menuNote: "Opcional — entra no relatório exportado, não na análise.",
+    title: "Informações do relatório",
+    optionalTag: "Opcional",
     lead:
-      "As perguntas que a norma faz ao autor (ABNT NBR ISO 24495-1 · 5.1). O que você escrever aqui é " +
-      "guardado e publicado no relatório exportado como decisão sua.",
+      "Registre para quem o texto foi escrito, o que essa pessoa precisa fazer depois da leitura e o que " +
+      "ela já sabe sobre o assunto.",
     caveat:
-      "A Lucid não verifica estas respostas, não as pontua e não as usa para reescrever nada. Preencher " +
-      "não prova que o texto respeita o que foi declarado — é registro, não medição.",
+      "A Lucid guarda estas respostas no relatório exportado, mas não as verifica: são registro, não medição.",
+    isoNote: "Baseado na ABNT NBR ISO 24495-1",
+    isoTitle:
+      "Estas perguntas ajudam a aplicar as orientações da seção 5.1 sobre relevância para o leitor.",
     done: "Fechar",
   },
 
@@ -534,18 +536,20 @@ export const COPY_PT: UiCopy = {
   },
 
   profile: {
-    label: "Critérios de análise",
-    defaults: "Limites padrão.",
-    adjustments: (n) => `${n} ${plural(n, "ajuste seu", "ajustes seus")} sobre o padrão.`,
-    rationale: "Ajuste os limites às regras da sua organização. Toda alteração fica registrada na auditoria.",
-    openAdjust: "Ajustar critérios",
-    closeAdjust: "Fechar",
+    label: "Limites da análise",
+    defaults: "Nenhum limite alterado.",
+    adjustments: (n) => `${n} ${plural(n, "limite alterado", "limites alterados")} por você.`,
+    chip: "Muda o que é apontado",
+    lead:
+      "Ajuste os limites de critérios como tamanho de frase e de parágrafo. Valem para esta análise e " +
+      "ficam registrados no relatório.",
+    openAdjust: "Ajustar limites",
     resetDefaults: "Voltar ao padrão",
-    thresholdsLabel: "Limiares",
-    policyLabel: "Critérios da política",
+    thresholdsLabel: "Limites",
+    policyLabel: "Critérios ativos",
     policyNote:
-      "Critério desligado não roda: o silêncio dele passa a significar “não procurei”, não “não encontrei”. " +
-      "Cada desligamento é listado acima e no relatório.",
+      "Critérios desativados não são verificados nem aparecem nos resultados. Todos ficam registrados no " +
+      "relatório e podem ser ativados novamente.",
     deviationOff: (label) => `${label}: desligado (padrão: ligado)`,
     deviationOn: (label) => `${label}: ligado (padrão: desligado)`,
     deviationValue: (what, value, fallback) => `${what} ${value} (padrão: ${fallback})`,

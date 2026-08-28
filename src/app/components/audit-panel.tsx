@@ -11,6 +11,7 @@ import { buildPanelSections, type PanelSectionId } from "../lib/panel-sections";
 import type { Bucket, FindingGroup, FindingQuery, SortOrder, StateFilter } from "../lib/finding-query";
 import type { ReviewMark, ReviewMarks } from "../lib/review-marks";
 import { findingId, metaFor } from "../lib/criteria";
+import type { OccurrenceCursor } from "../lib/occurrence-cursor";
 import { usePanelSections } from "../hooks/use-panel-sections";
 import { AuditOverview, ReadingSection } from "./audit-overview";
 import { PanelNav } from "./panel-nav";
@@ -62,6 +63,10 @@ export interface AuditPanelProps {
   onManualEdit: (target: Span, replacement: string) => void;
   onPrev: () => void;
   onNext: () => void;
+  occurrenceCursor: OccurrenceCursor | null;
+  occurrenceIndex: number;
+  onSelectOccurrence: (expression: string, index: number) => void;
+  onStepOccurrence: (delta: number) => void;
   probeExcerpt?: string;
   onClearProbeExcerpt?: () => void;
 }
@@ -152,7 +157,16 @@ export function AuditPanel(props: AuditPanelProps) {
       case "settings":
         return (
           <>
-            <BriefingPanel briefing={props.briefing} check={props.briefingCheck} onChange={props.onBriefingChange} />
+            <p className="px-4 pt-4 pb-1 text-[12.5px] leading-relaxed text-ink-2">{c.panel.settingsLead}</p>
+            <BriefingPanel
+              briefing={props.briefing}
+              check={props.briefingCheck}
+              cursor={props.occurrenceCursor}
+              index={props.occurrenceIndex}
+              onChange={props.onBriefingChange}
+              onSelectOccurrence={props.onSelectOccurrence}
+              onStepOccurrence={props.onStepOccurrence}
+            />
             <ProfilePanel config={props.config} onChange={props.onConfigChange} />
             <div className="border-t border-rule-1 px-4 py-4">
               <button
@@ -164,6 +178,10 @@ export function AuditPanel(props: AuditPanelProps) {
                 <ChevronRightIcon className="size-3.5" />
               </button>
               <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.panel.goToFindingsHint}</p>
+              <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.panel.settingsRecordPointer}</p>
+              <p className="mt-3 text-[11px] text-ink-dim" title={c.panel.settingsIsoTitle}>
+                {c.panel.settingsIsoNote}
+              </p>
             </div>
           </>
         );
@@ -225,7 +243,7 @@ function sectionSummary(
   switch (id) {
     case "settings":
       return [
-        c.panel.settingsSummaryReader(props.briefingCheck.declared),
+        c.panel.settingsSummaryExpressions(props.briefing.mustFind.length),
         c.panel.settingsSummaryProfile(configDeviations(props.config).length),
       ].join(c.panel.settingsSummaryJoin);
     case "metrics":

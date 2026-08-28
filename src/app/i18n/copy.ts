@@ -91,9 +91,13 @@ export interface UiCopy {
     readonly navLabel: string;
     readonly sections: Record<PanelSectionId, string>;
     readonly settingsTitle: string;
-    readonly settingsSummaryReader: (declared: boolean) => string;
+    readonly settingsLead: string;
+    readonly settingsSummaryExpressions: (n: number) => string;
     readonly settingsSummaryProfile: (deviations: number) => string;
     readonly settingsSummaryJoin: string;
+    readonly settingsRecordPointer: string;
+    readonly settingsIsoNote: string;
+    readonly settingsIsoTitle: string;
     readonly goToFindings: string;
     readonly goToFindingsHint: string;
     readonly metricsSummary: (words: string, perSentence: string) => string;
@@ -180,6 +184,7 @@ export interface UiCopy {
     readonly clearGroupMarks: (n: number) => string;
     readonly scopeOn: string;
     readonly scopeOff: string;
+    readonly scopeHint: (n: number) => string;
     readonly markSeen: string;
     readonly markSeenHint: string;
     readonly markSeenNamed: (excerpt: string) => string;
@@ -345,17 +350,8 @@ export interface UiCopy {
 
   readonly briefing: {
     readonly label: string;
-    readonly declared: string;
-    readonly notDeclared: string;
-    readonly rationale: string;
-    readonly openDeclare: string;
-    readonly openReview: string;
-    readonly closeBriefing: string;
-    readonly optionalNote: string;
-    readonly verifiedLabel: string;
-    readonly verifiedUse: string;
-    readonly recordMovedLabel: string;
-    readonly recordMoved: string;
+    readonly chip: string;
+    readonly lead: string;
     readonly audienceLabel: string;
     readonly audienceHint: string;
     readonly audiencePlaceholder: string;
@@ -366,13 +362,17 @@ export interface UiCopy {
     readonly priorHint: string;
     readonly priorPlaceholder: string;
     readonly mustFindLabel: string;
-    readonly mustFindHintBefore: string;
-    readonly mustFindHintStrong: string;
-    readonly mustFindHintAfter: string;
+    readonly mustFindHint: string;
     readonly mustFindPlaceholder: string;
+    readonly addExpression: string;
     readonly presenceLabel: string;
     readonly occurrences: (n: number) => string;
     readonly notFound: string;
+    readonly showOccurrences: (expression: string, n: number) => string;
+    readonly occurrencePosition: (index: number, total: number) => string;
+    readonly occurrenceNav: (expression: string) => string;
+    readonly prevOccurrence: (expression: string) => string;
+    readonly nextOccurrence: (expression: string) => string;
     readonly removeNamed: (expression: string) => string;
     readonly literalCaveat: string;
   };
@@ -384,6 +384,8 @@ export interface UiCopy {
     readonly optionalTag: string;
     readonly lead: string;
     readonly caveat: string;
+    readonly isoNote: string;
+    readonly isoTitle: string;
     readonly done: string;
   };
 
@@ -404,9 +406,9 @@ export interface UiCopy {
     readonly label: string;
     readonly defaults: string;
     readonly adjustments: (n: number) => string;
-    readonly rationale: string;
+    readonly chip: string;
+    readonly lead: string;
     readonly openAdjust: string;
-    readonly closeAdjust: string;
     readonly resetDefaults: string;
     readonly thresholdsLabel: string;
     readonly policyLabel: string;

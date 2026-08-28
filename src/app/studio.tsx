@@ -17,6 +17,7 @@ import { useReviewMarks } from "./hooks/use-review-marks";
 import { useDocumentSource } from "./hooks/use-document-source";
 import { useDocumentSelection } from "./hooks/use-document-selection";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
+import { useOccurrenceNavigation } from "./hooks/use-occurrence-navigation";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -129,6 +130,12 @@ export function Studio() {
     diagnostic,
     enabled: mode === "audit",
     onNavigate: revealSheet,
+  });
+
+  const occurrences = useOccurrenceNavigation({
+    check: briefingCheck,
+    scrollRef,
+    enabled: mode === "audit",
   });
 
   const rewriteTarget = useMemo(
@@ -289,6 +296,10 @@ export function Studio() {
     onManualEdit: applyManualEdit,
     onPrev: () => goTo(-1),
     onNext: () => goTo(1),
+    occurrenceCursor: occurrences.cursor,
+    occurrenceIndex: occurrences.index,
+    onSelectOccurrence: occurrences.select,
+    onStepOccurrence: occurrences.step,
   };
 
   return (
@@ -362,6 +373,8 @@ export function Studio() {
             flashId={flashId}
             hiddenHighlights={hiddenHighlights}
             rewriteTarget={rewriteTarget}
+            occurrences={occurrences.spans}
+            activeOccurrence={occurrences.active}
             onChangeText={onFreeTypeText}
             onSelectFinding={selectFinding}
           />

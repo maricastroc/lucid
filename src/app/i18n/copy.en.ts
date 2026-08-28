@@ -112,14 +112,24 @@ export const COPY_EN: UiCopy = {
       metrics: "Metrics",
       probe: "Comprehension",
     },
-    settingsTitle: "Analysis settings",
-    settingsSummaryReader: (declared) => (declared ? "reader defined" : "reader not defined"),
+    settingsTitle: "Customize analysis",
+    settingsLead: "Tune the criteria to the rules of the document or of your organization.",
+    settingsSummaryExpressions: (n) =>
+      n === 0 ? "no expressions" : `${n} ${plural(n, "expression", "expressions")}`,
     settingsSummaryProfile: (deviations) =>
-      deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "deviation", "deviations")}`,
+      deviations === 0
+        ? "default limits"
+        : `${deviations} ${plural(deviations, "changed limit", "changed limits")}`,
     settingsSummaryJoin: " · ",
-    goToFindings: "Go to the audit findings",
+    settingsRecordPointer:
+      "Information about the reader and the purpose of the document lives under Export › Report information.",
+    settingsIsoNote: "Based on ABNT NBR ISO 24495-1",
+    settingsIsoTitle:
+      "This section helps apply the section 5.1 guidance on relevance to the reader. The remaining limits " +
+      "correspond to the sentence, paragraph and heading criteria.",
+    goToFindings: "View audit points",
     goToFindingsHint:
-      "These settings produce no findings. The review happens in the Findings tab.",
+      "These settings are not audit points, but they change how some points are identified.",
     metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence`,
     probeSummary: "optional AI test",
     exportLabel: "Export",
@@ -220,8 +230,10 @@ export const COPY_EN: UiCopy = {
     batchClear: (n) => `Clear the marks on these ${n}`,
     batchCaveat: "Marking as seen is one at a time on purpose: the mark only means something if someone looked. In bulk you can only clear.",
     clearGroupMarks: (n) => `Clear ${n} ${plural(n, "mark", "marks")}`,
-    scopeOn: "Step through this criterion",
-    scopeOff: "Leave this criterion",
+    scopeOn: "Only this criterion",
+    scopeOff: "All criteria",
+    scopeHint: (n) =>
+      `The list and the ‹ › navigation step through only the ${n} ${plural(n, "occurrence", "occurrences")} of this criterion.`,
     markSeen: "Mark as seen",
     markSeenHint: "Mark as seen — you looked at this occurrence",
     markSeenNamed: (excerpt) => `Mark “${excerpt}” as seen`,
@@ -458,63 +470,51 @@ export const COPY_EN: UiCopy = {
   },
 
   briefing: {
-    label: "Principle 1 · Relevant",
-    declared: "Reader defined.",
-    notDeclared: "Reader not defined.",
-    rationale:
-      "No rule decides what is relevant to a specific reader, so this principle has no automatic criterion " +
-      "and is never marked as met. Lucid checks one literal thing here: the expressions you declare as " +
-      "essential.",
-    optionalNote:
-      "Optional and saved automatically in this browser. Filling it in or leaving it blank changes neither the " +
-      "number of findings nor the score — Principle 1 has no automatic criterion.",
-    verifiedLabel: "What the tool checks",
-    verifiedUse:
-      "This list is the only part of Principle 1 that produces a verification: Lucid looks for each expression " +
-      "literally in the text and says where it is, or that it is not there.",
-    recordMovedLabel: "Context on record",
-    recordMoved:
-      "Who the reader is, what they need to do and what they already know are an optional record: Lucid keeps " +
-      "them and publishes them in the report, but does not verify them or use them to rewrite. So they live " +
-      "outside the review, under Export › Report data.",
-    openDeclare: "Define the reader",
-    openReview: "Review reader",
-    closeBriefing: "Close",
-    audienceLabel: "Who is the reader?",
-    audienceHint: "Describe who will actually read it — not the official who signs it.",
+    label: "Required words and expressions",
+    chip: "Lucid looks for these",
+    lead:
+      "Add words or expressions that have to be found exactly as you write them. Lucid shows where each " +
+      "one appears — or tells you when it finds none.",
+    audienceLabel: "Who was this text written for?",
+    audienceHint: "Whoever actually reads it, not whoever signs it.",
     audiencePlaceholder: "e.g. a citizen with no legal training applying for the benefit for the first time",
-    purposeLabel: "What do they need to do after reading?",
-    purposeHint: "The concrete action or decision the text has to make possible.",
+    purposeLabel: "What does that person need to do?",
+    purposeHint: "The concrete action the text has to make possible.",
     purposePlaceholder: "e.g. find out whether they qualify and gather the documents in time",
-    priorLabel: "What do they already know?",
-    priorHint: "What can be assumed — and, by consequence, what must be explained.",
+    priorLabel: "What do they already know about it?",
+    priorHint: "What can be assumed — and therefore what has to be explained.",
     priorPlaceholder: "e.g. knows the benefit exists; does not know the vocabulary of the process",
-    mustFindLabel: "What does the reader need to find in the text?",
-    mustFindHintBefore: "One expression per item. The tool looks for each one ",
-    mustFindHintStrong: "literally",
-    mustFindHintAfter: " and says where it is — it does not judge whether the topic was covered.",
-    mustFindPlaceholder: "e.g. prazo de recurso",
-    presenceLabel: "Literal presence",
-    occurrences: (n) => ` — appears ${n}×`,
-    notFound: " — does not appear in these words",
+    mustFindLabel: "Which word or expression must appear?",
+    mustFindHint: "Add one expression at a time. The search ignores upper and lower case, but not accents.",
+    mustFindPlaceholder: "e.g. deadline to appeal",
+    addExpression: "Add expression",
+    presenceLabel: "Occurrences in the document",
+    occurrences: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
+    notFound: "Not found",
+    showOccurrences: (expression, n) =>
+      `Show “${expression}” in the document — ${n} ${plural(n, "occurrence", "occurrences")}`,
+    occurrencePosition: (index, total) => `${index} of ${total}`,
+    occurrenceNav: (expression) => `Occurrences of “${expression}”`,
+    prevOccurrence: (expression) => `Previous occurrence of “${expression}”`,
+    nextOccurrence: (expression) => `Next occurrence of “${expression}”`,
     removeNamed: (expression) => `Remove “${expression}”`,
     literalCaveat:
-      "Literal, accent-sensitive search. Finding it does not prove the reader will understand; not finding it does not " +
-      "prove the topic is absent — it may be said in other words. This list is yours, not a criterion of the standard: " +
-      "it does not enter the score.",
+      "Finding it does not guarantee the reader will understand; not finding it may only mean the text says " +
+      "it another way. This list is yours and does not change the score.",
   },
 
   reportRecord: {
-    menuItem: "Report data",
-    menuNote: "Optional record of the context — goes into the .md, not into the audit.",
-    title: "Report data",
-    optionalTag: "Optional record",
+    menuItem: "Report information",
+    menuNote: "Optional — goes into the exported report, not into the analysis.",
+    title: "Report information",
+    optionalTag: "Optional",
     lead:
-      "The questions the standard puts to the author (ABNT NBR ISO 24495-1 · 5.1). What you write here is kept " +
-      "and published in the exported report as your decision.",
+      "Record who the text was written for, what that person needs to do after reading it, and what they " +
+      "already know about the subject.",
     caveat:
-      "Lucid does not verify these answers, does not score them and does not use them to rewrite anything. " +
-      "Filling them in does not prove the text honours what was declared — it is a record, not a measurement.",
+      "Lucid keeps these answers in the exported report but does not check them: they are a record, not a measurement.",
+    isoNote: "Based on ABNT NBR ISO 24495-1",
+    isoTitle: "These questions help apply the section 5.1 guidance on relevance to the reader.",
     done: "Close",
   },
 
@@ -543,18 +543,20 @@ export const COPY_EN: UiCopy = {
   },
 
   profile: {
-    label: "Analysis criteria",
-    defaults: "Default limits.",
-    adjustments: (n) => `${n} ${plural(n, "adjustment of yours", "adjustments of yours")} over the default.`,
-    rationale: "Adjust the limits to your organisation's rules. Every change is recorded in the audit.",
-    openAdjust: "Adjust criteria",
-    closeAdjust: "Close",
+    label: "Analysis limits",
+    defaults: "No limits changed.",
+    adjustments: (n) => `${n} ${plural(n, "limit", "limits")} you changed.`,
+    chip: "Changes what gets flagged",
+    lead:
+      "Adjust the limits of criteria such as sentence and paragraph length. They apply to this analysis and " +
+      "are recorded in the report.",
+    openAdjust: "Adjust limits",
     resetDefaults: "Back to defaults",
-    thresholdsLabel: "Thresholds",
-    policyLabel: "Policy criteria",
+    thresholdsLabel: "Limits",
+    policyLabel: "Active criteria",
     policyNote:
-      "A criterion that is off does not run: its silence starts meaning “I did not look”, not “I found nothing”. " +
-      "Every switch-off is listed above and in the report.",
+      "Criteria you turn off are not checked and do not appear in the results. Every one is recorded in the " +
+      "report and can be turned back on.",
     deviationOff: (label) => `${label}: off (default: on)`,
     deviationOn: (label) => `${label}: on (default: off)`,
     deviationValue: (what, value, fallback) => `${what} ${value} (default: ${fallback})`,

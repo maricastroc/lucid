@@ -419,6 +419,25 @@ textarea.prose-doc:focus-visible {
   animation: finding-flash 0.66s var(--ease-settle);
 }
 
+.occ {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 3px;
+  padding: 0.04em 0.08em;
+}
+.prose-doc.is-focused .occ {
+  color: var(--ink-1);
+}
+.occ-active {
+  background: var(--mark-active);
+  box-shadow: 0 0 0 1.5px var(--accent) inset;
+  color: var(--ink-0);
+}
+.prose-doc.is-focused .occ-active {
+  color: var(--ink-0);
+}
+
 .margin-tick {
   transition:
     opacity 0.2s var(--ease-standard),

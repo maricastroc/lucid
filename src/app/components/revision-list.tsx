@@ -426,6 +426,7 @@ function Group({
   );
   const distinct = distinctTexts(group.items);
   const panelId = `revgrp-${group.criterion}`;
+  const allOfCriterion = diagnostic.findings.filter((f) => f.criterion === group.criterion);
 
   return (
     <div className="flex flex-col">
@@ -492,35 +493,35 @@ function Group({
 
       {open && (
         <div id={panelId} className="flex flex-col gap-0.5 pl-2">
-          <div className="flex items-start justify-between gap-2 px-3 pb-1 pt-0.5">
-            <p className="min-w-0 flex-1 text-[11.5px] leading-snug text-ink-3">{meta.why}</p>
-            <span className="flex shrink-0 items-center gap-1.5">
-              <HumanScopeNote items={diagnostic.findings.filter((f) => f.criterion === group.criterion)} />
+          <div className="px-3 pb-2 pt-0.5">
+            <p className="text-[11.5px] leading-snug text-ink-3">{meta.why}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
               <ProvenanceTag tag={tagFor(diagnostic, group.criterion, lang)} />
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 px-3 pb-1.5">
-            <button
-              type="button"
-              aria-pressed={scoped}
-              onClick={onScope}
-              className={`rounded-md border px-2 py-1 text-[11.5px] transition-colors duration-150 ${
-                scoped
-                  ? "border-accent-line bg-accent-weak text-accent"
-                  : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-0"
-              }`}
-            >
-              {scoped ? c.revisionList.scopeOff : c.revisionList.scopeOn}
-            </button>
-            {counts.total - counts.pending > 0 && (
+              <HumanScopeNote items={allOfCriterion} />
+              <span className="flex-1" />
               <button
                 type="button"
-                onClick={() => onMarkMany(group.items, null)}
-                className="rounded-md border border-rule-2 px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+                aria-pressed={scoped}
+                title={c.revisionList.scopeHint(allOfCriterion.length)}
+                onClick={onScope}
+                className={`rounded-md border px-2 py-1 text-[11.5px] transition-colors duration-150 ${
+                  scoped
+                    ? "border-accent-line bg-accent-weak text-accent"
+                    : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-0"
+                }`}
               >
-                {c.revisionList.clearGroupMarks(counts.total - counts.pending)}
+                {scoped ? c.revisionList.scopeOff : c.revisionList.scopeOn}
               </button>
-            )}
+              {counts.total - counts.pending > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onMarkMany(group.items, null)}
+                  className="rounded-md border border-rule-2 px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+                >
+                  {c.revisionList.clearGroupMarks(counts.total - counts.pending)}
+                </button>
+              )}
+            </div>
           </div>
           {group.items.map((f, index) => (
             <Row

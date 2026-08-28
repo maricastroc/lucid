@@ -5,6 +5,7 @@ import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
 import { severityRank } from "../lib/criteria";
+import { occurrenceKey } from "../lib/occurrence-cursor";
 import { useCopy } from "../i18n/use-copy";
 import { PenNibIcon } from "./icons";
 
@@ -19,6 +20,8 @@ interface Props {
   flashId: string | null;
   hiddenHighlights: ReadonlySet<string>;
   rewriteTarget: Span | null;
+  occurrences: readonly Span[];
+  activeOccurrence: Span | null;
   onChangeText: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
 }
@@ -28,12 +31,20 @@ interface SegmentContext {
   flashId: string | null;
   hiddenHighlights: ReadonlySet<string>;
   rewriteTarget: Span | null;
+  activeOccurrence: Span | null;
   onSelectFinding: (finding: Finding) => void;
+}
+
+function occurrenceAttrs(seg: LineSegment, active: Span | null) {
+  if (seg.mark === undefined) return null;
+  const key = occurrenceKey(seg.mark);
+  const isActive = active !== null && occurrenceKey(active) === key;
+  return { key, isActive, className: isActive ? "occ occ-active" : "occ" };
 }
 
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
   const { c, lang } = useCopy();
-  const { selectedId, flashId, hiddenHighlights, rewriteTarget, onSelectFinding } = ctx;
+  const { selectedId, flashId, hiddenHighlights, rewriteTarget, activeOccurrence, onSelectFinding } = ctx;
   return (
     <>
       {segments.map((seg, i) => {
@@ -42,9 +53,14 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
         const inTarget =
           rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
 
+        const occ = occurrenceAttrs(seg, activeOccurrence);
+
         if (!inline && !passage) {
+          const plain = ["seg"];
+          if (inTarget) plain.push("rewrite-target");
+          if (occ) plain.push(occ.className);
           return (
-            <span key={i} className={inTarget ? "seg rewrite-target" : "seg"}>
+            <span key={i} data-occurrence={occ?.key} className={plain.join(" ")}>
               {seg.text}
             </span>
           );
@@ -60,6 +76,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
         if (passage) classes.push("passage");
         if (selected) classes.push("seg-selected", "is-lit");
         if (flashId === id) classes.push("seg-flash");
+        if (occ) classes.push(occ.className, "is-lit");
         const ink = inline ? severityInkVar(inline.severity) : undefined;
 
         return (
@@ -68,6 +85,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
             role="button"
             tabIndex={0}
             data-finding-id={id}
+            data-occurrence={occ?.key}
             className={classes.join(" ")}
             style={ink ? ({ "--mark-ink": ink } as React.CSSProperties) : undefined}
             aria-pressed={selected}
@@ -123,12 +141,14 @@ function BlockView({
   blocks,
   diagnostic,
   hiddenHighlights,
+  occurrences,
   ctx,
   isFocused,
 }: {
   blocks: readonly Block[];
   diagnostic: Diagnostic;
   hiddenHighlights: ReadonlySet<string>;
+  occurrences: readonly Span[];
   ctx: SegmentContext;
   isFocused: boolean;
 }) {
@@ -151,7 +171,7 @@ function BlockView({
               {tick}
               <div className="u-sublabel mb-1 text-ink-3">{c.documentView.headingLevel(block.level)}</div>
               <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
-                <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end)} ctx={ctx} />
+                <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)} ctx={ctx} />
               </Tag>
             </div>
           );
@@ -169,7 +189,7 @@ function BlockView({
               <ListTag className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}>
                 {block.items.map((item, ii) => (
                   <li key={ii} className="pl-1">
-                    <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end)} ctx={ctx} />
+                    <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end, occurrences)} ctx={ctx} />
                   </li>
                 ))}
               </ListTag>
@@ -180,7 +200,7 @@ function BlockView({
         return (
           <p key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
             {tick}
-            <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end)} ctx={ctx} />
+            <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)} ctx={ctx} />
           </p>
         );
       })}
@@ -189,17 +209,40 @@ function BlockView({
 }
 
 export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentView(
-  { mode, text, diagnostic, blocks, selectedId, flashId, hiddenHighlights, rewriteTarget, onChangeText, onSelectFinding },
+  {
+    mode,
+    text,
+    diagnostic,
+    blocks,
+    selectedId,
+    flashId,
+    hiddenHighlights,
+    rewriteTarget,
+    occurrences,
+    activeOccurrence,
+    onChangeText,
+    onSelectFinding,
+  },
   scrollRef,
 ) {
   const { c } = useCopy();
-  const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings), [diagnostic]);
+  const lines = useMemo(
+    () => buildLines(diagnostic.text, diagnostic.findings, occurrences),
+    [diagnostic, occurrences],
+  );
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;
 
   const structured = blocks !== null && blocks.some((b) => b.kind !== "paragraph");
-  const ctx: SegmentContext = { selectedId, flashId, hiddenHighlights, rewriteTarget, onSelectFinding };
+  const ctx: SegmentContext = {
+    selectedId,
+    flashId,
+    hiddenHighlights,
+    rewriteTarget,
+    activeOccurrence,
+    onSelectFinding,
+  };
 
   return (
     <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label={c.documentView.regionLabel}>
@@ -243,7 +286,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                     <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">{c.documentView.emptyBody}</p>
                     <span
                       aria-hidden
-                      className="caret-blink mt-5 h-[1.4em] w-[3px] rounded-full bg-accent"
+                      className="caret-blink mt-5 h-[1.4em] w-0.75 rounded-full bg-accent"
                     />
                   </div>
                 )}
@@ -255,6 +298,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                     blocks={blocks!}
                     diagnostic={diagnostic}
                     hiddenHighlights={hiddenHighlights}
+                    occurrences={occurrences}
                     ctx={ctx}
                     isFocused={isFocused}
                   />

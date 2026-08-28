@@ -26,8 +26,8 @@ export function HumanScopeNote({ items }: { items: readonly Finding[] }) {
   if (!requiresHumanThroughout(items)) return null;
 
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-human-line bg-human-weak px-2 py-0.5 text-[11px] font-medium text-human">
-      <PenNibIcon className="size-3" />
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-[3px] bg-human-weak px-1.5 py-px text-[10px] tracking-wide text-human">
+      <PenNibIcon className="size-2.5 shrink-0" />
       {c.badges.humanLong}
     </span>
   );

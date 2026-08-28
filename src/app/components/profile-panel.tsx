@@ -14,6 +14,7 @@ import {
   withNumber,
 } from "../lib/profile";
 import { useCopy } from "../i18n/use-copy";
+import { ChevronDownIcon } from "./icons";
 import { Checkbox } from "./ui/checkbox";
 import { Stepper } from "./ui/stepper";
 
@@ -30,13 +31,16 @@ export function ProfilePanel({ config, onChange }: Props) {
 
   return (
     <div className="border-t border-rule-1 px-4 py-5">
-      <h3 className="u-label text-ink-3">{p.label}</h3>
+      <div className="flex flex-wrap items-center gap-2">
+        <h3 className="text-[13.5px] font-semibold text-ink-0">{p.label}</h3>
+        <span className="rounded-[3px] bg-human-weak px-1.5 py-px text-[10px] tracking-wide text-human">{p.chip}</span>
+      </div>
+
+      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-3">{p.lead}</p>
 
       <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-1">
         {deviations.length === 0 ? p.defaults : p.adjustments(deviations.length)}
       </p>
-
-      <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{p.rationale}</p>
 
       {deviations.length > 0 && (
         <ul className="mt-3 flex flex-col gap-1">
@@ -51,10 +55,14 @@ export function ProfilePanel({ config, onChange }: Props) {
       <div className="mt-3 flex gap-2">
         <button
           type="button"
+          aria-expanded={open}
           onClick={() => setOpen(!open)}
           className="inline-flex items-center gap-2 rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
         >
-          {open ? p.closeAdjust : p.openAdjust}
+          {p.openAdjust}
+          <ChevronDownIcon
+            className={`size-3.5 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
+          />
         </button>
         {deviations.length > 0 && (
           <button
