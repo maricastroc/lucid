@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { Diagnostic, Finding } from "@/lucid";
 import { findingId, metaFor, provenanceTag, severityInkVar } from "../lib/criteria";
 import {
@@ -18,7 +18,9 @@ import { startHerePlan, type StartHerePlan } from "../lib/start-here";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import { ActionBadge, CriterionMark, HumanScopeNote, SeverityDot } from "./badges";
-import { CheckIcon, ChevronDownIcon, ChevronLeftIcon, CloseIcon, EyeIcon, EyeOffIcon } from "./icons";
+import { FindingFilters } from "./revision-list/finding-filters";
+import { useListRovingFocus } from "./revision-list/use-list-roving-focus";
+import { CheckIcon, ChevronDownIcon, CloseIcon, EyeIcon, EyeOffIcon } from "./icons";
 
 export type { Bucket } from "../lib/finding-query";
 
@@ -170,10 +172,9 @@ export function RevisionList({
   onMarkMany,
 }: Props) {
   const { c, lang } = useCopy();
-  const listRef = useRef<HTMLDivElement>(null);
+  const { ref: listRef, onKeyDown } = useListRovingFocus();
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
   const [coverageOpen, setCoverageOpen] = useState(false);
-  const [moreFilters, setMoreFilters] = useState(false);
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
   const plan = startHerePlan(allFindings, marks, filtered);
@@ -189,123 +190,25 @@ export function RevisionList({
       return next;
     });
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-    e.preventDefault();
-    const rows = Array.from(listRef.current?.querySelectorAll<HTMLElement>("[data-row]") ?? []);
-    const i = rows.findIndex((r) => r === document.activeElement);
-    const next = e.key === "ArrowDown" ? Math.min(rows.length - 1, i + 1) : Math.max(0, i - 1);
-    rows[next]?.focus();
-  };
-
-  const buckets: Array<[Bucket, string]> = [
-    ["all", c.revisionList.bucketAll],
-    ["safe", c.revisionList.bucketSafe],
-    ["human", c.revisionList.bucketHuman],
-  ];
-  const showStates = sifting && (moreFilters || query.state !== "all");
-
-  const states: Array<[StateFilter, string]> = [
-    ["pending", c.revisionList.statePending],
-    ["seen", c.revisionList.stateSeen],
-    ["dismissed", c.revisionList.stateDismissed],
-  ];
-
   return (
     <div>
       <StartHere plan={plan} onBucket={onBucket} onCriterion={onCriterion} />
-
-      {query.criterion !== null && (
-        <div className="mb-2.5 flex items-center gap-2 border-b border-rule-1 px-4 pb-2.5">
-          <button
-            type="button"
-            onClick={() => onCriterion(null)}
-            className="row-hit inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[12px] text-accent transition-colors duration-150 hover:bg-accent-weak"
-          >
-            <ChevronLeftIcon className="size-3.5" />
-            {c.note.crumbAll}
-          </button>
-          <span className="min-w-0 truncate text-[12px] text-ink-2">{metaFor(query.criterion, lang).label}</span>
-        </div>
-      )}
-
-      {sifting && (
-      <div className="px-4 pb-2.5">
-        <input
-          type="search"
-          value={query.search}
-          onChange={(e) => onSearch(e.target.value)}
-          placeholder={c.revisionList.searchPlaceholder}
-          aria-label={c.revisionList.searchLabel}
-          className="w-full rounded-lg border border-rule-2 bg-sheet px-2.5 py-1.5 text-[12.5px] text-ink-0 placeholder:text-ink-dim focus:border-accent focus:outline-none"
-        />
-      </div>
-      )}
-
-      <div
-        role="group"
-        aria-label={c.revisionList.filterLabel}
-        className="flex flex-wrap items-center gap-1.5 px-4 pb-2.5"
-      >
-        {buckets.map(([b, labelText]) => (
-          <Pill key={b} active={query.bucket === b} onClick={() => onBucket(b)}>
-            {labelText}
-          </Pill>
-        ))}
-        {sifting && (
-          <button
-            type="button"
-            aria-expanded={showStates}
-            onClick={() => setMoreFilters((v) => !v)}
-            className="ml-auto inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-          >
-            <ChevronDownIcon
-              className={`size-3 shrink-0 transition-transform duration-150 ${showStates ? "" : "-rotate-90"}`}
-            />
-            {showStates ? c.revisionList.fewerFilters : c.revisionList.moreFilters}
-          </button>
-        )}
-        {showStates &&
-          states.map(([s, labelText]) => (
-            <Pill
-              key={s}
-              tone="quiet"
-              active={query.state === s}
-              onClick={() => onState(query.state === s ? "all" : s)}
-            >
-              {labelText}
-            </Pill>
-          ))}
-      </div>
-
-      {(sifting || filtered) && (
-      <div className="flex items-center justify-between gap-3 px-4 pb-3">
-        <span className="min-w-0 truncate text-[11.5px] text-ink-3">
-          {filtered
-            ? c.revisionList.showingFiltered(visible.length, allFindings.length)
-            : c.revisionList.showingAll(visible.length)}
-          {hiddenCount > 0 && ` · ${c.revisionList.hiddenCriteria(hiddenCount)}`}
-        </span>
-        <div className="flex shrink-0 items-center gap-1">
-          {filtered && (
-            <button
-              type="button"
-              onClick={onClearFilters}
-              className="rounded-md px-1.5 py-0.5 text-[11.5px] text-accent transition-colors duration-150 hover:bg-accent-weak"
-            >
-              {c.revisionList.clearFilters}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => onOrder(query.order === "severity" ? "document" : "severity")}
-            className="rounded-md px-1.5 py-0.5 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-          >
-            {query.order === "severity" ? c.revisionList.orderBySeverity : c.revisionList.orderByDocument}
-          </button>
-        </div>
-      </div>
-      )}
+      <FindingFilters
+        query={query}
+        sifting={sifting}
+        filtered={filtered}
+        visibleCount={visible.length}
+        totalCount={allFindings.length}
+        hiddenCount={hiddenCount}
+        onQuery={{
+          bucket: onBucket,
+          state: onState,
+          search: onSearch,
+          order: onOrder,
+          criterion: onCriterion,
+          clear: onClearFilters,
+        }}
+      />
 
       {filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
         <div className="mx-6 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-rule-1 bg-surface-2/60 px-2.5 py-2">
@@ -654,29 +557,3 @@ function GroupProgress({ pending, total }: { pending: number; total: number }) {
   );
 }
 
-function Pill({
-  active,
-  onClick,
-  tone = "strong",
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  tone?: "strong" | "quiet";
-  children: React.ReactNode;
-}) {
-  const activeClass =
-    tone === "strong" ? "border-transparent bg-ink-0 text-sheet" : "border-accent-line bg-accent-weak text-accent";
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors duration-150 ${
-        active ? activeClass : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-1"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
