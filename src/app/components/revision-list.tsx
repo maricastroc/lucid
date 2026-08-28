@@ -2,8 +2,17 @@
 
 import { useRef, useState } from "react";
 import type { Diagnostic, Finding } from "@/lucid";
-import { CRITERION_ORDER, findingId, metaFor, provenanceTag, severityInkVar } from "../lib/criteria";
-import { distinctTexts, type Bucket, type FindingGroup, type FindingQuery, type SortOrder, type StateFilter } from "../lib/finding-query";
+import { findingId, metaFor, provenanceTag, severityInkVar } from "../lib/criteria";
+import {
+  cleanCriteria,
+  distinctTexts,
+  hiddenHighlightCount,
+  type Bucket,
+  type FindingGroup,
+  type FindingQuery,
+  type SortOrder,
+  type StateFilter,
+} from "../lib/finding-query";
 import { reviewStateOf, tally, type ReviewMark, type ReviewMarks } from "../lib/review-marks";
 import { startHerePlan, type StartHerePlan } from "../lib/start-here";
 import { useCopy } from "../i18n/use-copy";
@@ -33,11 +42,6 @@ interface Props {
   onToggleHighlights: (criterion: string) => void;
   onMark: (finding: Finding, mark: ReviewMark | null) => void;
   onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
-}
-
-function countOf(diagnostic: Diagnostic, criterion: string): number {
-  const s = diagnostic.score.byCriterion.find((c) => c.criterion === criterion);
-  return s ? s.count.info + s.count.warning + s.count.error : 0;
 }
 
 function tagFor(diagnostic: Diagnostic, criterion: string, lang: UiLang) {
@@ -173,9 +177,9 @@ export function RevisionList({
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
   const plan = startHerePlan(allFindings, marks, filtered);
-  const hiddenHighlightCount = groups.filter((g) => hiddenHighlights.has(g.criterion)).length;
+  const hiddenCount = hiddenHighlightCount(groups, hiddenHighlights);
 
-  const clean = CRITERION_ORDER.filter((id) => countOf(diagnostic, id) === 0);
+  const clean = cleanCriteria(diagnostic);
 
   const toggleGroup = (criterion: string) =>
     setOpen((prev) => {
@@ -280,7 +284,7 @@ export function RevisionList({
           {filtered
             ? c.revisionList.showingFiltered(visible.length, allFindings.length)
             : c.revisionList.showingAll(visible.length)}
-          {hiddenHighlightCount > 0 && ` · ${c.revisionList.hiddenCriteria(hiddenHighlightCount)}`}
+          {hiddenCount > 0 && ` · ${c.revisionList.hiddenCriteria(hiddenCount)}`}
         </span>
         <div className="flex shrink-0 items-center gap-1">
           {filtered && (
