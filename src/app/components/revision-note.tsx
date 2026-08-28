@@ -1,17 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { isCriterionId, type Finding, type Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal, VerifiedRewrite } from "@/report/rewrite";
 import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, severityLabel } from "../lib/criteria";
 import { buildConfidence, detectedProse, detectionHeadline } from "../lib/narrative";
 import { rewriteTargetAt } from "../lib/paragraphs";
-import { isManualEditDirty, manualEditReplacement } from "../lib/text-edit";
-import { generateRewrite, REWRITE_MODELS, verifyManualEdit } from "../lib/rewrite";
+import { manualEditReplacement } from "../lib/text-edit";
+import { REWRITE_MODELS } from "../lib/rewrite";
 import { SendNotice } from "./send-notice";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon, ChevronDownIcon, PenNibIcon, WandIcon } from "./icons";
 import { Guidance } from "./revision-note-guidance";
+import { useManualEditDraft } from "./revision-note/use-manual-edit-draft";
+import { useRewriteDraft } from "./revision-note/use-rewrite-draft";
 
 export const APPLY_BUTTON_CLASS =
   "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
@@ -156,27 +158,16 @@ function ManualEdit({
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
   const original = target.text;
-  const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(original);
-  const [verified, setVerified] = useState<{ result: VerifiedRewrite; forDeclaration: AgentDeclaration | null } | null>(
-    null,
-  );
-  const [checking, setChecking] = useState(false);
-  const result = verified !== null && verified.forDeclaration === declaration ? verified.result : null;
-  const setResult = (r: VerifiedRewrite | null) =>
-    setVerified(r === null ? null : { result: r, forDeclaration: declaration });
+  const edit = useManualEditDraft({ source, target, criterion: finding.criterion, declaration, lang });
+  const { draft: editorDraft, verification: result, dirty } = edit;
+  const draft = editorDraft.status === "closed" ? original : editorDraft.text;
+  const checking = editorDraft.status === "checking";
 
-  const dirty = isManualEditDirty(original, draft);
-
-  if (!open) {
+  if (editorDraft.status === "closed") {
     return (
       <button
         type="button"
-        onClick={() => {
-          setDraft(original);
-          setResult(null);
-          setOpen(true);
-        }}
+        onClick={edit.open}
         className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
       >
         <PenNibIcon className="size-3.5" />
@@ -184,17 +175,6 @@ function ManualEdit({
       </button>
     );
   }
-
-  const check = async () => {
-    setChecking(true);
-    try {
-      setResult(
-        await verifyManualEdit(source, target, draft, finding.criterion, declaration ? [declaration] : undefined, lang),
-      );
-    } finally {
-      setChecking(false);
-    }
-  };
 
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-rule-1 bg-sheet">
@@ -204,7 +184,7 @@ function ManualEdit({
         </span>
         <button
           type="button"
-          onClick={() => setOpen(false)}
+          onClick={edit.close}
           className="rounded-md px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2"
         >
           {c.common.close}
@@ -213,10 +193,7 @@ function ManualEdit({
       <div className="px-3.5 py-3">
         <textarea
           value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value);
-            setResult(null);
-          }}
+          onChange={(e) => edit.edit(e.target.value)}
           spellCheck={false}
           aria-label={c.note.manualEditAria(unitLabel)}
           className="block max-h-[46vh] min-h-28 w-full resize-y rounded-lg border border-rule-2 bg-surface-2/40 px-3 py-2.5 font-serif text-[14.5px] leading-snug text-ink-0 outline-none transition-colors focus:border-human-line"
@@ -226,7 +203,7 @@ function ManualEdit({
           <button
             type="button"
             disabled={!dirty || checking}
-            onClick={check}
+            onClick={edit.check}
             className={APPLY_BUTTON_CLASS}
           >
             {checking ? c.note.manualVerifying : c.note.manualVerify}
@@ -234,10 +211,7 @@ function ManualEdit({
           <button
             type="button"
             disabled={draft === original}
-            onClick={() => {
-              setDraft(original);
-              setResult(null);
-            }}
+            onClick={edit.restore}
             className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {c.common.restore}
@@ -383,50 +357,23 @@ function GeneratedRewrite({
 }) {
   const { c } = useCopy();
   const choice = REWRITE_MODELS[0];
-  const [directed, setDirected] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<VerifiedRewrite | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-
-  const [prevDeclaration, setPrevDeclaration] = useState<AgentDeclaration | null>(declaration);
-  if (declaration !== prevDeclaration) {
-    setPrevDeclaration(declaration);
-    if (declaration) setDirected(true);
-    setResult(null);
-  }
 
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
 
-  const run = async () => {
-    const controller = new AbortController();
-    abortRef.current = controller;
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      setResult(
-        await generateRewrite(source, target, choice, {
-          criterion: finding.criterion,
-          directed,
-          declarations: declaration ? [declaration] : undefined,
-          signal: controller.signal,
-        }),
-      );
-    } catch (e) {
-      if (!controller.signal.aborted) {
-        setError(e instanceof Error ? e.message : c.note.aiFailedGeneric);
-      }
-    } finally {
-      abortRef.current = null;
-      setLoading(false);
-    }
-  };
+  const { draft, run, cancel } = useRewriteDraft({
+    source,
+    target,
+    criterion: finding.criterion,
+    choice,
+    declaration,
+    failureMessage: c.note.aiFailedGeneric,
+  });
 
-  const cancel = () => abortRef.current?.abort();
-
+  const loading = draft.status === "running";
+  const error = draft.status === "failed" ? draft.message : null;
+  const result = draft.status === "proposed" ? draft.result : null;
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
   return (
