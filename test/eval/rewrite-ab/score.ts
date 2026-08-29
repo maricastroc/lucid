@@ -65,7 +65,7 @@ const kindsOf = (blocks: readonly RawBlock[]): string[] =>
 
 async function docxSurvives(blocks: readonly RawBlock[]): Promise<boolean> {
   const { blocksToDocx } = await import("../../../src/exporters/docx");
-  const { htmlToRawBlocks } = await import("../../../src/importers/docx");
+  const { htmlToRawBlocks } = await import("../../../src/importers/html-blocks");
   const mammoth = (await import("mammoth")).default;
   const bytes = blocksToDocx(blocks);
   const { value: html } = await mammoth.convertToHtml({ buffer: Buffer.from(bytes) });

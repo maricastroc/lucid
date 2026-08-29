@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useMemo, useRef } from "react";
+import { forwardRef, useMemo } from "react";
 import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
@@ -24,7 +24,7 @@ interface Props {
   occurrences: readonly Span[];
   activeOccurrence: Span | null;
   onChangeText: (value: string) => void;
-  onPasteDocument: (value: string) => void;
+  onPasteDocument: (value: string, html: string | null) => void;
   onSelectFinding: (finding: Finding) => void;
   onOpenDocument: (file: File) => void;
 }
@@ -242,7 +242,6 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   scrollRef,
 ) {
   const { c } = useCopy();
-  const pastedOverAll = useRef(false);
   const drop = useFileDrop(onOpenDocument);
   const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings, occurrences), [diagnostic, occurrences]);
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
@@ -298,14 +297,15 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   value={text}
                   onPaste={(e) => {
                     const field = e.currentTarget;
-                    pastedOverAll.current = field.selectionStart === 0 && field.selectionEnd === field.value.length;
+                    if (field.selectionStart !== 0 || field.selectionEnd !== field.value.length) return;
+
+                    const plain = e.clipboardData.getData("text/plain").replace(/\r\n?/g, "\n");
+                    if (plain === "") return;
+
+                    e.preventDefault();
+                    onPasteDocument(plain, e.clipboardData.getData("text/html") || null);
                   }}
-                  onChange={(e) => {
-                    const replaced = pastedOverAll.current;
-                    pastedOverAll.current = false;
-                    if (replaced && e.target.value !== "") onPasteDocument(e.target.value);
-                    else onChangeText(e.target.value);
-                  }}
+                  onChange={(e) => onChangeText(e.target.value)}
                   spellCheck={false}
                   autoFocus={text === ""}
                   aria-label={c.documentView.textareaLabel}

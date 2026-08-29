@@ -228,8 +228,8 @@ export function Studio() {
   );
 
   const onPasteDocument = useCallback(
-    (value: string) => {
-      enterPastedDocument(value);
+    (value: string, html: string | null) => {
+      enterPastedDocument(value, html);
       afterDocumentEntered();
     },
     [enterPastedDocument, afterDocumentEntered],

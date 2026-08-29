@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import type { RawBlock } from "@/lucid";
 import { blocksToDocx } from "../src/exporters/docx";
 import { crc32, zip } from "../src/exporters/zip";
-import { htmlToRawBlocks } from "../src/importers/docx";
+import { htmlToRawBlocks } from "../src/importers/html-blocks";
 
 const BLOCKS: RawBlock[] = [
   { kind: "heading", level: 1, text: "Prazos e documentos" },

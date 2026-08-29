@@ -23,6 +23,7 @@ export interface ParagraphMetrics {
 }
 
 export interface ParagraphResult {
+  readonly paragraphs: readonly string[];
   readonly text: string;
   readonly dehyphenated: number;
   readonly shortLineBreaks: number;
@@ -131,11 +132,11 @@ export function buildParagraphs(lines: readonly PdfLine[], metrics: ParagraphMet
     blocks[at] += ` ${line.text}`;
   }
 
+  const paragraphs = blocks.map((block) => block.trimEnd()).filter((block) => block !== "");
+
   return {
-    text: blocks
-      .map((block) => block.trimEnd())
-      .filter((block) => block !== "")
-      .join("\n\n"),
+    paragraphs,
+    text: paragraphs.join("\n\n"),
     dehyphenated,
     shortLineBreaks,
   };

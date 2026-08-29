@@ -18,6 +18,7 @@ import {
   type RawBlock,
 } from "@/lucid";
 import type { DocxNotes, DocxRefusalKind } from "@/importers/docx";
+import { htmlToRawBlocks } from "@/importers/html-blocks";
 import type { PdfNotes, PdfRefusalKind } from "@/importers/pdf";
 import { SAMPLE_TEXT } from "../lib/sample";
 import { type WorkspaceSnapshot } from "../lib/workspace";
@@ -50,17 +51,48 @@ export interface DocumentSource {
   loadExample: () => void;
   clear: () => void;
   openDocument: (file: File) => Promise<boolean>;
-  enterPastedDocument: (value: string) => void;
+  enterPastedDocument: (value: string, html: string | null) => void;
+}
+
+const words = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+function refinesPastedLines(units: readonly string[], plain: string): boolean {
+  const lines = plain
+    .split("\n")
+    .map(words)
+    .filter((line) => line !== "");
+  let at = 0;
+  let joined = "";
+
+  for (const unit of units) {
+    if (at >= lines.length) return false;
+    joined = joined === "" ? words(unit) : `${joined} ${words(unit)}`;
+    if (joined === lines[at]) {
+      at += 1;
+      joined = "";
+      continue;
+    }
+    if (!lines[at].startsWith(`${joined} `)) return false;
+  }
+
+  return at === lines.length && joined === "";
 }
 
 function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
   return blocks === null ? null : buildStructuredDocument(blocks, ptDocumentServices);
 }
 
+interface DocumentSourceState {
+  readonly text: string;
+  readonly doc: Document | null;
+}
+
 export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Config): DocumentSource {
-  const [text, setTextState] = useState(() => initial?.text ?? "");
-  const [importedDoc, setImportedDoc] = useState<Document | null>(() => documentFrom(initial?.blocks ?? null));
-  const importedRef = useRef<Document | null>(importedDoc);
+  const [source, setSource] = useState<DocumentSourceState>(() => ({
+    text: initial?.text ?? "",
+    doc: documentFrom(initial?.blocks ?? null),
+  }));
+  const importedRef = useRef<Document | null>(source.doc);
   const refusedRef = useRef<{ reason: SpliceRefusal; text: string } | null>(null);
   const [refusedEdit, setRefusedEdit] = useState<{ reason: SpliceRefusal; text: string } | null>(null);
   const [importing, setImporting] = useState(false);
@@ -71,9 +103,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const adopt = useCallback((doc: Document | null, value: string) => {
     importedRef.current = doc;
     refusedRef.current = null;
-    setImportedDoc(doc);
     setRefusedEdit(null);
-    setTextState(value);
+    setSource({ text: value, doc });
   }, []);
 
   const enter = useCallback(
@@ -88,7 +119,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     (value: string) => {
       const current = importedRef.current;
       if (current === null) {
-        setTextState(value);
+        setSource({ text: value, doc: null });
         return;
       }
 
@@ -116,9 +147,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     if (pending === null) return;
     refusedRef.current = null;
     importedRef.current = null;
-    setImportedDoc(null);
     setRefusedEdit(null);
-    setTextState(pending.text);
+    setSource({ text: pending.text, doc: null });
   }, []);
 
   const discardRefusedEdit = useCallback(() => {
@@ -126,12 +156,12 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     setRefusedEdit(null);
   }, []);
 
-  const deferredText = useDeferredValue(text);
-  const structured = importedDoc !== null && deferredText === importedDoc.source;
+  const deferred = useDeferredValue(source);
+  const structured = deferred.doc !== null && deferred.text === deferred.doc.source;
 
   const doc = useMemo(
-    () => (structured ? importedDoc! : buildDocument(deferredText)),
-    [structured, importedDoc, deferredText],
+    () => (structured ? deferred.doc! : buildDocument(deferred.text)),
+    [structured, deferred],
   );
 
   const diagnostic = useMemo(() => analyzeDocument(doc, config), [doc, config]);
@@ -146,7 +176,24 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
   const clear = useCallback(() => enter(null, ""), [enter]);
 
-  const enterPastedDocument = useCallback((value: string) => enter(null, value), [enter]);
+  const enterPastedDocument = useCallback(
+    (value: string, html: string | null) => {
+      const blocks = html === null || html.trim() === "" ? [] : htmlToRawBlocks(html);
+      if (blocks.length === 0) {
+        enter(null, value);
+        return;
+      }
+
+      const units = blocks.flatMap((block) => (block.kind === "list" ? block.items : [block.text]));
+      if (!refinesPastedLines(units, value)) {
+        enter(null, value);
+        return;
+      }
+      const doc = buildStructuredDocument(blocks, ptDocumentServices);
+      enter(doc, doc.source);
+    },
+    [enter],
+  );
 
   const openDocument = useCallback(
     async (file: File): Promise<boolean> => {
@@ -187,20 +234,20 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     [enter],
   );
 
-  const rawBlocks = useMemo(() => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)), [importedDoc]);
+  const rawBlocks = useMemo(() => (source.doc === null ? null : toRawBlocks(source.doc.blocks)), [source.doc]);
 
   return {
-    text,
+    text: source.text,
     setText,
     originalText,
     diagnostic,
     silentCriteria,
     missingBlockKinds,
     importNotes: structured ? importNotes : null,
-    blocks: structured ? importedDoc!.blocks : null,
+    blocks: structured ? deferred.doc!.blocks : null,
     rawBlocks,
-    isEmpty: text.trim() === "" && (importedDoc === null || importedDoc.blocks.length === 0),
-    isSettled: deferredText === text,
+    isEmpty: source.text.trim() === "" && (source.doc === null || source.doc.blocks.length === 0),
+    isSettled: deferred === source,
     refusedEdit,
     acceptAsPlainText,
     discardRefusedEdit,

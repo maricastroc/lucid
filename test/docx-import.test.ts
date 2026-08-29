@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analyzeDocument, buildStructuredDocument } from "../src/lucid";
-import { htmlToRawBlocks } from "../src/importers/docx";
+import { htmlToRawBlocks } from "../src/importers/html-blocks";
 import { ptDocumentServices } from "../src/locales/pt-BR";
 
 describe("htmlToRawBlocks — mammoth's semantic HTML → neutral blocks", () => {

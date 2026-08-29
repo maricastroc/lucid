@@ -283,11 +283,9 @@ function buildJustification(eventiveness: Eventiveness, agentTruncated: boolean)
   }
   if (eventiveness === "ambiguous_present") {
     return (
-      'Construção "ser + particípio" no presente e sem agente explícito: pode ser voz passiva ' +
-      'de uma ação ("o benefício é concedido") ou predicativo de estado ("o servidor é ' +
-      'qualificado"), e a ferramenta não distingue os dois com segurança. Se descreve uma ação, ' +
-      "considere a voz ativa e diga quem a pratica; se descreve um estado ou característica, este " +
-      "apontamento não se aplica. A ferramenta não corrige automaticamente — a decisão é sua."
+      "Possível voz passiva: “ser” no presente + particípio, sem agente explícito. Como essa " +
+      "construção também pode indicar estado ou característica, confirme o sentido pelo contexto. " +
+      "Até lá, o apontamento fica registrado com peso menor que o de uma passiva confirmada."
     );
   }
   return (
@@ -366,7 +364,7 @@ export const passiveVoicePass: Pass = {
           criterion: CRITERION,
           category: "syntactic",
           span: { start, end, text: ctx.doc.source.slice(start, end) },
-          severity: "warning",
+          severity: eventiveness === "ambiguous_present" ? "info" : "warning",
           requiresHuman: !hasAgent || agentTruncated,
           justification: buildJustification(eventiveness, agentTruncated),
           meta,

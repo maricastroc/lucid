@@ -56,7 +56,7 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-dotted",
     signal: "âncora numa forma de “ser” seguida de particípio, em janela local de palavras",
-    why: "Esta construção pode representar voz passiva ou apenas um estado. Verifique se há uma ação cujo agente deveria ser identificado.",
+    why: "Quem pratica a ação some ou vai para o fim da frase. No presente e sem agente, porém, a construção também pode indicar estado ou característica; nesses casos, só o contexto permite decidir.",
   },
   passiva_sintetica: {
     label: "Voz passiva sintética",

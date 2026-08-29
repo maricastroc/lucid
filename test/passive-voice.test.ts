@@ -372,14 +372,25 @@ describe("passiveVoicePass — eventiveness at four levels (A-1)", () => {
       expect(findings, text).toHaveLength(1);
       expect(findings[0].meta, text).toMatchObject({ hasAgent: false, eventiveness: "ambiguous_present" });
       expect(findings[0].requiresHuman, text).toBe(true);
-      expect(findings[0].justification, text).toContain("predicativo de estado");
+      expect(findings[0].severity, text).toBe("info");
+      expect(findings[0].justification, text).toContain("estado ou característica");
     }
   });
 
-  it("the justification for the ambiguous present does NOT assert a passive categorically", () => {
+  it("names the other readings and asks for the context, asserting none of them", () => {
     const [f] = passiveFindings("O servidor é qualificado.");
-    expect(f.justification).toContain("pode ser voz passiva");
+    expect(f.justification).toContain("Possível voz passiva");
+    expect(f.justification).toContain("estado ou característica");
+    expect(f.justification).toContain("confirme o sentido pelo contexto");
     expect(f.justification).not.toContain("Frase na voz passiva,");
+  });
+
+  it("weighs less than a confirmed passive, and says so", () => {
+    const [ambiguo] = passiveFindings("O servidor é qualificado.");
+    const [confirmada] = passiveFindings("O pedido foi aprovado.");
+    expect(ambiguo.severity).toBe("info");
+    expect(confirmada.severity).toBe("warning");
+    expect(ambiguo.justification).toContain("peso menor");
   });
 
   it("the deontic 'ser obrigado a' WITHOUT an agent is excluded from the passive (covered by leitor_terceira_pessoa)", () => {

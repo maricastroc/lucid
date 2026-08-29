@@ -53,12 +53,8 @@ export function missingDigits(before: readonly string[], removed: readonly strin
 
 const refuse = (refusal: PdfRefusalKind): PdfResult => ({ ok: false, refusal });
 
-const toParagraphs = (text: string): RawBlock[] =>
-  text
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter((block) => block !== "")
-    .map((block) => ({ kind: "paragraph", text: block }));
+const toParagraphs = (paragraphs: readonly string[]): RawBlock[] =>
+  paragraphs.map((text) => ({ kind: "paragraph", text }));
 
 export function importPdfPages(pages: readonly PdfPageGeometry[], services: DocumentBuildServices): PdfResult {
   if (pages.length === 0) return refuse("unreadable");
@@ -87,7 +83,7 @@ export function importPdfPages(pages: readonly PdfPageGeometry[], services: Docu
   );
   if (missing.length > 0) return refuse("invariant");
 
-  const blocks = toParagraphs(built.text);
+  const blocks = toParagraphs(built.paragraphs);
   if (blocks.length === 0) return refuse("no_readable_content");
 
   return {

@@ -7,7 +7,7 @@ export const CRITERION_TEXT_EN: Record<CriterionId, CriterionText> = {
     kind: "Syntactic construction",
     principleName: "Clear sentences",
     signal: "anchored on a form of “ser” followed by a participle, within a local word window",
-    why: "This construction may be a passive or merely a state. Check whether there is an action whose agent should be named.",
+    why: "Whoever acts disappears or moves to the end of the sentence. In the present with no agent, though, the construction may also indicate a state or a characteristic; in those cases only the context can settle it.",
   },
   passiva_sintetica: {
     label: "Synthetic passive (“se”)",

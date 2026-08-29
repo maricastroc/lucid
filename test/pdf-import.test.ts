@@ -4,6 +4,7 @@ import { importPdfPages, missingDigits, type PdfPageGeometry, type PdfTextItem }
 import { cleanRunningLines, shapeOf } from "../src/importers/pdf/clean";
 import { hasPersistentGutter } from "../src/importers/pdf/columns";
 import { assembleLines } from "../src/importers/pdf/lines";
+import { buildParagraphs, metricsOf } from "../src/importers/pdf/paragraphs";
 import { isGlued, isScanned, qualityOf } from "../src/importers/pdf/quality";
 import { countRuledRegions } from "../src/importers/pdf/ruled-regions";
 import type { PdfLine, PdfRule } from "../src/importers/pdf/geometry";
@@ -170,5 +171,49 @@ describe("a document that reads clean", () => {
     const second = importOf(pages);
     if (!first.ok || !second.ok) throw new Error("esperava sucesso");
     expect(first.value.doc.source).toBe(second.value.doc.source);
+  });
+});
+
+describe("paragraphs travel as paragraphs, not as a string to be re-read", () => {
+  const PAGES = [
+    page([
+      ...prose([
+        "A Secretaria torna público o edital de chamamento, com fundamento na Lei",
+        "Estadual nº 13.811, de 16 de agosto de 2006, e demais normas aplicáveis.",
+      ]),
+      ...prose(["Constitui o objeto deste edital o fomento de bens culturais."], 200),
+    ]),
+  ];
+
+  it("hands the blocks the importer assembled straight through", () => {
+    const result = importOf(PAGES);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const paragraphs = result.value.doc.blocks.map((b) => (b.kind === "list" ? "" : b.text));
+    expect(paragraphs).toHaveLength(2);
+    expect(paragraphs[0]).toContain("Lei Estadual nº 13.811");
+    expect(paragraphs[1]).toBe("Constitui o objeto deste edital o fomento de bens culturais.");
+  });
+
+  it("keeps every block a paragraph, since the importer infers no headings", () => {
+    const result = importOf(PAGES);
+    if (!result.ok) return;
+    expect(result.value.doc.blocks.every((b) => b.kind === "paragraph")).toBe(true);
+  });
+});
+
+describe("buildParagraphs — the array is the result and the string is a view of it", () => {
+  it("the text it reports is exactly its own paragraphs joined", () => {
+    const lines = assembleLines(page(prose(["Primeira linha do parágrafo,", "que continua aqui."])), 1);
+    const built = buildParagraphs(lines, metricsOf(lines, WIDTH));
+    expect(built.text).toBe(built.paragraphs.join("\n\n"));
+  });
+
+  it("drops empty blocks in the array, not only in the string", () => {
+    const lines = assembleLines(page(prose(["Uma linha só."])), 1);
+    const built = buildParagraphs(lines, metricsOf(lines, WIDTH));
+    expect(built.paragraphs).toEqual(["Uma linha só."]);
+    expect(built.paragraphs.every((p) => p.trim() !== "")).toBe(true);
   });
 });
