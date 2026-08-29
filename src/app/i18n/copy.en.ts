@@ -631,6 +631,9 @@ export const COPY_EN: UiCopy = {
 
   documentView: {
     regionLabel: "Document under review",
+    emptyDrop: "Or drag a .docx or .pdf here.",
+    dropHere: "Drop to open",
+    dropHint: "Takes .docx and .pdf",
     draft: "Draft",
     structured: "Structured document",
     underReview: "Document under review",

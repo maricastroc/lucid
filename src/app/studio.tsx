@@ -343,6 +343,7 @@ export function Studio() {
             activeOccurrence={occurrences.active}
             onChangeText={onFreeTypeText}
             onSelectFinding={selectFinding}
+            onOpenDocument={openDocument}
           />
         )}
 

@@ -1,4 +1,5 @@
 import type { DocxNotes } from "@/importers/docx";
+import type { PdfNotes } from "@/importers/pdf";
 import type { BlockKind } from "@/lucid";
 import {
   analyzeDocument,
@@ -26,8 +27,10 @@ export interface AuditedFile {
   readonly counts: Record<Severity, number>;
   readonly silent: readonly string[];
   readonly missingBlockKinds: readonly BlockKind[];
-  readonly importNotes: DocxNotes | null;
+  readonly importNotes: ImportNotes | null;
 }
+
+export type ImportNotes = ({ readonly format: "docx" } & DocxNotes) | ({ readonly format: "pdf" } & PdfNotes);
 
 export const SEVERITY_ORDER: readonly Severity[] = ["info", "warning", "error"];
 
@@ -51,7 +54,7 @@ export function auditDocument(
   name: string,
   doc: Document,
   criteria: readonly CriterionId[],
-  importNotes: DocxNotes | null = null,
+  importNotes: ImportNotes | null = null,
 ): AuditedFile {
   return finish(name, analyzeDocument(doc), criteria, doc, importNotes);
 }
@@ -61,7 +64,7 @@ function finish(
   diagnostic: Diagnostic,
   criteria: readonly CriterionId[],
   doc: Document,
-  importNotes: DocxNotes | null,
+  importNotes: ImportNotes | null,
 ): AuditedFile {
   const selected =
     criteria.length === 0

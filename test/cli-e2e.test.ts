@@ -109,10 +109,17 @@ describe("lucid CLI — exit codes", () => {
   });
 
   it("rejects an unsupported extension instead of guessing", () => {
-    const pdf = path.join(workspace, "documento.pdf");
-    fs.writeFileSync(pdf, "nao importa");
-    expect(lucid([pdf]).status).toBe(1);
-    expect(lucid([pdf]).stderr).toContain("extensão não suportada");
+    const rtf = path.join(workspace, "documento.rtf");
+    fs.writeFileSync(rtf, "nao importa");
+    expect(lucid([rtf]).status).toBe(1);
+    expect(lucid([rtf]).stderr).toContain("extensão não suportada");
+  });
+
+  it("refuses a .pdf it cannot open, rather than auditing the bytes as text", () => {
+    const broken = path.join(workspace, "quebrado.pdf");
+    fs.writeFileSync(broken, "isto não é um PDF");
+    expect(lucid([broken]).status).toBe(1);
+    expect(lucid([broken]).stderr).toContain("não foi possível ler o arquivo");
   });
 });
 

@@ -1,5 +1,5 @@
 import type { ClauseStatus, CoverageReport, Severity } from "@/lucid";
-import type { AuditedFile } from "./audit";
+import type { AuditedFile, ImportNotes } from "./audit";
 import { SEVERITY_ORDER } from "./audit";
 
 const SEVERITY_LABEL: Record<Severity, string> = {
@@ -37,6 +37,8 @@ function importLines(file: AuditedFile): string[] {
   const notes = file.importNotes;
   if (notes === null) return [];
 
+  if (notes.format === "pdf") return pdfImportLines(file.name, notes);
+
   const out: string[] = [];
   if (notes.headingStylesRecovered.length > 0) {
     out.push(
@@ -57,6 +59,37 @@ function importLines(file: AuditedFile): string[] {
         "o conteúdo entra na auditoria, a disposição não. Célula e prosa são medidas com a mesma régua.",
     );
   }
+  return out;
+}
+
+function pdfImportLines(name: string, notes: Extract<ImportNotes, { format: "pdf" }>): string[] {
+  const out: string[] = [];
+  const did: string[] = [];
+
+  if (notes.ruledRegions > 0) {
+    did.push(
+      `${notes.ruledRegions} ${plural(notes.ruledRegions, "região desenhada como grade foi lida", "regiões desenhadas como grade foram lidas")} como texto corrido`,
+    );
+  }
+  const furniture = notes.removedHeaders + notes.removedFooters + notes.removedPageNumbers;
+  if (furniture > 0) {
+    did.push(
+      `${furniture} ${plural(furniture, "linha repetida de cabeçalho, rodapé ou número de página ficou", "linhas repetidas de cabeçalho, rodapé ou número de página ficaram")} fora da auditoria`,
+    );
+  }
+  if (notes.dehyphenated > 0) {
+    did.push(
+      `${notes.dehyphenated} ${plural(notes.dehyphenated, "palavra foi remontada", "palavras foram remontadas")} de quebra de linha`,
+    );
+  }
+
+  out.push(`${name}: ${notes.pages} ${plural(notes.pages, "página lida", "páginas lidas")}.`);
+  if (did.length > 0) out.push(`${name}: ${did.join("; ")}.`);
+  out.push(
+    `${name}: um PDF não declara título nem lista — tudo entra como parágrafo, e os critérios de ` +
+      "estrutura ficam sem objeto.",
+  );
+
   return out;
 }
 

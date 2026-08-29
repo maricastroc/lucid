@@ -6,8 +6,9 @@ import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model"
 import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
 import { severityRank } from "../lib/criteria";
 import { occurrenceKey } from "../lib/occurrence-cursor";
+import { useFileDrop } from "../hooks/use-file-drop";
 import { useCopy } from "../i18n/use-copy";
-import { PenNibIcon } from "./icons";
+import { ArrowDownIcon, PenNibIcon } from "./icons";
 
 export type Mode = "audit" | "edit";
 
@@ -24,6 +25,7 @@ interface Props {
   activeOccurrence: Span | null;
   onChangeText: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
+  onOpenDocument: (file: File) => void;
 }
 
 interface SegmentContext {
@@ -233,10 +235,12 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
     activeOccurrence,
     onChangeText,
     onSelectFinding,
+    onOpenDocument,
   },
   scrollRef,
 ) {
   const { c } = useCopy();
+  const drop = useFileDrop(onOpenDocument);
   const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings, occurrences), [diagnostic, occurrences]);
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
@@ -253,7 +257,22 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   };
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col bg-desk" aria-label={c.documentView.regionLabel}>
+    <section
+      className="relative flex min-w-0 flex-1 flex-col bg-desk"
+      aria-label={c.documentView.regionLabel}
+      {...drop.handlers}
+    >
+      {drop.dragging && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-3 z-20 grid place-items-center rounded-xl border-2 border-dashed border-accent bg-desk/85 backdrop-blur-[1px]"
+        >
+          <div className="text-center">
+            <p className="font-serif text-[19px] text-ink-0">{c.documentView.dropHere}</p>
+            <p className="mt-1 text-[12.5px] text-ink-2">{c.documentView.dropHint}</p>
+          </div>
+        </div>
+      )}
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
           <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
@@ -290,6 +309,10 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                     </span>
                     <p className="mt-4 font-serif text-[21px] leading-snug text-ink-1">{c.documentView.emptyTitle}</p>
                     <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">{c.documentView.emptyBody}</p>
+                    <p className="mt-3 flex items-center gap-1.5 text-[12.5px] text-ink-3">
+                      <ArrowDownIcon className="size-3.5 text-ink-dim" />
+                      {c.documentView.emptyDrop}
+                    </p>
                     <span aria-hidden className="caret-blink mt-5 h-[1.4em] w-0.75 rounded-full bg-accent" />
                   </div>
                 )}

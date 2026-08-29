@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useFileDrop } from "../hooks/use-file-drop";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowRightIcon, CheckIcon, CloseIcon, PenNibIcon } from "./icons";
 
@@ -12,12 +13,28 @@ interface Props {
 }
 
 export function Welcome({ onWrite, onOpenDocument, onLoadExample, importing }: Props) {
+  const drop = useFileDrop(onOpenDocument);
   const { c } = useCopy();
   const w = c.welcome;
   const fileInput = useRef<HTMLInputElement>(null);
 
   return (
-    <section className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-desk" aria-label={w.regionLabel}>
+    <section
+      className="relative flex min-w-0 flex-1 flex-col overflow-y-auto bg-desk"
+      aria-label={w.regionLabel}
+      {...drop.handlers}
+    >
+      {drop.dragging && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-3 z-20 grid place-items-center rounded-xl border-2 border-dashed border-accent bg-desk/85 backdrop-blur-[1px]"
+        >
+          <div className="text-center">
+            <p className="font-serif text-[19px] text-ink-0">{c.documentView.dropHere}</p>
+            <p className="mt-1 text-[12.5px] text-ink-2">{c.documentView.dropHint}</p>
+          </div>
+        </div>
+      )}
       <div className="mx-auto flex w-full max-w-4xl flex-col px-5 py-10 sm:px-8 sm:py-16">
         <div className="fade-in overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
           <div className="px-6 py-9 sm:px-14 sm:py-14">

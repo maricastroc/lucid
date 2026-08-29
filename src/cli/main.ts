@@ -6,13 +6,24 @@ import { HELP, parseArgs, type CliOptions } from "./args";
 import { renderCoverage, renderJson, renderText } from "./render";
 
 const DOCX = ".docx";
+const PDF = ".pdf";
 
 const REFUSAL_MESSAGE = {
-  unreadable: "não foi possível ler o arquivo — confirme que é um .docx válido",
+  unreadable: "não foi possível ler o arquivo — confirme que é um .docx ou .pdf válido",
   tracked_changes:
     "o arquivo tem alterações rastreadas ainda não resolvidas. Enquanto elas existirem, o próprio arquivo " +
     "não diz qual é o seu texto: aceite ou rejeite as alterações no editor e importe de novo",
   no_readable_content: "o arquivo não tem conteúdo legível para auditar",
+  scanned:
+    "este PDF é uma imagem digitalizada, não texto. Não há o que auditar no que não foi escrito como texto: " +
+    "use o arquivo original, em .docx ou em PDF gerado pelo computador",
+  columns:
+    "este PDF está em duas ou mais colunas, e a leitura de cima para baixo misturaria as colunas. Auditar " +
+    "um texto embaralhado mediria a extração, não a escrita: use o original em .docx, ou um PDF de uma coluna",
+  glued: "as palavras deste PDF saem grudadas na extração: o texto lido não é o texto escrito",
+  invariant:
+    "um número que está no PDF não sobreviveu à leitura — auditar aqui seria auditar um texto do qual a " +
+    "ferramenta não tem certeza",
 } as const;
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown", ""];
 
@@ -30,10 +41,16 @@ async function auditPath(target: string, options: CliOptions): Promise<AuditedFi
     const { importDocx } = await import("@/importers/docx");
     const result = await importDocx(await fs.readFile(target), ptDocumentServices);
     if (!result.ok) throw new Error(REFUSAL_MESSAGE[result.refusal]);
-    return auditDocument(target, result.value.doc, options.criteria, result.value.notes);
+    return auditDocument(target, result.value.doc, options.criteria, { format: "docx", ...result.value.notes });
+  }
+  if (extension === PDF) {
+    const { importPdf } = await import("@/importers/pdf");
+    const result = await importPdf(await fs.readFile(target), ptDocumentServices);
+    if (!result.ok) throw new Error(REFUSAL_MESSAGE[result.refusal]);
+    return auditDocument(target, result.value.doc, options.criteria, { format: "pdf", ...result.value.notes });
   }
   if (!TEXT_EXTENSIONS.includes(extension)) {
-    throw new Error(`extensão não suportada: ${extension || target} (use .txt, .md, .docx ou -)`);
+    throw new Error(`extensão não suportada: ${extension || target} (use .txt, .md, .docx, .pdf ou -)`);
   }
   return auditText(target, await fs.readFile(target, "utf8"), options.criteria);
 }

@@ -233,7 +233,7 @@ describe("import — what the audit says about the file it was handed", () => {
   };
   const audited = (over: Partial<typeof notes>) => ({
     ...auditText("doc.docx", "# Título curto\n\nO documento supracitado foi juntado aos autos.\n\n- Um\n- Dois", []),
-    importNotes: { ...notes, ...over },
+    importNotes: { format: "docx" as const, ...notes, ...over },
   });
 
   it("says nothing when nothing was rebuilt or flattened", () => {

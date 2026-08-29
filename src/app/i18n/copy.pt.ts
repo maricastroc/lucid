@@ -626,6 +626,9 @@ export const COPY_PT: UiCopy = {
 
   documentView: {
     regionLabel: "Documento em revisão",
+    emptyDrop: "Ou arraste um .docx ou .pdf para cá.",
+    dropHere: "Solte para abrir",
+    dropHint: "Aceita .docx e .pdf",
     draft: "Rascunho",
     structured: "Documento estruturado",
     underReview: "Documento em revisão",

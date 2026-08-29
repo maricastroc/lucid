@@ -478,6 +478,9 @@ export interface UiCopy {
 
   readonly documentView: {
     readonly regionLabel: string;
+    readonly emptyDrop: string;
+    readonly dropHere: string;
+    readonly dropHint: string;
     readonly draft: string;
     readonly structured: string;
     readonly underReview: string;

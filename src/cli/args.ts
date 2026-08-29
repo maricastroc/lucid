@@ -85,6 +85,9 @@ USO
   lucid <arquivo...> [opções]
   cat documento.txt | lucid -
 
+  Aceita .txt, .md, .docx e .pdf. Um PDF não declara título nem lista: tudo
+  entra como parágrafo, e os critérios de estrutura ficam sem objeto.
+
 OPÇÕES
   --format text|json     formato da saída (padrão: text)
   --fail-on <gravidade>  never|info|warning|error — sai com código 2 se houver
@@ -98,8 +101,9 @@ OPÇÕES
 
 CÓDIGOS DE SAÍDA
   0  a auditoria rodou
-  1  nada foi auditado (opção inválida, arquivo ilegível, ou recusa —
-     .docx com alterações rastreadas não resolvidas, ou sem conteúdo legível)
+  1  nada foi auditado (opção inválida, arquivo ilegível, ou recusa — .docx com
+     alterações rastreadas não resolvidas; PDF digitalizado, em colunas, com
+     texto grudado ou que perdeu um número na leitura; ou sem conteúdo legível)
   2  o limite declarado em --fail-on foi cruzado
 
   Sair com 0 significa que a medição terminou — NÃO que o texto foi aprovado.
