@@ -5,7 +5,6 @@ import { burdenMove, entryLabel, type LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
 import { ChevronDownIcon } from "./icons";
 
-/** Beyond this, a passage is folded: the trail is a list to scan, not a place to read prose. */
 const PASSAGE_LIMIT = 90;
 
 const MOVE_MARK: Record<ReturnType<typeof burdenMove>, string> = { down: "↓", up: "↑", level: "=" };
@@ -18,11 +17,6 @@ const MOVE_INK: Record<ReturnType<typeof burdenMove>, string> = {
 const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
-/**
- * The record of this document: the changes the engine registered, and the text as it came in. The
- * two belong together — the entry text is the starting point of the weight the list reports, and
- * without it the reader has a delta they cannot check. Nothing here restores or applies anything.
- */
 export function RecordedChanges({
   entries,
   originalText,
@@ -162,7 +156,6 @@ function EntryText({ text, afterChanges }: { text: string | null; afterChanges: 
       )}
       <p className="mt-2 text-[11.5px] italic leading-relaxed text-ink-3">
         {c.overview.entryNote}
-        {/* There is only a weight to point at when something was registered. */}
         {afterChanges && ` ${c.overview.entryStartingPoint}`}
       </p>
     </section>

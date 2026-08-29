@@ -310,34 +310,6 @@ export function Studio() {
         </div>
       )}
 
-      {refusedEdit !== null && (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2.5 text-[12.5px] text-ink-1"
-        >
-          <span className="min-w-0">
-            {c.studio.spliceRefused[refusedEdit.reason]}{" "}
-            <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
-          </span>
-          <span className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={acceptAsPlainText}
-              className="rounded-lg border border-rule-2 bg-sheet px-3 py-1.5 text-[12px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-            >
-              {c.studio.spliceAcceptPlain}
-            </button>
-            <button
-              type="button"
-              onClick={discardRefusedEdit}
-              className="rounded-lg px-2.5 py-1.5 text-[12px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-            >
-              {c.studio.spliceDiscard}
-            </button>
-          </span>
-        </div>
-      )}
-
       {saveFailed && (
         <div
           role="alert"
@@ -407,21 +379,50 @@ export function Studio() {
         onConfirm={discardAndGoHome}
       />
 
-      {canUndo && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex justify-center px-4">
-          <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
-            <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
-              <ArrowDownIcon className="size-4 text-safe" aria-hidden />
-              {c.studio.changeApplied}
-            </span>
-            <button
-              type="button"
-              onClick={undoChange}
-              className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
+      {(refusedEdit !== null || canUndo) && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex flex-col items-center gap-2 px-4">
+          {refusedEdit !== null && (
+            <div
+              role="alert"
+              className="rise pointer-events-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border border-sev-warning/40 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)"
             >
-              {c.studio.undo}
-            </button>
-          </div>
+              <span className="text-[12.5px] text-ink-1">
+                {c.studio.spliceRefused[refusedEdit.reason]}{" "}
+                <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={acceptAsPlainText}
+                  className="rounded-full border border-rule-2 px-3 py-1 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
+                >
+                  {c.studio.spliceAcceptPlain}
+                </button>
+                <button
+                  type="button"
+                  onClick={discardRefusedEdit}
+                  className="rounded-full px-2.5 py-1 text-[12.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
+                >
+                  {c.studio.spliceDiscard}
+                </button>
+              </span>
+            </div>
+          )}
+          {canUndo && (
+            <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
+              <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
+                <ArrowDownIcon className="size-4 text-safe" aria-hidden />
+                {c.studio.changeApplied}
+              </span>
+              <button
+                type="button"
+                onClick={undoChange}
+                className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
+              >
+                {c.studio.undo}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

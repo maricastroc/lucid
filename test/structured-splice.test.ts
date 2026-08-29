@@ -90,9 +90,14 @@ describe("spliceStructuredDocument — the structure survives an edit", () => {
 });
 
 describe("spliceStructuredDocument — it gives up instead of guessing", () => {
-  it("refuses an edit that crosses a block boundary", () => {
+  it("joins two blocks when the author deletes the boundary between them", () => {
     const doc = build();
-    expect(refusal(doc, doc.source.replace("documentos\n\nFoi", "documentos. Foi"))).toBe("crosses_units");
+    const next = splice(doc, "documentos\n\nFoi", "documentos. Foi");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "heading2", "list"]);
+    expect(next!.blocks[0].text).toBe(
+      "Prazos e documentos. Foi realizada a análise em sede de procedimento administrativo.",
+    );
   });
 
   it("ACCEPTS a line break inside a paragraph, keeping it one paragraph (ADR-088)", () => {
@@ -112,12 +117,14 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
     expect(refusal(doc, doc.source.replace("Servidor efetivo", "Servidor\nefetivo"))).toBe("unsupported_unit");
   });
 
-  it("refuses an edit that would empty a block", () => {
+  it("removes the block the author emptied, instead of discarding the edit", () => {
     const doc = build();
-    expect(splice(doc, "Prazos e documentos", "")).toBeNull();
+    const next = splice(doc, "Prazos e documentos", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["paragraph", "heading2", "list"]);
   });
 
-  it("refuses a wholesale rewrite of the text", () => {
+  it("still refuses a wholesale rewrite, where no structure can be derived", () => {
     const doc = build();
     expect(refusal(doc, "Um texto completamente diferente.")).toBe("crosses_units");
   });
@@ -151,5 +158,109 @@ describe("spliceStructuredDocument — the Principle 2 criteria stop going silen
       (f) => f.criterion === "salto_de_nivel_titulo",
     );
     expect(after).toHaveLength(1);
+  });
+});
+
+describe("spliceStructuredDocument — deleting is editing, not an error (ADR-080)", () => {
+  const texts = (doc: Document): string[] =>
+    doc.blocks.flatMap((b) => (b.kind === "list" ? b.items.map((i) => i.text) : [b.text]));
+
+  it("removes the paragraph the author emptied, and leaves the rest where it was", () => {
+    const doc = build();
+    const next = splice(doc, "Foi realizada a análise em sede de procedimento administrativo.\n\n", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "heading2", "list"]);
+  });
+
+  it("removes it too when the selection left the blank line behind", () => {
+    const doc = build();
+
+    const next = splice(doc, "Foi realizada a análise em sede de procedimento administrativo.", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "heading2", "list"]);
+  });
+
+  it("removes one list item and keeps the list", () => {
+    const doc = build();
+    const next = splice(doc, "\nServidor cedido", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "paragraph", "heading2", "list"]);
+    expect(texts(next!)).toEqual([
+      "Prazos e documentos",
+      "Foi realizada a análise em sede de procedimento administrativo.",
+      "Quem pode pedir",
+      "Servidor efetivo",
+    ]);
+  });
+
+  it("removes the list itself once its last item is gone", () => {
+    const doc = build();
+    const next = splice(doc, "\n\nServidor efetivo\nServidor cedido", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "paragraph", "heading2"]);
+  });
+
+  it("removes several blocks in one deletion", () => {
+    const doc = build();
+    const next = splice(
+      doc,
+      "Foi realizada a análise em sede de procedimento administrativo.\n\nQuem pode pedir\n\n",
+      "",
+    );
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "list"]);
+  });
+
+  it("empties the document when everything is deleted", () => {
+    const doc = build();
+    const result = spliceStructuredDocument(doc, "", ptDocumentServices);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.document.blocks).toEqual([]);
+  });
+
+  it("keeps the kind of the end that survived, so deleting a heading does not promote a paragraph", () => {
+    const doc = build();
+    const next = splice(doc, "Prazos e documentos\n\n", "");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["paragraph", "heading2", "list"]);
+  });
+
+  it("joins a partial block to the partial block after it", () => {
+    const doc = build();
+    const next = splice(doc, "documentos\n\nFoi realizada", "documentos e foi realizada");
+    expect(next).not.toBeNull();
+    expect(kinds(next!)).toEqual(["heading1", "heading2", "list"]);
+    expect(next!.blocks[0].text).toBe(
+      "Prazos e documentos e foi realizada a análise em sede de procedimento administrativo.",
+    );
+  });
+
+  it("refuses to invent a structure for text that replaced every block", () => {
+    const doc = build();
+    expect(refusal(doc, "Um texto completamente diferente que tomou o lugar de tudo.")).toBe("crosses_units");
+  });
+
+  it("refuses a line break typed into a selection that already spans blocks", () => {
+    const doc = build();
+    const next = doc.source.replace("documentos\n\nFoi realizada", "documentos ZZZ\nWWW realizada");
+    expect(refusal(doc, next)).toBe("unsupported_unit");
+  });
+
+  it("refuses to turn a paragraph break into a line break, which the structure cannot express", () => {
+    const doc = build();
+    expect(refusal(doc, doc.source.replace("documentos\n\nFoi", "documentos\ne foi"))).not.toBeNull();
+  });
+
+  it("offsets still slice back to their own text after a removal", () => {
+    const doc = build();
+    const next = splice(doc, "Foi realizada a análise em sede de procedimento administrativo.\n\n", "")!;
+    for (const block of next.blocks) expect(next.source.slice(block.start, block.end)).toBe(block.text);
+    for (const sentence of next.sentences) expect(next.source.slice(sentence.start, sentence.end)).toBe(sentence.text);
+  });
+
+  it("is deterministic", () => {
+    const doc = build();
+    const once = JSON.stringify(splice(doc, "Prazos e documentos\n\n", ""));
+    expect(JSON.stringify(splice(doc, "Prazos e documentos\n\n", ""))).toBe(once);
   });
 });

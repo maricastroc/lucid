@@ -28,11 +28,6 @@ export function documentBurden(findings: readonly Finding[]): number {
   return totalBurden(findings);
 }
 
-/**
- * Which way the audit weight went. A tie is its own answer: a change that left the weight where it
- * was did not lower it, and showing it as a fall would credit the change with something it did not
- * do. Shared so the panel and the exported report can never classify the same entry differently.
- */
 export type BurdenMove = "down" | "up" | "level";
 
 export function burdenMove(entry: LedgerEntry): BurdenMove {

@@ -81,7 +81,6 @@ export const COPY_PT: UiCopy = {
       unsupported_unit:
         "Ainda não sabemos aplicar uma alteração em várias linhas dentro de um título ou de um item de lista.",
       introduces_heading: "Esta alteração criaria um título novo, o que mudaria a estrutura do documento.",
-      empty_unit: "Esta alteração deixaria o bloco vazio.",
       rebuild_mismatch: "Não foi possível reconstruir o documento preservando os outros blocos.",
     },
     spliceRefusedKept: "O documento continua como estava — nada foi alterado.",

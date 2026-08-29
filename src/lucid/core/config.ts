@@ -31,7 +31,6 @@ export interface Config {
   gerundismo: {
     enabled: boolean;
   };
-  /** @deprecated Critério descontinuado (ADR-058); ver `adverbiosVagos`. Desligado por padrão. */
   adverbioMente: {
     enabled: boolean;
     minPorFrase: number;

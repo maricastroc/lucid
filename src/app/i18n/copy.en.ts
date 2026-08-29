@@ -80,7 +80,6 @@ export const COPY_EN: UiCopy = {
       crosses_units: "This change spans more than one block of the imported document.",
       unsupported_unit: "Applying a multi-line change inside a heading or a list item is not supported yet.",
       introduces_heading: "This change would create a new heading, altering the document's outline.",
-      empty_unit: "This change would leave the block empty.",
       rebuild_mismatch: "The document could not be rebuilt while preserving the other blocks.",
     },
     spliceRefusedKept: "The document is unchanged — nothing was applied.",

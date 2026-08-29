@@ -9,11 +9,6 @@ const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
-  /**
-   * The document as it entered this session, kept untouched for consulting. `null` means it was
-   * never recorded — a session saved before this field existed — and is not the same as `""`, which
-   * says the document was written here and has no entry text to compare against.
-   */
   readonly originalText: string | null;
   readonly blocks: readonly RawBlock[] | null;
   readonly ledger: readonly LedgerEntry[];

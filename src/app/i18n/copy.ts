@@ -1,4 +1,4 @@
-import type { CriterionId, PrincipleGroup, Severity } from "@/lucid";
+import type { CriterionId, PrincipleGroup, Severity, SpliceRefusal } from "@/lucid";
 import type { PanelSectionId } from "../lib/panel-sections";
 import type { CriterionCoverage } from "@/report/eval/contract";
 import type { LedgerSource } from "../lib/ledger";
@@ -69,10 +69,7 @@ export interface UiCopy {
       readonly body: string;
       readonly confirm: string;
     };
-    readonly spliceRefused: Record<
-      "crosses_units" | "unsupported_unit" | "introduces_heading" | "empty_unit" | "rebuild_mismatch",
-      string
-    >;
+    readonly spliceRefused: Record<SpliceRefusal, string>;
     readonly spliceRefusedKept: string;
     readonly spliceAcceptPlain: string;
     readonly spliceDiscard: string;

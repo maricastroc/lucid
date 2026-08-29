@@ -10,7 +10,6 @@ const ENTRY_TEXT = "O pedido foi indeferido pela comissão por falta dos 3 docum
 const entryBlock = () => within(auditPanel().getByRole("region", { name: /texto de entrada/i }));
 const showEntryText = () => entryBlock().getByRole("button", { name: /ver o texto de entrada/i });
 
-/** One sentence, long enough that the trail has to fold the passage it replaced. */
 const LONG_PASSIVE =
   "O pedido de reconsideração que o interessado apresentou foi indeferido pela comissão por falta " +
   "dos 3 documentos supracitados no edital. O prazo para recorrer é de dez dias.";

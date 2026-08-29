@@ -88,8 +88,7 @@ function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string
   });
 }
 
-export type SpliceRefusal =
-  "crosses_units" | "unsupported_unit" | "introduces_heading" | "empty_unit" | "rebuild_mismatch";
+export type SpliceRefusal = "crosses_units" | "unsupported_unit" | "introduces_heading" | "rebuild_mismatch";
 
 export type StructuredSplice =
   { readonly ok: true; readonly document: Document } | { readonly ok: false; readonly reason: SpliceRefusal };
@@ -121,6 +120,82 @@ function untouchedBlocksSurvived(
   return true;
 }
 
+function sameWords(a: string, b: string): boolean {
+  const words = (text: string): string => text.replace(/\s+/g, " ").trim();
+  return words(a) === words(b);
+}
+
+function rebuildFromUnits(
+  doc: Document,
+  unitTexts: readonly (string | null)[],
+  services: DocumentBuildServices,
+): Document {
+  const raw: RawBlock[] = [];
+  let cursor = 0;
+
+  for (const block of doc.blocks) {
+    if (block.kind === "list") {
+      const items: string[] = [];
+      for (let i = 0; i < block.items.length; i++) {
+        const text = unitTexts[cursor++];
+        if (text !== null) items.push(text);
+      }
+
+      if (items.length > 0) raw.push({ kind: "list", ordered: block.ordered, items });
+      continue;
+    }
+
+    const text = unitTexts[cursor++];
+    if (text === null) continue;
+    raw.push(block.kind === "heading" ? { kind: "heading", level: block.level, text } : { kind: "paragraph", text });
+  }
+
+  return buildStructuredDocument(raw, services);
+}
+
+function spliceAcrossUnits(
+  doc: Document,
+  target: string,
+  start: number,
+  end: number,
+  replacement: string,
+  services: DocumentBuildServices,
+): StructuredSplice {
+  if (replacement.includes("\n")) return { ok: false, reason: "unsupported_unit" };
+
+  const units = editableUnits(doc.blocks);
+  if (units.length === 0) return { ok: false, reason: "crosses_units" };
+
+  let firstIndex = -1;
+  for (let i = 0; i < units.length; i++) if (units[i].start <= start) firstIndex = i;
+  let lastIndex = -1;
+  for (let i = units.length - 1; i >= 0; i--) if (units[i].end >= end) lastIndex = i;
+  if (firstIndex === -1 || lastIndex === -1 || lastIndex < firstIndex) {
+    return { ok: false, reason: "crosses_units" };
+  }
+
+  const first = units[firstIndex];
+  const last = units[lastIndex];
+  const head = first.text.slice(0, Math.max(0, start - first.start));
+  const tail = last.text.slice(Math.max(0, end - last.start));
+  const merged = head + replacement + tail;
+
+  const coversEveryUnit = firstIndex === 0 && lastIndex === units.length - 1;
+  if (replacement.trim() !== "" && (coversEveryUnit || (head === "" && tail === ""))) {
+    return { ok: false, reason: "crosses_units" };
+  }
+
+  const survivor = head.trim() !== "" ? firstIndex : lastIndex;
+  const unitTexts = units.map((unit, index) => {
+    if (index < firstIndex || index > lastIndex) return unit.text;
+    if (index !== survivor) return null;
+    return merged.trim() === "" ? null : merged;
+  });
+
+  const rebuilt = rebuildFromUnits(doc, unitTexts, services);
+  return sameWords(rebuilt.source, target) ? { ok: true, document: rebuilt } : { ok: false, reason: "rebuild_mismatch" };
+}
+
 export function spliceStructuredDocument(
   doc: Document,
   nextText: string,
@@ -131,11 +206,23 @@ export function spliceStructuredDocument(
 
   const { start, end, replacement } = affixSplice(doc.source, target);
 
-  const unit = editableUnits(doc.blocks).find((candidate) => candidate.start <= start && end <= candidate.end);
-  if (unit === undefined) return { ok: false, reason: "crosses_units" };
+  const units = editableUnits(doc.blocks);
+  const unitIndex = units.findIndex((candidate) => candidate.start <= start && end <= candidate.end);
+  if (unitIndex === -1) return spliceAcrossUnits(doc, target, start, end, replacement, services);
+  const unit = units[unitIndex];
 
   const local = unit.text.slice(0, start - unit.start) + replacement + unit.text.slice(end - unit.start);
-  if (local.trim() === "") return { ok: false, reason: "empty_unit" };
+
+  if (local.trim() === "") {
+    const rebuilt = rebuildFromUnits(
+      doc,
+      units.map((_, index) => (index === unitIndex ? null : units[index].text)),
+      services,
+    );
+    return sameWords(rebuilt.source, target)
+      ? { ok: true, document: rebuilt }
+      : { ok: false, reason: "rebuild_mismatch" };
+  }
 
   if (!replacement.includes("\n")) {
     const rebuilt = buildStructuredDocument(withUnitText(doc.blocks, unit, local), services);

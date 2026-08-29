@@ -9,7 +9,6 @@ const DOCUMENT =
 
 const ENTRY = "Foi realizada a análise do documento em sede de procedimento.";
 
-/** A report with every section turned on: profile, briefing, trail and the entry-text appendix. */
 function fullReport(originalText = ENTRY): string {
   const d = analyze(DOCUMENT);
   const briefing = { audience: "servidor", purpose: "pedir a revisão", priorKnowledge: "nada", mustFind: ["prazo"] };

@@ -24,7 +24,6 @@ interface Props {
   occurrences: readonly Span[];
   activeOccurrence: Span | null;
   onChangeText: (value: string) => void;
-  /** A paste over the whole draft: a different document, not an edit to this one. */
   onPasteDocument: (value: string) => void;
   onSelectFinding: (finding: Finding) => void;
   onOpenDocument: (file: File) => void;

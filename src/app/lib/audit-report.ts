@@ -114,10 +114,6 @@ function renderProfileMarkdown(config: Config | null): string {
   return out.join("\n");
 }
 
-/**
- * The text as it entered, carried into the report so the weight the trail reports can be checked
- * against its own starting point. Read-only by construction: a report is not a restore path.
- */
 function renderEntryTextMarkdown(originalText: string | null, hasChanges: boolean): string {
   const out: string[] = ["## Anexo — Texto de entrada", ""];
 

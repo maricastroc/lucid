@@ -580,7 +580,6 @@ textarea.prose-doc:focus-visible {
     display: none !important;
   }
 
-  /* Paper has one theme. The report is printed black on white whatever the screen was showing. */
   #relatorio-impresso {
     display: block;
     color: #14110d;
@@ -621,8 +620,6 @@ textarea.prose-doc:focus-visible {
     margin: 0.9rem 0 0.3rem;
   }
 
-  /* A heading at the foot of a page, and an annotation split across the fold, both cost the
-     reader the thing the report exists to give: knowing which criterion they are looking at. */
   #relatorio-impresso h1,
   #relatorio-impresso h2,
   #relatorio-impresso h3,
@@ -631,7 +628,6 @@ textarea.prose-doc:focus-visible {
     break-inside: avoid;
   }
 
-  /* The reset also drops bold and italic weight from the inline tags the report leans on. */
   #relatorio-impresso strong {
     font-weight: 600;
   }
@@ -653,7 +649,6 @@ textarea.prose-doc:focus-visible {
     widows: 2;
   }
 
-  /* The reset strips list markers app-wide; on paper a list without them is just short lines. */
   #relatorio-impresso ul {
     margin: 0 0 0.6rem;
     padding-left: 1.1rem;

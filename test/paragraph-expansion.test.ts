@@ -155,17 +155,21 @@ describe("paragraph expansion — what stays refused", () => {
     ).toMatchObject({ ok: false, reason: "unsupported_unit" });
   });
 
-  it("refuses an edit that crosses two units", () => {
+  it("joins two units when the author deletes the boundary between them", () => {
     const doc = build();
     const crossing = doc.source.replace("Do objeto\n\nConstitui", "Do objeto — constitui");
-    expect(spliceStructuredDocument(doc, crossing, ptDocumentServices)).toMatchObject({
-      ok: false,
-      reason: "crosses_units",
-    });
+    const result = spliceStructuredDocument(doc, crossing, ptDocumentServices);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(kinds(result.document)).toEqual(["heading1", "paragraph", "heading2", "list"]);
+    expect(result.document.blocks[2].text).toBe("Do objeto — constitui o objeto deste edital o chamamento de organizações.");
   });
 
-  it("refuses an edit that empties the paragraph", () => {
-    expect(reason(build(), "   ")).toBe("empty_unit");
+  it("empties the document when the author replaces everything with whitespace", () => {
+    const result = spliceStructuredDocument(build(), "   ", ptDocumentServices);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.document.blocks).toEqual([]);
   });
 });
 

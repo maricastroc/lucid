@@ -29,10 +29,6 @@ export type ImportNotes = ({ readonly format: "docx" } & DocxNotes) | ({ readonl
 export interface DocumentSource {
   text: string;
   setText: (value: string) => void;
-  /**
-   * The document as it entered, held untouched for the whole life of that document. `null` only in
-   * a session restored from before this was recorded; `""` says the document was written here.
-   */
   originalText: string | null;
   diagnostic: Diagnostic;
   silentCriteria: readonly string[];
@@ -54,7 +50,6 @@ export interface DocumentSource {
   loadExample: () => void;
   clear: () => void;
   openDocument: (file: File) => Promise<boolean>;
-  /** A paste that replaced the whole draft: a different document has entered, structure and all. */
   enterPastedDocument: (value: string) => void;
 }
 
@@ -81,10 +76,6 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     setTextState(value);
   }, []);
 
-  /**
-   * A different document takes the place of the current one, so the entry text is redefined. Every
-   * other path through `adopt` is an edit to the same document and must leave the original alone.
-   */
   const enter = useCallback(
     (doc: Document | null, value: string) => {
       adopt(doc, value);
@@ -208,7 +199,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     importNotes: structured ? importNotes : null,
     blocks: structured ? importedDoc!.blocks : null,
     rawBlocks,
-    isEmpty: text.trim() === "" && importedDoc === null,
+    isEmpty: text.trim() === "" && (importedDoc === null || importedDoc.blocks.length === 0),
     isSettled: deferredText === text,
     refusedEdit,
     acceptAsPlainText,

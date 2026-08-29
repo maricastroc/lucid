@@ -1,12 +1,3 @@
-/**
- * Renders the audit report to HTML for printing. The markdown it reads is not arbitrary — it is
- * exactly what `buildAuditReport` writes, a closed set of constructs this project authors on both
- * sides. That is what lets a renderer this small be honest: a test walks a full report and refuses
- * any line it cannot account for, so nothing ever reaches the page as raw syntax.
- *
- * What the report carries is the author's own document, so every character is escaped first.
- */
-
 const ESCAPES: Record<string, string> = {
   "&": "&amp;",
   "<": "&lt;",
