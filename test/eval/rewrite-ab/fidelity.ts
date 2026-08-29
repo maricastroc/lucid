@@ -182,13 +182,20 @@ export interface FidelityReport {
 
 export function fidelityOf(original: string, proposed: string): FidelityReport {
   const refsBefore = legalRefs(original);
-  const relBefore = normRelations(original).map((r) => r.key).sort();
+  const relBefore = normRelations(original)
+    .map((r) => r.key)
+    .sort();
   const valBefore = values(original);
   return {
     legalRefsBefore: refsBefore.length,
     legalRefsLost: missingFrom(refsBefore, legalRefs(proposed)),
     relationsBefore: relBefore.length,
-    relationsLost: missingFrom(relBefore, normRelations(proposed).map((r) => r.key).sort()),
+    relationsLost: missingFrom(
+      relBefore,
+      normRelations(proposed)
+        .map((r) => r.key)
+        .sort(),
+    ),
     valuesBefore: valBefore.length,
     valuesLost: missingFrom(valBefore, values(proposed)),
     markerFamiliesLost: familiesLost(original, proposed),
@@ -221,11 +228,7 @@ function sentenceWordCounts(text: string, segment: (t: string) => number[]): num
   return segment(text);
 }
 
-export function styleOf(
-  original: string,
-  proposed: string,
-  segment: (text: string) => number[],
-): StyleReport {
+export function styleOf(original: string, proposed: string, segment: (text: string) => number[]): StyleReport {
   const wordsOf = (t: string): number => (t.match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) ?? []).length;
   const paragraphsOf = (t: string): number => t.split(/\n{2,}/u).filter((p) => p.trim() !== "").length;
   const openParens = (t: string): number => (t.match(/\(/gu) ?? []).length;

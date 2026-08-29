@@ -1,4 +1,10 @@
-import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
+import {
+  ChatProviderError,
+  describeFetchFailure,
+  requestSignal,
+  type ChatCompletionOptions,
+  type ChatProvider,
+} from "./types";
 import type { TokenUsage } from "./groq";
 
 const DEEPSEEK_ENDPOINT = "https://api.deepseek.com/chat/completions";

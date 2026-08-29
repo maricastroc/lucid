@@ -6,9 +6,7 @@ export function parseRewrite(raw: string): string | null {
   const tryParse = (candidate: string): string | null => {
     try {
       const parsed = JSON.parse(candidate) as { reescrita?: unknown };
-      return typeof parsed.reescrita === "string" && parsed.reescrita.trim() !== ""
-        ? parsed.reescrita.trim()
-        : null;
+      return typeof parsed.reescrita === "string" && parsed.reescrita.trim() !== "" ? parsed.reescrita.trim() : null;
     } catch {
       return null;
     }

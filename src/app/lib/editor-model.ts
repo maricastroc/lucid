@@ -68,9 +68,7 @@ export function buildLines(text: string, findings: readonly Finding[], marks: re
     const end = start + lineText.length;
     offset = end + 1;
 
-    const markers = findings.filter(
-      (f) => f.span.end > f.span.start && f.span.start < end && f.span.end > start,
-    );
+    const markers = findings.filter((f) => f.span.end > f.span.start && f.span.start < end && f.span.end > start);
 
     lines.push({
       number: i + 1,

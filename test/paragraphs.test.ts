@@ -40,9 +40,7 @@ describe("paragraphSpanAt", () => {
 describe("sentenceSpanAt", () => {
   const T = "A primeira frase é curta. A segunda frase é bem mais longa e cheia de detalhes.";
   it("returns the sentence containing the offset", () => {
-    expect(sentenceSpanAt(T, T.indexOf("segunda")).text).toBe(
-      "A segunda frase é bem mais longa e cheia de detalhes.",
-    );
+    expect(sentenceSpanAt(T, T.indexOf("segunda")).text).toBe("A segunda frase é bem mais longa e cheia de detalhes.");
     expect(sentenceSpanAt(T, 2).text).toBe("A primeira frase é curta.");
   });
 });

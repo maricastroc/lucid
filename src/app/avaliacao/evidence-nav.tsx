@@ -14,8 +14,7 @@ export function EvidenceNav({ sections }: { sections: readonly NavSection[] }) {
 
   useEffect(() => {
     const sync = () => {
-      const atBottom =
-        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
       if (atBottom) {
         setCurrent(sections[sections.length - 1]?.id ?? null);
         return;

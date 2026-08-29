@@ -6,11 +6,7 @@ import { rewriteTargetAt } from "@/app/lib/paragraphs";
 import { mountStudio } from "./support/mount-studio";
 import { auditPanel, documentRegion } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
-import {
-  PASSIVE_AND_JARGON,
-  PLAIN_FIRST_SENTENCE,
-  REWRITE_LOSING_THE_NUMBER,
-} from "./support/documents";
+import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE, REWRITE_LOSING_THE_NUMBER } from "./support/documents";
 
 async function answerWith(proposed: string): Promise<VerifiedRewrite> {
   const finding = analyze(PASSIVE_AND_JARGON).findings[0];

@@ -50,9 +50,7 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
                     <span className="rounded-full border border-rule-2 bg-surface px-3 py-1 text-[13px] font-medium text-ink-0">
                       {verb}
                     </span>
-                    {i < w.verbs.length - 1 && (
-                      <ArrowRightIcon className="size-3.5 text-ink-dim" aria-hidden />
-                    )}
+                    {i < w.verbs.length - 1 && <ArrowRightIcon className="size-3.5 text-ink-dim" aria-hidden />}
                   </span>
                 ))}
               </div>
@@ -137,15 +135,7 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
   );
 }
 
-function AnatomyCard({
-  title,
-  body,
-  children,
-}: {
-  title: string;
-  body: string;
-  children?: React.ReactNode;
-}) {
+function AnatomyCard({ title, body, children }: { title: string; body: string; children?: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-rule-1 bg-sheet px-4 py-3.5">
       <div className="text-[13px] font-semibold text-ink-0">{title}</div>

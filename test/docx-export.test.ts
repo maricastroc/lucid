@@ -94,9 +94,7 @@ describe("blocksToDocx — round trip through the project's own importer", () =>
   });
 
   it("escapes XML metacharacters instead of corrupting the file", async () => {
-    const tricky: RawBlock[] = [
-      { kind: "paragraph", text: 'O prazo & a "condição" <urgente> não se aplicam.' },
-    ];
+    const tricky: RawBlock[] = [{ kind: "paragraph", text: 'O prazo & a "condição" <urgente> não se aplicam.' }];
     expect(await reimport(blocksToDocx(tricky))).toEqual(tricky);
   });
 

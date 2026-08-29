@@ -11,7 +11,8 @@ export interface CriterionSpec {
 
 const RE_ACRONYM_SHAPE = /(?<!\p{L})\p{Lu}{2,6}(?!\p{L})/u;
 
-const RE_ENUM_MARKER = /(?:(?<!\p{L})(?:\d{1,2}|i{1,3}|iv|vi{0,3}|ix|x)\s*\)|(?<!\p{L})(?:primeiro|segundo|terceiro|quarto|quinto|primeira|segunda|terceira|quarta|quinta)(?!\p{L}))/giu;
+const RE_ENUM_MARKER =
+  /(?:(?<!\p{L})(?:\d{1,2}|i{1,3}|iv|vi{0,3}|ix|x)\s*\)|(?<!\p{L})(?:primeiro|segundo|terceiro|quarto|quinto|primeira|segunda|terceira|quarta|quinta)(?!\p{L}))/giu;
 
 const RE_PERIPHRASIS_SHAPE =
   /(?<!\p{L})(?:em|no|na|nos|nas|com|de|do|da|dos|das|por|para|ao|à|a)\s+\p{L}{3,14}\s+(?:de|do|da|dos|das|a|ao|à|as|às|para|com|que)(?!\p{L})/iu;
@@ -77,7 +78,7 @@ export const CRITERIA: readonly CriterionSpec[] = [
       "Uma PERÍFRASE INFLADA: uma locução de várias palavras ocupando o lugar de uma preposição,",
       "conjunção ou verbo simples, sem acrescentar sentido.",
       "",
-      'O teste é a troca: se a locução inteira pode ser substituída por UMA palavra simples sem',
+      "O teste é a troca: se a locução inteira pode ser substituída por UMA palavra simples sem",
       "mudar o que a frase afirma, ela é inflada.",
       "",
       "MARQUE a locução inteira, exatamente como aparece no texto.",

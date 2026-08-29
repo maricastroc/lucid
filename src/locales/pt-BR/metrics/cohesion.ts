@@ -31,10 +31,7 @@ function emptyByClass(): Record<ConnectiveClass, number> {
   return { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 };
 }
 
-function contentSet(
-  tokens: Document["sentences"][number]["tokens"],
-  stopwords: ReadonlySet<string>,
-): Set<string> {
+function contentSet(tokens: Document["sentences"][number]["tokens"], stopwords: ReadonlySet<string>): Set<string> {
   const set = new Set<string>();
   for (const t of tokens) {
     if (t.isWord && t.lower.length > 1 && !stopwords.has(t.lower)) set.add(normalizeNumber(t.lower));
@@ -68,7 +65,7 @@ export function createCohesion(deps: {
     let totalConnectives = 0;
     for (const sentence of doc.sentences) {
       const words = sentence.tokens.filter((t) => t.isWord);
-      for (let i = 0; i < words.length; ) {
+      for (let i = 0; i < words.length;) {
         const candidates = deps.connectives.byFirstWord.get(words[i].lower);
         let matched: ConnectiveCompiled | null = null;
         if (candidates) {

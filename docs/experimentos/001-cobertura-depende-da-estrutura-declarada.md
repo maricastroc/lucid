@@ -17,10 +17,10 @@
 
 ## 1. O que mede, e o que deliberadamente não mede
 
-| | |
-|---|---|
-| **Mede** | se o mesmo conteúdo, apresentado em recipientes diferentes, produz o mesmo conjunto de achados · quais critérios deixam de poder disparar · se a engine consegue distinguir os casos · se o corpus de avaliação exercita essa diferença |
-| **Não mede** | se os critérios estruturais estão **corretos** (isso é `test/`) · a frequência disso em documento real — **é o que falta, §7** · qualquer coisa sobre a Camada 2: nada aqui chama modelo |
+|              |                                                                                                                                                                                                                                         |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Mede**     | se o mesmo conteúdo, apresentado em recipientes diferentes, produz o mesmo conjunto de achados · quais critérios deixam de poder disparar · se a engine consegue distinguir os casos · se o corpus de avaliação exercita essa diferença |
+| **Não mede** | se os critérios estruturais estão **corretos** (isso é `test/`) · a frequência disso em documento real — **é o que falta, §7** · qualquer coisa sobre a Camada 2: nada aqui chama modelo                                                |
 
 ## 2. Método
 
@@ -28,11 +28,11 @@ Um conteúdo único, com título de nível 1 longo, salto para nível 3, um par�
 
 Três recipientes, mesma engine, mesma configuração:
 
-| recipiente | caminho |
-|---|---|
+| recipiente          | caminho                                               |
+| ------------------- | ----------------------------------------------------- |
 | `.docx` estruturado | `buildStructuredDocument(blocks)` → `analyzeDocument` |
-| `.txt` com marcador | Markdown (`#`, `- `) → `analyze` |
-| `.txt` em prosa | mesmas linhas, **sem** marcador → `analyze` |
+| `.txt` com marcador | Markdown (`#`, `- `) → `analyze`                      |
+| `.txt` em prosa     | mesmas linhas, **sem** marcador → `analyze`           |
 
 Tudo determinístico e offline. Mesmo texto, saída byte-idêntica.
 
@@ -47,7 +47,7 @@ Tudo determinístico e offline. Mesmo texto, saída byte-idêntica.
 
 - **O recipiente não é a variável.** `.docx` estruturado e `.txt` marcado produzem o mesmo conjunto de critérios e a mesma contagem. O importador não perde nem inventa nada.
 - **A variável é a estrutura declarada.** Em prosa, a perda é exatamente `heading_body_mismatch`, `long_heading`, `salto_de_nivel_titulo`, `single_item_list` — 4 dos 23 critérios, um terço dos achados daquele documento.
-- **Não é bug de detector.** Em prosa, `buildDocument` produz `["paragraph"]` e nada mais. Não existe título nem lista para auditar: os quatro critérios não *falham*, eles não têm objeto.
+- **Não é bug de detector.** Em prosa, `buildDocument` produz `["paragraph"]` e nada mais. Não existe título nem lista para auditar: os quatro critérios não _falham_, eles não têm objeto.
 - **A engine já sabe.** `hasStructuralMarkers()` devolve `true` para a versão marcada e `false` para a prosa. A informação existe, é determinística e é barata.
 
 Medição paralela, no corpus de avaliação:
@@ -75,9 +75,9 @@ Zero divergência — critério, offsets, severidade, sugestão, tudo preservado
 
 O README lista sete recusas. A sexta é:
 
-> *Report what it did **not** look for · Let a silent absence read as an all-clear.*
+> _Report what it did **not** look for · Let a silent absence read as an all-clear._
 
-**Sobre texto em prosa, a ferramenta não cumpre essa recusa.** Ela audita com 19 critérios em vez de 23, relata "nenhum achado" para o Princípio 2 e não distingue *não encontrei* de *não pude olhar* — que é exatamente a distinção que o ADR-083 acabou de tornar obrigatória no mapa de cláusulas (`unbuilt` × `out_of_reach`) e que aqui reaparece num terceiro eixo, ainda não tratado: **`unreachable-for-this-document`**.
+**Sobre texto em prosa, a ferramenta não cumpre essa recusa.** Ela audita com 19 critérios em vez de 23, relata "nenhum achado" para o Princípio 2 e não distingue _não encontrei_ de _não pude olhar_ — que é exatamente a distinção que o ADR-083 acabou de tornar obrigatória no mapa de cláusulas (`unbuilt` × `out_of_reach`) e que aqui reaparece num terceiro eixo, ainda não tratado: **`unreachable-for-this-document`**.
 
 O custo é direto e cai na cláusula: o mapa credita 4 detectores ao 5.2 (Princípio 2 — o leitor encontra o que precisa). Em prosa, **metade deles não pode disparar** — `long_heading` e `salto_de_nivel_titulo` —, e o mapa continua dizendo `parcial` com os mesmos 4. O relatório de cobertura é estático; a cobertura real é função do documento.
 

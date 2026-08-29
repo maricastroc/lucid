@@ -25,6 +25,7 @@ Art. 1º Para atendimento da nova composição do Tribunal Superior do Trabalho 
 Art. 1º Para atender à nova composição do Tribunal Superior do Trabalho, são criados cargos no Quadro de Pessoal da Secretaria do Tribunal.
 
 Esses cargos são de dois tipos:
+
 - Cargos em Comissão;
 - Cargos de Categorias Funcionais.
 
@@ -137,6 +138,7 @@ Essas importações são as que já tinham isenção ou redução de imposto, co
 Art. 1º As mudanças nos artigos 4º e 5º da Lei nº 7.988, de 28 de dezembro de 1989, sobre a redução dos impostos de Importação e sobre Produtos Industrializados, não valem para as importações que já têm isenção ou redução.
 
 Isso se aplica às importações feitas de acordo com:
+
 - o Decreto-Lei nº 2.433, de 19 de maio de 1988, com as mudanças do Decreto-Lei nº 2.451, de 29 de julho de 1988;
 - o Decreto-Lei nº 2.434, de 19 de maio de 1988; e
 - a Lei nº 7.752, de 14 de abril de 1989.
@@ -230,7 +232,6 @@ Nesse processo, serão usadas as regras dos artigos 219 a 239 da Lei nº 1.711, 
 Art. 2º O processo administrativo para investigar a responsabilidade pela ação ou omissão que o artigo 1º menciona será iniciado por uma decisão do Ministro de Estado ao qual o servidor está subordinado.
 
 Nesse processo, serão aplicadas as regras dos artigos 219 a 239 da Lei nº 1.711, de 28 de outubro de 1952 (Estatuto dos Funcionários Públicos Civis da União), no que for adequado.
-
 
 ## Diferenças só de redação (10)
 
@@ -407,4 +408,3 @@ A Procuradoria-Geral da Fazenda Nacional passa a ser responsável por verificar,
 Art. 1º A Secretaria da Receita Federal passa a administrar as receitas arrecadadas pelo Instituto Nacional de Colonização e Reforma Agrária (INCRA).
 
 A Procuradoria-Geral da Fazenda Nacional passa a apurar, inscrever e cobrar a dívida ativa dessas receitas. (Veja a Lei nº 8.847, de 1994)
-

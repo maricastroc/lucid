@@ -129,7 +129,8 @@ export const CRITERION_TEXT_EN: Record<CriterionId, CriterionText> = {
     label: "Dense subordination",
     kind: "Syntactic construction",
     principleName: "Concise sentences",
-    signal: "concentration of subordinating connectives in the same sentence (curated lexicon, polysemous ones excluded)",
+    signal:
+      "concentration of subordinating connectives in the same sentence (curated lexicon, polysemous ones excluded)",
     why: "Many chained subordinate clauses trap too many ideas in one sentence and weigh the reading down.",
   },
   leitor_terceira_pessoa: {

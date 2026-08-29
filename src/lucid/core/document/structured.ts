@@ -89,15 +89,10 @@ function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string
 }
 
 export type SpliceRefusal =
-  | "crosses_units"
-  | "unsupported_unit"
-  | "introduces_heading"
-  | "empty_unit"
-  | "rebuild_mismatch";
+  "crosses_units" | "unsupported_unit" | "introduces_heading" | "empty_unit" | "rebuild_mismatch";
 
 export type StructuredSplice =
-  | { readonly ok: true; readonly document: Document }
-  | { readonly ok: false; readonly reason: SpliceRefusal };
+  { readonly ok: true; readonly document: Document } | { readonly ok: false; readonly reason: SpliceRefusal };
 
 function expandParagraph(local: string, services: DocumentBuildServices): RawBlock[] | null {
   const raw = toRawBlocks(buildTextDocument(normalize(local), services).blocks);
@@ -185,7 +180,9 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
       sentences.push(...seg.sentences);
       tokens.push(...seg.tokens);
       const base = { start, end, text: source.slice(start, end), sentences: seg.sentences, wordCount: seg.wordCount };
-      blocks.push(rb.kind === "heading" ? { kind: "heading", level: rb.level, ...base } : { kind: "paragraph", ...base });
+      blocks.push(
+        rb.kind === "heading" ? { kind: "heading", level: rb.level, ...base } : { kind: "paragraph", ...base },
+      );
       continue;
     }
 
@@ -197,11 +194,25 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
       const seg = segmentAt(source.slice(start, end), start, services);
       sentences.push(...seg.sentences);
       tokens.push(...seg.tokens);
-      items.push({ kind: "listItem", start, end, text: source.slice(start, end), sentences: seg.sentences, wordCount: seg.wordCount });
+      items.push({
+        kind: "listItem",
+        start,
+        end,
+        text: source.slice(start, end),
+        sentences: seg.sentences,
+        wordCount: seg.wordCount,
+      });
     });
     if (items.length > 0) {
       const listEnd = items[items.length - 1].end;
-      blocks.push({ kind: "list", ordered: rb.ordered, start: listStart, end: listEnd, text: source.slice(listStart, listEnd), items });
+      blocks.push({
+        kind: "list",
+        ordered: rb.ordered,
+        start: listStart,
+        end: listEnd,
+        text: source.slice(listStart, listEnd),
+        items,
+      });
     }
   }
 

@@ -8,9 +8,7 @@ describe("studio boots", () => {
     mountStudio({ text: PASSIVE_AND_JARGON });
 
     expect(await screen.findByText(/pontos para revisar/)).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: /documento em revisão/i })).toHaveTextContent(
-      /o pedido foi indeferido/i,
-    );
+    expect(screen.getByRole("region", { name: /documento em revisão/i })).toHaveTextContent(/o pedido foi indeferido/i);
   });
 
   it("boots empty when there is no persisted document", async () => {

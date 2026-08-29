@@ -52,22 +52,13 @@ export function useManualEditDraft({
   const [state, setState] = useState<State>({ status: "closed" });
   const checkIdRef = useRef(0);
 
-  const open = useCallback(
-    () => setState({ status: "editing", text: original, verification: null }),
-    [original],
-  );
+  const open = useCallback(() => setState({ status: "editing", text: original, verification: null }), [original]);
 
   const close = useCallback(() => setState({ status: "closed" }), []);
 
-  const edit = useCallback(
-    (text: string) => setState({ status: "editing", text, verification: null }),
-    [],
-  );
+  const edit = useCallback((text: string) => setState({ status: "editing", text, verification: null }), []);
 
-  const restore = useCallback(
-    () => setState({ status: "editing", text: original, verification: null }),
-    [original],
-  );
+  const restore = useCallback(() => setState({ status: "editing", text: original, verification: null }), [original]);
 
   const check = useCallback(async () => {
     if (state.status === "closed") return;

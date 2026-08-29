@@ -64,9 +64,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     const { coverageReport } = await import("@/lucid");
     const report = coverageReport();
     process.stdout.write(
-      options.format === "json"
-        ? `${JSON.stringify(report, null, 2)}\n`
-        : `${renderCoverage(report, options.quiet)}\n`,
+      options.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : `${renderCoverage(report, options.quiet)}\n`,
     );
     return 0;
   }

@@ -36,7 +36,9 @@ function dataDepsOf(pass: Pass): DatasetId[] {
 }
 
 function fires(pass: Pass, text: string): boolean {
-  return pass.run({ doc: buildDocument(text), config: DEFAULT_CONFIG, data: createDataView(dataDepsOf(pass)) }).length > 0;
+  return (
+    pass.run({ doc: buildDocument(text), config: DEFAULT_CONFIG, data: createDataView(dataDepsOf(pass)) }).length > 0
+  );
 }
 
 describe("a cue do estrato E é mais larga que o detector", () => {

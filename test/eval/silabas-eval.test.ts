@@ -43,12 +43,9 @@ describe("countSyllables evaluation — golden set", () => {
     ).toEqual([]);
   });
 
-  describe.each(GOLDEN_SILABAS.filter((e) => e.estado === "correto"))(
-    "entry correta: '$palavra'",
-    (entry) => {
-      it(`countSyllables('${entry.palavra}') === ${entry.real}`, () => {
-        expect(countSyllables(entry.palavra)).toBe(entry.real);
-      });
-    },
-  );
+  describe.each(GOLDEN_SILABAS.filter((e) => e.estado === "correto"))("entry correta: '$palavra'", (entry) => {
+    it(`countSyllables('${entry.palavra}') === ${entry.real}`, () => {
+      expect(countSyllables(entry.palavra)).toBe(entry.real);
+    });
+  });
 });

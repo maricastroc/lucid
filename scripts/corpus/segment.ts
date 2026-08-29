@@ -44,7 +44,8 @@ async function main(): Promise<void> {
     for (const criterion of CRITERIA) {
       const matching = ids.filter((id, index) => criterion.cue(blocks[index].text));
       const ranked = [...matching].sort(
-        (a, b) => draw(`${manifest.splitSeed}:cue:${criterion.id}`, a) - draw(`${manifest.splitSeed}:cue:${criterion.id}`, b),
+        (a, b) =>
+          draw(`${manifest.splitSeed}:cue:${criterion.id}`, a) - draw(`${manifest.splitSeed}:cue:${criterion.id}`, b),
       );
       keptByCriterion.set(criterion.id, new Set(ranked.slice(0, CUED_PER_DOC)));
       cueHits.set(criterion.id, (cueHits.get(criterion.id) ?? 0) + matching.length);
@@ -57,8 +58,8 @@ async function main(): Promise<void> {
       const passageId = ids[index];
       const isRandom = draw(`${manifest.splitSeed}:random`, passageId) < args.randomRate;
 
-      const cued = cuedCriteria(block.text).filter((criterion) =>
-        keptByCriterion.get(criterion)?.has(passageId) === true,
+      const cued = cuedCriteria(block.text).filter(
+        (criterion) => keptByCriterion.get(criterion)?.has(passageId) === true,
       );
 
       if (!isRandom && cued.length === 0) return;
@@ -89,7 +90,9 @@ async function main(): Promise<void> {
     const hits = cueHits.get(criterion.id) ?? 0;
     const selectivity = totalBlocks === 0 ? 0 : hits / totalBlocks;
     const note = dropped > 0 ? ` (${dropped} descartados pelo teto por documento)` : "";
-    console.log(`  · ${criterion.id}: estrato E ${cued}${note} · cue casa ${(selectivity * 100).toFixed(0)}% dos blocos`);
+    console.log(
+      `  · ${criterion.id}: estrato E ${cued}${note} · cue casa ${(selectivity * 100).toFixed(0)}% dos blocos`,
+    );
     if (selectivity > 0.9) {
       console.log(`    ⚠ cue pouco seletiva: para este critério o estrato E não enriquece sobre o aleatório.`);
     }

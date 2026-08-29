@@ -81,9 +81,7 @@ describe("clause coverage — status roll-up", () => {
     ] as ClauseTree["nodes"];
 
   const taxonomyFor = (kinds: readonly string[]): CriterionTaxonomy =>
-    Object.fromEntries(
-      kinds.flatMap((kind, i) => (kind === "detected" ? [[`c${i}`, iso(`5.3.${i + 1}`)]] : [])),
-    );
+    Object.fromEntries(kinds.flatMap((kind, i) => (kind === "detected" ? [[`c${i}`, iso(`5.3.${i + 1}`)]] : [])));
 
   it("all children detected rolls up to detected", () => {
     const kinds = ["detected", "detected"] as const;

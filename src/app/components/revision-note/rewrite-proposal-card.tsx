@@ -98,7 +98,11 @@ export function RewriteProposalCard({
             className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             style={
               blocked
-                ? { background: "var(--human-weak)", color: "var(--human)", boxShadow: "inset 0 0 0 1px var(--human-line)" }
+                ? {
+                    background: "var(--human-weak)",
+                    color: "var(--human)",
+                    boxShadow: "inset 0 0 0 1px var(--human-line)",
+                  }
                 : { background: "var(--accent)", color: "var(--accent-ink)" }
             }
           >
@@ -120,7 +124,13 @@ function fmtDelta(n: number, digits: number): string {
 
 function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"; detail: string }) {
   const mark = ok ? (kind === "proof" ? "✓" : "○") : kind === "proof" ? "✗" : "⚠";
-  const tone = ok ? (kind === "proof" ? "text-safe" : "text-ink-3") : kind === "proof" ? "text-sev-error" : "text-human";
+  const tone = ok
+    ? kind === "proof"
+      ? "text-safe"
+      : "text-ink-3"
+    : kind === "proof"
+      ? "text-sev-error"
+      : "text-human";
   return (
     <li className="flex items-baseline gap-2 text-[12px] leading-relaxed">
       <span className={`shrink-0 font-semibold ${tone}`} aria-hidden>

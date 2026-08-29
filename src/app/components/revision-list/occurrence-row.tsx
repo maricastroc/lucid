@@ -47,8 +47,7 @@ export function OccurrenceRow({
             state === "dismissed" ? "line-through decoration-ink-3" : ""
           }`}
         >
-          “{excerpt}”
-          {context !== "" && <span className="font-sans text-[11.5px] text-ink-3"> {context}</span>}
+          “{excerpt}”{context !== "" && <span className="font-sans text-[11.5px] text-ink-3"> {context}</span>}
         </span>
         <ActionBadge finding={finding} />
       </button>

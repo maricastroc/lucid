@@ -3,7 +3,14 @@ import { renderFullBriefing } from "./briefing";
 import { buildIarisListGate2, buildIarisPort, buildIarisWithBriefing } from "./iaris-baseline";
 import type { EvalTarget } from "./targets";
 
-export type CandidateId = "rewrite@2" | "ab-A@1" | "ab-B@1" | "ab-C@1" | "iaris@v20-porta" | "iaris@v20+briefing" | "iaris@v20+briefing+lista@2";
+export type CandidateId =
+  | "rewrite@2"
+  | "ab-A@1"
+  | "ab-B@1"
+  | "ab-C@1"
+  | "iaris@v20-porta"
+  | "iaris@v20+briefing"
+  | "iaris@v20+briefing+lista@2";
 
 const NO_INVENTION_RULES = `- NÃO acrescente fato, exemplo, número, data ou explicação que não esteja no trecho;
 - NÃO invente quem praticou a ação — se o texto não diz o agente, NÃO diga (não crie "nós", "a

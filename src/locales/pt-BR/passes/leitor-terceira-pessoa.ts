@@ -6,15 +6,35 @@ const CRITERION = "leitor_terceira_pessoa";
 const READER_NOUNS = getPrepared("substantivos-leitor.pt");
 
 const SUBJECT_DETERMINERS = new Set([
-  "o", "a", "os", "as",
-  "todo", "toda", "todos", "todas",
-  "cada", "qualquer", "nenhum", "nenhuma",
+  "o",
+  "a",
+  "os",
+  "as",
+  "todo",
+  "toda",
+  "todos",
+  "todas",
+  "cada",
+  "qualquer",
+  "nenhum",
+  "nenhuma",
 ]);
 
 const DEONTIC_VERBS = new Set([
-  "deve", "devem", "deverá", "deverão", "deveria", "deveriam",
-  "precisa", "precisam", "precisará", "precisarão",
-  "poderá", "poderão", "pode", "podem",
+  "deve",
+  "devem",
+  "deverá",
+  "deverão",
+  "deveria",
+  "deveriam",
+  "precisa",
+  "precisam",
+  "precisará",
+  "precisarão",
+  "poderá",
+  "poderão",
+  "pode",
+  "podem",
 ]);
 
 const COPULA_OBLIGATION = new Set(["é", "são", "está", "estão", "fica", "ficam", "será", "serão"]);

@@ -94,4 +94,3 @@ export function clauseSplitPoints(text: string, span: Span): SplitPoint[] {
 
   return points;
 }
-

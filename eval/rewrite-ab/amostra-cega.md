@@ -34,6 +34,7 @@ Esses cargos serão de comissão e de categorias funcionais, conforme o Anexo I 
 Art. 1º Para atender à nova composição do Tribunal Superior do Trabalho, são criados cargos no Quadro de Pessoal da Secretaria do Tribunal.
 
 Esses cargos são de dois tipos:
+
 - Cargos em Comissão;
 - Cargos de Categorias Funcionais.
 
@@ -334,6 +335,7 @@ As mudanças nos artigos 4º e 5º da Lei nº 7.988, de 28 de dezembro de 1989, 
 Art. 1º As mudanças nos artigos 4º e 5º da Lei nº 7.988, de 28 de dezembro de 1989, sobre a redução dos impostos de Importação e sobre Produtos Industrializados, não valem para as importações que já têm isenção ou redução.
 
 Isso se aplica às importações feitas de acordo com:
+
 - o Decreto-Lei nº 2.433, de 19 de maio de 1988, com as mudanças do Decreto-Lei nº 2.451, de 29 de julho de 1988;
 - o Decreto-Lei nº 2.434, de 19 de maio de 1988; e
 - a Lei nº 7.752, de 14 de abril de 1989.
@@ -594,9 +596,6 @@ Art. 2º Quem tiver os Certificados de Privatização poderá usá-los para paga
 
 Quem tiver os Certificados de Privatização poderá usá-los para comprar ações de empresas públicas que forem vendidas pelo governo.
 
-
 ## Divergências apenas de redação (0)
 
 Mesmos vereditos determinísticos, textos diferentes. Ficam aqui para não esconder nada.
-
-

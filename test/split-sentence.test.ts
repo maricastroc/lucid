@@ -34,7 +34,7 @@ describe("clauseSplitPoints — boundary detection", () => {
     expect(points).toHaveLength(1);
     expect(points[0].kind).toBe("comma_conjunction");
     expect(points[0].marker).toBe("e");
-    expect(points[0].offset).toBe(source.indexOf(", e") );
+    expect(points[0].offset).toBe(source.indexOf(", e"));
   });
 
   it("a comma WITHOUT a coordinating conjunction is not a split point", () => {

@@ -110,7 +110,11 @@ export function ProbePanel({
         {status === "loading" ? t.running : t.run}
       </button>
 
-      {status === "error" && <p className="mt-3 text-[12px]" style={{ color: "var(--sev-error)" }}>{error}</p>}
+      {status === "error" && (
+        <p className="mt-3 text-[12px]" style={{ color: "var(--sev-error)" }}>
+          {error}
+        </p>
+      )}
 
       {status === "done" && data && (
         <>
@@ -128,13 +132,7 @@ export function ProbePanel({
   );
 }
 
-function ExcerptBox({
-  excerpt,
-  onClear,
-}: {
-  excerpt: ReturnType<typeof excerptState>;
-  onClear: () => void;
-}) {
+function ExcerptBox({ excerpt, onClear }: { excerpt: ReturnType<typeof excerptState>; onClear: () => void }) {
   const { c } = useCopy();
   const t = c.probe;
 

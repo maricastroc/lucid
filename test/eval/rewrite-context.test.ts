@@ -31,8 +31,7 @@ function windowAround(text: string, target: Span, paragraphs: number): string {
   return text.slice(from.start, to.end);
 }
 
-const markers = (text: string, re: RegExp): Set<string> =>
-  new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
+const markers = (text: string, re: RegExp): Set<string> => new Set((text.match(re) ?? []).map((m) => m.toLowerCase()));
 
 interface Row {
   document: string;

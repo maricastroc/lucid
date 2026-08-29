@@ -97,7 +97,6 @@ describe("countSyllables — hiatuses with no written accent (new rules)", () =>
 });
 
 describe("countSyllables — KNOWN LIMITATIONS (not fixed, documented)", () => {
-
   it("'poesia' improves with the strong-vowel rule (2→3) but still falls short of 4 (real: po-e-si-a)", () => {
     expect(countSyllables("poesia")).toBe(3);
   });

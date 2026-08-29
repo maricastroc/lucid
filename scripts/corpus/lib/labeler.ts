@@ -72,7 +72,10 @@ export function parseResponse(raw: string): ParsedResponse | null {
   return { trechos, confidence: record.confianca === "baixa" ? "baixa" : "alta" };
 }
 
-export function locate(passage: string, trechos: readonly string[]): { occurrences: Occurrence[]; unresolved: string[] } {
+export function locate(
+  passage: string,
+  trechos: readonly string[],
+): { occurrences: Occurrence[]; unresolved: string[] } {
   const occurrences: Occurrence[] = [];
   const unresolved: string[] = [];
   const taken: Array<{ start: number; end: number }> = [];
@@ -132,7 +135,15 @@ export async function labelPassage(request: LabelRequest): Promise<LabelerRun> {
       maxTokens: 3000,
     });
   } catch (cause) {
-    return { ...base, ok: false, error: String(cause), count: 0, occurrences: [], confidence: "baixa", rawResponse: "" };
+    return {
+      ...base,
+      ok: false,
+      error: String(cause),
+      count: 0,
+      occurrences: [],
+      confidence: "baixa",
+      rawResponse: "",
+    };
   }
 
   const parsed = parseResponse(raw);

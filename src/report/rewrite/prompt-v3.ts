@@ -181,7 +181,7 @@ export const INCOMPATIBLE: readonly Divergence[] = [
     block: "SAÍDA · schema de 5 campos",
     what: "simplifiedText, guidelineAnalysis, preservedTerms, fidelityCheck, reviewAlerts",
     why:
-      "O contrato do Lucid é {\"reescrita\": string}: a resposta é aplicada por splice num " +
+      'O contrato do Lucid é {"reescrita": string}: a resposta é aplicada por splice num ' +
       "span do documento (ADR-080/088) e verificada pela engine. Não há consumidor para os " +
       "outros quatro campos.",
   },
@@ -248,7 +248,7 @@ export const PATCHED: readonly Divergence[] = [
   },
   {
     block: "REGRA 1.2 (linha 84)",
-    what: 'removido \'e registrada em "preservedTerms[].reason"\'',
+    what: "removido 'e registrada em \"preservedTerms[].reason\"'",
     why: "O campo não existe na saída do Lucid; as quatro razões continuam como critério de decisão.",
   },
   {
@@ -350,11 +350,7 @@ ${targetText}
 """`;
 }
 
-export function buildRewritePromptV3(
-  fullText: string,
-  target: Span,
-  findings: readonly Finding[],
-): string {
+export function buildRewritePromptV3(fullText: string, target: Span, findings: readonly Finding[]): string {
   const criteria = new Set(findings.map((f) => f.criterion));
   const gate = criteria.has("prose_enumeration") ? LIST_GATE_ON : LIST_GATE_OFF;
   const briefing = renderBriefing(findings);

@@ -44,7 +44,9 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[]): string {
   out.push("");
   const first = entries[0];
   const last = entries[entries.length - 1];
-  out.push(`**Peso da auditoria na sessão:** ${fmt(first.burdenBefore)} → ${fmt(last.burdenAfter)} (${entries.length} ${entries.length === 1 ? "alteração" : "alterações"}).`);
+  out.push(
+    `**Peso da auditoria na sessão:** ${fmt(first.burdenBefore)} → ${fmt(last.burdenAfter)} (${entries.length} ${entries.length === 1 ? "alteração" : "alterações"}).`,
+  );
   out.push("");
   entries.forEach((e, i) => {
     const arrow = e.burdenAfter <= e.burdenBefore ? "↓" : "↑";

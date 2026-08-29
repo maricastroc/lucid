@@ -14,10 +14,7 @@ export interface DocumentEditsOptions {
   readonly snapshotMarks: (marks: ReviewMarks) => void;
   readonly shiftForEdit: (target: Span, delta: number) => void;
   readonly restoreMarks: () => void;
-  readonly recordChange: (
-    entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">,
-    nextText: string,
-  ) => boolean;
+  readonly recordChange: (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => boolean;
   readonly undo: () => void;
   readonly clearSelection: () => void;
 }

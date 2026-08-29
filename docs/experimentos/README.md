@@ -2,7 +2,7 @@
 
 Um ADR registra uma **decisão**. Um experimento registra uma **medição** — inclusive, e principalmente, quando o número é desfavorável ao projeto.
 
-Existe porque a disciplina que o `eval/report.json` já aplica aos detectores (limitação declarada conta *contra* a métrica; `precision` nunca é `1`; `recall` é `null` quando não há denominador) não tinha onde se aplicar às afirmações que o projeto faz sobre **si mesmo**. Uma promessa de README sem número é uma promessa; com número é uma medida, e às vezes a medida contradiz a promessa. É esse o material daqui.
+Existe porque a disciplina que o `eval/report.json` já aplica aos detectores (limitação declarada conta _contra_ a métrica; `precision` nunca é `1`; `recall` é `null` quando não há denominador) não tinha onde se aplicar às afirmações que o projeto faz sobre **si mesmo**. Uma promessa de README sem número é uma promessa; com número é uma medida, e às vezes a medida contradiz a promessa. É esse o material daqui.
 
 ## O que entra
 
@@ -29,6 +29,6 @@ Nenhum valor entra num documento destes sem um teste que o recompute e falhe qua
 
 ## Índice
 
-| # | Experimento | Resultado |
-|---|---|---|
+| #                                                      | Experimento                                                  | Resultado                                                                                                                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [001](001-cobertura-depende-da-estrutura-declarada.md) | A cobertura da auditoria depende do recipiente do documento? | Depende da **estrutura declarada**, não do recipiente — e o relatório não dizia. Corrigido no [ADR-084](../decisoes/adr-084-cobertura-condicionada-ao-documento.md) |

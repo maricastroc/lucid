@@ -101,7 +101,14 @@ describe("buildAuditReport — the audit as a deliverable", () => {
     const d = analyze(SAMPLE);
     expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");
     const withTrail = buildAuditReport(d, d.findings, META, [
-      { source: "manual", label: "Edição do autor · Jargão", before: "em sede de", after: "durante", burdenBefore: 6, burdenAfter: 5 },
+      {
+        source: "manual",
+        label: "Edição do autor · Jargão",
+        before: "em sede de",
+        after: "durante",
+        burdenBefore: 6,
+        burdenAfter: 5,
+      },
     ]);
     expect(withTrail).toContain("## Trilha de revisão");
     expect(withTrail).toContain("Edição do autor · Jargão");

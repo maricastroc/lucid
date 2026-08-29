@@ -4,13 +4,7 @@ import { readJsonl, writeJsonl } from "./lib/jsonl";
 import { paths } from "./lib/paths";
 import { assertNotSealed, loadManifest, refreshManifest, saveManifest } from "./lib/manifest";
 import { draw } from "./lib/segment";
-import type {
-  ConsolidatedLabel,
-  CorpusPassage,
-  CriterionId,
-  HumanReview,
-  LabelerRun,
-} from "./lib/types";
+import type { ConsolidatedLabel, CorpusPassage, CriterionId, HumanReview, LabelerRun } from "./lib/types";
 
 export interface QueueItem {
   passageId: string;
@@ -145,7 +139,9 @@ async function main(): Promise<void> {
   for (const route of new Set(queue.map((item) => item.route))) {
     console.log(`    · ${route}: ${queue.filter((item) => item.route === route).length}`);
   }
-  console.log(`  concordância bruta: ${pct(stats.rawAgreement)}  ·  κ Cohen: ${num(stats.cohenKappa)}  ·  AC1 Gwet: ${num(stats.gwetAc1)}`);
+  console.log(
+    `  concordância bruta: ${pct(stats.rawAgreement)}  ·  κ Cohen: ${num(stats.cohenKappa)}  ·  AC1 Gwet: ${num(stats.gwetAc1)}`,
+  );
   console.log(`  prevalência (ao menos um marcou): ${pct(stats.positiveRate)}`);
   if (stats.gwetAc1 !== null && stats.gwetAc1 < floor) {
     console.log(`  ⚠ AC1 abaixo do piso (${floor}): este critério NÃO é promovido a measuredAssisted.`);

@@ -43,7 +43,11 @@ export interface ScoredRow {
   readonly structure: StructureOutcome;
 }
 
-function burdenIn(findings: readonly { span: { start: number; end: number }; severity: string }[], start: number, end: number): number {
+function burdenIn(
+  findings: readonly { span: { start: number; end: number }; severity: string }[],
+  start: number,
+  end: number,
+): number {
   return findings.reduce(
     (sum, f) => (f.span.start < end && f.span.end > start ? sum + (SEVERITY_WEIGHT[f.severity] ?? 0) : sum),
     0,
@@ -118,7 +122,9 @@ export async function scoreRow(row: RunRow, target: EvalTarget): Promise<ScoredR
   const newEnd = target.span.start + row.proposed.length;
 
   const beforeRegion = new Set(
-    before.findings.filter((f) => f.span.start < target.span.end && f.span.end > target.span.start).map((f) => f.criterion),
+    before.findings
+      .filter((f) => f.span.start < target.span.end && f.span.end > target.span.start)
+      .map((f) => f.criterion),
   );
   const afterRegion = after.findings.filter((f) => f.span.start < newEnd && f.span.end > target.span.start);
   const beforeDoc = new Set(before.findings.map((f) => f.criterion));

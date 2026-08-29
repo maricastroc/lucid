@@ -127,7 +127,9 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
     const rewritten = applyProposal(item.text, target, proposal);
     const after = analyze(rewritten);
     const newEnd = target.start + proposal.proposed.length;
-    const findingsAfter = after.findings.filter((f) => overlapsRegion(f.span.start, f.span.end, target.start, newEnd)).length;
+    const findingsAfter = after.findings.filter((f) =>
+      overlapsRegion(f.span.start, f.span.end, target.start, newEnd),
+    ).length;
 
     const proofPassed = (c: string) => verification.proofs.find((p) => p.check === c)?.passed === true;
     const signalFlagged = (c: string) => verification.signals.find((s) => s.check === c)?.flagged === true;
@@ -140,7 +142,8 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
           : verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore,
       dWords: verification.metrics.wordsAfter - verification.metrics.wordsBefore,
       findingsAfter,
-      proofsPreserved: proofPassed("numbers_preserved") && proofPassed("dates_preserved") && proofPassed("no_new_jargon"),
+      proofsPreserved:
+        proofPassed("numbers_preserved") && proofPassed("dates_preserved") && proofPassed("no_new_jargon"),
       blocked: verification.hasBlockingFailure,
       meaningFlagged: signalFlagged("meaning_preserved"),
       entitiesFlagged: signalFlagged("entities_preserved"),
@@ -159,50 +162,50 @@ function pct(bools: boolean[]): number {
 }
 
 describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", () => {
-  it(
-    "compara (modelo × estratégia) nas 6 dimensões",
-    async () => {
-      const keys: Keys = {
-        groq: loadKey("GROQ_API_KEY"),
-        gemini: loadKey("GEMINI_API_KEY"),
-        deepseek: loadKey("DEEPSEEK_API_KEY"),
-      };
-      if (!keys.groq && !keys.gemini) {
-        throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
+  it("compara (modelo × estratégia) nas 6 dimensões", async () => {
+    const keys: Keys = {
+      groq: loadKey("GROQ_API_KEY"),
+      gemini: loadKey("GEMINI_API_KEY"),
+      deepseek: loadKey("DEEPSEEK_API_KEY"),
+    };
+    if (!keys.groq && !keys.gemini) {
+      throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
+    }
+
+    const models = (process.env.BENCHMARK_MODELS ?? "openai/gpt-oss-120b,gemini-2.5-flash")
+      .split(",")
+      .map((m) => m.trim())
+      .filter(Boolean);
+    const strategies: RewriteStrategy[] = ["correct", "rewrite", "directed"];
+
+    const rows: string[] = [];
+    rows.push(
+      "| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade(s/deriva)% | s/nome-perdido% | sem veto% | latência ms | tokens |",
+    );
+    rows.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
+
+    for (const model of models) {
+      for (const strategy of strategies) {
+        const s = await runSystem(model, strategy, keys);
+        const label = systemLabel(model, strategy);
+        rows.push(
+          `| ${label} | ${pct(s.map((x) => x.changed)).toFixed(0)} | ${mean(s.map((x) => x.dFlesch)).toFixed(1)} | ${mean(
+            s.map((x) => x.dWords),
+          ).toFixed(0)} | ${mean(s.map((x) => x.findingsAfter)).toFixed(1)} | ${pct(
+            s.map((x) => x.proofsPreserved),
+          ).toFixed(
+            0,
+          )} | ${pct(s.map((x) => !x.meaningFlagged)).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(
+            s.map((x) => !x.blocked),
+          ).toFixed(0)} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
+        );
       }
+    }
 
-      const models = (process.env.BENCHMARK_MODELS ?? "openai/gpt-oss-120b,gemini-2.5-flash")
-        .split(",")
-        .map((m) => m.trim())
-        .filter(Boolean);
-      const strategies: RewriteStrategy[] = ["correct", "rewrite", "directed"];
+    const table = rows.join("\n");
 
-      const rows: string[] = [];
-      rows.push("| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade(s/deriva)% | s/nome-perdido% | sem veto% | latência ms | tokens |");
-      rows.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
-
-      for (const model of models) {
-        for (const strategy of strategies) {
-          const s = await runSystem(model, strategy, keys);
-          const label = systemLabel(model, strategy);
-          rows.push(
-            `| ${label} | ${pct(s.map((x) => x.changed)).toFixed(0)} | ${mean(s.map((x) => x.dFlesch)).toFixed(1)} | ${mean(
-              s.map((x) => x.dWords),
-            ).toFixed(0)} | ${mean(s.map((x) => x.findingsAfter)).toFixed(1)} | ${pct(s.map((x) => x.proofsPreserved)).toFixed(
-              0,
-            )} | ${pct(s.map((x) => !x.meaningFlagged)).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(
-              s.map((x) => !x.blocked),
-            ).toFixed(0)} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
-          );
-        }
-      }
-
-      const table = rows.join("\n");
-
-      process.stdout.write(`\n=== BENCHMARK (${GOLDEN.length} trechos por sistema) ===\n${table}\n\n`);
-      if (process.env.BENCHMARK_OUT) fs.writeFileSync(process.env.BENCHMARK_OUT, `${table}\n`);
-      expect(rows.length).toBeGreaterThan(2);
-    },
-    600_000,
-  );
+    process.stdout.write(`\n=== BENCHMARK (${GOLDEN.length} trechos por sistema) ===\n${table}\n\n`);
+    if (process.env.BENCHMARK_OUT) fs.writeFileSync(process.env.BENCHMARK_OUT, `${table}\n`);
+    expect(rows.length).toBeGreaterThan(2);
+  }, 600_000);
 });

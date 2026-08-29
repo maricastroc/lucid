@@ -11,7 +11,12 @@ export interface RevisionSheetProps extends Omit<AuditPanelProps, "probeExcerpt"
 export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
   const { c } = useCopy();
   return (
-    <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label={c.documentView.sheetLabel}>
+    <div
+      className="fixed inset-0 z-40 lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label={c.documentView.sheetLabel}
+    >
       <button
         type="button"
         aria-label={c.documentView.sheetClose}
@@ -32,7 +37,7 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           blocks={panel.blocks}
           briefing={panel.settings.briefing}
           briefingCheck={panel.settings.briefingCheck}
-        onBriefingChange={panel.settings.onBriefingChange}
+          onBriefingChange={panel.settings.onBriefingChange}
           config={panel.settings.config}
         />
         <AuditPanel {...panel} />

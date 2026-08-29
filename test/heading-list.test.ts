@@ -62,7 +62,9 @@ describe("long_heading", () => {
   });
 
   it("plain text (no headings) never triggers", () => {
-    const found = analyze("Uma frase qualquer aqui. E outra ali.").findings.filter((f) => f.criterion === "long_heading");
+    const found = analyze("Uma frase qualquer aqui. E outra ali.").findings.filter(
+      (f) => f.criterion === "long_heading",
+    );
     expect(found).toHaveLength(0);
   });
 });

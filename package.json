@@ -51,7 +51,9 @@
     "corpus:measure": "vitest run test/eval/corpus-measure.test.ts",
     "measure:rewrite-context": "CONTEXT_MEASURE=1 vitest run test/eval/rewrite-context.test.ts",
     "ab:plan": "AB_PLAN=1 vitest run test/eval/rewrite-ab/ab.test.ts",
-    "ab:report": "AB_REPORT=1 vitest run test/eval/rewrite-ab/ab.test.ts"
+    "ab:report": "AB_REPORT=1 vitest run test/eval/rewrite-ab/ab.test.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.23",
@@ -80,7 +82,9 @@
     "esbuild": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "eslint-config-prettier": "^10.1.8",
     "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"

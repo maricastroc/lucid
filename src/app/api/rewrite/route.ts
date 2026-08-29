@@ -48,7 +48,13 @@ function isFindingLike(value: unknown): value is Finding {
   const f = value as Record<string, unknown>;
   if (typeof f.criterion !== "string") return false;
   const span = f.span as Record<string, unknown> | undefined;
-  return typeof span === "object" && span !== null && typeof span.start === "number" && typeof span.end === "number" && typeof span.text === "string";
+  return (
+    typeof span === "object" &&
+    span !== null &&
+    typeof span.start === "number" &&
+    typeof span.end === "number" &&
+    typeof span.text === "string"
+  );
 }
 
 const SUPPORTED_LOCALES: Record<string, typeof rewriteLocalePtBR> = { "pt-BR": rewriteLocalePtBR };
@@ -154,7 +160,8 @@ export async function POST(request: Request): Promise<Response> {
     const result = await proposeAndVerify(text, target, proposer, {
       locale,
       criterion: typeof criterion === "string" ? criterion : undefined,
-      strategy: typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
+      strategy:
+        typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
       briefing: Array.isArray(briefing) ? briefing.filter(isFindingLike) : undefined,
       findings: Array.isArray(findings) ? findings.filter(isFindingLike) : undefined,
       declarations: Array.isArray(declarations)

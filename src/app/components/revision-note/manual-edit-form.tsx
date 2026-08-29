@@ -69,12 +69,7 @@ export function ManualEditForm({
           style={{ caretColor: "var(--accent)" }}
         />
         <div className="mt-2.5 flex items-center gap-2">
-          <button
-            type="button"
-            disabled={!dirty || checking}
-            onClick={edit.check}
-            className={APPLY_BUTTON_CLASS}
-          >
+          <button type="button" disabled={!dirty || checking} onClick={edit.check} className={APPLY_BUTTON_CLASS}>
             {checking ? c.note.manualVerifying : c.note.manualVerify}
           </button>
           <button

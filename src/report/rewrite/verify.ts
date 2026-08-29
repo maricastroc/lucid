@@ -122,9 +122,7 @@ export async function verifyRewrite(
   const locale = options.locale ?? DEFAULT_LOCALE;
 
   if (proposal.localeId && proposal.localeId !== locale.id) {
-    throw new Error(
-      `proposta do locale '${proposal.localeId}' não pode ser verificada sob o locale '${locale.id}'`,
-    );
+    throw new Error(`proposta do locale '${proposal.localeId}' não pode ser verificada sob o locale '${locale.id}'`);
   }
 
   const rewritten = applyProposal(text, target, proposal);
@@ -139,17 +137,16 @@ export async function verifyRewrite(
   const declarations = (options.declarations ?? []).filter(
     (d) => d.span.start < originalEnd && d.span.end > originalStart,
   );
-  const declaredAgents = declarations
-    .map((d) => d.agent)
-    .filter((a): a is string => a !== null && a.trim().length > 0);
+  const declaredAgents = declarations.map((d) => d.agent).filter((a): a is string => a !== null && a.trim().length > 0);
   const declaredAgentsText = declaredAgents.join(" ");
 
   const proofs: Proof[] = [];
 
   if (options.criterion) {
     const criterion = options.criterion;
-    const targetRemaining = after.findings.filter((f) => f.criterion === criterion && overlaps(f, newStart, newEnd))
-      .length;
+    const targetRemaining = after.findings.filter(
+      (f) => f.criterion === criterion && overlaps(f, newStart, newEnd),
+    ).length;
     proofs.push({
       check: "target_resolved",
       passed: targetRemaining === 0,
@@ -248,7 +245,12 @@ export async function verifyRewrite(
       : `datas diferem: [${datesBefore.join(", ")}] → [${datesAfter.join(", ")}]`,
   };
 
-  const beforeSpanJargon = jargonTextsOverlapping(before.findings, originalStart, originalEnd, locale.jargonCriterionId);
+  const beforeSpanJargon = jargonTextsOverlapping(
+    before.findings,
+    originalStart,
+    originalEnd,
+    locale.jargonCriterionId,
+  );
   const afterRegionJargon = jargonTextsOverlapping(after.findings, newStart, newEnd, locale.jargonCriterionId);
   const introducedJargon = [...afterRegionJargon].filter((t) => !beforeSpanJargon.has(t));
   const noNewJargon: Proof = {
@@ -259,7 +261,6 @@ export async function verifyRewrite(
         ? "a proposta não introduziu jargão novo"
         : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
   };
-
 
   const sourceFirstPerson = firstPersonMarkers(`${text} ${declaredAgentsText}`, locale.firstPersonMarkers);
   const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();

@@ -1,6 +1,17 @@
 import type { DocxNotes } from "@/importers/docx";
 import type { BlockKind } from "@/lucid";
-import { analyzeDocument, buildDocument, coverageReport, missingBlockKindsIn, sortFindings, type CriterionId, type Diagnostic, type Document, type Finding, type Severity } from "@/lucid";
+import {
+  analyzeDocument,
+  buildDocument,
+  coverageReport,
+  missingBlockKindsIn,
+  sortFindings,
+  type CriterionId,
+  type Diagnostic,
+  type Document,
+  type Finding,
+  type Severity,
+} from "@/lucid";
 
 export interface Position {
   readonly line: number;
@@ -52,7 +63,10 @@ function finish(
   doc: Document,
   importNotes: DocxNotes | null,
 ): AuditedFile {
-  const selected = criteria.length === 0 ? diagnostic.findings : diagnostic.findings.filter((f) => (criteria as readonly string[]).includes(f.criterion));
+  const selected =
+    criteria.length === 0
+      ? diagnostic.findings
+      : diagnostic.findings.filter((f) => (criteria as readonly string[]).includes(f.criterion));
   const findings = sortFindings(selected);
   const counts: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const finding of findings) counts[finding.severity]++;

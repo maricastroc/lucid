@@ -374,9 +374,6 @@ Nesse processo, serão usadas as regras dos artigos 219 a 239 da Lei nº 1.711, 
 
 O Ministro de Estado, ao qual o funcionário está ligado, vai iniciar um processo para investigar se o funcionário agiu ou deixou de agir de forma errada, conforme o Artigo 1º. Para isso, serão usadas as regras dos Artigos 219 a 239 da Lei nº 1.711, de 28 de outubro de 1952. Essa lei é o Estatuto dos Funcionários Públicos Civis da União.
 
-
 ## Diferenças só de redação (0)
 
 Mesmo veredito medido, texto diferente. Ficam aqui para não esconder nada.
-
-

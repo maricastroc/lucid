@@ -119,9 +119,6 @@ export function cleanCriteria(diagnostic: Diagnostic): readonly string[] {
   return CRITERION_ORDER.filter((criterion) => occurrenceCount(diagnostic, criterion) === 0);
 }
 
-export function hiddenHighlightCount(
-  groups: readonly FindingGroup[],
-  hidden: ReadonlySet<string>,
-): number {
+export function hiddenHighlightCount(groups: readonly FindingGroup[], hidden: ReadonlySet<string>): number {
   return groups.filter((group) => hidden.has(group.criterion)).length;
 }

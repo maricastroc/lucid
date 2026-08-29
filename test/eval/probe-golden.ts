@@ -153,7 +153,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "Para quem é concedido o desconto na tarifa?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Estudantes' responde 'para quem'; quem conta como estudante (critério de comprovação) é pergunta diferente.",
+    porque:
+      "'Estudantes' responde 'para quem'; quem conta como estudante (critério de comprovação) é pergunta diferente.",
   },
   {
     id: "condicao-autorizacao",
@@ -161,7 +162,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "Sob que condição a entrada no laboratório é permitida?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Mediante autorização' é a condição nomeada e responde a pergunta; como se obtém a autorização não foi perguntado.",
+    porque:
+      "'Mediante autorização' é a condição nomeada e responde a pergunta; como se obtém a autorização não foi perguntado.",
   },
   {
     id: "condicao-forca-maior",
@@ -177,7 +179,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "A quem a isenção da taxa se aplica?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Aposentados' é o grupo nomeado e responde diretamente; os critérios de aposentadoria não foram perguntados.",
+    porque:
+      "'Aposentados' é o grupo nomeado e responde diretamente; os critérios de aposentadoria não foram perguntados.",
   },
   {
     id: "condicao-manifestacao",
@@ -185,7 +188,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "Quando o recurso será analisado?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Após a manifestação da parte contrária' é o marco temporal nomeado que a pergunta pede; o conteúdo dessa manifestação é outra pergunta.",
+    porque:
+      "'Após a manifestação da parte contrária' é o marco temporal nomeado que a pergunta pede; o conteúdo dessa manifestação é outra pergunta.",
   },
   {
     id: "condicao-irregularidade",
@@ -209,7 +213,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "Quem pode acessar a sala?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Servidores autorizados' é o grupo nomeado que responde a pergunta; como se autoriza um servidor não foi perguntado.",
+    porque:
+      "'Servidores autorizados' é o grupo nomeado que responde a pergunta; como se autoriza um servidor não foi perguntado.",
   },
   {
     id: "condicao-atraso",
@@ -233,7 +238,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "De que a renovação do contrato depende?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Aprovação da diretoria' é a dependência nomeada e responde exatamente a pergunta; os critérios da diretoria são outra questão.",
+    porque:
+      "'Aprovação da diretoria' é a dependência nomeada e responde exatamente a pergunta; os critérios da diretoria são outra questão.",
   },
   {
     id: "condicao-maioridade",
@@ -249,7 +255,8 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "Sob que condição a liberação do veículo ocorre?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'Mediante pagamento integral' é a condição nomeada; o valor ou a forma de pagamento não foram perguntados.",
+    porque:
+      "'Mediante pagamento integral' é a condição nomeada; o valor ou a forma de pagamento não foram perguntados.",
   },
   {
     id: "condicao-notificacao",
@@ -257,19 +264,38 @@ export const GOLDEN_SONDA: readonly ProbeGoldenCase[] = [
     pergunta: "A partir de quando o prazo é contado?",
     humanoTrava: false,
     categoria: "condicao_nomeada",
-    porque: "'A partir da notificação' é o marco nomeado que a pergunta pede; a forma da notificação não foi perguntada.",
+    porque:
+      "'A partir da notificação' é o marco nomeado que a pergunta pede; a forma da notificação não foi perguntada.",
   },
 ];
 
 export function oracleResult(c: ProbeGoldenCase): ProbeResult {
   const operacoes = c.operacaoLeitura ? [c.operacaoLeitura] : [];
   if (!c.humanoTrava) {
-    return { podeResponder: true, respostaExtraida: "(fato extraído)", ondeTravou: [], operacoesDeLeitura: operacoes, precisouInferir: false };
+    return {
+      podeResponder: true,
+      respostaExtraida: "(fato extraído)",
+      ondeTravou: [],
+      operacoesDeLeitura: operacoes,
+      precisouInferir: false,
+    };
   }
   if (c.modoDeFalha === "precisa_inferir") {
-    return { podeResponder: true, respostaExtraida: "(exige inferência)", ondeTravou: [], operacoesDeLeitura: operacoes, precisouInferir: true };
+    return {
+      podeResponder: true,
+      respostaExtraida: "(exige inferência)",
+      ondeTravou: [],
+      operacoesDeLeitura: operacoes,
+      precisouInferir: true,
+    };
   }
-  return { podeResponder: false, respostaExtraida: "o texto não diz", ondeTravou: [{ frase: c.trecho, motivo: "o texto não diz" }], operacoesDeLeitura: operacoes, precisouInferir: false };
+  return {
+    podeResponder: false,
+    respostaExtraida: "o texto não diz",
+    ondeTravou: [{ frase: c.trecho, motivo: "o texto não diz" }],
+    operacoesDeLeitura: operacoes,
+    precisouInferir: false,
+  };
 }
 
 export function oracleFixtures(): Record<string, ProbeResult> {

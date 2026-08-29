@@ -24,8 +24,7 @@ const BLOCKS: readonly RawBlock[] = [
 
 const build = (): Document => buildStructuredDocument(BLOCKS, ptDocumentServices);
 
-const kinds = (doc: Document): string[] =>
-  doc.blocks.map((b) => (b.kind === "heading" ? `heading${b.level}` : b.kind));
+const kinds = (doc: Document): string[] => doc.blocks.map((b) => (b.kind === "heading" ? `heading${b.level}` : b.kind));
 
 function replacePreamble(doc: Document, next: string) {
   return spliceStructuredDocument(doc, doc.source.replace(PREAMBLE, next), ptDocumentServices);
@@ -119,7 +118,10 @@ describe("paragraph expansion — fidelity", () => {
     const target = "Constitui o objeto deste edital o chamamento de organizações.";
     const r = spliceStructuredDocument(
       doc,
-      doc.source.replace(target, "O objeto é o chamamento de:\n- organizações da sociedade civil.\n- entidades sem fins lucrativos."),
+      doc.source.replace(
+        target,
+        "O objeto é o chamamento de:\n- organizações da sociedade civil.\n- entidades sem fins lucrativos.",
+      ),
       ptDocumentServices,
     );
     expect(r.ok).toBe(true);
@@ -145,7 +147,11 @@ describe("paragraph expansion — what stays refused", () => {
   it("refuses a multiline edit inside an existing list item", () => {
     const doc = build();
     expect(
-      spliceStructuredDocument(doc, doc.source.replace("Plano de trabalho assinado", "Plano\nassinado"), ptDocumentServices),
+      spliceStructuredDocument(
+        doc,
+        doc.source.replace("Plano de trabalho assinado", "Plano\nassinado"),
+        ptDocumentServices,
+      ),
     ).toMatchObject({ ok: false, reason: "unsupported_unit" });
   });
 

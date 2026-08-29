@@ -81,7 +81,9 @@ async function main(): Promise<void> {
     .filter((passage) => passage.strata.random || passage.strata.cued.includes(criterion.id))
     .slice(0, args.limit ?? Number.POSITIVE_INFINITY);
 
-  console.log(`${criterion.id} · split ${args.split} · ${eligible.length} trechos · rotuladores: ${labelers.map((l) => l.spec.id).join(", ")}`);
+  console.log(
+    `${criterion.id} · split ${args.split} · ${eligible.length} trechos · rotuladores: ${labelers.map((l) => l.spec.id).join(", ")}`,
+  );
 
   for (const { spec, provider } of labelers) {
     const stamped: LabelerSpec = { ...spec, promptVersion: criterion.promptVersion };
@@ -108,7 +110,12 @@ async function main(): Promise<void> {
   }
 
   const roster = labelers.map(({ spec }) => ({ ...spec, promptVersion: criterion.promptVersion }));
-  const merged = [...manifest.labelers.filter((entry) => !roster.some((r) => r.id === entry.id && r.promptVersion === entry.promptVersion)), ...roster];
+  const merged = [
+    ...manifest.labelers.filter(
+      (entry) => !roster.some((r) => r.id === entry.id && r.promptVersion === entry.promptVersion),
+    ),
+    ...roster,
+  ];
   saveManifest({ ...manifest, labelers: merged });
 
   console.log("pronto. Próximo: npm run corpus:reconcile -- --criterion " + criterion.id);

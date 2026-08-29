@@ -21,11 +21,10 @@ interface DependencyCruiserOutput {
 }
 
 function runDependencyCruiser(): DependencyCruiserOutput {
-  const raw = execFileSync(
-    DEPCRUISE_BIN,
-    ["src", "--config", ".dependency-cruiser.cjs", "--output-type", "json"],
-    { cwd: REPO_ROOT, encoding: "utf-8" },
-  );
+  const raw = execFileSync(DEPCRUISE_BIN, ["src", "--config", ".dependency-cruiser.cjs", "--output-type", "json"], {
+    cwd: REPO_ROOT,
+    encoding: "utf-8",
+  });
   return JSON.parse(raw) as DependencyCruiserOutput;
 }
 

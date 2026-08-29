@@ -15,7 +15,9 @@ function decodeEntities(s: string): string {
 }
 
 function textOf(innerHtml: string): string {
-  return decodeEntities(innerHtml.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+  return decodeEntities(innerHtml.replace(/<[^>]+>/g, " "))
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function findMatchingClose(html: string, tagName: string, from: number): number | null {
@@ -92,8 +94,7 @@ export interface DocxImport {
 }
 
 export type DocxResult =
-  | { readonly ok: true; readonly value: DocxImport }
-  | { readonly ok: false; readonly refusal: DocxRefusalKind };
+  { readonly ok: true; readonly value: DocxImport } | { readonly ok: false; readonly refusal: DocxRefusalKind };
 
 const RE_TRACKED_CHANGE = /<w:(?:ins|del)(?=[\s/>])/;
 const RE_TABLE = /<w:tbl(?=[\s/>])/g;
@@ -135,10 +136,7 @@ function outlineStyles(stylesXml: string): Map<string, OutlineStyle> {
   return found;
 }
 
-export function headingStyleMap(
-  stylesXml: string,
-  documentXml: string,
-): { entries: string[]; names: string[] } {
+export function headingStyleMap(stylesXml: string, documentXml: string): { entries: string[]; names: string[] } {
   const used = referencedStyleIds(documentXml);
   const levelByName = new Map<string, number>();
 
@@ -195,10 +193,7 @@ export async function importDocx(
   let html: string;
   let messages: readonly { message: string }[];
   try {
-    const converted = await mammoth.convertToHtml(
-      source,
-      map.entries.length > 0 ? { styleMap: map.entries } : {},
-    );
+    const converted = await mammoth.convertToHtml(source, map.entries.length > 0 ? { styleMap: map.entries } : {});
     html = converted.value;
     messages = converted.messages;
   } catch {

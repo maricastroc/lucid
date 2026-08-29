@@ -51,7 +51,15 @@ describe("DeepSeekProvider — response parsing (mocked fetch)", () => {
   it("a response with no content becomes a ChatProviderError", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ choices: [] }), headers: new Headers() }) as unknown as Response),
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            json: async () => ({ choices: [] }),
+            headers: new Headers(),
+          }) as unknown as Response,
+      ),
     );
     const provider = new DeepSeekProvider("fake-key");
     await expect(provider.complete("p", { model: "deepseek-v4-flash", temperature: 0 })).rejects.toBeInstanceOf(
@@ -60,12 +68,15 @@ describe("DeepSeekProvider — response parsing (mocked fetch)", () => {
   });
 
   it("a non-429 error becomes a ChatProviderError with no retry", async () => {
-    const fetchMock = vi.fn(async () => ({
-      ok: false,
-      status: 402,
-      json: async () => ({ error: { message: "Insufficient Balance" } }),
-      headers: new Headers(),
-    }) as unknown as Response);
+    const fetchMock = vi.fn(
+      async () =>
+        ({
+          ok: false,
+          status: 402,
+          json: async () => ({ error: { message: "Insufficient Balance" } }),
+          headers: new Headers(),
+        }) as unknown as Response,
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     const provider = new DeepSeekProvider("fake-key");

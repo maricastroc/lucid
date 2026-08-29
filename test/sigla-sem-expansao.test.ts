@@ -59,7 +59,9 @@ describe("sigla_sem_expansao — precision (low false positive rate)", () => {
 
   it("kill switch", () => {
     const config = { ...DEFAULT_CONFIG, siglaSemExpansao: { enabled: false } };
-    expect(analyze("A LGPD entrou em vigor.", config).findings.filter((f) => f.criterion === "sigla_sem_expansao")).toEqual([]);
+    expect(
+      analyze("A LGPD entrou em vigor.", config).findings.filter((f) => f.criterion === "sigla_sem_expansao"),
+    ).toEqual([]);
   });
 });
 

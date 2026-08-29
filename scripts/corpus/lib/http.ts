@@ -151,7 +151,10 @@ export function parseRobots(body: string, userAgent: string): RobotsRules {
 
 export function pathAllowed(path: string, rules: RobotsRules): boolean {
   const longest = (patterns: readonly string[]): number =>
-    patterns.reduce((best, pattern) => (matchesRobotsPattern(path, pattern) ? Math.max(best, pattern.length) : best), -1);
+    patterns.reduce(
+      (best, pattern) => (matchesRobotsPattern(path, pattern) ? Math.max(best, pattern.length) : best),
+      -1,
+    );
 
   const disallow = longest(rules.disallow);
   if (disallow < 0) return true;

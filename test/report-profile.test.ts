@@ -27,7 +27,7 @@ describe("audit report — the editorial profile travels with the audit", () => 
   it("states that a disabled criterion means 'did not look', not 'did not find'", () => {
     const md = report({ ...DEFAULT_CONFIG, passiveVoice: { enabled: false } });
     expect(md).toContain("Voz passiva: desligado (padrão: ligado)");
-    expect(md).toContain('não procurei');
+    expect(md).toContain("não procurei");
     expect(md).toContain("não é comparável a um placar padrão");
   });
 
@@ -39,7 +39,9 @@ describe("audit report — the editorial profile travels with the audit", () => 
 describe("describeDeviation — every deviation reads as prose, in the criterion's own name", () => {
   it("uses the criterion label for a toggle", () => {
     const config = { ...DEFAULT_CONFIG, mesoclise: { enabled: false } };
-    expect(configDeviations(config).map((d) => describeDeviation(d))).toEqual(["Mesóclise: desligado (padrão: ligado)"]);
+    expect(configDeviations(config).map((d) => describeDeviation(d))).toEqual([
+      "Mesóclise: desligado (padrão: ligado)",
+    ]);
   });
 
   it("uses the knob label for a threshold", () => {

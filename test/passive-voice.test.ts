@@ -18,13 +18,25 @@ function passiveFindings(text: string, config: Config = DEFAULT_CONFIG) {
 }
 
 describe("passiveVoicePass — simple forms of ser", () => {
-  it.each(["é", "são", "era", "eram", "foi", "foram", "será", "serão", "seria", "seriam", "seja", "sejam", "fosse", "fossem"])(
-    "detects the passive with the form '%s' + a regular participle",
-    (form) => {
-      const findings = passiveFindings(`Isso ${form} aprovado pela equipe.`);
-      expect(findings).toHaveLength(1);
-    },
-  );
+  it.each([
+    "é",
+    "são",
+    "era",
+    "eram",
+    "foi",
+    "foram",
+    "será",
+    "serão",
+    "seria",
+    "seriam",
+    "seja",
+    "sejam",
+    "fosse",
+    "fossem",
+  ])("detects the passive with the form '%s' + a regular participle", (form) => {
+    const findings = passiveFindings(`Isso ${form} aprovado pela equipe.`);
+    expect(findings).toHaveLength(1);
+  });
 
   it("detects the infinitive 'ser' followed directly by the participle", () => {
     const findings = passiveFindings("O projeto vai ser analisado.");
@@ -257,12 +269,13 @@ describe("passiveVoicePass — more than one passive in the document", () => {
 });
 
 describe("passiveVoicePass — no detection in active sentences", () => {
-  it.each(["O diretor aprovou o pedido.", "A comissão rejeitou a proposta.", "Os servidores entregaram os relatórios."])(
-    "'%s' yields no finding",
-    (text) => {
-      expect(passiveFindings(text)).toEqual([]);
-    },
-  );
+  it.each([
+    "O diretor aprovou o pedido.",
+    "A comissão rejeitou a proposta.",
+    "Os servidores entregaram os relatórios.",
+  ])("'%s' yields no finding", (text) => {
+    expect(passiveFindings(text)).toEqual([]);
+  });
 });
 
 describe("passiveVoicePass — no detection with estar/ficar", () => {
@@ -285,12 +298,14 @@ describe("passiveVoicePass — no detection for known -ado/-ido nouns", () => {
 });
 
 describe("passiveVoicePass — no detection for ambiguous forms in the lexicon", () => {
-  it.each(["Ela é dedicada ao trabalho.", "Ele é interessado no assunto.", "Ela é casada.", "Ele é formado em Direito."])(
-    "'%s' yields no finding",
-    (text) => {
-      expect(passiveFindings(text)).toEqual([]);
-    },
-  );
+  it.each([
+    "Ela é dedicada ao trabalho.",
+    "Ele é interessado no assunto.",
+    "Ela é casada.",
+    "Ele é formado em Direito.",
+  ])("'%s' yields no finding", (text) => {
+    expect(passiveFindings(text)).toEqual([]);
+  });
 });
 
 describe("passiveVoicePass — proparoxytone -ido/-ada adjectives are not participles (F1)", () => {

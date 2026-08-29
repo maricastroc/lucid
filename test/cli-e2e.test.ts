@@ -7,7 +7,8 @@ import type { RawBlock } from "@/lucid";
 import { blocksToDocx } from "../src/exporters/docx";
 
 const BIN = path.resolve("dist/cli/lucid.mjs");
-const JURIDIQUES = "Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.\n";
+const JURIDIQUES =
+  "Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.\n";
 
 let workspace: string;
 

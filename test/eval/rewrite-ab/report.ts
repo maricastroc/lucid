@@ -110,16 +110,17 @@ export function aggregate(rows: readonly ScoredRow[]): Aggregate[] {
         entitiesFlaggedPct: pct(group.map((r) => r.flaggedSignals.includes("entities_preserved"))),
         inventedAgentPct: pct(group.map((r) => r.flaggedSignals.includes("possible_invented_agent"))),
         structure,
-        refusalReasons: tally(
-          group.flatMap((r) => (r.structure.kind === "refused" ? [r.structure.reason] : [])),
-        ),
+        refusalReasons: tally(group.flatMap((r) => (r.structure.kind === "refused" ? [r.structure.reason] : []))),
         docxOk: group.filter((r) => r.structure.kind === "expanded" && r.structure.docxSurvives === true).length,
         docxBroken: group.filter((r) => r.structure.kind === "expanded" && r.structure.docxSurvives === false).length,
         promptTokensMean: mean(group.map((r) => r.row.promptTokens)),
         completionTokensMean: mean(group.map((r) => r.row.completionTokens)),
         totalTokens: group.reduce((n, r) => n + r.row.totalTokens, 0),
         latencyMeanMs: mean(group.map((r) => r.row.latencyMs)),
-        latencyP95Ms: quantile(group.map((r) => r.row.latencyMs), 0.95),
+        latencyP95Ms: quantile(
+          group.map((r) => r.row.latencyMs),
+          0.95,
+        ),
         truncated: group.filter((r) => r.row.truncated).length,
         unparseable: group.filter((r) => r.row.parseOutcome === "unparseable").length,
         errors: group.filter((r) => r.row.error !== null).length,
@@ -152,7 +153,9 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
 
   out.push("### 1–3. Fidelidade (números/datas/valores/nomes, relações entre normas, obrigações e exceções)");
   out.push("");
-  out.push("| Sistema | n | núm.OK% | datas OK% | valores perdidos% | refs jurídicas perdidas% | relações perdidas% | família de marcador perdida% | nome próprio sinalizado% |");
+  out.push(
+    "| Sistema | n | núm.OK% | datas OK% | valores perdidos% | refs jurídicas perdidas% | relações perdidas% | família de marcador perdida% | nome próprio sinalizado% |",
+  );
   out.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|");
   for (const a of aggregates) {
     const numbersOk = 100 - (a.failedProofCounts.numbers_preserved ?? 0) * (100 / a.n);
@@ -167,7 +170,9 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("");
   out.push("### 4–6. Provas, veto, peso e achados novos");
   out.push("");
-  out.push("| Sistema | n | reescreveu% | provas OK (méd.) | veto% | peso região antes→depois | região piorou% | Δpeso total | total piorou% | critérios novos na região (méd.) |");
+  out.push(
+    "| Sistema | n | reescreveu% | provas OK (méd.) | veto% | peso região antes→depois | região piorou% | Δpeso total | total piorou% | critérios novos na região (méd.) |",
+  );
   out.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
   for (const a of aggregates) {
     out.push(
@@ -182,7 +187,9 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("");
   out.push("### 6b. As regras que a IAris declara sobre si — medidas igual para todos");
   out.push("");
-  out.push("| Sistema | n | inchaço médio | inflou >40% | perdeu parágrafo% | frases >20 palavras (antes→depois) | frases curtas criadas (méd.) | parênteses novos (méd.) | marcação proibida% | virou lista% |");
+  out.push(
+    "| Sistema | n | inchaço médio | inflou >40% | perdeu parágrafo% | frases >20 palavras (antes→depois) | frases curtas criadas (méd.) | parênteses novos (méd.) | marcação proibida% | virou lista% |",
+  );
   out.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
   for (const a of aggregates) {
     out.push(
@@ -200,7 +207,10 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("| Sistema | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive |");
   out.push("|---|--:|--:|--:|--:|---|---|");
   for (const a of aggregates) {
-    const reasons = Object.entries(a.refusalReasons).map(([r, n]) => `${r}=${n}`).join(", ") || "—";
+    const reasons =
+      Object.entries(a.refusalReasons)
+        .map(([r, n]) => `${r}=${n}`)
+        .join(", ") || "—";
     const docx = a.docxOk + a.docxBroken === 0 ? "—" : `${a.docxOk} ok / ${a.docxBroken} quebrou`;
     out.push(
       `| ${label(a)} | ${a.structure.unchanged ?? 0} | ${a.structure.expanded ?? 0} | ${a.structure.refused ?? 0} | ${
@@ -212,7 +222,9 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("");
   out.push("### 8. Custo");
   out.push("");
-  out.push("| Sistema | tokens prompt (méd.) | tokens saída (méd.) | tokens totais | latência méd. (ms) | p95 (ms) | truncados | ilegíveis | erros |");
+  out.push(
+    "| Sistema | tokens prompt (méd.) | tokens saída (méd.) | tokens totais | latência méd. (ms) | p95 (ms) | truncados | ilegíveis | erros |",
+  );
   out.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|");
   for (const a of aggregates) {
     out.push(
@@ -226,7 +238,10 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("### Provas reprovadas, por prova");
   out.push("");
   for (const a of aggregates) {
-    const failures = Object.entries(a.failedProofCounts).map(([c, n]) => `${c}=${n}`).join(", ") || "nenhuma";
+    const failures =
+      Object.entries(a.failedProofCounts)
+        .map(([c, n]) => `${c}=${n}`)
+        .join(", ") || "nenhuma";
     out.push(`- **${label(a)}** — ${failures}`);
   }
 
@@ -234,7 +249,10 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   out.push("### Critérios introduzidos na região, por critério");
   out.push("");
   for (const a of aggregates) {
-    const introduced = Object.entries(a.newCriteriaCounts).map(([c, n]) => `${c}=${n}`).join(", ") || "nenhum";
+    const introduced =
+      Object.entries(a.newCriteriaCounts)
+        .map(([c, n]) => `${c}=${n}`)
+        .join(", ") || "nenhum";
     out.push(`- **${label(a)}** — ${introduced}`);
   }
 

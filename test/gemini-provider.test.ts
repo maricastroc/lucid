@@ -51,7 +51,15 @@ describe("GeminiProvider — response parsing (mocked fetch)", () => {
   it("a response with no content becomes a ChatProviderError", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ candidates: [] }), headers: new Headers() }) as unknown as Response),
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            json: async () => ({ candidates: [] }),
+            headers: new Headers(),
+          }) as unknown as Response,
+      ),
     );
     const provider = new GeminiProvider("fake-key");
     await expect(provider.complete("p", { model: "gemini-2.5-flash", temperature: 0 })).rejects.toBeInstanceOf(

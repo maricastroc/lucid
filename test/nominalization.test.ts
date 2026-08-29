@@ -56,21 +56,24 @@ describe("nominalizationPass — requiresHuman classifies the mapping's ambiguit
     "O comitê fez a análise ontem.",
     "Eles fazem a análise semanalmente.",
     "É bom que façam a análise.",
-  ])("single mapping ('%s' → analisar): requiresHuman=false — any rewriter resolves it with no new information", (text) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].requiresHuman).toBe(false);
-  });
+  ])(
+    "single mapping ('%s' → analisar): requiresHuman=false — any rewriter resolves it with no new information",
+    (text) => {
+      const findings = nomFindings(text);
+      expect(findings).toHaveLength(1);
+      expect(findings[0].requiresHuman).toBe(false);
+    },
+  );
 
-  it.each([
-    "É preciso promover a revisão dos autos.",
-    "É preciso fazer a revisão de documentos.",
-  ])("ambiguous mapping ('%s' → revisão): requiresHuman=true — picking the verb is the author's call", (text) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-    expect(findings[0].requiresHuman).toBe(true);
-    expect(findings[0].meta).toMatchObject({ nominalization: expect.stringContaining("revis") });
-  });
+  it.each(["É preciso promover a revisão dos autos.", "É preciso fazer a revisão de documentos."])(
+    "ambiguous mapping ('%s' → revisão): requiresHuman=true — picking the verb is the author's call",
+    (text) => {
+      const findings = nomFindings(text);
+      expect(findings).toHaveLength(1);
+      expect(findings[0].requiresHuman).toBe(true);
+      expect(findings[0].meta).toMatchObject({ nominalization: expect.stringContaining("revis") });
+    },
+  );
 });
 
 describe("nominalizationPass — definite and indefinite articles", () => {
@@ -92,13 +95,13 @@ describe("nominalizationPass — definite and indefinite articles", () => {
 });
 
 describe("nominalizationPass — à/ao/às/aos contractions", () => {
-  it.each([
-    "É preciso proceder à verificação dos dados.",
-    "É preciso proceder ao pagamento imediatamente.",
-  ])("'%s' matches the 'a' pattern of 'proceder'", (text) => {
-    const findings = nomFindings(text);
-    expect(findings).toHaveLength(1);
-  });
+  it.each(["É preciso proceder à verificação dos dados.", "É preciso proceder ao pagamento imediatamente."])(
+    "'%s' matches the 'a' pattern of 'proceder'",
+    (text) => {
+      const findings = nomFindings(text);
+      expect(findings).toHaveLength(1);
+    },
+  );
 
   it("a 'direct' determiner (o/a/os/as/um/uma) does not match a verb with the 'a' pattern", () => {
     expect(nomFindings("É preciso proceder a verificação.")).toEqual([]);
@@ -106,13 +109,22 @@ describe("nominalizationPass — à/ao/às/aos contractions", () => {
 });
 
 describe("nominalizationPass — curated nominalizations", () => {
-  it.each(["análise", "pagamento", "solicitação", "verificação", "avaliação", "aprovação", "correção", "atualização", "publicação", "cancelamento", "agendamento"])(
-    "'%s' is recognized",
-    (nominalization) => {
-      const findings = nomFindings(`É preciso fazer a ${nominalization}.`);
-      expect(findings).toHaveLength(1);
-    },
-  );
+  it.each([
+    "análise",
+    "pagamento",
+    "solicitação",
+    "verificação",
+    "avaliação",
+    "aprovação",
+    "correção",
+    "atualização",
+    "publicação",
+    "cancelamento",
+    "agendamento",
+  ])("'%s' is recognized", (nominalization) => {
+    const findings = nomFindings(`É preciso fazer a ${nominalization}.`);
+    expect(findings).toHaveLength(1);
+  });
 });
 
 describe("nominalizationPass — words outside the dataset", () => {
@@ -138,12 +150,9 @@ describe("nominalizationPass — a light verb used lexically", () => {
 });
 
 describe("nominalizationPass — a nominalization with no light verb", () => {
-  it.each(["A análise foi publicada ontem.", "O pagamento venceu ontem."])(
-    "'%s' yields no finding",
-    (text) => {
-      expect(nomFindings(text)).toEqual([]);
-    },
-  );
+  it.each(["A análise foi publicada ontem.", "O pagamento venceu ontem."])("'%s' yields no finding", (text) => {
+    expect(nomFindings(text)).toEqual([]);
+  });
 });
 
 describe("nominalizationPass — a modifier between determiner and nominalization", () => {

@@ -45,11 +45,7 @@ export function CriterionGroup({
   const meta = metaFor(group.criterion, lang);
   const counts = tally(marks, group.items);
 
-  const repeated = new Set(
-    group.items
-      .map(excerptOf)
-      .filter((text, index, all) => all.indexOf(text) !== index),
-  );
+  const repeated = new Set(group.items.map(excerptOf).filter((text, index, all) => all.indexOf(text) !== index));
   const distinct = distinctTexts(group.items);
   const panelId = `revgrp-${group.criterion}`;
   const allOfCriterion = diagnostic.findings.filter((f) => f.criterion === group.criterion);

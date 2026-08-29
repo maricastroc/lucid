@@ -18,8 +18,7 @@ export function CuratedEquivalent({ finding }: { finding: Finding }) {
       await navigator.clipboard.writeText(after);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
-    } catch {
-    }
+    } catch {}
   };
 
   return (
@@ -60,20 +59,10 @@ export function CuratedEquivalent({ finding }: { finding: Finding }) {
   );
 }
 
-function DiffRow({
-  label,
-  tone,
-  children,
-}: {
-  label: string;
-  tone?: "safe";
-  children: React.ReactNode;
-}) {
+function DiffRow({ label, tone, children }: { label: string; tone?: "safe"; children: React.ReactNode }) {
   return (
     <div className="flex items-baseline gap-3 px-3.5 py-2.5">
-      <span className={`u-sublabel w-12 shrink-0 ${tone === "safe" ? "text-safe" : "text-ink-3"}`}>
-        {label}
-      </span>
+      <span className={`u-sublabel w-12 shrink-0 ${tone === "safe" ? "text-safe" : "text-ink-3"}`}>{label}</span>
       <span className="min-w-0">{children}</span>
     </div>
   );

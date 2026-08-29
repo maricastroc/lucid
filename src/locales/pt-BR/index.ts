@@ -83,11 +83,7 @@ export function sentenceSpanAt(text: string, offset: number): Span {
 }
 
 export function coverageReport(doc?: Document): CoverageReport {
-  return buildCoverageReport(
-    localePtBR.clauses,
-    localePtBR.taxonomy,
-    doc ? { passes: localePtBR.passes, doc } : {},
-  );
+  return buildCoverageReport(localePtBR.clauses, localePtBR.taxonomy, doc ? { passes: localePtBR.passes, doc } : {});
 }
 
 export function silentCriteriaIn(blocks: readonly Block[]): string[] {

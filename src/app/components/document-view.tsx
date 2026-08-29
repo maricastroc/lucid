@@ -50,8 +50,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
       {segments.map((seg, i) => {
         const inline = seg.inline && !hiddenHighlights.has(seg.inline.criterion) ? seg.inline : undefined;
         const passage = seg.passage && !hiddenHighlights.has(seg.passage.criterion) ? seg.passage : undefined;
-        const inTarget =
-          rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
+        const inTarget = rewriteTarget !== null && seg.start >= rewriteTarget.start && seg.end <= rewriteTarget.end;
 
         const occ = occurrenceAttrs(seg, activeOccurrence);
 
@@ -155,7 +154,8 @@ function BlockView({
   const { c } = useCopy();
   const markersIn = (start: number, end: number): Finding[] =>
     diagnostic.findings.filter(
-      (f) => !hiddenHighlights.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
+      (f) =>
+        !hiddenHighlights.has(f.criterion) && f.span.end > f.span.start && f.span.start < end && f.span.end > start,
     );
 
   return (
@@ -171,7 +171,10 @@ function BlockView({
               {tick}
               <div className="u-sublabel mb-1 text-ink-3">{c.documentView.headingLevel(block.level)}</div>
               <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
-                <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)} ctx={ctx} />
+                <Segments
+                  segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
+                  ctx={ctx}
+                />
               </Tag>
             </div>
           );
@@ -186,10 +189,15 @@ function BlockView({
                 {block.ordered ? c.documentView.orderedList : c.documentView.list}
                 {c.documentView.listItems(block.items.length)}
               </div>
-              <ListTag className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}>
+              <ListTag
+                className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}
+              >
                 {block.items.map((item, ii) => (
                   <li key={ii} className="pl-1">
-                    <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end, occurrences)} ctx={ctx} />
+                    <Segments
+                      segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end, occurrences)}
+                      ctx={ctx}
+                    />
                   </li>
                 ))}
               </ListTag>
@@ -200,7 +208,10 @@ function BlockView({
         return (
           <p key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
             {tick}
-            <Segments segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)} ctx={ctx} />
+            <Segments
+              segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
+              ctx={ctx}
+            />
           </p>
         );
       })}
@@ -226,10 +237,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   scrollRef,
 ) {
   const { c } = useCopy();
-  const lines = useMemo(
-    () => buildLines(diagnostic.text, diagnostic.findings, occurrences),
-    [diagnostic, occurrences],
-  );
+  const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings, occurrences), [diagnostic, occurrences]);
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;
@@ -280,14 +288,9 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                     <span className="grid size-11 place-items-center rounded-full bg-accent-weak text-accent">
                       <PenNibIcon className="size-5" />
                     </span>
-                    <p className="mt-4 font-serif text-[21px] leading-snug text-ink-1">
-                      {c.documentView.emptyTitle}
-                    </p>
+                    <p className="mt-4 font-serif text-[21px] leading-snug text-ink-1">{c.documentView.emptyTitle}</p>
                     <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-ink-3">{c.documentView.emptyBody}</p>
-                    <span
-                      aria-hidden
-                      className="caret-blink mt-5 h-[1.4em] w-0.75 rounded-full bg-accent"
-                    />
+                    <span aria-hidden className="caret-blink mt-5 h-[1.4em] w-0.75 rounded-full bg-accent" />
                   </div>
                 )}
               </div>

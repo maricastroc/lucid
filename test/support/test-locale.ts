@@ -27,7 +27,7 @@ const testMarkerPass: Pass = {
         findings.push({
           criterion: "test_marker",
           category: "lexical",
-                span: { start: token.start, end: token.end, text: token.text },
+          span: { start: token.start, end: token.end, text: token.text },
           severity: "info",
           requiresHuman: true,
           justification: "marcador de teste",

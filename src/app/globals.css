@@ -45,10 +45,12 @@
   --radius-lg: 14px;
   --radius-xl: 20px;
 
+  /* prettier-ignore */
   --shadow-sheet:
     0 1px 2px rgb(31 29 24 / 0.04),
     0 10px 24px -16px rgb(31 29 24 / 0.1),
     0 36px 80px -40px rgb(31 29 24 / 0.24);
+  /* prettier-ignore */
   --shadow-pop:
     0 0 0 1px rgb(31 29 24 / 0.03),
     0 2px 6px rgb(31 29 24 / 0.06),
@@ -138,10 +140,12 @@
   --mark-passage: rgb(146 98 15 / 0.055);
   --mark-passage-dim: rgb(146 98 15 / 0.03);
   --mark-active: rgb(58 70 145 / 0.16);
+  /* prettier-ignore */
   --shadow-sheet:
     0 1px 2px rgb(31 29 24 / 0.04),
     0 10px 24px -16px rgb(31 29 24 / 0.1),
     0 36px 80px -40px rgb(31 29 24 / 0.24);
+  /* prettier-ignore */
   --shadow-pop:
     0 0 0 1px rgb(31 29 24 / 0.03),
     0 2px 6px rgb(31 29 24 / 0.06),
@@ -323,7 +327,9 @@ textarea.prose-doc:focus-visible {
   line-height: 1.85;
   letter-spacing: 0.001em;
   color: var(--ink-0);
-  font-feature-settings: "onum" 1, "liga" 1;
+  font-feature-settings:
+    "onum" 1,
+    "liga" 1;
 }
 .prose-doc p {
   margin: 0;

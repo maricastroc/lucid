@@ -7,11 +7,7 @@ export type Split = "dev" | "test";
 export type LabelTier = "human" | "consensus" | "model_only";
 
 export type Route =
-  | "auto_consensus"
-  | "human_divergence"
-  | "human_low_confidence"
-  | "human_audit_sample"
-  | "human_labeler_failure";
+  "auto_consensus" | "human_divergence" | "human_low_confidence" | "human_audit_sample" | "human_labeler_failure";
 
 export type Confidence = "alta" | "baixa";
 

@@ -13,8 +13,7 @@ export function reviewStateOf(marks: ReviewMarks, finding: Finding): ReviewState
   return marks[findingId(finding)] ?? "pending";
 }
 
-export const isPending = (marks: ReviewMarks, finding: Finding): boolean =>
-  marks[findingId(finding)] === undefined;
+export const isPending = (marks: ReviewMarks, finding: Finding): boolean => marks[findingId(finding)] === undefined;
 
 export function withMark(marks: ReviewMarks, finding: Finding, mark: ReviewMark | null): ReviewMarks {
   const id = findingId(finding);

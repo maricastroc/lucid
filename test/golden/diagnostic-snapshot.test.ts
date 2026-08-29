@@ -41,7 +41,12 @@ describe("stability of the snapshot anchors (before comparing portraits)", () =>
     const d = analyze("Um texto qualquer para checar o meta.");
     const metaWithoutLocale: Record<string, unknown> = { ...d.meta };
     delete metaWithoutLocale.localeId;
-    expect(Object.keys(metaWithoutLocale).sort()).toEqual(["configHash", "dataHash", "lucidVersion", "standardVersion"]);
+    expect(Object.keys(metaWithoutLocale).sort()).toEqual([
+      "configHash",
+      "dataHash",
+      "lucidVersion",
+      "standardVersion",
+    ]);
   });
 });
 

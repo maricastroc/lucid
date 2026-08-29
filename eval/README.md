@@ -42,7 +42,7 @@ contract both sides depend on: the tooling that produces the artifact and the
   (the same order as `criteriaCoverage`, so no consumer ever sees two orderings of one set), with
   `negatives` (how many cases require the detector **not** to fire) and two deliberately separate
   failure lists:
-  - `knownLimitations` — a **declared** failure, with a curated reason. It counts *against* the
+  - `knownLimitations` — a **declared** failure, with a curated reason. It counts _against_ the
     metric instead of being excluded.
   - `regressions` — a failure on an entry marked `correto`, **with no reason, because nobody wrote
     one**. Empty on a green build (the eval asserts that no `correto` entry fails); it exists so
@@ -54,7 +54,7 @@ contract both sides depend on: the tooling that produces the artifact and the
   - `measured` — precision/recall against a golden corpus that includes negative cases.
   - `goldenLabelledOnly` — exact findings labelled in the integrated golden, without an aggregate
     metric.
-  - `unitTestsOnly` — unit tests only. A unit test is written *from* the implementation and
+  - `unitTestsOnly` — unit tests only. A unit test is written _from_ the implementation and
     therefore **does not measure recall** over text nobody anticipated. Absence of a number is not
     absence of a defect.
 

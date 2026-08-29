@@ -6,11 +6,7 @@
   "sealed": false,
   "splitSeed": "lucid-corpus-v1",
   "testFraction": 0.3,
-  "criteria": [
-    "sigla_sem_expansao",
-    "prose_enumeration",
-    "perifrase_inflada"
-  ],
+  "criteria": ["sigla_sem_expansao", "prose_enumeration", "perifrase_inflada"],
   "counts": {
     "documents": 16,
     "passages": 149,

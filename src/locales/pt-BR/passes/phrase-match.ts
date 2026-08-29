@@ -8,7 +8,11 @@ export interface PhraseHit {
   entry: PhraseEntry;
 }
 
-function matchAt(tokens: readonly Token[], index: number, byFirstWord: PhrasePrepared): { endIndex: number; entry: PhraseEntry } | null {
+function matchAt(
+  tokens: readonly Token[],
+  index: number,
+  byFirstWord: PhrasePrepared,
+): { endIndex: number; entry: PhraseEntry } | null {
   const first = tokens[index];
   if (!first.isWord) return null;
   const candidates = byFirstWord.get(first.lower);
@@ -31,7 +35,7 @@ function matchAt(tokens: readonly Token[], index: number, byFirstWord: PhrasePre
 export function matchPhrasesInSentence(sentence: Sentence, byFirstWord: PhrasePrepared, source: string): PhraseHit[] {
   const tokens = sentence.tokens;
   const hits: PhraseHit[] = [];
-  for (let i = 0; i < tokens.length; ) {
+  for (let i = 0; i < tokens.length;) {
     const m = matchAt(tokens, i, byFirstWord);
     if (!m) {
       i++;

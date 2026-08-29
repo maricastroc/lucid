@@ -28,7 +28,10 @@ describe("jargonPass evaluation — golden set", () => {
       console.log(
         "[eval jargon] detection errors:\n" +
           detectionErrors
-            .map((r) => `  - [${r.categoria}] "${r.texto}": expected=${r.expectedCount}, actual=${r.actualCount} (${r.estado})`)
+            .map(
+              (r) =>
+                `  - [${r.categoria}] "${r.texto}": expected=${r.expectedCount}, actual=${r.actualCount} (${r.estado})`,
+            )
             .join("\n"),
       );
     }

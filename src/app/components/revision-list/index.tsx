@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import type { Diagnostic, Finding } from "@/lucid";
-import { cleanCriteria, hiddenHighlightCount, type Bucket, type FindingGroup, type FindingQuery, type SortOrder, type StateFilter } from "../../lib/finding-query";
+import {
+  cleanCriteria,
+  hiddenHighlightCount,
+  type Bucket,
+  type FindingGroup,
+  type FindingQuery,
+  type SortOrder,
+  type StateFilter,
+} from "../../lib/finding-query";
 import type { ReviewMark, ReviewMarks } from "../../lib/review-marks";
 import { tally } from "../../lib/review-marks";
 import { startHerePlan } from "../../lib/start-here";

@@ -7,7 +7,6 @@ import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
 import { formatRate, evaluatePassiveVoice } from "./compute";
 
 describe("passiveVoicePass evaluation — golden set", () => {
-
   const { results, summary } = evaluatePassiveVoice();
 
   const wrong = results.filter((r) => r.fp > 0 || r.fn > 0);

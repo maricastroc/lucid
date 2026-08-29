@@ -2,12 +2,34 @@ import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 
 const CRITERION = "gerundismo";
 
-const IR_FORMS = new Set(["vou", "vais", "vai", "vamos", "ides", "vão", "irei", "irás", "irá", "iremos", "ireis", "irão"]);
+const IR_FORMS = new Set([
+  "vou",
+  "vais",
+  "vai",
+  "vamos",
+  "ides",
+  "vão",
+  "irei",
+  "irás",
+  "irá",
+  "iremos",
+  "ireis",
+  "irão",
+]);
 
 const GERUND_SUFFIXES = ["ando", "endo", "indo"];
 
 const NON_GERUND = new Set([
-  "lindo", "brando", "tremendo", "horrendo", "estupendo", "nefando", "infando", "reverendo", "venerando", "orando",
+  "lindo",
+  "brando",
+  "tremendo",
+  "horrendo",
+  "estupendo",
+  "nefando",
+  "infando",
+  "reverendo",
+  "venerando",
+  "orando",
 ]);
 
 function isGerund(token: Token): boolean {

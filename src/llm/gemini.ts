@@ -1,4 +1,10 @@
-import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
+import {
+  ChatProviderError,
+  describeFetchFailure,
+  requestSignal,
+  type ChatCompletionOptions,
+  type ChatProvider,
+} from "./types";
 import type { TokenUsage } from "./groq";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";

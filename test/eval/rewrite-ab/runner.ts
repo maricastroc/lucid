@@ -92,11 +92,12 @@ interface Bound {
 }
 
 export function providerFor(model: string, keys: Keys): Bound {
-  const usageOf = (p: { lastUsage: { promptTokens: number; completionTokens: number; totalTokens: number } | null }) => () => ({
-    prompt: p.lastUsage?.promptTokens ?? 0,
-    completion: p.lastUsage?.completionTokens ?? 0,
-    total: p.lastUsage?.totalTokens ?? 0,
-  });
+  const usageOf =
+    (p: { lastUsage: { promptTokens: number; completionTokens: number; totalTokens: number } | null }) => () => ({
+      prompt: p.lastUsage?.promptTokens ?? 0,
+      completion: p.lastUsage?.completionTokens ?? 0,
+      total: p.lastUsage?.totalTokens ?? 0,
+    });
   if ((GROQ_MODELS as readonly string[]).includes(model)) {
     if (!keys.groq) throw new Error(`GROQ_API_KEY ausente para ${model}`);
     const p = new GroqProvider(keys.groq);
@@ -239,7 +240,15 @@ export async function runJobs(
 
     if (error !== null && isDailyQuota(error)) {
       log(`  COTA DIÁRIA ESGOTADA em ${job.model} — parando. Nenhuma espera dentro desta corrida recupera isso.`);
-      return { planned: jobs.length, reused, called, failed, tokens, stoppedBy: "quota-exhausted", quotaMessage: error };
+      return {
+        planned: jobs.length,
+        reused,
+        called,
+        failed,
+        tokens,
+        stoppedBy: "quota-exhausted",
+        quotaMessage: error,
+      };
     }
 
     await sleep(600);

@@ -8,8 +8,7 @@ const SEVERITY_LABEL: Record<Severity, string> = {
   error: "prioritário",
 };
 
-const CAVEAT_MEASURES =
-  "A auditoria mede, não aprova: ausência de achados não é atestado de clareza.";
+const CAVEAT_MEASURES = "A auditoria mede, não aprova: ausência de achados não é atestado de clareza.";
 const CAVEAT_CURATED =
   "Critérios de léxico consultam listas curadas — contagem zero significa que nada da lista casou, não que o fenômeno não existe.";
 

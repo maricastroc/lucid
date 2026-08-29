@@ -138,9 +138,7 @@ describe("the coverage map answers for a document, not only for the instrument (
         limit: { kind: "unreachable", reason: "..." },
       },
     ] as unknown as ClauseTree["nodes"];
-    expect(() =>
-      buildCoverageReport({ standard: "T", transcription: "s", exhaustive: false, nodes }, {}),
-    ).toThrow();
+    expect(() => buildCoverageReport({ standard: "T", transcription: "s", exhaustive: false, nodes }, {})).toThrow();
   });
 });
 

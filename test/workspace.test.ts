@@ -30,16 +30,47 @@ describe("workspace — round trip through storage", () => {
   });
 
   it("restores a plain-text document with no structure", () => {
-    writeWorkspace({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
-    expect(readWorkspace()).toEqual({ text: "O prazo venceu ontem.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: "O prazo venceu ontem.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
+    expect(readWorkspace()).toEqual({
+      text: "O prazo venceu ontem.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
   });
 
   it("restores the revision trail and the working mode", () => {
     const ledger = [
-      { source: "manual" as const, label: "Edição do autor", before: "em sede de", after: "no âmbito de", burdenBefore: 15.9, burdenAfter: 12.4 },
+      {
+        source: "manual" as const,
+        label: "Edição do autor",
+        before: "em sede de",
+        after: "no âmbito de",
+        burdenBefore: 15.9,
+        burdenAfter: 12.4,
+      },
       { source: "ai" as const, label: "Reescrita por IA · directed@4", burdenBefore: 12.4, burdenAfter: 9.1 },
     ];
-    writeWorkspace({ text: "Texto revisado.", blocks: null, ledger, mode: "edit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: "Texto revisado.",
+      blocks: null,
+      ledger,
+      mode: "edit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
     const restored = readWorkspace();
     expect(restored?.ledger).toEqual(ledger);
     expect(restored?.mode).toBe("edit");
@@ -47,7 +78,15 @@ describe("workspace — round trip through storage", () => {
 
   it("rebuilds the imported .docx structure byte-identically", () => {
     const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
-    writeWorkspace({ text: imported.source, blocks: toRawBlocks(imported.blocks), ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: imported.source,
+      blocks: toRawBlocks(imported.blocks),
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
 
     const restored = readWorkspace();
     expect(restored?.blocks).toEqual(BLOCKS);
@@ -70,7 +109,15 @@ describe("workspace — the reader briefing (ADR-079)", () => {
       priorKnowledge: "Não conhece o vocabulário do processo",
       mustFind: ["prazo de recurso", "valor da taxa"],
     };
-    writeWorkspace({ text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: "Texto.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
     expect(readWorkspace()?.briefing).toEqual(briefing);
   });
 
@@ -115,8 +162,20 @@ describe("workspace — the editorial profile (ADR-081)", () => {
   });
 
   it("restores a profile that departs from the default", () => {
-    const config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 25, errorAbove: 40 }, mesoclise: { enabled: false } };
-    writeWorkspace({ text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config, reviewMarks: {} });
+    const config = {
+      ...DEFAULT_CONFIG,
+      sentenceLength: { warnAbove: 25, errorAbove: 40 },
+      mesoclise: { enabled: false },
+    };
+    writeWorkspace({
+      text: "Texto.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config,
+      reviewMarks: {},
+    });
     const restored = readWorkspace();
     expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25, errorAbove: 40 });
     expect(restored?.config.mesoclise.enabled).toBe(false);
@@ -165,7 +224,14 @@ describe("workspace — the editorial profile (ADR-081)", () => {
   it("rejects a non-finite threshold", () => {
     localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ version: 3, text: "a", blocks: null, ledger: [], mode: "audit", config: { sentenceLength: { warnAbove: null } } }),
+      JSON.stringify({
+        version: 3,
+        text: "a",
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        config: { sentenceLength: { warnAbove: null } },
+      }),
     );
     expect(readWorkspace()).toBeNull();
   });
@@ -181,10 +247,34 @@ describe("workspace — a corrupt payload is discarded, never half-restored", ()
     "wrong schema version": { version: 99, text: "a", blocks: null, ledger: [], mode: "audit" },
     "missing text": { version: 1, blocks: null, ledger: [], mode: "audit" },
     "unknown mode": { version: 1, text: "a", blocks: null, ledger: [], mode: "revisar" },
-    "block of unknown kind": { version: 1, text: "a", blocks: [{ kind: "quote", text: "a" }], ledger: [], mode: "audit" },
-    "heading with no level": { version: 1, text: "a", blocks: [{ kind: "heading", text: "a" }], ledger: [], mode: "audit" },
-    "ledger entry with unknown source": { version: 1, text: "a", blocks: null, ledger: [{ source: "bot", label: "x", burdenBefore: 1, burdenAfter: 0 }], mode: "audit" },
-    "ledger entry with no burden": { version: 1, text: "a", blocks: null, ledger: [{ source: "manual", label: "x" }], mode: "audit" },
+    "block of unknown kind": {
+      version: 1,
+      text: "a",
+      blocks: [{ kind: "quote", text: "a" }],
+      ledger: [],
+      mode: "audit",
+    },
+    "heading with no level": {
+      version: 1,
+      text: "a",
+      blocks: [{ kind: "heading", text: "a" }],
+      ledger: [],
+      mode: "audit",
+    },
+    "ledger entry with unknown source": {
+      version: 1,
+      text: "a",
+      blocks: null,
+      ledger: [{ source: "bot", label: "x", burdenBefore: 1, burdenAfter: 0 }],
+      mode: "audit",
+    },
+    "ledger entry with no burden": {
+      version: 1,
+      text: "a",
+      blocks: null,
+      ledger: [{ source: "manual", label: "x" }],
+      mode: "audit",
+    },
   };
 
   for (const [name, payload] of Object.entries(REJECTED)) {
@@ -211,13 +301,29 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
         throw new Error("QuotaExceededError");
       },
     });
-    writeWorkspace({ text: "Documento grande.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: "Documento grande.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
     expect(getSaveFailed()).toBe(true);
   });
 
   it("clears the flag once a write succeeds again", () => {
     installStorage();
-    writeWorkspace({ text: "Documento pequeno.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: {} });
+    writeWorkspace({
+      text: "Documento pequeno.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+    });
     expect(getSaveFailed()).toBe(false);
   });
 
@@ -239,14 +345,30 @@ describe("workspace — the author's review marks", () => {
 
   it("round-trips the marks so a long review survives closing the tab", () => {
     const reviewMarks = { "jargon:10:22": "seen" as const, "passive_voice:40:53": "dismissed" as const };
-    writeWorkspace({ text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks });
+    writeWorkspace({
+      text: "Texto.",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks,
+    });
     expect(readWorkspace()?.reviewMarks).toEqual(reviewMarks);
   });
 
   it("reads a workspace saved before the marks existed as an empty set", () => {
     localStorage.setItem(
       "lucid-workspace",
-      JSON.stringify({ version: 3, text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG }),
+      JSON.stringify({
+        version: 3,
+        text: "Texto.",
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        briefing: EMPTY_BRIEFING,
+        config: DEFAULT_CONFIG,
+      }),
     );
     expect(readWorkspace()?.reviewMarks).toEqual({});
   });
@@ -254,7 +376,16 @@ describe("workspace — the author's review marks", () => {
   it("refuses a stored mark that is not one the app writes", () => {
     localStorage.setItem(
       "lucid-workspace",
-      JSON.stringify({ version: 4, text: "Texto.", blocks: null, ledger: [], mode: "audit", briefing: EMPTY_BRIEFING, config: DEFAULT_CONFIG, reviewMarks: { "jargon:1:2": "approved" } }),
+      JSON.stringify({
+        version: 4,
+        text: "Texto.",
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        briefing: EMPTY_BRIEFING,
+        config: DEFAULT_CONFIG,
+        reviewMarks: { "jargon:1:2": "approved" },
+      }),
     );
     expect(readWorkspace()).toBeNull();
   });

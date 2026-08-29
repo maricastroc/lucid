@@ -1,6 +1,15 @@
 "use client";
 
-import { configDeviations, type Block, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
+import {
+  configDeviations,
+  type Block,
+  type BriefingCheck,
+  type Config,
+  type Diagnostic,
+  type Finding,
+  type ReaderBriefing,
+  type Severity,
+} from "@/lucid";
 import { severityInkVar, severityLabel } from "../lib/criteria";
 import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
@@ -34,7 +43,18 @@ interface Props {
   marks: ReviewMarks;
 }
 
-export function AuditOverview({ diagnostic, findings, safeCount, humanCount, ledger, silentCriteria, missingBlockKinds, importNotes, config, marks }: Props) {
+export function AuditOverview({
+  diagnostic,
+  findings,
+  safeCount,
+  humanCount,
+  ledger,
+  silentCriteria,
+  missingBlockKinds,
+  importNotes,
+  config,
+  marks,
+}: Props) {
   const { c, lang } = useCopy();
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
@@ -60,7 +80,9 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
         {silentCriteria.length > 0 && (
           <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
             {c.overview.structureCaveat(
-              missingBlockKinds.map((kind) => c.overview.structureMissing[kind] ?? kind).join(c.overview.structureMissingJoin),
+              missingBlockKinds
+                .map((kind) => c.overview.structureMissing[kind] ?? kind)
+                .join(c.overview.structureMissingJoin),
               silentCriteria.length,
             )}
           </p>
@@ -68,12 +90,22 @@ export function AuditOverview({ diagnostic, findings, safeCount, humanCount, led
 
         {total > 0 && (
           <>
-            <div className="mt-5 flex h-1.5 gap-1" role="img" aria-label={c.overview.splitAriaLabel(safeCount, humanCount)}>
+            <div
+              className="mt-5 flex h-1.5 gap-1"
+              role="img"
+              aria-label={c.overview.splitAriaLabel(safeCount, humanCount)}
+            >
               {safeCount > 0 && (
-                <span className="rounded-full" style={{ width: `${(safeCount / total) * 100}%`, background: "var(--safe)" }} />
+                <span
+                  className="rounded-full"
+                  style={{ width: `${(safeCount / total) * 100}%`, background: "var(--safe)" }}
+                />
               )}
               {humanCount > 0 && (
-                <span className="rounded-full" style={{ width: `${(humanCount / total) * 100}%`, background: "var(--human)" }} />
+                <span
+                  className="rounded-full"
+                  style={{ width: `${(humanCount / total) * 100}%`, background: "var(--human)" }}
+                />
               )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px]">

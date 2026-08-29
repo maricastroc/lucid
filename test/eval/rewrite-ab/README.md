@@ -13,17 +13,20 @@ Cada bloco é ligado por variável de ambiente e todos são pulados no `npm test
 ```bash
 AB_PLAN=1 npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
+
 Mostra alvos, critérios do briefing, chamadas planejadas e teto. **Zero chamadas.**
 
 ```bash
 caffeinate -i env AB=1 npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
+
 Etapa 1 — roda os candidatos. `AB_CANDIDATES` e `AB_MODELS` estreitam o braço;
 `AB_MAX_CALLS` e `AB_MAX_TOKENS` mudam o teto. Ver **Rede** abaixo.
 
 ```bash
 AB_STAGE2=1 AB_WINNER=iaris@v20+briefing npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
+
 Etapa 2 — o mesmo prompt com documento inteiro × janela de ±1, ±2 e ±3 parágrafos. **Não
 executada** até hoje. Só o contexto do prompt muda: a verificação continua com o documento
 inteiro, porque `no_new_findings`, `no_invented_first_person` e `possible_invented_agent` são
@@ -33,6 +36,7 @@ globais por definição (`eval/rewrite-context.json`).
 AB_REPORT=1 npx vitest run test/eval/rewrite-ab/ab.test.ts
 AB_FINAL=1 AB_FINALISTS="iaris@v20+briefing,iaris@v20-porta" npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
+
 Pontuação e relatórios. **Offline, zero chamadas** — reexecutar não custa nada. `AB_REPORT`
 escreve as tabelas dos sete braços e a amostra cega; `AB_FINAL` abre a anatomia do veto de duas
 finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
@@ -50,18 +54,18 @@ finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
 
 ## Arquivos
 
-| | |
-|---|---|
-| `targets.ts` | seleção determinística dos alvos, com a regra escrita por extenso |
-| `candidates.ts` | os construtores de prompt e o registro dos candidatos |
-| `briefing.ts` | os achados da engine renderizados como briefing |
-| `iaris-baseline.ts` | a v20 da IAris copiada byte a byte, com `INCOMPATIBLE` e `PATCHED` |
-| `iaris-drift.test.ts` | falha se a cópia divergir da fonte; pula sem o repo vizinho |
-| `fidelity.ts` | métricas offline: referência jurídica, relação entre normas, marcadores deônticos, as regras que a IAris declara sobre si |
-| `score.ts` | verificação determinística + estrutura ADR-088 + round-trip `.docx` |
-| `veto-anatomy.ts` | abre o `veto%` por prova, sem transformar veto em não-veto |
-| `report.ts` | agregação, recorte balanceado, amostra cega e duelo de duas |
-| `runner.ts` | rede: teto, reaproveitamento, parada por cota |
+|                       |                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `targets.ts`          | seleção determinística dos alvos, com a regra escrita por extenso                                                         |
+| `candidates.ts`       | os construtores de prompt e o registro dos candidatos                                                                     |
+| `briefing.ts`         | os achados da engine renderizados como briefing                                                                           |
+| `iaris-baseline.ts`   | a v20 da IAris copiada byte a byte, com `INCOMPATIBLE` e `PATCHED`                                                        |
+| `iaris-drift.test.ts` | falha se a cópia divergir da fonte; pula sem o repo vizinho                                                               |
+| `fidelity.ts`         | métricas offline: referência jurídica, relação entre normas, marcadores deônticos, as regras que a IAris declara sobre si |
+| `score.ts`            | verificação determinística + estrutura ADR-088 + round-trip `.docx`                                                       |
+| `veto-anatomy.ts`     | abre o `veto%` por prova, sem transformar veto em não-veto                                                                |
+| `report.ts`           | agregação, recorte balanceado, amostra cega e duelo de duas                                                               |
+| `runner.ts`           | rede: teto, reaproveitamento, parada por cota                                                                             |
 
 Saídas em `eval/rewrite-ab/`: `runs.jsonl` (chamadas cruas), `relatorio.md`, `final-*.md`,
 `duelo-*.md` e as chaves das amostras cegas.

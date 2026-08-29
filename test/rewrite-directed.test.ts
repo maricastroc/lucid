@@ -20,7 +20,7 @@ describe("directed@4 — the engine directs the AI through two briefings (mandat
   it("separates askable jargon (mandatory) from an agentless passive (best-effort)", () => {
     const { source, target, findings } = targetAndFindings(SAMPLE);
     expect(findings.length).toBeGreaterThan(1);
-    expect(findings.every((f) => f.criterion !== "jargon" ? f.requiresHuman : !f.requiresHuman)).toBe(true);
+    expect(findings.every((f) => (f.criterion !== "jargon" ? f.requiresHuman : !f.requiresHuman))).toBe(true);
 
     const prompt = buildRewritePrompt(source, target, { strategy: "directed", findings });
 
@@ -162,6 +162,8 @@ describe("directed@4 — elicitation inside the briefing (ADR-055): the author's
     const declsB = [{ span: b.findings[0].span, agent: "a comissão" }];
     expect(
       buildRewritePrompt(a.source, a.target, { strategy: "directed", findings: a.findings, declarations: declsA }),
-    ).toBe(buildRewritePrompt(b.source, b.target, { strategy: "directed", findings: b.findings, declarations: declsB }));
+    ).toBe(
+      buildRewritePrompt(b.source, b.target, { strategy: "directed", findings: b.findings, declarations: declsB }),
+    );
   });
 });

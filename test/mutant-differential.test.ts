@@ -25,7 +25,29 @@ function splice(source: string, m: Mutant): string {
 }
 
 function structuralCorpus(): string[] {
-  const alphabet = [".", "!", "?", "…", '"', "'", ")", "]", "”", "’", "»", "“", "«", "(", "[", " ", "\n", "\t", "A", "a", "1"];
+  const alphabet = [
+    ".",
+    "!",
+    "?",
+    "…",
+    '"',
+    "'",
+    ")",
+    "]",
+    "”",
+    "’",
+    "»",
+    "“",
+    "«",
+    "(",
+    "[",
+    " ",
+    "\n",
+    "\t",
+    "A",
+    "a",
+    "1",
+  ];
   const out: string[] = [];
   const build = (prefix: string, depth: number) => {
     if (depth === 0) return void out.push(prefix);
@@ -36,7 +58,28 @@ function structuralCorpus(): string[] {
 }
 
 function lexicalCorpus(): string[] {
-  const parts = ["art.", "km", "9h", "Sr.", "1", "500", "Silva", "casa", "A", "a", ".", " ", "\n\n", "\t", '"', "“", "(", "!", "?", "…"];
+  const parts = [
+    "art.",
+    "km",
+    "9h",
+    "Sr.",
+    "1",
+    "500",
+    "Silva",
+    "casa",
+    "A",
+    "a",
+    ".",
+    " ",
+    "\n\n",
+    "\t",
+    '"',
+    "“",
+    "(",
+    "!",
+    "?",
+    "…",
+  ];
   const out: string[] = [];
   const build = (prefix: string, depth: number) => {
     out.push(prefix);
@@ -55,58 +98,52 @@ function realCorpus(): string[] {
 }
 
 describe.runIf(REPORT)("mutant differential", () => {
-  it(
-    "finds a distinguishing input for each survived mutant",
-    async () => {
-      const report = JSON.parse(fs.readFileSync(REPORT, "utf8"));
-      const file = report.files[TARGET] ?? Object.values(report.files)[0];
-      const source: string = file.source;
-      const survived: Mutant[] = file.mutants.filter(
-        (m: Mutant) => m.status === "Survived" || m.status === "NoCoverage",
-      );
+  it("finds a distinguishing input for each survived mutant", async () => {
+    const report = JSON.parse(fs.readFileSync(REPORT, "utf8"));
+    const file = report.files[TARGET] ?? Object.values(report.files)[0];
+    const source: string = file.source;
+    const survived: Mutant[] = file.mutants.filter((m: Mutant) => m.status === "Survived" || m.status === "NoCoverage");
 
-      const original = await import("../src/lucid/core/document/segment-sentences");
-      const corpus = [...structuralCorpus(), ...lexicalCorpus(), ...realCorpus()];
-      const baseline = corpus.map((t) => JSON.stringify(original.segmentSentences(t, ptAbbreviations)));
+    const original = await import("../src/lucid/core/document/segment-sentences");
+    const corpus = [...structuralCorpus(), ...lexicalCorpus(), ...realCorpus()];
+    const baseline = corpus.map((t) => JSON.stringify(original.segmentSentences(t, ptAbbreviations)));
 
-      fs.mkdirSync(MUT_DIR, { recursive: true });
-      const rows: string[] = [];
+    fs.mkdirSync(MUT_DIR, { recursive: true });
+    const rows: string[] = [];
 
-      for (const m of survived) {
-        const file_ = path.join(MUT_DIR, `m${m.id}.ts`);
-        fs.writeFileSync(file_, splice(source, m));
-        let diff: string | null = null;
-        try {
-          const mod = await import(/* @vite-ignore */ file_);
-          for (let i = 0; i < corpus.length; i++) {
-            let got: string;
-            try {
-              got = JSON.stringify(mod.segmentSentences(corpus[i], ptAbbreviations));
-            } catch {
-              got = "THROW";
-            }
-            if (got !== baseline[i]) {
-              diff = corpus[i];
-              break;
-            }
+    for (const m of survived) {
+      const file_ = path.join(MUT_DIR, `m${m.id}.ts`);
+      fs.writeFileSync(file_, splice(source, m));
+      let diff: string | null = null;
+      try {
+        const mod = await import(/* @vite-ignore */ file_);
+        for (let i = 0; i < corpus.length; i++) {
+          let got: string;
+          try {
+            got = JSON.stringify(mod.segmentSentences(corpus[i], ptAbbreviations));
+          } catch {
+            got = "THROW";
           }
-        } catch {
-          diff = "COMPILE_ERROR";
+          if (got !== baseline[i]) {
+            diff = corpus[i];
+            break;
+          }
         }
-        rows.push(
-          `${diff === null ? "EQUIV " : "GAP   "} ${m.location.start.line}:${m.location.start.column} ${m.mutatorName} → ${JSON.stringify(
-            m.replacement,
-          ).slice(0, 60)}${diff === null ? "" : "   ⟵ " + JSON.stringify(diff).slice(0, 70)}`,
-        );
+      } catch {
+        diff = "COMPILE_ERROR";
       }
-
-      fs.rmSync(MUT_DIR, { recursive: true, force: true });
-      rows.sort();
-      process.stdout.write(
-        `\n=== ${survived.length} sobreviventes · corpus ${corpus.length} entradas ===\n${rows.join("\n")}\n\n` +
-          `GAP=${rows.filter((r) => r.startsWith("GAP")).length}  EQUIV=${rows.filter((r) => r.startsWith("EQUIV")).length}\n`,
+      rows.push(
+        `${diff === null ? "EQUIV " : "GAP   "} ${m.location.start.line}:${m.location.start.column} ${m.mutatorName} → ${JSON.stringify(
+          m.replacement,
+        ).slice(0, 60)}${diff === null ? "" : "   ⟵ " + JSON.stringify(diff).slice(0, 70)}`,
       );
-    },
-    900_000,
-  );
+    }
+
+    fs.rmSync(MUT_DIR, { recursive: true, force: true });
+    rows.sort();
+    process.stdout.write(
+      `\n=== ${survived.length} sobreviventes · corpus ${corpus.length} entradas ===\n${rows.join("\n")}\n\n` +
+        `GAP=${rows.filter((r) => r.startsWith("GAP")).length}  EQUIV=${rows.filter((r) => r.startsWith("EQUIV")).length}\n`,
+    );
+  }, 900_000);
 });

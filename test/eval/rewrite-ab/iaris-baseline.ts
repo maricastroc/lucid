@@ -26,7 +26,6 @@ const ENGINE_SAW_ENUMERATION = `
   A engine determinística também apontou "Enumeração em prosa" neste trecho — é evidência a mais
   de que a forma de lista cabe aqui, mas as condições acima continuam decidindo.`;
 
-
 function sentenceBullets(): { heading: string; bullets: string[] } {
   const lines = SENTENCES.split("\n");
   const heading = lines[0];

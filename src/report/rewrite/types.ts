@@ -51,10 +51,7 @@ export interface Proof {
 }
 
 export interface VerificationSignal {
-  check:
-    | "entities_preserved"
-    | "meaning_preserved"
-    | "possible_invented_agent";
+  check: "entities_preserved" | "meaning_preserved" | "possible_invented_agent";
   flagged: boolean;
   detail: string;
 }

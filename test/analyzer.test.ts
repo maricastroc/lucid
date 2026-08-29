@@ -99,7 +99,8 @@ describe("analyze — document with one finding", () => {
 describe("analyze — multiple findings", () => {
   it("several long sentences yield one finding per sentence, all counted in the scorecard", () => {
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
-    const text = "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
+    const text =
+      "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
     const diagnostic = analyze(text, config);
 
     expect(diagnostic.findings).toHaveLength(3);

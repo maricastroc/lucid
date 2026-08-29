@@ -125,9 +125,7 @@ describe("eval artifact — publication invariants", () => {
     expect(negativesOnly.precision).toBeNull();
     expect(negativesOnly.recall).toBeNull();
 
-    const oneFP = summarize([
-      { texto: "b", expectedCount: 0, actualCount: 1, estado: "correto", tp: 0, fp: 1, fn: 0 },
-    ]);
+    const oneFP = summarize([{ texto: "b", expectedCount: 0, actualCount: 1, estado: "correto", tp: 0, fp: 1, fn: 0 }]);
     expect(oneFP.precision).toBe(0);
     expect(oneFP.recall).toBeNull();
 

@@ -32,7 +32,13 @@ async function runAgreement(probe: ComprehensionProbe, golden: readonly ProbeGol
   for (const c of golden) {
     const result = await probe.probe({ trecho: c.trecho, pergunta: c.pergunta });
     const sondaFlag = interpret(result).tipo === "flag";
-    rows.push({ id: c.id, categoria: c.categoria, humanoTrava: c.humanoTrava, sondaFlag, concorda: sondaFlag === c.humanoTrava });
+    rows.push({
+      id: c.id,
+      categoria: c.categoria,
+      humanoTrava: c.humanoTrava,
+      sondaFlag,
+      concorda: sondaFlag === c.humanoTrava,
+    });
   }
   return rows;
 }
@@ -78,7 +84,13 @@ describe("probe meta-eval — golden + harness (offline)", () => {
       {},
       {
         id: "always-neutral@test",
-        fallback: { podeResponder: true, respostaExtraida: "x", ondeTravou: [], operacoesDeLeitura: [], precisouInferir: false },
+        fallback: {
+          podeResponder: true,
+          respostaExtraida: "x",
+          ondeTravou: [],
+          operacoesDeLeitura: [],
+          precisouInferir: false,
+        },
       },
     );
     const rows = await runAgreement(alwaysNeutral, GOLDEN_SONDA);
@@ -91,7 +103,16 @@ describe("probe meta-eval — golden + harness (offline)", () => {
   it("harness: probe that ALWAYS stalls → recall 1, precision = base rate (a pessimistic floor has a cost)", async () => {
     const alwaysFlag = new StubComprehensionProbe(
       {},
-      { id: "always-flag@test", fallback: { podeResponder: false, respostaExtraida: "o texto não diz", ondeTravou: [], operacoesDeLeitura: [], precisouInferir: false } },
+      {
+        id: "always-flag@test",
+        fallback: {
+          podeResponder: false,
+          respostaExtraida: "o texto não diz",
+          ondeTravou: [],
+          operacoesDeLeitura: [],
+          precisouInferir: false,
+        },
+      },
     );
     const rows = await runAgreement(alwaysFlag, GOLDEN_SONDA);
     const m = score(rows);
@@ -137,40 +158,40 @@ function buildLiveProbe(): LlmComprehensionProbe {
 }
 
 describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {
-  it(
-    "the real probe stalls where the human stalled (confusion matrix + recall floor)",
-    async () => {
-      const probe = buildLiveProbe();
-      const rows = await runAgreement(probe, GOLDEN_SONDA);
-      const m = score(rows);
+  it("the real probe stalls where the human stalled (confusion matrix + recall floor)", async () => {
+    const probe = buildLiveProbe();
+    const rows = await runAgreement(probe, GOLDEN_SONDA);
+    const m = score(rows);
 
-      const lines: string[] = [];
-      lines.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
-      lines.push(`agreement=${(m.accuracy * 100).toFixed(0)}% · recall(stalls)=${(m.recall * 100).toFixed(0)}% · precision=${(m.precision * 100).toFixed(0)}%`);
-      lines.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
+    const lines: string[] = [];
+    lines.push(`\n=== META-EVAL DA SONDA (${GOLDEN_SONDA.length} trechos) · sonda=${probe.id} ===`);
+    lines.push(
+      `agreement=${(m.accuracy * 100).toFixed(0)}% · recall(stalls)=${(m.recall * 100).toFixed(0)}% · precision=${(m.precision * 100).toFixed(0)}%`,
+    );
+    lines.push(`matriz: TP=${m.tp} FN=${m.fn} FP=${m.fp} TN=${m.tn}`);
 
-      const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
-      lines.push("\npor categoria:");
-      for (const cat of categorias) {
-        const sub = rows.filter((r) => r.categoria === cat);
-        const concordantes = sub.filter((r) => r.concorda).length;
-        lines.push(`  ${cat}: ${concordantes}/${sub.length} concordam`);
-      }
+    const categorias = [...new Set(rows.map((r) => r.categoria))].sort();
+    lines.push("\npor categoria:");
+    for (const cat of categorias) {
+      const sub = rows.filter((r) => r.categoria === cat);
+      const concordantes = sub.filter((r) => r.concorda).length;
+      lines.push(`  ${cat}: ${concordantes}/${sub.length} concordam`);
+    }
 
-      for (const r of rows) {
-        const mark = r.concorda ? "ok " : "XX ";
-        lines.push(`  ${mark}[${r.categoria}] ${r.id}: human=${r.humanoTrava ? "stalls" : "reads"} · probe=${r.sondaFlag ? "flag" : "neutro"}`);
-      }
+    for (const r of rows) {
+      const mark = r.concorda ? "ok " : "XX ";
       lines.push(
-        "\nHonest caveat (I5): small golden, 1 run, temperature 0. Agreement is a floor signal, not a scoreboard. " +
-          "Passing is NEVER approval of comprehension — only the absence of a floor violation.",
+        `  ${mark}[${r.categoria}] ${r.id}: human=${r.humanoTrava ? "stalls" : "reads"} · probe=${r.sondaFlag ? "flag" : "neutro"}`,
       );
-      process.stdout.write(`${lines.join("\n")}\n\n`);
-      if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${lines.join("\n")}\n`);
+    }
+    lines.push(
+      "\nHonest caveat (I5): small golden, 1 run, temperature 0. Agreement is a floor signal, not a scoreboard. " +
+        "Passing is NEVER approval of comprehension — only the absence of a floor violation.",
+    );
+    process.stdout.write(`${lines.join("\n")}\n\n`);
+    if (process.env.PROBE_EVAL_OUT) fs.writeFileSync(process.env.PROBE_EVAL_OUT, `${lines.join("\n")}\n`);
 
-      expect(m.recall).toBeGreaterThanOrEqual(0.6);
-      expect(m.precision).toBeGreaterThanOrEqual(0.7);
-    },
-    600_000,
-  );
+    expect(m.recall).toBeGreaterThanOrEqual(0.6);
+    expect(m.precision).toBeGreaterThanOrEqual(0.7);
+  }, 600_000);
 });

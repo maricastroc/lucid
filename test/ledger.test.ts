@@ -3,8 +3,22 @@ import { analyze } from "../src/lucid";
 import { documentBurden, renderLedgerMarkdown, sourceLabel, type LedgerEntry } from "../src/app/lib/ledger";
 
 const ENTRIES: LedgerEntry[] = [
-  { source: "manual", label: "Edição do autor · Jargão", before: "em sede de", after: "durante", burdenBefore: 6, burdenAfter: 5 },
-  { source: "ai", label: "Reescrita por IA · groq:llama", before: "Foi realizada a análise", after: "A comissão analisou", burdenBefore: 5, burdenAfter: 2 },
+  {
+    source: "manual",
+    label: "Edição do autor · Jargão",
+    before: "em sede de",
+    after: "durante",
+    burdenBefore: 6,
+    burdenAfter: 5,
+  },
+  {
+    source: "ai",
+    label: "Reescrita por IA · groq:llama",
+    before: "Foi realizada a análise",
+    after: "A comissão analisou",
+    burdenBefore: 5,
+    burdenAfter: 2,
+  },
 ];
 
 describe("ledger — provenance trail", () => {

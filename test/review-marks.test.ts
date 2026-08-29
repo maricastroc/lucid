@@ -15,7 +15,6 @@ import {
 const delta = (span: { start: number; end: number }, replacement: string): number =>
   replacement.length - (span.end - span.start);
 
-
 function finding(criterion: string, start: number, end: number, text = "x"): Finding {
   return {
     criterion,

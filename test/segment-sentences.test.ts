@@ -24,11 +24,7 @@ describe("normalize", () => {
 describe("segmentSentences — plain text with several sentences", () => {
   it("splits sentences ending in a full stop", () => {
     const source = "O gato subiu no telhado. O cachorro latiu forte. As crianças riram muito.";
-    expect(texts(source)).toEqual([
-      "O gato subiu no telhado.",
-      "O cachorro latiu forte.",
-      "As crianças riram muito.",
-    ]);
+    expect(texts(source)).toEqual(["O gato subiu no telhado.", "O cachorro latiu forte.", "As crianças riram muito."]);
   });
 
   it("splits sentences ending in a question or exclamation mark", () => {
@@ -45,18 +41,12 @@ describe("segmentSentences — common PT-BR abbreviations", () => {
 
   it("does not break after legal/administrative abbreviations", () => {
     const source = "Conforme o art. 5 da lei, isso é permitido. O inc. II trata de exceções.";
-    expect(texts(source)).toEqual([
-      "Conforme o art. 5 da lei, isso é permitido.",
-      "O inc. II trata de exceções.",
-    ]);
+    expect(texts(source)).toEqual(["Conforme o art. 5 da lei, isso é permitido.", "O inc. II trata de exceções."]);
   });
 
   it("does not break on a compound abbreviation (p.ex.)", () => {
     const source = "Alguns animais, p.ex. o gato e o cão, são domésticos. Outros não são.";
-    expect(texts(source)).toEqual([
-      "Alguns animais, p.ex. o gato e o cão, são domésticos.",
-      "Outros não são.",
-    ]);
+    expect(texts(source)).toEqual(["Alguns animais, p.ex. o gato e o cão, são domésticos.", "Outros não são."]);
   });
 
   it("does not break after etc.", () => {
@@ -238,19 +228,14 @@ describe("segmentSentences — the next sentence opens with a quote or bracket (
       "A regra mudou.",
       "(A anterior foi revogada.)",
     ]);
-    expect(texts("A regra mudou. [Ver a nota do editor.]")).toEqual([
-      "A regra mudou.",
-      "[Ver a nota do editor.]",
-    ]);
+    expect(texts("A regra mudou. [Ver a nota do editor.]")).toEqual(["A regra mudou.", "[Ver a nota do editor.]"]);
   });
 
   it("without the space, the opening mark does NOT confirm — same rule as F3", () => {
     expect(texts("O prazo terminou.“Vamos recorrer”, disse ele.")).toEqual([
       "O prazo terminou.“Vamos recorrer”, disse ele.",
     ]);
-    expect(texts("O prazo terminou.O pedido foi negado.")).toEqual([
-      "O prazo terminou.O pedido foi negado.",
-    ]);
+    expect(texts("O prazo terminou.O pedido foi negado.")).toEqual(["O prazo terminou.O pedido foi negado."]);
   });
 
   it("an unconfirmed boundary does not abort the scan — later boundaries still land", () => {
@@ -267,17 +252,9 @@ describe("segmentSentences — the next sentence opens with a quote or bracket (
 
 describe("segmentSentences — the digit rule protects a decimal, not any digit near a period (ADR-075)", () => {
   it("only a digit on BOTH sides suppresses the boundary", () => {
-    expect(texts("O valor de R$ 1.500,00 foi pago hoje.")).toEqual([
-      "O valor de R$ 1.500,00 foi pago hoje.",
-    ]);
-    expect(texts("Veja o item 1. O segundo vem depois.")).toEqual([
-      "Veja o item 1.",
-      "O segundo vem depois.",
-    ]);
-    expect(texts("O total foi de mil. 500 pessoas vieram.")).toEqual([
-      "O total foi de mil.",
-      "500 pessoas vieram.",
-    ]);
+    expect(texts("O valor de R$ 1.500,00 foi pago hoje.")).toEqual(["O valor de R$ 1.500,00 foi pago hoje."]);
+    expect(texts("Veja o item 1. O segundo vem depois.")).toEqual(["Veja o item 1.", "O segundo vem depois."]);
+    expect(texts("O total foi de mil. 500 pessoas vieram.")).toEqual(["O total foi de mil.", "500 pessoas vieram."]);
   });
 });
 
@@ -431,7 +408,7 @@ describe("segmentSentences — exact offsets for each sentence", () => {
 describe("segmentSentences — determinism (byte-identical on repeated runs)", () => {
   it("the same input always produces the same output (byte-identical JSON)", () => {
     const source =
-      "O Sr. Dr. João A. Silva, nascido em 1.234, disse: \"Isso é ótimo!\" Ele riu muito... " +
+      'O Sr. Dr. João A. Silva, nascido em 1.234, disse: "Isso é ótimo!" Ele riu muito... ' +
       "Depois foi embora.\n\nOutra linha aqui.";
 
     const first = JSON.stringify(segmentSentences(source));

@@ -65,7 +65,8 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dotted",
-    signal: "“se” enclítico em verbo (aplica-se, publicam-se); exclui verbos inerentemente pronominais (trata-se, refere-se…)",
+    signal:
+      "“se” enclítico em verbo (aplica-se, publicam-se); exclui verbos inerentemente pronominais (trata-se, refere-se…)",
     why: "O “se” esconde quem pratica a ação — e o leitor precisa saber quem faz o quê.",
   },
   nominalization: {
@@ -85,7 +86,8 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     principleName: "Frases claras e concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
-    signal: "substantivo de ação de um léxico curado encadeado por “de” a outro substantivo abstrato, ou concentrado na mesma frase",
+    signal:
+      "substantivo de ação de um léxico curado encadeado por “de” a outro substantivo abstrato, ou concentrado na mesma frase",
     why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
   },
   jargon: {
@@ -105,7 +107,8 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     principleName: "Palavras familiares",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "sigla (2–6 letras maiúsculas) usada antes de ser apresentada por extenso; exclui UFs, unidades e siglas universais",
+    signal:
+      "sigla (2–6 letras maiúsculas) usada antes de ser apresentada por extenso; exclui UFs, unidades e siglas universais",
     why: "Sigla não apresentada exige que o leitor já a conheça — quem não conhece trava logo no começo.",
   },
   long_sentence: {
@@ -323,9 +326,7 @@ export function findingId(f: Finding): string {
   return `${f.criterion}:${f.span.start}:${f.span.end}`;
 }
 
-const CRITERION_RANK: Record<string, number> = Object.fromEntries(
-  CRITERION_ORDER.map((c, i) => [c, i]),
-);
+const CRITERION_RANK: Record<string, number> = Object.fromEntries(CRITERION_ORDER.map((c, i) => [c, i]));
 
 export function criterionRank(criterion: string): number {
   return CRITERION_RANK[criterion] ?? CRITERION_ORDER.length;

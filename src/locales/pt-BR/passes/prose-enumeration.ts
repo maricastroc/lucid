@@ -3,12 +3,18 @@ import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 const CRITERION = "prose_enumeration";
 
 const ORDINAL_RANK: Record<string, number> = {
-  primeiro: 1, primeira: 1,
-  segundo: 2, segunda: 2,
-  terceiro: 3, terceira: 3,
-  quarto: 4, quarta: 4,
-  quinto: 5, quinta: 5,
-  sexto: 6, sexta: 6,
+  primeiro: 1,
+  primeira: 1,
+  segundo: 2,
+  segunda: 2,
+  terceiro: 3,
+  terceira: 3,
+  quarto: 4,
+  quarta: 4,
+  quinto: 5,
+  quinta: 5,
+  sexto: 6,
+  sexta: 6,
 };
 
 const ROMAN_RANK: Record<string, number> = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6 };

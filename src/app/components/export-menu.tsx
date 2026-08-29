@@ -22,7 +22,16 @@ export interface ExportMenuProps {
   config: Config;
 }
 
-export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, briefingCheck, onBriefingChange, config }: ExportMenuProps) {
+export function ExportMenu({
+  diagnostic,
+  findings,
+  ledger,
+  blocks,
+  briefing,
+  briefingCheck,
+  onBriefingChange,
+  config,
+}: ExportMenuProps) {
   const { c } = useCopy();
   const [docxError, setDocxError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
@@ -76,7 +85,9 @@ export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, bri
       >
         <ArrowDownIcon className="size-3.5" />
         {c.panel.exportLabel}
-        <ChevronDownIcon className={`size-3 text-ink-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDownIcon
+          className={`size-3 text-ink-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (

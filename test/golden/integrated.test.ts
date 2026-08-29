@@ -47,7 +47,10 @@ describe("integrated golden — semantic assertions per case", () => {
     it("every expected finding exists with complete and correct provenance", () => {
       for (const expected of testCase.expected.findings) {
         const actual = findActual(diagnostic, expected);
-        expect(actual, `missing finding: ${expected.criterion} @[${expected.start},${expected.end}] "${expected.spanText}"`).toBeDefined();
+        expect(
+          actual,
+          `missing finding: ${expected.criterion} @[${expected.start},${expected.end}] "${expected.spanText}"`,
+        ).toBeDefined();
         if (!actual) continue;
 
         expect(actual.span.text).toBe(expected.spanText);
@@ -67,7 +70,10 @@ describe("integrated golden — semantic assertions per case", () => {
         const predicted = testCase.expected.findings.some(
           (e) => e.criterion === actual.criterion && e.start === actual.span.start && e.end === actual.span.end,
         );
-        expect(predicted, `unexpected finding: ${actual.criterion} @[${actual.span.start},${actual.span.end}] "${actual.span.text}"`).toBe(true);
+        expect(
+          predicted,
+          `unexpected finding: ${actual.criterion} @[${actual.span.start},${actual.span.end}] "${actual.span.text}"`,
+        ).toBe(true);
       }
     });
 

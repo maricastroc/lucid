@@ -7,39 +7,129 @@ export interface EntradaGolden {
 }
 
 export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
-  { texto: "É preciso fazer a análise de documentos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso fazer a análise de documentos.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "É preciso realizar o pagamento da taxa.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso efetuar a solicitação de acesso.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso proceder à verificação dos dados.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso efetuar a solicitação de acesso.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso proceder à verificação dos dados.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "É preciso fazer a avaliação de riscos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso promover a aprovação do projeto.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso promover a aprovação do projeto.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "É preciso fazer a correção dos erros.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso realizar a atualização do sistema.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso efetuar a publicação do edital.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso fazer o cancelamento da inscrição.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso realizar o agendamento da consulta.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso realizar a atualização do sistema.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso efetuar a publicação do edital.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso fazer o cancelamento da inscrição.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso realizar o agendamento da consulta.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "É preciso fazer a análise.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
   { texto: "É preciso proceder ao pagamento.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
   { texto: "É preciso fazer as análises de dados.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso realizar os pagamentos das taxas.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso realizar os pagamentos das taxas.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
 
   { texto: "O comitê fez a análise de documentos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
   { texto: "A equipe realizou o pagamento da taxa.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "Eles procederam à verificação dos dados.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "A diretoria fará a avaliação dos riscos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "O órgão realizava a publicação do edital.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "A equipe realizará o pagamento da taxa amanhã.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "Eles promovem a avaliação de riscos todo mês.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "Eles procederam à verificação dos dados.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "A diretoria fará a avaliação dos riscos.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "O órgão realizava a publicação do edital.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "A equipe realizará o pagamento da taxa amanhã.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "Eles promovem a avaliação de riscos todo mês.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "O comitê faria a análise dos dados.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
   { texto: "É bom que façam a análise de riscos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
 
   { texto: "É preciso fazer a revisão do texto.", expectedCount: 1, expectRequiresHuman: true, estado: "correto" },
   { texto: "É preciso fazer a revisão.", expectedCount: 1, expectRequiresHuman: true, estado: "correto" },
 
-  { texto: "É preciso fazer a análise e o relatório.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso realizar a análise que pedimos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso fazer a análise de dados e sistemas.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
-  { texto: "É preciso realizar uma análise detalhada dos processos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "É preciso fazer a análise e o relatório.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso realizar a análise que pedimos.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso fazer a análise de dados e sistemas.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
+  {
+    texto: "É preciso realizar uma análise detalhada dos processos.",
+    expectedCount: 1,
+    expectRequiresHuman: false,
+    estado: "correto",
+  },
   { texto: "É preciso fazer a análise, se possível.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
 
   { texto: "Fazer o jantar é relaxante.", expectedCount: 0, estado: "correto" },
@@ -54,19 +144,25 @@ export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
   { texto: "É preciso fazer a nossa análise.", expectedCount: 0, estado: "correto" },
   { texto: "É preciso fazer a boa análise.", expectedCount: 0, estado: "correto" },
 
-  { texto: "É preciso fazer a análise de documentos. Depois, realizar o pagamento da taxa.", expectedCount: 2, estado: "correto" },
+  {
+    texto: "É preciso fazer a análise de documentos. Depois, realizar o pagamento da taxa.",
+    expectedCount: 2,
+    estado: "correto",
+  },
 
   {
     texto: "É necessário proceder com a análise dos dados.",
     expectedCount: 1,
     estado: "limitacao_conhecida",
-    motivo: "'proceder com' é regência alternativa de 'proceder' não cadastrada — só o padrão 'a' (à/ao/às/aos) foi implementado, por ser o único demonstrado nos exemplos do pedido",
+    motivo:
+      "'proceder com' é regência alternativa de 'proceder' não cadastrada — só o padrão 'a' (à/ao/às/aos) foi implementado, por ser o único demonstrado nos exemplos do pedido",
   },
   {
     texto: "É preciso dar continuidade ao processo.",
     expectedCount: 1,
     estado: "limitacao_conhecida",
-    motivo: "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)",
+    motivo:
+      "'dar' não está no léxico de verbos leves cadastrados nesta etapa (escopo restrito aos 5 verbos dos exemplos do pedido: fazer/realizar/efetuar/promover/proceder)",
   },
 
   {

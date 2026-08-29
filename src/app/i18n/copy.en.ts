@@ -114,12 +114,9 @@ export const COPY_EN: UiCopy = {
     },
     settingsTitle: "Customize analysis",
     settingsLead: "Tune the criteria to the rules of the document or of your organization.",
-    settingsSummaryExpressions: (n) =>
-      n === 0 ? "no expressions" : `${n} ${plural(n, "expression", "expressions")}`,
+    settingsSummaryExpressions: (n) => (n === 0 ? "no expressions" : `${n} ${plural(n, "expression", "expressions")}`),
     settingsSummaryProfile: (deviations) =>
-      deviations === 0
-        ? "default limits"
-        : `${deviations} ${plural(deviations, "changed limit", "changed limits")}`,
+      deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "changed limit", "changed limits")}`,
     settingsSummaryJoin: " · ",
     settingsRecordPointer:
       "Information about the reader and the purpose of the document lives under Export › Report information.",
@@ -128,8 +125,7 @@ export const COPY_EN: UiCopy = {
       "This section helps apply the section 5.1 guidance on relevance to the reader. The remaining limits " +
       "correspond to the sentence, paragraph and heading criteria.",
     goToFindings: "View audit points",
-    goToFindingsHint:
-      "These settings are not audit points, but they change how some points are identified.",
+    goToFindingsHint: "These settings are not audit points, but they change how some points are identified.",
     metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence`,
     probeSummary: "optional AI test",
     exportLabel: "Export",
@@ -143,9 +139,7 @@ export const COPY_EN: UiCopy = {
     adjustedProfileStrong: "adjusted profile",
     adjustedProfile: (deviations, disabled) =>
       `${deviations} ${plural(deviations, "deviation", "deviations")} from the default` +
-      (disabled > 0
-        ? `, ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}`
-        : ""),
+      (disabled > 0 ? `, ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}` : ""),
     adjustedProfileAfter: "It is not comparable to a default score.",
     splitAriaLabel: (safe, human) => `${safe} direct swaps, ${human} require a human decision`,
     legendSafe: "direct swap available",
@@ -228,7 +222,8 @@ export const COPY_EN: UiCopy = {
     orderByDocument: "by position",
     batchLabel: "In bulk",
     batchClear: (n) => `Clear the marks on these ${n}`,
-    batchCaveat: "Marking as seen is one at a time on purpose: the mark only means something if someone looked. In bulk you can only clear.",
+    batchCaveat:
+      "Marking as seen is one at a time on purpose: the mark only means something if someone looked. In bulk you can only clear.",
     clearGroupMarks: (n) => `Clear ${n} ${plural(n, "mark", "marks")}`,
     scopeOn: "Only this criterion",
     scopeOff: "All criteria",
@@ -599,8 +594,7 @@ export const COPY_EN: UiCopy = {
     run: "Run comprehension test",
     httpFailure: (status) => `failed (HTTP ${status})`,
     running: "Testing…",
-    staleWarning:
-      "The text changed after this test — the result below is for the previous passage. Run it again.",
+    staleWarning: "The text changed after this test — the result below is for the previous passage. Run it again.",
     stuck: "The answer was not found in the text.",
     excerpt: "passage:",
     extracted: "Answer found:",

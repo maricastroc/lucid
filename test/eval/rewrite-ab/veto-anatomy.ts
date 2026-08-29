@@ -3,11 +3,7 @@ import { applyProposal } from "@/report/rewrite";
 import type { ScoredRow } from "./score";
 
 export type VetoClass =
-  | "alvo-nao-resolvido-marginal"
-  | "alvo-nao-resolvido-substancial"
-  | "achado-novo"
-  | "fidelidade"
-  | "sem-veto";
+  "alvo-nao-resolvido-marginal" | "alvo-nao-resolvido-substancial" | "achado-novo" | "fidelidade" | "sem-veto";
 
 const MARGIN = 5;
 
@@ -108,7 +104,9 @@ export function renderVetoAnatomy(details: readonly VetoDetail[]): string {
   out.push("tabela abaixo distingue. **Nenhum veto vira não-veto aqui**: a engine continua se");
   out.push("recusando a aprovar; o que muda é saber o que ela recusou.");
   out.push("");
-  out.push("| Candidato | n | vetos | alvo aberto (marginal ≤5 palavras) | alvo aberto (substancial) | achado novo | fidelidade |");
+  out.push(
+    "| Candidato | n | vetos | alvo aberto (marginal ≤5 palavras) | alvo aberto (substancial) | achado novo | fidelidade |",
+  );
   out.push("|---|--:|--:|--:|--:|--:|--:|");
   for (const [candidate, group] of [...byCandidate.entries()].sort()) {
     const count = (k: VetoClass): number => group.filter((d) => d.klass === k).length;

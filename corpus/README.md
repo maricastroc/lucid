@@ -5,9 +5,9 @@ escreveu para eles**. Racional completo em `docs/decisoes/adr-087`.
 
 O `eval/report.json` já declara por que isto existe:
 
-> `circular_recall_curated` — *"o número mede 'o código lê a própria lista', não 'o
+> `circular_recall_curated` — _"o número mede 'o código lê a própria lista', não 'o
 > instrumento acha o fenômeno na língua'. **Recall honesto exige rotular documento
-> real, cego ao léxico.**"*
+> real, cego ao léxico.**"_
 
 Este corpus é a resposta a essa ressalva. A medição que ele produz **não** entra em
 `measured` — vai para uma faixa própria, `measuredAssisted`, porque a supervisão é
@@ -55,10 +55,10 @@ achou e nunca apontar o que ele perdeu: o recall viraria inmensurável por const
 
 ## Os dois estratos
 
-| | como entra | o que se pode publicar |
-|---|---|---|
-| **R** aleatório | sorteio determinístico, sem olhar cue nenhuma | precisão **e recall**, mais a prevalência do fenômeno |
-| **E** enriquecido | casou a cue de superfície do critério | **só precisão** — recall ali mediria a peneira, não a língua |
+|                   | como entra                                    | o que se pode publicar                                       |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------------ |
+| **R** aleatório   | sorteio determinístico, sem olhar cue nenhuma | precisão **e recall**, mais a prevalência do fenômeno        |
+| **E** enriquecido | casou a cue de superfície do critério         | **só precisão** — recall ali mediria a peneira, não a língua |
 
 A cue é sempre **mais larga que o detector** (`test/corpus/strata.test.ts` verifica a
 relação de superconjunto contra os passes reais) e independente dele: ela decide
@@ -80,8 +80,8 @@ Dados pessoais, em duas linhas e nesta ordem:
 1. **recorte por tipo de ato** — `denyPattern` exclui ato de pessoal (nomeação,
    exoneração, aposentadoria, benefício), que é onde mora CPF, nome e matrícula.
    Este é o controle principal;
-2. **`countPii` como segunda linha**, com o limite que a ADR-086 fixou: *não achar
-   nada não prova que não há*. Documento com detecção é **descartado, não mascarado**
+2. **`countPii` como segunda linha**, com o limite que a ADR-086 fixou: _não achar
+   nada não prova que não há_. Documento com detecção é **descartado, não mascarado**
    — mascarar mudaria o texto medido.
 
 O repositório versiona **trecho + procedência + hash**, não o acervo: `corpus/raw/`
@@ -108,7 +108,7 @@ texto **encontrado**, não autoral; prevalência do fenômeno em ato oficial;
 concordância entre rotuladores como medida de quão bem definido está o critério.
 
 **Não pode:** ser chamado de golden validado por humano (só o subconjunto revisado
-é); somar `human` e `consensus` sem declarar a mistura; ser chamado de *ground
-truth*; publicar recall do estrato E; publicar métrica de critério abaixo do piso de
+é); somar `human` e `consensus` sem declarar a mistura; ser chamado de _ground
+truth_; publicar recall do estrato E; publicar métrica de critério abaixo do piso de
 concordância ou cujo consenso ninguém auditou — nos dois casos o `measurement.json`
 traz `promoted: false` e o motivo.

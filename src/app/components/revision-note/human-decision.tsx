@@ -32,9 +32,7 @@ export function HumanDecision({
         {c.note.humanHeader}
       </div>
       <div className="px-3 py-3">
-        <p className="text-[12.5px] leading-relaxed text-ink-1">
-          {humanLead ?? c.note.humanLead}
-        </p>
+        <p className="text-[12.5px] leading-relaxed text-ink-1">{humanLead ?? c.note.humanLead}</p>
         <Disclosure label={c.note.howToProceed}>
           <p className="text-[12px] leading-relaxed text-ink-2">{rationale}</p>
           <div className="mt-3">

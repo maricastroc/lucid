@@ -94,7 +94,9 @@ function renderBriefing(findings: readonly Finding[], labelFor: (criterion: stri
   }
   return order
     .map((criterion) => {
-      const shortSpans = [...new Set((spansByCriterion.get(criterion) ?? []).filter((s) => s.split(/\s+/).length <= 6))];
+      const shortSpans = [
+        ...new Set((spansByCriterion.get(criterion) ?? []).filter((s) => s.split(/\s+/).length <= 6)),
+      ];
       const examples = shortSpans.length ? ` (ex.: ${shortSpans.map((s) => `"${s}"`).join(", ")})` : "";
       return `- ${labelFor(criterion)}${examples}`;
     })
@@ -113,9 +115,7 @@ function buildDirectedPrompt(
 ): string {
   const declarationOf = new Map(declarations.map((d) => [`${d.span.start}:${d.span.end}`, d]));
   const declOf = (f: Finding): AgentDeclaration | undefined =>
-    f.criterion === "passive_voice" && f.requiresHuman
-      ? declarationOf.get(`${f.span.start}:${f.span.end}`)
-      : undefined;
+    f.criterion === "passive_voice" && f.requiresHuman ? declarationOf.get(`${f.span.start}:${f.span.end}`) : undefined;
 
   const mandatory = findings.filter((f) => !f.requiresHuman);
   const declared = findings.filter((f) => declOf(f)?.agent != null);
@@ -132,7 +132,9 @@ function buildDirectedPrompt(
 
   const sections: string[] = [];
   if (mandatoryBrief) {
-    sections.push(`A engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${mandatoryBrief}`);
+    sections.push(
+      `A engine determinística analisou o trecho e apontou os pontos abaixo. Resolva TODOS:\n${mandatoryBrief}`,
+    );
   }
   if (declared.length > 0) {
     const lines = declared.map((f) => `- "${flatSpan(f)}" → agente declarado: «${declOf(f)!.agent}»`).join("\n");

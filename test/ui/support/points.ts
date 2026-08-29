@@ -10,7 +10,9 @@ export const pointRow = (excerpt: string | RegExp) =>
   });
 
 export async function expandCriterion(user: UserEvent, label: string | RegExp): Promise<void> {
-  await user.click(auditPanel().getByRole("button", { name: new RegExp(`^${typeof label === "string" ? label : label.source}`) }));
+  await user.click(
+    auditPanel().getByRole("button", { name: new RegExp(`^${typeof label === "string" ? label : label.source}`) }),
+  );
 }
 
 export async function openPoint(user: UserEvent, criterion: string, excerpt: string): Promise<void> {

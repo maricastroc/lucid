@@ -78,7 +78,8 @@ export const COPY_PT: UiCopy = {
     },
     spliceRefused: {
       crosses_units: "Esta alteração atravessa mais de um bloco do documento importado.",
-      unsupported_unit: "Ainda não sabemos aplicar uma alteração em várias linhas dentro de um título ou de um item de lista.",
+      unsupported_unit:
+        "Ainda não sabemos aplicar uma alteração em várias linhas dentro de um título ou de um item de lista.",
       introduces_heading: "Esta alteração criaria um título novo, o que mudaria a estrutura do documento.",
       empty_unit: "Esta alteração deixaria o bloco vazio.",
       rebuild_mismatch: "Não foi possível reconstruir o documento preservando os outros blocos.",
@@ -114,8 +115,7 @@ export const COPY_PT: UiCopy = {
     },
     settingsTitle: "Personalizar análise",
     settingsLead: "Personalize os critérios de acordo com as regras do documento ou da sua organização.",
-    settingsSummaryExpressions: (n) =>
-      n === 0 ? "nenhuma expressão" : `${n} ${plural(n, "expressão", "expressões")}`,
+    settingsSummaryExpressions: (n) => (n === 0 ? "nenhuma expressão" : `${n} ${plural(n, "expressão", "expressões")}`),
     settingsSummaryProfile: (deviations) =>
       deviations === 0
         ? "limites padrão"
@@ -128,8 +128,7 @@ export const COPY_PT: UiCopy = {
       "Esta seção ajuda a aplicar as orientações da seção 5.1 sobre relevância para o leitor. " +
       "Os demais limites correspondem aos critérios de frase, parágrafo e título.",
     goToFindings: "Ver pontos da auditoria",
-    goToFindingsHint:
-      "Esses ajustes não são pontos da auditoria, mas mudam como alguns pontos são identificados.",
+    goToFindingsHint: "Esses ajustes não são pontos da auditoria, mas mudam como alguns pontos são identificados.",
     metricsSummary: (words, perSentence) => `${words} palavras · ${perSentence} por frase`,
     probeSummary: "teste opcional com IA",
     exportLabel: "Exportar",
@@ -176,8 +175,7 @@ export const COPY_PT: UiCopy = {
     trailLabel: "Trilha de revisão",
     trailWeight: (before, after, changes) =>
       `Peso da auditoria ${before} → ${after} · ${changes} ${plural(changes, "alteração", "alterações")}`,
-    trailCaveat:
-      "Registro do que foi feito nesta sessão — não é atestado de qualidade. Vai no relatório exportado.",
+    trailCaveat: "Registro do que foi feito nesta sessão — não é atestado de qualidade. Vai no relatório exportado.",
     descriptor: "descritor",
     metricWords: "Palavras",
     metricSentences: "Frases",
@@ -226,7 +224,8 @@ export const COPY_PT: UiCopy = {
     orderByDocument: "por posição",
     batchLabel: "Em lote",
     batchClear: (n) => `Limpar as marcas destas ${n}`,
-    batchCaveat: "Marcar como vista é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
+    batchCaveat:
+      "Marcar como vista é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
     clearGroupMarks: (n) => `Limpar ${n} ${plural(n, "marca", "marcas")}`,
     scopeOn: "Filtrar por este critério",
     scopeOff: "Ver todos os critérios",
@@ -476,8 +475,7 @@ export const COPY_PT: UiCopy = {
     priorHint: "O que dá para pressupor — e, portanto, o que precisa ser explicado.",
     priorPlaceholder: "Ex.: sabe que existe um benefício; não conhece o vocabulário do processo",
     mustFindLabel: "Qual palavra ou expressão deve aparecer?",
-    mustFindHint:
-      "Adicione uma expressão por vez. A busca ignora maiúsculas e minúsculas, mas considera os acentos.",
+    mustFindHint: "Adicione uma expressão por vez. A busca ignora maiúsculas e minúsculas, mas considera os acentos.",
     mustFindPlaceholder: "Ex.: prazo para recurso",
     addExpression: "Adicionar expressão",
     presenceLabel: "Ocorrências no documento",
@@ -503,11 +501,9 @@ export const COPY_PT: UiCopy = {
     lead:
       "Registre para quem o texto foi escrito, o que essa pessoa precisa fazer depois da leitura e o que " +
       "ela já sabe sobre o assunto.",
-    caveat:
-      "A Lucid guarda estas respostas no relatório exportado, mas não as verifica: são registro, não medição.",
+    caveat: "A Lucid guarda estas respostas no relatório exportado, mas não as verifica: são registro, não medição.",
     isoNote: "Baseado na ABNT NBR ISO 24495-1",
-    isoTitle:
-      "Estas perguntas ajudam a aplicar as orientações da seção 5.1 sobre relevância para o leitor.",
+    isoTitle: "Estas perguntas ajudam a aplicar as orientações da seção 5.1 sobre relevância para o leitor.",
     done: "Fechar",
   },
 

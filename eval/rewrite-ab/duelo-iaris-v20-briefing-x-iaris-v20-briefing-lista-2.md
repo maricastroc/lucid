@@ -190,7 +190,6 @@ Art. 2º O Ministro de Estado a quem o funcionário estiver subordinado vai abri
 
 Nesse processo, serão usadas as regras dos artigos 219 a 239 da Lei nº 1.711, de 28 de outubro de 1952 (Estatuto dos Funcionários Públicos Civis da União), no que for adequado.
 
-
 ## Diferenças só de redação (8)
 
 Mesmo veredito medido, texto diferente. Ficam aqui para não esconder nada.
@@ -350,4 +349,3 @@ A Procuradoria-Geral da Fazenda Nacional passa a apurar, inscrever e cobrar a d�
 Art. 1º A Secretaria da Receita Federal passa a administrar as receitas arrecadadas pelo Instituto Nacional de Colonização e Reforma Agrária (INCRA).
 
 A Procuradoria-Geral da Fazenda Nacional passa a apurar, inscrever e cobrar a dívida ativa dessas receitas. (Vide Lei nº 8.847, de 1994)
-

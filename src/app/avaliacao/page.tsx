@@ -107,7 +107,6 @@ export default function AvaliacaoPage() {
                 de texto: mede o motor, não o documento de ninguém.
               </span>
             </p>
-
           </header>
 
           <EvidenceNav sections={SECTIONS} />
@@ -116,8 +115,8 @@ export default function AvaliacaoPage() {
 
           <Band id="metodo" label="Método" aside="o que os números podem significar">
             <p className="max-w-[64ch] text-[13.5px] leading-relaxed text-ink-1">
-              Limites do método, do próprio artefato. Os cartões de critério remetem a eles pelos índices. Pontuação
-              por <Mono>{method.scoring}</Mono>.
+              Limites do método, do próprio artefato. Os cartões de critério remetem a eles pelos índices. Pontuação por{" "}
+              <Mono>{method.scoring}</Mono>.
             </p>
             <ol className="mt-5 grid grid-cols-1 gap-x-10 lg:grid-cols-2">
               {method.caveats.map((caveat, i) => (
@@ -139,9 +138,9 @@ export default function AvaliacaoPage() {
 
           <Band id="camadas" label="Camadas de evidência" aside="três regimes, não um placar">
             <p className="max-w-[62ch] text-[15px] leading-[1.65] text-ink-1">
-              <Tabular>{criteriaCoverage.measured.length}</Tabular> dos{" "}
-              <Tabular>{criteriaCoverage.total}</Tabular> critérios do motor têm métrica publicada. Os demais aparecem
-              nas camadas abaixo, com a evidência que de fato existe para cada um — a régua enfraquece junto.
+              <Tabular>{criteriaCoverage.measured.length}</Tabular> dos <Tabular>{criteriaCoverage.total}</Tabular>{" "}
+              critérios do motor têm métrica publicada. Os demais aparecem nas camadas abaixo, com a evidência que de
+              fato existe para cada um — a régua enfraquece junto.
             </p>
 
             <div className="relative mt-9 pl-5 sm:pl-7">
@@ -270,8 +269,8 @@ export default function AvaliacaoPage() {
           <Band id="procedencia" label="Procedência" aside="assinatura da rodada">
             <div className="rounded-lg border border-rule-2 bg-surface-2 px-5 py-5">
               <p className="max-w-[64ch] text-[13px] leading-relaxed text-ink-1">
-                Estes seis valores identificam a rodada: com eles e o mesmo corpus, qualquer pessoa
-                chega aos mesmos números desta página — e uma divergência aponta qual peça mudou.
+                Estes seis valores identificam a rodada: com eles e o mesmo corpus, qualquer pessoa chega aos mesmos
+                números desta página — e uma divergência aponta qual peça mudou.
               </p>
               <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-rule-1 pt-5 sm:grid-cols-3">
                 <Field term="lucidVersion" value={stamp.lucidVersion} />
@@ -365,8 +364,8 @@ function EvidenceSummary({ artifact }: { artifact: EvalArtifact }) {
         Evidência disponível para os <Tabular>{criteriaCoverage.total}</Tabular> critérios
       </h2>
       <p className="mt-2 max-w-[64ch] text-[12.5px] leading-relaxed text-ink-1">
-        Quantos critérios têm cada tipo de evidência. Não é nota, aprovação nem média — é o quanto se
-        sabe sobre cada um, e a régua enfraquece da esquerda para a direita.
+        Quantos critérios têm cada tipo de evidência. Não é nota, aprovação nem média — é o quanto se sabe sobre cada
+        um, e a régua enfraquece da esquerda para a direita.
       </p>
 
       <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">

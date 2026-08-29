@@ -1,7 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, isDefaultConfig, type Config, type Finding, type ReaderBriefing } from "@/lucid";
+import {
+  checkBriefing,
+  DEFAULT_CONFIG,
+  EMPTY_BRIEFING,
+  isDefaultConfig,
+  type Config,
+  type Finding,
+  type ReaderBriefing,
+} from "@/lucid";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
 import { EMPTY_MARKS } from "./lib/review-marks";
@@ -72,16 +80,7 @@ export function Studio() {
 
   const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
 
-  const {
-    query,
-    setCriterion,
-    setBucket,
-    setState,
-    setSearch,
-    setOrder,
-    clearFilters,
-    filtered,
-  } = useFindingQuery();
+  const { query, setCriterion, setBucket, setState, setSearch, setOrder, clearFilters, filtered } = useFindingQuery();
 
   const findings = useMemo(() => orderFindingsForIndex(diagnostic.findings), [diagnostic]);
   const { hiddenHighlights, toggleHighlights } = useHighlightVisibility();
@@ -341,9 +340,7 @@ export function Studio() {
           />
         )}
 
-        {!isEmpty && (
-          <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />
-        )}
+        {!isEmpty && <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />}
       </div>
 
       {mode === "audit" && visible.length > 0 && !sheetOpen && (

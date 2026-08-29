@@ -6,7 +6,10 @@ import { useCopy } from "../i18n/use-copy";
 import type { UiCopy } from "../i18n/copy";
 import { REPORT_RECORD_FIELDS, type ReportRecordField } from "../lib/briefing-surfaces";
 
-const COPY_KEYS: Record<ReportRecordField, { label: keyof UiCopy["briefing"]; hint: keyof UiCopy["briefing"]; placeholder: keyof UiCopy["briefing"] }> = {
+const COPY_KEYS: Record<
+  ReportRecordField,
+  { label: keyof UiCopy["briefing"]; hint: keyof UiCopy["briefing"]; placeholder: keyof UiCopy["briefing"] }
+> = {
   audience: { label: "audienceLabel", hint: "audienceHint", placeholder: "audiencePlaceholder" },
   purpose: { label: "purposeLabel", hint: "purposeHint", placeholder: "purposePlaceholder" },
   priorKnowledge: { label: "priorLabel", hint: "priorHint", placeholder: "priorPlaceholder" },

@@ -23,10 +23,7 @@ describe("heading_body_mismatch", () => {
 
   it("zero content words in common, body with enough substance → marks (info, requiresHuman, no suggestion)", () => {
     const heading = "Prazos e documentos";
-    const found = findingsFor([
-      H(heading),
-      P("A comissão avaliará os pedidos recebidos na reunião de sexta-feira."),
-    ]);
+    const found = findingsFor([H(heading), P("A comissão avaliará os pedidos recebidos na reunião de sexta-feira.")]);
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe(heading);
     expect(found[0].source).toBe("structural-heuristic");
@@ -36,7 +33,9 @@ describe("heading_body_mismatch", () => {
     expect(found[0].requiresHuman).toBe(true);
     expect(found[0].suggestion).toBeUndefined();
     expect(found[0].meta?.headingContentWords).toBeGreaterThan(0);
-    expect(found[0].meta?.bodyContentWords).toBeGreaterThanOrEqual(DEFAULT_CONFIG.headingBodyMismatch.minBodyContentWords);
+    expect(found[0].meta?.bodyContentWords).toBeGreaterThanOrEqual(
+      DEFAULT_CONFIG.headingBodyMismatch.minBodyContentWords,
+    );
   });
 
   it("a body that is too short (below the content-word minimum) → no finding, even with no echo", () => {

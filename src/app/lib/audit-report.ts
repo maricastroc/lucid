@@ -1,6 +1,24 @@
-import { configDeviations, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Severity } from "@/lucid";
+import {
+  configDeviations,
+  type BriefingCheck,
+  type Config,
+  type Diagnostic,
+  type Finding,
+  type ReaderBriefing,
+  type Severity,
+} from "@/lucid";
 import { describeDeviation, disabledCriteria } from "./profile";
-import { CRITERION_ORDER, coverageLabel, coverageOf, isSafe, metaFor, principleGroupLabel, provenanceLabel, severityRank, SEVERITY_LABEL } from "./criteria";
+import {
+  CRITERION_ORDER,
+  coverageLabel,
+  coverageOf,
+  isSafe,
+  metaFor,
+  principleGroupLabel,
+  provenanceLabel,
+  severityRank,
+  SEVERITY_LABEL,
+} from "./criteria";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 import { readabilityOf } from "./readability";
 
@@ -41,7 +59,8 @@ function renderBriefingMarkdown(briefing: BriefingReport | null): string {
   out.push("_Briefing declarado pelo autor. É registro de decisão humana, não medição da ferramenta._");
   out.push("");
   if (declared.audience.trim() !== "") out.push(`- **Quem é o leitor:** ${collapse(declared.audience)}`);
-  if (declared.purpose.trim() !== "") out.push(`- **O que precisa fazer depois de ler:** ${collapse(declared.purpose)}`);
+  if (declared.purpose.trim() !== "")
+    out.push(`- **O que precisa fazer depois de ler:** ${collapse(declared.purpose)}`);
   if (declared.priorKnowledge.trim() !== "") out.push(`- **O que já sabe:** ${collapse(declared.priorKnowledge)}`);
   out.push("");
 
@@ -50,7 +69,9 @@ function renderBriefingMarkdown(briefing: BriefingReport | null): string {
     out.push("");
     for (const item of check.coverage) {
       const found = item.occurrences.length > 0;
-      out.push(`- ${found ? "✓" : "✗"} “${item.expression}” — ${found ? `aparece ${item.occurrences.length}×` : "não aparece com essas palavras"}`);
+      out.push(
+        `- ${found ? "✓" : "✗"} “${item.expression}” — ${found ? `aparece ${item.occurrences.length}×` : "não aparece com essas palavras"}`,
+      );
     }
     out.push("");
     out.push(
@@ -135,7 +156,9 @@ export function buildAuditReport(
   out.push(
     `- **${safe}** de troca direta (equivalente indicado; a aplicação é do autor) · **${human}** de decisão do autor`,
   );
-  out.push(`- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`);
+  out.push(
+    `- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`,
+  );
   const readability = readabilityOf(m);
   out.push(
     readability.measured
@@ -202,10 +225,14 @@ export function buildAuditReport(
       out.push(f.justification);
       if (isSafe(f) && f.suggestion !== undefined) {
         out.push("");
-        out.push(`**Equivalente direto (curado):** ${f.suggestion} — indicado pela ferramenta; a troca no texto é do autor.`);
+        out.push(
+          `**Equivalente direto (curado):** ${f.suggestion} — indicado pela ferramenta; a troca no texto é do autor.`,
+        );
       } else if (!f.requiresHuman) {
         out.push("");
-        out.push("_Sem troca 1:1 pronta, mas resolvível: a IA pode reescrever e a engine verifica — aplicar é decisão sua._");
+        out.push(
+          "_Sem troca 1:1 pronta, mas resolvível: a IA pode reescrever e a engine verifica — aplicar é decisão sua._",
+        );
       } else {
         out.push("");
         out.push("_Exige decisão humana — a ferramenta aponta, não reescreve por você._");

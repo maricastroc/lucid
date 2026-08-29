@@ -40,7 +40,9 @@ describe("leitor_terceira_pessoa — periphrastic deontics and quantified subjec
   });
 
   it("'será obrigado a' (future) counts too", () => {
-    expect(readerFindings("O interessado será obrigado a comparecer.")[0].span.text).toBe("O interessado será obrigado a");
+    expect(readerFindings("O interessado será obrigado a comparecer.")[0].span.text).toBe(
+      "O interessado será obrigado a",
+    );
   });
 
   it("a subject with a generic quantifier (todo/cada/qualquer) is recognized", () => {

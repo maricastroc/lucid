@@ -4,12 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { IARIS_SOURCE, INCOMPATIBLE, PATCHED, VERBATIM_RANGES } from "@/report/rewrite";
-import {
-  buildIarisListGate2,
-  buildIarisPort,
-  buildIarisWithBriefing,
-  IARIS_LIST_RULE,
-} from "./iaris-baseline";
+import { buildIarisListGate2, buildIarisPort, buildIarisWithBriefing, IARIS_LIST_RULE } from "./iaris-baseline";
 import { loadEvalTargets } from "./targets";
 const IARIS_FILE = path.join(os.homedir(), "Desktop/@dev/iaris/src/core/prompt/system-prompt.ts");
 const present = fs.existsSync(IARIS_FILE);
@@ -46,8 +41,7 @@ describe.runIf(present)("IAris baseline — the copy still matches the source", 
 
   it("each edited block carries exactly the edit PATCHED declares — nothing more", () => {
     const lines = sourcePrompt().split("\n");
-    const at = (name: string): string =>
-      lines.slice(VERBATIM_RANGES[name][0] - 1, VERBATIM_RANGES[name][1]).join("\n");
+    const at = (name: string): string => lines.slice(VERBATIM_RANGES[name][0] - 1, VERBATIM_RANGES[name][1]).join("\n");
     const prompt = promptFor();
 
     expect(at("MARKUP")).toContain('"simplifiedText"');
@@ -111,7 +105,10 @@ describe("lista@2 — só o gatilho muda", () => {
     const b = buildIarisListGate2(target, "«c»").split("\n");
 
     const head = (lines: string[]): string[] =>
-      lines.slice(0, lines.findIndex((l) => l.startsWith("- Arquitetura da informação")));
+      lines.slice(
+        0,
+        lines.findIndex((l) => l.startsWith("- Arquitetura da informação")),
+      );
     const tail = (lines: string[]): string[] =>
       lines.slice(lines.findIndex((l) => l.startsWith("- Estrutura das frases")));
 
@@ -123,7 +120,7 @@ describe("lista@2 — só o gatilho muda", () => {
     const target = loadEvalTargets(1)[0];
     expect(target.criteria).not.toContain("prose_enumeration");
     expect(buildIarisWithBriefing(target, "«c»")).toContain('a engine NÃO apontou "Enumeração em prosa"');
-    expect(buildIarisListGate2(target, "«c»")).not.toContain('a engine NÃO apontou');
+    expect(buildIarisListGate2(target, "«c»")).not.toContain("a engine NÃO apontou");
     expect(buildIarisListGate2(target, "«c»")).toContain("ITENS SEMANTICAMENTE PARALELOS E SEPARÁVEIS");
   });
 

@@ -96,8 +96,7 @@ function buildJustification(entry: JargonEntry, hasSuggestion: boolean): string 
         ? "a troca depende do que vem depois na frase, e substituir sem ajustar o resto " +
           "poderia gerar um erro gramatical"
         : entry.reason === "polysemous"
-          ? "esta palavra tem mais de um sentido possível, e trocar sem confirmar o " +
-            "sentido aqui seria arriscado"
+          ? "esta palavra tem mais de um sentido possível, e trocar sem confirmar o " + "sentido aqui seria arriscado"
           : "a ferramenta não tem, aqui, uma troca segura o bastante para sugerir automaticamente";
 
     return `${base} Um equivalente possível é "${entry.plain}", mas ${motivo}; a decisão de trocar é do autor.`;

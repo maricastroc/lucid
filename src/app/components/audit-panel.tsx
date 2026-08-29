@@ -2,7 +2,16 @@
 
 import { useMemo, useRef } from "react";
 import type { DocxNotes } from "@/importers/docx";
-import { configDeviations, type Block, type BriefingCheck, type Config, type Diagnostic, type Finding, type ReaderBriefing, type Span } from "@/lucid";
+import {
+  configDeviations,
+  type Block,
+  type BriefingCheck,
+  type Config,
+  type Diagnostic,
+  type Finding,
+  type ReaderBriefing,
+  type Span,
+} from "@/lucid";
 import { BriefingPanel } from "./briefing-panel";
 import { ProfilePanel } from "./profile-panel";
 import type { RewriteProposal } from "@/report/rewrite";
@@ -268,7 +277,10 @@ function sectionSummary(
         c.panel.settingsSummaryProfile(configDeviations(props.settings.config).length),
       ].join(c.panel.settingsSummaryJoin);
     case "metrics":
-      return c.panel.metricsSummary(fmt(props.diagnostic.metrics.words), fmt(props.diagnostic.metrics.wordsPerSentence));
+      return c.panel.metricsSummary(
+        fmt(props.diagnostic.metrics.words),
+        fmt(props.diagnostic.metrics.wordsPerSentence),
+      );
     case "probe":
       return c.panel.probeSummary;
     default:

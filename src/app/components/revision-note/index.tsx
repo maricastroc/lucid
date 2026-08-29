@@ -3,7 +3,14 @@
 import { useState } from "react";
 import type { Finding, Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal } from "@/report/rewrite";
-import { isSafe, metaFor, principleGroupLabel, provenanceLabel, severityInkVar, severityLabel } from "../../lib/criteria";
+import {
+  isSafe,
+  metaFor,
+  principleGroupLabel,
+  provenanceLabel,
+  severityInkVar,
+  severityLabel,
+} from "../../lib/criteria";
 import { detectedProse, detectionHeadline } from "../../lib/narrative";
 import { useCopy } from "../../i18n/use-copy";
 import { CuratedEquivalent } from "./curated-equivalent";
@@ -48,7 +55,11 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
       </p>
 
       <Block label={c.note.excerpt}>
-        <Excerpt finding={finding} ink={ink} channelClass={meta.channel === "inline" ? `mark ${meta.markStyleClass}` : "passage"} />
+        <Excerpt
+          finding={finding}
+          ink={ink}
+          channelClass={meta.channel === "inline" ? `mark ${meta.markStyleClass}` : "passage"}
+        />
       </Block>
 
       <Block label={c.note.whatWeFound}>

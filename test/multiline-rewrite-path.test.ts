@@ -33,8 +33,7 @@ const DOCX_BLOCKS: readonly RawBlock[] = [
 
 const structured = (): Document => buildStructuredDocument(DOCX_BLOCKS, ptDocumentServices);
 
-const kinds = (doc: Document): string[] =>
-  doc.blocks.map((b) => (b.kind === "heading" ? `heading${b.level}` : b.kind));
+const kinds = (doc: Document): string[] => doc.blocks.map((b) => (b.kind === "heading" ? `heading${b.level}` : b.kind));
 
 describe("multiline rewrite — the structured (.docx) path", () => {
   it("REFUSES a multiline proposal: the structured splice returns null by construction", () => {

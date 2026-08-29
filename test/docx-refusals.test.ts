@@ -63,7 +63,9 @@ describe("import refuses what the file itself leaves ambiguous", () => {
   it("does not refuse over an unknown paragraph style that is not a heading", async () => {
     const result = await importOf({
       "word/document.xml": documentXml(styled("Recuo", "Parágrafo recuado comum.")),
-      "word/styles.xml": stylesXml(`<w:style w:type="paragraph" w:styleId="Recuo"><w:name w:val="Recuo Especial"/></w:style>`),
+      "word/styles.xml": stylesXml(
+        `<w:style w:type="paragraph" w:styleId="Recuo"><w:name w:val="Recuo Especial"/></w:style>`,
+      ),
     });
 
     expect(result.ok).toBe(true);
@@ -74,7 +76,9 @@ describe("import refuses what the file itself leaves ambiguous", () => {
 describe("import rebuilds headings from the outline level the file declares", () => {
   const PT_BR = {
     "word/document.xml": documentXml(
-      styled("Ttulo1", "Do procedimento") + styled("Ttulo3", "Quem pode pedir") + para("O documento supracitado foi juntado aos autos."),
+      styled("Ttulo1", "Do procedimento") +
+        styled("Ttulo3", "Quem pode pedir") +
+        para("O documento supracitado foi juntado aos autos."),
     ),
     "word/styles.xml": stylesXml(outlineStyle("Ttulo1", "Título 1", 0) + outlineStyle("Ttulo3", "Título 3", 2)),
   };
@@ -140,7 +144,12 @@ describe("import declares what it flattened instead of pretending it kept it", (
     );
 
     expect(notes.tablesFlattened).toBe(1);
-    expect(doc.blocks.map((block) => block.text)).toEqual(["Antes da tabela.", "Prazo", "30 dias", "Depois da tabela."]);
+    expect(doc.blocks.map((block) => block.text)).toEqual([
+      "Antes da tabela.",
+      "Prazo",
+      "30 dias",
+      "Depois da tabela.",
+    ]);
   });
 
   it("counts the text boxes whose content joined the reading order", async () => {

@@ -109,7 +109,9 @@ describe("prose_enumeration — numeric and roman markers inline (A9)", () => {
   });
 
   it("the closing parenthesis must be welded to the numeral", () => {
-    expect(spans("Veja o item 1 ) do edital; o item 2 ) do anexo; o item 3 ) da tabela.", "prose_enumeration")).toEqual([]);
+    expect(spans("Veja o item 1 ) do edital; o item 2 ) do anexo; o item 3 ) da tabela.", "prose_enumeration")).toEqual(
+      [],
+    );
   });
 
   it("years and amounts are not item numbers (1–2 digits only)", () => {

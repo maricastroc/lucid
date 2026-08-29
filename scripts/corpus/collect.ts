@@ -107,7 +107,10 @@ async function main(): Promise<void> {
       }
     }
 
-    const pending = [...candidates].filter((url) => !already.has(url)).sort().slice(0, budget);
+    const pending = [...candidates]
+      .filter((url) => !already.has(url))
+      .sort()
+      .slice(0, budget);
     console.log(`· ${source.id}: ${candidates.size} candidatos, ${pending.length} a buscar`);
     if (args.dry) continue;
 

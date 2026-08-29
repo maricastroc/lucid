@@ -46,7 +46,9 @@ describe("passiva_sintetica — exclusions (low false positive rate)", () => {
 
   it("kill switch", () => {
     const config = { ...DEFAULT_CONFIG, passivaSintetica: { enabled: false } };
-    expect(analyze("Aplica-se a multa.", config).findings.filter((f) => f.criterion === "passiva_sintetica")).toEqual([]);
+    expect(analyze("Aplica-se a multa.", config).findings.filter((f) => f.criterion === "passiva_sintetica")).toEqual(
+      [],
+    );
   });
 });
 
@@ -120,7 +122,9 @@ describe("passiva_sintetica — proclisis precision: the conditional 'se' stays 
 
   it("the kill switch turns off the proclitic arm as well", () => {
     const config = { ...DEFAULT_CONFIG, passivaSintetica: { enabled: false } };
-    expect(analyze("Não se aplica a multa.", config).findings.filter((f) => f.criterion === "passiva_sintetica")).toEqual([]);
+    expect(
+      analyze("Não se aplica a multa.", config).findings.filter((f) => f.criterion === "passiva_sintetica"),
+    ).toEqual([]);
   });
 });
 

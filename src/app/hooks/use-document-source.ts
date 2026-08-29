@@ -70,22 +70,25 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     setTextState(value);
   }, []);
 
-  const setText = useCallback((value: string) => {
-    const current = importedRef.current;
-    if (current === null) {
-      setTextState(value);
-      return;
-    }
+  const setText = useCallback(
+    (value: string) => {
+      const current = importedRef.current;
+      if (current === null) {
+        setTextState(value);
+        return;
+      }
 
-    const result = spliceStructuredDocument(current, value, ptDocumentServices);
-    if (!result.ok) {
-      refusedRef.current = { reason: result.reason, text: value };
-      setRefusedEdit(refusedRef.current);
-      return;
-    }
+      const result = spliceStructuredDocument(current, value, ptDocumentServices);
+      if (!result.ok) {
+        refusedRef.current = { reason: result.reason, text: value };
+        setRefusedEdit(refusedRef.current);
+        return;
+      }
 
-    adopt(result.document, result.document.source);
-  }, [adopt]);
+      adopt(result.document, result.document.source);
+    },
+    [adopt],
+  );
 
   const previewText = useCallback((value: string): string | null => {
     const current = importedRef.current;
@@ -129,33 +132,33 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
   const clear = useCallback(() => adopt(null, ""), [adopt]);
 
-  const openDocx = useCallback(async (file: File): Promise<boolean> => {
-    setImporting(true);
-    setImportError(null);
-    try {
-      const bytes = await file.arrayBuffer();
+  const openDocx = useCallback(
+    async (file: File): Promise<boolean> => {
+      setImporting(true);
+      setImportError(null);
+      try {
+        const bytes = await file.arrayBuffer();
 
-      const { importDocx } = await import("@/importers/docx");
-      const result = await importDocx(bytes, ptDocumentServices);
-      if (!result.ok) {
-        setImportError(result.refusal);
+        const { importDocx } = await import("@/importers/docx");
+        const result = await importDocx(bytes, ptDocumentServices);
+        if (!result.ok) {
+          setImportError(result.refusal);
+          return false;
+        }
+        setImportNotes(result.value.notes);
+        adopt(result.value.doc, result.value.doc.source);
+        return true;
+      } catch {
+        setImportError("unreadable");
         return false;
+      } finally {
+        setImporting(false);
       }
-      setImportNotes(result.value.notes);
-      adopt(result.value.doc, result.value.doc.source);
-      return true;
-    } catch {
-      setImportError("unreadable");
-      return false;
-    } finally {
-      setImporting(false);
-    }
-  }, [adopt]);
-
-  const rawBlocks = useMemo(
-    () => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)),
-    [importedDoc],
+    },
+    [adopt],
   );
+
+  const rawBlocks = useMemo(() => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)), [importedDoc]);
 
   return {
     text,

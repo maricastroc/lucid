@@ -86,14 +86,23 @@ describe("determinism — independence from pass execution order (24 permutation
     expect([...d2.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1))).toEqual(
       [...d1.score.byCriterion].sort((a, b) => (a.criterion < b.criterion ? -1 : 1)),
     );
-    expect(d2.score.byCriterion.map((c) => c.criterion)).toEqual(d1.score.byCriterion.map((c) => c.criterion).reverse());
+    expect(d2.score.byCriterion.map((c) => c.criterion)).toEqual(
+      d1.score.byCriterion.map((c) => c.criterion).reverse(),
+    );
   });
 });
 
 describe("determinism — independence from dataset entry order (jargon longest-match-first)", () => {
   const synthetic = [
     { term: "em", kind: "word", domain: "legal", plain: "no", safeForSuggestion: true, reason: null },
-    { term: "em sede de", kind: "phrase", domain: "legal", plain: "no âmbito de", safeForSuggestion: true, reason: null },
+    {
+      term: "em sede de",
+      kind: "phrase",
+      domain: "legal",
+      plain: "no âmbito de",
+      safeForSuggestion: true,
+      reason: null,
+    },
     { term: "em face de", kind: "phrase", domain: "legal", plain: "diante de", safeForSuggestion: true, reason: null },
   ] as const;
 
@@ -112,7 +121,11 @@ describe("determinism — independence from dataset entry order (jargon longest-
 
   it("the set of terms per first word is independent of the input order", () => {
     const terms = (entries: readonly (typeof synthetic)[number][]) =>
-      new Set(compileJargonEntries(entries as never).get("em")!.map((c) => c.words.join(" ")));
+      new Set(
+        compileJargonEntries(entries as never)
+          .get("em")!
+          .map((c) => c.words.join(" ")),
+      );
     expect(terms([...synthetic].reverse())).toEqual(terms(synthetic));
   });
 
@@ -159,11 +172,17 @@ describe("determinism — no shared state (A, B, A)", () => {
 describe("determinism — Config variations", () => {
   const variants: Array<{ name: string; config: Partial<Config> }> = [
     { name: "default", config: {} },
-    { name: "long_sentence off (very high threshold)", config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } } },
+    {
+      name: "long_sentence off (very high threshold)",
+      config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } },
+    },
     { name: "passive off", config: { passiveVoice: { enabled: false } } },
     { name: "nominalization off", config: { nominalization: { enabled: false } } },
     { name: "jargon off", config: { jargon: { enabled: false, suggestFromGlossary: true } } },
-    { name: "jargon with no informative equivalent", config: { jargon: { enabled: true, suggestFromGlossary: false } } },
+    {
+      name: "jargon with no informative equivalent",
+      config: { jargon: { enabled: true, suggestFromGlossary: false } },
+    },
     { name: "partial threshold override", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
   ];
 

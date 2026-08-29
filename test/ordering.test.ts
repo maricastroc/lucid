@@ -49,7 +49,10 @@ describe("sortFindings — tie-breaking on each key, in the right order", () => 
   });
 
   it("does not mutate the input array", () => {
-    const input = [finding({ span: { start: 9, end: 10, text: "a" } }), finding({ span: { start: 1, end: 2, text: "b" } })];
+    const input = [
+      finding({ span: { start: 9, end: 10, text: "a" } }),
+      finding({ span: { start: 1, end: 2, text: "b" } }),
+    ];
     const copy = [...input];
     sortFindings(input);
     expect(input).toEqual(copy);

@@ -69,9 +69,10 @@ describe("the AI proposal draft", () => {
     generate.mockResolvedValue(answer("uma proposta"));
     const declaration: AgentDeclaration = { span: TARGET, agent: "a comissão" };
 
-    const { result, rerender } = renderHook((props: { declaration: AgentDeclaration | null }) =>
-      useRewriteDraft(options(props.declaration)),
-    { initialProps: { declaration: null as AgentDeclaration | null } });
+    const { result, rerender } = renderHook(
+      (props: { declaration: AgentDeclaration | null }) => useRewriteDraft(options(props.declaration)),
+      { initialProps: { declaration: null as AgentDeclaration | null } },
+    );
 
     await act(async () => result.current.run());
     expect(result.current.draft.status).toBe("proposed");
@@ -87,9 +88,10 @@ describe("the AI proposal draft", () => {
     });
     const declaration: AgentDeclaration = { span: TARGET, agent: "a comissão" };
 
-    const { result, rerender } = renderHook((props: { declaration: AgentDeclaration | null }) =>
-      useRewriteDraft(options(props.declaration)),
-    { initialProps: { declaration: null as AgentDeclaration | null } });
+    const { result, rerender } = renderHook(
+      (props: { declaration: AgentDeclaration | null }) => useRewriteDraft(options(props.declaration)),
+      { initialProps: { declaration: null as AgentDeclaration | null } },
+    );
 
     await act(async () => result.current.run());
     expect(result.current.draft).toEqual({ status: "failed", message: "sem resposta" });

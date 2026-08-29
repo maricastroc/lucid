@@ -17,7 +17,17 @@ describe("parseArgs — options", () => {
   });
 
   it("reads format, threshold and repeated criteria", () => {
-    const parsed = parseArgs(["--format", "json", "--fail-on", "error", "--criterion", "jargon", "--criterion", "long_sentence", "doc.txt"]);
+    const parsed = parseArgs([
+      "--format",
+      "json",
+      "--fail-on",
+      "error",
+      "--criterion",
+      "jargon",
+      "--criterion",
+      "long_sentence",
+      "doc.txt",
+    ]);
     expect(parsed).toMatchObject({
       ok: true,
       options: { format: "json", failOn: "error", criteria: ["jargon", "long_sentence"], paths: ["doc.txt"] },
@@ -77,7 +87,9 @@ describe("auditText — the engine seen through the CLI", () => {
   it("finds the same thing the engine finds and orders it", () => {
     const audited = auditText("doc.txt", JURIDIQUES, []);
     expect(audited.findings.length).toBeGreaterThan(0);
-    expect(audited.findings.map((f) => f.span.start)).toEqual([...audited.findings.map((f) => f.span.start)].sort((a, b) => a - b));
+    expect(audited.findings.map((f) => f.span.start)).toEqual(
+      [...audited.findings.map((f) => f.span.start)].sort((a, b) => a - b),
+    );
     expect(audited.counts.warning).toBeGreaterThan(0);
   });
 

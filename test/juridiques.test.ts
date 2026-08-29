@@ -40,7 +40,10 @@ describe("perifrase_inflada — inflated phrasings", () => {
       "no sentido de",
       "com relação a",
     ]);
-    expect(spans("Agimos a fim de cumprir no âmbito da lei.", "perifrase_inflada")).toEqual(["a fim de", "no âmbito da"]);
+    expect(spans("Agimos a fim de cumprir no âmbito da lei.", "perifrase_inflada")).toEqual([
+      "a fim de",
+      "no âmbito da",
+    ]);
   });
 
   it("the finding requires a human decision and cites the lean form", () => {

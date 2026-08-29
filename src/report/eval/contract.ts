@@ -49,11 +49,7 @@ export interface DetectorReport {
 }
 
 export type CaveatId =
-  | "count_scoring"
-  | "circular_recall_curated"
-  | "known_limitations_counted"
-  | "unmeasured_criteria"
-  | "no_layer_2";
+  "count_scoring" | "circular_recall_curated" | "known_limitations_counted" | "unmeasured_criteria" | "no_layer_2";
 
 export interface MethodCaveat {
   id: CaveatId;

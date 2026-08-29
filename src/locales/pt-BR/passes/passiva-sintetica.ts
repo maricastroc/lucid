@@ -5,11 +5,46 @@ const CRITERION = "passiva_sintetica";
 const RE_ENCLITIC_SE = /^\p{L}{2,}-se$/u;
 
 const PROCLISIS_ATTRACTORS: ReadonlySet<string> = new Set([
-  "não", "nunca", "jamais", "ninguém", "nada", "tampouco",
-  "que", "quem", "onde", "aonde", "quando", "quanto", "quantos", "quantas",
-  "qual", "quais", "cujo", "cuja", "cujos", "cujas", "conforme", "porque", "embora", "enquanto",
-  "tudo", "todos", "todas", "ambos", "alguém", "algo",
-  "sempre", "talvez", "também", "já", "aqui", "ali", "assim", "hoje", "agora", "raramente",
+  "não",
+  "nunca",
+  "jamais",
+  "ninguém",
+  "nada",
+  "tampouco",
+  "que",
+  "quem",
+  "onde",
+  "aonde",
+  "quando",
+  "quanto",
+  "quantos",
+  "quantas",
+  "qual",
+  "quais",
+  "cujo",
+  "cuja",
+  "cujos",
+  "cujas",
+  "conforme",
+  "porque",
+  "embora",
+  "enquanto",
+  "tudo",
+  "todos",
+  "todas",
+  "ambos",
+  "alguém",
+  "algo",
+  "sempre",
+  "talvez",
+  "também",
+  "já",
+  "aqui",
+  "ali",
+  "assim",
+  "hoje",
+  "agora",
+  "raramente",
 ]);
 
 export const passivaSinteticaPass: Pass = {
@@ -29,10 +64,12 @@ export const passivaSinteticaPass: Pass = {
       if (!RE_ENCLITIC_SE.test(token.lower)) continue;
       if (pronominais.has(token.lower)) continue;
 
-      findings.push(finding({ start: token.start, end: token.end, text: token.text }, token.text, {
-        position: "enclitic",
-        form: token.lower,
-      }));
+      findings.push(
+        finding({ start: token.start, end: token.end, text: token.text }, token.text, {
+          position: "enclitic",
+          form: token.lower,
+        }),
+      );
     }
 
     for (const sentence of ctx.doc.sentences) {
@@ -49,11 +86,13 @@ export const passivaSinteticaPass: Pass = {
         if (pronominais.has(`${verb.lower}-se`)) continue;
 
         const text = ctx.doc.source.slice(se.start, verb.end);
-        findings.push(finding({ start: se.start, end: verb.end, text }, text, {
-          position: "proclitic",
-          form: `${se.lower} ${verb.lower}`,
-          attractor: attractor.lower,
-        }));
+        findings.push(
+          finding({ start: se.start, end: verb.end, text }, text, {
+            position: "proclitic",
+            form: `${se.lower} ${verb.lower}`,
+            attractor: attractor.lower,
+          }),
+        );
       }
     }
 

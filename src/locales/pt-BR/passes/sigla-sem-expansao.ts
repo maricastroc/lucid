@@ -68,8 +68,7 @@ export const siglaSemExpansaoPass: Pass = {
       const prev = tokens[i - 1];
       const next = tokens[i + 1];
 
-      const definedHere =
-        (prev?.text === "(" && next?.text === ")") || next?.text === "(";
+      const definedHere = (prev?.text === "(" && next?.text === ")") || next?.text === "(";
       if (definedHere) {
         defined.add(key);
         continue;

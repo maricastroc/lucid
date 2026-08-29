@@ -89,7 +89,10 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
       "e o resultado final desse exame minucioso foi comunicado ao interessado dentro do prazo regular.";
     const finding = analyze(text).findings.find((f) => f.criterion === "long_sentence")!;
 
-    const p = proposal(finding, finding.span.text + " Ainda mais palavras foram acrescentadas sem necessidade alguma aqui.");
+    const p = proposal(
+      finding,
+      finding.span.text + " Ainda mais palavras foram acrescentadas sem necessidade alguma aqui.",
+    );
 
     const v = await verify(text, finding, p);
 
@@ -116,9 +119,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
       "Foi feita uma análise do documento. Isso foi feito para verificar as condições necessárias " +
       "para conceder o benefício. A decisão foi comunicada ao interessado no processo.";
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
-    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "groq-70b-live", original: PARAGRAPH, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      PARAGRAPH,
+      target,
+      { proposerId: "groq-70b-live", original: PARAGRAPH, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
@@ -129,9 +137,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
       "A comissão analisou o documento. Ela verificou as condições necessárias para dar o benefício. " +
       "A decisão foi informada à pessoa interessada no processo.";
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
-    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "gemini-flash-live", original: PARAGRAPH, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      PARAGRAPH,
+      target,
+      { proposerId: "gemini-flash-live", original: PARAGRAPH, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
@@ -142,9 +155,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
       "A comissão competente analisou o documento no procedimento administrativo. Ela verificou as " +
       "condições citadas acima exigidas para conceder o benefício. Depois, comunicou a decisão ao interessado.";
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
-    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "ideal", original: PARAGRAPH, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      PARAGRAPH,
+      target,
+      { proposerId: "ideal", original: PARAGRAPH, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
@@ -158,9 +176,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     const proposed = `${RESOLVABLE_PASSIVE} O pagamento ocorre conforme acordo prévio.`;
     const target = { start: 0, end: text.length, text };
-    const v = await verifyRewrite(text, target, { proposerId: "ignorou-pedivel", original: text, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      text,
+      target,
+      { proposerId: "ignorou-pedivel", original: text, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
@@ -192,9 +215,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     const proposed = `${RESOLVABLE_PASSIVE} O interessado recebeu a decisão.`;
     const target = { start: 0, end: text.length, text };
-    const v = await verifyRewrite(text, target, { proposerId: "trocou-o-errado", original: text, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      text,
+      target,
+      { proposerId: "trocou-o-errado", original: text, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
@@ -208,9 +236,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     const proposed = "O documento foi analisado.";
     const target = { start: 0, end: text.length, text };
-    const v = await verifyRewrite(text, target, { proposerId: "apagou-o-agente", original: text, proposed }, {
-      findings,
-    });
+    const v = await verifyRewrite(
+      text,
+      target,
+      { proposerId: "apagou-o-agente", original: text, proposed },
+      {
+        findings,
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
@@ -224,10 +257,15 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     const proposed = "O documento foi analisado.";
     const target = { start: 0, end: text.length, text };
-    const v = await verifyRewrite(text, target, { proposerId: "sem-agente-decidido", original: text, proposed }, {
-      findings,
-      declarations: [{ span: passive.span, agent: null }],
-    });
+    const v = await verifyRewrite(
+      text,
+      target,
+      { proposerId: "sem-agente-decidido", original: text, proposed },
+      {
+        findings,
+        declarations: [{ span: passive.span, agent: null }],
+      },
+    );
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(true);
   });
@@ -245,10 +283,15 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     const target = { start: 0, end: text.length, text };
     const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
-    const v = await verifyRewrite(text, target, { proposerId: "com-declaracao", original: text, proposed }, {
-      findings: [passive],
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      text,
+      target,
+      { proposerId: "com-declaracao", original: text, proposed },
+      {
+        findings: [passive],
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
   });
@@ -256,9 +299,14 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
   it("findings that are 100% requiresHuman (nothing askable) — the proof is OMITTED, it does not become an empty 'passed'", async () => {
     const passives = analyze(PARAGRAPH).findings.filter((f) => f.criterion === "passive_voice");
     const target = { start: 0, end: PARAGRAPH.length, text: PARAGRAPH };
-    const v = await verifyRewrite(PARAGRAPH, target, { proposerId: "x", original: PARAGRAPH, proposed: PARAGRAPH }, {
-      findings: passives,
-    });
+    const v = await verifyRewrite(
+      PARAGRAPH,
+      target,
+      { proposerId: "x", original: PARAGRAPH, proposed: PARAGRAPH },
+      {
+        findings: passives,
+      },
+    );
     expect(v.proofs.find((p) => p.check === "directed_findings_resolved")).toBeUndefined();
   });
 });
@@ -279,9 +327,14 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
   it("the rewrite names the declared agent (different case) → PASSES", async () => {
     const passive = passiveOf(TEXT);
     const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
-    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      TEXT,
+      wholeTarget(TEXT),
+      { proposerId: "t", original: TEXT, proposed },
+      {
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
     expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
@@ -290,9 +343,14 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
   it("an active rewrite with ANOTHER agent → FAILS (the requirement is the author's agent, not just any)", async () => {
     const passive = passiveOf(TEXT);
     const proposed = "O setor comunicou a decisão ao interessado no processo administrativo em curso.";
-    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, {
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      TEXT,
+      wholeTarget(TEXT),
+      { proposerId: "t", original: TEXT, proposed },
+      {
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(false);
     expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
@@ -301,18 +359,28 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
 
   it("the rewrite keeps the passive without naming the declared agent → FAILS", async () => {
     const passive = passiveOf(TEXT);
-    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      TEXT,
+      wholeTarget(TEXT),
+      { proposerId: "t", original: TEXT, proposed: TEXT },
+      {
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(false);
   });
 
   it("the decision to stay impersonal (agent: null) → proof OMITTED (the refusal is legitimate, it demands no active voice)", async () => {
     const passive = passiveOf(TEXT);
-    const v = await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed: TEXT }, {
-      declarations: [{ span: passive.span, agent: null }],
-    });
+    const v = await verifyRewrite(
+      TEXT,
+      wholeTarget(TEXT),
+      { proposerId: "t", original: TEXT, proposed: TEXT },
+      {
+        declarations: [{ span: passive.span, agent: null }],
+      },
+    );
 
     expect(v.proofs.find((p) => p.check === "declared_agent_present")).toBeUndefined();
   });
@@ -342,9 +410,14 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
     const text = "Foi verificada a documentação enviada pelo requerente ao protocolo geral.";
     const passive = passiveOf(text);
     const proposed = "Nós verificamos a documentação enviada pelo requerente ao protocolo geral.";
-    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
-      declarations: [{ span: passive.span, agent: "nós" }],
-    });
+    const v = await verifyRewrite(
+      text,
+      wholeTarget(text),
+      { proposerId: "t", original: text, proposed },
+      {
+        declarations: [{ span: passive.span, agent: "nós" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
     expect(proofPassed(v, "no_invented_first_person")).toBe(true);
@@ -362,9 +435,14 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
     const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
     const passive = passiveOf(text);
     const proposed = "A comissão decidiu prorrogar o prazo até o fim do mês corrente.";
-    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      text,
+      wholeTarget(text),
+      { proposerId: "t", original: text, proposed },
+      {
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
@@ -374,9 +452,14 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
     const text = "Foi decidido que o prazo seria prorrogado até o fim do mês corrente.";
     const passive = passiveOf(text);
     const proposed = "A equipe decidiu prorrogar o prazo até o fim do mês corrente.";
-    const v = await verifyRewrite(text, wholeTarget(text), { proposerId: "t", original: text, proposed }, {
-      declarations: [{ span: passive.span, agent: "a comissão" }],
-    });
+    const v = await verifyRewrite(
+      text,
+      wholeTarget(text),
+      { proposerId: "t", original: text, proposed },
+      {
+        declarations: [{ span: passive.span, agent: "a comissão" }],
+      },
+    );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(false);
     expect(signalFlagged(v, "possible_invented_agent")).toBe(true);
@@ -386,8 +469,12 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
     const passive = passiveOf(TEXT);
     const proposed = "A comissão comunicou a decisão ao interessado no processo administrativo em curso.";
     const opts: VerifyOptions = { declarations: [{ span: passive.span, agent: "a comissão" }] };
-    const a = JSON.stringify(await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts));
-    const b = JSON.stringify(await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts));
+    const a = JSON.stringify(
+      await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts),
+    );
+    const b = JSON.stringify(
+      await verifyRewrite(TEXT, wholeTarget(TEXT), { proposerId: "t", original: TEXT, proposed }, opts),
+    );
     expect(b).toBe(a);
   });
 });
@@ -676,12 +763,22 @@ describe("verifyRewrite — LUCID-013: the optional probe degrades gracefully", 
       readonly id = "signal-spy@1";
       async probe(_input: ProbeInput, options?: { signal?: AbortSignal }): Promise<ProbeResult> {
         receivedSignals.push(options?.signal);
-        return { podeResponder: true, respostaExtraida: "x", ondeTravou: [], operacoesDeLeitura: [], precisouInferir: false };
+        return {
+          podeResponder: true,
+          respostaExtraida: "x",
+          ondeTravou: [],
+          operacoesDeLeitura: [],
+          precisouInferir: false,
+        };
       }
     }
 
     const controller = new AbortController();
-    await verify(text, finding, p, { probe: new SignalSpyProbe(), question: "quando o prazo começa?", signal: controller.signal });
+    await verify(text, finding, p, {
+      probe: new SignalSpyProbe(),
+      question: "quando o prazo começa?",
+      signal: controller.signal,
+    });
 
     expect(receivedSignals).toHaveLength(2);
     expect(receivedSignals[0]).toBe(controller.signal);

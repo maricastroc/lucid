@@ -1,0 +1,15 @@
+# Gerados
+.next/
+out/
+build/
+dist/
+next-env.d.ts
+reports/
+.stryker-tmp/
+package-lock.json
+
+# Artefatos estampados: reformatar mudaria o byte e o hash da rodada
+eval/report.json
+
+# Dados curados: a formatação atual é revisada à mão, uma entrada por linha
+src/locales/pt-BR/datasets/

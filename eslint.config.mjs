@@ -1,19 +1,15 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import prettier from "eslint-config-prettier/flat";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  globalIgnores([
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-    ".stryker-tmp/**",
-    "reports/**",
-    "dist/**",
-  ]),
+  // Desliga as regras de estilo que o Prettier já resolve. As regras de conteúdo — as de
+  // determinismo abaixo, e as do next — continuam valendo.
+  prettier,
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".stryker-tmp/**", "reports/**", "dist/**"]),
   {
     files: ["src/lucid/core/**/*.ts", "src/lucid/core/**/*.tsx"],
     rules: {

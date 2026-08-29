@@ -102,10 +102,7 @@ interface ConsensusAudit {
   interval: { low: number; high: number } | null;
 }
 
-function auditConsensus(
-  labels: readonly ConsolidatedLabel[],
-  runsById: Map<string, LabelerRun[]>,
-): ConsensusAudit {
+function auditConsensus(labels: readonly ConsolidatedLabel[], runsById: Map<string, LabelerRun[]>): ConsensusAudit {
   const audited = labels.filter((label) => label.route === "human_audit_sample" && label.tier === "human");
   let disagreements = 0;
   for (const label of audited) {

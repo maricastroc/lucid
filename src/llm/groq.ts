@@ -1,4 +1,10 @@
-import { ChatProviderError, describeFetchFailure, requestSignal, type ChatCompletionOptions, type ChatProvider } from "./types";
+import {
+  ChatProviderError,
+  describeFetchFailure,
+  requestSignal,
+  type ChatCompletionOptions,
+  type ChatProvider,
+} from "./types";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 

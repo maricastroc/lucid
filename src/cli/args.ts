@@ -14,7 +14,8 @@ export interface CliOptions {
   readonly version: boolean;
 }
 
-export type ParseResult = { readonly ok: true; readonly options: CliOptions } | { readonly ok: false; readonly error: string };
+export type ParseResult =
+  { readonly ok: true; readonly options: CliOptions } | { readonly ok: false; readonly error: string };
 
 const FORMATS: readonly OutputFormat[] = ["text", "json"];
 const FAIL_ON: readonly FailOn[] = ["never", "info", "warning", "error"];

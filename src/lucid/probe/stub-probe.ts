@@ -13,10 +13,7 @@ export class StubComprehensionProbe implements ComprehensionProbe {
   private readonly fixtures: ReadonlyMap<string, ProbeResult>;
   private readonly fallback: ProbeResult;
 
-  constructor(
-    fixtures: Record<string, ProbeResult>,
-    options: { id?: string; fallback?: ProbeResult } = {},
-  ) {
+  constructor(fixtures: Record<string, ProbeResult>, options: { id?: string; fallback?: ProbeResult } = {}) {
     this.id = options.id ?? "stub-probe@1";
     this.fixtures = new Map(Object.entries(fixtures));
     this.fallback = options.fallback ?? DEFAULT_UNANSWERABLE;

@@ -1,4 +1,3 @@
-
 export const PASSIVE_AND_JARGON =
   "O pedido foi indeferido pela comissão por falta dos 3 documentos supracitados. " +
   "O prazo para recorrer é de dez dias.";

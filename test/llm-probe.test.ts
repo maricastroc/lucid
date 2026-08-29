@@ -40,7 +40,9 @@ describe("parseProbeResult — robust and pessimistic", () => {
   });
 
   it("discards reading operations outside the closed enum", () => {
-    const r = parseProbeResult('{"pode_responder": true, "operacoes_de_leitura": ["inventada", "integrar_entre_frases"]}');
+    const r = parseProbeResult(
+      '{"pode_responder": true, "operacoes_de_leitura": ["inventada", "integrar_entre_frases"]}',
+    );
     expect(r.operacoesDeLeitura).toEqual(["integrar_entre_frases"]);
   });
 });

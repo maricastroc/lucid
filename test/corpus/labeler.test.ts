@@ -74,7 +74,14 @@ describe("locate", () => {
 });
 
 describe("robots.txt", () => {
-  const body = ["User-agent: *", "Disallow: /privado", "Allow: /privado/publico", "", "User-agent: outro", "Disallow: /"].join("\n");
+  const body = [
+    "User-agent: *",
+    "Disallow: /privado",
+    "Allow: /privado/publico",
+    "",
+    "User-agent: outro",
+    "Disallow: /",
+  ].join("\n");
 
   it("usa o grupo do agente ou o coringa", () => {
     const rules = parseRobots(body, "lucid-corpus/1.0");

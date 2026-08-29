@@ -89,7 +89,12 @@ function parse(raw: string): WorkspaceSnapshot | null {
   if (typeof value.text !== "string") return null;
   if (value.mode !== "audit" && value.mode !== "edit") return null;
 
-  const blocks = value.blocks === null ? null : Array.isArray(value.blocks) && value.blocks.every(isRawBlock) ? (value.blocks as RawBlock[]) : undefined;
+  const blocks =
+    value.blocks === null
+      ? null
+      : Array.isArray(value.blocks) && value.blocks.every(isRawBlock)
+        ? (value.blocks as RawBlock[])
+        : undefined;
   if (blocks === undefined) return null;
 
   if (!Array.isArray(value.ledger) || !value.ledger.every(isLedgerEntry)) return null;

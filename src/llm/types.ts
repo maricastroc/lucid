@@ -23,14 +23,22 @@ export class ChatProviderError extends Error {
 
 export const DEFAULT_LLM_TIMEOUT_MS = 45_000;
 
-export function requestSignal(external: AbortSignal | undefined, timeoutMs: number = DEFAULT_LLM_TIMEOUT_MS): AbortSignal {
+export function requestSignal(
+  external: AbortSignal | undefined,
+  timeoutMs: number = DEFAULT_LLM_TIMEOUT_MS,
+): AbortSignal {
   const timeout = AbortSignal.timeout(timeoutMs);
   return external ? AbortSignal.any([external, timeout]) : timeout;
 }
 
-export function describeFetchFailure(cause: unknown, providerLabel: string, timeoutMs: number = DEFAULT_LLM_TIMEOUT_MS): string {
+export function describeFetchFailure(
+  cause: unknown,
+  providerLabel: string,
+  timeoutMs: number = DEFAULT_LLM_TIMEOUT_MS,
+): string {
   if (cause instanceof Error) {
-    if (cause.name === "TimeoutError") return `${providerLabel} não respondeu em ${Math.round(timeoutMs / 1000)}s (tempo esgotado)`;
+    if (cause.name === "TimeoutError")
+      return `${providerLabel} não respondeu em ${Math.round(timeoutMs / 1000)}s (tempo esgotado)`;
     if (cause.name === "AbortError") return `requisição ao ${providerLabel} cancelada`;
   }
   return `falha de rede ao chamar o ${providerLabel}: ${String(cause)}`;

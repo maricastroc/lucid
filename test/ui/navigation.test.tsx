@@ -57,8 +57,7 @@ describe("flow 1 · navigating to a point in the document", () => {
 });
 
 describe("flow 1 · stepping through the occurrences of a declared expression", () => {
-  const withTerm = () =>
-    mountStudio({ text: TERM_TWICE, briefing: { ...EMPTY_BRIEFING, mustFind: ["prazo"] } });
+  const withTerm = () => mountStudio({ text: TERM_TWICE, briefing: { ...EMPTY_BRIEFING, mustFind: ["prazo"] } });
 
   it("goes to the first occurrence and scrolls the document to it", async () => {
     const scrolled: string[] = [];

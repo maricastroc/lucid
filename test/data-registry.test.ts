@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { REGISTRY, DOCUMENT_DATASETS, datasetFingerprint, dataHashFor, type DatasetId } from "../src/locales/pt-BR/datasets/registry";
+import {
+  REGISTRY,
+  DOCUMENT_DATASETS,
+  datasetFingerprint,
+  dataHashFor,
+  type DatasetId,
+} from "../src/locales/pt-BR/datasets/registry";
 import { analyze } from "../src/lucid";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
 import { localePtBR } from "../src/locales/pt-BR";

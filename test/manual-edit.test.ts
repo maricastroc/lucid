@@ -53,8 +53,7 @@ describe("the ManualEdit target = the finding's rewrite unit", () => {
   });
 
   it("text with paragraphs → the finding's PARAGRAPH, and the rest stays intact when applied", () => {
-    const text =
-      "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
+    const text = "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
     const { source, span, unit } = manualEditTargetFor(text, "passive_voice");
     expect(unit).toBe("paragraph");
     expect(span.text).toBe("As contas foram aprovadas pelo conselho.");
@@ -65,8 +64,7 @@ describe("the ManualEdit target = the finding's rewrite unit", () => {
   });
 
   it("the loop closes: the engine re-analyzes the result of the hand edit", () => {
-    const text =
-      "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
+    const text = "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const edited = spliceSpan(source, span, manualEditReplacement("O conselho aprovou as contas."));
 
@@ -78,8 +76,7 @@ describe("the ManualEdit target = the finding's rewrite unit", () => {
 });
 
 describe("verifyManualEdit — the author's version is judged by the SAME verifier", () => {
-  const text =
-    "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
+  const text = "As contas foram aprovadas pelo conselho.\n\nO pagamento deve ser feito na hipótese de deferimento.";
 
   it("stamps the author's provenance, trims the draft and returns PROOFS + metrics, offline (no meaning probe)", async () => {
     const { source, span } = manualEditTargetFor(text, "passive_voice");
