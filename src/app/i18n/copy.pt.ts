@@ -465,7 +465,7 @@ export const COPY_PT: UiCopy = {
     chip: "A Lucid procura no texto",
     lead:
       "Adicione palavras ou expressões que precisam ser encontradas exatamente como você escrever. " +
-      "A Lucid mostra onde cada uma aparece — ou avisa quando não encontra.",
+      "A Lucid mostra onde cada uma aparece ou avisa quando não encontra.",
     audienceLabel: "Para quem este texto foi escrito?",
     audienceHint: "Quem vai ler de verdade, não quem assina.",
     audiencePlaceholder: "Ex.: cidadão sem formação jurídica que pede o benefício pela primeira vez",

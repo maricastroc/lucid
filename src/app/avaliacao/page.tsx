@@ -3,6 +3,8 @@ import Link from "next/link";
 import { coverageLabel, metaFor } from "../lib/criteria";
 import rawReport from "../../../eval/report.json";
 import { EVAL_SCHEMA_VERSION, type CaveatId, type DetectorReport, type EvalArtifact } from "@/report/eval/contract";
+import { EvidenceNav } from "./evidence-nav";
+import { CopyRunSignature } from "./run-signature";
 
 export const metadata: Metadata = {
   title: "Avaliação do motor — Lucid",
@@ -17,6 +19,15 @@ const artifact = rawReport as unknown as EvalArtifact;
 const comma = (s: string): string => s.replace(".", ",");
 const rate = (v: number | null): string => (v === null ? "—" : `${comma((v * 100).toFixed(1))}%`);
 const decimal = (v: number | null, places = 3): string => (v === null ? "—" : comma(v.toFixed(places)));
+const SECTIONS = [
+  { id: "resumo", label: "Resumo" },
+  { id: "metodo", label: "Método" },
+  { id: "camadas", label: "Camadas de evidência" },
+  { id: "criterios", label: "Critérios medidos" },
+  { id: "falhas", label: "Falhas declaradas" },
+  { id: "procedencia", label: "Procedência" },
+] as const;
+
 const TIERS = [
   {
     note: "Precisão e recall contra golden que inclui casos negativos — há oportunidade real de falso positivo.",
@@ -53,28 +64,38 @@ export default function AvaliacaoPage() {
 
   const regressions = detectors.flatMap((d) => d.regressions.map((r) => ({ ...r, criterion: d.criterion })));
 
+  const runSignature = [
+    `lucidVersion: ${stamp.lucidVersion}`,
+    `localeId: ${stamp.localeId}`,
+    `schemaVersion: ${artifact.schemaVersion}`,
+    `configHash: ${stamp.configHash}`,
+    `dataHash: ${stamp.dataHash}`,
+    `goldenHash: ${stamp.goldenHash}`,
+    `standardVersion: ${stamp.standardVersion}`,
+  ].join("\n");
+
   return (
     <main className="min-h-dvh bg-desk px-4 py-8 sm:px-6 sm:py-12">
       <div className="mx-auto w-full max-w-272">
-        <div className="fade-in overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
-          <header className="px-6 py-10 sm:px-14 sm:py-16">
+        <div className="fade-in overflow-clip rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
+          <header className="px-6 py-8 sm:px-14 sm:py-10">
             <p className="u-label flex items-center gap-2 text-ink-2">
               <span className="size-1.5 rounded-full bg-accent" aria-hidden />
               Avaliação do motor
             </p>
 
-            <h1 className="mt-8 max-w-[28ch] font-serif text-[36px] leading-[1.08] tracking-[-0.02em] text-ink-0 sm:text-[50px]">
+            <h1 className="mt-5 max-w-[30ch] font-serif text-[26px] leading-[1.12] tracking-[-0.02em] text-ink-0 sm:text-[35px]">
               O Lucid só publica métricas onde a medição é sustentada.
               <span className="mt-1 block text-ink-2">O resto ele declara como não medido.</span>
             </h1>
 
-            <p className="mt-8 max-w-[60ch] text-[14.5px] leading-[1.7] text-ink-1">
+            <p className="mt-5 max-w-[62ch] text-[14px] leading-[1.65] text-ink-1">
               Cada taxa desta página vem de corpus rotulado à mão, com as falhas conhecidas contando contra o número em
               vez de serem excluídas. Todo valor é lido de <Mono>eval/report.json</Mono> — nada é recalculado aqui, e o
               que não foi medido aparece como não medido.
             </p>
 
-            <p className="mt-6 flex max-w-[60ch] items-start gap-2.5 text-[13.5px] leading-relaxed text-ink-1">
+            <p className="mt-4 flex max-w-[62ch] items-start gap-2.5 text-[13px] leading-relaxed text-ink-1">
               <span
                 className="mt-0.5 grid size-4.5 shrink-0 place-items-center rounded-full border border-human-line bg-human-weak"
                 aria-hidden
@@ -87,27 +108,14 @@ export default function AvaliacaoPage() {
               </span>
             </p>
 
-            <nav aria-label="Seções" className="mt-10 flex flex-wrap items-center gap-2">
-              {[
-                ["metodo", "Método"],
-                ["camadas", "Camadas de evidência"],
-                ["criterios", "Critérios medidos"],
-                ["falhas", "Falhas declaradas"],
-                ["procedencia", "Procedência"],
-              ].map(([id, label]) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className="inline-flex items-center rounded-full border border-rule-2 px-3 py-1 text-[12px] font-medium text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  {label}
-                </a>
-              ))}
-            </nav>
           </header>
 
+          <EvidenceNav sections={SECTIONS} />
+
+          <EvidenceSummary artifact={artifact} />
+
           <Band id="metodo" label="Método" aside="o que os números podem significar">
-            <p className="max-w-[64ch] text-[13.5px] leading-relaxed text-ink-2">
+            <p className="max-w-[64ch] text-[13.5px] leading-relaxed text-ink-1">
               Limites do método, do próprio artefato. Os cartões de critério remetem a eles pelos índices. Pontuação
               por <Mono>{method.scoring}</Mono>.
             </p>
@@ -116,12 +124,12 @@ export default function AvaliacaoPage() {
                 <li
                   key={caveat.id}
                   id={`nota-${caveat.id}`}
-                  className="grid scroll-mt-6 grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-rule-1 py-3 transition-colors first:border-t-0 target:bg-accent-weak lg:[&:nth-child(2)]:border-t-0"
+                  className="grid scroll-mt-20 grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-rule-1 py-3 transition-colors first:border-t-0 target:bg-accent-weak lg:[&:nth-child(2)]:border-t-0"
                 >
-                  <span aria-hidden className="pt-px font-mono text-[11px] tabular-nums text-ink-2">
+                  <span aria-hidden className="pt-px font-mono text-[11px] tabular-nums text-ink-1">
                     {i + 1}
                   </span>
-                  <p className="text-[12.5px] leading-[1.6] text-ink-2">
+                  <p className="text-[12.5px] leading-[1.6] text-ink-1">
                     {caveat.text} <MonoTag className="ml-0.5 align-[1px]">{caveat.id}</MonoTag>
                   </p>
                 </li>
@@ -149,18 +157,31 @@ export default function AvaliacaoPage() {
                     </p>
                     <div>
                       <h3 className="text-[14.5px] leading-snug text-ink-0">{l.label}</h3>
-                      <p className="mt-1.5 max-w-[58ch] text-[12.5px] leading-relaxed text-ink-2">{TIERS[i].note}</p>
+                      <p className="mt-1.5 max-w-[58ch] text-[12.5px] leading-relaxed text-ink-1">{TIERS[i].note}</p>
                       <ul className="mt-4 flex flex-wrap gap-1.5">
                         {l.criteria.map((c) => (
                           <li
                             key={c}
-                            className="inline-flex items-baseline gap-1.5 rounded-full border border-rule-1 bg-surface px-2.5 py-1"
+                            title={c}
+                            className="inline-flex items-baseline rounded-full border border-rule-2 bg-surface px-2.5 py-1 text-[12px] text-ink-0"
                           >
-                            <span className="text-[12px] text-ink-1">{metaFor(c).label}</span>
-                            <span className="font-mono text-[9.5px] tracking-tight text-ink-2">{c}</span>
+                            {metaFor(c).label}
                           </li>
                         ))}
                       </ul>
+                      <details className="mt-2.5 text-[11.5px]">
+                        <summary className="inline-flex w-fit cursor-pointer list-none rounded-sm text-ink-1 underline decoration-rule-3 underline-offset-4 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent">
+                          identificadores
+                        </summary>
+                        <ul className="mt-2 flex flex-col gap-1">
+                          {l.criteria.map((c) => (
+                            <li key={c} className="flex flex-wrap items-baseline gap-x-2 text-ink-1">
+                              <span className="text-ink-0">{metaFor(c).label}</span>
+                              <MonoTag>{c}</MonoTag>
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
                     </div>
                   </li>
                 ))}
@@ -181,7 +202,7 @@ export default function AvaliacaoPage() {
                       <p className="font-serif text-[15px] leading-snug text-ink-0">
                         <Quoted>{r.texto}</Quoted>
                       </p>
-                      <p className="mt-1 font-mono text-[11px] text-ink-2">
+                      <p className="mt-1 font-mono text-[11px] text-ink-1">
                         {r.criterion} · esperado <Tabular>{r.expectedCount}</Tabular> · obtido{" "}
                         <Tabular>{r.actualCount}</Tabular>
                       </p>
@@ -198,7 +219,7 @@ export default function AvaliacaoPage() {
                 <CriterionCard key={d.criterion} d={d} noteNumber={noteNumber} />
               ))}
             </div>
-            <p className="mt-6 max-w-[68ch] text-[12.5px] leading-relaxed text-ink-2">
+            <p className="mt-6 max-w-[68ch] text-[12.5px] leading-relaxed text-ink-1">
               <span className="text-ink-1">Casos</span> é o tamanho do corpus do critério e{" "}
               <span className="text-ink-1">negativos</span> é quantos deles exigem que o detector fique calado — sem
               eles, precisão seria 100% por construção. Um traço significa ausência de medida, nunca zero.
@@ -208,13 +229,14 @@ export default function AvaliacaoPage() {
           <Band id="falhas" label="Falhas declaradas" aside="com motivo, contando contra a métrica">
             <div className="flex flex-col gap-11">
               {detectors.map((d) => (
-                <section key={d.criterion} id={`lim-${d.criterion}`} className="scroll-mt-6">
+                <section key={d.criterion} id={`lim-${d.criterion}`} className="scroll-mt-20">
                   <h3 className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 border-b border-rule-2 pb-2.5">
                     <span className="text-[14px] text-ink-0">{metaFor(d.criterion).label}</span>
                     <MonoTag>{d.criterion}</MonoTag>
-                    <span className="ml-auto text-[12px] tabular-nums text-ink-2">
+                    <span className="ml-auto text-[12px] tabular-nums text-ink-1">
                       {d.knownLimitations.length}{" "}
                       {d.knownLimitations.length === 1 ? "caso declarado" : "casos declarados"}
+                      <span className="ml-1.5 text-ink-1">· conta contra a métrica</span>
                     </span>
                   </h3>
                   <ol className="mt-5 flex flex-col gap-7">
@@ -226,13 +248,16 @@ export default function AvaliacaoPage() {
                         >
                           {i + 1}
                         </span>
-                        <div>
+                        <div className="min-w-0">
                           <p className="wrap-break-word border-l-2 border-rule-3 pl-4 font-serif text-[16.5px] leading-snug text-ink-0">
                             <Quoted>{lim.texto}</Quoted>
                           </p>
-                          <p className="mt-3 max-w-[58ch] wrap-break-word pl-4 text-[12.5px] leading-[1.65] text-ink-2">
-                            {lim.motivo}
-                          </p>
+                          <div className="mt-3 pl-4">
+                            <p className="u-sublabel text-ink-1">por que falha</p>
+                            <p className="mt-1.5 max-w-[58ch] wrap-break-word text-[12.5px] leading-[1.65] text-ink-1">
+                              {lim.motivo}
+                            </p>
+                          </div>
                         </div>
                       </li>
                     ))}
@@ -244,7 +269,11 @@ export default function AvaliacaoPage() {
 
           <Band id="procedencia" label="Procedência" aside="assinatura da rodada">
             <div className="rounded-lg border border-rule-2 bg-surface-2 px-5 py-5">
-              <dl className="grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
+              <p className="max-w-[64ch] text-[13px] leading-relaxed text-ink-1">
+                Estes seis valores identificam a rodada: com eles e o mesmo corpus, qualquer pessoa
+                chega aos mesmos números desta página — e uma divergência aponta qual peça mudou.
+              </p>
+              <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-rule-1 pt-5 sm:grid-cols-3">
                 <Field term="lucidVersion" value={stamp.lucidVersion} />
                 <Field term="localeId" value={stamp.localeId} />
                 <Field term="schemaVersion" value={String(artifact.schemaVersion)} />
@@ -252,7 +281,11 @@ export default function AvaliacaoPage() {
                 <Field term="dataHash" value={stamp.dataHash} />
                 <Field term="goldenHash" value={stamp.goldenHash} />
               </dl>
-              <p className="mt-5 border-t border-rule-1 pt-4 text-[12px] leading-relaxed text-ink-2">
+              <div className="mt-5 border-t border-rule-1 pt-4">
+                <CopyRunSignature signature={runSignature} />
+              </div>
+
+              <p className="mt-4 text-[12px] leading-relaxed text-ink-1">
                 <span className="font-mono text-[11px] text-ink-1">{stamp.standardVersion}</span> · mesma estampa e
                 mesmo corpus devem produzir os mesmos valores. Ela não cobre o código-fonte dos detectores —{" "}
                 <Mono>lucidVersion</Mono> é declarada à mão —, e por isso o guard de atualidade compara byte a byte em
@@ -264,21 +297,21 @@ export default function AvaliacaoPage() {
               <div>
                 <h3 className="text-[13.5px] text-ink-1">
                   Silabação
-                  <span className="ml-2 text-[12px] text-ink-2">serviço interno, não critério da norma</span>
+                  <span className="ml-2 text-[12px] text-ink-1">serviço interno, não critério da norma</span>
                 </h3>
                 <dl className="mt-3.5 flex flex-wrap gap-x-10 gap-y-4">
                   <Field term="acerto exato" value={rate(services.syllables.exactRate)} big />
                   <Field term="erro absoluto médio" value={decimal(services.syllables.meanAbsoluteError)} big />
                 </dl>
               </div>
-              <p className="text-[12px] text-ink-2">
+              <p className="text-[12px] text-ink-1">
                 <Tabular>{services.syllables.words}</Tabular> palavras ·{" "}
                 <Tabular>{services.syllables.limitations}</Tabular> declaradas
               </p>
             </div>
           </Band>
 
-          <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-rule-1 bg-surface px-6 py-4 text-[11.5px] text-ink-2 sm:px-14">
+          <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-rule-1 bg-surface px-6 py-4 text-[11.5px] text-ink-1 sm:px-14">
             <span className="size-1.5 rounded-full bg-accent" aria-hidden />
             Medição determinística e offline
             <span className="text-ink-dim" aria-hidden>
@@ -295,6 +328,78 @@ export default function AvaliacaoPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function EvidenceSummary({ artifact }: { artifact: EvalArtifact }) {
+  const { criteriaCoverage, detectors } = artifact;
+  const declaredFailures = detectors.reduce((total, d) => total + d.summary.limitations, 0);
+
+  const regimes = [
+    {
+      value: criteriaCoverage.measured.length,
+      label: "com métrica publicada",
+      note: "precisão e recall contra golden com negativos",
+      href: "#criterios",
+      className: "text-ink-0",
+    },
+    {
+      value: criteriaCoverage.goldenLabelledOnly.length,
+      label: "rotulados, sem métrica",
+      note: "regressão quebra o build, mas não há taxa",
+      href: "#camadas",
+      className: "text-ink-1",
+    },
+    {
+      value: criteriaCoverage.unitTestsOnly.length,
+      label: "apenas teste unitário",
+      note: "confirma o previsto, não mede o imprevisto",
+      href: "#camadas",
+      className: "text-ink-2",
+    },
+  ] as const;
+
+  return (
+    <section id="resumo" className="scroll-mt-16 border-t border-rule-2 bg-surface px-6 py-7 sm:px-14">
+      <h2 className="u-label text-ink-1">
+        Evidência disponível para os <Tabular>{criteriaCoverage.total}</Tabular> critérios
+      </h2>
+      <p className="mt-2 max-w-[64ch] text-[12.5px] leading-relaxed text-ink-1">
+        Quantos critérios têm cada tipo de evidência. Não é nota, aprovação nem média — é o quanto se
+        sabe sobre cada um, e a régua enfraquece da esquerda para a direita.
+      </p>
+
+      <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+        {regimes.map((r) => (
+          <div key={r.label}>
+            <dd className={`font-serif text-[34px] leading-none tabular-nums ${r.className}`}>{r.value}</dd>
+            <dt className="mt-2 text-[12.5px] leading-snug text-ink-0">
+              <a
+                href={r.href}
+                className="rounded-sm underline decoration-rule-3 underline-offset-4 transition-colors hover:decoration-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                {r.label}
+              </a>
+            </dt>
+            <p className="mt-1 max-w-[22ch] text-[11.5px] leading-snug text-ink-1">{r.note}</p>
+          </div>
+        ))}
+        <div>
+          <dd className="font-serif text-[34px] leading-none tabular-nums text-human">{declaredFailures}</dd>
+          <dt className="mt-2 text-[12.5px] leading-snug text-ink-0">
+            <a
+              href="#falhas"
+              className="rounded-sm underline decoration-rule-3 underline-offset-4 transition-colors hover:decoration-ink-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              falhas declaradas
+            </a>
+          </dt>
+          <p className="mt-1 max-w-[22ch] text-[11.5px] leading-snug text-ink-1">
+            contam contra a métrica, não são excluídas
+          </p>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -320,13 +425,13 @@ function Band({
   return (
     <section
       id={id}
-      className="scroll-mt-4 border-t border-rule-1 px-6 py-10 sm:px-14 sm:py-12 lg:grid lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-x-10"
+      className="scroll-mt-16 border-t border-rule-2 px-6 py-10 sm:px-14 lg:grid lg:grid-cols-[10rem_minmax(0,1fr)] lg:gap-x-8"
     >
-      <div className="lg:pt-0.5">
-        <h2 className="u-label text-ink-2">{label}</h2>
-        {aside && <p className="mt-2 hidden max-w-[14ch] text-[11.5px] leading-snug text-ink-2 lg:block">{aside}</p>}
+      <div className="lg:sticky lg:top-16 lg:self-start lg:border-r lg:border-rule-1 lg:pr-8">
+        <h2 className="u-label text-ink-0">{label}</h2>
+        {aside && <p className="mt-2 hidden max-w-[15ch] text-[11.5px] leading-snug text-ink-1 lg:block">{aside}</p>}
       </div>
-      <div className="mt-5 lg:mt-0">{children}</div>
+      <div className="mt-4 lg:mt-0">{children}</div>
     </section>
   );
 }
@@ -348,7 +453,7 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
           <h3 className="text-[14.5px] leading-tight text-ink-0">{metaFor(d.criterion).label}</h3>
           <MonoTag className="mt-2">{d.criterion}</MonoTag>
         </div>
-        <span className="shrink-0 rounded-full border border-rule-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-medium text-ink-2">
+        <span className="shrink-0 rounded-full border border-rule-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-medium text-ink-1">
           {coverageLabel(d.coverage)}
           {curated && <NoteRef n={noteNumber("circular_recall_curated")} id="circular_recall_curated" />}
         </span>
@@ -362,7 +467,7 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
       <dl className="mt-6 flex flex-col gap-y-1.5 border-t border-rule-1 pt-4">
         {corpus.map((c) => (
           <div key={c.term} className="flex items-baseline justify-between gap-3">
-            <dt className="font-mono text-[10.5px] tracking-tight text-ink-2">
+            <dt className="font-mono text-[10.5px] tracking-tight text-ink-1">
               {c.term}
               {c.note && <NoteRef n={noteNumber(c.note)} id={c.note} />}
             </dt>
@@ -371,7 +476,7 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
         ))}
       </dl>
 
-      <p className="mt-5 flex items-baseline gap-1.5 text-[12px] text-ink-2">
+      <p className="mt-5 flex items-baseline gap-1.5 text-[12px] text-ink-1">
         <a
           href={`#lim-${d.criterion}`}
           className="inline-flex items-baseline gap-1 rounded-sm underline decoration-rule-3 underline-offset-4 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
@@ -389,7 +494,7 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
 function Reading({ term, value }: { term: string; value: string }) {
   return (
     <div>
-      <dt className="u-sublabel text-ink-2">{term}</dt>
+      <dt className="u-sublabel text-ink-1">{term}</dt>
       <dd className="mt-2 font-serif text-[38px] leading-none tabular-nums text-ink-0">{value}</dd>
     </div>
   );
@@ -401,7 +506,7 @@ function NoteRef({ n, id }: { n: number | null; id: CaveatId }) {
     <sup className="ml-0.5 font-mono text-[9px] font-normal">
       <a
         href={`#nota-${id}`}
-        className="rounded-sm text-ink-2 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="rounded-sm text-ink-1 underline decoration-dotted underline-offset-2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <span className="sr-only">Nota de método </span>
         {n}
@@ -413,7 +518,7 @@ function NoteRef({ n, id }: { n: number | null; id: CaveatId }) {
 function Field({ term, value, big = false }: { term: string; value: string; big?: boolean }) {
   return (
     <div>
-      <dt className={big ? "u-sublabel text-ink-2" : "font-mono text-[10.5px] tracking-tight text-ink-2"}>{term}</dt>
+      <dt className={big ? "u-sublabel text-ink-1" : "font-mono text-[10.5px] tracking-tight text-ink-1"}>{term}</dt>
       <dd
         className={
           big
