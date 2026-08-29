@@ -193,7 +193,9 @@ function spliceAcrossUnits(
   });
 
   const rebuilt = rebuildFromUnits(doc, unitTexts, services);
-  return sameWords(rebuilt.source, target) ? { ok: true, document: rebuilt } : { ok: false, reason: "rebuild_mismatch" };
+  return sameWords(rebuilt.source, target)
+    ? { ok: true, document: rebuilt }
+    : { ok: false, reason: "rebuild_mismatch" };
 }
 
 export function spliceStructuredDocument(

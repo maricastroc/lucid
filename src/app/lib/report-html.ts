@@ -11,11 +11,9 @@ export function escapeHtml(text: string): string {
 }
 
 function emphasise(escaped: string): string {
-  return (
-    escaped
-      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-      .replace(/(^|[\s(“"])_([^_]+)_(?=$|[\s).,;:”"])/g, "$1<em>$2</em>")
-  );
+  return escaped
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/(^|[\s(“"])_([^_]+)_(?=$|[\s).,;:”"])/g, "$1<em>$2</em>");
 }
 
 export function renderInline(text: string): string {

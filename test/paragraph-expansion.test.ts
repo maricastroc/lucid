@@ -163,7 +163,9 @@ describe("paragraph expansion — what stays refused", () => {
     if (!result.ok) return;
 
     expect(kinds(result.document)).toEqual(["heading1", "paragraph", "heading2", "list"]);
-    expect(result.document.blocks[2].text).toBe("Do objeto — constitui o objeto deste edital o chamamento de organizações.");
+    expect(result.document.blocks[2].text).toBe(
+      "Do objeto — constitui o objeto deste edital o chamamento de organizações.",
+    );
   });
 
   it("empties the document when the author replaces everything with whitespace", () => {
