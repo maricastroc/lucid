@@ -3,14 +3,16 @@
 import { useState } from "react";
 import type { Finding } from "@/lucid";
 import { buildConfidence } from "../../lib/narrative";
+import { matchLeadingCase } from "../../lib/text-edit";
 import { useCopy } from "../../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon } from "../icons";
 
-export function CuratedEquivalent({ finding }: { finding: Finding }) {
+export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onApply: () => void }) {
   const { c, lang } = useCopy();
   const [copied, setCopied] = useState(false);
   const before = finding.span.text.replace(/\s+/g, " ").trim();
-  const after = finding.suggestion!;
+
+  const after = matchLeadingCase(before, finding.suggestion!);
   const rationale = buildConfidence(finding, lang).rationale;
 
   const copy = async () => {
@@ -42,7 +44,14 @@ export function CuratedEquivalent({ finding }: { finding: Finding }) {
           </DiffRow>
         </div>
 
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onApply}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-safe px-3.5 py-2 text-[12.5px] font-semibold text-sheet transition-opacity duration-150 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            {c.note.safeApply(after)}
+          </button>
           <button
             type="button"
             onClick={copy}
@@ -52,7 +61,8 @@ export function CuratedEquivalent({ finding }: { finding: Finding }) {
           </button>
         </div>
 
-        <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
+        <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{c.note.safeApplyNote}</p>
+        <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.safeNote}</p>
       </div>
     </div>

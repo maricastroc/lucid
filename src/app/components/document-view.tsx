@@ -169,7 +169,7 @@ function BlockView({
         if (block.kind === "heading") {
           const Tag = `h${Math.min(Math.max(block.level + 1, 2), 6)}` as "h2" | "h3" | "h4" | "h5" | "h6";
           return (
-            <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
+            <div key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
               {tick}
               <div className="u-sublabel mb-1 text-ink-3">{c.documentView.headingLevel(block.level)}</div>
               <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
@@ -185,7 +185,7 @@ function BlockView({
         if (block.kind === "list") {
           const ListTag = block.ordered ? "ol" : "ul";
           return (
-            <div key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+            <div key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
               {tick}
               <div className="u-sublabel mb-1.5 text-ink-3">
                 {block.ordered ? c.documentView.orderedList : c.documentView.list}
@@ -208,7 +208,7 @@ function BlockView({
         }
 
         return (
-          <p key={bi} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+          <p key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
             {tick}
             <Segments
               segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
@@ -295,7 +295,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   value={text}
                   onChange={(e) => onChangeText(e.target.value)}
                   spellCheck={false}
-                  autoFocus
+                  autoFocus={text === ""}
                   aria-label={c.documentView.textareaLabel}
                   className={`prose-doc block min-h-[58vh] w-full resize-none border-0 bg-transparent p-0 outline-none transition-opacity duration-200 ${
                     text === "" ? "opacity-0" : "opacity-100"
@@ -330,7 +330,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                   />
                 ) : (
                   paragraphs.map((para) => (
-                    <p key={para.number} className="relative">
+                    <p key={para.number} data-start={para.start} className="relative">
                       <MarginTick
                         markers={para.markers.filter((m) => !hiddenHighlights.has(m.criterion))}
                         selectedId={selectedId}

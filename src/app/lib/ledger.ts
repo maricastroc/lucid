@@ -3,7 +3,7 @@ import { totalBurden } from "@/report/rewrite";
 import { copyFor } from "../i18n/copy";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
-export type LedgerSource = "manual" | "ai";
+export type LedgerSource = "manual" | "ai" | "glossary";
 
 export interface LedgerEntry {
   source: LedgerSource;

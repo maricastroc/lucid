@@ -9,6 +9,7 @@ import {
   type Config,
   type Finding,
   type ReaderBriefing,
+  type Span,
 } from "@/lucid";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
@@ -24,6 +25,7 @@ import { useDocumentSelection } from "./hooks/use-document-selection";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
 import { useOccurrenceNavigation } from "./hooks/use-occurrence-navigation";
 import { useDocumentEdits } from "./hooks/use-document-edits";
+import { useReadingPosition } from "./hooks/use-reading-position";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -179,12 +181,22 @@ export function Studio() {
     discardAndGoHome();
   }, [isEmpty, mode, discardAndGoHome]);
 
-  const { applyManualEdit, applyRewrite, undoChange } = useDocumentEdits({
+  const reading = useReadingPosition(scrollRef, mode, text);
+
+  const shiftAllForEdit = useCallback(
+    (target: Span, delta: number) => {
+      shiftForEdit(target, delta);
+      reading.rebase(target, delta);
+    },
+    [shiftForEdit, reading],
+  );
+
+  const { applyManualEdit, applyCuratedSwap, applyRewrite, undoChange } = useDocumentEdits({
     diagnostic,
     marks,
     previewText,
     snapshotMarks,
-    shiftForEdit,
+    shiftForEdit: shiftAllForEdit,
     restoreMarks,
     recordChange,
     undo,
@@ -247,7 +259,7 @@ export function Studio() {
     },
     review: { marks, onMark: mark, onMarkMany: markMany },
     highlights: { hidden: hiddenHighlights, onToggle: toggleHighlights },
-    edits: { onApplyRewrite: applyRewrite, onManualEdit: applyManualEdit },
+    edits: { onApplyRewrite: applyRewrite, onManualEdit: applyManualEdit, onApplyCuratedSwap: applyCuratedSwap },
     settings: {
       briefing,
       briefingCheck,

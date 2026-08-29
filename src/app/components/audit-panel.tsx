@@ -59,6 +59,7 @@ export interface HighlightVisibility {
 export interface DocumentEditActions {
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onManualEdit: (target: Span, replacement: string) => void;
+  onApplyCuratedSwap: (target: Span, replacement: string) => void;
 }
 
 export interface AnalysisSettings {
@@ -134,6 +135,7 @@ export function AuditPanel(props: AuditPanelProps) {
             source={props.diagnostic.text}
             onApplyRewrite={props.edits.onApplyRewrite}
             onManualEdit={props.edits.onManualEdit}
+            onApplyCuratedSwap={props.edits.onApplyCuratedSwap}
           />
         </div>
       </>

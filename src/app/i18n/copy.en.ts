@@ -290,6 +290,9 @@ export const COPY_EN: UiCopy = {
     safeTerm: "Term",
     safePlain: "Plain",
     safeEquivalent: "1:1 equivalent from the glossary",
+    safeApply: (term: string) => `Replace with «${term}»`,
+    safeApplyNote:
+      "The swap is yours: the tool only vouches that this equivalent is 1:1 and context-free. Applied one at a time, and the engine re-audits the text afterwards.",
     safeNote:
       "The tool points to the equivalent; it does not alter the text. Make the swap under “Edit or paste my version” " +
       "below — the engine will re-audit the result.",
@@ -671,6 +674,7 @@ export const COPY_EN: UiCopy = {
   ledger: {
     manual: "Author's edit",
     ai: "AI rewrite",
+    glossary: "Direct swap from the glossary",
   },
 
   readability: {

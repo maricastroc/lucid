@@ -12,6 +12,7 @@ import {
   severityLabel,
 } from "../../lib/criteria";
 import { detectedProse, detectionHeadline } from "../../lib/narrative";
+import { matchLeadingCase } from "../../lib/text-edit";
 import { useCopy } from "../../i18n/use-copy";
 import { CuratedEquivalent } from "./curated-equivalent";
 import { HumanDecision } from "./human-decision";
@@ -23,9 +24,10 @@ export interface RevisionNoteProps {
   source: string;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onManualEdit: (target: Span, replacement: string) => void;
+  onApplyCuratedSwap: (target: Span, replacement: string) => void;
 }
 
-export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: RevisionNoteProps) {
+export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit, onApplyCuratedSwap }: RevisionNoteProps) {
   const { c, lang } = useCopy();
   const meta = metaFor(finding.criterion, lang);
   const ink = severityInkVar(finding.severity);
@@ -68,7 +70,10 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit }: 
 
       <div className="mt-7">
         {safe ? (
-          <CuratedEquivalent finding={finding} />
+          <CuratedEquivalent
+            finding={finding}
+            onApply={() => onApplyCuratedSwap(finding.span, matchLeadingCase(finding.span.text, finding.suggestion!))}
+          />
         ) : (
           <HumanDecision
             finding={finding}

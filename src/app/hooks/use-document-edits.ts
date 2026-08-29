@@ -20,6 +20,7 @@ export interface DocumentEditsOptions {
 }
 
 export interface DocumentEdits {
+  readonly applyCuratedSwap: (target: Span, replacement: string) => void;
   readonly applyManualEdit: (target: Span, replacement: string) => void;
   readonly applyRewrite: (target: Span, proposal: RewriteProposal) => void;
   readonly undoChange: () => void;
@@ -65,6 +66,18 @@ export function useDocumentEdits({
     [diagnostic, applyChange, moveMarks],
   );
 
+  const applyCuratedSwap = useCallback(
+    (target: Span, replacement: string) => {
+      const nextText = spliceSpan(diagnostic.text, target, replacement);
+      moveMarks(target, nextText);
+      applyChange(
+        { source: "glossary", label: sourceLabel("glossary"), before: target.text, after: replacement },
+        nextText,
+      );
+    },
+    [diagnostic, applyChange, moveMarks],
+  );
+
   const applyRewrite = useCallback(
     (target: Span, proposal: RewriteProposal) => {
       const nextText = spliceSpan(diagnostic.text, target, proposal.proposed);
@@ -88,5 +101,5 @@ export function useDocumentEdits({
     undo();
   }, [restoreMarks, undo]);
 
-  return { applyManualEdit, applyRewrite, undoChange };
+  return { applyManualEdit, applyCuratedSwap, applyRewrite, undoChange };
 }

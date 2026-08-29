@@ -293,6 +293,9 @@ export const COPY_PT: UiCopy = {
     safeTerm: "Termo",
     safePlain: "Comum",
     safeEquivalent: "equivalente 1:1 do glossário",
+    safeApply: (term: string) => `Trocar por «${term}»`,
+    safeApplyNote:
+      "A troca é sua: a ferramenta só assina que este equivalente é 1:1 e não depende do contexto. Aplicada uma de cada vez, e a engine re-audita o texto depois.",
     safeNote:
       "A ferramenta indica o equivalente; ela não altera o texto. Faça a troca em “Editar ou colar minha versão” " +
       "abaixo — a engine re-audita o resultado.",
@@ -666,6 +669,7 @@ export const COPY_PT: UiCopy = {
   ledger: {
     manual: "Edição do autor",
     ai: "Reescrita por IA",
+    glossary: "Troca direta do glossário",
   },
 
   readability: {

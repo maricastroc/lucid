@@ -238,6 +238,8 @@ export interface UiCopy {
     readonly safeTerm: string;
     readonly safePlain: string;
     readonly safeEquivalent: string;
+    readonly safeApply: (term: string) => string;
+    readonly safeApplyNote: string;
     readonly safeNote: string;
 
     readonly humanHeader: string;
