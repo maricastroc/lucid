@@ -4,11 +4,17 @@ import type { LedgerEntry } from "./ledger";
 import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 4;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4];
+const SCHEMA_VERSION = 5;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
+  /**
+   * The document as it entered this session, kept untouched for consulting. `null` means it was
+   * never recorded — a session saved before this field existed — and is not the same as `""`, which
+   * says the document was written here and has no entry text to compare against.
+   */
+  readonly originalText: string | null;
   readonly blocks: readonly RawBlock[] | null;
   readonly ledger: readonly LedgerEntry[];
   readonly mode: Mode;
@@ -108,8 +114,14 @@ function parse(raw: string): WorkspaceSnapshot | null {
   const reviewMarks = parseStoredMarks(value.reviewMarks);
   if (reviewMarks === null) return null;
 
+  // Absent in every workspace saved before version 5, and those stay readable.
+  if (value.originalText !== undefined && value.originalText !== null && typeof value.originalText !== "string") {
+    return null;
+  }
+
   return {
     text: value.text,
+    originalText: typeof value.originalText === "string" ? value.originalText : null,
     blocks,
     ledger: value.ledger as LedgerEntry[],
     mode: value.mode,

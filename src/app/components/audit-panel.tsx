@@ -85,6 +85,7 @@ export interface AuditPanelProps {
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
+  originalText: string | null;
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
@@ -152,6 +153,7 @@ export function AuditPanel(props: AuditPanelProps) {
             safeCount={props.safeCount}
             humanCount={props.humanCount}
             ledger={props.ledger}
+            originalText={props.originalText}
             blocks={props.blocks}
             silentCriteria={props.silentCriteria}
             missingBlockKinds={props.missingBlockKinds}

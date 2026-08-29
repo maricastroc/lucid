@@ -99,7 +99,7 @@ describe("buildAuditReport — the audit as a deliverable", () => {
 
   it("includes the provenance trail when there are changes; omits it when there are none (Step 6)", () => {
     const d = analyze(SAMPLE);
-    expect(buildAuditReport(d, d.findings, META)).not.toContain("## Trilha de revisão");
+    expect(buildAuditReport(d, d.findings, META)).not.toContain("## Alterações registradas");
     const withTrail = buildAuditReport(d, d.findings, META, [
       {
         source: "manual",
@@ -110,7 +110,74 @@ describe("buildAuditReport — the audit as a deliverable", () => {
         burdenAfter: 5,
       },
     ]);
-    expect(withTrail).toContain("## Trilha de revisão");
+    expect(withTrail).toContain("## Alterações registradas");
     expect(withTrail).toContain("Edição do autor · Jargão");
+  });
+});
+
+describe("buildAuditReport — the entry text, so the reported delta can be checked", () => {
+  const d = analyze(SAMPLE);
+  const CHANGE = [
+    {
+      source: "manual" as const,
+      label: "Edição do autor · Jargão",
+      before: "em sede de",
+      after: "durante",
+      burdenBefore: 6,
+      burdenAfter: 5,
+    },
+  ];
+  const report = (originalText: string | null, ledger = CHANGE) =>
+    buildAuditReport(d, d.findings, META, ledger, null, null, originalText);
+
+  it("carries the whole entry text, not a summary of it", () => {
+    const md = report("Foi realizada a análise do documento pela comissão competente.");
+    expect(md).toContain("## Anexo — Texto de entrada");
+    expect(md).toContain("Foi realizada a análise do documento pela comissão competente.");
+  });
+
+  it("says the delta cannot be checked when the entry text was never recorded", () => {
+    const md = report(null);
+    expect(md).toContain("## Anexo — Texto de entrada");
+    expect(md).toContain("**Não registrado.**");
+    expect(md).toContain("não pode ser conferido");
+  });
+
+  it("says the document was written here when there was no entry text", () => {
+    expect(report("")).toContain("O documento foi escrito dentro do Lucid");
+  });
+
+  it("stays silent when there is neither an entry text nor a change to explain", () => {
+    expect(report(null, [])).not.toContain("Anexo — Texto de entrada");
+    expect(report("", [])).not.toContain("Anexo — Texto de entrada");
+  });
+
+  it("shows the entry text even with no changes registered, since free editing leaves no trail", () => {
+    expect(report("O texto de partida.", [])).toContain("O texto de partida.");
+  });
+
+  it("refuses to let backticks in the document break out of the block", () => {
+    const md = report("Use a marca ``dupla`` e a ```tripla``` no texto.");
+    expect(md).toContain("````\nUse a marca ``dupla`` e a ```tripla``` no texto.\n````");
+  });
+
+  it("says nothing about restoring, because the report is a record and not a path back", () => {
+    const md = report("O texto de partida.");
+    expect(md).toContain("não restaura nem aplica nada");
+  });
+
+  it("deterministic: the same entry text produces byte-identical markdown", () => {
+    expect(report("O texto de partida.")).toBe(report("O texto de partida."));
+  });
+});
+
+describe("buildAuditReport — the entry text does not overclaim", () => {
+  const d = analyze(SAMPLE);
+
+  it("does not point at a weight that is not there when nothing was registered", () => {
+    const md = buildAuditReport(d, d.findings, META, [], null, null, "O texto de partida.");
+    expect(md).not.toContain("variação de peso informada acima");
+    // The absence of registered changes is not the absence of changes.
+    expect(md).toContain("edição feita à mão não gera registro");
   });
 });

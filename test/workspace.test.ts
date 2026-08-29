@@ -31,6 +31,7 @@ describe("workspace — round trip through storage", () => {
 
   it("restores a plain-text document with no structure", () => {
     writeWorkspace({
+      originalText: null,
       text: "O prazo venceu ontem.",
       blocks: null,
       ledger: [],
@@ -40,6 +41,7 @@ describe("workspace — round trip through storage", () => {
       reviewMarks: {},
     });
     expect(readWorkspace()).toEqual({
+      originalText: null,
       text: "O prazo venceu ontem.",
       blocks: null,
       ledger: [],
@@ -63,6 +65,7 @@ describe("workspace — round trip through storage", () => {
       { source: "ai" as const, label: "Reescrita por IA · directed@4", burdenBefore: 12.4, burdenAfter: 9.1 },
     ];
     writeWorkspace({
+      originalText: null,
       text: "Texto revisado.",
       blocks: null,
       ledger,
@@ -79,6 +82,7 @@ describe("workspace — round trip through storage", () => {
   it("rebuilds the imported .docx structure byte-identically", () => {
     const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
     writeWorkspace({
+      originalText: null,
       text: imported.source,
       blocks: toRawBlocks(imported.blocks),
       ledger: [],
@@ -110,6 +114,7 @@ describe("workspace — the reader briefing (ADR-079)", () => {
       mustFind: ["prazo de recurso", "valor da taxa"],
     };
     writeWorkspace({
+      originalText: null,
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -168,6 +173,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       mesoclise: { enabled: false },
     };
     writeWorkspace({
+      originalText: null,
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -302,6 +308,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
       },
     });
     writeWorkspace({
+      originalText: null,
       text: "Documento grande.",
       blocks: null,
       ledger: [],
@@ -316,6 +323,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
   it("clears the flag once a write succeeds again", () => {
     installStorage();
     writeWorkspace({
+      originalText: null,
       text: "Documento pequeno.",
       blocks: null,
       ledger: [],
@@ -346,6 +354,7 @@ describe("workspace — the author's review marks", () => {
   it("round-trips the marks so a long review survives closing the tab", () => {
     const reviewMarks = { "jargon:10:22": "seen" as const, "passive_voice:40:53": "dismissed" as const };
     writeWorkspace({
+      originalText: null,
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -388,5 +397,65 @@ describe("workspace — the author's review marks", () => {
       }),
     );
     expect(readWorkspace()).toBeNull();
+  });
+});
+
+describe("workspace — the entry text", () => {
+  beforeEach(() => {
+    installStorage();
+    clearWorkspace();
+  });
+
+  const base = {
+    text: "O prazo foi prorrogado.",
+    blocks: null,
+    ledger: [],
+    mode: "audit",
+    briefing: EMPTY_BRIEFING,
+    config: DEFAULT_CONFIG,
+    reviewMarks: {},
+  } as const;
+
+  it("survives a reload with the document it belongs to", () => {
+    writeWorkspace({ ...base, originalText: "O prazo foi prorrogado pela autoridade competente." });
+    expect(readWorkspace()?.originalText).toBe("O prazo foi prorrogado pela autoridade competente.");
+  });
+
+  it("keeps an empty entry text as itself, saying the document was written here", () => {
+    writeWorkspace({ ...base, originalText: "" });
+    expect(readWorkspace()?.originalText).toBe("");
+  });
+
+  it("reads a workspace saved before the entry text existed, and says it was not recorded", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 4, text: "a", blocks: null, ledger: [], mode: "audit" }),
+    );
+    // Not "" — the document was not written here; nobody knows what it started as.
+    expect(readWorkspace()?.originalText).toBeNull();
+  });
+
+  it("still reads every older version, entry text or not", () => {
+    for (const version of [1, 2, 3, 4]) {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ version, text: "a", blocks: null, ledger: [], mode: "audit" }),
+      );
+      expect(readWorkspace()?.text).toBe("a");
+      expect(readWorkspace()?.originalText).toBeNull();
+    }
+  });
+
+  it("rejects a payload whose entry text is not text", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 5, text: "a", originalText: 42, blocks: null, ledger: [], mode: "audit" }),
+    );
+    expect(readWorkspace()).toBeNull();
+  });
+
+  it("accepts an explicit null, which is what an unrecorded document writes back", () => {
+    writeWorkspace({ ...base, originalText: null });
+    expect(readWorkspace()?.originalText).toBeNull();
   });
 });

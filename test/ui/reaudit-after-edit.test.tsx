@@ -1,3 +1,4 @@
+import { within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
 import { auditPanel, documentRegion } from "./support/panels";
@@ -42,7 +43,8 @@ describe("flow 6 · re-auditing after a change", () => {
     await auditReady();
     await replaceFirstSentence(user);
 
-    expect(auditPanel().getByText(/edição do autor/i)).toBeInTheDocument();
-    expect(auditPanel().getByText(/registro do que foi feito nesta sessão/i)).toBeInTheDocument();
+    const trail = within(auditPanel().getByRole("list", { name: /alterações registradas/i }));
+    expect(trail.getByText(/edição do autor/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/sem entrar aqui nem no relatório exportado/i)).toBeInTheDocument();
   });
 });

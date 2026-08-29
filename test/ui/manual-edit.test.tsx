@@ -1,3 +1,4 @@
+import { within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
 import { auditPanel, documentRegion } from "./support/panels";
@@ -35,7 +36,8 @@ describe("flow 4 · verifying and applying a manual edit", () => {
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
     expect(documentRegion().getByRole("article")).not.toHaveTextContent(/foi indeferido/i);
-    expect(auditPanel().getByText(/edição do autor/i)).toBeInTheDocument();
+    const trail = within(auditPanel().getByRole("list", { name: /alterações registradas/i }));
+    expect(trail.getByText(/edição do autor/i)).toBeInTheDocument();
   });
 
   it("refuses to verify an untouched draft", async () => {

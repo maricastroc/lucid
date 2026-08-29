@@ -189,10 +189,27 @@ export const COPY_PT: UiCopy = {
     readingLabel: "Métricas de leitura",
     readingCaveat:
       "Os indicadores de legibilidade e coesão ajudam na revisão, mas não determinam sozinhos se o texto está claro.",
-    trailLabel: "Trilha de revisão",
+    trailLabel: "Alterações registradas",
     trailWeight: (before, after, changes) =>
-      `Peso da auditoria ${before} → ${after} · ${changes} ${plural(changes, "alteração", "alterações")}`,
-    trailCaveat: "Registro do que foi feito nesta sessão — não é atestado de qualidade. Vai no relatório exportado.",
+      `Peso da auditoria ${before} → ${after} · ${changes} ${plural(changes, "alteração registrada", "alterações registradas")}`,
+    trailCaveat:
+      "Esta lista mostra apenas as alterações aplicadas a partir de um ponto da revisão. O que você reescreve à " +
+      "mão no modo Escrever muda o documento sem entrar aqui nem no relatório exportado.",
+    changeFrom: "de",
+    changeTo: "para",
+    changeExpand: "Ver trecho completo",
+    changeCollapse: "Recolher trecho",
+    entryLabel: "Texto de entrada",
+    entryShow: "Ver o texto de entrada",
+    entryHide: "Ocultar o texto de entrada",
+    entrySize: (chars) => `${chars.toLocaleString("pt-BR")} ${plural(chars, "caractere", "caracteres")}`,
+    entryNote:
+      "Cópia do texto como ele entrou nesta sessão, guardada só para consulta. O Lucid não restaura nem aplica " +
+      "nada a partir daqui.",
+    entryStartingPoint: "É o ponto de partida do peso informado acima.",
+    entryUnknown:
+      "Texto de entrada não registrado para este documento: a sessão foi salva antes de o Lucid guardar essa cópia.",
+    entryWrittenHere: "Este documento foi escrito aqui — não há texto de entrada para comparar.",
     descriptor: "descritor",
     metricWords: "Palavras",
     metricSentences: "Frases",

@@ -29,6 +29,11 @@ export type ImportNotes = ({ readonly format: "docx" } & DocxNotes) | ({ readonl
 export interface DocumentSource {
   text: string;
   setText: (value: string) => void;
+  /**
+   * The document as it entered, held untouched for the whole life of that document. `null` only in
+   * a session restored from before this was recorded; `""` says the document was written here.
+   */
+  originalText: string | null;
   diagnostic: Diagnostic;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
@@ -49,6 +54,8 @@ export interface DocumentSource {
   loadExample: () => void;
   clear: () => void;
   openDocument: (file: File) => Promise<boolean>;
+  /** A paste that replaced the whole draft: a different document has entered, structure and all. */
+  enterPastedDocument: (value: string) => void;
 }
 
 function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
@@ -64,6 +71,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<ImportError | null>(null);
   const [importNotes, setImportNotes] = useState<ImportNotes | null>(null);
+  const [originalText, setOriginalText] = useState<string | null>(() => (initial === null ? "" : initial.originalText));
 
   const adopt = useCallback((doc: Document | null, value: string) => {
     importedRef.current = doc;
@@ -72,6 +80,18 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     setRefusedEdit(null);
     setTextState(value);
   }, []);
+
+  /**
+   * A different document takes the place of the current one, so the entry text is redefined. Every
+   * other path through `adopt` is an edit to the same document and must leave the original alone.
+   */
+  const enter = useCallback(
+    (doc: Document | null, value: string) => {
+      adopt(doc, value);
+      setOriginalText(value);
+    },
+    [adopt],
+  );
 
   const setText = useCallback(
     (value: string) => {
@@ -131,9 +151,11 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     [doc, silentCriteria],
   );
 
-  const loadExample = useCallback(() => adopt(null, SAMPLE_TEXT), [adopt]);
+  const loadExample = useCallback(() => enter(null, SAMPLE_TEXT), [enter]);
 
-  const clear = useCallback(() => adopt(null, ""), [adopt]);
+  const clear = useCallback(() => enter(null, ""), [enter]);
+
+  const enterPastedDocument = useCallback((value: string) => enter(null, value), [enter]);
 
   const openDocument = useCallback(
     async (file: File): Promise<boolean> => {
@@ -151,7 +173,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
             return false;
           }
           setImportNotes({ format: "pdf", ...result.value.notes });
-          adopt(result.value.doc, result.value.doc.source);
+          enter(result.value.doc, result.value.doc.source);
           return true;
         }
 
@@ -162,7 +184,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
           return false;
         }
         setImportNotes({ format: "docx", ...result.value.notes });
-        adopt(result.value.doc, result.value.doc.source);
+        enter(result.value.doc, result.value.doc.source);
         return true;
       } catch {
         setImportError("unreadable");
@@ -171,7 +193,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         setImporting(false);
       }
     },
-    [adopt],
+    [enter],
   );
 
   const rawBlocks = useMemo(() => (importedDoc === null ? null : toRawBlocks(importedDoc.blocks)), [importedDoc]);
@@ -179,6 +201,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   return {
     text,
     setText,
+    originalText,
     diagnostic,
     silentCriteria,
     missingBlockKinds,
@@ -197,5 +220,6 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     loadExample,
     clear,
     openDocument,
+    enterPastedDocument,
   };
 }

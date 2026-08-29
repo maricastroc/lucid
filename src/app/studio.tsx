@@ -67,6 +67,8 @@ export function Studio() {
     loadExample: loadExampleDocument,
     clear: clearDocument,
     openDocument: importDocumentFile,
+    originalText,
+    enterPastedDocument,
   } = useDocumentSource(restored, config);
 
   const {
@@ -111,8 +113,8 @@ export function Studio() {
       clearWorkspace();
       return;
     }
-    writeWorkspace({ text, blocks: rawBlocks, ledger, mode, briefing, config, reviewMarks: marks });
-  }, [isSettled, isEmpty, text, rawBlocks, ledger, mode, briefing, config, marks]);
+    writeWorkspace({ text, originalText, blocks: rawBlocks, ledger, mode, briefing, config, reviewMarks: marks });
+  }, [isSettled, isEmpty, text, originalText, rawBlocks, ledger, mode, briefing, config, marks]);
 
   const revealSheet = useCallback(() => setSheetOpen(true), []);
   const {
@@ -145,14 +147,20 @@ export function Studio() {
     [selectedFinding, diagnostic],
   );
 
-  const afterDocumentReplaced = useCallback(() => {
+  // A different document is now open: everything that described the previous one is spent. The
+  // trail goes with it — it records changes to a document that no longer exists.
+  const afterDocumentEntered = useCallback(() => {
     clearSelection();
     resetHistory();
     setBriefing(EMPTY_BRIEFING);
-    setMode("audit");
     resetMarks();
     clearFilters();
   }, [clearSelection, resetHistory, resetMarks, clearFilters]);
+
+  const afterDocumentReplaced = useCallback(() => {
+    afterDocumentEntered();
+    setMode("audit");
+  }, [afterDocumentEntered]);
 
   const loadExample = useCallback(() => {
     loadExampleDocument();
@@ -221,6 +229,16 @@ export function Studio() {
     [noteFreeEdit, forgetMarkHistory, setText],
   );
 
+  // Pasting over the whole draft brings in another document; the reader stays where they are, so
+  // the mode is left alone.
+  const onPasteDocument = useCallback(
+    (value: string) => {
+      enterPastedDocument(value);
+      afterDocumentEntered();
+    },
+    [enterPastedDocument, afterDocumentEntered],
+  );
+
   const panelProps = {
     diagnostic,
     findings,
@@ -229,6 +247,7 @@ export function Studio() {
     safeCount,
     humanCount,
     ledger,
+    originalText,
     blocks,
     silentCriteria,
     missingBlockKinds,
@@ -354,6 +373,7 @@ export function Studio() {
             occurrences={occurrences.spans}
             activeOccurrence={occurrences.active}
             onChangeText={onFreeTypeText}
+            onPasteDocument={onPasteDocument}
             onSelectFinding={selectFinding}
             onOpenDocument={openDocument}
           />

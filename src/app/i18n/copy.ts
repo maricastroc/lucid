@@ -144,6 +144,18 @@ export interface UiCopy {
     readonly trailLabel: string;
     readonly trailWeight: (before: string, after: string, changes: number) => string;
     readonly trailCaveat: string;
+    readonly changeFrom: string;
+    readonly changeTo: string;
+    readonly changeExpand: string;
+    readonly changeCollapse: string;
+    readonly entryLabel: string;
+    readonly entryShow: string;
+    readonly entryHide: string;
+    readonly entrySize: (chars: number) => string;
+    readonly entryNote: string;
+    readonly entryStartingPoint: string;
+    readonly entryUnknown: string;
+    readonly entryWrittenHere: string;
     readonly descriptor: string;
     readonly metricWords: string;
     readonly metricSentences: string;

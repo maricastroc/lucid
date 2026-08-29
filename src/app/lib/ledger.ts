@@ -28,6 +28,19 @@ export function documentBurden(findings: readonly Finding[]): number {
   return totalBurden(findings);
 }
 
+/**
+ * Which way the audit weight went. A tie is its own answer: a change that left the weight where it
+ * was did not lower it, and showing it as a fall would credit the change with something it did not
+ * do. Shared so the panel and the exported report can never classify the same entry differently.
+ */
+export type BurdenMove = "down" | "up" | "level";
+
+export function burdenMove(entry: LedgerEntry): BurdenMove {
+  if (entry.burdenAfter < entry.burdenBefore) return "down";
+  if (entry.burdenAfter > entry.burdenBefore) return "up";
+  return "level";
+}
+
 const collapse = (t: string): string => t.replace(/\s+/g, " ").trim();
 const truncate = (t: string, max = 90): string => (t.length > max ? `${t.slice(0, max - 1)}…` : t);
 const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
@@ -35,22 +48,31 @@ const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(
 export function renderLedgerMarkdown(entries: readonly LedgerEntry[]): string {
   if (entries.length === 0) return "";
   const out: string[] = [];
-  out.push("## Trilha de revisão");
+  out.push("## Alterações registradas");
   out.push("");
   out.push(
-    "Registro das alterações aplicadas nesta sessão, com o peso de severidade do documento (ABNT/ADR-018) " +
-      "antes e depois de cada uma. É um registro do que foi feito — não um atestado de qualidade.",
+    "Alterações aplicadas a partir de um ponto da revisão — troca do glossário, edição do autor e proposta de IA — " +
+      "com o peso de severidade do documento (ABNT/ADR-018) antes e depois de cada uma. É um registro do que foi " +
+      "feito, não um atestado de qualidade.",
+  );
+  out.push("");
+  out.push(
+    "**Esta lista não é o histórico completo de edição.** Texto reescrito à mão no modo Escrever altera o " +
+      "documento sem gerar entrada aqui, e a variação de peso abaixo não atribui a essas edições nada do que " +
+      "mudou.",
   );
   out.push("");
   const first = entries[0];
   const last = entries[entries.length - 1];
   out.push(
-    `**Peso da auditoria na sessão:** ${fmt(first.burdenBefore)} → ${fmt(last.burdenAfter)} (${entries.length} ${entries.length === 1 ? "alteração" : "alterações"}).`,
+    `**Peso da auditoria na sessão:** ${fmt(first.burdenBefore)} → ${fmt(last.burdenAfter)} ` +
+      `(${entries.length} ${entries.length === 1 ? "alteração registrada" : "alterações registradas"}).`,
   );
   out.push("");
   entries.forEach((e, i) => {
-    const arrow = e.burdenAfter <= e.burdenBefore ? "↓" : "↑";
-    out.push(`**${i + 1}. ${e.label}** — peso ${fmt(e.burdenBefore)} → ${fmt(e.burdenAfter)} ${arrow}`);
+    const move = burdenMove(e);
+    const mark = move === "level" ? "(sem mudança de peso)" : move === "down" ? "↓" : "↑";
+    out.push(`**${i + 1}. ${e.label}** — peso ${fmt(e.burdenBefore)} → ${fmt(e.burdenAfter)} ${mark}`);
     if (e.before !== undefined && e.after !== undefined) {
       out.push(`_de:_ "${truncate(collapse(e.before))}" · _para:_ "${truncate(collapse(e.after))}"`);
     }

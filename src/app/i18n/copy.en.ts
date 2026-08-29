@@ -186,11 +186,27 @@ export const COPY_EN: UiCopy = {
     readingCaveat:
       "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
       "text is clear.",
-    trailLabel: "Revision trail",
+    trailLabel: "Recorded changes",
     trailWeight: (before, after, changes) =>
-      `Audit weight ${before} → ${after} · ${changes} ${plural(changes, "change", "changes")}`,
+      `Audit weight ${before} → ${after} · ${changes} recorded ${plural(changes, "change", "changes")}`,
     trailCaveat:
-      "A record of what was done in this session — not a certificate of quality. It goes into the exported report.",
+      "This list shows only the changes applied from a point in the review. What you rewrite by hand in Write " +
+      "changes the document without appearing here or in the exported report.",
+    changeFrom: "from",
+    changeTo: "to",
+    changeExpand: "Show the full passage",
+    changeCollapse: "Collapse the passage",
+    entryLabel: "Text as it came in",
+    entryShow: "Show the text as it came in",
+    entryHide: "Hide the text as it came in",
+    entrySize: (chars) => `${chars.toLocaleString("en-US")} ${plural(chars, "character", "characters")}`,
+    entryNote:
+      "A copy of the text as it entered this session, kept for consulting only. Lucid neither restores nor " +
+      "applies anything from here.",
+    entryStartingPoint: "It is the starting point of the weight reported above.",
+    entryUnknown:
+      "No entry text recorded for this document: the session was saved before Lucid began keeping this copy.",
+    entryWrittenHere: "This document was written here — there is no entry text to compare against.",
     descriptor: "descriptor",
     metricWords: "Words",
     metricSentences: "Sentences",

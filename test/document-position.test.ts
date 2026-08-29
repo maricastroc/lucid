@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   blockTopForOffset,
+  measureDraftLines,
   offsetAtBlockTop,
   offsetAtScroll,
   rebaseOffset,
@@ -164,5 +165,20 @@ describe("rebaseOffset", () => {
     const restored = offsetAtScroll(lines, scrollForOffset(lines, shortened));
     expect(restored).toBeLessThanOrEqual(shortened);
     expect(shortened - restored).toBeLessThan(PER_LINE);
+  });
+});
+
+describe("measureDraftLines without a layout engine", () => {
+  it("gives up on one line instead of throwing where ranges have no rectangles", () => {
+    const range = { getBoundingClientRect: undefined };
+    const doc = { createRange: () => range } as unknown as Document;
+    const original = globalThis.document;
+    Object.defineProperty(globalThis, "document", { value: doc, configurable: true });
+    try {
+      const field = { value: "Um texto qualquer para medir." } as HTMLTextAreaElement;
+      expect(measureDraftLines(field)).toEqual([{ offset: 0, top: 0 }]);
+    } finally {
+      Object.defineProperty(globalThis, "document", { value: original, configurable: true });
+    }
   });
 });

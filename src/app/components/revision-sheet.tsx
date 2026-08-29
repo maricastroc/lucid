@@ -34,6 +34,7 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           diagnostic={panel.diagnostic}
           findings={panel.findings}
           ledger={panel.ledger}
+          originalText={panel.originalText}
           blocks={panel.blocks}
           briefing={panel.settings.briefing}
           briefingCheck={panel.settings.briefingCheck}

@@ -15,6 +15,7 @@ export interface ExportMenuProps {
   diagnostic: Diagnostic;
   findings: readonly Finding[];
   ledger: readonly LedgerEntry[];
+  originalText: string | null;
   blocks: readonly Block[] | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
@@ -26,6 +27,7 @@ export function ExportMenu({
   diagnostic,
   findings,
   ledger,
+  originalText,
   blocks,
   briefing,
   briefingCheck,
@@ -47,6 +49,7 @@ export function ExportMenu({
         ledger,
         { briefing, check: briefingCheck },
         config,
+        originalText,
       ),
       "text/markdown;charset=utf-8",
     );

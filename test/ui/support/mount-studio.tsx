@@ -8,12 +8,14 @@ import { Studio } from "@/app/studio";
 export interface MountOptions {
   text?: string;
   briefing?: ReaderBriefing;
+  originalText?: string | null;
 }
 
-export function mountStudio({ text, briefing = EMPTY_BRIEFING }: MountOptions = {}) {
+export function mountStudio({ text, briefing = EMPTY_BRIEFING, originalText = text ?? "" }: MountOptions = {}) {
   if (text !== undefined) {
     writeWorkspace({
       text,
+      originalText,
       blocks: null,
       ledger: [],
       mode: "audit",

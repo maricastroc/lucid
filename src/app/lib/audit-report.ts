@@ -114,6 +114,50 @@ function renderProfileMarkdown(config: Config | null): string {
   return out.join("\n");
 }
 
+/**
+ * The text as it entered, carried into the report so the weight the trail reports can be checked
+ * against its own starting point. Read-only by construction: a report is not a restore path.
+ */
+function renderEntryTextMarkdown(originalText: string | null, hasChanges: boolean): string {
+  const out: string[] = ["## Anexo — Texto de entrada", ""];
+
+  if (originalText === null || originalText === "") {
+    if (!hasChanges) return "";
+    out.push(
+      originalText === null
+        ? "**Não registrado.** Esta sessão foi salva antes de o Lucid guardar uma cópia do texto de entrada, " +
+            "portanto o peso inicial informado acima não pode ser conferido contra o texto de partida."
+        : "O documento foi escrito dentro do Lucid: não houve texto de entrada, e o peso inicial informado acima " +
+            "corresponde ao primeiro estado analisado.",
+    );
+    out.push("");
+    return out.join("\n");
+  }
+
+  out.push(
+    hasChanges
+      ? "Cópia do documento como ele entrou nesta sessão, para que a variação de peso informada acima possa ser " +
+          "conferida contra o ponto de partida. É registro, não proposta: o Lucid não restaura nem aplica nada a " +
+          "partir deste anexo."
+      : "Cópia do documento como ele entrou nesta sessão. Nenhuma alteração foi registrada, o que não quer dizer " +
+          "que o texto atual seja igual a este: edição feita à mão não gera registro. É registro, não proposta — " +
+          "o Lucid não restaura nem aplica nada a partir deste anexo.",
+  );
+  out.push("");
+  const fence = "`".repeat(Math.max(3, longestBacktickRun(originalText) + 1));
+  out.push(fence);
+  out.push(originalText);
+  out.push(fence);
+  out.push("");
+  return out.join("\n");
+}
+
+function longestBacktickRun(text: string): number {
+  let longest = 0;
+  for (const run of text.match(/`+/g) ?? []) longest = Math.max(longest, run.length);
+  return longest;
+}
+
 export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
@@ -121,6 +165,7 @@ export function buildAuditReport(
   ledger: readonly LedgerEntry[] = [],
   briefing: BriefingReport | null = null,
   config: Config | null = null,
+  originalText: string | null = null,
 ): string {
   const m = diagnostic.metrics;
   const total = findings.length;
@@ -254,6 +299,11 @@ export function buildAuditReport(
   const trail = renderLedgerMarkdown(ledger);
   if (trail) {
     out.push(trail);
+  }
+
+  const entryText = renderEntryTextMarkdown(originalText, ledger.length > 0);
+  if (entryText) {
+    out.push(entryText);
   }
 
   out.push("---");

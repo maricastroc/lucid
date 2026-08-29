@@ -13,12 +13,13 @@ import {
 import { severityInkVar, severityLabel } from "../lib/criteria";
 import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
-import { entryLabel, type LedgerEntry } from "../lib/ledger";
+import type { LedgerEntry } from "../lib/ledger";
 import { tally, type ReviewMarks } from "../lib/review-marks";
 import { copyFor } from "../i18n/copy";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import type { ImportNotes } from "../hooks/use-document-source";
+import { RecordedChanges } from "./recorded-changes";
 
 function flattenedLabel(notes: ImportNotes, c: ReturnType<typeof copyFor>): string | null {
   const parts: string[] = [];
@@ -45,6 +46,7 @@ interface Props {
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
+  originalText: string | null;
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
@@ -61,6 +63,7 @@ export function AuditOverview({
   safeCount,
   humanCount,
   ledger,
+  originalText,
   silentCriteria,
   missingBlockKinds,
   importNotes,
@@ -170,7 +173,7 @@ export function AuditOverview({
         </p>
       </div>
 
-      {ledger.length > 0 && <TrailSection entries={ledger} />}
+      <RecordedChanges entries={ledger} originalText={originalText} />
     </div>
   );
 }
@@ -235,44 +238,6 @@ function Legend({ swatch, label, value }: { swatch: string; label: string; value
       <span className="tabular-nums text-ink-0">{value}</span>
       <span className="text-ink-2">{label}</span>
     </span>
-  );
-}
-
-const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
-
-function TrailSection({ entries }: { entries: readonly LedgerEntry[] }) {
-  const { c, lang } = useCopy();
-  const first = entries[0];
-  const last = entries[entries.length - 1];
-  return (
-    <div className="border-t border-rule-1 px-4 py-5">
-      <h3 className="u-label text-ink-3">{c.overview.trailLabel}</h3>
-      <p className="mt-2 text-[12px] text-ink-2">
-        {c.overview.trailWeight(fmtBurden(first.burdenBefore), fmtBurden(last.burdenAfter), entries.length)}
-      </p>
-      <ol className="mt-3 flex flex-col gap-1.5">
-        {entries.map((e, i) => {
-          const down = e.burdenAfter <= e.burdenBefore;
-          return (
-            <li
-              key={`${i}-${e.source}-${e.burdenAfter}`}
-              className="flex items-baseline justify-between gap-3 text-[12px]"
-            >
-              <span className="min-w-0 truncate text-ink-1">
-                <span className="tabular-nums text-ink-3">{i + 1}.</span> {entryLabel(e, lang)}
-              </span>
-              <span className="shrink-0 tabular-nums text-ink-2">
-                {fmtBurden(e.burdenBefore)}→{fmtBurden(e.burdenAfter)}{" "}
-                <span className={down ? "text-safe" : "text-human"} aria-hidden>
-                  {down ? "↓" : "↑"}
-                </span>
-              </span>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="mt-2 text-[11.5px] italic leading-relaxed text-ink-3">{c.overview.trailCaveat}</p>
-    </div>
   );
 }
 

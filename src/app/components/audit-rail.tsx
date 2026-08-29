@@ -20,6 +20,7 @@ export function AuditRail({ probeExcerpt, onClearProbeExcerpt, ...panel }: RailP
         diagnostic={panel.diagnostic}
         findings={panel.findings}
         ledger={panel.ledger}
+        originalText={panel.originalText}
         blocks={panel.blocks}
         briefing={panel.settings.briefing}
         briefingCheck={panel.settings.briefingCheck}
