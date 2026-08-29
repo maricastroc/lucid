@@ -30,10 +30,10 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           findings={panel.findings}
           ledger={panel.ledger}
           blocks={panel.blocks}
-          briefing={panel.briefing}
-          briefingCheck={panel.briefingCheck}
-        onBriefingChange={panel.onBriefingChange}
-          config={panel.config}
+          briefing={panel.settings.briefing}
+          briefingCheck={panel.settings.briefingCheck}
+        onBriefingChange={panel.settings.onBriefingChange}
+          config={panel.settings.config}
         />
         <AuditPanel {...panel} />
       </div>

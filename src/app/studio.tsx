@@ -1,14 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, isDefaultConfig, type Config, type Finding, type ReaderBriefing, type Span } from "@/lucid";
-import type { RewriteProposal } from "@/report/rewrite";
+import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, isDefaultConfig, type Config, type Finding, type ReaderBriefing } from "@/lucid";
 import { isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
 import { EMPTY_MARKS } from "./lib/review-marks";
 import { rewriteTargetAt } from "./lib/paragraphs";
-import { spliceSpan } from "./lib/text-edit";
-import { sourceLabel, type LedgerEntry } from "./lib/ledger";
 import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
 import { useCopy } from "./i18n/use-copy";
 import { useFindingQuery } from "./hooks/use-finding-query";
@@ -18,6 +15,7 @@ import { useDocumentSource } from "./hooks/use-document-source";
 import { useDocumentSelection } from "./hooks/use-document-selection";
 import { useFindingNavigation } from "./hooks/use-finding-navigation";
 import { useOccurrenceNavigation } from "./hooks/use-occurrence-navigation";
+import { useDocumentEdits } from "./hooks/use-document-edits";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -182,57 +180,17 @@ export function Studio() {
     discardAndGoHome();
   }, [isEmpty, mode, discardAndGoHome]);
 
-  const applyChange = useCallback(
-    (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string) => {
-      if (recordChange(entry, nextText)) clearSelection();
-    },
-    [recordChange, clearSelection],
-  );
-
-  const moveMarks = useCallback(
-    (target: Span, nextText: string) => {
-      const canonical = previewText(nextText);
-      if (canonical === null) return;
-      snapshotMarks(marks);
-      shiftForEdit(target, canonical.length - diagnostic.text.length);
-    },
-    [diagnostic, marks, previewText, snapshotMarks, shiftForEdit],
-  );
-
-  const applyManualEdit = useCallback(
-    (target: Span, replacement: string) => {
-      const nextText = spliceSpan(diagnostic.text, target, replacement);
-      moveMarks(target, nextText);
-      applyChange(
-        { source: "manual", label: sourceLabel("manual"), before: target.text, after: replacement },
-        nextText,
-      );
-    },
-    [diagnostic, applyChange, moveMarks],
-  );
-
-  const applyRewrite = useCallback(
-    (target: Span, proposal: RewriteProposal) => {
-      const nextText = spliceSpan(diagnostic.text, target, proposal.proposed);
-      moveMarks(target, nextText);
-      applyChange(
-        {
-          source: "ai",
-          label: `${sourceLabel("ai")} · ${proposal.proposerId}`,
-          proposerId: proposal.proposerId,
-          before: target.text,
-          after: proposal.proposed,
-        },
-        nextText,
-      );
-    },
-    [diagnostic, applyChange, moveMarks],
-  );
-
-  const undoChange = useCallback(() => {
-    restoreMarks();
-    undo();
-  }, [restoreMarks, undo]);
+  const { applyManualEdit, applyRewrite, undoChange } = useDocumentEdits({
+    diagnostic,
+    marks,
+    previewText,
+    snapshotMarks,
+    shiftForEdit,
+    restoreMarks,
+    recordChange,
+    undo,
+    clearSelection,
+  });
 
   const selectFinding = useCallback(
     (finding: Finding) => {
@@ -255,10 +213,8 @@ export function Studio() {
   const panelProps = {
     diagnostic,
     findings,
-    selectedFinding,
-    selectedId,
-    index: selectedIndex + 1,
-    total: visible.length,
+    groups,
+    visible,
     safeCount,
     humanCount,
     ledger,
@@ -266,42 +222,47 @@ export function Studio() {
     silentCriteria,
     missingBlockKinds,
     importNotes,
-    briefing,
-    briefingCheck,
-    onBriefingChange: setBriefing,
-    config,
-    onConfigChange: setConfig,
-    groups,
-    visible,
     query,
-    marks,
     filtered,
-    hiddenHighlights,
-    onToggleHighlights: toggleHighlights,
-    onBucket: setBucket,
-    onState: setState,
-    onSearch: setSearch,
-    onOrder: setOrder,
-    onCriterion: setCriterion,
-    onClearFilters: clearFilters,
-    onMark: mark,
-    onMarkMany: markMany,
-    onSelect: selectFinding,
-    onBackToList: clearSelection,
-    onBackToOverview: () => {
-      clearSelection();
-      setCriterion(null);
+    onQuery: {
+      bucket: setBucket,
+      state: setState,
+      search: setSearch,
+      order: setOrder,
+      criterion: setCriterion,
+      clear: clearFilters,
     },
-    onApplyRewrite: applyRewrite,
-    onManualEdit: applyManualEdit,
-    onPrev: () => goTo(-1),
-    onNext: () => goTo(1),
-    occurrenceCursor: occurrences.cursor,
-    occurrenceIndex: occurrences.index,
-    onSelectOccurrence: occurrences.select,
-    onStepOccurrence: occurrences.step,
+    navigation: {
+      selectedFinding,
+      selectedId,
+      index: selectedIndex + 1,
+      total: visible.length,
+      onSelect: selectFinding,
+      onPrev: () => goTo(-1),
+      onNext: () => goTo(1),
+      onBackToList: clearSelection,
+      onBackToOverview: () => {
+        clearSelection();
+        setCriterion(null);
+      },
+    },
+    review: { marks, onMark: mark, onMarkMany: markMany },
+    highlights: { hidden: hiddenHighlights, onToggle: toggleHighlights },
+    edits: { onApplyRewrite: applyRewrite, onManualEdit: applyManualEdit },
+    settings: {
+      briefing,
+      briefingCheck,
+      onBriefingChange: setBriefing,
+      config,
+      onConfigChange: setConfig,
+    },
+    occurrences: {
+      cursor: occurrences.cursor,
+      index: occurrences.index,
+      onSelect: occurrences.select,
+      onStep: occurrences.step,
+    },
   };
-
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
       <Masthead mode={mode} onChangeMode={setMode} onOpenDocx={openDocx} onGoHome={goHome} importing={importing} />

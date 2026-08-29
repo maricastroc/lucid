@@ -8,7 +8,8 @@ import { ProfilePanel } from "./profile-panel";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import { buildPanelSections, type PanelSectionId } from "../lib/panel-sections";
-import type { Bucket, FindingGroup, FindingQuery, SortOrder, StateFilter } from "../lib/finding-query";
+import type { FindingGroup, FindingQuery } from "../lib/finding-query";
+import type { QueryActions } from "./revision-list/finding-filters";
 import type { ReviewMark, ReviewMarks } from "../lib/review-marks";
 import { findingId } from "../lib/criteria";
 import type { OccurrenceCursor } from "../lib/occurrence-cursor";
@@ -23,13 +24,54 @@ import { NoteNav } from "./revision-note/note-nav";
 import { useCopy } from "../i18n/use-copy";
 import { ChevronRightIcon } from "./icons";
 
-export interface AuditPanelProps {
-  diagnostic: Diagnostic;
-  findings: readonly Finding[];
+export interface NoteNavigation {
   selectedFinding: Finding | null;
   selectedId: string | null;
   index: number;
   total: number;
+  onSelect: (finding: Finding) => void;
+  onPrev: () => void;
+  onNext: () => void;
+  onBackToList: () => void;
+  onBackToOverview: () => void;
+}
+
+export interface ReviewSurface {
+  marks: ReviewMarks;
+  onMark: (finding: Finding, mark: ReviewMark | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+}
+
+export interface HighlightVisibility {
+  hidden: ReadonlySet<string>;
+  onToggle: (criterion: string) => void;
+}
+
+export interface DocumentEditActions {
+  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onManualEdit: (target: Span, replacement: string) => void;
+}
+
+export interface AnalysisSettings {
+  briefing: ReaderBriefing;
+  briefingCheck: BriefingCheck;
+  onBriefingChange: (briefing: ReaderBriefing) => void;
+  config: Config;
+  onConfigChange: (config: Config) => void;
+}
+
+export interface OccurrenceSurface {
+  cursor: OccurrenceCursor | null;
+  index: number;
+  onSelect: (expression: string, index: number) => void;
+  onStep: (delta: number) => void;
+}
+
+export interface AuditPanelProps {
+  diagnostic: Diagnostic;
+  findings: readonly Finding[];
+  groups: readonly FindingGroup[];
+  visible: readonly Finding[];
   safeCount: number;
   humanCount: number;
   ledger: readonly LedgerEntry[];
@@ -37,37 +79,15 @@ export interface AuditPanelProps {
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
   importNotes: DocxNotes | null;
-  briefing: ReaderBriefing;
-  briefingCheck: BriefingCheck;
-  onBriefingChange: (briefing: ReaderBriefing) => void;
-  config: Config;
-  onConfigChange: (config: Config) => void;
-  groups: readonly FindingGroup[];
-  visible: readonly Finding[];
   query: FindingQuery;
-  marks: ReviewMarks;
   filtered: boolean;
-  hiddenHighlights: ReadonlySet<string>;
-  onToggleHighlights: (criterion: string) => void;
-  onBucket: (b: Bucket) => void;
-  onState: (s: StateFilter) => void;
-  onSearch: (s: string) => void;
-  onOrder: (o: SortOrder) => void;
-  onCriterion: (criterion: string | null) => void;
-  onClearFilters: () => void;
-  onMark: (finding: Finding, mark: ReviewMark | null) => void;
-  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
-  onSelect: (finding: Finding) => void;
-  onBackToList: () => void;
-  onBackToOverview: () => void;
-  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onManualEdit: (target: Span, replacement: string) => void;
-  onPrev: () => void;
-  onNext: () => void;
-  occurrenceCursor: OccurrenceCursor | null;
-  occurrenceIndex: number;
-  onSelectOccurrence: (expression: string, index: number) => void;
-  onStepOccurrence: (delta: number) => void;
+  onQuery: QueryActions;
+  navigation: NoteNavigation;
+  review: ReviewSurface;
+  highlights: HighlightVisibility;
+  edits: DocumentEditActions;
+  settings: AnalysisSettings;
+  occurrences: OccurrenceSurface;
   probeExcerpt?: string;
   onClearProbeExcerpt?: () => void;
 }
@@ -83,28 +103,28 @@ export function AuditPanel(props: AuditPanelProps) {
     () => buildPanelSections({ findingCount: props.visible.length, hasProbe }, c),
     [props.visible.length, hasProbe, c],
   );
-  const nav = usePanelSections(sections, scrollRef, props.selectedFinding === null);
+  const nav = usePanelSections(sections, scrollRef, props.navigation.selectedFinding === null);
 
-  if (props.selectedFinding) {
+  if (props.navigation.selectedFinding) {
     return (
       <>
         <NoteNav
-          index={props.index}
-          total={props.total}
-          criterion={props.selectedFinding.criterion}
-          mark={props.marks[findingId(props.selectedFinding)] ?? null}
-          onMark={(value) => props.onMark(props.selectedFinding as Finding, value)}
-          onPrev={props.onPrev}
-          onNext={props.onNext}
-          onBackToList={props.onBackToList}
-          onBackToOverview={props.onBackToOverview}
+          index={props.navigation.index}
+          total={props.navigation.total}
+          criterion={props.navigation.selectedFinding.criterion}
+          mark={props.review.marks[findingId(props.navigation.selectedFinding)] ?? null}
+          onMark={(value) => props.review.onMark(props.navigation.selectedFinding as Finding, value)}
+          onPrev={props.navigation.onPrev}
+          onNext={props.navigation.onNext}
+          onBackToList={props.navigation.onBackToList}
+          onBackToOverview={props.navigation.onBackToOverview}
         />
-        <div key={props.selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
+        <div key={props.navigation.selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
           <RevisionNote
-            finding={props.selectedFinding}
+            finding={props.navigation.selectedFinding}
             source={props.diagnostic.text}
-            onApplyRewrite={props.onApplyRewrite}
-            onManualEdit={props.onManualEdit}
+            onApplyRewrite={props.edits.onApplyRewrite}
+            onManualEdit={props.edits.onManualEdit}
           />
         </div>
       </>
@@ -125,10 +145,10 @@ export function AuditPanel(props: AuditPanelProps) {
             silentCriteria={props.silentCriteria}
             missingBlockKinds={props.missingBlockKinds}
             importNotes={props.importNotes}
-            briefing={props.briefing}
-            briefingCheck={props.briefingCheck}
-            config={props.config}
-            marks={props.marks}
+            briefing={props.settings.briefing}
+            briefingCheck={props.settings.briefingCheck}
+            config={props.settings.config}
+            marks={props.review.marks}
           />
         );
       case "findings":
@@ -139,20 +159,20 @@ export function AuditPanel(props: AuditPanelProps) {
             visible={props.visible}
             allFindings={props.findings}
             query={props.query}
-            marks={props.marks}
+            marks={props.review.marks}
             filtered={props.filtered}
-            selectedId={props.selectedId}
-            onBucket={props.onBucket}
-            onState={props.onState}
-            onSearch={props.onSearch}
-            onOrder={props.onOrder}
-            onCriterion={props.onCriterion}
-            onClearFilters={props.onClearFilters}
-            onSelect={props.onSelect}
-            hiddenHighlights={props.hiddenHighlights}
-            onToggleHighlights={props.onToggleHighlights}
-            onMark={props.onMark}
-            onMarkMany={props.onMarkMany}
+            selectedId={props.navigation.selectedId}
+            onBucket={props.onQuery.bucket}
+            onState={props.onQuery.state}
+            onSearch={props.onQuery.search}
+            onOrder={props.onQuery.order}
+            onCriterion={props.onQuery.criterion}
+            onClearFilters={props.onQuery.clear}
+            onSelect={props.navigation.onSelect}
+            hiddenHighlights={props.highlights.hidden}
+            onToggleHighlights={props.highlights.onToggle}
+            onMark={props.review.onMark}
+            onMarkMany={props.review.onMarkMany}
           />
         );
       case "settings":
@@ -160,15 +180,15 @@ export function AuditPanel(props: AuditPanelProps) {
           <>
             <p className="px-4 pt-4 pb-1 text-[12.5px] leading-relaxed text-ink-2">{c.panel.settingsLead}</p>
             <BriefingPanel
-              briefing={props.briefing}
-              check={props.briefingCheck}
-              cursor={props.occurrenceCursor}
-              index={props.occurrenceIndex}
-              onChange={props.onBriefingChange}
-              onSelectOccurrence={props.onSelectOccurrence}
-              onStepOccurrence={props.onStepOccurrence}
+              briefing={props.settings.briefing}
+              check={props.settings.briefingCheck}
+              cursor={props.occurrences.cursor}
+              index={props.occurrences.index}
+              onChange={props.settings.onBriefingChange}
+              onSelectOccurrence={props.occurrences.onSelect}
+              onStepOccurrence={props.occurrences.onStep}
             />
-            <ProfilePanel config={props.config} onChange={props.onConfigChange} />
+            <ProfilePanel config={props.settings.config} onChange={props.settings.onConfigChange} />
             <div className="border-t border-rule-1 px-4 py-4">
               <button
                 type="button"
@@ -193,7 +213,7 @@ export function AuditPanel(props: AuditPanelProps) {
           <ProbePanel
             excerpt={props.probeExcerpt ?? ""}
             onClearExcerpt={props.onClearProbeExcerpt ?? (() => {})}
-            suggestedQuestion={props.briefing.purpose}
+            suggestedQuestion={props.settings.briefing.purpose}
           />
         );
     }
@@ -244,8 +264,8 @@ function sectionSummary(
   switch (id) {
     case "settings":
       return [
-        c.panel.settingsSummaryExpressions(props.briefing.mustFind.length),
-        c.panel.settingsSummaryProfile(configDeviations(props.config).length),
+        c.panel.settingsSummaryExpressions(props.settings.briefing.mustFind.length),
+        c.panel.settingsSummaryProfile(configDeviations(props.settings.config).length),
       ].join(c.panel.settingsSummaryJoin);
     case "metrics":
       return c.panel.metricsSummary(fmt(props.diagnostic.metrics.words), fmt(props.diagnostic.metrics.wordsPerSentence));

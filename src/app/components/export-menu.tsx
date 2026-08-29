@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks } from "../lib/export-document";
 import type { LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
 import { ReportRecordDialog } from "./report-record-dialog";
+import { downloadFile } from "./export-menu/download-file";
+import { useDismissableMenu } from "./export-menu/use-dismissable-menu";
 import { ArrowDownIcon, ChevronDownIcon, PenNibIcon } from "./icons";
 
 export interface ExportMenuProps {
@@ -20,63 +22,14 @@ export interface ExportMenuProps {
   config: Config;
 }
 
-function download(filename: string, content: BlobPart, mime: string) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, briefingCheck, onBriefingChange, config }: ExportMenuProps) {
   const { c } = useCopy();
-  const [open, setOpen] = useState(false);
   const [docxError, setDocxError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
-  const boxRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    boxRef.current?.querySelector<HTMLElement>("[role='menuitem']")?.focus();
-  }, [open]);
-
-  const close = (returnFocus: boolean) => {
-    setOpen(false);
-    setDocxError(null);
-    if (returnFocus) triggerRef.current?.focus();
-  };
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      e.stopPropagation();
-      close(true);
-      return;
-    }
-    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
-    e.preventDefault();
-    e.stopPropagation();
-    const items = Array.from(boxRef.current?.querySelectorAll<HTMLElement>("[role='menuitem']") ?? []);
-    const i = items.findIndex((item) => item === document.activeElement);
-    const next = e.key === "ArrowDown" ? (i + 1) % items.length : (i - 1 + items.length) % items.length;
-    items[next]?.focus();
-  };
+  const { open, boxRef, triggerRef, toggle, close, setOpen, onKeyDown } = useDismissableMenu(() => setDocxError(null));
 
   const exportAudit = () => {
-    download(
+    downloadFile(
       "auditoria-lucid.md",
       buildAuditReport(
         diagnostic,
@@ -95,7 +48,7 @@ export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, bri
     setDocxError(null);
     try {
       const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks));
-      download(
+      downloadFile(
         "documento-revisado.docx",
         bytes as BlobPart,
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -107,7 +60,7 @@ export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, bri
   };
 
   const exportTxt = () => {
-    download("documento-revisado.txt", diagnostic.text, "text/plain;charset=utf-8");
+    downloadFile("documento-revisado.txt", diagnostic.text, "text/plain;charset=utf-8");
     close(false);
   };
 
@@ -118,7 +71,7 @@ export function ExportMenu({ diagnostic, findings, ledger, blocks, briefing, bri
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => (open ? close(false) : setOpen(true))}
+        onClick={toggle}
         className="inline-flex items-center gap-1.5 rounded-full border border-rule-2 px-3 py-1.5 text-[12px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
       >
         <ArrowDownIcon className="size-3.5" />
