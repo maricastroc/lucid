@@ -53,3 +53,6 @@ AGENTS.md
 # fonte mudar o documento, o hash denuncia em vez de a medição derivar calada.
 /corpus/raw
 /corpus/*/text
+
+# Copiado de pdfjs-dist por scripts/copy-pdf-worker.mjs (npm run pdf:worker)
+public/pdf.worker.min.mjs

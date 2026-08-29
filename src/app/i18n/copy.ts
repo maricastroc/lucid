@@ -28,7 +28,7 @@ export interface UiCopy {
   readonly masthead: {
     readonly home: string;
     readonly tagline: string;
-    readonly openDocx: string;
+    readonly openDocument: string;
     readonly opening: string;
     readonly evaluation: string;
     readonly workMode: string;
@@ -80,6 +80,10 @@ export interface UiCopy {
     readonly importRefusal: {
       readonly unreadable: string;
       readonly tracked_changes: string;
+      readonly scanned: string;
+      readonly columns: string;
+      readonly glued: string;
+      readonly invariant: string;
       readonly no_readable_content: string;
     };
     readonly revisions: (n: number) => string;
@@ -123,9 +127,14 @@ export interface UiCopy {
     readonly docxNote: string;
     readonly importTables: (n: number) => string;
     readonly importTextBoxes: (n: number) => string;
+    readonly importRuledRegions: (n: number) => string;
+    readonly importFurniture: (n: number) => string;
+    readonly importDehyphenated: (n: number) => string;
     readonly importAnd: string;
+    readonly importAlso: string;
     readonly importRecovered: (styles: string) => string;
     readonly importFlattened: (what: string) => string;
+    readonly importFromPdf: (what: string) => string;
     readonly structureMissing: Record<string, string>;
     readonly structureMissingJoin: string;
     readonly structureCaveat: (missing: string, count: number) => string;

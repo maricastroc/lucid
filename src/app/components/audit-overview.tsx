@@ -18,13 +18,25 @@ import { tally, type ReviewMarks } from "../lib/review-marks";
 import { copyFor } from "../i18n/copy";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
-import type { DocxNotes } from "@/importers/docx";
+import type { ImportNotes } from "../hooks/use-document-source";
 
-function flattenedLabel(notes: DocxNotes, c: ReturnType<typeof copyFor>): string | null {
+function flattenedLabel(notes: ImportNotes, c: ReturnType<typeof copyFor>): string | null {
   const parts: string[] = [];
-  if (notes.tablesFlattened > 0) parts.push(c.overview.importTables(notes.tablesFlattened));
-  if (notes.textBoxesInlined > 0) parts.push(c.overview.importTextBoxes(notes.textBoxesInlined));
-  return parts.length === 0 ? null : parts.join(c.overview.importAnd);
+
+  if (notes.format === "docx") {
+    if (notes.tablesFlattened > 0) parts.push(c.overview.importTables(notes.tablesFlattened));
+    if (notes.textBoxesInlined > 0) parts.push(c.overview.importTextBoxes(notes.textBoxesInlined));
+  } else {
+    if (notes.ruledRegions > 0) parts.push(c.overview.importRuledRegions(notes.ruledRegions));
+    const furniture = notes.removedHeaders + notes.removedFooters + notes.removedPageNumbers;
+    if (furniture > 0) parts.push(c.overview.importFurniture(furniture));
+    if (notes.dehyphenated > 0) parts.push(c.overview.importDehyphenated(notes.dehyphenated));
+  }
+
+  if (parts.length === 0) return null;
+
+  const last = parts[parts.length - 1];
+  return parts.length === 1 ? last : `${parts.slice(0, -1).join(c.overview.importAlso)}${c.overview.importAnd}${last}`;
 }
 
 interface Props {
@@ -36,7 +48,7 @@ interface Props {
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
-  importNotes: DocxNotes | null;
+  importNotes: ImportNotes | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
   config: Config;
@@ -128,14 +140,16 @@ export function AuditOverview({
           </>
         )}
 
-        {importNotes !== null && importNotes.headingStylesRecovered.length > 0 && (
+        {importNotes?.format === "docx" && importNotes.headingStylesRecovered.length > 0 && (
           <p className="mt-3 text-[11.5px] leading-relaxed text-ink-3">
             {c.overview.importRecovered(importNotes.headingStylesRecovered.join(", "))}
           </p>
         )}
         {importNotes !== null && flattenedLabel(importNotes, c) !== null && (
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            {c.overview.importFlattened(flattenedLabel(importNotes, c) as string)}
+            {importNotes.format === "pdf"
+              ? c.overview.importFromPdf(flattenedLabel(importNotes, c) as string)
+              : c.overview.importFlattened(flattenedLabel(importNotes, c) as string)}
           </p>
         )}
 

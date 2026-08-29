@@ -12,12 +12,12 @@ import { MoonIcon, SunIcon } from "./icons";
 interface Props {
   mode: Mode;
   onChangeMode: (mode: Mode) => void;
-  onOpenDocx: (file: File) => void;
+  onOpenDocument: (file: File) => void;
   onGoHome: () => void;
   importing: boolean;
 }
 
-export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }: Props) {
+export function Masthead({ mode, onChangeMode, onOpenDocument, onGoHome, importing }: Props) {
   const { theme, toggle } = useTheme();
   const { c } = useCopy();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -42,11 +42,11 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
         <input
           ref={fileInput}
           type="file"
-          accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf"
           className="hidden"
           onChange={(e) => {
             const file = e.target.files?.[0];
-            if (file) onOpenDocx(file);
+            if (file) onOpenDocument(file);
             e.target.value = "";
           }}
         />
@@ -56,7 +56,7 @@ export function Masthead({ mode, onChangeMode, onOpenDocx, onGoHome, importing }
           disabled={importing}
           className="hidden items-center gap-1.5 rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60 sm:inline-flex"
         >
-          {importing ? c.masthead.opening : c.masthead.openDocx}
+          {importing ? c.masthead.opening : c.masthead.openDocument}
         </button>
         <Link
           href="/avaliacao"

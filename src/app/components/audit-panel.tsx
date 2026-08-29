@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import type { DocxNotes } from "@/importers/docx";
+import type { ImportNotes } from "../hooks/use-document-source";
 import {
   configDeviations,
   type Block,
@@ -87,7 +87,7 @@ export interface AuditPanelProps {
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
-  importNotes: DocxNotes | null;
+  importNotes: ImportNotes | null;
   query: FindingQuery;
   filtered: boolean;
   onQuery: QueryActions;

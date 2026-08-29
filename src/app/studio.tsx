@@ -64,7 +64,7 @@ export function Studio() {
     previewText,
     loadExample: loadExampleDocument,
     clear: clearDocument,
-    openDocx: importDocxFile,
+    openDocument: importDocumentFile,
   } = useDocumentSource(restored, config);
 
   const {
@@ -157,11 +157,11 @@ export function Studio() {
     afterDocumentReplaced();
   }, [loadExampleDocument, afterDocumentReplaced]);
 
-  const openDocx = useCallback(
+  const openDocument = useCallback(
     async (file: File) => {
-      if (await importDocxFile(file)) afterDocumentReplaced();
+      if (await importDocumentFile(file)) afterDocumentReplaced();
     },
-    [importDocxFile, afterDocumentReplaced],
+    [importDocumentFile, afterDocumentReplaced],
   );
 
   const discardAndGoHome = useCallback(() => {
@@ -264,7 +264,13 @@ export function Studio() {
   };
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
-      <Masthead mode={mode} onChangeMode={setMode} onOpenDocx={openDocx} onGoHome={goHome} importing={importing} />
+      <Masthead
+        mode={mode}
+        onChangeMode={setMode}
+        onOpenDocument={openDocument}
+        onGoHome={goHome}
+        importing={importing}
+      />
       {importError !== null && (
         <div
           role="alert"
@@ -318,7 +324,7 @@ export function Studio() {
         {isEmpty && mode === "audit" ? (
           <Welcome
             onWrite={() => setMode("edit")}
-            onOpenDocx={openDocx}
+            onOpenDocument={openDocument}
             onLoadExample={loadExample}
             importing={importing}
           />

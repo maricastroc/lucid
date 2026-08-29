@@ -24,7 +24,7 @@ export const COPY_EN: UiCopy = {
   masthead: {
     home: "Back to start",
     tagline: "Plain language auditor",
-    openDocx: "Open .docx",
+    openDocument: "Open document",
     opening: "Opening…",
     evaluation: "Evaluation",
     workMode: "Working mode",
@@ -95,6 +95,14 @@ export const COPY_EN: UiCopy = {
         "This file has tracked changes that were never resolved. While they are there, the file itself does " +
         "not say what its text is — auditing it would mean auditing a version nobody approved. Accept or " +
         "reject the changes in your editor and import it again.",
+      scanned:
+        "This PDF is a scan, not text. There is nothing to audit in something that was never written as text — send the original, as .docx or as a PDF produced by a computer.",
+      columns:
+        "This PDF is set in two or more columns, and reading it top to bottom would interleave them. Rather than audit a scrambled text, the import stops here — send the original as .docx, or a single-column PDF.",
+      glued:
+        "The words of this PDF come out glued together: the text read is not the text written, and auditing it would measure the extraction, not the writing.",
+      invariant:
+        "A number in the PDF did not survive the reading. The tool would rather refuse than audit a text it cannot vouch for.",
       no_readable_content:
         "This file has no readable content to audit. That is not a clean document: it is an empty one.",
     },
@@ -151,11 +159,19 @@ export const COPY_EN: UiCopy = {
     docxNote: "Contains the revised text, without the original formatting: bold, tables, images and headers.",
     importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
+    importRuledRegions: (n: number) =>
+      `${n} ${n === 1 ? "region drawn as a grid" : "regions drawn as a grid"} read as running text`,
+    importFurniture: (n: number) =>
+      `${n} repeated ${n === 1 ? "line" : "lines"} of header, footer or page number left out of the audit`,
+    importDehyphenated: (n: number) => `${n} ${n === 1 ? "word" : "words"} rejoined across a line break`,
     importAnd: " and ",
+    importAlso: ", ",
     importRecovered: (styles: string) =>
       `We recognised the headings in the file (${styles}). Without that, they would come in as ordinary paragraphs.`,
     importFlattened: (what: string) =>
       `${what} became paragraphs. The content is audited, but the original arrangement is not.`,
+    importFromPdf: (what: string) =>
+      `Reading the PDF: ${what}. A PDF declares no headings and no lists, so everything enters as a paragraph.`,
     structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
     structureMissingJoin: " or ",
     structureCaveat: (missing: string, count: number) =>

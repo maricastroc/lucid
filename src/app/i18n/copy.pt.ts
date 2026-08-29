@@ -24,7 +24,7 @@ export const COPY_PT: UiCopy = {
   masthead: {
     home: "Voltar ao início",
     tagline: "Auditor de linguagem simples",
-    openDocx: "Abrir .docx",
+    openDocument: "Abrir documento",
     opening: "Abrindo…",
     evaluation: "Avaliação",
     workMode: "Modo de trabalho",
@@ -96,6 +96,14 @@ export const COPY_PT: UiCopy = {
         "Este arquivo tem alterações rastreadas ainda não resolvidas. Enquanto elas existirem, o próprio " +
         "arquivo não diz qual é o seu texto — auditar aqui seria auditar uma versão que ninguém aprovou. " +
         "Aceite ou rejeite as alterações no editor e importe de novo.",
+      scanned:
+        "Este PDF é uma imagem digitalizada, não texto. Não dá para auditar o que não foi escrito como texto — envie o arquivo original, em .docx ou em PDF gerado pelo computador.",
+      columns:
+        "Este PDF está em duas ou mais colunas, e a leitura de cima para baixo misturaria as colunas. Em vez de auditar um texto embaralhado, a importação para aqui — envie o original em .docx ou um PDF de uma coluna.",
+      glued:
+        "As palavras deste PDF saem grudadas na extração: o texto lido não é o texto escrito, e auditar aqui mediria a extração, não a escrita.",
+      invariant:
+        "Um número que está no PDF não sobreviveu à leitura. A ferramenta prefere recusar a auditar um texto do qual não tem certeza.",
       no_readable_content:
         "Este arquivo não tem conteúdo legível para auditar. Não é um documento limpo: é um documento vazio.",
     },
@@ -154,11 +162,20 @@ export const COPY_PT: UiCopy = {
     docxNote: "Contém o texto revisado, sem a formatação original: negrito, tabelas, imagens e cabeçalhos.",
     importTables: (n: number) => `${n} ${n === 1 ? "tabela achatada" : "tabelas achatadas"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "caixa de texto embutida" : "caixas de texto embutidas"}`,
+    importRuledRegions: (n: number) =>
+      `${n} ${n === 1 ? "região com grade, lida" : "regiões com grade, lidas"} como texto corrido`,
+    importFurniture: (n: number) =>
+      `${n} ${n === 1 ? "linha repetida de cabeçalho, rodapé ou número de página" : "linhas repetidas de cabeçalho, rodapé ou número de página"} fora da auditoria`,
+    importDehyphenated: (n: number) =>
+      `${n} ${n === 1 ? "palavra remontada" : "palavras remontadas"} de quebra de linha`,
     importAnd: " e ",
+    importAlso: ", ",
     importRecovered: (styles: string) =>
       `Reconhecemos os títulos do arquivo (${styles}). Sem isso, eles entrariam como parágrafo comum.`,
     importFlattened: (what: string) =>
       `${what} viraram parágrafos. O conteúdo entra na auditoria, mas a disposição original não.`,
+    importFromPdf: (what: string) =>
+      `Leitura do PDF: ${what}. O PDF não declara títulos nem listas, então tudo entra como parágrafo.`,
     structureMissing: { heading: "títulos", list: "listas" } as Record<string, string>,
     structureMissingJoin: " nem ",
     structureCaveat: (missing: string, count: number) =>

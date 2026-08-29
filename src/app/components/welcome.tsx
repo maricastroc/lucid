@@ -6,12 +6,12 @@ import { ArrowRightIcon, CheckIcon, CloseIcon, PenNibIcon } from "./icons";
 
 interface Props {
   onWrite: () => void;
-  onOpenDocx: (file: File) => void;
+  onOpenDocument: (file: File) => void;
   onLoadExample: () => void;
   importing: boolean;
 }
 
-export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props) {
+export function Welcome({ onWrite, onOpenDocument, onLoadExample, importing }: Props) {
   const { c } = useCopy();
   const w = c.welcome;
   const fileInput = useRef<HTMLInputElement>(null);
@@ -70,11 +70,11 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
               <input
                 ref={fileInput}
                 type="file"
-                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) onOpenDocx(file);
+                  if (file) onOpenDocument(file);
                   e.target.value = "";
                 }}
               />
@@ -92,7 +92,7 @@ export function Welcome({ onWrite, onOpenDocx, onLoadExample, importing }: Props
                 disabled={importing}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-rule-2 px-5 py-2.5 text-[13.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60"
               >
-                {importing ? c.masthead.opening : c.masthead.openDocx}
+                {importing ? c.masthead.opening : c.masthead.openDocument}
               </button>
               <button
                 type="button"

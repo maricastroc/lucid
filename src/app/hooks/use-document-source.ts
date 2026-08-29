@@ -18,10 +18,13 @@ import {
   type RawBlock,
 } from "@/lucid";
 import type { DocxNotes, DocxRefusalKind } from "@/importers/docx";
+import type { PdfNotes, PdfRefusalKind } from "@/importers/pdf";
 import { SAMPLE_TEXT } from "../lib/sample";
 import { type WorkspaceSnapshot } from "../lib/workspace";
 
-export type ImportError = DocxRefusalKind;
+export type ImportError = DocxRefusalKind | PdfRefusalKind;
+
+export type ImportNotes = ({ readonly format: "docx" } & DocxNotes) | ({ readonly format: "pdf" } & PdfNotes);
 
 export interface DocumentSource {
   text: string;
@@ -29,7 +32,7 @@ export interface DocumentSource {
   diagnostic: Diagnostic;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
-  importNotes: DocxNotes | null;
+  importNotes: ImportNotes | null;
   blocks: readonly Block[] | null;
   rawBlocks: readonly RawBlock[] | null;
   isEmpty: boolean;
@@ -45,7 +48,7 @@ export interface DocumentSource {
 
   loadExample: () => void;
   clear: () => void;
-  openDocx: (file: File) => Promise<boolean>;
+  openDocument: (file: File) => Promise<boolean>;
 }
 
 function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
@@ -60,7 +63,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const [refusedEdit, setRefusedEdit] = useState<{ reason: SpliceRefusal; text: string } | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<ImportError | null>(null);
-  const [importNotes, setImportNotes] = useState<DocxNotes | null>(null);
+  const [importNotes, setImportNotes] = useState<ImportNotes | null>(null);
 
   const adopt = useCallback((doc: Document | null, value: string) => {
     importedRef.current = doc;
@@ -132,12 +135,25 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
   const clear = useCallback(() => adopt(null, ""), [adopt]);
 
-  const openDocx = useCallback(
+  const openDocument = useCallback(
     async (file: File): Promise<boolean> => {
       setImporting(true);
       setImportError(null);
       try {
         const bytes = await file.arrayBuffer();
+        const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
+
+        if (isPdf) {
+          const { importPdf } = await import("@/importers/pdf");
+          const result = await importPdf(bytes, ptDocumentServices);
+          if (!result.ok) {
+            setImportError(result.refusal);
+            return false;
+          }
+          setImportNotes({ format: "pdf", ...result.value.notes });
+          adopt(result.value.doc, result.value.doc.source);
+          return true;
+        }
 
         const { importDocx } = await import("@/importers/docx");
         const result = await importDocx(bytes, ptDocumentServices);
@@ -145,7 +161,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
           setImportError(result.refusal);
           return false;
         }
-        setImportNotes(result.value.notes);
+        setImportNotes({ format: "docx", ...result.value.notes });
         adopt(result.value.doc, result.value.doc.source);
         return true;
       } catch {
@@ -180,6 +196,6 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     dismissImportError: useCallback(() => setImportError(null), []),
     loadExample,
     clear,
-    openDocx,
+    openDocument,
   };
 }

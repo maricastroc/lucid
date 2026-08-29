@@ -6,10 +6,17 @@ import prettier from "eslint-config-prettier/flat";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Desliga as regras de estilo que o Prettier já resolve. As regras de conteúdo — as de
-  // determinismo abaixo, e as do next — continuam valendo.
   prettier,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", ".stryker-tmp/**", "reports/**", "dist/**"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".stryker-tmp/**",
+    "reports/**",
+    "dist/**",
+    "public/pdf.worker.min.mjs",
+  ]),
   {
     files: ["src/lucid/core/**/*.ts", "src/lucid/core/**/*.tsx"],
     rules: {

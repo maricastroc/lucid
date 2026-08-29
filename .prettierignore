@@ -7,6 +7,7 @@ next-env.d.ts
 reports/
 .stryker-tmp/
 package-lock.json
+public/pdf.worker.min.mjs
 
 # Artefatos estampados: reformatar mudaria o byte e o hash da rodada
 eval/report.json
