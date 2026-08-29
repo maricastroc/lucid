@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze, DEFAULT_CONFIG } from "../src/lucid";
 import { buildAuditReport } from "../src/app/lib/audit-report";
 
 const SAMPLE =
@@ -177,7 +177,41 @@ describe("buildAuditReport — the entry text does not overclaim", () => {
   it("does not point at a weight that is not there when nothing was registered", () => {
     const md = buildAuditReport(d, d.findings, META, [], null, null, "O texto de partida.");
     expect(md).not.toContain("variação de peso informada acima");
-    // The absence of registered changes is not the absence of changes.
     expect(md).toContain("edição feita à mão não gera registro");
+  });
+});
+
+describe("buildAuditReport — the stamp that makes the audit re-runnable", () => {
+  const d = analyze(SAMPLE);
+  const md = () => buildAuditReport(d, d.findings, META);
+
+  it("carries the engine, the profile and the curated data the numbers came from", () => {
+    expect(md()).toContain(
+      `Motor Lucid ${d.meta.lucidVersion} · perfil \`${d.meta.configHash}\` · ` +
+        `dados \`${d.meta.dataHash}\` · ${d.meta.localeId}`,
+    );
+  });
+
+  it("stamps a default profile too, not only one that departs from it", () => {
+    expect(md()).not.toContain("## Perfil editorial");
+    expect(md()).toContain(d.meta.configHash);
+  });
+
+  it("says what the stamp is for, where the stamp is", () => {
+    expect(md()).toContain("Dois relatórios só são comparáveis se o motor, o perfil e os dados carimbados acima");
+  });
+
+  it("takes the standard's version from the engine instead of repeating it by hand", () => {
+    expect(md()).toContain(`Análise determinística · ${d.meta.standardVersion} · Lucid`);
+  });
+
+  it("no longer points at a hash that is not in the document", () => {
+    const withProfile = buildAuditReport(d, d.findings, META, [], null, {
+      ...DEFAULT_CONFIG,
+      sentenceLength: { warnAbove: 25, errorAbove: 40 },
+    });
+    expect(withProfile).toContain("## Perfil editorial");
+    expect(withProfile).not.toContain("`configHash` acima");
+    expect(withProfile).toContain("O perfil carimbado no cabeçalho");
   });
 });

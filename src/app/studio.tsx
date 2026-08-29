@@ -147,8 +147,6 @@ export function Studio() {
     [selectedFinding, diagnostic],
   );
 
-  // A different document is now open: everything that described the previous one is spent. The
-  // trail goes with it — it records changes to a document that no longer exists.
   const afterDocumentEntered = useCallback(() => {
     clearSelection();
     resetHistory();
@@ -229,8 +227,6 @@ export function Studio() {
     [noteFreeEdit, forgetMarkHistory, setText],
   );
 
-  // Pasting over the whole draft brings in another document; the reader stays where they are, so
-  // the mode is left alone.
   const onPasteDocument = useCallback(
     (value: string) => {
       enterPastedDocument(value);

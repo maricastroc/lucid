@@ -153,6 +153,8 @@ export const COPY_EN: UiCopy = {
     legendSafe: "direct swap available",
     legendHuman: "author's decision",
     exportAudit: "Download audit (.md)",
+    printAudit: "Print audit (PDF)",
+    printNote: "Opens the browser's print dialog — choose “Save as PDF”.",
     exportDocx: "Download revised text (.docx)",
     exportTxt: "Download text (.txt)",
     docxError: "The .docx could not be generated. Use the .txt export instead.",

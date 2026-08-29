@@ -114,7 +114,6 @@ function parse(raw: string): WorkspaceSnapshot | null {
   const reviewMarks = parseStoredMarks(value.reviewMarks);
   if (reviewMarks === null) return null;
 
-  // Absent in every workspace saved before version 5, and those stay readable.
   if (value.originalText !== undefined && value.originalText !== null && typeof value.originalText !== "string") {
     return null;
   }

@@ -156,6 +156,8 @@ export const COPY_PT: UiCopy = {
     legendSafe: "troca direta indicada",
     legendHuman: "decisão do autor",
     exportAudit: "Baixar auditoria (.md)",
+    printAudit: "Imprimir auditoria (PDF)",
+    printNote: "Abre a caixa de impressão do navegador — escolha “Salvar como PDF”.",
     exportDocx: "Baixar texto revisado (.docx)",
     exportTxt: "Baixar texto (.txt)",
     docxError: "Não foi possível gerar o .docx. Use a exportação em .txt.",

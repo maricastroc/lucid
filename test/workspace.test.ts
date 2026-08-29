@@ -431,7 +431,6 @@ describe("workspace — the entry text", () => {
       STORAGE_KEY,
       JSON.stringify({ version: 4, text: "a", blocks: null, ledger: [], mode: "audit" }),
     );
-    // Not "" — the document was not written here; nobody knows what it started as.
     expect(readWorkspace()?.originalText).toBeNull();
   });
 

@@ -126,7 +126,6 @@ function EntryText({ text, afterChanges }: { text: string | null; afterChanges: 
   const [open, setOpen] = useState(false);
   const frame = afterChanges ? "mt-5 border-t border-rule-1 pt-4" : "";
 
-  // Said only where it explains something: next to a weight whose starting point is missing.
   if (text === null || text === "") {
     if (!afterChanges) return null;
     return (

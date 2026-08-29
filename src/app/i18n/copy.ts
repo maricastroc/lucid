@@ -121,6 +121,8 @@ export interface UiCopy {
     readonly legendSafe: string;
     readonly legendHuman: string;
     readonly exportAudit: string;
+    readonly printAudit: string;
+    readonly printNote: string;
     readonly exportDocx: string;
     readonly exportTxt: string;
     readonly docxError: string;

@@ -70,8 +70,6 @@ export function rebaseOffset(offset: number, target: { start: number; end: numbe
 export function measureDraftLines(textarea: HTMLTextAreaElement): DraftLine[] {
   const value = textarea.value;
   if (value === "") return [{ offset: 0, top: 0 }];
-  // Without range rectangles there is no way to see where the text wraps. The draft then opens at
-  // the top instead of at the reader's place — a worse restoration, never a broken one.
   if (typeof document.createRange().getBoundingClientRect !== "function") return [{ offset: 0, top: 0 }];
 
   const mirror = buildMirror(textarea);

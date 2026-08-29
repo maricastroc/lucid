@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks } from "../lib/export-document";
+import { renderReportHtml } from "../lib/report-html";
 import type { LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
+import { PrintReport } from "./print-report";
 import { ReportRecordDialog } from "./report-record-dialog";
 import { downloadFile } from "./export-menu/download-file";
 import { useDismissableMenu } from "./export-menu/use-dismissable-menu";
@@ -37,24 +39,31 @@ export function ExportMenu({
   const { c } = useCopy();
   const [docxError, setDocxError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
+  const [printHtml, setPrintHtml] = useState<string | null>(null);
   const { open, boxRef, triggerRef, toggle, close, setOpen, onKeyDown } = useDismissableMenu(() => setDocxError(null));
 
-  const exportAudit = () => {
-    downloadFile(
-      "auditoria-lucid.md",
-      buildAuditReport(
-        diagnostic,
-        findings,
-        { generatedAt: new Date().toLocaleString("pt-BR") },
-        ledger,
-        { briefing, check: briefingCheck },
-        config,
-        originalText,
-      ),
-      "text/markdown;charset=utf-8",
+  const auditMarkdown = () =>
+    buildAuditReport(
+      diagnostic,
+      findings,
+      { generatedAt: new Date().toLocaleString("pt-BR") },
+      ledger,
+      { briefing, check: briefingCheck },
+      config,
+      originalText,
     );
+
+  const exportAudit = () => {
+    downloadFile("auditoria-lucid.md", auditMarkdown(), "text/markdown;charset=utf-8");
     close(false);
   };
+
+  const printAudit = () => {
+    setPrintHtml(renderReportHtml(auditMarkdown()));
+    close(false);
+  };
+
+  const printed = useCallback(() => setPrintHtml(null), []);
 
   const exportDocx = async () => {
     setDocxError(null);
@@ -100,6 +109,9 @@ export function ExportMenu({
           className="rise absolute right-0 z-30 mt-1.5 w-76 rounded-lg border border-rule-2 bg-sheet p-1.5 shadow-(--shadow-pop)"
         >
           <MenuItem onClick={exportAudit}>{c.overview.exportAudit}</MenuItem>
+          <MenuItem onClick={printAudit} note={c.overview.printNote}>
+            {c.overview.printAudit}
+          </MenuItem>
           <MenuItem onClick={exportDocx} note={c.overview.docxNote}>
             {c.overview.exportDocx}
           </MenuItem>
@@ -124,6 +136,8 @@ export function ExportMenu({
           </div>
         </div>
       )}
+
+      {printHtml !== null && <PrintReport html={printHtml} onPrinted={printed} />}
 
       <ReportRecordDialog
         open={recordOpen}

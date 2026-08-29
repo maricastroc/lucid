@@ -107,8 +107,8 @@ function renderProfileMarkdown(config: Config | null): string {
     out.push("");
   }
   out.push(
-    "_A norma não fixa números; o limiar é escolha editorial. O `configHash` acima identifica exatamente este " +
-      "perfil — dois relatórios só são comparáveis se o hash for o mesmo._",
+    "_A norma não fixa números; o limiar é escolha editorial. O perfil carimbado no cabeçalho identifica " +
+      "exatamente estes ajustes._",
   );
   out.push("");
   return out.join("\n");
@@ -168,6 +168,7 @@ export function buildAuditReport(
   originalText: string | null = null,
 ): string {
   const m = diagnostic.metrics;
+  const engine = diagnostic.meta;
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
@@ -177,10 +178,18 @@ export function buildAuditReport(
   const out: string[] = [];
   out.push("# Auditoria de Linguagem Simples");
   out.push("");
-  out.push("Análise determinística · ABNT NBR ISO 24495-1:2024 · Lucid");
+  out.push(`Análise determinística · ${engine.standardVersion} · Lucid`);
   out.push(`Gerado em ${meta.generatedAt}${meta.documentTitle ? ` · ${meta.documentTitle}` : ""}`);
+  out.push(
+    `Motor Lucid ${engine.lucidVersion} · perfil \`${engine.configHash}\` · ` +
+      `dados \`${engine.dataHash}\` · ${engine.localeId}`,
+  );
   out.push("");
   out.push("> **Este relatório mede, não aprova.** A ausência de anotações não é atestado de clareza.");
+  out.push(
+    "> Dois relatórios só são comparáveis se o motor, o perfil e os dados carimbados acima forem os mesmos: " +
+      "limiar diferente ou léxico diferente produzem placar diferente a partir do mesmo texto.",
+  );
   out.push(
     "> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação. O valor não é truncado: " +
       "o número é o calculado, e a faixa de referência é leitura ao lado dele.",

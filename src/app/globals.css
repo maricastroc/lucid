@@ -565,3 +565,161 @@ textarea.prose-doc:focus-visible {
     background: var(--accent-line);
   }
 }
+
+/* The audit on paper. Off screen entirely; on print it is the only thing left standing. */
+#relatorio-impresso {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 18mm 16mm 20mm;
+  }
+
+  body > *:not(#relatorio-impresso) {
+    display: none !important;
+  }
+
+  /* Paper has one theme. The report is printed black on white whatever the screen was showing. */
+  #relatorio-impresso {
+    display: block;
+    color: #14110d;
+    background: #fff;
+    font-family: var(--font-serif);
+    font-size: 10.5pt;
+    line-height: 1.5;
+  }
+
+  #relatorio-impresso h1 {
+    font-size: 20pt;
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0 0 0.5rem;
+  }
+
+  #relatorio-impresso h2 {
+    font-family: var(--font-sans);
+    font-size: 12pt;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    margin: 1.9rem 0 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #d9d2c6;
+  }
+
+  #relatorio-impresso h3 {
+    font-family: var(--font-sans);
+    font-size: 10.5pt;
+    font-weight: 600;
+    margin: 1.1rem 0 0.35rem;
+  }
+
+  #relatorio-impresso h4 {
+    font-family: var(--font-sans);
+    font-size: 10pt;
+    font-weight: 600;
+    margin: 0.9rem 0 0.3rem;
+  }
+
+  /* A heading at the foot of a page, and an annotation split across the fold, both cost the
+     reader the thing the report exists to give: knowing which criterion they are looking at. */
+  #relatorio-impresso h1,
+  #relatorio-impresso h2,
+  #relatorio-impresso h3,
+  #relatorio-impresso h4 {
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  /* The reset also drops bold and italic weight from the inline tags the report leans on. */
+  #relatorio-impresso strong {
+    font-weight: 600;
+  }
+
+  #relatorio-impresso em {
+    font-style: italic;
+  }
+
+  #relatorio-impresso p,
+  #relatorio-impresso li,
+  #relatorio-impresso blockquote,
+  #relatorio-impresso tr {
+    break-inside: avoid;
+  }
+
+  #relatorio-impresso p {
+    margin: 0 0 0.5rem;
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* The reset strips list markers app-wide; on paper a list without them is just short lines. */
+  #relatorio-impresso ul {
+    margin: 0 0 0.6rem;
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+
+  #relatorio-impresso li {
+    margin-bottom: 0.15rem;
+  }
+
+  #relatorio-impresso blockquote {
+    margin: 0.6rem 0;
+    padding: 0.5rem 0.75rem;
+    border-left: 2px solid #8b8377;
+    background: #f6f3ec;
+    font-size: 9.5pt;
+  }
+
+  #relatorio-impresso blockquote p:last-child {
+    margin-bottom: 0;
+  }
+
+  #relatorio-impresso table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5rem 0 0.8rem;
+    font-family: var(--font-sans);
+    font-size: 9pt;
+  }
+
+  #relatorio-impresso th,
+  #relatorio-impresso td {
+    border-bottom: 1px solid #ded7cb;
+    padding: 0.3rem 0.45rem;
+  }
+
+  #relatorio-impresso th {
+    border-bottom-width: 1.5px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  #relatorio-impresso code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  /* The entry text is the whole document: it wraps and breaks across pages like any prose. */
+  #relatorio-impresso pre.report-source {
+    margin: 0.6rem 0;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #ded7cb;
+    background: #faf8f3;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    break-inside: auto;
+  }
+
+  #relatorio-impresso pre.report-source code {
+    font-family: var(--font-serif);
+    font-size: 9.5pt;
+  }
+
+  #relatorio-impresso hr {
+    border: 0;
+    border-top: 1px solid #d9d2c6;
+    margin: 1.5rem 0 0.6rem;
+  }
+}

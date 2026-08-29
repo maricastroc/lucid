@@ -51,7 +51,6 @@ describe("ledger — provenance trail", () => {
     expect(md).toContain("**2. Reescrita por IA · groq:llama** — peso 5 → 2 ↓");
     expect(md).toContain('_de:_ "em sede de" · _para:_ "durante"');
     expect(md).toContain("não um atestado de qualidade");
-    // The list names its own limits: free editing changes the document without landing here.
     expect(md).toContain("não é o histórico completo de edição");
   });
 

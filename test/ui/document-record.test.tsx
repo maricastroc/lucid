@@ -61,7 +61,7 @@ describe("the record of a document · the text as it came in", () => {
   it("says the entry text was never recorded, instead of pretending the delta is checkable", async () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: null });
     await auditReady();
-    // Nothing to show until a weight exists whose starting point is missing.
+
     expect(auditPanel().queryByText(/não registrado para este documento/i)).not.toBeInTheDocument();
 
     await applyManualEdit(user);
@@ -113,8 +113,6 @@ describe("the record of a document · what the trail shows and what it admits", 
   });
 
   it("does not draw a fall for a change that left the weight where it was", async () => {
-    // The curated equivalent of "em sede de" is itself flagged, so the term changes and the
-    // weight does not — the case the arrow used to report as a fall.
     const { user } = mountStudio({ text: "O pedido foi analisado em sede de procedimento administrativo." });
     await auditReady();
     await openPoint(user, "Jargão", "em sede de");
@@ -123,7 +121,6 @@ describe("the record of a document · what the trail shows and what it admits", 
     const trail = within(await auditPanel().findByRole("list", { name: /alterações registradas/i }));
     const weight = trail.getByText(/→/);
     const [before, after] = weight.textContent!.split("→");
-    // The swap trades one curated term for another of equal severity, so the weight cannot move.
     expect(after.replace(/[↓↑=]/g, "").trim()).toBe(before.trim());
     expect(weight).toHaveTextContent("=");
     expect(weight).not.toHaveTextContent("↓");
@@ -152,7 +149,7 @@ describe("the record of a document · a different document takes its place", () 
 
     expect(auditPanel().queryByRole("list", { name: /alterações registradas/i })).toBeNull();
     await user.click(showEntryText());
-    // The entry text is the example itself, not the document that was open before it.
+
     expect(entryBlock().queryByText(ENTRY_TEXT)).not.toBeInTheDocument();
   });
 });
@@ -186,7 +183,6 @@ describe("the record of a document · pasting a document in", () => {
     await user.click(screen.getByRole("tab", { name: /^revisar$/i }));
     await auditReady();
 
-    // The changes described a document that is gone; the entry text is the one that arrived.
     expect(auditPanel().queryByRole("list", { name: /alterações registradas/i })).toBeNull();
     await user.click(showEntryText());
     expect(entryBlock().getByText(PASTED)).toBeInTheDocument();
