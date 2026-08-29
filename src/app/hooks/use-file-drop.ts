@@ -14,7 +14,6 @@ export interface FileDrop {
 
 const carriesFile = (event: DragEvent): boolean => Array.from(event.dataTransfer?.types ?? []).includes("Files");
 
-
 export function useFileDrop(onFile: (file: File) => void): FileDrop {
   const [dragging, setDragging] = useState(false);
   const depth = useRef(0);
