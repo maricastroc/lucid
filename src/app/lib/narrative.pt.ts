@@ -10,21 +10,29 @@ export const NARRATIVE_PT: NarrativeSet = {
   long_sentence: {
     headline: (f) => {
       const w = metaNum(f, "words");
-      return w != null ? `Frase longa · ${w} palavras` : "Frase longa";
+      return w != null ? `Frase com ${w} palavras` : "Comprimento de frase";
     },
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      if (w == null || th == null) return "Esta frase é longa demais para uma leitura fácil.";
-      return `Esta frase tem ${w} palavras. Para facilitar a leitura, recomendamos frases com até ${th} palavras.`;
+      if (w == null || th == null) return "O comprimento desta frase está acima do gatilho de inspeção.";
+      return (
+        `Esta frase tem ${w} palavras. O Lucid inspeciona frases acima de ${th} palavras — esse número é um ` +
+        "parâmetro metodológico do produto, e não um limite da norma: a ABNT NBR ISO 24495-1 pede frases " +
+        "concisas e variação de tamanho, sem estabelecer contagem. A verificação principal é outra: veja se a " +
+        "frase carrega mais de uma ideia. Uma frase extensa com uma ideia só pode estar adequada e não " +
+        "precisa necessariamente ser dividida."
+      );
     },
     confidence: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       return assistida(
         `A ferramenta mede o comprimento com exatidão${
-          w != null && th != null ? ` (${w} palavras contra o limiar de ${th})` : ""
-        }, mas não decide o que é supérfluo nem onde cortar — isso é trabalho de autor (Princípio 1). O que ela pode fazer é localizar onde a frase pode se dividir; a escolha é sua.`,
+          w != null && th != null ? ` (${w} palavras contra o gatilho de ${th})` : ""
+        }, mas o comprimento sozinho não decide se a frase está clara: ele não distingue uma ideia longa de ` +
+          "várias ideias empilhadas, e não vê nome de órgão, referência legal nem valor por extenso, que " +
+          "alongam a frase sem multiplicar o que ela pede do leitor. Quem lê a frase e conta as ideias é você.",
       );
     },
   },

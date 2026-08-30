@@ -3,7 +3,6 @@ import { stableHash } from "./hash";
 export interface Config {
   sentenceLength: {
     warnAbove: number;
-    errorAbove: number;
   };
   passiveVoice: {
     enabled: boolean;
@@ -87,7 +86,6 @@ export interface Config {
 export const DEFAULT_CONFIG: Config = {
   sentenceLength: {
     warnAbove: 20,
-    errorAbove: 30,
   },
   passiveVoice: {
     enabled: true,

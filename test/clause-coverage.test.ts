@@ -126,7 +126,35 @@ describe("clause coverage — the published report", () => {
 
   it("clauses come out in canonical section order", () => {
     const sections = report.clauses.map((clause) => clause.section);
-    expect(sections).toEqual(["5.1", "5.2", "5.3", "5.3.2", "5.3.3", "5.3.4", "5.4"]);
+    expect(sections).toEqual([
+      "5.1",
+      "5.1.1",
+      "5.1.2",
+      "5.1.3",
+      "5.1.4",
+      "5.1.5",
+      "5.1.6",
+      "5.2",
+      "5.2.1",
+      "5.2.2",
+      "5.2.3",
+      "5.2.4",
+      "5.2.5",
+      "5.3",
+      "5.3.1",
+      "5.3.2",
+      "5.3.3",
+      "5.3.4",
+      "5.3.5",
+      "5.3.6",
+      "5.3.7",
+      "5.3.8",
+      "5.4",
+      "5.4.1",
+      "5.4.2",
+      "5.4.3",
+      "5.4.4",
+    ]);
   });
 
   it("accounts for every criterion exactly once: cited clause or outside the standard", () => {
@@ -148,8 +176,25 @@ describe("clause coverage — the published report", () => {
 
   it("covers Principle 1 through a named instrument rather than a detector", () => {
     const relevant = report.clauses.find((clause) => clause.section === "5.1");
+    const content = report.clauses.find((clause) => clause.section === "5.1.6");
     expect(relevant?.criteria).toEqual([]);
-    expect(relevant?.instruments).toEqual(["checkBriefing"]);
+    expect(content?.criteria).toEqual([]);
+    expect(content?.instruments).toEqual(["checkBriefing"]);
     expect(relevant?.status).toBe("partial");
+  });
+
+  it("the clause titles are the ones in the standard, and none is provisional any more", () => {
+    const bySection = new Map(CLAUSE_TREE.nodes.map((node) => [node.section, node]));
+    expect(bySection.get("5.3.4")?.title).toBe("Escreva frases concisas");
+    expect(bySection.get("5.3.5")?.title).toBe("Escreva parágrafos claros e concisos");
+    expect(CLAUSE_TREE.nodes.every((node) => !node.provisional)).toBe(true);
+  });
+
+  it("no criterion cites a clause that has subclauses of its own", () => {
+    const withChildren = new Set(CLAUSE_TREE.nodes.flatMap((node) => (node.parent === null ? [] : [node.parent])));
+    for (const clause of report.clauses) {
+      if (!withChildren.has(clause.section)) continue;
+      expect(clause.criteria, `clause ${clause.section}`).toEqual([]);
+    }
   });
 });

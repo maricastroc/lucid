@@ -353,9 +353,15 @@ export interface UiCopy {
     readonly longSentenceWithCutsTail: string;
     readonly longSentenceNoCuts: string;
     readonly statWords: string;
-    readonly statOver: string;
-    readonly statTarget: string;
-    readonly statTargetValue: (n: number) => string;
+    readonly statTrigger: string;
+    readonly statTriggerNote: string;
+    readonly standardSaysLabel: string;
+    readonly standardSays: string;
+    readonly parameterSaysLabel: string;
+    readonly parameterSays: (threshold: number) => string;
+    readonly coOccurringLabel: string;
+    readonly coOccurringNote: string;
+    readonly coOccurringNone: string;
     readonly cutsAvailable: (n: number) => string;
     readonly cutsInformationNotAction: string;
     readonly cutLabel: (i: number, boundary: string) => string;
@@ -525,7 +531,6 @@ export interface UiCopy {
     readonly decrease: (label: string) => string;
     readonly increase: (label: string) => string;
     readonly knobSentenceWarn: string;
-    readonly knobSentenceError: string;
     readonly knobParagraph: string;
     readonly knobHeading: string;
     readonly knobSubordination: string;

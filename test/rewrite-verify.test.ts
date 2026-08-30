@@ -65,17 +65,19 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
     expect(v.metrics.wordsAfter).toBeLessThan(v.metrics.wordsBefore);
   });
 
-  it("severity weighting: trading 1 error for 2 warnings PASSES region_improved (a raw count would go up)", async () => {
+  it("severity weighting: trading 1 warning for 2 infos PASSES region_improved (a raw count would go up)", async () => {
     const text =
-      "A equipe da secretaria revisou com muita atenção todos os documentos que chegaram durante a semana " +
-      "passada, para garantir que o relatório final destinado ao diretor ficasse realmente completo, bem claro e correto.";
+      "A equipe da secretaria revisou todos os documentos que chegaram durante a semana passada para " +
+      "garantir que o relatório final ficasse completo e correto.";
     const finding = analyze(text).findings.find((f) => f.criterion === "long_sentence")!;
-    expect(finding.severity).toBe("error");
+    expect(finding.severity).toBe("warning");
 
     const proposed =
-      "A equipe da secretaria revisou com bastante atenção todos os documentos que chegaram na semana passada para " +
-      "deixar o relatório final bem completo. Depois disso, o setor enviou uma cópia para cada pessoa que participou " +
-      "do processo e pediu que todos confirmassem o retorno até sexta.";
+      "A equipe revisou os documentos da semana passada. O relatório final ficou praticamente completo e " +
+      "totalmente correto.";
+    const after = analyze(proposed).findings;
+    expect(after.map((f) => f.severity)).toEqual(["info", "info"]);
+
     const v = await verifyRewrite(text, finding.span, { proposerId: "test", original: finding.span.text, proposed });
 
     expect(proofPassed(v, "region_improved")).toBe(true);

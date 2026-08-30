@@ -109,15 +109,15 @@ describe("score — disabled criteria", () => {
 describe("score — derivation: metrics vs findings", () => {
   it("changing the sentence threshold (a counting metric) changes the score without touching the other criteria", () => {
     const base = analyze(TEXT_4);
-    const withError = analyze(TEXT_4, { sentenceLength: { warnAbove: 5, errorAbove: 10 } });
+    const loose = analyze(TEXT_4, { sentenceLength: { warnAbove: 100 } });
     const longBase = base.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
-    const longError = withError.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
+    const longLoose = loose.score.byCriterion.find((c) => c.criterion === "long_sentence")!;
     expect(longBase.count).toEqual({ info: 0, warning: 1, error: 0 });
-    expect(longError.count).toEqual({ info: 0, warning: 0, error: 1 });
+    expect(longLoose.count).toEqual({ info: 0, warning: 0, error: 0 });
 
     for (const criterion of ["passive_voice", "nominalization", "jargon"] as const) {
       const a = base.score.byCriterion.find((c) => c.criterion === criterion)!;
-      const b = withError.score.byCriterion.find((c) => c.criterion === criterion)!;
+      const b = loose.score.byCriterion.find((c) => c.criterion === criterion)!;
       expect(b.count).toEqual(a.count);
     }
   });

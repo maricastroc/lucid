@@ -1,10 +1,13 @@
-import type { Block, Document, ListItemBlock, Sentence, Token } from "../types";
+import type { AbbreviationLexicon, Block, Document, ListItemBlock, Sentence, Token } from "../types";
 import type { DocumentBuildServices } from "./model";
 import { segmentAt } from "./structured";
 
 const RE_HEADING = /^(#{1,6})([ \t]+)(\S.*?)[ \t\r]*$/;
 const RE_LIST = /^([ \t]*)([-*+]|\d{1,9}[.)])([ \t]+)(\S.*?)[ \t\r]*$/;
 const RE_BLANK = /^[ \t\r]*$/;
+const RE_TERMINAL = /[.!?:;…]$/u;
+const RE_WORD = /\p{L}[\p{L}\p{M}-]*/gu;
+const RE_LOWERCASE = /\p{Ll}/u;
 
 interface Line {
   readonly start: number;
@@ -60,6 +63,29 @@ function matchListItem(line: Line): { ordered: boolean; range: ItemRange } | nul
   return { ordered: /\d/.test(m[2]), range: { start: contentStart, end: contentStart + m[4].length } };
 }
 
+function lastWord(text: string): string | null {
+  const words = text.match(RE_WORD);
+  return words === null ? null : words[words.length - 1].toLowerCase();
+}
+
+function closesBlock(text: string, abbreviations: AbbreviationLexicon): boolean {
+  const trimmed = text.replace(/[ \t\r]+$/u, "");
+  if (RE_BLANK.test(trimmed)) return true;
+  if (RE_HEADING.test(trimmed) || RE_LIST.test(trimmed)) return true;
+  if (RE_TERMINAL.test(trimmed)) {
+    if (!trimmed.endsWith(".")) return true;
+    const word = lastWord(trimmed);
+    return word === null || !abbreviations.blocking.has(word);
+  }
+  const words = trimmed.match(RE_WORD);
+  return words !== null && words.length >= 2 && !RE_LOWERCASE.test(trimmed);
+}
+
+function startsList(lines: readonly Line[], index: number, abbreviations: AbbreviationLexicon): boolean {
+  if (!RE_LIST.test(lines[index].text)) return false;
+  return index === 0 || closesBlock(lines[index - 1].text, abbreviations);
+}
+
 export function hasStructuralMarkers(source: string): boolean {
   for (const line of splitLines(source)) {
     if (RE_HEADING.test(line.text) || RE_LIST.test(line.text)) return true;
@@ -67,7 +93,7 @@ export function hasStructuralMarkers(source: string): boolean {
   return false;
 }
 
-function parseBlockRanges(source: string): BlockRange[] {
+function parseBlockRanges(source: string, abbreviations: AbbreviationLexicon): BlockRange[] {
   const lines = splitLines(source);
   const ranges: BlockRange[] = [];
   let i = 0;
@@ -87,7 +113,7 @@ function parseBlockRanges(source: string): BlockRange[] {
       continue;
     }
 
-    const first = matchListItem(line);
+    const first = startsList(lines, i, abbreviations) ? matchListItem(line) : null;
     if (first) {
       const items: ItemRange[] = [first.range];
       let j = i + 1;
@@ -106,7 +132,7 @@ function parseBlockRanges(source: string): BlockRange[] {
     let j = i + 1;
     while (j < lines.length) {
       const nl = lines[j];
-      if (RE_BLANK.test(nl.text) || matchHeading(nl) || matchListItem(nl)) break;
+      if (RE_BLANK.test(nl.text) || matchHeading(nl) || startsList(lines, j, abbreviations)) break;
       end = nl.start + nl.text.length;
       j++;
     }
@@ -138,7 +164,7 @@ function segmentRange(source: string, start: number, end: number, services: Docu
 }
 
 export function buildTextDocument(source: string, services: DocumentBuildServices): Document {
-  const ranges = parseBlockRanges(source);
+  const ranges = parseBlockRanges(source, services.abbreviations);
   const sentences: Sentence[] = [];
   const tokens: Token[] = [];
   const blocks: Block[] = [];

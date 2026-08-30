@@ -208,7 +208,7 @@ describe("buildAuditReport — the stamp that makes the audit re-runnable", () =
   it("no longer points at a hash that is not in the document", () => {
     const withProfile = buildAuditReport(d, d.findings, META, [], null, {
       ...DEFAULT_CONFIG,
-      sentenceLength: { warnAbove: 25, errorAbove: 40 },
+      sentenceLength: { warnAbove: 25 },
     });
     expect(withProfile).toContain("## Perfil editorial");
     expect(withProfile).not.toContain("`configHash` acima");

@@ -50,6 +50,14 @@ reescrita. Não são conselhos: são as condições de aceitação.
 8. Nomes próprios, órgãos, leis, artigos e anexos precisam sobreviver, escritos como estavam.
 9. Se o original não diz quem pratica a ação, a reescrita não pode dizer. Inventar agente é a
    falha mais grave possível aqui, porque ela parece uma melhoria.
+10. Se o original não impõe dever, a reescrita não pode impor. Trocar uma descrição por "deve" ou
+    "deverá" é sinalizado ao autor.
+11. Se o trecho abre com rótulo de dispositivo ("Art. 2º", "§ 2º", "I -", "a)"), a reescrita abre
+    com o MESMO rótulo, idêntico. Ele identifica o dispositivo no documento inteiro: apagá-lo
+    reprova em número preservado e deixa o trecho sem endereço.
+12. Marcação: só devolva lista quando o briefing acima disser que o motor apontou "Enumeração em
+    prosa". Sem esse apontamento, a resposta é texto corrido — mesmo que o trecho pareça uma
+    enumeração, e mesmo que a lista ficasse mais bonita. Esta capacidade ainda não foi validada.
 
 Três coisas que o motor NÃO consegue medir, e que por isso dependem inteiramente de você:
 - OMISSÃO. Não existe informação dispensável. Se algo parece supérfluo, mantenha. Simplificar
@@ -59,6 +67,37 @@ Três coisas que o motor NÃO consegue medir, e que por isso dependem inteiramen
   possibilidade em certeza.
 - CONDIÇÕES E EXCEÇÕES. "Se", "caso", "desde que", "salvo", "exceto", "ressalvado", "sem
   prejuízo de". Apagar uma exceção muda o que a norma manda, e o motor não vai pegar isso.`;
+
+const BINDINGS = `O QUE A DIVISÃO NÃO PODE QUEBRAR
+Dividir frase é a sua ferramenta principal, e ela tem três lugares onde corta errado. Antes de
+responder, releia a sua reescrita procurando por estes três:
+
+- RESSALVA E EXCEÇÃO. "Ressalvado", "ressalvada", "salvo", "exceto", "sem prejuízo de", "à
+  exceção de", "observado", "respeitado" ligam uma coisa a outra: eles dizem O QUE FICA DE FORA
+  de uma regra, ou O QUE CONTINUA VALENDO apesar dela. Esse laço tem de continuar visível e
+  apontando para o mesmo lado.
+  "Ressalvada a prioridade dos pagamentos de pessoal" significa que os pagamentos de pessoal
+  CONTINUAM tendo prioridade. Escrever "esta prioridade não vale para os pagamentos de pessoal"
+  inverte quem tem prioridade e é erro grave, ainda que a frase fique curta e bonita.
+  "Sem prejuízo das sanções penais" significa que as sanções continuam de pé ALÉM do que vem a
+  seguir — não que elas passem a ser consequência do que vem a seguir.
+  Se você não consegue dividir a frase sem soltar a ressalva do que ela rege, NÃO DIVIDA: uma
+  frase de 24 palavras com o sentido certo é melhor que duas de 12 com o sentido trocado. O motor
+  vai apontar a frase longa, e o autor decide — isso é muito melhor que ele aplicar um sentido
+  errado sem saber.
+
+- DESCREVER NÃO É OBRIGAR. Se o original descreve como algo acontece ("será instaurado mediante
+  ato do Ministro", "serão aqueles aprovados pelo órgão", "entidades ativas no fomento"), a
+  reescrita descreve também. Não escreva "o Ministro deve instaurar", "o órgão deve aprovar",
+  "as entidades devem atuar": isso cria um dever que a norma não impôs, e o motor sinaliza quando
+  acontece.
+  Vale igual para o particípio que descreve estado — "existentes em 31 de dezembro", "registradas
+  em conta própria", "constantes do anexo". Eles dizem COMO a coisa é, não o que alguém tem de
+  fazer: "devem existir" e "devem estar registradas" impõem dever onde havia descrição.
+
+- O NOME DA CATEGORIA. Quando o original nomeia uma categoria jurídica com várias palavras
+  ("concessionárias de serviços públicos de energia elétrica", "entidades sem fins lucrativos"),
+  ela vale inteira: encurtar para "empresas" ou "entidades" muda quem está dentro da regra.`;
 
 const WORDS = `PALAVRAS FAMILIARES (seção 5.3.2)
 Trocar é o padrão; manter é a exceção, e ela precisa se justificar sozinha.
@@ -91,6 +130,10 @@ const SENTENCES = `FRASES CLARAS E CONCISAS (seções 5.3.3 e 5.3.4)
   menos de ~15 palavras, porque aí dividir atrapalha o ritmo sem facilitar nada. Ela nunca
   autoriza deixar uma frase acima do teto inteira.
 - Varie o comprimento dentro do teto: frases todas iguais cansam tanto quanto uma frase longa.
+- Divida com moderação: uma frase do original raramente precisa virar mais de três. Uma sequência
+  de frases muito curtas, todas com o mesmo sujeito retomado por "ele", "ela", "este" ou "esse",
+  não é linguagem simples — é a mesma frase picada, e obriga a pessoa a remontá-la de cabeça.
+  Quando duas ideias são a mesma ideia, elas ficam na mesma frase.
 - Uma frase pode ficar mais longa que a do original quando isso serve ao leitor — trocar
   nominalização por verbo ou explicitar um sujeito oculto custa palavras e vale a pena.
 - Verbo no lugar de substantivo de ação: "para análise" vira "para analisar", "fazer a
@@ -147,6 +190,8 @@ ${TASK}
 
 ${AUDIT}
 
+${BINDINGS}
+
 ${WORDS}
 
 ${SENTENCES}
@@ -166,17 +211,18 @@ ${targetText}
 """`;
 }
 
-export function buildLucidV2(fullText: string, target: Span, findings: readonly Finding[]): string {
+export function buildLucidV4(fullText: string, target: Span, findings: readonly Finding[]): string {
   const criteria = new Set(findings.map((f) => f.criterion));
   const listClause = criteria.has("prose_enumeration") ? LIST_ALLOWED : LIST_FORBIDDEN;
   return compose(fullText, target.text, listClause, renderBriefing(findings));
 }
 
-const PROMPT_V2_PARTS = {
+const PROMPT_V4_PARTS = {
   ROLE,
   OUTPUT,
   TASK,
   AUDIT,
+  BINDINGS,
   WORDS,
   SENTENCES,
   STRUCTURE,
@@ -185,4 +231,6 @@ const PROMPT_V2_PARTS = {
   TONE,
 } as const;
 
-export const _parts = PROMPT_V2_PARTS;
+export const composePromptV4 = compose;
+
+export const _parts = PROMPT_V4_PARTS;

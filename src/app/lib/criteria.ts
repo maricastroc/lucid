@@ -112,14 +112,17 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     why: "Sigla não apresentada exige que o leitor já a conheça — quem não conhece trava logo no começo.",
   },
   long_sentence: {
-    label: "Frase longa",
+    label: "Comprimento de frase",
     ruleId: "long_sentence",
     kind: "Extensão da frase",
     principleName: "Frases concisas",
     channel: "passage",
     markStyleClass: "",
-    signal: "contagem de palavras da frase acima do limite configurado",
-    why: "Frases longas sobrecarregam a memória de trabalho de quem lê.",
+    signal: "contagem de palavras da frase acima do gatilho de inspeção configurado",
+    why:
+      "Extensão é um gatilho de inspeção, não um defeito: a norma pede uma ideia por frase e variação de " +
+      "tamanho, sem fixar número. Frases longas tendem a acumular ideias, mas uma frase longa com uma " +
+      "ideia só pode estar adequada, e uma frase curta pode ser difícil por outros motivos.",
   },
   mais_que_perfeito_sintetico: {
     label: "Mais-que-perfeito sintético",

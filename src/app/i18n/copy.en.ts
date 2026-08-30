@@ -361,8 +361,8 @@ export const COPY_EN: UiCopy = {
       "original meaning.",
     humanLeadByCriterion: {
       long_sentence:
-        "There is more than one way to split this sentence. Review the passage and choose the split that best " +
-        "preserves the original meaning.",
+        "Read the sentence and decide whether it carries more than one idea. If it does, you choose where to " +
+        "separate and how to recompose; if it carries one, mark it as seen — length alone compels nothing.",
     },
     howToProceed: "How to proceed",
 
@@ -487,20 +487,32 @@ export const COPY_EN: UiCopy = {
       "Split into shorter sentences, one idea at a time — the start of each subordinate clause is usually the natural " +
       "cut. The tool does not rewrite: deciding what becomes its own sentence, and reconjugating, is your call.",
 
-    longSentenceLead: "The tool does not rewrite — it ",
-    longSentenceLeadStrong: "measures the effort",
-    longSentenceWithCuts: " the sentence demands, and ",
-    longSentenceWithCutsStrong: "points below to where it comes apart",
-    longSentenceWithCutsTail: ". Recomposing each side is your call.",
-    longSentenceNoCuts: " the sentence demands. Where to split and how to recompose is your call.",
+    longSentenceLead: "The tool does not rewrite and does not ask you to split — it ",
+    longSentenceLeadStrong: "counts the words",
+    longSentenceWithCuts: " in the sentence and ",
+    longSentenceWithCutsStrong: "shows below where it could come apart",
+    longSentenceWithCutsTail: ", should you decide there is more than one idea here.",
+    longSentenceNoCuts: " in the sentence. Whether there is more than one idea here is yours to read.",
     statWords: "words",
-    statOver: "over by",
-    statTarget: "target",
-    statTargetValue: (n) => `${n} sentences`,
-    cutsAvailable: (n) => (n === 1 ? "1 possible cut" : `${n} possible cuts`),
+    statTrigger: "trigger",
+    statTriggerNote: "Lucid parameter",
+    standardSaysLabel: "The standard asks for",
+    standardSays:
+      "concise sentences, one idea per sentence and varied length across the document — without stating a " +
+      "number (ABNT NBR ISO 24495-1, 5.3.4).",
+    parameterSaysLabel: "Lucid inspects",
+    parameterSays: (threshold) =>
+      `sentences above ${threshold} words. That number is this product's choice, adjustable in the editorial ` +
+      "profile, and crossing it does not mean the sentence is inadequate.",
+    coOccurringLabel: "Other signals in this sentence",
+    coOccurringNote: "Each carries its own criterion and its own justification. None of this adds up to a score.",
+    coOccurringNone:
+      "The engine found no other signal inside this sentence. That does not certify it is clear: it is only " +
+      "the absence of the signals the engine knows how to look for.",
+    cutsAvailable: (n) => (n === 1 ? "1 possible boundary" : `${n} possible boundaries`),
     cutsInformationNotAction: "information, not action",
-    cutLabel: (i, boundary) => `cut ${i} · ${boundary}`,
-    cutsNote: "The tool points at the boundary; it does not split. The new sentence is yours.",
+    cutLabel: (i, boundary) => `boundary ${i} · ${boundary}`,
+    cutsNote: "The tool points at the boundary, does not split, and does not claim splitting is needed.",
     boundarySemicolon: "semicolon",
     boundaryDash: "em dash",
     boundaryCommaConjunction: (marker) => `comma before “${marker}”`,
@@ -727,8 +739,7 @@ export const COPY_EN: UiCopy = {
     deviationValue: (what, value, fallback) => `${what} ${value} (default: ${fallback})`,
     decrease: (label) => `Decrease ${label}`,
     increase: (label) => `Increase ${label}`,
-    knobSentenceWarn: "Long sentence — warn above",
-    knobSentenceError: "Long sentence — priority above",
+    knobSentenceWarn: "Inspect sentences above",
     knobParagraph: "Long paragraph — above (sentences)",
     knobHeading: "Long heading — above (words)",
     knobSubordination: "Dense subordination — from (clauses)",

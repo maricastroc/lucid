@@ -60,7 +60,7 @@ describe("a purpose is a different measure, not a different label", () => {
 
   it("recognises the config it produced, and refuses an unknown name", () => {
     for (const id of PROFILE_IDS) expect(profileOf(profileConfig(id))).toBe(id);
-    expect(profileOf({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 7, errorAbove: 9 } })).toBeNull();
+    expect(profileOf({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 7 } })).toBeNull();
     expect(isProfileId("cartilha")).toBe(false);
     expect(isProfileId("publico")).toBe(true);
   });

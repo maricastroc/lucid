@@ -1,4 +1,4 @@
-import type { Finding } from "../../lucid/core/types";
+import type { Finding } from "@/lucid";
 
 const LABEL: Record<string, string> = {
   passive_voice: "Voz passiva",
@@ -17,7 +17,7 @@ const LABEL: Record<string, string> = {
   dupla_negacao: "Dupla negação",
   leitor_terceira_pessoa: "Fala indireta ao leitor",
   subordinacao_densa: "Subordinação densa",
-  long_sentence: "Comprimento de frase",
+  long_sentence: "Frase longa",
   paragraph_length: "Parágrafo longo",
   prose_enumeration: "Enumeração em prosa",
   salto_de_nivel_titulo: "Salto de nível de título",
@@ -27,9 +27,7 @@ const LABEL: Record<string, string> = {
 };
 
 const HINT: Record<string, string> = {
-  long_sentence:
-    "A frase passou do gatilho de inspeção. Verifique se ela carrega mais de uma ideia: se carregar, " +
-    "separe; se carregar uma só, deixe como está — extensão sozinha não obriga a dividir.",
+  long_sentence: "O trecho é longo demais: divida em frases curtas, uma ideia por frase.",
   passive_voice: "Prefira a voz ativa: diga quem faz a ação (sem inventar, se o texto não disser).",
   nominalization: "Troque substantivos de ação pelos verbos correspondentes.",
   jargon: "Troque termos técnicos por palavras comuns equivalentes.",
@@ -51,7 +49,7 @@ const HINT: Record<string, string> = {
   paragraph_length: "O parágrafo acumula frases demais.",
 };
 
-export const criterionLabel = (criterion: string): string => LABEL[criterion] ?? criterion;
+const criterionLabel = (criterion: string): string => LABEL[criterion] ?? criterion;
 
 const FALLBACK_HINT = "Resolva o problema de clareza apontado neste ponto.";
 
@@ -67,7 +65,7 @@ function shortExamples(findings: readonly Finding[]): string {
   return spans.length ? ` (ex.: ${spans.map((s) => `"${s}"`).join(", ")})` : "";
 }
 
-export function renderBriefing(findings: readonly Finding[]): string {
+export function renderBriefingAsMeasured(findings: readonly Finding[]): string {
   const order: string[] = [];
   const byCriterion = new Map<string, Finding[]>();
   for (const finding of findings) {

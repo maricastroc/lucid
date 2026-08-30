@@ -10,21 +10,30 @@ export const NARRATIVE_EN: NarrativeSet = {
   long_sentence: {
     headline: (f) => {
       const w = metaNum(f, "words");
-      return w != null ? `Long sentence · ${w} words` : "Long sentence";
+      return w != null ? `Sentence with ${w} words` : "Sentence length";
     },
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      if (w == null || th == null) return "This sentence is too long to read comfortably.";
-      return `This sentence has ${w} words. For easier reading, we recommend sentences of up to ${th} words.`;
+      if (w == null || th == null) return "This sentence is above the inspection trigger for length.";
+      return (
+        `This sentence has ${w} words. Lucid inspects sentences above ${th} words — that number is a ` +
+        "methodological parameter of this product, not a limit set by the standard: ABNT NBR ISO 24495-1 asks " +
+        "for concise sentences and varied length without stating a count. The main check is a different one: " +
+        "see whether the sentence carries more than one idea. A long sentence carrying a single idea can be " +
+        "fine, and does not necessarily need to be split."
+      );
     },
     confidence: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       return assistida(
         `The tool measures length exactly${
-          w != null && th != null ? ` (${w} words against a threshold of ${th})` : ""
-        }, but it does not decide what is superfluous or where to cut — that is the author's work (Principle 1). What it can do is locate where the sentence could split; the choice is yours.`,
+          w != null && th != null ? ` (${w} words against a trigger of ${th})` : ""
+        }, but length alone does not decide whether the sentence is clear: it cannot tell one long idea from ` +
+          "several stacked ones, and it does not see institution names, legal references or spelled-out " +
+          "amounts, which lengthen a sentence without multiplying what it asks of the reader. Reading the " +
+          "sentence and counting the ideas is yours to do.",
       );
     },
   },

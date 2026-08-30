@@ -119,3 +119,46 @@ describe("structure in pasted text (A10) — a marker in one place does not re-r
     expect(sentencesOf(`# Aviso\n\n${base}`).slice(1)).toEqual(before);
   });
 });
+
+describe("a list marker only opens a list at a block boundary (ADR-094)", () => {
+  const WRAPPED =
+    "O orçamento compreende:\n\nI\n- o Orçamento Fiscal referente aos Poderes da União, seus fundos e\n" +
+    "entidades da Administração Direta e Indireta;\n\nII\n- o Orçamento da Seguridade Social, abrangendo as\n" +
+    "entidades vinculadas a ela.";
+
+  it("a wrapped enumerator continued by a dash is not a list", () => {
+    expect(blockKinds(WRAPPED)).toEqual(["paragraph", "paragraph", "paragraph"]);
+    expect(analyze(WRAPPED).findings.filter((f) => f.criterion === "single_item_list")).toEqual([]);
+  });
+
+  it("the sentence keeps the enumerator and does not start mid-clause", () => {
+    const sentences = buildDocument(WRAPPED).sentences.map((s) => s.text.replace(/\s+/gu, " "));
+    expect(sentences[1].startsWith("I - o Orçamento Fiscal")).toBe(true);
+    expect(sentences[2].startsWith("II - o Orçamento da Seguridade Social")).toBe(true);
+  });
+
+  it("an abbreviation does not close the block, so a wrapped 'Art.' + '10.' is not a list either", () => {
+    const text = "Da autorização\n\nArt.\n10. O Poder Executivo promoverá o cancelamento das despesas condicionais.";
+    expect(blockKinds(text)).toEqual(["paragraph", "paragraph"]);
+    const sentences = buildDocument(text).sentences.map((s) => s.text.replace(/\s+/gu, " "));
+    expect(sentences).toContain("Art. 10.");
+    expect(sentences).toContain("O Poder Executivo promoverá o cancelamento das despesas condicionais.");
+  });
+
+  it("a real list still opens after a blank line, a colon stem or a title line", () => {
+    const afterBlank = "Traga os documentos.\n\n- RG\n- CPF";
+    const afterStem = "Traga os documentos:\n- RG\n- CPF";
+    const afterTitle = "DOCUMENTOS NECESSÁRIOS\n- RG\n- CPF";
+    for (const text of [afterBlank, afterStem, afterTitle]) {
+      expect(
+        blockKinds(text).filter((k) => k === "list"),
+        text,
+      ).toHaveLength(1);
+    }
+  });
+
+  it("a single item still opens a list when a blank line puts it at a block boundary", () => {
+    const text = "Traga o documento.\n\n- somente o RG original com foto";
+    expect(blockKinds(text)).toEqual(["paragraph", "list"]);
+  });
+});

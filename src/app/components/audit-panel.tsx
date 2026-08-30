@@ -192,6 +192,7 @@ export function AuditPanel(props: AuditPanelProps) {
           <RevisionNote
             finding={selected}
             source={props.diagnostic.text}
+            allFindings={props.diagnostic.findings}
             onApplyRewrite={props.edits.onApplyRewrite}
             onManualEdit={props.edits.onManualEdit}
             onApplyCuratedSwap={props.edits.onApplyCuratedSwap}

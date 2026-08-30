@@ -34,7 +34,7 @@ describe("paragraph_length — a paragraph with too many sentences", () => {
     const six = "Frase um. Frase dois. Frase três. Frase quatro. Frase cinco. Frase seis.";
     const findings = analyze(six).findings.filter((f) => f.criterion === "paragraph_length");
     expect(findings).toHaveLength(1);
-    expect(findings[0].normativeReference?.section).toBe("5.2");
+    expect(findings[0].normativeReference?.section).toBe("5.2.2");
     expect(findings[0].category).toBe("structural");
     expect(findings[0].requiresHuman).toBe(true);
   });
@@ -60,7 +60,7 @@ describe("prose_enumeration — enumeration written as prose", () => {
     const t = "O rito tem fases. Primeiro, protocola-se. Segundo, analisa-se. Terceiro, decide-se.";
     const findings = analyze(t).findings.filter((f) => f.criterion === "prose_enumeration");
     expect(findings).toHaveLength(1);
-    expect(findings[0].normativeReference?.section).toBe("5.2");
+    expect(findings[0].normativeReference?.section).toBe("5.2.3");
     expect(findings[0].requiresHuman).toBe(true);
   });
 
@@ -88,7 +88,7 @@ describe("prose_enumeration — numeric and roman markers inline (A9)", () => {
     const findings = analyze(text).findings.filter((f) => f.criterion === "prose_enumeration");
     expect(findings).toHaveLength(1);
     expect(findings[0].meta).toMatchObject({ items, notation: "marcador" });
-    expect(findings[0].normativeReference?.section).toBe("5.2");
+    expect(findings[0].normativeReference?.section).toBe("5.2.3");
     expect(findings[0].requiresHuman).toBe(true);
   });
 

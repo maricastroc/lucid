@@ -1,24 +1,6 @@
-import type { Config } from "@/lucid/core/config";
-import type { PassFinding, Pass, Severity } from "@/lucid/core/types";
+import type { PassFinding, Pass } from "@/lucid/core/types";
 
 const CRITERION = "long_sentence";
-
-interface ExceededThreshold {
-  severity: Severity;
-  threshold: number;
-}
-
-function evaluateThreshold(wordCount: number, config: Config): ExceededThreshold | null {
-  const { warnAbove, errorAbove } = config.sentenceLength;
-
-  if (wordCount > errorAbove) {
-    return { severity: "error", threshold: errorAbove };
-  }
-  if (wordCount > warnAbove) {
-    return { severity: "warning", threshold: warnAbove };
-  }
-  return null;
-}
 
 export const sentenceLengthPass: Pass = {
   criterion: CRITERION,
@@ -26,25 +8,23 @@ export const sentenceLengthPass: Pass = {
 
   run(ctx) {
     const findings: PassFinding[] = [];
+    const { warnAbove } = ctx.config.sentenceLength;
 
     for (const sentence of ctx.doc.sentences) {
-      const exceeded = evaluateThreshold(sentence.wordCount, ctx.config);
-      if (!exceeded) continue;
-
-      const { severity, threshold } = exceeded;
+      if (sentence.wordCount <= warnAbove) continue;
 
       findings.push({
         criterion: CRITERION,
         category: "syntactic",
         span: { start: sentence.start, end: sentence.end, text: sentence.text },
-        severity,
+        severity: "warning",
         requiresHuman: true,
         justification:
-          `Frase com ${sentence.wordCount} palavras — acima do limite de ${threshold} ` +
-          `(${severity === "error" ? "erro" : "alerta"}). Considere dividir em frases ` +
-          "menores ou cortar informação supérflua; a ferramenta não reescreve " +
-          "automaticamente.",
-        meta: { words: sentence.wordCount, threshold },
+          `Frase com ${sentence.wordCount} palavras. O Lucid inspeciona frases acima de ` +
+          `${warnAbove} palavras — um parâmetro do produto, não um limite da norma: a ABNT NBR ` +
+          "ISO 24495-1 pede frases concisas e variação de tamanho, sem fixar número. Verifique se " +
+          "a frase carrega mais de uma ideia; se carrega uma só, ela pode estar adequada como está.",
+        meta: { words: sentence.wordCount, threshold: warnAbove },
       });
     }
 

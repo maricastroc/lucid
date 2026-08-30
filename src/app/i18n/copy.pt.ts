@@ -365,8 +365,8 @@ export const COPY_PT: UiCopy = {
       "sentido original.",
     humanLeadByCriterion: {
       long_sentence:
-        "Há mais de uma forma de dividir esta frase. Revise o trecho e escolha a divisão que melhor " +
-        "preserve o sentido original.",
+        "Leia a frase e decida se ela carrega mais de uma ideia. Se carrega, você escolhe onde separar e como " +
+        "recompor; se carrega uma só, marque como vista — a extensão sozinha não obriga a nada.",
     },
     howToProceed: "Como seguir",
 
@@ -487,20 +487,32 @@ export const COPY_PT: UiCopy = {
       "Separe em frases mais curtas, uma ideia por vez — o começo de cada oração subordinada costuma ser o corte natural. " +
       "A ferramenta não reescreve: decidir o que vira frase própria e reconjugar é decisão sua.",
 
-    longSentenceLead: "A ferramenta não reescreve — ",
-    longSentenceLeadStrong: "mede o esforço",
+    longSentenceLead: "A ferramenta não reescreve e não pede que você divida — ",
+    longSentenceLeadStrong: "conta as palavras",
     longSentenceWithCuts: " da frase e ",
-    longSentenceWithCutsStrong: "aponta abaixo onde ela se separa",
-    longSentenceWithCutsTail: ". Recompor cada lado é decisão sua.",
-    longSentenceNoCuts: " da frase. Onde dividir e como recompor é decisão sua.",
+    longSentenceWithCutsStrong: "mostra abaixo onde ela poderia se separar",
+    longSentenceWithCutsTail: ", caso você decida que há mais de uma ideia aqui.",
+    longSentenceNoCuts: " da frase. Se há mais de uma ideia aqui, e o que fazer com ela, é leitura sua.",
     statWords: "palavras",
-    statOver: "acima de",
-    statTarget: "meta",
-    statTargetValue: (n) => `${n} frases`,
-    cutsAvailable: (n) => (n === 1 ? "1 corte possível" : `${n} cortes possíveis`),
+    statTrigger: "gatilho",
+    statTriggerNote: "parâmetro do Lucid",
+    standardSaysLabel: "A norma pede",
+    standardSays:
+      "frases concisas, uma ideia por frase e variação de tamanho ao longo do texto — sem fixar número " +
+      "(ABNT NBR ISO 24495-1, 5.3.4).",
+    parameterSaysLabel: "O Lucid inspeciona",
+    parameterSays: (threshold) =>
+      `frases acima de ${threshold} palavras. O número é escolha do produto, ajustável no perfil editorial, ` +
+      "e passar dele não significa que a frase esteja inadequada.",
+    coOccurringLabel: "Outros sinais nesta frase",
+    coOccurringNote: "Cada um tem seu próprio critério e sua própria justificativa. Nada aqui vira nota somada.",
+    coOccurringNone:
+      "O motor não encontrou outro sinal dentro desta frase. Isso não atesta que ela esteja clara: é só a " +
+      "ausência dos sinais que ele sabe procurar.",
+    cutsAvailable: (n) => (n === 1 ? "1 fronteira possível" : `${n} fronteiras possíveis`),
     cutsInformationNotAction: "informação, não ação",
-    cutLabel: (i, boundary) => `corte ${i} · ${boundary}`,
-    cutsNote: "A ferramenta aponta a fronteira, não divide. A frase nova é sua.",
+    cutLabel: (i, boundary) => `fronteira ${i} · ${boundary}`,
+    cutsNote: "A ferramenta aponta a fronteira, não divide, e não afirma que dividir seja necessário.",
     boundarySemicolon: "ponto-e-vírgula",
     boundaryDash: "travessão",
     boundaryCommaConjunction: (marker) => `vírgula antes de “${marker}”`,
@@ -724,8 +736,7 @@ export const COPY_PT: UiCopy = {
     deviationValue: (what, value, fallback) => `${what} ${value} (padrão: ${fallback})`,
     decrease: (label) => `Diminuir ${label}`,
     increase: (label) => `Aumentar ${label}`,
-    knobSentenceWarn: "Frase longa — alerta acima de",
-    knobSentenceError: "Frase longa — prioritário acima de",
+    knobSentenceWarn: "Inspecionar frases acima de",
     knobParagraph: "Parágrafo longo — acima de (frases)",
     knobHeading: "Título longo — acima de (palavras)",
     knobSubordination: "Subordinação densa — a partir de (orações)",

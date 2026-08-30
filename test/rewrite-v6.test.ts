@@ -20,10 +20,10 @@ const TEXT =
 const target: Span = { start: 0, end: TEXT.length, text: TEXT };
 const findings = (): readonly Finding[] => analyze(TEXT).findings;
 
-describe("rewrite@5 — a estratégia padrão", () => {
+describe("rewrite@6 — a estratégia padrão", () => {
   it("é o prompt próprio do Lucid, e a estratégia padrão aponta para ele", () => {
-    expect(REWRITE_PROMPT_VERSION).toBe("rewrite@5");
-    expect(STRATEGY_VERSION.rewrite).toBe("rewrite@5");
+    expect(REWRITE_PROMPT_VERSION).toBe("rewrite@6");
+    expect(STRATEGY_VERSION.rewrite).toBe("rewrite@6");
     expect(buildRewritePrompt(TEXT, target, { findings: findings() })).toBe(
       buildRewritePromptV4(TEXT, target, findings()),
     );
@@ -58,7 +58,7 @@ describe("rewrite@5 — a estratégia padrão", () => {
     const prompt = buildRewritePromptV4(TEXT, target, findings());
 
     expect(prompt).toContain("O QUE O MOTOR JÁ MEDIU NESTE TRECHO");
-    expect(prompt).toContain("Frase longa ·");
+    expect(prompt).toContain("Comprimento de frase ·");
     expect(prompt).toContain(TEXT);
   });
 
@@ -69,9 +69,18 @@ describe("rewrite@5 — a estratégia padrão", () => {
     expect(prompt).toContain("[DOCUMENTO — para ler, não para reescrever]");
   });
 
-  it("declara o teto de frase como condição de aceitação, não como preferência", () => {
-    expect(PROMPT_V4_PARTS.SENTENCES).toContain("20 palavras é TETO, não sugestão");
-    expect(PROMPT_V4_PARTS.AUDIT).toContain("reprova a partir de 21");
+  it("declara uma ideia por frase como a regra e 20 palavras como gatilho, não como teto", () => {
+    expect(PROMPT_V4_PARTS.SENTENCES).toContain("UMA IDEIA POR FRASE é a regra");
+    expect(PROMPT_V4_PARTS.SENTENCES).toContain("ela pode passar de 20 palavras e ficar como está");
+    expect(PROMPT_V4_PARTS.SENTENCES).not.toContain("TETO");
+    expect(PROMPT_V4_PARTS.AUDIT).toContain("nenhuma delas é erro");
+  });
+
+  it("descreve a segmentação e a contagem como o motor de fato as faz", () => {
+    expect(PROMPT_V4_PARTS.AUDIT).toContain("pontuação terminal");
+    expect(PROMPT_V4_PARTS.AUDIT).toContain("linha em branco");
+    expect(PROMPT_V4_PARTS.AUDIT).toContain("não contam como palavra");
+    expect(PROMPT_V4_PARTS.AUDIT).not.toContain("entre pontuações");
   });
 
   it("manda preferir a frase longa apontada à ressalva quebrada", () => {
@@ -86,7 +95,7 @@ describe("rewrite@5 — a estratégia padrão", () => {
   });
 });
 
-describe("rewrite@5 — o que a troca preservou", () => {
+describe("rewrite@6 — o que a troca preservou", () => {
   it("o rewrite@2 continua alcançável para rollback", () => {
     const previous = buildRewritePrompt(TEXT, target, { strategy: "rewrite2", criterion: "long_sentence" });
 
@@ -136,7 +145,7 @@ describe("rewrite@5 — o que a troca preservou", () => {
   });
 });
 
-describe("rewrite@5 — o briefing fala a língua da interface", () => {
+describe("rewrite@6 — o briefing fala a língua da interface", () => {
   it("chama cada critério pelo mesmo nome que a interface", () => {
     for (const criterion of CRITERION_ORDER) {
       expect(criterionLabel(criterion), criterion).toBe(metaFor(criterion).label);

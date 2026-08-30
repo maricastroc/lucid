@@ -179,7 +179,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
   it("restores a profile that departs from the default", () => {
     const config = {
       ...DEFAULT_CONFIG,
-      sentenceLength: { warnAbove: 25, errorAbove: 40 },
+      sentenceLength: { warnAbove: 25 },
       mesoclise: { enabled: false },
     };
     writeWorkspace({
@@ -195,7 +195,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       guidedStep: null,
     });
     const restored = readWorkspace();
-    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25, errorAbove: 40 });
+    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25 });
     expect(restored?.config.mesoclise.enabled).toBe(false);
   });
 
@@ -212,7 +212,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       }),
     );
     const restored = readWorkspace();
-    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25, errorAbove: 30 });
+    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25 });
     expect(restored?.config.mesoclise).toEqual(DEFAULT_CONFIG.mesoclise);
   });
 

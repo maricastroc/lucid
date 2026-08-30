@@ -2,6 +2,16 @@ import type { Diagnostic, Finding, Severity } from "@/lucid";
 import { CRITERION_ORDER, criterionRank, isSafe, severityRank } from "./criteria";
 import { isPending, reviewStateOf, type ReviewMarks } from "./review-marks";
 
+export function findingsInsideSpan(finding: Finding, all: readonly Finding[]): Finding[] {
+  return all.filter(
+    (other) =>
+      other !== finding &&
+      other.criterion !== finding.criterion &&
+      other.span.start >= finding.span.start &&
+      other.span.end <= finding.span.end,
+  );
+}
+
 export type Bucket = "all" | "safe" | "human";
 export type StateFilter = "all" | "pending" | "seen" | "dismissed";
 export type SortOrder = "severity" | "document";

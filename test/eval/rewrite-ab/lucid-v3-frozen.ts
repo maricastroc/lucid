@@ -1,5 +1,5 @@
 import type { Finding, Span } from "@/lucid";
-import { renderBriefing } from "@/report/rewrite";
+import { renderBriefingAsMeasured as renderBriefing } from "./briefing-frozen";
 
 const ROLE = `Você é um proponente de reescrita em Linguagem Simples para documentos institucionais
 brasileiros, e trabalha dentro de um sistema em que quem julga não é você.

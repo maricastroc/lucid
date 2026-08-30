@@ -30,9 +30,7 @@ export function buildConfidence(f: Finding, lang: UiLang = DEFAULT_UI_LANG): Con
 export interface LongSentenceGuidance {
   words: number | null;
   threshold: number | null;
-  over: number | null;
   subordination: number;
-  targetSentences: number | null;
   candidates: SplitPoint[];
 }
 
@@ -42,13 +40,11 @@ export function longSentenceGuidance(f: Finding, source: string): LongSentenceGu
   const span = f.span.text;
   const words = metaNum(f, "words");
   const threshold = metaNum(f, "threshold");
-  const over = words != null && threshold != null ? words - threshold : null;
-  const targetSentences = words != null && threshold != null ? Math.ceil(words / threshold) : null;
 
   const commas = (span.match(/,/g) ?? []).length;
   const subs = (span.match(SUBORD_RE) ?? []).length;
   const subordination = commas + subs;
 
   const candidates = clauseSplitPoints(source, f.span);
-  return { words, threshold, over, subordination, targetSentences, candidates };
+  return { words, threshold, subordination, candidates };
 }

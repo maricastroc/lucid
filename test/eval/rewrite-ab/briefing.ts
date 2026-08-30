@@ -1,1 +1,1 @@
-export { renderBriefing as renderFullBriefing } from "@/report/rewrite";
+export { renderBriefingAsMeasured as renderFullBriefing } from "./briefing-frozen";

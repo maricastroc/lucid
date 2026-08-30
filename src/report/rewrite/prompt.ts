@@ -7,7 +7,7 @@ export type RewriteStrategy = "correct" | "rewrite" | "rewrite2" | "directed";
 
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
-  rewrite: "rewrite@5",
+  rewrite: "rewrite@6",
   rewrite2: "rewrite@2",
   directed: "directed@4",
 };

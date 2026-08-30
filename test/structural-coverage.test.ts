@@ -90,11 +90,13 @@ describe("experiment 001 — coverage follows declared structure, not the contai
   });
 
   it("half of the detectors the map credits to Principle 2 depend on declared structure", () => {
-    const findable = coverageReport().clauses.find((clause) => clause.section === "5.2");
-    const structural = (findable?.criteria ?? []).filter((criterion) =>
+    const credited = coverageReport()
+      .clauses.filter((clause) => clause.section === "5.2" || clause.parent === "5.2")
+      .flatMap((clause) => clause.criteria);
+    const structural = credited.filter((criterion) =>
       (REQUIRES_DECLARED_STRUCTURE as readonly string[]).includes(criterion),
     );
-    expect(findable?.criteria).toHaveLength(4);
+    expect(credited).toHaveLength(4);
     expect(structural.sort()).toEqual(["long_heading", "salto_de_nivel_titulo"]);
   });
 });
@@ -122,8 +124,11 @@ describe("the coverage map answers for a document, not only for the instrument (
   });
 
   it("degrades Principle 2 from its instrument status when half its detectors cannot look", () => {
-    const findable = coverageReport(proseDoc()).clauses.find((clause) => clause.section === "5.2");
-    expect(findable?.silent).toEqual(["long_heading", "salto_de_nivel_titulo"]);
+    const clauses = coverageReport(proseDoc()).clauses;
+    const findable = clauses.find((clause) => clause.section === "5.2");
+    const headings = clauses.find((clause) => clause.section === "5.2.4");
+    expect(headings?.silent).toEqual(["long_heading", "salto_de_nivel_titulo"]);
+    expect(headings?.status).toBe("unreachable");
     expect(findable?.status).toBe("partial");
   });
 

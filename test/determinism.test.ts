@@ -161,7 +161,7 @@ describe("determinism — no shared state (A, B, A)", () => {
   });
 
   it("the same Config object reused across several calls produces stable results", () => {
-    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 8, errorAbove: 20 } };
+    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 8 } };
     const r1 = JSON.stringify(analyze(RICH_TEXT, config));
     JSON.stringify(analyze("outro texto qualquer aqui", config));
     const r2 = JSON.stringify(analyze(RICH_TEXT, config));
@@ -174,7 +174,7 @@ describe("determinism — Config variations", () => {
     { name: "default", config: {} },
     {
       name: "long_sentence off (very high threshold)",
-      config: { sentenceLength: { warnAbove: 10_000, errorAbove: 20_000 } },
+      config: { sentenceLength: { warnAbove: 10_000 } },
     },
     { name: "passive off", config: { passiveVoice: { enabled: false } } },
     { name: "nominalization off", config: { nominalization: { enabled: false } } },
@@ -183,7 +183,7 @@ describe("determinism — Config variations", () => {
       name: "jargon with no informative equivalent",
       config: { jargon: { enabled: true, suggestFromGlossary: false } },
     },
-    { name: "partial threshold override", config: { sentenceLength: { warnAbove: 5, errorAbove: 12 } } },
+    { name: "partial threshold override", config: { sentenceLength: { warnAbove: 5 } } },
   ];
 
   it.each(variants)("$name — deterministic and byte-identical across runs", ({ config }) => {

@@ -17,20 +17,20 @@ const CONFIGS: Record<ProfileId, Config> = {
   base: DEFAULT_CONFIG,
 
   normativo: withOverrides({
-    sentenceLength: { warnAbove: 25, errorAbove: 40 },
+    sentenceLength: { warnAbove: 25 },
     paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 6 },
     subordinacao: { ...DEFAULT_CONFIG.subordinacao, minPorFrase: 4 },
   }),
 
   publico: withOverrides({
-    sentenceLength: { warnAbove: 15, errorAbove: 25 },
+    sentenceLength: { warnAbove: 15 },
     paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 3 },
     subordinacao: { ...DEFAULT_CONFIG.subordinacao, minPorFrase: 2 },
     nominalizacaoEncadeada: { ...DEFAULT_CONFIG.nominalizacaoEncadeada, minPorFrase: 2 },
   }),
 
   digital: withOverrides({
-    sentenceLength: { warnAbove: 15, errorAbove: 25 },
+    sentenceLength: { warnAbove: 15 },
     paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 2 },
     longHeading: { ...DEFAULT_CONFIG.longHeading, maxWords: 8 },
     proseEnumeration: { ...DEFAULT_CONFIG.proseEnumeration, minMarkers: 2 },

@@ -89,7 +89,7 @@ describe("LlmRewriteProposer", () => {
     await new LlmRewriteProposer(rewrite, "m1", "rewrite").propose({ text: t.text, target: t });
 
     expect(new LlmRewriteProposer(correct, "m1", "correct").id).toBe("mock:m1+correct@1");
-    expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@5");
+    expect(new LlmRewriteProposer(rewrite, "m1", "rewrite").id).toBe("mock:m1+rewrite@6");
 
     expect(correct.lastPrompt).toMatch(/MENOR alteração/);
     expect(rewrite.lastPrompt).toMatch(/DOCUMENTO — para ler, não para reescrever/);

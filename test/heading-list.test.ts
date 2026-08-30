@@ -20,7 +20,7 @@ describe("long_heading", () => {
     const found = findingsFor([H(long), P("Um parágrafo.")], "long_heading");
     expect(found).toHaveLength(1);
     expect(found[0].span.text).toBe(long);
-    expect(found[0].normativeReference?.section).toBe("5.2");
+    expect(found[0].normativeReference?.section).toBe("5.2.4");
     expect(found[0].category).toBe("structural");
     expect(found[0].severity).toBe("warning");
     expect(found[0].requiresHuman).toBe(true);

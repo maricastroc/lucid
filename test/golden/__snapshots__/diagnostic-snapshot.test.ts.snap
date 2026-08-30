@@ -4,7 +4,7 @@ exports[`snapshots of the full Diagnostic > 'admin_simples_sem_finding' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -252,7 +252,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "long_sentence",
-      "justification": "Frase com 29 palavras — acima do limite de 20 (alerta). Considere dividir em frases menores ou cortar informação supérflua; a ferramenta não reescreve automaticamente.",
+      "justification": "Frase com 29 palavras. O Lucid inspeciona frases acima de 20 palavras — um parâmetro do produto, não um limite da norma: a ABNT NBR ISO 24495-1 pede frases concisas e variação de tamanho, sem fixar número. Verifique se a frase carrega mais de uma ideia; se carrega uma só, ela pode estar adequada como está.",
       "meta": {
         "threshold": 20,
         "words": 29,
@@ -340,7 +340,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -659,7 +659,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -975,7 +975,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -1223,7 +1223,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "long_sentence",
-      "justification": "Frase com 29 palavras — acima do limite de 20 (alerta). Considere dividir em frases menores ou cortar informação supérflua; a ferramenta não reescreve automaticamente.",
+      "justification": "Frase com 29 palavras. O Lucid inspeciona frases acima de 20 palavras — um parâmetro do produto, não um limite da norma: a ABNT NBR ISO 24495-1 pede frases concisas e variação de tamanho, sem fixar número. Verifique se a frase carrega mais de uma ideia; se carrega uma só, ela pode estar adequada como está.",
       "meta": {
         "threshold": 20,
         "words": 29,
@@ -1367,7 +1367,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -1638,7 +1638,7 @@ exports[`snapshots of the full Diagnostic > 'termos_protegidos_por_guardas' 1`] 
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -1884,7 +1884,7 @@ exports[`snapshots of the full Diagnostic > 'texto_vazio' 1`] = `
 {
   "findings": [],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -2155,7 +2155,7 @@ exports[`snapshots of the full Diagnostic > 'unicode_aspas_travessao' 1`] = `
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
@@ -2455,7 +2455,7 @@ exports[`snapshots of the full Diagnostic > 'voz_passiva_com_e_sem_agente' 1`] =
     },
   ],
   "meta": {
-    "configHash": "ebb6dee9",
+    "configHash": "e5341089",
     "dataHash": "12660a83",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",

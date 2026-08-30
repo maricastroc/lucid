@@ -22,12 +22,20 @@ import { Disclosure } from "./note-disclosure";
 export interface RevisionNoteProps {
   finding: Finding;
   source: string;
+  allFindings: readonly Finding[];
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onManualEdit: (target: Span, replacement: string) => void;
   onApplyCuratedSwap: (target: Span, replacement: string) => void;
 }
 
-export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit, onApplyCuratedSwap }: RevisionNoteProps) {
+export function RevisionNote({
+  finding,
+  source,
+  allFindings,
+  onApplyRewrite,
+  onManualEdit,
+  onApplyCuratedSwap,
+}: RevisionNoteProps) {
   const { c, lang } = useCopy();
   const meta = metaFor(finding.criterion, lang);
   const ink = severityInkVar(finding.severity);
@@ -78,6 +86,7 @@ export function RevisionNote({ finding, source, onApplyRewrite, onManualEdit, on
           <HumanDecision
             finding={finding}
             source={source}
+            allFindings={allFindings}
             declaration={declaration}
             onDeclare={setDeclaration}
             onApplyRewrite={onApplyRewrite}

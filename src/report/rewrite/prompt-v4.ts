@@ -37,9 +37,11 @@ const AUDIT = `O QUE O MOTOR VAI VERIFICAR NA SUA RESPOSTA
 Cada item é uma medição determinística sobre o texto, feita comparando o original com a sua
 reescrita. Não são conselhos: são as condições de aceitação.
 
-1. O apontamento que motivou esta reescrita precisa desaparecer do trecho. Os limiares são
-   numéricos e não têm margem: em "Frase longa", o motor conta as palavras entre pontuações
-   fortes e reprova a partir de 21. Uma frase de 21 palavras reprova exatamente como uma de 60.
+1. O apontamento que motivou esta reescrita precisa desaparecer do trecho. Em "Comprimento de
+   frase", o motor corta o texto em frases por pontuação terminal (. ! ? …) ou por linha em branco,
+   e conta as palavras de cada frase — número, data e endereço não contam como palavra. Ele aponta
+   a partir de 21 palavras. O apontamento tem sempre o mesmo peso: uma frase de 21 palavras e uma
+   de 60 pesam igual, e nenhuma delas é erro.
 2. O peso dos apontamentos dentro do trecho precisa cair — resolver um e criar dois reprova.
 3. A reescrita não pode aumentar o total de apontamentos do documento inteiro.
 4. Todo número do trecho precisa reaparecer na reescrita, com a mesma grafia. Nenhum número novo.
@@ -83,7 +85,7 @@ responder, releia a sua reescrita procurando por estes três:
   seguir — não que elas passem a ser consequência do que vem a seguir.
   Se você não consegue dividir a frase sem soltar a ressalva do que ela rege, NÃO DIVIDA: uma
   frase de 24 palavras com o sentido certo é melhor que duas de 12 com o sentido trocado. O motor
-  vai apontar a frase longa, e o autor decide — isso é muito melhor que ele aplicar um sentido
+  vai registrar o comprimento, e o autor decide — isso é muito melhor que ele aplicar um sentido
   errado sem saber.
 
 - DESCREVER NÃO É OBRIGAR. Se o original descreve como algo acontece ("será instaurado mediante
@@ -122,14 +124,14 @@ Trocar é o padrão; manter é a exceção, e ela precisa se justificar sozinha.
 const SENTENCES = `FRASES CLARAS E CONCISAS (seções 5.3.3 e 5.3.4)
 - Voz ativa e ordem direta: sujeito, verbo, objeto. Diga quem faz o quê — e se o original não
   disser quem age, deixe sem agente em vez de inventar um (veja o item 9 da auditoria).
-- 20 palavras é TETO, não sugestão. Nenhuma frase da sua reescrita pode passar disso. Uma ideia
-  por frase: desfaça cadeias de orações subordinadas em frases próprias e prefira criar frase
-  nova a alongar a existente. Ao terminar, conte as palavras da frase mais longa que você
-  escreveu; se passar de 20, quebre de novo antes de responder.
-- A ressalva contra fragmentar vale só ABAIXO do teto: não quebre em duas uma frase que já tem
-  menos de ~15 palavras, porque aí dividir atrapalha o ritmo sem facilitar nada. Ela nunca
-  autoriza deixar uma frase acima do teto inteira.
-- Varie o comprimento dentro do teto: frases todas iguais cansam tanto quanto uma frase longa.
+- UMA IDEIA POR FRASE é a regra; 20 palavras é só o gatilho de revisão do motor. Desfaça cadeias
+  de orações subordinadas em frases próprias quando cada uma carregar a sua ideia. Ao terminar,
+  releia a frase mais longa que você escreveu e pergunte quantas ideias ela carrega: se carrega
+  mais de uma, separe; se carrega uma só, ela pode passar de 20 palavras e ficar como está.
+- Não fragmente. Não quebre em duas uma frase que já tem menos de ~15 palavras, e não quebre uma
+  frase longa que diz uma coisa só: dividir aí atrapalha o ritmo sem facilitar nada.
+- Varie o comprimento: frases todas do mesmo tamanho cansam tanto quanto uma frase longa, e a
+  norma pede a variação explicitamente.
 - Divida com moderação: uma frase do original raramente precisa virar mais de três. Uma sequência
   de frases muito curtas, todas com o mesmo sujeito retomado por "ele", "ela", "este" ou "esse",
   não é linguagem simples — é a mesma frase picada, e obriga a pessoa a remontá-la de cabeça.

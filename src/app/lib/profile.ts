@@ -13,7 +13,6 @@ export interface Knob {
 
 type KnobLabelKey =
   | "knobSentenceWarn"
-  | "knobSentenceError"
   | "knobParagraph"
   | "knobHeading"
   | "knobSubordination"
@@ -52,7 +51,6 @@ export const SECTION_CRITERION: Record<string, string> = {
 
 export const KNOBS: readonly Knob[] = [
   { section: "sentenceLength", field: "warnAbove", labelKey: "knobSentenceWarn", min: 5, max: 120 },
-  { section: "sentenceLength", field: "errorAbove", labelKey: "knobSentenceError", min: 5, max: 200 },
   { section: "paragraphLength", field: "maxSentences", labelKey: "knobParagraph", min: 1, max: 30 },
   { section: "longHeading", field: "maxWords", labelKey: "knobHeading", min: 2, max: 40 },
   { section: "subordinacao", field: "minPorFrase", labelKey: "knobSubordination", min: 2, max: 12 },

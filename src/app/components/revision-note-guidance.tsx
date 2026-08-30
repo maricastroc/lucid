@@ -2,6 +2,8 @@
 
 import { useState, type ReactNode } from "react";
 import { isCriterionId, passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
+import { findingsInsideSpan } from "../lib/finding-query";
+import { metaFor } from "../lib/criteria";
 import type { AgentDeclaration } from "@/report/rewrite";
 import { Checkbox } from "./ui/checkbox";
 import { longSentenceGuidance } from "../lib/narrative";
@@ -11,18 +13,19 @@ import type { UiCopy } from "../i18n/copy";
 export interface GuidanceProps {
   finding: Finding;
   source: string;
+  allFindings: readonly Finding[];
   declaration?: AgentDeclaration | null;
   onDeclare?: (d: AgentDeclaration | null) => void;
 }
 
-export function Guidance({ finding, source, declaration, onDeclare }: GuidanceProps) {
+export function Guidance({ finding, source, allFindings, declaration, onDeclare }: GuidanceProps) {
   const { c } = useCopy();
   const g = c.guidance;
   const criterion = finding.criterion;
   if (!isCriterionId(criterion)) return <GuideText>{g.generic}</GuideText>;
   switch (criterion) {
     case "long_sentence":
-      return <LongSentenceGuide finding={finding} source={source} />;
+      return <LongSentenceGuide finding={finding} source={source} allFindings={allFindings} />;
     case "passive_voice":
       return <PassiveGuide finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />;
     case "passiva_sintetica":
@@ -121,11 +124,21 @@ function boundaryLabel(point: SplitPoint, c: UiCopy): string {
   }
 }
 
-function LongSentenceGuide({ finding, source }: { finding: Finding; source: string }) {
-  const { c } = useCopy();
+function LongSentenceGuide({
+  finding,
+  source,
+  allFindings,
+}: {
+  finding: Finding;
+  source: string;
+  allFindings: readonly Finding[];
+}) {
+  const { c, lang } = useCopy();
   const t = c.guidance;
   const guide = longSentenceGuidance(finding, source);
   const hasCuts = guide.candidates.length > 0;
+  const inside = findingsInsideSpan(finding, allFindings);
+  const criteria = [...new Set(inside.map((f) => f.criterion))];
   return (
     <div>
       <p className="text-[12.5px] leading-relaxed text-ink-1">
@@ -141,13 +154,48 @@ function LongSentenceGuide({ finding, source }: { finding: Finding; source: stri
           <>{t.longSentenceNoCuts}</>
         )}
       </p>
-      <div className="mt-3 grid grid-cols-3 gap-2">
+
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <Stat label={t.statWords} value={guide.words != null ? String(guide.words) : "—"} />
-        <Stat label={t.statOver} value={guide.over != null ? `+${guide.over}` : "—"} />
         <Stat
-          label={t.statTarget}
-          value={guide.targetSentences != null ? t.statTargetValue(guide.targetSentences) : "—"}
+          label={t.statTrigger}
+          value={guide.threshold != null ? String(guide.threshold) : "—"}
+          note={t.statTriggerNote}
         />
+      </div>
+
+      <dl className="mt-4 flex flex-col gap-2 rounded-lg border border-rule-1 bg-surface-2 px-3 py-2.5">
+        <div>
+          <dt className="u-sublabel text-ink-3">{t.standardSaysLabel}</dt>
+          <dd className="text-[12px] leading-relaxed text-ink-1">{t.standardSays}</dd>
+        </div>
+        <div>
+          <dt className="u-sublabel text-ink-3">{t.parameterSaysLabel}</dt>
+          <dd className="text-[12px] leading-relaxed text-ink-1">
+            {guide.threshold != null ? t.parameterSays(guide.threshold) : "—"}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-4">
+        <p className="u-sublabel mb-2 text-ink-3">{t.coOccurringLabel}</p>
+        {criteria.length > 0 ? (
+          <>
+            <ul className="flex flex-wrap gap-1.5">
+              {criteria.map((criterion) => (
+                <li
+                  key={criterion}
+                  className="rounded-[5px] border border-rule-1 bg-sheet px-2 py-0.5 text-[11.5px] text-ink-1"
+                >
+                  {metaFor(criterion, lang).label}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{t.coOccurringNote}</p>
+          </>
+        ) : (
+          <p className="text-[11.5px] leading-relaxed text-ink-3">{t.coOccurringNone}</p>
+        )}
       </div>
 
       {hasCuts && (
@@ -338,11 +386,12 @@ function NominalizationGuide({ finding }: { finding: Finding }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <div className="rounded-lg border border-rule-1 bg-sheet px-2 py-2 text-center shadow-(--shadow-card)">
       <div className="text-[15px] tabular-nums text-ink-0">{value}</div>
       <div className="u-sublabel mt-0.5 font-medium text-ink-3">{label}</div>
+      {note !== undefined && <div className="mt-0.5 text-[10.5px] leading-tight text-ink-3">{note}</div>}
     </div>
   );
 }

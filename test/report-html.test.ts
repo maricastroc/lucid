@@ -27,7 +27,7 @@ function fullReport(originalText = ENTRY): string {
       },
     ],
     { briefing, check: checkBriefing(d.text, briefing) },
-    { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 25, errorAbove: 40 }, mesoclise: { enabled: false } },
+    { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 25 }, mesoclise: { enabled: false } },
     originalText,
   );
 }

@@ -18,9 +18,9 @@ describe("audit report — the editorial profile travels with the audit", () => 
   });
 
   it("names every departure and the value it replaced", () => {
-    const md = report({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 60, errorAbove: 90 } });
+    const md = report({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 60 } });
     expect(md).toContain("## Perfil editorial");
-    expect(md).toContain("Frase longa — alerta acima de 60 (padrão: 20)");
+    expect(md).toContain("Inspecionar frases acima de 60 (padrão: 20)");
     expect(md).toContain("não** rodou com os limiares padrão");
   });
 

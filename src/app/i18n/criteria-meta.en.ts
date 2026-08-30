@@ -48,11 +48,14 @@ export const CRITERION_TEXT_EN: Record<CriterionId, CriterionText> = {
     why: "An unexpanded acronym assumes the reader already knows it — anyone who does not stalls right at the start.",
   },
   long_sentence: {
-    label: "Long sentence",
+    label: "Sentence length",
     kind: "Sentence length",
     principleName: "Concise sentences",
-    signal: "sentence word count above the configured threshold",
-    why: "Long sentences overload the reader's working memory.",
+    signal: "sentence word count above the configured inspection trigger",
+    why:
+      "Length is an inspection trigger, not a defect: the standard asks for one idea per sentence and for " +
+      "varied length, without fixing a number. Long sentences tend to accumulate ideas, but a long sentence " +
+      "carrying a single idea can be fine, and a short sentence can be hard for other reasons.",
   },
   mais_que_perfeito_sintetico: {
     label: "Synthetic pluperfect",

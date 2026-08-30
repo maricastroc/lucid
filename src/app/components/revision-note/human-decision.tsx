@@ -12,12 +12,14 @@ import { Disclosure } from "./note-disclosure";
 export function HumanDecision({
   finding,
   source,
+  allFindings,
   declaration,
   onDeclare,
   onApplyRewrite,
 }: {
   finding: Finding;
   source: string;
+  allFindings: readonly Finding[];
   declaration: AgentDeclaration | null;
   onDeclare: (d: AgentDeclaration | null) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
@@ -36,7 +38,13 @@ export function HumanDecision({
         <Disclosure label={c.note.howToProceed}>
           <p className="text-[12px] leading-relaxed text-ink-2">{rationale}</p>
           <div className="mt-3">
-            <Guidance finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />
+            <Guidance
+              finding={finding}
+              source={source}
+              allFindings={allFindings}
+              declaration={declaration}
+              onDeclare={onDeclare}
+            />
           </div>
         </Disclosure>
 

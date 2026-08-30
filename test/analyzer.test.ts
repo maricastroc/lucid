@@ -77,7 +77,7 @@ describe("analyze — document with no findings", () => {
 
 describe("analyze — document with one finding", () => {
   it("a long sentence yields exactly one finding with the correct fields", () => {
-    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5, errorAbove: 100 } };
+    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5 } };
     const text = "Esta é uma frase propositalmente longa para ultrapassar o limite de alerta configurado no teste.";
 
     const diagnostic = analyze(text, config);
@@ -98,7 +98,7 @@ describe("analyze — document with one finding", () => {
 
 describe("analyze — multiple findings", () => {
   it("several long sentences yield one finding per sentence, all counted in the scorecard", () => {
-    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
+    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3 } };
     const text =
       "Uma frase bem longa para o teste. Outra frase também bem longa aqui. Mais uma frase igualmente longa.";
     const diagnostic = analyze(text, config);
@@ -168,7 +168,7 @@ describe("analyze — custom configuration", () => {
     const text = "Frase curta de teste aqui agora.";
 
     const withoutFindings = analyze(text, DEFAULT_CONFIG);
-    const withFindings = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 1000 } });
+    const withFindings = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2 } });
 
     expect(withoutFindings.findings).toHaveLength(0);
     expect(withFindings.findings).toHaveLength(1);
@@ -178,7 +178,7 @@ describe("analyze — custom configuration", () => {
     const text = "Texto qualquer para o teste de hash.";
 
     const standard = analyze(text);
-    const custom = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2, errorAbove: 4 } });
+    const custom = analyze(text, { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 2 } });
 
     expect(custom.meta.configHash).not.toBe(standard.meta.configHash);
   });
@@ -197,7 +197,7 @@ describe("analyze — integrated metrics", () => {
 
 describe("analyze — offsets preserved", () => {
   it("each finding's span reconstructs the excerpt exactly by slicing Diagnostic.text", () => {
-    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 1000 } };
+    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3 } };
     const text = "Primeira frase bem longa para o teste. Segunda frase também bem longa aqui.";
 
     const diagnostic = analyze(text, config);
@@ -223,7 +223,7 @@ describe("analyze — byte-identical on repeated runs", () => {
 
   it("the same input always produces the same JSON (custom config)", () => {
     const text = "Primeira frase bem longa para o teste. Segunda frase também bem longa aqui.";
-    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3, errorAbove: 6 } };
+    const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 3 } };
 
     const r1 = JSON.stringify(analyze(text, config));
     const r2 = JSON.stringify(analyze(text, config));

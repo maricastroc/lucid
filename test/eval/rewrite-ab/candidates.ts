@@ -2,11 +2,12 @@ import { buildRewritePrompt, buildRewritePromptV4 } from "@/report/rewrite";
 import { buildLucidV1 } from "./lucid-v1-frozen";
 import { buildLucidV2 } from "./lucid-v2-frozen";
 import { buildLucidV3 } from "./lucid-v3-frozen";
+import { buildLucidV4 } from "./lucid-v4-frozen";
 import { renderFullBriefing } from "./briefing";
 import type { EvalTarget } from "./targets";
 
 export type CandidateId =
-  "rewrite@2" | "ab-A@1" | "ab-B@1" | "ab-C@1" | "lucid@v1" | "lucid@v2" | "lucid@v3" | "lucid@v4";
+  "rewrite@2" | "ab-A@1" | "ab-B@1" | "ab-C@1" | "lucid@v1" | "lucid@v2" | "lucid@v3" | "lucid@v4" | "lucid@v5";
 
 const NO_INVENTION_RULES = `- NÃO acrescente fato, exemplo, número, data ou explicação que não esteja no trecho;
 - NÃO invente quem praticou a ação — se o texto não diz o agente, NÃO diga (não crie "nós", "a
@@ -164,6 +165,13 @@ export const CANDIDATES: readonly Candidate[] = [
   {
     id: "lucid@v4",
     description: "lucid@v3 com o rótulo do dispositivo e a proibição de lista elevados a condição de aceitação",
+    build: (target, fullText) => buildLucidV4(fullText, target.span, target.findings),
+  },
+  {
+    id: "lucid@v5",
+    description:
+      "lucid@v4 (`rewrite@5`) sem o teto de 20 palavras: uma ideia por frase vira a regra, o comprimento " +
+      "vira gatilho de revisão, e a auditoria descreve a segmentação e a contagem como o motor de fato as faz",
     build: (target, fullText) => buildRewritePromptV4(fullText, target.span, target.findings),
   },
 ];

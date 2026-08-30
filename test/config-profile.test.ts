@@ -17,10 +17,9 @@ describe("configDeviations — every departure from the default is nameable", ()
   });
 
   it("names a loosened threshold with the value it replaced", () => {
-    const config = withOverrides({ sentenceLength: { warnAbove: 30, errorAbove: 45 } });
+    const config = withOverrides({ sentenceLength: { warnAbove: 30 } });
     expect(configDeviations(config)).toEqual([
       { section: "sentenceLength", field: "warnAbove", value: 30, fallback: 20 },
-      { section: "sentenceLength", field: "errorAbove", value: 45, fallback: 30 },
     ]);
     expect(isDefaultConfig(config)).toBe(false);
   });
@@ -42,7 +41,7 @@ describe("configDeviations — every departure from the default is nameable", ()
   it("is deterministic and ordered by the default's own declaration order", () => {
     const config = withOverrides({
       mesoclise: { enabled: false },
-      sentenceLength: { warnAbove: 25, errorAbove: 30 },
+      sentenceLength: { warnAbove: 25 },
       passiveVoice: { enabled: false },
     });
     const sections = configDeviations(config).map((d) => d.section);
@@ -54,7 +53,7 @@ describe("configDeviations — every departure from the default is nameable", ()
 describe("the profile actually drives the engine", () => {
   it("a looser sentence threshold produces fewer long-sentence findings", () => {
     const strict = analyze(LONG).findings.filter((f) => f.criterion === "long_sentence");
-    const loose = analyze(LONG, { sentenceLength: { warnAbove: 60, errorAbove: 90 } }).findings.filter(
+    const loose = analyze(LONG, { sentenceLength: { warnAbove: 60 } }).findings.filter(
       (f) => f.criterion === "long_sentence",
     );
     expect(strict.length).toBeGreaterThan(0);
@@ -74,7 +73,7 @@ describe("the profile actually drives the engine", () => {
 describe("the profile cannot be changed silently — the stamp moves with it", () => {
   it("changing a threshold changes the configHash", () => {
     const base = hashConfig(DEFAULT_CONFIG);
-    expect(hashConfig(withOverrides({ sentenceLength: { warnAbove: 25, errorAbove: 30 } }))).not.toBe(base);
+    expect(hashConfig(withOverrides({ sentenceLength: { warnAbove: 25 } }))).not.toBe(base);
   });
 
   it("disabling a criterion changes the configHash", () => {
@@ -82,7 +81,7 @@ describe("the profile cannot be changed silently — the stamp moves with it", (
   });
 
   it("the diagnostic carries the hash of the profile that produced it", () => {
-    const custom: Partial<Config> = { sentenceLength: { warnAbove: 40, errorAbove: 60 } };
+    const custom: Partial<Config> = { sentenceLength: { warnAbove: 40 } };
     expect(analyze(LONG, custom).meta.configHash).toBe(hashConfig(withOverrides(custom)));
     expect(analyze(LONG).meta.configHash).toBe(hashConfig(DEFAULT_CONFIG));
   });
