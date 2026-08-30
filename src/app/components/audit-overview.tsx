@@ -10,7 +10,7 @@ import {
   type ReaderBriefing,
   type Severity,
 } from "@/lucid";
-import { severityInkVar, severityLabel } from "../lib/criteria";
+import { severityInkVar } from "../lib/criteria";
 import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
 import type { LedgerEntry } from "../lib/ledger";
@@ -97,8 +97,8 @@ export function AuditOverview({
         {deviations.length > 0 && (
           <p className="mt-2 max-w-md text-[12px] leading-relaxed" style={{ color: "var(--sev-warn)" }}>
             {c.overview.adjustedProfileBefore}
-            <strong className="font-semibold">{c.overview.adjustedProfileStrong}</strong> (
-            {c.overview.adjustedProfile(deviations.length, offCount)}). {c.overview.adjustedProfileAfter}
+            <strong className="font-semibold">{c.overview.adjustedProfileStrong}</strong>
+            {c.overview.adjustedProfile(deviations.length, offCount)} {c.overview.adjustedProfileAfter}
           </p>
         )}
         {silentCriteria.length > 0 && (
@@ -133,8 +133,8 @@ export function AuditOverview({
               )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px]">
-              <Legend swatch="var(--safe)" label={c.overview.legendSafe} value={safeCount} />
-              <Legend swatch="var(--human)" label={c.overview.legendHuman} value={humanCount} />
+              <Legend swatch="var(--safe)" label={c.overview.legendSafe(safeCount)} value={safeCount} />
+              <Legend swatch="var(--human)" label={c.overview.legendHuman(humanCount)} value={humanCount} />
             </div>
             {(sev.error > 0 || sev.warning > 0 || sev.info > 0) && (
               <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] text-ink-2">
@@ -142,7 +142,7 @@ export function AuditOverview({
                   sev[s] > 0 ? (
                     <span key={s} className="inline-flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full" style={{ background: severityInkVar(s) }} aria-hidden />
-                      {sev[s]} {severityLabel(s, lang).toLowerCase()}
+                      {sev[s]} {c.overview.severityCount(s, sev[s])}
                     </span>
                   ) : null,
                 )}
@@ -173,16 +173,14 @@ export function AuditOverview({
         <p className="mt-4 text-[12px] italic leading-relaxed text-ink-2">{c.overview.scoreCaveat}</p>
 
         <p className="mt-3 flex items-center gap-2 text-[11px] text-ink-3">
-          <span className="inline-flex items-center gap-1.5 text-ink-2">
-            <span className="size-1.5 rounded-full bg-accent" aria-hidden />
-            {c.note.footerDeterministic}
-          </span>
-          <span aria-hidden>·</span>
           <span
-            className="truncate"
+            className="inline-flex min-w-0 items-center gap-1.5 text-ink-2"
             title={c.panel.provenanceTitle(diagnostic.meta.configHash, diagnostic.meta.lucidVersion)}
           >
-            {diagnostic.meta.standardVersion}
+            <span className="size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+            <span className="truncate">
+              {c.note.footerDeterministic} {diagnostic.meta.standardVersion}
+            </span>
           </span>
         </p>
       </div>

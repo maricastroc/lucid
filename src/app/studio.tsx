@@ -36,6 +36,7 @@ import { RevisionSheet } from "./components/revision-sheet";
 import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 import { ConfirmDialog } from "./components/ui/confirm-dialog";
+import { Button } from "./components/ui/button";
 
 export function Studio() {
   const { c } = useCopy();
@@ -410,9 +411,9 @@ export function Studio() {
           className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
         >
           <span>{c.studio.importRefusal[importError]}</span>
-          <button type="button" onClick={dismissImportError} className="text-ink-2 hover:text-ink-0">
+          <Button variant="ghost" size="sm" onClick={dismissImportError}>
             {c.common.close}
-          </button>
+          </Button>
         </div>
       )}
 
@@ -458,13 +459,15 @@ export function Studio() {
       </div>
 
       {mode === "audit" && visible.length > 0 && !sheetOpen && (
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="xl"
+          shape="pill"
           onClick={revealSheet}
-          className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-pop) lg:hidden"
+          className="fixed bottom-5 right-5 z-30 shadow-(--shadow-pop) lg:hidden"
         >
           {c.studio.revisions(visible.length)}
-        </button>
+        </Button>
       )}
 
       {mode === "audit" && sheetOpen && (
@@ -498,20 +501,12 @@ export function Studio() {
                 <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
               </span>
               <span className="flex shrink-0 items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={acceptAsPlainText}
-                  className="rounded-full border border-rule-2 px-3 py-1 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-                >
+                <Button variant="outline" shape="pill" onClick={acceptAsPlainText}>
                   {c.studio.spliceAcceptPlain}
-                </button>
-                <button
-                  type="button"
-                  onClick={discardRefusedEdit}
-                  className="rounded-full px-2.5 py-1 text-[12.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-                >
+                </Button>
+                <Button variant="ghost" shape="pill" onClick={discardRefusedEdit}>
                   {c.studio.spliceDiscard}
-                </button>
+                </Button>
               </span>
             </div>
           )}
@@ -521,13 +516,9 @@ export function Studio() {
                 <ArrowDownIcon className="size-4 text-safe" aria-hidden />
                 {c.studio.changeApplied}
               </span>
-              <button
-                type="button"
-                onClick={undoChange}
-                className="rounded-full px-3 py-1 text-[12.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
-              >
+              <Button variant="link" shape="pill" onClick={undoChange}>
                 {c.studio.undo}
-              </button>
+              </Button>
             </div>
           )}
         </div>

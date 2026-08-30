@@ -13,6 +13,7 @@ import { ReportRecordDialog } from "./report-record-dialog";
 import { downloadFile } from "./export-menu/download-file";
 import { useDismissableMenu } from "./export-menu/use-dismissable-menu";
 import { ArrowDownIcon, ChevronDownIcon, PenNibIcon } from "./icons";
+import { Button } from "./ui/button";
 
 export interface ExportMenuProps {
   diagnostic: Diagnostic;
@@ -94,20 +95,13 @@ export function ExportMenu({
 
   return (
     <div ref={boxRef} className="relative" onKeyDown={onKeyDown}>
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={toggle}
-        className="inline-flex items-center gap-1.5 rounded-full border border-rule-2 px-3 py-1.5 text-[12px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-      >
+      <Button ref={triggerRef} shape="pill" aria-haspopup="menu" aria-expanded={open} onClick={toggle}>
         <ArrowDownIcon className="size-3.5" />
         {c.panel.exportLabel}
         <ChevronDownIcon
           className={`size-3 text-ink-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
         />
-      </button>
+      </Button>
 
       {open && (
         <div

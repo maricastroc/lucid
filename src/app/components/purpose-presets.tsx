@@ -13,6 +13,7 @@ import {
 } from "../lib/profiles";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
+import { Button } from "./ui/button";
 
 interface Props {
   config: Config;
@@ -34,19 +35,16 @@ export function PurposePresets({ config, selected, onSelect }: Props) {
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {PROFILE_IDS.map((id) => (
-          <button
+          <Button
             key={id}
-            type="button"
+            variant={id === selected ? "primary" : "outline"}
+            shape="pill"
             aria-pressed={id === selected}
             onClick={() => onSelect(id)}
-            className={
-              id === selected
-                ? "rounded-full bg-accent px-3 py-1.5 text-[12px] font-semibold text-accent-ink"
-                : "rounded-full border border-rule-2 px-3 py-1.5 text-[12px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-            }
+            className="px-3 py-1.5 text-[12px]"
           >
             {p.names[id]}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -7,8 +7,8 @@ import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE } from "./support/documents";
 
 const ENTRY_TEXT = "O pedido foi indeferido pela comissão por falta dos 3 documentos supracitados.";
 
-const entryBlock = () => within(auditPanel().getByRole("region", { name: /texto de entrada/i }));
-const showEntryText = () => entryBlock().getByRole("button", { name: /ver o texto de entrada/i });
+const entryBlock = () => within(auditPanel().getByRole("region", { name: /texto original/i }));
+const showEntryText = () => entryBlock().getByRole("button", { name: /ver o texto original/i });
 
 const LONG_PASSIVE =
   "O pedido de reconsideração que o interessado apresentou foi indeferido pela comissão por falta " +
@@ -34,7 +34,7 @@ describe("the record of a document · the text as it came in", () => {
     await user.click(showEntryText());
     expect(entryBlock().getByText(ENTRY_TEXT)).toBeInTheDocument();
 
-    await user.click(entryBlock().getByRole("button", { name: /ocultar o texto de entrada/i }));
+    await user.click(entryBlock().getByRole("button", { name: /ocultar o texto original/i }));
     expect(entryBlock().queryByText(ENTRY_TEXT)).not.toBeInTheDocument();
   });
 
@@ -44,7 +44,7 @@ describe("the record of a document · the text as it came in", () => {
     await user.click(showEntryText());
 
     expect(entryBlock().queryByRole("button", { name: /restaurar|reverter|voltar ao original/i })).toBeNull();
-    expect(entryBlock().getByText(/não restaura nem aplica nada/i)).toBeInTheDocument();
+    expect(entryBlock().getByText(/não restaura nem aplica alterações/i)).toBeInTheDocument();
   });
 
   it("survives a change to the document: the entry text is the text that came in, not the current one", async () => {
@@ -65,7 +65,7 @@ describe("the record of a document · the text as it came in", () => {
 
     await applyManualEdit(user);
     expect(entryBlock().getByText(/não registrado para este documento/i)).toBeInTheDocument();
-    expect(entryBlock().queryByRole("button", { name: /ver o texto de entrada/i })).toBeNull();
+    expect(entryBlock().queryByRole("button", { name: /ver o texto original/i })).toBeNull();
   });
 
   it("says a document written here has no entry text to compare against", async () => {
@@ -80,7 +80,7 @@ describe("the record of a document · the text as it came in", () => {
     mountStudio({ text: PASSIVE_AND_JARGON, originalText: "" });
     await auditReady();
 
-    expect(auditPanel().queryByRole("region", { name: /texto de entrada/i })).toBeNull();
+    expect(auditPanel().queryByRole("region", { name: /texto original/i })).toBeNull();
     expect(auditPanel().queryByText(/alterações registradas/i)).not.toBeInTheDocument();
   });
 });
@@ -130,7 +130,7 @@ describe("the record of a document · what the trail shows and what it admits", 
     await auditReady();
     await applyManualEdit(user);
 
-    expect(auditPanel().getByText(/sem entrar aqui nem no relatório exportado/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/não aparecem aqui nem no relatório exportado/i)).toBeInTheDocument();
   });
 });
 

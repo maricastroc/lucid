@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useFileDrop } from "../hooks/use-file-drop";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowRightIcon, CheckIcon, CloseIcon, PenNibIcon } from "./icons";
+import { Button } from "./ui/button";
 
 interface Props {
   onWrite: () => void;
@@ -95,30 +96,24 @@ export function Welcome({ onWrite, onOpenDocument, onLoadExample, importing }: P
                   e.target.value = "";
                 }}
               />
-              <button
-                type="button"
-                onClick={onWrite}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-5 py-2.5 text-[13.5px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong"
-              >
+              <Button variant="primary" size="hero" shape="pill" onClick={onWrite}>
                 <PenNibIcon className="size-4" />
                 {w.write}
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="outline"
+                size="hero"
+                shape="pill"
                 onClick={() => fileInput.current?.click()}
                 disabled={importing}
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-rule-2 px-5 py-2.5 text-[13.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60"
+                className="bg-transparent px-5 py-2.5 text-[13.5px] hover:bg-surface"
               >
                 {importing ? c.masthead.opening : c.masthead.openDocument}
-              </button>
-              <button
-                type="button"
-                onClick={onLoadExample}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full px-3 py-2.5 text-[13.5px] font-medium text-accent transition-colors duration-150 hover:bg-accent-weak sm:ml-1"
-              >
+              </Button>
+              <Button variant="link" size="hero" shape="pill" onClick={onLoadExample} className="sm:ml-1">
                 {w.loadExample}
                 <ArrowRightIcon className="size-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
 

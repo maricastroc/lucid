@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ChangeKind, CriterionChange } from "../lib/attribution";
-import { metaFor } from "../lib/criteria";
+import { formatWeight, metaFor } from "../lib/criteria";
 import { burdenMove, entryLabel, type LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
 import { ChevronDownIcon } from "./icons";
@@ -16,7 +16,6 @@ const MOVE_INK: Record<ReturnType<typeof burdenMove>, string> = {
   level: "text-ink-3",
 };
 
-const fmtBurden = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
 export function RecordedChanges({
@@ -40,7 +39,11 @@ export function RecordedChanges({
         <>
           <h3 className="u-label text-ink-3">{c.overview.trailLabel}</h3>
           <p className="mt-2 text-[12px] text-ink-2">
-            {c.overview.trailWeight(fmtBurden(first.burdenBefore), fmtBurden(last.burdenAfter), entries.length)}
+            {c.overview.trailWeight(
+              formatWeight(first.burdenBefore, lang),
+              formatWeight(last.burdenAfter, lang),
+              entries.length,
+            )}
           </p>
           <ol aria-label={c.overview.trailLabel} className="mt-3 flex flex-col gap-2.5">
             {entries.map((e, i) => {
@@ -52,7 +55,7 @@ export function RecordedChanges({
                       <span className="tabular-nums text-ink-3">{i + 1}.</span> {entryLabel(e, lang)}
                     </span>
                     <span className="shrink-0 tabular-nums text-ink-2">
-                      {fmtBurden(e.burdenBefore)}→{fmtBurden(e.burdenAfter)}{" "}
+                      {formatWeight(e.burdenBefore, lang)}→{formatWeight(e.burdenAfter, lang)}{" "}
                       <span className={MOVE_INK[move]} aria-hidden>
                         {MOVE_MARK[move]}
                       </span>

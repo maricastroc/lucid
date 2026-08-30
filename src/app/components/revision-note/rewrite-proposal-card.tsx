@@ -2,6 +2,7 @@
 
 import type { VerifiedRewrite } from "@/report/rewrite";
 import { useCopy } from "../../i18n/use-copy";
+import { Button } from "../ui/button";
 
 export function RewriteProposalCard({
   result,
@@ -91,23 +92,9 @@ export function RewriteProposalCard({
         <p className="font-serif text-[14.5px] leading-snug text-ink-1">{proposal.proposed}</p>
 
         <div className="mt-3">
-          <button
-            type="button"
-            onClick={onApplyRewrite}
-            disabled={stale}
-            className="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-semibold transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            style={
-              blocked
-                ? {
-                    background: "var(--human-weak)",
-                    color: "var(--human)",
-                    boxShadow: "inset 0 0 0 1px var(--human-line)",
-                  }
-                : { background: "var(--accent)", color: "var(--accent-ink)" }
-            }
-          >
+          <Button variant={blocked ? "tonal-human" : "primary"} size="lg" disabled={stale} onClick={onApplyRewrite}>
             {stale ? c.note.applyStale : blocked ? c.note.applyBlocked : c.note.apply}
-          </button>
+          </Button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
             {stale ? c.note.applyStaleNote : blocked ? c.note.applyBlockedNote : c.note.applyNote}
           </p>

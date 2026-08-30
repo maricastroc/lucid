@@ -406,3 +406,12 @@ export function orderFindingsForIndex(findings: readonly Finding[]): Finding[] {
     return a.span.end - b.span.end;
   });
 }
+
+/** The audit weight is a decimal, and a decimal is written differently in each locale. */
+export function formatWeight(value: number, lang: UiLang): string {
+  if (Number.isInteger(value)) return String(value);
+  return value.toLocaleString(lang === "pt-BR" ? "pt-BR" : "en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+}

@@ -5,6 +5,7 @@ import type { ReaderBriefing } from "@/lucid";
 import { useCopy } from "../i18n/use-copy";
 import type { UiCopy } from "../i18n/copy";
 import { REPORT_RECORD_FIELDS, type ReportRecordField } from "../lib/briefing-surfaces";
+import { Button } from "./ui/button";
 
 const COPY_KEYS: Record<
   ReportRecordField,
@@ -82,12 +83,9 @@ export function ReportRecordDialog({
 
           <div className="shrink-0 px-6 pb-6 pt-5">
             <RadixDialog.Close asChild>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center rounded-full border border-rule-2 px-4 py-2 text-[13px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
-              >
+              <Button variant="outline" size="xl" shape="pill">
                 {r.done}
-              </button>
+              </Button>
             </RadixDialog.Close>
           </div>
         </RadixDialog.Content>

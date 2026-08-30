@@ -6,6 +6,7 @@ import { buildConfidence } from "../../lib/narrative";
 import { matchLeadingCase } from "../../lib/text-edit";
 import { useCopy } from "../../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon } from "../icons";
+import { Button } from "../ui/button";
 
 export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onApply: () => void }) {
   const { c, lang } = useCopy();
@@ -45,20 +46,12 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onApply}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-safe px-3.5 py-2 text-[12.5px] font-semibold text-sheet transition-opacity duration-150 hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
+          <Button variant="safe" size="lg" onClick={onApply}>
             {c.note.safeApply(after)}
-          </button>
-          <button
-            type="button"
-            onClick={copy}
-            className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-          >
+          </Button>
+          <Button variant="outline" onClick={copy}>
             {copied ? c.common.copied : c.common.copy}
-          </button>
+          </Button>
         </div>
 
         <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{c.note.safeApplyNote}</p>

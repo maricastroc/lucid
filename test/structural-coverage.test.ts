@@ -169,10 +169,10 @@ describe("the interface says it too, in both languages (ADR-084)", () => {
 
   it("says only what is actually missing — never claims headings are absent when they exist", () => {
     const t = copyFor("pt-BR").overview;
-    expect(t.structureCaveat(t.structureMissing.list, 1)).toContain("Não encontramos listas");
-    expect(t.structureCaveat(t.structureMissing.list, 1)).not.toContain("títulos neste documento");
+    expect(t.structureCaveat(t.structureMissing.list, 1)).toContain("Este documento não tem listas");
+    expect(t.structureCaveat(t.structureMissing.list, 1)).not.toContain("não tem títulos");
 
     const both = [t.structureMissing.heading, t.structureMissing.list].join(t.structureMissingJoin);
-    expect(t.structureCaveat(both, 4)).toContain("Não encontramos títulos nem listas");
+    expect(t.structureCaveat(both, 4)).toContain("Este documento não tem títulos nem listas");
   });
 });

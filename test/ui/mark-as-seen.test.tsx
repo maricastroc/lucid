@@ -28,7 +28,7 @@ describe("flow 2 · marking a point as seen", () => {
     await user.click(markButton());
 
     expect(auditPanel().getByRole("button", { name: /^\d+“foi indeferido/ })).toBeInTheDocument();
-    expect(auditPanel().getByTitle(/1 de 1 marcadas/)).toBeInTheDocument();
+    expect(auditPanel().getByTitle(/1 de 1 revisados/)).toBeInTheDocument();
   });
 
   it("unmarks on a second click, back to pending", async () => {

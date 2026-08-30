@@ -18,7 +18,7 @@ const header = () =>
     .getByText(/etapa \d+ de \d+/i)
     .closest("div")!.parentElement!;
 const B = (name: RegExp) => auditPanel().getAllByRole("button", { name });
-const advance = () => auditPanel().queryByRole("button", { name: /marcar como vista e (avançar|concluir)/i });
+const advance = () => auditPanel().queryByRole("button", { name: /marcar como revisado e (avançar|concluir)/i });
 
 async function enter(user: User): Promise<void> {
   await user.click(auditPanel().getAllByRole("button", { name: /percorrer/i })[0]);
@@ -41,7 +41,7 @@ describe("the guided path stays with the reader", () => {
 
     await enter(user);
     expect(within(header()).getByText(/etapa 1 de \d+/i)).toBeInTheDocument();
-    expect(within(header()).getByText(/0 de \d+ ocorrências revisadas/i)).toBeInTheDocument();
+    expect(within(header()).getByText(/0 de \d+ pontos revisados/i)).toBeInTheDocument();
     expect(within(header()).getByText(/depois: etapa \d+ ·/i)).toBeInTheDocument();
   });
 
@@ -89,14 +89,14 @@ describe("the guided path stays with the reader", () => {
     await auditReady();
     await enter(user);
     await user.click(B(/^\d+“/)[0]);
-    expect(auditPanel().getByRole("button", { name: /marcar como vista e avançar/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /marcar como revisado e avançar/i })).toBeInTheDocument();
 
     for (let i = 0; i < 16; i++) {
-      const mark = auditPanel().queryByRole("button", { name: /marcar como vista e avançar/i });
+      const mark = auditPanel().queryByRole("button", { name: /marcar como revisado e avançar/i });
       if (mark === null) break;
       await user.click(mark);
     }
-    expect(auditPanel().getByRole("button", { name: /marcar como vista e concluir a etapa/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /marcar como revisado e concluir a etapa/i })).toBeInTheDocument();
   });
 
   it("announces the finished step and offers the next one", async () => {
@@ -106,8 +106,8 @@ describe("the guided path stays with the reader", () => {
     await walkTheStep(user);
 
     expect(within(header()).getByText(/etapa concluída:/i)).toBeInTheDocument();
-    expect(within(header()).getByText(/ocorrências revisadas/i)).toBeInTheDocument();
-    expect(within(header()).getByRole("button", { name: /continuar para a etapa \d+ ·/i })).toBeInTheDocument();
+    expect(within(header()).getByText(/pontos revisados/i)).toBeInTheDocument();
+    expect(within(header()).getByRole("button", { name: /continuar para a etapa \d+:/i })).toBeInTheDocument();
   });
 
   it("keeps the step number where it was, even after finishing it", async () => {
@@ -136,13 +136,13 @@ describe("the guided path stays with the reader", () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
     expect(auditPanel().getAllByText(/percurso de revisão/i).length).toBeGreaterThan(0);
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1 ·/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
 
     await enter(user);
-    expect(auditPanel().queryByRole("button", { name: /começar pela etapa 1 ·/i })).not.toBeInTheDocument();
+    expect(auditPanel().queryByRole("button", { name: /começar pela etapa 1:/i })).not.toBeInTheDocument();
 
     await user.click(within(header()).getByRole("button", { name: /sair do percurso/i }));
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1 ·/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
   });
 
   it("gives a step the same number in the plan and in the header", async () => {
@@ -182,7 +182,7 @@ describe("the guided path stays with the reader", () => {
 
     await user.click(auditPanel().getByRole("button", { name: /sair do percurso/i }));
     expect(auditPanel().queryByText(/etapa \d+ de \d+/i)).not.toBeInTheDocument();
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1 ·/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
   });
 
   it("stops offering a step to resume once every step is walked", async () => {
@@ -204,13 +204,13 @@ describe("the guided path stays with the reader", () => {
     }
 
     expect(auditPanel().getAllByText(/percurso concluído/i).length).toBeGreaterThan(0);
-    expect(auditPanel().queryByRole("button", { name: /retomar a etapa/i })).not.toBeInTheDocument();
+    expect(auditPanel().queryByRole("button", { name: /continuar a etapa/i })).not.toBeInTheDocument();
   });
 
   it("enters the step instead of stacking one more filter on top", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
-    await user.click(auditPanel().getByRole("button", { name: /^troca direta$/i }));
+    await user.click(auditPanel().getByRole("button", { name: /^com troca direta$/i }));
     await user.type(auditPanel().getByRole("searchbox", { name: /buscar/i }), "sede");
 
     await enter(user);
@@ -232,8 +232,8 @@ describe("the guided path stays with the reader", () => {
     mountStudio({ text: BIG });
     await auditReady();
     const steps = auditPanel().getAllByRole("button", { name: /percorrer/i });
-    expect(steps[0].textContent).toMatch(/comece aqui/i);
-    for (const later of steps.slice(1)) expect(later.textContent).not.toMatch(/comece aqui|continue aqui/i);
+    expect(steps[0].textContent).toMatch(/começar daqui/i);
+    for (const later of steps.slice(1)) expect(later.textContent).not.toMatch(/começar daqui|continuar daqui/i);
   });
 
   it("comes back to the step the reader left open in the last session", async () => {
@@ -247,6 +247,6 @@ describe("the guided path stays with the reader", () => {
     mountStudio({ text: BIG, guidedStep: "long_sentence_not_a_criterion" });
     await auditReady();
     expect(auditPanel().queryByText(/etapa \d+ de \d+/i)).not.toBeInTheDocument();
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1 ·/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
   });
 });

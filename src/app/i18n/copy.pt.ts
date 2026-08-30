@@ -122,7 +122,8 @@ export const COPY_PT: UiCopy = {
     },
     settingsTitle: "Personalizar análise",
     settingsLead: "Personalize os critérios de acordo com as regras do documento ou da sua organização.",
-    settingsSummaryExpressions: (n) => (n === 0 ? "nenhuma expressão" : `${n} ${plural(n, "expressão", "expressões")}`),
+    settingsSummaryExpressions: (n) =>
+      n === 0 ? "Nenhuma expressão adicionada" : `${n} ${plural(n, "expressão adicionada", "expressões adicionadas")}`,
     settingsSummaryProfile: (deviations) =>
       deviations === 0
         ? "limites padrão"
@@ -136,7 +137,7 @@ export const COPY_PT: UiCopy = {
       "Os demais limites correspondem aos critérios de frase, parágrafo e título.",
     goToFindings: "Ver pontos da auditoria",
     goToFindingsHint: "Esses ajustes não são pontos da auditoria, mas mudam como alguns pontos são identificados.",
-    metricsSummary: (words, perSentence) => `${words} palavras · ${perSentence} por frase`,
+    metricsSummary: (words, perSentence) => `${words} palavras · média de ${perSentence} por frase`,
     probeSummary: "teste opcional com IA",
     exportLabel: "Exportar",
     exportMenuLabel: "Formatos de exportação",
@@ -145,15 +146,22 @@ export const COPY_PT: UiCopy = {
 
   overview: {
     annotations: (n) => plural(n, "ponto para revisar", "pontos para revisar"),
-    adjustedProfileBefore: "Placar produzido com ",
-    adjustedProfileStrong: "perfil ajustado",
+    adjustedProfileBefore: "Esta auditoria usa um ",
+    adjustedProfileStrong: "perfil personalizado",
     adjustedProfile: (deviations, disabled) =>
-      `${deviations} ${plural(deviations, "desvio", "desvios")} do padrão` +
-      (disabled > 0 ? `, ${disabled} ${plural(disabled, "critério desligado", "critérios desligados")}` : ""),
-    adjustedProfileAfter: "Não é comparável a um placar padrão.",
-    splitAriaLabel: (safe, human) => `${safe} de troca direta, ${human} exigem decisão humana`,
-    legendSafe: "troca direta indicada",
-    legendHuman: "decisão do autor",
+      `, com ${deviations} ${plural(deviations, "ajuste", "ajustes")} em relação ao padrão` +
+      (disabled > 0 ? `, ${disabled} ${plural(disabled, "critério desligado", "critérios desligados")}` : "") +
+      ".",
+    adjustedProfileAfter: "Por isso, o resultado não pode ser comparado ao de uma auditoria padrão.",
+    splitAriaLabel: (safe, human) => `${safe} com troca direta, ${human} para você decidir`,
+    legendSafe: (n) => plural(n, "troca direta indicada", "trocas diretas indicadas"),
+    legendHuman: (n) => plural(n, "ponto para você decidir", "pontos para você decidir"),
+    severityCount: (severity, n) =>
+      severity === "error"
+        ? plural(n, "prioridade alta", "prioridades altas")
+        : severity === "warning"
+          ? plural(n, "requer atenção", "requerem atenção")
+          : plural(n, "observação", "observações"),
     exportAudit: "Baixar auditoria (.md)",
     printAudit: "Imprimir auditoria (PDF)",
     printNote: "Abre a caixa de impressão do navegador — escolha “Salvar como PDF”.",
@@ -180,26 +188,28 @@ export const COPY_PT: UiCopy = {
     structureMissing: { heading: "títulos", list: "listas" } as Record<string, string>,
     structureMissingJoin: " nem ",
     structureCaveat: (missing: string, count: number) =>
-      `Não encontramos ${missing} neste documento. Por isso, ${count} ` +
+      `Este documento não tem ${missing}. Por isso, ${count} ` +
       `${plural(count, "critério não pôde", "critérios não puderam")} ser ` +
       `${plural(count, "avaliado", "avaliados")}. ` +
-      "Para incluí-los na auditoria, envie um arquivo .docx com essa estrutura ou use # para títulos e " +
-      "- para itens de lista.",
+      `${plural(count, "Para avaliá-lo", "Para avaliá-los")}, envie um arquivo .docx que contenha essas ` +
+      "estruturas ou use # nos títulos e - nos itens de lista.",
     scoreCaveat:
-      "O placar resume os critérios avaliados. Ele não aprova o documento nem garante que o texto esteja claro.",
+      "O placar resume os critérios avaliados, mas não substitui uma revisão completa nem garante que o texto " +
+      "esteja claro.",
     readingLabel: "Métricas de leitura",
     readingCaveat:
       "Os indicadores de legibilidade e coesão ajudam na revisão, mas não determinam sozinhos se o texto está claro.",
     balanceLabel: "Antes e depois",
     balanceNone: "Nenhuma alteração foi registrada ainda.",
-    balanceTotal: (before, after) => `Peso da auditoria ${before} → ${after}`,
+    balanceTotal: (before, after) => `Peso da auditoria: ${before} → ${after}`,
+    balanceFound: (before, after) => `Pontos encontrados: ${before} → ${after}`,
     balanceCount: (before, after) => `${before} → ${after}`,
     balanceDirection: { improved: "melhorou", regressed: "piorou", unchanged: "sem mudança" },
     balanceKind: {
       resolved: "resolvido",
       kept: "mantido",
-      reshaped: "reescrito, segue apontado",
-      introduced: "introduzido",
+      reshaped: "reescrito, mas ainda identificado",
+      introduced: "identificado após a alteração",
       transformed: "virou outra coisa",
       indirect: "efeito indireto",
     },
@@ -209,28 +219,29 @@ export const COPY_PT: UiCopy = {
     balanceTypingNote:
       "Trecho reescrito à mão. A comparação é da região inteira: dentro dela não dá para dizer qual ocorrência é qual.",
     balanceCaveat:
-      "Peso menor não é texto aprovado. A comparação diz o que os critérios encontram antes e depois, não se o leitor entendeu.",
+      "Um peso menor não significa que o texto está aprovado. Esta comparação mostra apenas o que os critérios " +
+      "encontraram antes e depois — não se o público compreendeu o texto.",
     trailLabel: "Alterações registradas",
     trailWeight: (before, after, changes) =>
       `Peso da auditoria ${before} → ${after} · ${changes} ${plural(changes, "alteração registrada", "alterações registradas")}`,
     trailCaveat:
-      "Esta lista mostra apenas as alterações aplicadas a partir de um ponto da revisão. O que você reescreve à " +
-      "mão no modo Escrever muda o documento sem entrar aqui nem no relatório exportado.",
+      "Esta lista mostra apenas as alterações aplicadas durante a revisão. As mudanças feitas diretamente no modo " +
+      "Escrever alteram o documento, mas não aparecem aqui nem no relatório exportado.",
     changeFrom: "de",
     changeTo: "para",
     changeExpand: "Ver trecho completo",
     changeCollapse: "Recolher trecho",
-    entryLabel: "Texto de entrada",
-    entryShow: "Ver o texto de entrada",
-    entryHide: "Ocultar o texto de entrada",
+    entryLabel: "Texto original",
+    entryShow: "Ver o texto original",
+    entryHide: "Ocultar o texto original",
     entrySize: (chars) => `${chars.toLocaleString("pt-BR")} ${plural(chars, "caractere", "caracteres")}`,
     entryNote:
-      "Cópia do texto como ele entrou nesta sessão, guardada só para consulta. O Lucid não restaura nem aplica " +
-      "nada a partir daqui.",
-    entryStartingPoint: "É o ponto de partida do peso informado acima.",
+      "Versão original do texto, disponível apenas para consulta. O Lucid não restaura nem aplica alterações a " +
+      "partir dela.",
+    entryStartingPoint: "Esse texto foi usado para calcular o peso inicial mostrado acima.",
     entryUnknown:
-      "Texto de entrada não registrado para este documento: a sessão foi salva antes de o Lucid guardar essa cópia.",
-    entryWrittenHere: "Este documento foi escrito aqui — não há texto de entrada para comparar.",
+      "Texto original não registrado para este documento: a sessão foi salva antes de o Lucid guardar essa cópia.",
+    entryWrittenHere: "Este documento foi escrito aqui — não há texto original para comparar.",
     descriptor: "descritor",
     metricWords: "Palavras",
     metricSentences: "Frases",
@@ -242,39 +253,40 @@ export const COPY_PT: UiCopy = {
   },
 
   revisionList: {
-    regionLabel: "Índice da auditoria",
-    title: "Índice da auditoria",
+    regionLabel: "Etapas da revisão",
+    title: "Etapas da revisão",
     indexLabel: "Todos os critérios",
     indexHint:
-      "A lista inteira, na ordem de gravidade. O percurso acima é uma rota sugerida sobre estes mesmos pontos.",
+      "Veja todos os critérios em ordem de gravidade. A revisão por etapas acima organiza estes mesmos pontos em " +
+      "um percurso sugerido.",
     filterLabel: "Filtrar anotações",
-    bucketAll: "Todas",
-    bucketSafe: "Troca direta",
-    bucketHuman: "Decisão sua",
+    bucketAll: "Todos",
+    bucketSafe: "Com troca direta",
+    bucketHuman: "Para você decidir",
     empty: "Nenhuma anotação disparada.",
     emptyInFilter: "Nenhuma anotação neste filtro.",
     hideInDocument: "Ocultar realces no documento",
     hideNamed: (label) => `Ocultar os realces de “${label}” no documento`,
     showInDocument: "Mostrar realces no documento",
     showNamed: (label) => `Mostrar os realces de “${label}” no documento`,
-    coverage: "Cobertura",
-    cleanCriteria: (n) =>
-      `${n} ${plural(n, "critério verificado, sem ocorrência", "critérios verificados, sem ocorrência")}`,
+    coverage: "Cobertura da análise",
+    cleanCriteria: (n) => `${n} ${plural(n, "critério avaliado", "critérios avaliados")} sem nenhum ponto encontrado`,
     hiddenCriteria: (n) =>
       `${n} ${plural(n, "critério com realces ocultos", "critérios com realces ocultos")} — continuam na auditoria`,
     highlightsOff: "realces ocultos no documento",
     lexiconCaveat:
-      "Os critérios verificam padrões específicos. Ajudam na revisão, mas não substituem a análise de quem escreveu.",
-    occurrences: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
+      "Os critérios identificam padrões específicos e ajudam na revisão, mas não substituem a avaliação de quem " +
+      "escreveu o texto.",
+    occurrences: (n) => `${n} ${plural(n, "ponto", "pontos")}`,
     distinct: (n) => `${n} ${plural(n, "trecho distinto", "trechos distintos")}`,
     hiddenByFilter: (n) => `${n} fora do filtro`,
     statePending: "Pendentes",
-    stateSeen: "Vistas",
-    stateDismissed: "Dispensadas",
-    searchLabel: "Buscar trecho nos achados",
-    searchPlaceholder: "Buscar trecho…",
-    showingAll: (n) => `${n} ${plural(n, "ocorrência", "ocorrências")}`,
-    showingFiltered: (shown, total) => `${shown} de ${total} ${plural(total, "ocorrência", "ocorrências")}`,
+    stateSeen: "Revisados",
+    stateDismissed: "Ignorados",
+    searchLabel: "Buscar nos pontos",
+    searchPlaceholder: "Buscar nos pontos…",
+    showingAll: (n) => `${n} ${plural(n, "ponto", "pontos")}`,
+    showingFiltered: (shown, total) => `${shown} de ${total} ${plural(total, "ponto", "pontos")}`,
     moreFilters: "Mais filtros",
     fewerFilters: "Menos filtros",
     clearFilters: "limpar filtros",
@@ -283,24 +295,26 @@ export const COPY_PT: UiCopy = {
     batchLabel: "Em lote",
     batchClear: (n) => `Limpar as marcas destas ${n}`,
     batchCaveat:
-      "Marcar como vista é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
+      "Marcar como revisado é um a um, de propósito: a marca só vale se alguém olhou. Em lote só dá para limpar.",
     clearGroupMarks: (n) => `Limpar ${n} ${plural(n, "marca", "marcas")}`,
     scopeOn: "Filtrar por este critério",
     scopeOff: "Ver todos os critérios",
     scopeHint: (n) =>
-      `A lista e a navegação ‹ › passam a percorrer só as ${n} ${plural(n, "ocorrência", "ocorrências")} deste critério.`,
-    markSeen: "Marcar como vista",
-    markSeenHint: "Marcar como vista — você olhou esta ocorrência",
-    markSeenNamed: (excerpt) => `Marcar “${excerpt}” como vista`,
-    dismiss: "Dispensar",
-    dismissHint: "Dispensar — você não vai mexer nesta ocorrência",
-    dismissNamed: (excerpt) => `Dispensar “${excerpt}”`,
+      `A lista e a navegação ‹ › passam a percorrer só os ${n} ${plural(n, "ponto", "pontos")} deste critério.`,
+    markSeen: "Marcar como revisado",
+    markSeenHint: "Marcar como revisado — você avaliou este ponto",
+    markSeenNamed: (excerpt) => `Marcar “${excerpt}” como revisado`,
+    dismiss: "Ignorar",
+    dismissHint: "Ignorar — você não vai mexer neste ponto",
+    dismissNamed: (excerpt) => `Ignorar “${excerpt}”`,
     unmark: "Desmarcar",
     unmarkHint: "Desmarcar — volta a pendente",
-    progress: (done, total) => `${done} de ${total} marcadas`,
+    progress: (done, total) => `${done} de ${total} revisados`,
     pendingCount: (n) => `${n} ${plural(n, "pendente", "pendentes")}`,
-    progressCaveat: "Marca do autor sobre a própria revisão — não altera o placar nem aprova o texto.",
-    progressTitle: (done, total) => `${done} de ${total} marcadas`,
+    progressCaveat:
+      "Essas marcações servem apenas para acompanhar sua revisão. Elas não alteram o resultado da auditoria nem " +
+      "aprovam o texto.",
+    progressTitle: (done, total) => `${done} de ${total} revisados`,
     absenceCaveat: "A ausência de anotações não é atestado de clareza — é a cobertura da auditoria.",
   },
 
@@ -328,7 +342,7 @@ export const COPY_PT: UiCopy = {
     crumbAll: "Todos os critérios",
     crumbBackTo: (criterion) => `Voltar para a lista de ${criterion}`,
     backToList: "Voltar à lista",
-    footerDeterministic: "Análise determinística",
+    footerDeterministic: "Análise automática baseada na",
 
     safeHeader: "Troca direta · equivalente curado",
     safeTerm: "Termo",
@@ -574,80 +588,81 @@ export const COPY_PT: UiCopy = {
     trailStep: (index, total, label, state) => `Etapa ${index} de ${total}: ${label}, ${state}`,
     stepOf: (index, total) => `Etapa ${index} de ${total}`,
     overall: (reviewed, total) => `${reviewed}/${total} no percurso`,
-    overallTitle: (reviewed, total) => `${reviewed} de ${total} ocorrências revisadas no percurso inteiro`,
+    overallTitle: (reviewed, total) => `${reviewed} de ${total} pontos revisados no percurso inteiro`,
     todo: (pending) =>
       pending === 1
-        ? "Falta 1 ocorrência. Abra e marque como vista ou dispensada."
-        : `Faltam ${pending} ocorrências. Abra uma a uma e marque cada uma como vista ou dispensada.`,
-    within: (reviewed, total) =>
-      `${reviewed} de ${total} ${plural(total, "ocorrência revisada", "ocorrências revisadas")}`,
-    withinShort: (reviewed, total) => `${reviewed} de ${total} revisadas`,
+        ? "Falta 1 ponto. Abra e marque como revisado ou ignorado."
+        : `Faltam ${pending} pontos. Abra um a um e marque cada um como revisado ou ignorado.`,
+    within: (reviewed, total) => `${reviewed} de ${total} ${plural(total, "ponto revisado", "pontos revisados")}`,
+    withinShort: (reviewed, total) => `${reviewed} de ${total} revisados`,
     start: "Começar esta etapa",
     resume: "Continuar de onde parou",
     nextUp: (index, label) => `Depois: etapa ${index} · ${label}`,
-    advance: (index, label) => `Continuar para a etapa ${index} · ${label}`,
+    advance: (index, label) => `Continuar para a etapa ${index}: ${label}`,
     finishedTitle: (label) => `Etapa concluída: ${label}`,
-    finishedCount: (n) => `${n} ${plural(n, "ocorrência revisada", "ocorrências revisadas")}`,
+    finishedCount: (n) => `${n} ${plural(n, "ponto revisado", "pontos revisados")}`,
     reviewAgain: "Rever esta etapa",
     allDoneTitle: "Percurso concluído",
     allDoneCount: (reviewed, steps) =>
-      `${reviewed} ${plural(reviewed, "ocorrência revisada", "ocorrências revisadas")} em ${steps} ${plural(steps, "etapa", "etapas")}.`,
+      `${reviewed} ${plural(reviewed, "ponto revisado", "pontos revisados")} em ${steps} ${plural(steps, "etapa", "etapas")}.`,
     allDone:
-      "Ocorrência revisada não é ocorrência resolvida: resolvida é a que saiu do texto. O placar continua o mesmo até o texto mudar.",
+      "Ponto revisado não é ponto resolvido: resolvido é o que deixou de existir no texto. O resultado da " +
+      "auditoria continua o mesmo até o texto mudar.",
     allDoneNext: "Exportar › Relatório da auditoria guarda o que foi percorrido.",
     leave: "Sair do percurso",
     leaveDone: "Voltar à auditoria",
     states: { "not-started": "não iniciada", "in-progress": "em andamento", done: "concluída" },
-    stepCrumb: (index, label) => `Etapa ${index} · ${label}`,
-    occurrenceOf: (index, total) => `Ocorrência ${index} de ${total}`,
+    stepCrumb: (index, label) => `Etapa ${index}: ${label}`,
+    occurrenceOf: (index, total) => `Ponto ${index} de ${total}`,
     backToStep: "Voltar à etapa",
-    markAndAdvance: "Marcar como vista e avançar",
-    markAndFinish: "Marcar como vista e concluir a etapa",
-    seenChip: "Vista",
-    nextOccurrence: "Próxima ocorrência",
-    stepOccurrences: "Ocorrências desta etapa",
+    markAndAdvance: "Marcar como revisado e avançar",
+    markAndFinish: "Marcar como revisado e concluir a etapa",
+    seenChip: "Revisado",
+    nextOccurrence: "Próximo ponto",
+    stepOccurrences: "Pontos desta etapa",
     stepProgressLabel: "Progresso da etapa",
     routeProgressLabel: "Progresso do percurso",
   },
 
   startHere: {
-    label: "Percurso de revisão",
+    label: "Revisão por etapas",
+    entryLabel: "Percurso de revisão",
     volume: (total, criteria) =>
-      `${total} ${plural(total, "ocorrência", "ocorrências")} em ${criteria} ${plural(criteria, "critério", "critérios")}`,
+      `${total} ${plural(total, "ponto", "pontos")} em ${criteria} ${plural(criteria, "critério", "critérios")}`,
     lead: (hasSwaps) =>
       hasSwaps
-        ? "Um critério de cada vez, da maior gravidade para a menor. Você pode entrar por qualquer etapa."
-        : "Um critério de cada vez, da maior gravidade para a menor — aqui não há troca direta a fazer. " +
-          "Você pode entrar por qualquer etapa.",
+        ? "Revise um critério de cada vez, do mais grave ao mais leve. Você também pode começar por outra etapa."
+        : "Revise um critério de cada vez, do mais grave ao mais leve. Como não há trocas diretas nesta etapa, " +
+          "você decide como tratar cada ponto. Você também pode começar por outra etapa.",
     safeAction: (n) => `Ver as ${n} ${plural(n, "troca direta", "trocas diretas")}`,
     shortcutLabel: "Atalho",
     criterionAction: (label, n) => `Percorrer “${label}” (${n})`,
     stepDone: "concluída",
     stepPending: (n) => `${n} ${plural(n, "pendente", "pendentes")}`,
-    stepPartial: (reviewed, total) => `${reviewed}/${total} revisadas`,
+    stepPartial: (reviewed, total) => `${reviewed} de ${total} revisados`,
     stepsDone: (done, total) => `${done} de ${total} ${plural(total, "etapa concluída", "etapas concluídas")}`,
-    routeReviewed: (reviewed, total) => `${reviewed} de ${total} revisadas`,
-    startTag: "comece aqui",
-    resumeTag: "continue aqui",
-    entryLead: (total) =>
-      `Ler ${total} pontos de uma vez não funciona. O percurso divide a revisão em etapas — um critério ` +
-      "de cada vez, da maior gravidade para a menor.",
-    beginRoute: "Começar o percurso",
-    resumeRoute: "Continuar o percurso",
-    nextStepHint: (index, label) => `Começa na etapa ${index} · ${label}`,
-    resumeStepHint: (index, label) => `Você parou na etapa ${index} · ${label}`,
-    beginAt: (index, label) => `Começar pela etapa ${index} · ${label}`,
-    resumeAt: (index, label) => `Retomar a etapa ${index} · ${label}`,
+    routeReviewed: (reviewed, total) => `${reviewed} de ${total} revisados`,
+    startTag: "começar daqui",
+    resumeTag: "continuar daqui",
+    entryLead: (total) => `Revise os ${total} pontos em etapas: um critério de cada vez, do mais grave ao mais leve.`,
+    beginRoute: "Começar a revisão",
+    resumeRoute: "Continuar a revisão",
+    nextStepHint: (index, label) => `Começa na etapa ${index}: ${label}`,
+    resumeStepHint: (index, label) => `Você parou na etapa ${index}: ${label}`,
+    beginAt: (index, label) => `Começar pela etapa ${index}: ${label}`,
+    resumeAt: (index, label) => `Continuar a etapa ${index}: ${label}`,
     progressLabel: "Onde a revisão está",
     progressCounts: (pending, seen, dismissed) =>
-      `${seen} ${plural(seen, "vista", "vistas")} · ${dismissed} ${plural(dismissed, "ignorada", "ignoradas")}`,
+      `${seen} revisados · ${dismissed} ${plural(dismissed, "ignorado", "ignorados")}`,
     progressResolved: (resolved, introduced) =>
       introduced === 0
-        ? `${resolved} ${plural(resolved, "saiu do texto", "saíram do texto")}`
-        : `${resolved} ${plural(resolved, "saiu", "saíram")} do texto · ${introduced} ${plural(introduced, "entrou", "entraram")}`,
-    progressDone: "Nada pendente. Ponto marcado como visto ou ignorado não é ponto resolvido.",
+        ? `${resolved} ${plural(resolved, "ponto deixou de existir", "pontos deixaram de existir")}`
+        : `${resolved} ${plural(resolved, "ponto deixou de existir", "pontos deixaram de existir")} · ` +
+          `${introduced} ${plural(introduced, "novo ponto apareceu", "novos pontos apareceram")}`,
+    progressDone: "Nada pendente. Ponto marcado como revisado ou ignorado não é ponto resolvido.",
     caveat:
-      "Sugestão de ordem, não regra: os pontos são os mesmos em qualquer sequência, e a ordem não altera o placar.",
+      "Esta é apenas uma ordem sugerida. Você pode revisar as etapas em qualquer sequência, sem alterar o " +
+      "resultado da auditoria.",
   },
 
   presets: {

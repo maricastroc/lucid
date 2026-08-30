@@ -6,6 +6,7 @@ import { useCopy } from "../i18n/use-copy";
 import type { UiCopy } from "../i18n/copy";
 import type { UiLang } from "../i18n/types";
 import { ArrowRightIcon, CheckIcon, CloseIcon } from "./icons";
+import { Button, IconButton } from "./ui/button";
 
 export interface RouteStop {
   readonly step: StartHereStep;
@@ -159,15 +160,9 @@ export function GuidedStepHeader({ route, onGo, onLeave, onOpen, compact = false
           <span key={step.reviewed} className="fade-in shrink-0 tabular-nums text-[11px] text-ink-2" aria-live="polite">
             {g.withinShort(step.reviewed, step.count)}
           </span>
-          <button
-            type="button"
-            onClick={onLeave}
-            aria-label={g.leave}
-            title={g.leave}
-            className="grid size-6 shrink-0 place-items-center rounded-md text-ink-3 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-0"
-          >
+          <IconButton label={g.leave} size="sm" onClick={onLeave}>
             <CloseIcon className="size-3.5" />
-          </button>
+          </IconButton>
         </div>
         <Meter done={step.reviewed} total={step.count} tone={finished ? "safe" : "accent"} shape="rule" />
       </div>
@@ -183,14 +178,10 @@ export function GuidedStepHeader({ route, onGo, onLeave, onOpen, compact = false
           <span className="tabular-nums text-ink-2">{position}</span>
         </span>
         {route.allDone ? null : (
-          <button
-            type="button"
-            onClick={onLeave}
-            className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-[11.5px] text-ink-3 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-0"
-          >
+          <Button variant="ghost" size="xs" shape="soft" onClick={onLeave} className="shrink-0">
             <CloseIcon className="size-3" />
             {g.leave}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -223,14 +214,10 @@ export function GuidedStepHeader({ route, onGo, onLeave, onOpen, compact = false
             {g.allDoneCount(route.reviewed, route.steps.length)}
           </p>
           <p className="mt-1 text-[11.5px] leading-relaxed text-ink-2">{g.allDone}</p>
-          <button
-            type="button"
-            onClick={onLeave}
-            className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90"
-          >
+          <Button variant="primary" onClick={onLeave} className="mt-2.5">
             {g.leaveDone}
             <ArrowRightIcon className="size-3.5" />
-          </button>
+          </Button>
           <p className="mt-2 text-[11px] leading-relaxed text-ink-3">{g.allDoneNext}</p>
         </div>
       ) : finished ? (
@@ -244,22 +231,19 @@ export function GuidedStepHeader({ route, onGo, onLeave, onOpen, compact = false
           <p className="mt-1 pl-7 text-[12px] tabular-nums text-ink-2">{g.finishedCount(step.reviewed)}</p>
           <div className="mt-2.5 flex flex-wrap items-center gap-2 pl-7">
             {route.next !== null && (
-              <button
-                type="button"
-                onClick={() => onGo(route.next!.step.criterion)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90"
-              >
+              <Button variant="primary" onClick={() => onGo(route.next!.step.criterion)}>
                 {g.advance(route.next.index + 1, metaFor(route.next.step.criterion, lang).label)}
                 <ArrowRightIcon className="size-3.5" />
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={onOpen}
-              className="rounded-lg px-2 py-1.5 text-[11.5px] text-ink-2 underline decoration-rule-2 underline-offset-2 transition-colors duration-150 hover:text-ink-0"
+              className="underline decoration-rule-2 underline-offset-2"
             >
               {g.reviewAgain}
-            </button>
+            </Button>
           </div>
         </div>
       ) : (
@@ -279,14 +263,10 @@ export function GuidedStepHeader({ route, onGo, onLeave, onOpen, compact = false
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <button
-              type="button"
-              onClick={onOpen}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-[12.5px] font-semibold text-accent-ink shadow-(--shadow-card) transition-opacity duration-150 hover:opacity-90"
-            >
+            <Button variant="primary" size="lg" onClick={onOpen}>
               {step.reviewed === 0 ? g.start : g.resume}
               <ArrowRightIcon className="size-3.5" />
-            </button>
+            </Button>
             {route.next !== null && (
               <span className="min-w-0 truncate text-[11.5px] text-ink-3">
                 {g.nextUp(route.next.index + 1, metaFor(route.next.step.criterion, lang).label)}

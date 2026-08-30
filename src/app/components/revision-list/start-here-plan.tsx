@@ -8,6 +8,7 @@ import type { StartHerePlan as Plan } from "../../lib/start-here";
 import { useCopy } from "../../i18n/use-copy";
 import type { UiLang } from "../../i18n/types";
 import { ArrowRightIcon, CheckIcon } from "../icons";
+import { Button } from "../ui/button";
 
 type RowTone = "done" | "entry" | "ahead";
 
@@ -175,16 +176,18 @@ export function StartHerePlan({
           </div>
         ) : (
           entry !== null && (
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="lg"
+              block
               onClick={() => onStart(entry.criterion)}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3.5 py-2.5 text-[12.5px] font-semibold text-accent-ink shadow-(--shadow-card) transition-opacity duration-150 hover:opacity-90"
+              className="py-2.5 text-[12.5px]"
             >
               {started
                 ? s.resumeAt(entryIndex + 1, metaFor(entry.criterion, lang).label)
                 : s.beginAt(entryIndex + 1, metaFor(entry.criterion, lang).label)}
               <ArrowRightIcon className="size-3.5" />
-            </button>
+            </Button>
           )
         )}
 

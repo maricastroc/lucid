@@ -54,7 +54,7 @@ describe("undoing a change", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
-    await user.click(auditPanel().getByRole("button", { name: /^marcar como vista$/i }));
+    await user.click(auditPanel().getByRole("button", { name: /^marcar como revisado$/i }));
     await user.click(auditPanel().getByRole("button", { name: /voltar à lista/i }));
 
     await applyManualEditFromList(user);

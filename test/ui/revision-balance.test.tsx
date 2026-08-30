@@ -61,7 +61,7 @@ describe("before and after, criterion by criterion", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await applyRegisteredEdit(user);
-    expect(auditPanel().getByText(/peso menor não é texto aprovado/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/um peso menor não significa que o texto está aprovado/i)).toBeInTheDocument();
   });
 });
 

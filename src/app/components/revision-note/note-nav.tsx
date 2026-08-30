@@ -4,6 +4,7 @@ import type { ReviewMark } from "../../lib/review-marks";
 import { metaFor } from "../../lib/criteria";
 import { useCopy } from "../../i18n/use-copy";
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { Button } from "../ui/button";
 
 export interface GuidedOccurrence {
   readonly willFinishStep: boolean;
@@ -41,14 +42,10 @@ export function NoteNav({
     return (
       <div className="shrink-0 border-b border-rule-1">
         <div className="flex h-10 items-center gap-1 px-2.5 text-[11.5px]">
-          <button
-            type="button"
-            onClick={onBackToList}
-            className="row-hit inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-1 text-accent transition-colors duration-150 hover:bg-accent-weak"
-          >
+          <Button variant="link" size="xs" shape="soft" onClick={onBackToList} className="row-hit shrink-0">
             <ChevronLeftIcon className="size-3.5" />
             {g.backToStep}
-          </button>
+          </Button>
           <span className="ml-auto shrink-0 tabular-nums text-ink-2">{g.occurrenceOf(index, total)}</span>
           <IconBtn label={c.note.navPrev} onClick={onPrev}>
             <ChevronLeftIcon className="size-4" />
@@ -65,31 +62,19 @@ export function NoteNav({
                 <CheckIcon className="size-3.5" />
                 {g.seenChip}
               </span>
-              <button
-                type="button"
-                onClick={() => onMark(null)}
-                className="shrink-0 rounded-full px-2 py-1.5 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-              >
+              <Button variant="ghost" size="sm" shape="pill" onClick={() => onMark(null)} className="shrink-0">
                 {c.revisionList.unmark}
-              </button>
-              <button
-                type="button"
-                onClick={onNext}
-                className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90"
-              >
+              </Button>
+              <Button variant="primary" onClick={onNext} className="ml-auto shrink-0">
                 {g.nextOccurrence}
                 <ChevronRightIcon className="size-3.5" />
-              </button>
+              </Button>
             </>
           ) : (
-            <button
-              type="button"
-              onClick={() => onMark("seen")}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3 py-2 text-[12.5px] font-semibold text-accent-ink shadow-(--shadow-card) transition-opacity duration-150 hover:opacity-90"
-            >
+            <Button variant="primary" block onClick={() => onMark("seen")} className="py-2">
               <CheckIcon className="size-3.5" />
               {guided.willFinishStep ? g.markAndFinish : g.markAndAdvance}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -99,22 +84,20 @@ export function NoteNav({
   return (
     <div className="shrink-0 border-b border-rule-1">
       <div className="flex h-10 items-center gap-1 px-2.5 text-[11.5px]">
-        <button
-          type="button"
-          onClick={onBackToOverview}
-          className="rounded-md px-1.5 py-1 text-ink-3 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-1"
-        >
+        <Button variant="ghost" size="xs" shape="soft" onClick={onBackToOverview}>
           {c.note.crumbAll}
-        </button>
+        </Button>
         <ChevronRightIcon className="size-3 shrink-0 text-ink-dim" />
-        <button
-          type="button"
+        <Button
+          variant="link"
+          size="xs"
+          shape="soft"
           onClick={onBackToList}
-          className="row-hit min-w-0 truncate rounded-md px-1.5 py-1 font-medium text-accent transition-colors duration-150 hover:bg-accent-weak"
+          className="row-hit min-w-0 truncate"
           title={c.note.crumbBackTo(label)}
         >
           {label} <span className="tabular-nums opacity-70">{total}</span>
-        </button>
+        </Button>
         <ChevronRightIcon className="size-3 shrink-0 text-ink-dim" />
         <span className="shrink-0 tabular-nums text-ink-2">
           {index} <span className="text-ink-3">{c.note.navOf}</span> {total}
@@ -129,14 +112,10 @@ export function NoteNav({
           <IconBtn label={c.note.navNext} onClick={onNext}>
             <ChevronRightIcon className="size-4" />
           </IconBtn>
-          <button
-            type="button"
-            onClick={onBackToList}
-            className="ml-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
-          >
+          <Button variant="ghost" size="sm" shape="pill" onClick={onBackToList} className="ml-1">
             <ChevronLeftIcon className="size-3.5" />
             {c.note.backToList}
-          </button>
+          </Button>
         </div>
         <button
           type="button"

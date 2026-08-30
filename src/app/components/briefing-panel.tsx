@@ -5,6 +5,7 @@ import type { BriefingCheck, BriefingCoverage, ReaderBriefing } from "@/lucid";
 import type { OccurrenceCursor } from "../lib/occurrence-cursor";
 import { useCopy } from "../i18n/use-copy";
 import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import { Button, IconButton } from "./ui/button";
 
 interface Props {
   briefing: ReaderBriefing;
@@ -64,13 +65,9 @@ export function BriefingPanel({
             placeholder={b.mustFindPlaceholder}
             className="min-w-0 flex-1 rounded-lg border border-rule-2 bg-sheet px-2.5 py-2 text-[13px] text-ink-0 placeholder:text-ink-dim focus:border-accent focus:outline-none"
           />
-          <button
-            type="button"
-            onClick={addExpression}
-            className="shrink-0 rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-          >
+          <Button variant="outline" onClick={addExpression} className="shrink-0">
             {b.addExpression}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -171,27 +168,24 @@ function ExpressionRow({
         </span>
       )}
 
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="xs"
+        shape="soft"
         onClick={onRemove}
         aria-label={b.removeNamed(item.expression)}
-        className="shrink-0 rounded-md px-1 text-[11.5px] text-ink-3 transition-colors duration-150 hover:text-ink-0"
+        className="shrink-0"
       >
         {c.common.remove}
-      </button>
+      </Button>
     </li>
   );
 }
 
 function StepButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className="grid size-6 place-items-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-3 hover:text-ink-0"
-    >
+    <IconButton label={label} size="sm" shape="pill" onClick={onClick}>
       {children}
-    </button>
+    </IconButton>
   );
 }

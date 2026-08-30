@@ -8,6 +8,7 @@ import { useTheme } from "../hooks/use-theme";
 import { useUiLang } from "../i18n/lang";
 import { useCopy } from "../i18n/use-copy";
 import { MoonIcon, SunIcon } from "./icons";
+import { IconButton } from "./ui/button";
 
 interface Props {
   mode: Mode;
@@ -94,14 +95,15 @@ export function Masthead({ mode, onChangeMode, onOpenDocument, onGoHome, importi
 
         <LanguageToggle />
 
-        <button
-          type="button"
+        <IconButton
+          label={theme === "light" ? c.masthead.darkTheme : c.masthead.lightTheme}
+          variant="outline"
+          size="lg"
+          shape="pill"
           onClick={toggle}
-          aria-label={theme === "light" ? c.masthead.darkTheme : c.masthead.lightTheme}
-          className="grid size-9 place-items-center rounded-full border border-rule-2 text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
         >
           {theme === "light" ? <MoonIcon className="size-4.25" /> : <SunIcon className="size-4.25" />}
-        </button>
+        </IconButton>
       </div>
     </header>
   );
@@ -113,15 +115,16 @@ function LanguageToggle() {
   const target = lang === "pt-BR" ? "en" : "pt-BR";
 
   return (
-    <button
-      type="button"
+    <IconButton
+      label={c.language.switchTo[target]}
+      variant="outline"
+      size="lg"
+      shape="pill"
       onClick={toggle}
-      aria-label={c.language.switchTo[target]}
-      title={c.language.switchTo[target]}
-      className="u-label grid size-9 place-items-center rounded-full border border-rule-2 text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0"
+      className="u-label"
     >
       {c.language.short[target]}
-    </button>
+    </IconButton>
   );
 }
 

@@ -5,6 +5,7 @@ import { firstStep } from "./guided-step";
 import type { StartHerePlan } from "../lib/start-here";
 import { useCopy } from "../i18n/use-copy";
 import { ArrowRightIcon, CheckIcon } from "./icons";
+import { Button } from "./ui/button";
 
 export function GuidedEntry({
   plan,
@@ -36,7 +37,7 @@ export function GuidedEntry({
       }`}
     >
       <div className="flex items-baseline justify-between gap-3">
-        <h3 className="u-label text-ink-1">{s.label}</h3>
+        <h3 className="u-label text-ink-1">{s.entryLabel}</h3>
         {started && (
           <span className="shrink-0 text-[11px] tabular-nums text-ink-3">
             {s.stepsDone(stepsDone, plan.steps.length)}
@@ -74,14 +75,10 @@ export function GuidedEntry({
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={() => onStart(entry.criterion)}
-            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent px-3.5 py-2.5 text-[12.5px] font-semibold text-accent-ink shadow-(--shadow-card) transition-opacity duration-150 hover:opacity-90"
-          >
+          <Button variant="primary" size="lg" block onClick={() => onStart(entry.criterion)} className="mt-3 py-2.5">
             {started ? s.resumeRoute : s.beginRoute}
             <ArrowRightIcon className="size-3.5" />
-          </button>
+          </Button>
           <p className="mt-1.5 text-center text-[11px] text-ink-3">
             {started
               ? s.resumeStepHint(entryIndex + 1, metaFor(entry.criterion, lang).label)

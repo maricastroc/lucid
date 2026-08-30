@@ -121,7 +121,8 @@ export const COPY_EN: UiCopy = {
     },
     settingsTitle: "Customize analysis",
     settingsLead: "Tune the criteria to the rules of the document or of your organization.",
-    settingsSummaryExpressions: (n) => (n === 0 ? "no expressions" : `${n} ${plural(n, "expression", "expressions")}`),
+    settingsSummaryExpressions: (n) =>
+      n === 0 ? "No expressions added" : `${n} ${plural(n, "expression added", "expressions added")}`,
     settingsSummaryProfile: (deviations) =>
       deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "changed limit", "changed limits")}`,
     settingsSummaryJoin: " · ",
@@ -133,7 +134,7 @@ export const COPY_EN: UiCopy = {
       "correspond to the sentence, paragraph and heading criteria.",
     goToFindings: "View audit points",
     goToFindingsHint: "These settings are not audit points, but they change how some points are identified.",
-    metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence`,
+    metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence on average`,
     probeSummary: "optional AI test",
     exportLabel: "Export",
     exportMenuLabel: "Export formats",
@@ -142,15 +143,22 @@ export const COPY_EN: UiCopy = {
 
   overview: {
     annotations: (n) => plural(n, "point to review", "points to review"),
-    adjustedProfileBefore: "Score produced with an ",
-    adjustedProfileStrong: "adjusted profile",
+    adjustedProfileBefore: "This audit uses a ",
+    adjustedProfileStrong: "custom profile",
     adjustedProfile: (deviations, disabled) =>
-      `${deviations} ${plural(deviations, "deviation", "deviations")} from the default` +
-      (disabled > 0 ? `, ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}` : ""),
-    adjustedProfileAfter: "It is not comparable to a default score.",
-    splitAriaLabel: (safe, human) => `${safe} direct swaps, ${human} require a human decision`,
-    legendSafe: "direct swap available",
-    legendHuman: "author's decision",
+      `, with ${deviations} ${plural(deviations, "adjustment", "adjustments")} against the default` +
+      (disabled > 0 ? `, ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}` : "") +
+      ".",
+    adjustedProfileAfter: "Its result cannot be compared with a default audit.",
+    splitAriaLabel: (safe, human) => `${safe} with a direct swap, ${human} for you to decide`,
+    legendSafe: (n) => plural(n, "direct swap available", "direct swaps available"),
+    legendHuman: (n) => plural(n, "point for you to decide", "points for you to decide"),
+    severityCount: (severity, n) =>
+      severity === "error"
+        ? plural(n, "high priority", "high priority")
+        : severity === "warning"
+          ? plural(n, "needs attention", "need attention")
+          : plural(n, "observation", "observations"),
     exportAudit: "Download audit (.md)",
     printAudit: "Print audit (PDF)",
     printNote: "Opens the browser's print dialog — choose “Save as PDF”.",
@@ -176,12 +184,12 @@ export const COPY_EN: UiCopy = {
     structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
     structureMissingJoin: " or ",
     structureCaveat: (missing: string, count: number) =>
-      `We found no ${missing} in this document, so ${count} ` +
+      `This document has no ${missing}, so ${count} ` +
       `${plural(count, "criterion", "criteria")} could not be assessed. ` +
-      "To include them in the audit, upload a .docx with that structure, or use # for headings and " +
-      "- for list items.",
+      `${plural(count, "To assess it", "To assess them")}, upload a .docx that contains those structures, or ` +
+      "use # for headings and - for list items.",
     scoreCaveat:
-      "The score summarizes the criteria that were assessed. It does not approve the document or guarantee " +
+      "The score summarizes the criteria that were assessed, but it does not replace a full review or guarantee " +
       "the text is clear.",
     readingLabel: "Reading metrics",
     readingCaveat:
@@ -189,14 +197,15 @@ export const COPY_EN: UiCopy = {
       "text is clear.",
     balanceLabel: "Before and after",
     balanceNone: "No change has been recorded yet.",
-    balanceTotal: (before, after) => `Audit weight ${before} → ${after}`,
+    balanceTotal: (before, after) => `Audit weight: ${before} → ${after}`,
+    balanceFound: (before, after) => `Points found: ${before} → ${after}`,
     balanceCount: (before, after) => `${before} → ${after}`,
     balanceDirection: { improved: "improved", regressed: "got worse", unchanged: "no change" },
     balanceKind: {
       resolved: "resolved",
       kept: "kept",
       reshaped: "rewritten, still flagged",
-      introduced: "introduced",
+      introduced: "flagged after the change",
       transformed: "became something else",
       indirect: "knock-on effect",
     },
@@ -206,28 +215,29 @@ export const COPY_EN: UiCopy = {
     balanceTypingNote:
       "Passage rewritten by hand. The comparison covers the whole region: inside it there is no telling which occurrence is which.",
     balanceCaveat:
-      "Less weight is not an approved text. The comparison says what the criteria find before and after, not whether the reader understood.",
+      "Less weight does not mean the text is approved. This comparison only shows what the criteria found before " +
+      "and after — not whether the audience understood the text.",
     trailLabel: "Recorded changes",
     trailWeight: (before, after, changes) =>
       `Audit weight ${before} → ${after} · ${changes} recorded ${plural(changes, "change", "changes")}`,
     trailCaveat:
-      "This list shows only the changes applied from a point in the review. What you rewrite by hand in Write " +
-      "changes the document without appearing here or in the exported report.",
+      "This list shows only the changes applied during the review. Edits made directly in Write change the " +
+      "document, but do not appear here or in the exported report.",
     changeFrom: "from",
     changeTo: "to",
     changeExpand: "Show the full passage",
     changeCollapse: "Collapse the passage",
-    entryLabel: "Text as it came in",
-    entryShow: "Show the text as it came in",
-    entryHide: "Hide the text as it came in",
+    entryLabel: "Original text",
+    entryShow: "Show the original text",
+    entryHide: "Hide the original text",
     entrySize: (chars) => `${chars.toLocaleString("en-US")} ${plural(chars, "character", "characters")}`,
     entryNote:
-      "A copy of the text as it entered this session, kept for consulting only. Lucid neither restores nor " +
-      "applies anything from here.",
-    entryStartingPoint: "It is the starting point of the weight reported above.",
+      "The original version of the text, available for consulting only. Lucid neither restores nor applies " +
+      "changes from it.",
+    entryStartingPoint: "This text was used to compute the starting weight shown above.",
     entryUnknown:
-      "No entry text recorded for this document: the session was saved before Lucid began keeping this copy.",
-    entryWrittenHere: "This document was written here — there is no entry text to compare against.",
+      "No original text recorded for this document: the session was saved before Lucid began keeping this copy.",
+    entryWrittenHere: "This document was written here — there is no original text to compare against.",
     descriptor: "descriptor",
     metricWords: "Words",
     metricSentences: "Sentences",
@@ -239,37 +249,40 @@ export const COPY_EN: UiCopy = {
   },
 
   revisionList: {
-    regionLabel: "Audit index",
-    title: "Audit index",
+    regionLabel: "Review steps",
+    title: "Review steps",
     indexLabel: "All criteria",
-    indexHint: "The whole list, ordered by severity. The path above is a suggested route over these very points.",
+    indexHint:
+      "Every criterion, ordered by severity. The step-by-step review above arranges these same points into a " +
+      "suggested route.",
     filterLabel: "Filter annotations",
     bucketAll: "All",
-    bucketSafe: "Direct swap",
-    bucketHuman: "Your call",
+    bucketSafe: "With a direct swap",
+    bucketHuman: "For you to decide",
     empty: "No annotations fired.",
     emptyInFilter: "No annotations under this filter.",
     hideInDocument: "Hide highlights in the document",
     hideNamed: (label) => `Hide the “${label}” highlights in the document`,
     showInDocument: "Show highlights in the document",
     showNamed: (label) => `Show the “${label}” highlights in the document`,
-    coverage: "Coverage",
-    cleanCriteria: (n) => `${n} ${plural(n, "criterion checked, no occurrence", "criteria checked, no occurrence")}`,
+    coverage: "Coverage of the analysis",
+    cleanCriteria: (n) => `${n} ${plural(n, "criterion", "criteria")} assessed with no point found`,
     hiddenCriteria: (n) =>
       `${n} ${plural(n, "criterion with highlights hidden", "criteria with highlights hidden")} — still in the audit`,
     highlightsOff: "highlights hidden in the document",
     lexiconCaveat:
-      "The criteria check for specific patterns. They help with the review, but do not replace the judgment of whoever wrote the text.",
-    occurrences: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
+      "The criteria spot specific patterns and help with the review, but they do not replace the judgment of " +
+      "whoever wrote the text.",
+    occurrences: (n) => `${n} ${plural(n, "point", "points")}`,
     distinct: (n) => `${n} distinct ${plural(n, "excerpt", "excerpts")}`,
     hiddenByFilter: (n) => `${n} outside the filter`,
     statePending: "Pending",
-    stateSeen: "Seen",
-    stateDismissed: "Dismissed",
-    searchLabel: "Search the excerpts",
-    searchPlaceholder: "Search excerpt…",
-    showingAll: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
-    showingFiltered: (shown, total) => `${shown} of ${total} ${plural(total, "occurrence", "occurrences")}`,
+    stateSeen: "Reviewed",
+    stateDismissed: "Ignored",
+    searchLabel: "Search the points",
+    searchPlaceholder: "Search the points…",
+    showingAll: (n) => `${n} ${plural(n, "point", "points")}`,
+    showingFiltered: (shown, total) => `${shown} of ${total} ${plural(total, "point", "points")}`,
     moreFilters: "More filters",
     fewerFilters: "Fewer filters",
     clearFilters: "clear filters",
@@ -278,24 +291,26 @@ export const COPY_EN: UiCopy = {
     batchLabel: "In bulk",
     batchClear: (n) => `Clear the marks on these ${n}`,
     batchCaveat:
-      "Marking as seen is one at a time on purpose: the mark only means something if someone looked. In bulk you can only clear.",
+      "Marking as reviewed is one at a time on purpose: the mark only means something if someone looked. In bulk " +
+      "you can only clear.",
     clearGroupMarks: (n) => `Clear ${n} ${plural(n, "mark", "marks")}`,
     scopeOn: "Only this criterion",
     scopeOff: "All criteria",
     scopeHint: (n) =>
-      `The list and the ‹ › navigation step through only the ${n} ${plural(n, "occurrence", "occurrences")} of this criterion.`,
-    markSeen: "Mark as seen",
-    markSeenHint: "Mark as seen — you looked at this occurrence",
-    markSeenNamed: (excerpt) => `Mark “${excerpt}” as seen`,
-    dismiss: "Dismiss",
-    dismissHint: "Dismiss — you will not act on this occurrence",
-    dismissNamed: (excerpt) => `Dismiss “${excerpt}”`,
+      `The list and the ‹ › navigation step through only the ${n} ${plural(n, "point", "points")} of this criterion.`,
+    markSeen: "Mark as reviewed",
+    markSeenHint: "Mark as reviewed — you assessed this point",
+    markSeenNamed: (excerpt) => `Mark “${excerpt}” as reviewed`,
+    dismiss: "Ignore",
+    dismissHint: "Ignore — you will not act on this point",
+    dismissNamed: (excerpt) => `Ignore “${excerpt}”`,
     unmark: "Unmark",
     unmarkHint: "Unmark — back to pending",
-    progress: (done, total) => `${done} of ${total} marked`,
+    progress: (done, total) => `${done} of ${total} reviewed`,
     pendingCount: (n) => `${n} pending`,
-    progressCaveat: "The author's own mark on their review — it does not change the score or approve the text.",
-    progressTitle: (done, total) => `${done} of ${total} marked`,
+    progressCaveat:
+      "These marks only help you keep track of your review. They do not change the audit result or approve the text.",
+    progressTitle: (done, total) => `${done} of ${total} reviewed`,
     absenceCaveat: "No annotations is not a certificate of clarity — it is the coverage of the audit.",
   },
 
@@ -323,7 +338,7 @@ export const COPY_EN: UiCopy = {
     crumbAll: "All criteria",
     crumbBackTo: (criterion) => `Back to the ${criterion} list`,
     backToList: "Back to list",
-    footerDeterministic: "Deterministic analysis",
+    footerDeterministic: "Automated analysis based on the",
 
     safeHeader: "Direct swap · curated equivalent",
     safeTerm: "Term",
@@ -577,76 +592,79 @@ export const COPY_EN: UiCopy = {
     trailStep: (index, total, label, state) => `Step ${index} of ${total}: ${label}, ${state}`,
     stepOf: (index, total) => `Step ${index} of ${total}`,
     overall: (reviewed, total) => `${reviewed}/${total} in the path`,
-    overallTitle: (reviewed, total) => `${reviewed} of ${total} occurrences reviewed across the whole path`,
+    overallTitle: (reviewed, total) => `${reviewed} of ${total} points reviewed across the whole path`,
     todo: (pending) =>
       pending === 1
-        ? "1 occurrence left. Open it and mark it as seen or dismissed."
-        : `${pending} occurrences left. Open them one by one and mark each as seen or dismissed.`,
-    within: (reviewed, total) =>
-      `${reviewed} of ${total} ${total === 1 ? "occurrence reviewed" : "occurrences reviewed"}`,
+        ? "1 point left. Open it and mark it as reviewed or ignored."
+        : `${pending} points left. Open them one by one and mark each as reviewed or ignored.`,
+    within: (reviewed, total) => `${reviewed} of ${total} ${total === 1 ? "point reviewed" : "points reviewed"}`,
     withinShort: (reviewed, total) => `${reviewed} of ${total} reviewed`,
     start: "Start this step",
     resume: "Pick up where you left off",
     nextUp: (index, label) => `Then: step ${index} · ${label}`,
-    advance: (index, label) => `Continue to step ${index} · ${label}`,
+    advance: (index, label) => `Continue to step ${index}: ${label}`,
     finishedTitle: (label) => `Step finished: ${label}`,
-    finishedCount: (n) => `${n} ${n === 1 ? "occurrence reviewed" : "occurrences reviewed"}`,
+    finishedCount: (n) => `${n} ${n === 1 ? "point reviewed" : "points reviewed"}`,
     reviewAgain: "Go through this step again",
     allDoneTitle: "Path finished",
     allDoneCount: (reviewed, steps) =>
-      `${reviewed} ${reviewed === 1 ? "occurrence reviewed" : "occurrences reviewed"} across ${steps} ${steps === 1 ? "step" : "steps"}.`,
+      `${reviewed} ${reviewed === 1 ? "point reviewed" : "points reviewed"} across ${steps} ${steps === 1 ? "step" : "steps"}.`,
     allDone:
-      "A reviewed occurrence is not a resolved one: resolved is what left the text. The score stays the same until the text changes.",
+      "A reviewed point is not a resolved one: resolved is what stopped existing in the text. The audit result " +
+      "stays the same until the text changes.",
     allDoneNext: "Export › Audit report keeps a record of what was walked.",
     leave: "Leave the path",
     leaveDone: "Back to the audit",
     states: { "not-started": "not started", "in-progress": "in progress", done: "finished" },
-    stepCrumb: (index, label) => `Step ${index} · ${label}`,
-    occurrenceOf: (index, total) => `Occurrence ${index} of ${total}`,
+    stepCrumb: (index, label) => `Step ${index}: ${label}`,
+    occurrenceOf: (index, total) => `Point ${index} of ${total}`,
     backToStep: "Back to the step",
-    markAndAdvance: "Mark as seen and move on",
-    markAndFinish: "Mark as seen and finish the step",
-    seenChip: "Seen",
-    nextOccurrence: "Next occurrence",
-    stepOccurrences: "Occurrences in this step",
+    markAndAdvance: "Mark as reviewed and move on",
+    markAndFinish: "Mark as reviewed and finish the step",
+    seenChip: "Reviewed",
+    nextOccurrence: "Next point",
+    stepOccurrences: "Points in this step",
     stepProgressLabel: "Step progress",
     routeProgressLabel: "Path progress",
   },
 
   startHere: {
-    label: "Guided review",
+    label: "Step-by-step review",
+    entryLabel: "Guided review",
     volume: (total, criteria) =>
-      `${total} ${plural(total, "occurrence", "occurrences")} across ${criteria} ${plural(criteria, "criterion", "criteria")}`,
+      `${total} ${plural(total, "point", "points")} across ${criteria} ${plural(criteria, "criterion", "criteria")}`,
     lead: (hasSwaps) =>
       hasSwaps
-        ? "One criterion at a time, heaviest first. You can enter at any step."
-        : "One criterion at a time, heaviest first — there are no direct swaps to make here. You can enter at any step.",
+        ? "Review one criterion at a time, heaviest first. You can also start at another step."
+        : "Review one criterion at a time, heaviest first. As there are no direct swaps in this step, you decide " +
+          "how to treat each point. You can also start at another step.",
     safeAction: (n) => `See the ${n} direct ${plural(n, "swap", "swaps")}`,
     shortcutLabel: "Shortcut",
     criterionAction: (label, n) => `Walk “${label}” (${n})`,
     stepDone: "finished",
     stepPending: (n) => `${n} pending`,
-    stepPartial: (reviewed, total) => `${reviewed}/${total} reviewed`,
+    stepPartial: (reviewed, total) => `${reviewed} of ${total} reviewed`,
     stepsDone: (done, total) => `${done} of ${total} ${plural(total, "step finished", "steps finished")}`,
     routeReviewed: (reviewed, total) => `${reviewed} of ${total} reviewed`,
     startTag: "start here",
     resumeTag: "pick up here",
-    entryLead: (total) =>
-      `Reading ${total} points at once does not work. The path splits the review into steps — one ` +
-      "criterion at a time, heaviest first.",
-    beginRoute: "Start the path",
-    resumeRoute: "Continue the path",
-    nextStepHint: (index, label) => `Starts at step ${index} · ${label}`,
-    resumeStepHint: (index, label) => `You stopped at step ${index} · ${label}`,
-    beginAt: (index, label) => `Start at step ${index} · ${label}`,
-    resumeAt: (index, label) => `Resume step ${index} · ${label}`,
+    entryLead: (total) => `Review the ${total} points in steps: one criterion at a time, heaviest first.`,
+    beginRoute: "Start the review",
+    resumeRoute: "Continue the review",
+    nextStepHint: (index, label) => `Starts at step ${index}: ${label}`,
+    resumeStepHint: (index, label) => `You stopped at step ${index}: ${label}`,
+    beginAt: (index, label) => `Start at step ${index}: ${label}`,
+    resumeAt: (index, label) => `Continue step ${index}: ${label}`,
     progressLabel: "Where the review stands",
-    progressCounts: (pending, seen, dismissed) => `${pending} pending · ${seen} seen · ${dismissed} dismissed`,
+    progressCounts: (pending, seen, dismissed) => `${seen} reviewed · ${dismissed} ignored`,
     progressResolved: (resolved, introduced) =>
-      introduced === 0 ? `${resolved} left the text` : `${resolved} left the text · ${introduced} came in`,
-    progressDone: "Nothing pending. A point marked as seen or dismissed is not a point resolved.",
+      introduced === 0
+        ? `${resolved} ${plural(resolved, "point stopped existing", "points stopped existing")}`
+        : `${resolved} ${plural(resolved, "point stopped existing", "points stopped existing")} · ` +
+          `${introduced} new ${plural(introduced, "point appeared", "points appeared")}`,
+    progressDone: "Nothing pending. A point marked as reviewed or ignored is not a point resolved.",
     caveat:
-      "A suggested order, not a rule: the findings are the same in any sequence, and order never changes the score.",
+      "This is only a suggested order. You can review the steps in any sequence without changing the audit result.",
   },
 
   presets: {

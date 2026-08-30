@@ -7,6 +7,7 @@ import { rewriteTargetAt } from "../../lib/paragraphs";
 import { REWRITE_MODELS } from "../../lib/rewrite";
 import { useCopy } from "../../i18n/use-copy";
 import { ChevronDownIcon, WandIcon } from "../icons";
+import { Button } from "../ui/button";
 import { SendNotice } from "../send-notice";
 import { RewriteProposalCard } from "./rewrite-proposal-card";
 import { useRewriteDraft } from "./use-rewrite-draft";
@@ -78,22 +79,13 @@ export function AiRewritePanel({
 
           <div className="mt-3.5 flex items-center justify-end gap-2">
             {loading && (
-              <button
-                type="button"
-                onClick={cancel}
-                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-rule-2 px-3.5 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-              >
+              <Button variant="outline" size="lg" onClick={cancel} className="h-9 shrink-0">
                 {c.common.cancel}
-              </button>
+              </Button>
             )}
-            <button
-              type="button"
-              onClick={run}
-              disabled={loading}
-              className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-accent px-3.5 text-[13px] font-semibold text-accent-ink shadow-(--shadow-card) transition-colors duration-150 hover:bg-accent-strong disabled:opacity-60"
-            >
+            <Button variant="primary" size="lg" onClick={run} disabled={loading} className="h-9 shrink-0">
               {c.note.aiRun}
-            </button>
+            </Button>
           </div>
 
           {error !== null && (

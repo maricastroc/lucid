@@ -115,8 +115,9 @@ export interface UiCopy {
     readonly adjustedProfile: (deviations: number, disabled: number) => string;
     readonly adjustedProfileAfter: string;
     readonly splitAriaLabel: (safe: number, human: number) => string;
-    readonly legendSafe: string;
-    readonly legendHuman: string;
+    readonly legendSafe: (n: number) => string;
+    readonly legendHuman: (n: number) => string;
+    readonly severityCount: (severity: Severity, n: number) => string;
     readonly exportAudit: string;
     readonly printAudit: string;
     readonly printNote: string;
@@ -143,6 +144,7 @@ export interface UiCopy {
     readonly balanceLabel: string;
     readonly balanceNone: string;
     readonly balanceTotal: (before: string, after: string) => string;
+    readonly balanceFound: (before: number, after: number) => string;
     readonly balanceCount: (before: number, after: number) => string;
     readonly balanceDirection: Record<"improved" | "regressed" | "unchanged", string>;
     readonly balanceKind: Record<"resolved" | "kept" | "reshaped" | "introduced" | "transformed" | "indirect", string>;
@@ -461,6 +463,7 @@ export interface UiCopy {
 
   readonly startHere: {
     readonly label: string;
+    readonly entryLabel: string;
     readonly volume: (total: number, criteria: number) => string;
     readonly lead: (hasSwaps: boolean) => string;
     readonly safeAction: (n: number) => string;

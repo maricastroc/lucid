@@ -6,6 +6,7 @@ import { useCopy } from "../i18n/use-copy";
 import { excerptState, PROBE_MAX_EXCERPT } from "../lib/probe-excerpt";
 import { SendNotice } from "./send-notice";
 import type { UiCopy } from "../i18n/copy";
+import { Button } from "./ui/button";
 
 interface ProbeResponse {
   signal: ProbeSignal;
@@ -101,14 +102,9 @@ export function ProbePanel({
 
       <SendNotice text={excerpt.text} />
 
-      <button
-        type="button"
-        onClick={run}
-        disabled={!canRun}
-        className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 bg-sheet px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button variant="outline" size="lg" onClick={run} disabled={!canRun} className="mt-2 bg-sheet">
         {status === "loading" ? t.running : t.run}
-      </button>
+      </Button>
 
       {status === "error" && (
         <p className="mt-3 text-[12px]" style={{ color: "var(--sev-error)" }}>
@@ -148,13 +144,9 @@ function ExcerptBox({ excerpt, onClear }: { excerpt: ReturnType<typeof excerptSt
     <div className="mt-3">
       <div className="flex items-baseline justify-between gap-2">
         <span className="u-sublabel text-ink-3">{t.excerptLabel}</span>
-        <button
-          type="button"
-          onClick={onClear}
-          className="rounded-md px-1.5 py-0.5 text-[11px] text-ink-3 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-1"
-        >
+        <Button variant="ghost" size="xs" onClick={onClear}>
           {t.clearExcerpt}
-        </button>
+        </Button>
       </div>
       <blockquote className="mt-1.5 max-h-40 overflow-y-auto rounded-lg border border-rule-2 bg-sheet px-3 py-2.5">
         <span className="whitespace-pre-wrap font-serif text-[13.5px] leading-snug text-ink-1">{excerpt.text}</span>

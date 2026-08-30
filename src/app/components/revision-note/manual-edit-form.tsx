@@ -8,9 +8,7 @@ import { useCopy } from "../../i18n/use-copy";
 import { PenNibIcon } from "../icons";
 import { RewriteProposalCard } from "./rewrite-proposal-card";
 import { useManualEditDraft } from "./use-manual-edit-draft";
-
-export const APPLY_BUTTON_CLASS =
-  "inline-flex items-center gap-1.5 rounded-lg border border-human-line bg-human-weak px-3.5 py-2 text-[13px] font-semibold text-human transition-colors duration-150 hover:bg-[color-mix(in_srgb,var(--human)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-human-weak";
+import { Button } from "../ui/button";
 
 export function ManualEditForm({
   finding,
@@ -34,14 +32,10 @@ export function ManualEditForm({
 
   if (editorDraft.status === "closed") {
     return (
-      <button
-        type="button"
-        onClick={edit.open}
-        className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-rule-2 px-3.5 py-2 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface-2"
-      >
+      <Button variant="outline" size="lg" onClick={edit.open} className="mt-4">
         <PenNibIcon className="size-3.5" />
         {c.note.manualOpen}
-      </button>
+      </Button>
     );
   }
 
@@ -51,13 +45,9 @@ export function ManualEditForm({
         <span className="u-sublabel text-ink-3">
           {c.note.manualTitle} · {unitLabel}
         </span>
-        <button
-          type="button"
-          onClick={edit.close}
-          className="rounded-md px-2 py-1 text-[11.5px] text-ink-2 transition-colors duration-150 hover:bg-surface-2"
-        >
+        <Button variant="ghost" size="sm" shape="soft" onClick={edit.close}>
           {c.common.close}
-        </button>
+        </Button>
       </div>
       <div className="px-3.5 py-3">
         <textarea
@@ -69,17 +59,12 @@ export function ManualEditForm({
           style={{ caretColor: "var(--accent)" }}
         />
         <div className="mt-2.5 flex items-center gap-2">
-          <button type="button" disabled={!dirty || checking} onClick={edit.check} className={APPLY_BUTTON_CLASS}>
+          <Button variant="tonal-human" size="lg" disabled={!dirty || checking} onClick={edit.check}>
             {checking ? c.note.manualVerifying : c.note.manualVerify}
-          </button>
-          <button
-            type="button"
-            disabled={draft === original}
-            onClick={edit.restore}
-            className="rounded-lg border border-rule-2 px-3 py-2 text-[12.5px] text-ink-1 transition-colors duration-150 hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
-          >
+          </Button>
+          <Button variant="outline" disabled={draft === original} onClick={edit.restore}>
             {c.common.restore}
-          </button>
+          </Button>
         </div>
 
         {result !== null && (
