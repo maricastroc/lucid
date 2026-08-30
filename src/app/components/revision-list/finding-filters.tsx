@@ -110,9 +110,7 @@ export function FindingFilters({ query, sifting, filtered, visibleCount, totalCo
       {(sifting || filtered) && (
         <div className="flex items-center justify-between gap-3 px-4 pb-3">
           <span className="min-w-0 truncate text-[11.5px] text-ink-3">
-            {filtered
-              ? c.revisionList.showingFiltered(visibleCount, totalCount)
-              : c.revisionList.showingAll(visibleCount)}
+            {filtered ? c.counts.shown(visibleCount, totalCount) : c.counts.shownAll(totalCount)}
             {hiddenCount > 0 && ` · ${c.revisionList.hiddenCriteria(hiddenCount)}`}
           </span>
           <div className="flex shrink-0 items-center gap-1">

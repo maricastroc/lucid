@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, browseAllPoints, documentRegion } from "./support/panels";
 import { auditReady, expandCriterion } from "./support/points";
 import { TWO_PASSIVES } from "./support/documents";
 import { useListRovingFocus } from "@/app/components/revision-list/use-list-roving-focus";
@@ -52,6 +52,7 @@ describe("up and down in the audit walk the points themselves", () => {
   it("opens the first point from the list", async () => {
     const { user } = mountStudio({ text: TWO_PASSIVES });
     await auditReady();
+    await browseAllPoints(user);
     await expandCriterion(user, "Voz passiva");
     auditPanel().getAllByRole("button", { name: /^\d+“/ })[0].focus();
 
@@ -66,6 +67,7 @@ describe("up and down in the audit walk the points themselves", () => {
   it("keeps walking inside the criterion in scope, wrapping at the end", async () => {
     const { user } = mountStudio({ text: TWO_PASSIVES });
     await auditReady();
+    await browseAllPoints(user);
     await expandCriterion(user, "Voz passiva");
     await user.click(auditPanel().getAllByRole("button", { name: /^\d+“/ })[0]);
 

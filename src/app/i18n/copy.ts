@@ -1,5 +1,6 @@
 import type { CriterionId, PrincipleGroup, Severity, SpliceRefusal } from "@/lucid";
-import type { PanelSectionId } from "../lib/panel-sections";
+import type { AuditViewId } from "../lib/audit-views";
+import type { MetricRowKey } from "../lib/metric-rows";
 import type { CriterionCoverage } from "@/report/eval/contract";
 import type { LedgerSource } from "../lib/ledger";
 import type { UiLang } from "./types";
@@ -83,14 +84,13 @@ export interface UiCopy {
       readonly invariant: string;
       readonly no_readable_content: string;
     };
-    readonly revisions: (n: number) => string;
+    readonly openAudit: (pending: number) => string;
     readonly changeApplied: string;
     readonly undo: string;
   };
 
   readonly panel: {
     readonly navLabel: string;
-    readonly sections: Record<PanelSectionId, string>;
     readonly settingsTitle: string;
     readonly settingsLead: string;
     readonly settingsSummaryExpressions: (n: number) => string;
@@ -99,16 +99,20 @@ export interface UiCopy {
     readonly settingsRecordPointer: string;
     readonly settingsIsoNote: string;
     readonly settingsIsoTitle: string;
-    readonly goToFindings: string;
+    readonly settingsOpen: string;
+    readonly settingsClose: string;
+    readonly settingsDone: string;
     readonly goToFindingsHint: string;
-    readonly metricsSummary: (words: string, perSentence: string) => string;
-    readonly probeSummary: string;
     readonly exportLabel: string;
     readonly exportMenuLabel: string;
     readonly provenanceTitle: (configHash: string, version: string) => string;
   };
 
   readonly overview: {
+    readonly foundLabel: string;
+    readonly movedLabel: string;
+    readonly seeChanges: string;
+    readonly limitsLabel: string;
     readonly annotations: (n: number) => string;
     readonly adjustedProfileBefore: string;
     readonly adjustedProfileStrong: string;
@@ -145,6 +149,7 @@ export interface UiCopy {
     readonly scoreCaveat: string;
     readonly readingLabel: string;
     readonly readingCaveat: string;
+    readonly balanceWeightNoun: string;
     readonly balanceLabel: string;
     readonly balanceNone: string;
     readonly balanceTotal: (before: string, after: string) => string;
@@ -184,14 +189,14 @@ export interface UiCopy {
   readonly revisionList: {
     readonly regionLabel: string;
     readonly title: string;
-    readonly indexLabel: string;
-    readonly indexHint: string;
+    readonly browseLabel: string;
     readonly filterLabel: string;
     readonly bucketAll: string;
     readonly bucketSafe: string;
     readonly bucketHuman: string;
     readonly empty: string;
-    readonly emptyInFilter: string;
+    readonly emptyFilterTitle: string;
+    readonly emptyFilterBody: (found: number) => string;
     readonly hideInDocument: string;
     readonly hideNamed: (label: string) => string;
     readonly showInDocument: string;
@@ -209,8 +214,7 @@ export interface UiCopy {
     readonly stateDismissed: string;
     readonly searchLabel: string;
     readonly searchPlaceholder: string;
-    readonly showingAll: (n: number) => string;
-    readonly showingFiltered: (shown: number, total: number) => string;
+
     readonly moreFilters: string;
     readonly fewerFilters: string;
     readonly clearFilters: string;
@@ -435,31 +439,74 @@ export interface UiCopy {
     readonly done: string;
   };
 
-  readonly guided: {
-    readonly routeLabel: string;
-    readonly trailLabel: string;
-    readonly trailStep: (index: number, total: number, label: string, state: string) => string;
+  readonly views: Record<AuditViewId, { readonly label: string; readonly purpose: string }>;
+
+  readonly counts: {
+    readonly stripLabel: string;
+    readonly found: (n: number) => string;
+    readonly pending: (n: number) => string;
+    readonly reviewed: (n: number) => string;
+    readonly dismissed: (n: number) => string;
+    readonly noun: {
+      readonly found: (n: number) => string;
+      readonly pending: (n: number) => string;
+      readonly pendingPoints: (n: number) => string;
+      readonly reviewed: (n: number) => string;
+      readonly dismissed: (n: number) => string;
+      readonly change: (n: number) => string;
+    };
+    readonly shown: (shown: number, found: number) => string;
+    readonly shownAll: (found: number) => string;
+    readonly stepsDone: (done: number, total: number) => string;
+    readonly nothingPending: string;
+    readonly resolvedSince: (resolved: number, introduced: number) => string;
+  };
+
+  readonly route: {
+    readonly label: string;
+    readonly tabsLabel: string;
+    readonly tabRoute: string;
+    readonly tabBrowse: string;
+    readonly idleLead: (found: number, steps: number) => string;
     readonly stepOf: (index: number, total: number) => string;
-    readonly overall: (reviewed: number, total: number) => string;
-    readonly overallTitle: (reviewed: number, total: number) => string;
-    readonly todo: (pending: number) => string;
-    readonly within: (reviewed: number, total: number) => string;
-    readonly withinShort: (reviewed: number, total: number) => string;
-    readonly start: string;
+    readonly begin: string;
     readonly resume: string;
+    readonly beginHint: (index: number, label: string) => string;
+    readonly resumeHint: (index: number, label: string) => string;
+    readonly openStep: string;
+    readonly resumeStep: string;
+    readonly stepPending: (n: number) => string;
+    readonly stepProgress: (reviewed: number, count: number) => string;
+    readonly routeProgress: (reviewed: number, found: number) => string;
     readonly nextUp: (index: number, label: string) => string;
     readonly advance: (index: number, label: string) => string;
     readonly finishedTitle: (label: string) => string;
-    readonly finishedCount: (n: number) => string;
+    readonly finishedCount: (reviewed: number, dismissed: number) => string;
     readonly reviewAgain: string;
     readonly allDoneTitle: string;
     readonly allDoneCount: (reviewed: number, steps: number) => string;
-    readonly allDone: string;
+    readonly allDoneBody: string;
     readonly allDoneNext: string;
     readonly leave: string;
     readonly leaveDone: string;
+    readonly backToReview: string;
+    readonly stepsLabel: string;
+    readonly stepDone: string;
+    readonly stepPartial: (reviewed: number, count: number) => string;
+    readonly startTag: string;
+    readonly resumeTag: string;
+    readonly stepAction: (label: string, n: number) => string;
     readonly states: Record<"not-started" | "in-progress" | "done", string>;
-    readonly stepCrumb: (index: number, label: string) => string;
+    readonly orderCaveat: string;
+    readonly swapShortcutLabel: string;
+    readonly swapShortcut: (n: number) => string;
+    readonly browseLead: string;
+    readonly browseReturn: (index: number, label: string) => string;
+  };
+
+  readonly guided: {
+    readonly trailLabel: string;
+    readonly trailStep: (index: number, total: number, label: string, state: string) => string;
     readonly occurrenceOf: (index: number, total: number) => string;
     readonly backToStep: string;
     readonly markAndAdvance: string;
@@ -471,33 +518,30 @@ export interface UiCopy {
     readonly routeProgressLabel: string;
   };
 
-  readonly startHere: {
-    readonly label: string;
-    readonly entryLabel: string;
-    readonly volume: (total: number, criteria: number) => string;
-    readonly lead: (hasSwaps: boolean) => string;
-    readonly safeAction: (n: number) => string;
-    readonly shortcutLabel: string;
-    readonly criterionAction: (label: string, n: number) => string;
-    readonly stepDone: string;
-    readonly stepPending: (n: number) => string;
-    readonly stepPartial: (reviewed: number, total: number) => string;
-    readonly stepsDone: (done: number, total: number) => string;
-    readonly routeReviewed: (reviewed: number, total: number) => string;
-    readonly startTag: string;
-    readonly resumeTag: string;
-    readonly entryLead: (total: number) => string;
-    readonly beginRoute: string;
-    readonly resumeRoute: string;
-    readonly nextStepHint: (index: number, label: string) => string;
-    readonly resumeStepHint: (index: number, label: string) => string;
-    readonly beginAt: (index: number, label: string) => string;
-    readonly resumeAt: (index: number, label: string) => string;
-    readonly progressLabel: string;
-    readonly progressCounts: (pending: number, seen: number, dismissed: number) => string;
-    readonly progressResolved: (resolved: number, introduced: number) => string;
-    readonly progressDone: string;
-    readonly caveat: string;
+  readonly changes: {
+    readonly emptyTitle: string;
+    readonly emptyBody: string;
+    readonly listLabel: string;
+    readonly effectLabel: string;
+    readonly detailsShow: string;
+    readonly detailsHide: string;
+    readonly undoLast: string;
+    readonly weightMeaning: string;
+    readonly stillOpen: (n: number) => string;
+    readonly none: string;
+  };
+
+  readonly metricsView: {
+    readonly notAScore: string;
+    readonly explainShow: string;
+    readonly explainHide: string;
+    readonly meaningLabel: string;
+    readonly directionLabel: string;
+    readonly limitLabel: string;
+    readonly meanings: Record<
+      MetricRowKey,
+      { readonly meaning: string; readonly direction: string; readonly limit: string }
+    >;
   };
 
   readonly presets: {

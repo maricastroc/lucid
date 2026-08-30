@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { readWorkspace } from "@/app/lib/workspace";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE } from "./support/documents";
 
@@ -10,7 +10,7 @@ type User = ReturnType<typeof mountStudio>["user"];
 const section = () =>
   auditPanel()
     .getByRole("heading", { name: /antes e depois/i })
-    .closest("div")!;
+    .closest("section")!;
 const draft = () => documentRegion().getByRole("textbox", { name: /texto do documento/i }) as HTMLTextAreaElement;
 
 async function applyRegisteredEdit(user: User): Promise<void> {
@@ -40,16 +40,20 @@ describe("before and after, criterion by criterion", () => {
   it("shows the weight and count of the whole revision once something changed", async () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
+    await openChanges(user);
     expect(auditPanel().queryByRole("heading", { name: /antes e depois/i })).not.toBeInTheDocument();
 
     await applyRegisteredEdit(user);
-    expect(within(section()).getByText(/peso da auditoria/i)).toBeInTheDocument();
+    await openChanges(user);
+    expect(within(section()).getByText(/pontos encontrados: \d+ → \d+/i)).toBeInTheDocument();
+    expect(within(section()).getByText(/de peso/i)).toBeInTheDocument();
   });
 
   it("names the criterion that improved and by how much", async () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await applyRegisteredEdit(user);
+    await openChanges(user);
 
     const rows = within(section()).getAllByRole("listitem");
     const passiva = rows.find((row) => /voz passiva/i.test(row.textContent ?? ""))!;
@@ -61,7 +65,8 @@ describe("before and after, criterion by criterion", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await applyRegisteredEdit(user);
-    expect(auditPanel().getByText(/um peso menor não significa que o texto está aprovado/i)).toBeInTheDocument();
+    await openChanges(user);
+    expect(auditPanel().getByText(/um peso menor não significa que o texto está/i)).toBeInTheDocument();
   });
 });
 
@@ -90,6 +95,7 @@ describe("free typing is recorded as one session, not one keystroke", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await typeFreely(user, "foi indeferido pela comissão", "a comissão indeferiu");
+    await openChanges(user);
     expect(auditPanel().getByText(/não dá para dizer qual ocorrência é qual/i)).toBeInTheDocument();
   });
 

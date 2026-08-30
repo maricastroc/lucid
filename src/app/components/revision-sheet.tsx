@@ -1,15 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { AuditPanel, type AuditPanelProps } from "./audit-panel";
 import { PanelHeader } from "./panel-header";
 import { useCopy } from "../i18n/use-copy";
 
-export interface RevisionSheetProps extends Omit<AuditPanelProps, "probeExcerpt" | "onClearProbeExcerpt"> {
+export interface RevisionSheetProps extends Omit<AuditPanelProps, "settingsOpen" | "onCloseSettings"> {
   onDismiss: () => void;
 }
 
 export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
   const { c } = useCopy();
+  const [settingsOpen, setSettingsOpen] = useState(false);
   return (
     <div
       className="fixed inset-0 z-40 lg:hidden"
@@ -31,6 +33,8 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           className="mx-auto mt-2.5 h-1.5 w-10 shrink-0 rounded-full bg-rule-3"
         />
         <PanelHeader
+          settingsOpen={settingsOpen}
+          onOpenSettings={() => setSettingsOpen((open) => !open)}
           diagnostic={panel.diagnostic}
           findings={panel.findings}
           ledger={panel.ledger}
@@ -43,7 +47,7 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           onBriefingChange={panel.settings.onBriefingChange}
           config={panel.settings.config}
         />
-        <AuditPanel {...panel} />
+        <AuditPanel {...panel} settingsOpen={settingsOpen} onCloseSettings={() => setSettingsOpen(false)} />
       </div>
     </div>
   );

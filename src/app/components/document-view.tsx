@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useMemo, useRef } from "react";
 import type { Block, Diagnostic, Finding, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
@@ -14,6 +14,9 @@ export type Mode = "audit" | "edit";
 
 interface Props {
   mode: Mode;
+  onChangeMode: (mode: Mode) => void;
+  onOpenDocument: (file: File) => void;
+  importing: boolean;
   text: string;
   diagnostic: Diagnostic;
   blocks: readonly Block[] | null;
@@ -27,7 +30,6 @@ interface Props {
   onLeaveDraft: () => void;
   onPasteDocument: (value: string, html: string | null) => void;
   onSelectFinding: (finding: Finding) => void;
-  onOpenDocument: (file: File) => void;
 }
 
 interface SegmentContext {
@@ -226,6 +228,9 @@ function BlockView({
 export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentView(
   {
     mode,
+    onChangeMode,
+    onOpenDocument,
+    importing,
     text,
     diagnostic,
     blocks,
@@ -239,7 +244,6 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
     onLeaveDraft,
     onPasteDocument,
     onSelectFinding,
-    onOpenDocument,
   },
   scrollRef,
 ) {
@@ -277,22 +281,17 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
           </div>
         </div>
       )}
+      <DocumentToolbar
+        mode={mode}
+        onChangeMode={onChangeMode}
+        onOpenDocument={onOpenDocument}
+        importing={importing}
+        words={words}
+        structured={structured}
+      />
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-16">
+        <div className="mx-auto w-full max-w-210 px-4 py-8 sm:px-8 sm:py-12 lg:py-14">
           <div className="overflow-hidden rounded-xl border border-rule-1 bg-sheet shadow-(--shadow-sheet)">
-            <div className="flex items-center justify-between border-b border-rule-1 px-6 py-3.5 sm:px-14">
-              <span className="u-sublabel text-ink-3">
-                {mode === "edit"
-                  ? c.documentView.draft
-                  : structured
-                    ? c.documentView.structured
-                    : c.documentView.underReview}
-              </span>
-              <span className="text-[12px] tabular-nums text-ink-3">
-                {words} {c.common.words}
-              </span>
-            </div>
-
             {mode === "edit" ? (
               <div className="relative px-6 py-8 sm:px-14 sm:py-12">
                 <textarea
@@ -363,3 +362,91 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
     </section>
   );
 });
+
+function DocumentToolbar({
+  mode,
+  onChangeMode,
+  onOpenDocument,
+  importing,
+  words,
+  structured,
+}: {
+  mode: Mode;
+  onChangeMode: (mode: Mode) => void;
+  onOpenDocument: (file: File) => void;
+  importing: boolean;
+  words: number;
+  structured: boolean;
+}) {
+  const { c } = useCopy();
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="flex h-12 shrink-0 items-center gap-3 border-b border-rule-1 bg-desk px-4 sm:px-6">
+      <span className="hidden shrink-0 text-[12px] tabular-nums text-ink-3 sm:block">
+        {words} {c.common.words}
+      </span>
+      {mode === "edit" ? (
+        <span className="u-sublabel hidden min-w-0 truncate rounded-full border border-accent-line bg-accent-weak px-2 py-0.5 text-accent sm:block">
+          {c.documentView.draft}
+        </span>
+      ) : (
+        structured && (
+          <span className="u-sublabel hidden min-w-0 truncate rounded-full border border-rule-2 px-2 py-0.5 text-ink-3 sm:block">
+            {c.documentView.structured}
+          </span>
+        )
+      )}
+
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div
+          role="tablist"
+          aria-label={c.masthead.workMode}
+          className="flex items-center rounded-full border border-rule-2 bg-surface p-0.5"
+        >
+          {(
+            [
+              ["audit", c.masthead.review],
+              ["edit", c.masthead.write],
+            ] as const
+          ).map(([m, labelText]) => (
+            <button
+              key={m}
+              role="tab"
+              type="button"
+              aria-selected={mode === m}
+              onClick={() => onChangeMode(m)}
+              className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors duration-150 ${
+                mode === m
+                  ? "bg-sheet text-ink-0 shadow-[0_0_0_1px_rgb(31_29_24/0.05),0_1px_2px_rgb(31_29_24/0.1)]"
+                  : "text-ink-2 hover:text-ink-0"
+              }`}
+            >
+              {labelText}
+            </button>
+          ))}
+        </div>
+
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onOpenDocument(file);
+            e.target.value = "";
+          }}
+        />
+        <button
+          type="button"
+          onClick={() => fileInput.current?.click()}
+          disabled={importing}
+          className="hidden items-center gap-1.5 rounded-full border border-rule-2 px-3.5 py-1.5 text-[12.5px] font-medium text-ink-1 transition-colors duration-150 hover:bg-surface hover:text-ink-0 disabled:opacity-60 sm:inline-flex"
+        >
+          {importing ? c.masthead.opening : c.masthead.openDocument}
+        </button>
+      </div>
+    </div>
+  );
+}

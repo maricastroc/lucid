@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { EMPTY_BRIEFING } from "@/lucid";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
-import { auditReady, expandCriterion, openPoint } from "./support/points";
+import { auditPanel, documentRegion, openSettings } from "./support/panels";
+import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, TERM_TWICE, TWO_PASSIVES } from "./support/documents";
 
 describe("flow 1 · navigating to a point in the document", () => {
@@ -67,7 +67,7 @@ describe("flow 1 · stepping through the occurrences of a declared expression", 
 
     const { user } = withTerm();
     await auditReady();
-    await expandCriterion(user, "Personalizar análise");
+    await openSettings(user);
     await user.click(auditPanel().getByRole("button", { name: /^Ver “prazo” no documento/ }));
 
     expect(auditPanel().getByRole("status")).toHaveTextContent("1 de 2");
@@ -83,7 +83,7 @@ describe("flow 1 · stepping through the occurrences of a declared expression", 
 
     const { user } = withTerm();
     await auditReady();
-    await expandCriterion(user, "Personalizar análise");
+    await openSettings(user);
     await user.click(auditPanel().getByRole("button", { name: /^Ver “prazo” no documento/ }));
     await user.click(auditPanel().getByRole("button", { name: /^Próxima ocorrência de “prazo”/ }));
 
@@ -96,7 +96,7 @@ describe("flow 1 · stepping through the occurrences of a declared expression", 
   it("wraps from the last occurrence back to the first", async () => {
     const { user } = withTerm();
     await auditReady();
-    await expandCriterion(user, "Personalizar análise");
+    await openSettings(user);
     await user.click(auditPanel().getByRole("button", { name: /^Ver “prazo” no documento/ }));
     await user.click(auditPanel().getByRole("button", { name: /^Ocorrência anterior de “prazo”/ }));
 

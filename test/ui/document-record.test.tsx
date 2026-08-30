@@ -1,7 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE } from "./support/documents";
 
@@ -9,6 +9,7 @@ const ENTRY_TEXT = "O pedido foi indeferido pela comissão por falta dos 3 docum
 
 const entryBlock = () => within(auditPanel().getByRole("region", { name: /texto original/i }));
 const showEntryText = () => entryBlock().getByRole("button", { name: /ver o texto original/i });
+const trailList = () => within(auditPanel().getByRole("list", { name: /alterações aplicadas/i }));
 
 const LONG_PASSIVE =
   "O pedido de reconsideração que o interessado apresentou foi indeferido pela comissão por falta " +
@@ -29,6 +30,7 @@ describe("the record of a document · the text as it came in", () => {
   it("keeps the entry text out of sight until it is asked for", async () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: ENTRY_TEXT });
     await auditReady();
+    await openChanges(user);
 
     expect(entryBlock().queryByText(ENTRY_TEXT)).not.toBeInTheDocument();
     await user.click(showEntryText());
@@ -41,6 +43,7 @@ describe("the record of a document · the text as it came in", () => {
   it("offers no way to put the entry text back — it is a record, not a restore", async () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: ENTRY_TEXT });
     await auditReady();
+    await openChanges(user);
     await user.click(showEntryText());
 
     expect(entryBlock().queryByRole("button", { name: /restaurar|reverter|voltar ao original/i })).toBeNull();
@@ -53,6 +56,7 @@ describe("the record of a document · the text as it came in", () => {
     await applyManualEdit(user);
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
+    await openChanges(user);
     await user.click(showEntryText());
     expect(entryBlock().getByText(ENTRY_TEXT)).toBeInTheDocument();
   });
@@ -64,6 +68,7 @@ describe("the record of a document · the text as it came in", () => {
     expect(auditPanel().queryByText(/não registrado para este documento/i)).not.toBeInTheDocument();
 
     await applyManualEdit(user);
+    await openChanges(user);
     expect(entryBlock().getByText(/não registrado para este documento/i)).toBeInTheDocument();
     expect(entryBlock().queryByRole("button", { name: /ver o texto original/i })).toBeNull();
   });
@@ -72,16 +77,19 @@ describe("the record of a document · the text as it came in", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: "" });
     await auditReady();
     await applyManualEdit(user);
+    await openChanges(user);
 
     expect(entryBlock().getByText(/foi escrito aqui/i)).toBeInTheDocument();
   });
 
-  it("shows nothing at all for a document with no entry text and no registered change", async () => {
-    mountStudio({ text: PASSIVE_AND_JARGON, originalText: "" });
+  it("says plainly that nothing has changed yet, instead of showing an empty record", async () => {
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: "" });
     await auditReady();
+    await openChanges(user);
 
     expect(auditPanel().queryByRole("region", { name: /texto original/i })).toBeNull();
-    expect(auditPanel().queryByText(/alterações registradas/i)).not.toBeInTheDocument();
+    expect(auditPanel().queryByRole("list", { name: /alterações aplicadas/i })).toBeNull();
+    expect(auditPanel().getByText(/nenhuma alteração ainda/i)).toBeInTheDocument();
   });
 });
 
@@ -90,8 +98,9 @@ describe("the record of a document · what the trail shows and what it admits", 
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await applyManualEdit(user);
+    await openChanges(user);
 
-    const trail = within(auditPanel().getByRole("list", { name: /alterações registradas/i }));
+    const trail = trailList();
     expect(trail.getByText(/o pedido foi indeferido pela comissão/i)).toBeInTheDocument();
     expect(trail.getByText(/a comissão negou o pedido/i)).toBeInTheDocument();
   });
@@ -100,14 +109,15 @@ describe("the record of a document · what the trail shows and what it admits", 
     const { user } = mountStudio({ text: LONG_PASSIVE });
     await auditReady();
     await applyManualEdit(user);
+    await openChanges(user);
 
-    const trail = within(auditPanel().getByRole("list", { name: /alterações registradas/i }));
+    const trail = trailList();
     expect(trail.getByText(/…$/)).toBeInTheDocument();
 
-    await user.click(trail.getByRole("button", { name: /ver trecho completo/i }));
+    await user.click(trail.getByRole("button", { name: /ver detalhes da alteração/i }));
     expect(trail.queryByText(/…$/)).not.toBeInTheDocument();
 
-    await user.click(trail.getByRole("button", { name: /recolher trecho/i }));
+    await user.click(trail.getByRole("button", { name: /ocultar detalhes da alteração/i }));
     expect(trail.getByText(/…$/)).toBeInTheDocument();
   });
 
@@ -116,8 +126,9 @@ describe("the record of a document · what the trail shows and what it admits", 
     await auditReady();
     await openPoint(user, "Jargão", "em sede de");
     await user.click(auditPanel().getByRole("button", { name: /^trocar por/i }));
+    await openChanges(user);
 
-    const trail = within(await auditPanel().findByRole("list", { name: /alterações registradas/i }));
+    const trail = within(await auditPanel().findByRole("list", { name: /alterações aplicadas/i }));
     const weight = trail.getByText(/→/);
     const [before, after] = weight.textContent!.split("→");
     expect(after.replace(/[↓↑=]/g, "").trim()).toBe(before.trim());
@@ -129,6 +140,7 @@ describe("the record of a document · what the trail shows and what it admits", 
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
     await auditReady();
     await applyManualEdit(user);
+    await openChanges(user);
 
     expect(auditPanel().getByText(/não aparecem aqui nem no relatório exportado/i)).toBeInTheDocument();
   });
@@ -139,14 +151,16 @@ describe("the record of a document · a different document takes its place", () 
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: ENTRY_TEXT });
     await auditReady();
     await applyManualEdit(user);
-    expect(auditPanel().getByRole("list", { name: /alterações registradas/i })).toBeInTheDocument();
+    await openChanges(user);
+    expect(auditPanel().getByRole("list", { name: /alterações aplicadas/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /início|lucid/i }));
     await user.click(await screen.findByRole("button", { name: /descartar|sair sem salvar|apagar/i }));
     await user.click(await screen.findByRole("button", { name: /carregar exemplo/i }));
     await auditReady();
+    await openChanges(user);
 
-    expect(auditPanel().queryByRole("list", { name: /alterações registradas/i })).toBeNull();
+    expect(auditPanel().queryByRole("list", { name: /alterações aplicadas/i })).toBeNull();
     await user.click(showEntryText());
 
     expect(entryBlock().queryByText(ENTRY_TEXT)).not.toBeInTheDocument();
@@ -164,6 +178,7 @@ describe("the record of a document · pasting a document in", () => {
     await user.paste(PASTED);
     await user.click(screen.getByRole("tab", { name: /^revisar$/i }));
     await auditReady();
+    await openChanges(user);
 
     await user.click(showEntryText());
     expect(entryBlock().getByText(PASTED)).toBeInTheDocument();
@@ -173,7 +188,8 @@ describe("the record of a document · pasting a document in", () => {
     const { user } = mountStudio({ text: PASSIVE_AND_JARGON, originalText: ENTRY_TEXT });
     await auditReady();
     await applyManualEdit(user);
-    expect(auditPanel().getByRole("list", { name: /alterações registradas/i })).toBeInTheDocument();
+    await openChanges(user);
+    expect(auditPanel().getByRole("list", { name: /alterações aplicadas/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: /^escrever$/i }));
     await user.click(draft());
@@ -181,8 +197,9 @@ describe("the record of a document · pasting a document in", () => {
     await user.paste(PASTED);
     await user.click(screen.getByRole("tab", { name: /^revisar$/i }));
     await auditReady();
+    await openChanges(user);
 
-    expect(auditPanel().queryByRole("list", { name: /alterações registradas/i })).toBeNull();
+    expect(auditPanel().queryByRole("list", { name: /alterações aplicadas/i })).toBeNull();
     await user.click(showEntryText());
     expect(entryBlock().getByText(PASTED)).toBeInTheDocument();
     expect(entryBlock().queryByText(ENTRY_TEXT)).not.toBeInTheDocument();
@@ -196,6 +213,7 @@ describe("the record of a document · pasting a document in", () => {
     await user.type(draft(), " Texto acrescentado.");
     await user.click(screen.getByRole("tab", { name: /^revisar$/i }));
     await auditReady();
+    await openChanges(user);
 
     await user.click(showEntryText());
     expect(entryBlock().getByText(ENTRY_TEXT)).toBeInTheDocument();

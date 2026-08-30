@@ -6,14 +6,21 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Compass,
   Eye,
   EyeOff,
+  Gauge,
+  History,
+  ListChecks,
   Minus,
   Moon,
   PenTool,
   Plus,
   Quote,
+  Route,
+  Search,
   ShieldAlert,
+  SlidersHorizontal,
   Sun,
   Wand2,
   X,
@@ -45,3 +52,10 @@ export const EyeIcon = icon(Eye, "EyeIcon");
 export const EyeOffIcon = icon(EyeOff, "EyeOffIcon");
 export const MinusIcon = icon(Minus, "MinusIcon");
 export const PlusIcon = icon(Plus, "PlusIcon");
+export const CompassIcon = icon(Compass, "CompassIcon");
+export const ListChecksIcon = icon(ListChecks, "ListChecksIcon");
+export const HistoryIcon = icon(History, "HistoryIcon");
+export const GaugeIcon = icon(Gauge, "GaugeIcon");
+export const SlidersIcon = icon(SlidersHorizontal, "SlidersIcon");
+export const RouteIcon = icon(Route, "RouteIcon");
+export const SearchIcon = icon(Search, "SearchIcon");

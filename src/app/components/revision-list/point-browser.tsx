@@ -11,26 +11,21 @@ import {
   type SortOrder,
   type StateFilter,
 } from "../../lib/finding-query";
-import type { ReviewMark, ReviewMarks } from "../../lib/review-marks";
-import { tally } from "../../lib/review-marks";
-import { startHerePlan } from "../../lib/start-here";
+import { tally, type ReviewMark, type ReviewMarks } from "../../lib/review-marks";
 import { useCopy } from "../../i18n/use-copy";
+import { Button } from "../ui/button";
 import { CleanCriteriaDisclosure } from "./clean-criteria-disclosure";
 import { CriterionGroup } from "./criterion-group";
 import { FindingFilters } from "./finding-filters";
-import { StartHerePlan } from "./start-here-plan";
 import { useListRovingFocus } from "./use-list-roving-focus";
 
-export type { Bucket } from "../../lib/finding-query";
-
-const FILTER_THRESHOLD = 10;
+export const FILTER_THRESHOLD = 10;
 
 interface Props {
   diagnostic: Diagnostic;
   groups: readonly FindingGroup[];
   visible: readonly Finding[];
   allFindings: readonly Finding[];
-  originalFindings: readonly Finding[] | null;
   query: FindingQuery;
   marks: ReviewMarks;
   filtered: boolean;
@@ -40,8 +35,6 @@ interface Props {
   onSearch: (s: string) => void;
   onOrder: (o: SortOrder) => void;
   onCriterion: (criterion: string | null) => void;
-  onStartStep: (criterion: string) => void;
-  guided: boolean;
   onClearFilters: () => void;
   onSelect: (finding: Finding) => void;
   hiddenHighlights: ReadonlySet<string>;
@@ -50,12 +43,11 @@ interface Props {
   onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
 }
 
-export function RevisionList({
+export function PointBrowser({
   diagnostic,
   groups,
   visible,
   allFindings,
-  originalFindings,
   query,
   marks,
   filtered,
@@ -65,8 +57,6 @@ export function RevisionList({
   onSearch,
   onOrder,
   onCriterion,
-  onStartStep,
-  guided,
   onClearFilters,
   onSelect,
   hiddenHighlights,
@@ -79,9 +69,7 @@ export function RevisionList({
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
-  const plan = startHerePlan(allFindings, marks, filtered, originalFindings);
   const hiddenCount = hiddenHighlightCount(groups, hiddenHighlights);
-
   const clean = cleanCriteria(diagnostic);
 
   const toggleGroup = (criterion: string) =>
@@ -93,15 +81,12 @@ export function RevisionList({
     });
 
   return (
-    <div>
-      <StartHerePlan plan={guided ? null : plan} onBucket={onBucket} onStart={onStartStep} />
-      {!guided && plan !== null && (
-        <div className="mx-4 mb-2.5 border-t border-rule-1 pt-3">
-          <h4 className="u-label text-ink-2">{c.revisionList.indexLabel}</h4>
-          <p className="mt-1 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.indexHint}</p>
-        </div>
-      )}
-      {!guided && (
+    <div className="fade-in">
+      <div className="px-4 pt-4">
+        <h3 className="u-label text-ink-2">{c.revisionList.browseLabel}</h3>
+      </div>
+
+      <div className="pt-2.5">
         <FindingFilters
           query={query}
           sifting={sifting}
@@ -118,10 +103,10 @@ export function RevisionList({
             clear: onClearFilters,
           }}
         />
-      )}
+      </div>
 
-      {!guided && filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
-        <div className="mx-6 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-rule-1 bg-surface-2/60 px-2.5 py-2">
+      {filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
+        <div className="mx-4 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-rule-1 bg-surface-2/60 px-2.5 py-2">
           <span className="u-sublabel text-ink-3">{c.revisionList.batchLabel}</span>
           <button
             type="button"
@@ -136,9 +121,7 @@ export function RevisionList({
 
       <div ref={listRef} onKeyDown={onKeyDown} className="flex flex-col gap-1 px-3 pb-3">
         {groups.length === 0 ? (
-          <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">
-            {allFindings.length === 0 ? c.revisionList.empty : c.revisionList.emptyInFilter}
-          </p>
+          <EmptyList found={allFindings.length} filtered={filtered} onClearFilters={onClearFilters} />
         ) : (
           groups.map((group) => (
             <CriterionGroup
@@ -146,8 +129,8 @@ export function RevisionList({
               group={group}
               diagnostic={diagnostic}
               marks={marks}
-              guided={guided}
-              open={guided || open.has(group.criterion) || query.criterion === group.criterion}
+              guided={false}
+              open={open.has(group.criterion) || query.criterion === group.criterion}
               scoped={query.criterion === group.criterion}
               selectedId={selectedId}
               onToggle={() => toggleGroup(group.criterion)}
@@ -162,9 +145,35 @@ export function RevisionList({
         )}
       </div>
 
-      {!guided && <CleanCriteriaDisclosure criteria={clean} />}
+      <CleanCriteriaDisclosure criteria={clean} />
 
       <p className="px-4 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
+    </div>
+  );
+}
+
+function EmptyList({
+  found,
+  filtered,
+  onClearFilters,
+}: {
+  found: number;
+  filtered: boolean;
+  onClearFilters: () => void;
+}) {
+  const { c } = useCopy();
+  if (!filtered || found === 0) {
+    return <p className="px-3 py-8 text-center text-[12.5px] text-ink-3">{c.revisionList.empty}</p>;
+  }
+  return (
+    <div role="status" className="mx-1 my-4 rounded-xl border border-dashed border-rule-2 px-4 py-5 text-center">
+      <p className="text-[13px] font-medium text-ink-1">{c.revisionList.emptyFilterTitle}</p>
+      <p className="mx-auto mt-1.5 max-w-xs text-[12px] leading-relaxed text-ink-2">
+        {c.revisionList.emptyFilterBody(found)}
+      </p>
+      <Button variant="outline" size="lg" onClick={onClearFilters} className="mt-3">
+        {c.revisionList.clearFilters}
+      </Button>
     </div>
   );
 }

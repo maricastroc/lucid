@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPanelSections, PANEL_SECTION_IDS } from "../src/app/lib/panel-sections";
+import { AUDIT_VIEW_IDS, buildAuditViews } from "../src/app/lib/audit-views";
 import { PROBE_SECTION_ENABLED } from "../src/app/lib/probe-availability";
 import { COPY } from "../src/app/i18n/copy";
 import { GOLDEN_SONDA } from "./eval/probe-golden";
@@ -11,23 +11,23 @@ describe("comprehension probe — hidden from production until the meta-eval cle
     expect(PROBE_SECTION_ENABLED).toBe(false);
   });
 
-  it("the audit panel offers no comprehension section, even where the surface can render one", () => {
+  it("the audit panel offers no comprehension destination, even where the surface can host one", () => {
     for (const hasProbe of [true, false]) {
-      const sections = buildPanelSections({ findingCount: 5, hasProbe }, c);
-      expect(sections.map((s) => s.id)).not.toContain("probe");
+      const built = buildAuditViews({ pending: 5, changes: 0, hasProbe }, c);
+      expect(built.map((v) => v.id)).not.toContain("probe");
     }
   });
 
-  it("hiding the section is the ONLY gate — the surface still declares it can host the probe", () => {
-    const offered = buildPanelSections({ findingCount: 5, hasProbe: true }, c);
-    const notOffered = buildPanelSections({ findingCount: 5, hasProbe: false }, c);
-    expect(offered.map((s) => s.id)).toEqual(notOffered.map((s) => s.id));
+  it("hiding it is the ONLY gate — the surface still declares it can host the probe", () => {
+    const offered = buildAuditViews({ pending: 5, changes: 0, hasProbe: true }, c);
+    const notOffered = buildAuditViews({ pending: 5, changes: 0, hasProbe: false }, c);
+    expect(offered.map((v) => v.id)).toEqual(notOffered.map((v) => v.id));
   });
 
-  it("nothing was deleted: the section id and its copy survive in both interface languages", () => {
-    expect(PANEL_SECTION_IDS).toContain("probe");
-    expect(COPY["pt-BR"].panel.sections.probe.length).toBeGreaterThan(0);
-    expect(COPY.en.panel.sections.probe.length).toBeGreaterThan(0);
+  it("nothing was deleted: the id and its copy survive in both interface languages", () => {
+    expect(AUDIT_VIEW_IDS).toContain("probe");
+    expect(COPY["pt-BR"].views.probe.label.length).toBeGreaterThan(0);
+    expect(COPY.en.views.probe.label.length).toBeGreaterThan(0);
     expect(COPY["pt-BR"].probe.title.length).toBeGreaterThan(0);
   });
 

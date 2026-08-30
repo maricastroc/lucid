@@ -130,7 +130,11 @@ describe("editing an imported document — what it still refuses, and where it s
     await user.keyboard("U");
 
     const notice = await screen.findByRole("alert");
-    expect(notice.parentElement).toHaveClass("fixed", "bottom-6");
+
+    expect(notice.parentElement).toHaveClass("absolute", "bottom-5");
+    const pane = notice.parentElement!.parentElement!;
+    expect(pane.querySelector('[aria-label="Documento em revisão"]')).not.toBeNull();
+    expect(pane.querySelector('[aria-label="Auditoria"]')).toBeNull();
   });
 
   it("still offers both ways out of the refusal", async () => {

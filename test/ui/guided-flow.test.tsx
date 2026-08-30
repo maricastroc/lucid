@@ -1,8 +1,8 @@
 import { within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel } from "./support/panels";
-import { auditReady } from "./support/points";
+import { auditPanel, browseAllPoints, openReview } from "./support/panels";
+import { auditReady, startRoute } from "./support/points";
 
 const BIG = Array.from(
   { length: 5 },
@@ -21,7 +21,8 @@ const B = (name: RegExp) => auditPanel().getAllByRole("button", { name });
 const advance = () => auditPanel().queryByRole("button", { name: /marcar como revisado e (avançar|concluir)/i });
 
 async function enter(user: User): Promise<void> {
-  await user.click(auditPanel().getAllByRole("button", { name: /percorrer/i })[0]);
+  await openReview(user);
+  await startRoute(user);
 }
 
 async function walkTheStep(user: User): Promise<void> {
@@ -41,8 +42,18 @@ describe("the guided path stays with the reader", () => {
 
     await enter(user);
     expect(within(header()).getByText(/etapa 1 de \d+/i)).toBeInTheDocument();
-    expect(within(header()).getByText(/0 de \d+ pontos revisados/i)).toBeInTheDocument();
+    expect(within(header()).getByText(/0 de \d+ pontos desta etapa/i)).toBeInTheDocument();
     expect(within(header()).getByText(/depois: etapa \d+ ·/i)).toBeInTheDocument();
+  });
+
+  it("counts inside the step and across the path, each with the noun it counts", async () => {
+    const { user } = mountStudio({ text: BIG });
+    await auditReady();
+    await enter(user);
+
+    expect(within(header()).getByText(/\d+ de \d+ pontos desta etapa/i)).toBeInTheDocument();
+    expect(within(header()).getByText(/\d+ de \d+ pontos no percurso/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/\d+ de \d+ etapas? conclu/i)).toBeInTheDocument();
   });
 
   it("offers exactly one primary action to open the step", async () => {
@@ -50,7 +61,7 @@ describe("the guided path stays with the reader", () => {
     await auditReady();
     await enter(user);
     expect(
-      within(header()).getAllByRole("button", { name: /começar esta etapa|continuar de onde parou/i }),
+      within(header()).getAllByRole("button", { name: /abrir o primeiro ponto|continuar de onde parou/i }),
     ).toHaveLength(1);
   });
 
@@ -65,6 +76,7 @@ describe("the guided path stays with the reader", () => {
   it("puts the walking chrome away so the step is the only thing to do", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await browseAllPoints(user);
     expect(auditPanel().getByRole("searchbox", { name: /buscar/i })).toBeInTheDocument();
 
     await enter(user);
@@ -128,26 +140,27 @@ describe("the guided path stays with the reader", () => {
     await user.click(within(header()).getByRole("button", { name: /sair do percurso/i }));
     expect(auditPanel().queryByText(/etapa \d+ de \d+/i)).not.toBeInTheDocument();
 
-    await enter(user);
+    await startRoute(user);
     expect(within(header()).getByText(/etapa \d+ de \d+/i).textContent).toBe(at);
   });
 
   it("hides the full plan while a step is being walked, and brings it back on leaving", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
-    expect(auditPanel().getAllByText(/percurso de revisão/i).length).toBeGreaterThan(0);
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
+    await openReview(user);
+    expect(auditPanel().getByText(/etapas do percurso/i)).toBeInTheDocument();
 
-    await enter(user);
-    expect(auditPanel().queryByRole("button", { name: /começar pela etapa 1:/i })).not.toBeInTheDocument();
+    await startRoute(user);
+    expect(auditPanel().queryByRole("button", { name: /percorrer “jargão”/i })).not.toBeInTheDocument();
 
     await user.click(within(header()).getByRole("button", { name: /sair do percurso/i }));
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /^começar a revisão$/i })).toBeInTheDocument();
   });
 
   it("gives a step the same number in the plan and in the header", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await openReview(user);
     const row = auditPanel().getAllByRole("button", { name: /percorrer/i })[1];
     const number = /^\d+/.exec(row.textContent ?? "")![0];
 
@@ -182,25 +195,28 @@ describe("the guided path stays with the reader", () => {
 
     await user.click(auditPanel().getByRole("button", { name: /sair do percurso/i }));
     expect(auditPanel().queryByText(/etapa \d+ de \d+/i)).not.toBeInTheDocument();
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /^começar a revisão$/i })).toBeInTheDocument();
   });
 
   it("stops offering a step to resume once every step is walked", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await openReview(user);
     for (let step = 0; step < 5; step++) {
       const entry = auditPanel()
         .queryAllByRole("button", { name: /percorrer/i })
         .find((button) => /pendente/.test(button.textContent ?? ""));
       if (entry === undefined) break;
       await user.click(entry);
-      await user.click(within(header()).getByRole("button", { name: /começar esta etapa|continuar de onde parou/i }));
+      await user.click(
+        within(header()).getByRole("button", { name: /abrir o primeiro ponto|continuar de onde parou/i }),
+      );
       for (let i = 0; i < 16; i++) {
         const mark = advance();
         if (mark === null) break;
         await user.click(mark);
       }
-      await user.click(within(header()).getByRole("button", { name: /sair do percurso|voltar à auditoria/i }));
+      await user.click(within(header()).getByRole("button", { name: /sair do percurso|voltar ao panorama/i }));
     }
 
     expect(auditPanel().getAllByText(/percurso concluído/i).length).toBeGreaterThan(0);
@@ -210,6 +226,7 @@ describe("the guided path stays with the reader", () => {
   it("enters the step instead of stacking one more filter on top", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await browseAllPoints(user);
     await user.click(auditPanel().getByRole("button", { name: /^com troca direta$/i }));
     await user.type(auditPanel().getByRole("searchbox", { name: /buscar/i }), "sede");
 
@@ -229,8 +246,9 @@ describe("the guided path stays with the reader", () => {
   });
 
   it("marks one step as the way in, and leaves the others plainly ahead", async () => {
-    mountStudio({ text: BIG });
+    const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await openReview(user);
     const steps = auditPanel().getAllByRole("button", { name: /percorrer/i });
     expect(steps[0].textContent).toMatch(/começar daqui/i);
     for (const later of steps.slice(1)) expect(later.textContent).not.toMatch(/começar daqui|continuar daqui/i);
@@ -244,9 +262,46 @@ describe("the guided path stays with the reader", () => {
   });
 
   it("drops a stored step whose criterion the text no longer has", async () => {
-    mountStudio({ text: BIG, guidedStep: "long_sentence_not_a_criterion" });
+    const { user } = mountStudio({ text: BIG, guidedStep: "long_sentence_not_a_criterion" });
     await auditReady();
     expect(auditPanel().queryByText(/etapa \d+ de \d+/i)).not.toBeInTheDocument();
-    expect(auditPanel().getByRole("button", { name: /começar pela etapa 1:/i })).toBeInTheDocument();
+    await openReview(user);
+    expect(auditPanel().getByRole("button", { name: /^começar a revisão$/i })).toBeInTheDocument();
+  });
+});
+
+describe("the guided path and free lookup are two named ways to work", () => {
+  it("names both, and shows only one at a time", async () => {
+    const { user } = mountStudio({ text: BIG });
+    await auditReady();
+    await openReview(user);
+
+    expect(auditPanel().getByRole("radio", { name: /^percurso/i })).toHaveAttribute("aria-checked", "true");
+    expect(auditPanel().getByRole("radio", { name: /^todos os pontos/i })).toHaveAttribute("aria-checked", "false");
+    expect(auditPanel().queryByRole("searchbox", { name: /buscar/i })).not.toBeInTheDocument();
+  });
+
+  it("keeps the open step while the reader looks something up, and offers the way back", async () => {
+    const { user } = mountStudio({ text: BIG });
+    await auditReady();
+    await enter(user);
+    const at = within(header()).getByText(/etapa \d+ de \d+/i).textContent;
+
+    await user.click(auditPanel().getByRole("radio", { name: /^todos os pontos/i }));
+    expect(auditPanel().getByRole("searchbox", { name: /buscar/i })).toBeInTheDocument();
+    expect(auditPanel().getByText(/nada aqui altera o percurso/i)).toBeInTheDocument();
+
+    await user.click(auditPanel().getByRole("button", { name: /voltar ao percurso · etapa/i }));
+    expect(within(header()).getByText(/etapa \d+ de \d+/i).textContent).toBe(at);
+  });
+
+  it("shows every point in free lookup, not only the ones the open step holds", async () => {
+    const { user } = mountStudio({ text: BIG });
+    await auditReady();
+    await enter(user);
+    await user.click(auditPanel().getByRole("radio", { name: /^todos os pontos/i }));
+
+    expect(auditPanel().getByText(/^exibindo (os )?\d+/i)).toBeInTheDocument();
+    expect(auditPanel().queryByRole("button", { name: /limpar filtros/i })).not.toBeInTheDocument();
   });
 });

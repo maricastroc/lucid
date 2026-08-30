@@ -11,6 +11,7 @@ import {
   type Finding,
   type ReaderBriefing,
   type Span,
+  type SpliceRefusal,
 } from "@/lucid";
 import { findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
@@ -124,6 +125,11 @@ export function Studio() {
   const { groups, visible } = useMemo(
     () => queryFindings(diagnostic.findings, query, marks),
     [diagnostic, query, marks],
+  );
+
+  const pendingCount = useMemo(
+    () => findings.filter((finding) => marks[findingId(finding)] === undefined).length,
+    [findings, marks],
   );
 
   useEffect(() => {
@@ -263,10 +269,11 @@ export function Studio() {
     [clearFilters, setCriterion, clearSelection],
   );
 
-  const scopeCriterion = useCallback(
-    (criterion: string | null) => {
-      if (criterion === null) setGuidedStep(null);
-      else setGuidedStep((step) => (step === null ? null : criterion));
+  const scopeCriterion = setCriterion;
+
+  const focusCriterion = useCallback(
+    (criterion: string) => {
+      setGuidedStep((step) => (step === null ? null : criterion));
       setCriterion(criterion);
     },
     [setCriterion],
@@ -300,7 +307,7 @@ export function Studio() {
     [visible, marks, select, clearSelection],
   );
 
-  const leaveGuided = useCallback(() => {
+  const leaveRoute = useCallback(() => {
     setGuidedStep(null);
     setCriterion(null);
     clearSelection();
@@ -309,10 +316,10 @@ export function Studio() {
   const selectFinding = useCallback(
     (finding: Finding) => {
       setMode("audit");
-      scopeCriterion(finding.criterion);
+      focusCriterion(finding.criterion);
       select(finding);
     },
-    [select, scopeCriterion],
+    [select, focusCriterion],
   );
 
   const onFreeTypeText = useCallback(
@@ -371,11 +378,12 @@ export function Studio() {
       },
     },
     review: { marks, onMark: mark, onMarkMany: markMany },
-    guided: {
+    history: { canUndo, onUndo: undoChange },
+    route: {
       step: guidedStep,
-      onGo: goToStep,
-      onLeave: leaveGuided,
-      onOpen: openFirstPending,
+      onOpenStep: goToStep,
+      onLeave: leaveRoute,
+      onOpenFirstPending: openFirstPending,
       onAdvance: advancePast,
     },
     highlights: { hidden: hiddenHighlights, onToggle: toggleHighlights },
@@ -398,13 +406,7 @@ export function Studio() {
   };
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
-      <Masthead
-        mode={mode}
-        onChangeMode={changeMode}
-        onOpenDocument={openDocument}
-        onGoHome={goHome}
-        importing={importing}
-      />
+      <Masthead onGoHome={goHome} />
       {importError !== null && (
         <div
           role="alert"
@@ -435,30 +437,42 @@ export function Studio() {
             importing={importing}
           />
         ) : (
-          <DocumentView
-            ref={scrollRef}
-            mode={mode}
-            text={text}
-            diagnostic={diagnostic}
-            blocks={blocks}
-            selectedId={selectedId}
-            flashId={flashId}
-            hiddenHighlights={hiddenHighlights}
-            rewriteTarget={rewriteTarget}
-            occurrences={occurrences.spans}
-            activeOccurrence={occurrences.active}
-            onChangeText={onFreeTypeText}
-            onLeaveDraft={closeTypingSession}
-            onPasteDocument={onPasteDocument}
-            onSelectFinding={selectFinding}
-            onOpenDocument={openDocument}
-          />
+          <div className="relative flex min-w-0 flex-1 flex-col">
+            <DocumentView
+              ref={scrollRef}
+              mode={mode}
+              onChangeMode={changeMode}
+              importing={importing}
+              text={text}
+              diagnostic={diagnostic}
+              blocks={blocks}
+              selectedId={selectedId}
+              flashId={flashId}
+              hiddenHighlights={hiddenHighlights}
+              rewriteTarget={rewriteTarget}
+              occurrences={occurrences.spans}
+              activeOccurrence={occurrences.active}
+              onChangeText={onFreeTypeText}
+              onLeaveDraft={closeTypingSession}
+              onPasteDocument={onPasteDocument}
+              onSelectFinding={selectFinding}
+              onOpenDocument={openDocument}
+            />
+            <DocumentNotices
+              refusedEdit={refusedEdit}
+              canUndo={canUndo}
+              changeKey={ledger.length}
+              onAcceptPlain={acceptAsPlainText}
+              onDiscardRefused={discardRefusedEdit}
+              onUndo={undoChange}
+            />
+          </div>
         )}
 
         {!isEmpty && <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />}
       </div>
 
-      {mode === "audit" && visible.length > 0 && !sheetOpen && (
+      {mode === "audit" && findings.length > 0 && !sheetOpen && (
         <Button
           variant="primary"
           size="xl"
@@ -466,7 +480,7 @@ export function Studio() {
           onClick={revealSheet}
           className="fixed bottom-5 right-5 z-30 shadow-(--shadow-pop) lg:hidden"
         >
-          {c.studio.revisions(visible.length)}
+          {c.studio.openAudit(pendingCount)}
         </Button>
       )}
 
@@ -488,39 +502,67 @@ export function Studio() {
         confirmLabel={c.studio.goHome.confirm}
         onConfirm={discardAndGoHome}
       />
+    </div>
+  );
+}
 
-      {(refusedEdit !== null || canUndo) && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-30 flex flex-col items-center gap-2 px-4">
-          {refusedEdit !== null && (
-            <div
-              role="alert"
-              className="rise pointer-events-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border border-sev-warning/40 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)"
-            >
-              <span className="text-[12.5px] text-ink-1">
-                {c.studio.spliceRefused[refusedEdit.reason]}{" "}
-                <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
-              </span>
-              <span className="flex shrink-0 items-center gap-1.5">
-                <Button variant="outline" shape="pill" onClick={acceptAsPlainText}>
-                  {c.studio.spliceAcceptPlain}
-                </Button>
-                <Button variant="ghost" shape="pill" onClick={discardRefusedEdit}>
-                  {c.studio.spliceDiscard}
-                </Button>
-              </span>
-            </div>
-          )}
-          {canUndo && (
-            <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
-              <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
-                <ArrowDownIcon className="size-4 text-safe" aria-hidden />
-                {c.studio.changeApplied}
-              </span>
-              <Button variant="link" shape="pill" onClick={undoChange}>
-                {c.studio.undo}
-              </Button>
-            </div>
-          )}
+function DocumentNotices({
+  refusedEdit,
+  canUndo,
+  changeKey,
+  onAcceptPlain,
+  onDiscardRefused,
+  onUndo,
+}: {
+  refusedEdit: { reason: SpliceRefusal } | null;
+  canUndo: boolean;
+  changeKey: number;
+  onAcceptPlain: () => void;
+  onDiscardRefused: () => void;
+  onUndo: () => void;
+}) {
+  const { c } = useCopy();
+  const [settled, setSettled] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!canUndo) return;
+    const timer = setTimeout(() => setSettled(changeKey), 8000);
+    return () => clearTimeout(timer);
+  }, [canUndo, changeKey]);
+
+  const showUndo = canUndo && settled !== changeKey;
+  if (refusedEdit === null && !showUndo) return null;
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-5 z-30 flex flex-col items-center gap-2 px-4">
+      {refusedEdit !== null && (
+        <div
+          role="alert"
+          className="rise pointer-events-auto flex max-w-2xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-2xl border border-sev-warning/40 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)"
+        >
+          <span className="text-[12.5px] text-ink-1">
+            {c.studio.spliceRefused[refusedEdit.reason]}{" "}
+            <span className="text-ink-2">{c.studio.spliceRefusedKept}</span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1.5">
+            <Button variant="outline" shape="pill" onClick={onAcceptPlain}>
+              {c.studio.spliceAcceptPlain}
+            </Button>
+            <Button variant="ghost" shape="pill" onClick={onDiscardRefused}>
+              {c.studio.spliceDiscard}
+            </Button>
+          </span>
+        </div>
+      )}
+      {showUndo && (
+        <div className="rise pointer-events-auto flex items-center gap-3 rounded-full border border-rule-2 bg-sheet px-4 py-2.5 shadow-(--shadow-pop)">
+          <span className="inline-flex items-center gap-2 text-[13px] text-ink-1">
+            <ArrowDownIcon className="size-4 text-safe" aria-hidden />
+            {c.studio.changeApplied}
+          </span>
+          <Button variant="link" shape="pill" onClick={onUndo}>
+            {c.studio.undo}
+          </Button>
         </div>
       )}
     </div>

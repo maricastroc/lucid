@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { screen } from "@testing-library/react";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON } from "./support/documents";
 
@@ -36,6 +36,7 @@ describe("applying an equivalent the engine already signed", () => {
     await openJargon(user);
 
     await user.click(auditPanel().getByRole("button", { name: /trocar por «citados acima»/i }));
+    await openChanges(user);
 
     expect(auditPanel().getByText(/troca direta do glossário/i)).toBeInTheDocument();
     expect(auditPanel().queryByText(/^edição do autor$/i)).not.toBeInTheDocument();

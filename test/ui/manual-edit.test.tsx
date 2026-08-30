@@ -1,7 +1,7 @@
 import { within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE } from "./support/documents";
 
@@ -36,7 +36,8 @@ describe("flow 4 · verifying and applying a manual edit", () => {
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
     expect(documentRegion().getByRole("article")).not.toHaveTextContent(/foi indeferido/i);
-    const trail = within(auditPanel().getByRole("list", { name: /alterações registradas/i }));
+    await openChanges(user);
+    const trail = within(auditPanel().getByRole("list", { name: /alterações aplicadas/i }));
     expect(trail.getByText(/edição do autor/i)).toBeInTheDocument();
   });
 

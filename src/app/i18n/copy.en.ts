@@ -105,20 +105,13 @@ export const COPY_EN: UiCopy = {
       no_readable_content:
         "This file has no readable content to audit. That is not a clean document: it is an empty one.",
     },
-    revisions: (n) => `${n} ${plural(n, "revision", "revisions")}`,
+    openAudit: (pending) => (pending === 0 ? "Open the audit" : `Open the audit · ${pending} pending`),
     changeApplied: "Change applied to the text.",
     undo: "Undo",
   },
 
   panel: {
-    navLabel: "Panel sections",
-    sections: {
-      summary: "Summary",
-      findings: "Points",
-      settings: "Settings",
-      metrics: "Metrics",
-      probe: "Comprehension",
-    },
+    navLabel: "Audit destinations",
     settingsTitle: "Customize analysis",
     settingsLead: "Tune the criteria to the rules of the document or of your organization.",
     settingsSummaryExpressions: (n) =>
@@ -132,16 +125,22 @@ export const COPY_EN: UiCopy = {
     settingsIsoTitle:
       "This section helps apply the section 5.1 guidance on relevance to the reader. The remaining limits " +
       "correspond to the sentence, paragraph and heading criteria.",
-    goToFindings: "View audit points",
-    goToFindingsHint: "These settings are not audit points, but they change how some points are identified.",
-    metricsSummary: (words, perSentence) => `${words} words · ${perSentence} per sentence on average`,
-    probeSummary: "optional AI test",
+    settingsOpen: "Configure the analysis",
+    settingsClose: "Back to the audit",
+    settingsDone: "Apply and go back",
+    goToFindingsHint:
+      "Nothing here is an audit point: these are the thresholds and the vocabulary the analysis uses to find " +
+      "points. Changing them re-runs the analysis.",
     exportLabel: "Export",
     exportMenuLabel: "Export formats",
     provenanceTitle: (configHash, version) => `config ${configHash} · lucid ${version}`,
   },
 
   overview: {
+    foundLabel: "What the audit found",
+    movedLabel: "What has changed",
+    seeChanges: "See the changes",
+    limitsLabel: "Limits of this analysis",
     annotations: (n) => plural(n, "point to review", "points to review"),
     adjustedProfileBefore: "This audit uses a ",
     adjustedProfileStrong: "custom profile",
@@ -199,6 +198,7 @@ export const COPY_EN: UiCopy = {
     readingCaveat:
       "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
       "text is clear.",
+    balanceWeightNoun: "in weight",
     balanceLabel: "Before and after",
     balanceNone: "No change has been recorded yet.",
     balanceTotal: (before, after) => `Audit weight: ${before} → ${after}`,
@@ -253,18 +253,18 @@ export const COPY_EN: UiCopy = {
   },
 
   revisionList: {
-    regionLabel: "Review steps",
-    title: "Review steps",
-    indexLabel: "All criteria",
-    indexHint:
-      "Every criterion, ordered by severity. The step-by-step review above arranges these same points into a " +
-      "suggested route.",
+    regionLabel: "Review",
+    title: "Review",
+    browseLabel: "Points by criterion",
     filterLabel: "Filter annotations",
     bucketAll: "All",
     bucketSafe: "With a direct swap",
     bucketHuman: "For you to decide",
-    empty: "No annotations fired.",
-    emptyInFilter: "No annotations under this filter.",
+    empty: "No criterion fired in this text.",
+    emptyFilterTitle: "No point matches this filter",
+    emptyFilterBody: (found) =>
+      `The document still has ${found} ${found === 1 ? "point found" : "points found"}. ` +
+      "Clear the filters to see them again.",
     hideInDocument: "Hide highlights in the document",
     hideNamed: (label) => `Hide the “${label}” highlights in the document`,
     showInDocument: "Show highlights in the document",
@@ -285,8 +285,6 @@ export const COPY_EN: UiCopy = {
     stateDismissed: "Ignored",
     searchLabel: "Search the points",
     searchPlaceholder: "Search the points…",
-    showingAll: (n) => `${n} ${plural(n, "point", "points")}`,
-    showingFiltered: (shown, total) => `${shown} of ${total} ${plural(total, "point", "points")}`,
     moreFilters: "More filters",
     fewerFilters: "Fewer filters",
     clearFilters: "clear filters",
@@ -602,37 +600,111 @@ export const COPY_EN: UiCopy = {
     done: "Close",
   },
 
-  guided: {
-    routeLabel: "Guided review",
-    trailLabel: "Steps in the path",
-    trailStep: (index, total, label, state) => `Step ${index} of ${total}: ${label}, ${state}`,
+  views: {
+    overview: {
+      label: "Overview",
+      purpose: "What the audit found in this text, and what to do next.",
+    },
+    review: {
+      label: "Review",
+      purpose: "Where you walk through the points and decide what to do with each one.",
+    },
+    changes: {
+      label: "Changes",
+      purpose: "The auditable history of what changed in the text, and the effect of each change.",
+    },
+    metrics: {
+      label: "Metrics",
+      purpose: "Descriptive measures of the text. None of them is a score or an approval.",
+    },
+    probe: {
+      label: "Comprehension",
+      purpose: "Optional AI test. It never approves — it only shows where a reader gets stuck.",
+    },
+  },
+
+  counts: {
+    stripLabel: "Review state",
+    found: (n) => `${n} ${plural(n, "point found", "points found")}`,
+    pending: (n) => `${n} pending`,
+    reviewed: (n) => `${n} reviewed`,
+    dismissed: (n) => `${n} dismissed`,
+    noun: {
+      found: (n) => plural(n, "point found", "points found"),
+      pending: () => "pending",
+      pendingPoints: (n) => plural(n, "pending point", "pending points"),
+      reviewed: () => "reviewed",
+      dismissed: () => "dismissed",
+      change: (n) => plural(n, "recorded change", "recorded changes"),
+    },
+    shown: (shown, found) => `Showing ${shown} of ${found} ${plural(found, "point", "points")}`,
+    shownAll: (found) => `Showing ${plural(found, "the only point", `all ${found} points`)}`,
+    stepsDone: (done, total) => `${done} of ${total} ${plural(total, "step done", "steps done")}`,
+    nothingPending: "Nothing pending",
+    resolvedSince: (resolved, introduced) =>
+      introduced === 0
+        ? `${resolved} ${plural(resolved, "point left the text", "points left the text")}`
+        : `${resolved} ${plural(resolved, "point left", "points left")} · ` +
+          `${introduced} ${plural(introduced, "new point appeared", "new points appeared")}`,
+  },
+
+  route: {
+    label: "Path",
+    tabsLabel: "How to review",
+    tabRoute: "Guided path",
+    tabBrowse: "All points",
+    idleLead: (found, steps) =>
+      `The path groups the ${found} points into ${steps} ${plural(steps, "step", "steps")}: ` +
+      "one criterion at a time, heaviest first.",
     stepOf: (index, total) => `Step ${index} of ${total}`,
-    overall: (reviewed, total) => `${reviewed}/${total} in the path`,
-    overallTitle: (reviewed, total) => `${reviewed} of ${total} points reviewed across the whole path`,
-    todo: (pending) =>
-      pending === 1
-        ? "1 point left. Open it and mark it as reviewed or ignored."
-        : `${pending} points left. Open them one by one and mark each as reviewed or ignored.`,
-    within: (reviewed, total) => `${reviewed} of ${total} ${total === 1 ? "point reviewed" : "points reviewed"}`,
-    withinShort: (reviewed, total) => `${reviewed} of ${total} reviewed`,
-    start: "Start this step",
-    resume: "Pick up where you left off",
-    nextUp: (index, label) => `Then: step ${index} · ${label}`,
+    begin: "Start the review",
+    resume: "Continue the review",
+    beginHint: (index, label) => `Starts at step ${index}: ${label}`,
+    resumeHint: (index, label) => `You stopped at step ${index}: ${label}`,
+    openStep: "Open the first point",
+    resumeStep: "Pick up where you left off",
+    stepPending: (n) =>
+      n === 1
+        ? "1 point left in this step. Open it and mark it as reviewed or dismissed."
+        : `${n} points left in this step. Open them one by one and mark each as reviewed or dismissed.`,
+    stepProgress: (reviewed, count) => `${reviewed} of ${count} ${plural(count, "point", "points")} in this step`,
+    routeProgress: (reviewed, found) => `${reviewed} of ${found} ${plural(found, "point", "points")} on the path`,
+    nextUp: (index, label) => `Next: step ${index} · ${label}`,
     advance: (index, label) => `Continue to step ${index}: ${label}`,
-    finishedTitle: (label) => `Step finished: ${label}`,
-    finishedCount: (n) => `${n} ${n === 1 ? "point reviewed" : "points reviewed"}`,
+    finishedTitle: (label) => `Step done: ${label}`,
+    finishedCount: (reviewed, dismissed) =>
+      dismissed === 0
+        ? `${reviewed} ${plural(reviewed, "point reviewed", "points reviewed")}`
+        : `${reviewed} reviewed · ${dismissed} dismissed`,
     reviewAgain: "Go through this step again",
     allDoneTitle: "Path finished",
     allDoneCount: (reviewed, steps) =>
-      `${reviewed} ${reviewed === 1 ? "point reviewed" : "points reviewed"} across ${steps} ${steps === 1 ? "step" : "steps"}.`,
-    allDone:
-      "A reviewed point is not a resolved one: resolved is what stopped existing in the text. The audit result " +
-      "stays the same until the text changes.",
-    allDoneNext: "Export › Audit report keeps a record of what was walked.",
+      `${reviewed} ${plural(reviewed, "point reviewed", "points reviewed")} across ${steps} ${plural(steps, "step", "steps")}.`,
+    allDoneBody:
+      "Walking the path is not approval. A reviewed point is one you looked at; a resolved point is one that " +
+      "left the text. The audit stays the same until the text changes.",
+    allDoneNext: "What you walked through is kept in Export › Audit report.",
     leave: "Leave the path",
-    leaveDone: "Back to the audit",
-    states: { "not-started": "not started", "in-progress": "in progress", done: "finished" },
-    stepCrumb: (index, label) => `Step ${index}: ${label}`,
+    leaveDone: "Back to the overview",
+    backToReview: "Go through the points again",
+    stepsLabel: "Steps on the path",
+    stepDone: "done",
+    stepPartial: (reviewed, count) => `${reviewed} of ${count} reviewed`,
+    startTag: "start here",
+    resumeTag: "continue here",
+    stepAction: (label, n) => `Walk “${label}” (${n} ${plural(n, "point", "points")})`,
+    states: { "not-started": "not started", "in-progress": "in progress", done: "done" },
+    orderCaveat:
+      "This is only a suggested order. You can walk the steps in any sequence without changing the audit result.",
+    swapShortcutLabel: "Shortcut",
+    swapShortcut: (n) => `See the ${n} ${plural(n, "direct swap", "direct swaps")}`,
+    browseLead: "Free lookup: filter and open any point. Nothing here changes the path.",
+    browseReturn: (index, label) => `Back to the path · step ${index}: ${label}`,
+  },
+
+  guided: {
+    trailLabel: "Steps on the path",
+    trailStep: (index, total, label, state) => `Step ${index} of ${total}: ${label}, ${state}`,
     occurrenceOf: (index, total) => `Point ${index} of ${total}`,
     backToStep: "Back to the step",
     markAndAdvance: "Mark as reviewed and move on",
@@ -644,43 +716,70 @@ export const COPY_EN: UiCopy = {
     routeProgressLabel: "Path progress",
   },
 
-  startHere: {
-    label: "Step-by-step review",
-    entryLabel: "Guided review",
-    volume: (total, criteria) =>
-      `${total} ${plural(total, "point", "points")} across ${criteria} ${plural(criteria, "criterion", "criteria")}`,
-    lead: (hasSwaps) =>
-      hasSwaps
-        ? "Review one criterion at a time, heaviest first. You can also start at another step."
-        : "Review one criterion at a time, heaviest first. As there are no direct swaps in this step, you decide " +
-          "how to treat each point. You can also start at another step.",
-    safeAction: (n) => `See the ${n} direct ${plural(n, "swap", "swaps")}`,
-    shortcutLabel: "Shortcut",
-    criterionAction: (label, n) => `Walk “${label}” (${n})`,
-    stepDone: "finished",
-    stepPending: (n) => `${n} pending`,
-    stepPartial: (reviewed, total) => `${reviewed} of ${total} reviewed`,
-    stepsDone: (done, total) => `${done} of ${total} ${plural(total, "step finished", "steps finished")}`,
-    routeReviewed: (reviewed, total) => `${reviewed} of ${total} reviewed`,
-    startTag: "start here",
-    resumeTag: "pick up here",
-    entryLead: (total) => `Review the ${total} points in steps: one criterion at a time, heaviest first.`,
-    beginRoute: "Start the review",
-    resumeRoute: "Continue the review",
-    nextStepHint: (index, label) => `Starts at step ${index}: ${label}`,
-    resumeStepHint: (index, label) => `You stopped at step ${index}: ${label}`,
-    beginAt: (index, label) => `Start at step ${index}: ${label}`,
-    resumeAt: (index, label) => `Continue step ${index}: ${label}`,
-    progressLabel: "Where the review stands",
-    progressCounts: (pending, seen, dismissed) => `${seen} reviewed · ${dismissed} ignored`,
-    progressResolved: (resolved, introduced) =>
-      introduced === 0
-        ? `${resolved} ${plural(resolved, "point stopped existing", "points stopped existing")}`
-        : `${resolved} ${plural(resolved, "point stopped existing", "points stopped existing")} · ` +
-          `${introduced} new ${plural(introduced, "point appeared", "points appeared")}`,
-    progressDone: "Nothing pending. A point marked as reviewed or ignored is not a point resolved.",
-    caveat:
-      "This is only a suggested order. You can review the steps in any sequence without changing the audit result.",
+  changes: {
+    emptyTitle: "No changes yet",
+    emptyBody:
+      "Once you apply a glossary swap, paste a rewrite or edit the text, every change shows up here with the " +
+      "before, the after and its effect on the criteria.",
+    listLabel: "Applied changes",
+    effectLabel: "Effect on criteria",
+    detailsShow: "See the details of this change",
+    detailsHide: "Hide the details of this change",
+    undoLast: "Undo this change",
+    weightMeaning:
+      "Weight adds up the severity of the points found (error 3, warning 1, note 0.3) and exists to compare the " +
+      "text with itself, before and after a change. A smaller weight does not mean the text is approved: it only " +
+      "shows what the automatic criteria found — not whether the audience understood the text.",
+    stillOpen: (n) => `${n} ${plural(n, "point is still in the text", "points are still in the text")}`,
+    none: "No criterion changed its count.",
+  },
+
+  metricsView: {
+    notAScore:
+      "These measures describe the surface of the text. They support reading the criteria and never replace the " +
+      "judgement of whoever wrote it, nor do they signal approval.",
+    explainShow: "What this measure means",
+    explainHide: "Hide explanation",
+    meaningLabel: "Measures",
+    directionLabel: "Direction",
+    limitLabel: "Limit",
+    meanings: {
+      words: {
+        meaning: "How many words the text has after import.",
+        direction: "Neither higher nor lower is better: it is just the size of what was analysed.",
+        limit: "Counts words in the extracted text, not in the original file.",
+      },
+      sentences: {
+        meaning: "How many sentences the segmenter found.",
+        direction: "Neither higher nor lower is better.",
+        limit: "Abbreviations and lists can shift the count in heavily fragmented texts.",
+      },
+      wordsPerSentence: {
+        meaning: "Average words per sentence.",
+        direction: "A high average often goes with sentences that pile up ideas — a signal, not a defect.",
+        limit: "The average hides variation: very short and very long sentences can average out well.",
+      },
+      readability: {
+        meaning: "Flesch index adapted to Portuguese by Martins et al. (1996).",
+        direction: "A higher value means a surface that is easier to decode.",
+        limit: "A mechanical formula over syllables and words: it reads no meaning, order or structure.",
+      },
+      referentialCohesion: {
+        meaning: "How much neighbouring sentences repeat the same nouns.",
+        direction: "Descriptive: too much repetition tires, too little makes the reader guess the referent.",
+        limit: "It compares words, not meanings. Synonyms and pronouns do not count.",
+      },
+      adjacentGap: {
+        meaning: "Share of neighbouring sentences with no word in common.",
+        direction: "Descriptive: a high value points to jumps between sentences, which may or may not be right.",
+        limit: "It cannot tell a deliberate jump from an accidental one.",
+      },
+      connectives: {
+        meaning: "Connectives per 100 words.",
+        direction: "Descriptive: both extremes get in the way, and the right number depends on the genre.",
+        limit: "Counted from a closed list; it does not judge whether the connective is the right one.",
+      },
+    },
   },
 
   presets: {

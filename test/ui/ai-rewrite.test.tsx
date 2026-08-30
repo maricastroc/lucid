@@ -4,7 +4,7 @@ import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/r
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { rewriteTargetAt } from "@/app/lib/paragraphs";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel, documentRegion } from "./support/panels";
+import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE, REWRITE_LOSING_THE_NUMBER } from "./support/documents";
 
@@ -55,6 +55,7 @@ describe("flow 5 · asking for an AI rewrite and applying it", () => {
     await user.click(auditPanel().getByRole("button", { name: /^usar como rascunho/i }));
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
+    await openChanges(user);
     expect(auditPanel().getByText(/stub-test@1/)).toBeInTheDocument();
   });
 });

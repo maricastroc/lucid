@@ -1,7 +1,7 @@
 import { within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { mountStudio } from "./support/mount-studio";
-import { auditPanel } from "./support/panels";
+import { auditPanel, browseAllPoints, openOverview, openReview } from "./support/panels";
 import { auditReady } from "./support/points";
 
 const BIG = Array.from(
@@ -11,26 +11,33 @@ const BIG = Array.from(
     `a verificação das condições supracitadas exigidas para a concessão do benefício requerido pelo interessado.`,
 ).join("\n\n");
 
-const ramp = () =>
+type User = ReturnType<typeof mountStudio>["user"];
+
+const plan = () =>
   auditPanel()
-    .getByRole("button", { name: /começar pela etapa 1:|continuar a etapa \d+:/i })
-    .closest("div")!.parentElement!;
-const progress = () =>
-  auditPanel()
-    .getAllByText(/não alteram o resultado da auditoria/i)[0]
+    .getByText(/etapas do percurso/i)
     .closest("div")!;
+const counts = () => auditPanel().getByRole("group", { name: /estado da revisão/i });
+
+async function markFirstPointOfFirstStep(user: User, how: RegExp): Promise<void> {
+  await openReview(user);
+  await user.click(within(plan()).getAllByRole("button", { name: /percorrer/i })[0]);
+  await user.click(auditPanel().getAllByRole("button", { name: how })[0]);
+}
 
 describe("the guided review turns a long audit into a path", () => {
-  it("opens with the mechanical step first", async () => {
-    mountStudio({ text: BIG });
+  it("offers the cheapest move as a shortcut, without making it the path", async () => {
+    const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await openReview(user);
     expect(auditPanel().getByRole("button", { name: /ver as \d+ trocas? direta/i })).toBeInTheDocument();
   });
 
   it("offers the heaviest criterion, and the lighter ones after it", async () => {
-    mountStudio({ text: BIG });
+    const { user } = mountStudio({ text: BIG });
     await auditReady();
-    const walks = within(ramp())
+    await openReview(user);
+    const walks = within(plan())
       .getAllByRole("button", { name: /percorrer/i })
       .map((b) => b.textContent ?? "");
     expect(walks.length).toBeGreaterThan(1);
@@ -41,33 +48,35 @@ describe("the guided review turns a long audit into a path", () => {
   it("shows where the review stands, and keeps showing it after the first mark", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
-    await user.click(within(ramp()).getAllByRole("button", { name: /percorrer/i })[0]);
-    await user.click(auditPanel().getAllByRole("button", { name: /^Marcar .+ como revisado$/i })[0]);
+    await markFirstPointOfFirstStep(user, /^Marcar .+ como revisado$/i);
 
-    expect(within(progress()).getByText(/1 revisados · 0 ignorados/)).toBeInTheDocument();
-    expect(within(progress()).getByText(/não alteram o resultado da auditoria/i)).toBeInTheDocument();
+    await openOverview(user);
+    expect(counts()).toHaveTextContent(/1\s*revisados?/);
+    expect(counts()).toHaveTextContent(/0\s*ignorados?/);
   });
 
   it("never counts a dismissed point as a resolved one", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
-    await user.click(within(ramp()).getAllByRole("button", { name: /percorrer/i })[0]);
-    await user.click(auditPanel().getAllByRole("button", { name: /^Ignorar /i })[0]);
+    await markFirstPointOfFirstStep(user, /^Ignorar /i);
 
-    expect(within(progress()).getByText(/0 revisados · 1 ignorado/)).toBeInTheDocument();
-    expect(within(progress()).queryByText(/saiu do texto|saíram do texto/i)).not.toBeInTheDocument();
+    await openOverview(user);
+    expect(counts()).toHaveTextContent(/0\s*revisados?/);
+    expect(counts()).toHaveTextContent(/1\s*ignorados?/);
+    expect(auditPanel().queryByText(/saiu do texto|saíram do texto/i)).not.toBeInTheDocument();
   });
 
-  it("says plainly that seen and dismissed are not resolved", async () => {
-    mountStudio({ text: BIG });
+  it("says plainly that the order is a suggestion, not a rule", async () => {
+    const { user } = mountStudio({ text: BIG });
     await auditReady();
-    expect(within(ramp()).getByText(/apenas uma ordem sugerida/i)).toBeInTheDocument();
+    await openReview(user);
+    expect(auditPanel().getByText(/apenas uma ordem sugerida/i)).toBeInTheDocument();
   });
 
   it("puts the path where the reader lands, with one way in", async () => {
     mountStudio({ text: BIG });
     await auditReady();
-    expect(auditPanel().getAllByText(/percurso de revisão/i).length).toBeGreaterThan(0);
+    expect(auditPanel().getAllByText(/^percurso$/i).length).toBeGreaterThan(0);
     expect(auditPanel().getByRole("button", { name: /^começar a revisão$/i })).toBeInTheDocument();
     expect(auditPanel().getByText(/começa na etapa 1:/i)).toBeInTheDocument();
   });
@@ -75,23 +84,23 @@ describe("the guided review turns a long audit into a path", () => {
   it("counts the path as a whole once there is something to count, and not before", async () => {
     const { user } = mountStudio({ text: BIG });
     await auditReady();
-    expect(within(ramp()).queryByText(/0 de \d+ revisados/i)).not.toBeInTheDocument();
-    expect(within(ramp()).queryByText(/0 de \d+ etapas? conclu/i)).not.toBeInTheDocument();
+    expect(auditPanel().queryByText(/\d+ de \d+ pontos no percurso/i)).not.toBeInTheDocument();
+    expect(auditPanel().queryByText(/\d+ de \d+ etapas? conclu/i)).not.toBeInTheDocument();
 
-    await user.click(auditPanel().getAllByRole("button", { name: /percorrer/i })[0]);
-    await user.click(auditPanel().getAllByRole("button", { name: /^Marcar .+ como revisado$/i })[0]);
-    await user.click(auditPanel().getByRole("button", { name: /sair do percurso/i }));
+    await markFirstPointOfFirstStep(user, /^Marcar .+ como revisado$/i);
+    await openOverview(user);
 
-    expect(within(ramp()).getAllByText(/1 de \d+ revisados/i).length).toBeGreaterThan(0);
-    expect(within(ramp()).getByText(/0 de \d+ etapas? conclu/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/1 de \d+ pontos no percurso/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/0 de \d+ etapas? conclu/i)).toBeInTheDocument();
   });
 
   it("leaves the reader free to open any criterion, in any order", async () => {
-    mountStudio({ text: BIG });
+    const { user } = mountStudio({ text: BIG });
     await auditReady();
+    await browseAllPoints(user);
     const criteria = auditPanel()
       .getAllByRole("button")
-      .filter((b) => /pontos?/.test(b.textContent ?? ""));
+      .filter((b) => /\d+ pontos?/.test(b.textContent ?? ""));
     expect(criteria.length).toBeGreaterThan(1);
   });
 });

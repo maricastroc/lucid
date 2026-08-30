@@ -1,42 +1,31 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ImportNotes } from "../hooks/use-document-source";
-import {
-  configDeviations,
-  type Block,
-  type BriefingCheck,
-  type Config,
-  type Diagnostic,
-  type Finding,
-  type ReaderBriefing,
-  type Span,
-} from "@/lucid";
-import { BriefingPanel } from "./briefing-panel";
-import { ProfilePanel } from "./profile-panel";
-import { PurposePresets } from "./purpose-presets";
-import { GuidedStepHeader, routeFor } from "./guided-step";
-import { planSteps } from "../lib/start-here";
+import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
-import { buildPanelSections, type PanelSectionId } from "../lib/panel-sections";
+import { buildAuditViews, viewPanelId, viewTabId, type AuditViewId } from "../lib/audit-views";
 import type { FindingGroup, FindingQuery } from "../lib/finding-query";
 import type { QueryActions } from "./revision-list/finding-filters";
 import type { ReviewMark, ReviewMarks } from "../lib/review-marks";
+import { reviewRoute } from "../lib/review-route";
 import { findingId } from "../lib/criteria";
 import type { OccurrenceCursor } from "../lib/occurrence-cursor";
-import { usePanelSections } from "../hooks/use-panel-sections";
-import { AuditOverview, ReadingSection } from "./audit-overview";
-import { PanelNav } from "./panel-nav";
-import { PanelSection } from "./panel-section";
+import { useAuditView, type ReviewMode } from "../hooks/use-audit-view";
+import { AuditNav } from "./audit-nav";
+import { RouteHeader } from "./route/route-header";
+import { ChangesView } from "./views/changes-view";
+import { MetricsView } from "./views/metrics-view";
+import { OverviewView } from "./views/overview-view";
+import { ReviewView } from "./views/review-view";
+import { SettingsView } from "./views/settings-view";
+import { ViewHeader } from "./views/view-header";
 import { ProbePanel } from "./probe-panel";
-import { RevisionList } from "./revision-list";
 import { RevisionNote } from "./revision-note";
 import { NoteNav } from "./revision-note/note-nav";
 import { useCopy } from "../i18n/use-copy";
-import { ChevronRightIcon } from "./icons";
-import { Button } from "./ui/button";
 
 export interface NoteNavigation {
   selectedFinding: Finding | null;
@@ -103,78 +92,118 @@ export interface AuditPanelProps {
   onQuery: QueryActions;
   navigation: NoteNavigation;
   review: ReviewSurface;
-  guided: {
+  route: {
     step: string | null;
-    onGo: (criterion: string) => void;
+    onOpenStep: (criterion: string) => void;
     onLeave: () => void;
-    onOpen: () => void;
+    onOpenFirstPending: () => void;
     onAdvance: (marked: Finding) => void;
   };
   highlights: HighlightVisibility;
   edits: DocumentEditActions;
   settings: AnalysisSettings;
   occurrences: OccurrenceSurface;
+  history: { canUndo: boolean; onUndo: () => void };
+  settingsOpen: boolean;
+  onCloseSettings: () => void;
   probeExcerpt?: string;
   onClearProbeExcerpt?: () => void;
 }
 
-const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
-
 export function AuditPanel(props: AuditPanelProps) {
   const { c } = useCopy();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const hasProbe = props.probeExcerpt !== undefined;
 
-  const guidedStep = props.guided.step;
-  const sectionCount = guidedStep === null ? props.visible.length : props.findings.length;
-  const sections = useMemo(
-    () => buildPanelSections({ findingCount: sectionCount, hasProbe }, c),
-    [sectionCount, hasProbe, c],
+  const route = useMemo(
+    () => reviewRoute(props.findings, props.review.marks, props.route.step, props.originalFindings),
+    [props.findings, props.review.marks, props.route.step, props.originalFindings],
   );
-  const nav = usePanelSections(sections, scrollRef, props.navigation.selectedFinding === null);
 
-  const goTo = nav.goTo;
-  const selectedId = props.navigation.selectedId;
+  const views = useMemo(
+    () =>
+      buildAuditViews(
+        { pending: route.pending, changes: props.ledger.length, hasProbe: props.probeExcerpt !== undefined },
+        c,
+      ),
+    [route.pending, props.ledger.length, props.probeExcerpt, c],
+  );
+
+  const nav = useAuditView(views, scrollRef);
+  const { goToRoute, goTo, setReviewMode } = nav;
+
+  const closeSettings = props.onCloseSettings;
+  const goToView = useCallback(
+    (id: AuditViewId) => {
+      closeSettings();
+      goTo(id);
+    },
+    [closeSettings, goTo],
+  );
+
+  const guidedStep = props.route.step;
+  const lastStep = useRef<string | null | undefined>(undefined);
   useEffect(() => {
-    if (guidedStep !== null && selectedId === null) goTo("findings");
-  }, [guidedStep, selectedId, goTo]);
+    if (lastStep.current === guidedStep) return;
+    lastStep.current = guidedStep;
+    if (guidedStep === null) return;
+    closeSettings();
+    setReviewMode("route");
+    goTo("review");
+  }, [guidedStep, closeSettings, setReviewMode, goTo]);
 
   const noteRef = useRef<HTMLDivElement>(null);
   const noteWasOpen = useRef(false);
+  const selectedId = props.navigation.selectedId;
   useEffect(() => {
     const open = selectedId !== null;
     if (open && !noteWasOpen.current) noteRef.current?.focus({ preventScroll: true });
     noteWasOpen.current = open;
   }, [selectedId]);
 
-  const route = guidedStep === null ? null : routeFor(planSteps(props.findings, props.review.marks), guidedStep);
-  const guidedHeader = (compact: boolean) =>
-    route === null ? null : (
-      <GuidedStepHeader
-        route={route}
-        compact={compact}
-        onGo={props.guided.onGo}
-        onLeave={props.guided.onLeave}
-        onOpen={props.guided.onOpen}
+  if (props.settingsOpen) {
+    return (
+      <SettingsView
+        briefing={props.settings.briefing}
+        check={props.settings.briefingCheck}
+        cursor={props.occurrences.cursor}
+        index={props.occurrences.index}
+        config={props.settings.config}
+        profileId={props.settings.profileId}
+        onBriefingChange={props.settings.onBriefingChange}
+        onConfigChange={props.settings.onConfigChange}
+        onProfileChange={props.settings.onProfileChange}
+        onSelectOccurrence={props.occurrences.onSelect}
+        onStepOccurrence={props.occurrences.onStep}
+        onClose={closeSettings}
       />
     );
+  }
 
   if (props.navigation.selectedFinding) {
     const selected = props.navigation.selectedFinding;
     const pendingHere = props.review.marks[findingId(selected)] === undefined;
+    const walking = route.open !== null;
     return (
       <>
-        {guidedHeader(true)}
+        {walking && (
+          <RouteHeader
+            route={route}
+            compact
+            onGo={props.route.onOpenStep}
+            onLeave={props.route.onLeave}
+            onOpen={props.route.onOpenFirstPending}
+          />
+        )}
         <NoteNav
           index={props.navigation.index}
           total={props.navigation.total}
           criterion={selected.criterion}
           mark={props.review.marks[findingId(selected)] ?? null}
-          guided={route === null ? null : { willFinishStep: pendingHere && route.current.pending === 1 }}
+          guided={walking ? { willFinishStep: pendingHere && route.open!.step.pending === 1 } : null}
           onMark={(value) => {
             props.review.onMark(selected, value);
-            if (value === null || route === null) return;
-            props.guided.onAdvance(selected);
+            if (value === null || !walking) return;
+            props.route.onAdvance(selected);
           }}
           onPrev={props.navigation.onPrev}
           onNext={props.navigation.onNext}
@@ -202,161 +231,93 @@ export function AuditPanel(props: AuditPanelProps) {
     );
   }
 
-  const body = (id: PanelSectionId) => {
-    switch (id) {
-      case "summary":
-        return (
-          <AuditOverview
+  const active = views.find((view) => view.id === nav.view) ?? views[0];
+
+  return (
+    <>
+      <AuditNav views={views} activeId={nav.view} onGo={goToView} onKeyDown={nav.onTabKeyDown} />
+      <div
+        ref={scrollRef}
+        id={viewPanelId(active.id)}
+        role="tabpanel"
+        aria-labelledby={viewTabId(active.id)}
+        tabIndex={0}
+        className="min-h-0 flex-1 overflow-y-auto focus:outline-none"
+      >
+        <ViewHeader id={active.id} title={active.label} purpose={active.purpose} />
+        {active.id === "overview" && (
+          <OverviewView
             diagnostic={props.diagnostic}
             findings={props.findings}
+            route={route}
             safeCount={props.safeCount}
             humanCount={props.humanCount}
-            ledger={props.ledger}
-            originalText={props.originalText}
-            originalFindings={props.originalFindings}
+            changeCount={props.ledger.length}
             blocks={props.blocks}
             silentCriteria={props.silentCriteria}
             missingBlockKinds={props.missingBlockKinds}
             importNotes={props.importNotes}
-            briefing={props.settings.briefing}
-            briefingCheck={props.settings.briefingCheck}
             config={props.settings.config}
-            marks={props.review.marks}
-            guidedActive={guidedStep !== null}
-            onStartStep={props.guided.onGo}
+            onContinue={props.route.onOpenStep}
+            onOpenReview={goToRoute}
+            onSeeChanges={() => goToView("changes")}
           />
-        );
-      case "findings":
-        return (
-          <RevisionList
+        )}
+        {active.id === "review" && (
+          <ReviewView
             diagnostic={props.diagnostic}
+            route={route}
             groups={props.groups}
             visible={props.visible}
             allFindings={props.findings}
-            originalFindings={props.originalFindings}
             query={props.query}
             marks={props.review.marks}
             filtered={props.filtered}
             selectedId={props.navigation.selectedId}
+            mode={nav.reviewMode}
+            onMode={(mode: ReviewMode) => {
+              nav.setReviewMode(mode);
+              props.onQuery.criterion(mode === "browse" ? null : (route.open?.step.criterion ?? null));
+            }}
             onBucket={props.onQuery.bucket}
             onState={props.onQuery.state}
             onSearch={props.onQuery.search}
             onOrder={props.onQuery.order}
             onCriterion={props.onQuery.criterion}
-            onStartStep={props.guided.onGo}
-            guided={guidedStep !== null}
             onClearFilters={props.onQuery.clear}
             onSelect={props.navigation.onSelect}
             hiddenHighlights={props.highlights.hidden}
             onToggleHighlights={props.highlights.onToggle}
             onMark={props.review.onMark}
             onMarkMany={props.review.onMarkMany}
+            onOpenStep={props.route.onOpenStep}
+            onLeaveRoute={props.route.onLeave}
+            onOpenFirstPending={props.route.onOpenFirstPending}
+            onSeeSwaps={() => {
+              nav.setReviewMode("browse");
+              props.onQuery.bucket("safe");
+            }}
           />
-        );
-      case "settings":
-        return (
-          <>
-            <p className="px-4 pt-4 pb-1 text-[12.5px] leading-relaxed text-ink-2">{c.panel.settingsLead}</p>
-            <BriefingPanel
-              briefing={props.settings.briefing}
-              check={props.settings.briefingCheck}
-              cursor={props.occurrences.cursor}
-              index={props.occurrences.index}
-              onChange={props.settings.onBriefingChange}
-              onSelectOccurrence={props.occurrences.onSelect}
-              onStepOccurrence={props.occurrences.onStep}
-            />
-            <PurposePresets
-              config={props.settings.config}
-              selected={props.settings.profileId}
-              onSelect={props.settings.onProfileChange}
-            />
-            <ProfilePanel config={props.settings.config} onChange={props.settings.onConfigChange} />
-            <div className="border-t border-rule-1 px-4 py-4">
-              <Button variant="primary" size="lg" onClick={() => nav.goTo("findings")} className="text-[12.5px]">
-                {c.panel.goToFindings}
-                <ChevronRightIcon className="size-3.5" />
-              </Button>
-              <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.panel.goToFindingsHint}</p>
-              <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.panel.settingsRecordPointer}</p>
-              <p className="mt-3 text-[11px] text-ink-dim" title={c.panel.settingsIsoTitle}>
-                {c.panel.settingsIsoNote}
-              </p>
-            </div>
-          </>
-        );
-      case "metrics":
-        return <ReadingSection diagnostic={props.diagnostic} />;
-      case "probe":
-        return (
+        )}
+        {active.id === "changes" && (
+          <ChangesView
+            entries={props.ledger}
+            originalText={props.originalText}
+            originalFindings={props.originalFindings}
+            findings={props.findings}
+            canUndo={props.history.canUndo}
+            onUndo={props.history.onUndo}
+          />
+        )}
+        {active.id === "metrics" && <MetricsView diagnostic={props.diagnostic} />}
+        {active.id === "probe" && (
           <ProbePanel
             excerpt={props.probeExcerpt ?? ""}
             onClearExcerpt={props.onClearProbeExcerpt ?? (() => {})}
             suggestedQuestion={props.settings.briefing.purpose}
           />
-        );
-    }
-  };
-
-  return (
-    <>
-      <PanelNav sections={sections} activeId={nav.activeId} onGo={nav.goTo} />
-      {guidedHeader(false)}
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        {sections.map((section) => (
-          <PanelSection
-            key={section.id}
-            id={section.id}
-            title={
-              section.id === "findings" && guidedStep !== null ? c.guided.stepOccurrences : sectionTitle(section.id, c)
-            }
-            summary={sectionSummary(section.id, props, c)}
-            collapsible={section.collapsible}
-            open={nav.isOpen(section.id)}
-            onToggle={nav.toggle}
-          >
-            {body(section.id)}
-          </PanelSection>
-        ))}
+        )}
       </div>
     </>
   );
-}
-
-function sectionTitle(id: PanelSectionId, c: ReturnType<typeof useCopy>["c"]): string {
-  switch (id) {
-    case "summary":
-      return c.panel.sections.summary;
-    case "findings":
-      return c.revisionList.title;
-    case "settings":
-      return c.panel.settingsTitle;
-    case "metrics":
-      return c.overview.readingLabel;
-    case "probe":
-      return c.probe.title;
-  }
-}
-
-function sectionSummary(
-  id: PanelSectionId,
-  props: AuditPanelProps,
-  c: ReturnType<typeof useCopy>["c"],
-): string | undefined {
-  switch (id) {
-    case "settings":
-      return [
-        c.panel.settingsSummaryExpressions(props.settings.briefing.mustFind.length),
-        c.panel.settingsSummaryProfile(configDeviations(props.settings.config).length),
-      ].join(c.panel.settingsSummaryJoin);
-    case "metrics":
-      return c.panel.metricsSummary(
-        fmt(props.diagnostic.metrics.words),
-        fmt(props.diagnostic.metrics.wordsPerSentence),
-      );
-    case "probe":
-      return c.panel.probeSummary;
-    default:
-      return undefined;
-  }
 }
