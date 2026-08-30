@@ -159,10 +159,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const deferred = useDeferredValue(source);
   const structured = deferred.doc !== null && deferred.text === deferred.doc.source;
 
-  const doc = useMemo(
-    () => (structured ? deferred.doc! : buildDocument(deferred.text)),
-    [structured, deferred],
-  );
+  const doc = useMemo(() => (structured ? deferred.doc! : buildDocument(deferred.text)), [structured, deferred]);
 
   const diagnostic = useMemo(() => analyzeDocument(doc, config), [doc, config]);
 

@@ -16,6 +16,7 @@ export function CriterionGroup({
   group,
   diagnostic,
   marks,
+  guided,
   open,
   scoped,
   selectedId,
@@ -30,6 +31,7 @@ export function CriterionGroup({
   group: FindingGroup;
   diagnostic: Diagnostic;
   marks: ReviewMarks;
+  guided: boolean;
   open: boolean;
   scoped: boolean;
   selectedId: string | null;
@@ -50,68 +52,78 @@ export function CriterionGroup({
   const panelId = `revgrp-${group.criterion}`;
   const allOfCriterion = diagnostic.findings.filter((f) => f.criterion === group.criterion);
 
+  const heading = (
+    <>
+      {!guided && (
+        <ChevronDownIcon
+          className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
+        />
+      )}
+      <CriterionMark criterion={group.criterion} />
+      <span className="min-w-0 flex-1">
+        <span className="flex items-center gap-2">
+          <span className="min-w-0 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
+          <span
+            className="size-1.5 shrink-0 rounded-full"
+            style={{ background: severityInkVar(group.maxSeverity) }}
+            aria-hidden
+          />
+        </span>
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-ink-3">
+          <span className="tabular-nums">{c.revisionList.occurrences(group.items.length)}</span>
+          {highlightsHidden && (
+            <>
+              <span aria-hidden>·</span>
+              <span>{c.revisionList.highlightsOff}</span>
+            </>
+          )}
+          {distinct < group.items.length && (
+            <>
+              <span aria-hidden>·</span>
+              <span className="tabular-nums">{c.revisionList.distinct(distinct)}</span>
+            </>
+          )}
+          {group.filteredOut > 0 && (
+            <>
+              <span aria-hidden>·</span>
+              <span className="tabular-nums">{c.revisionList.hiddenByFilter(group.filteredOut)}</span>
+            </>
+          )}
+        </span>
+      </span>
+      <GroupProgress pending={counts.pending} total={counts.total} />
+    </>
+  );
+
   return (
     <div className="flex flex-col">
-      <div className="row-hit flex w-full items-center rounded-lg hover:bg-surface-2">
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={onToggle}
-          className={`flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-opacity duration-150 ${
-            highlightsHidden ? "opacity-55" : ""
-          }`}
-        >
-          <ChevronDownIcon
-            className={`size-3.5 shrink-0 text-ink-3 transition-transform duration-150 ${open ? "" : "-rotate-90"}`}
-          />
-          <CriterionMark criterion={group.criterion} />
-          <span className="min-w-0 flex-1">
-            <span className="flex items-center gap-2">
-              <span className="min-w-0 truncate text-[13.5px] font-medium text-ink-0">{meta.label}</span>
-              <span
-                className="size-1.5 shrink-0 rounded-full"
-                style={{ background: severityInkVar(group.maxSeverity) }}
-                aria-hidden
-              />
-            </span>
-            <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-ink-3">
-              <span className="tabular-nums">{c.revisionList.occurrences(group.items.length)}</span>
-              {highlightsHidden && (
-                <>
-                  <span aria-hidden>·</span>
-                  <span>{c.revisionList.highlightsOff}</span>
-                </>
-              )}
-              {distinct < group.items.length && (
-                <>
-                  <span aria-hidden>·</span>
-                  <span className="tabular-nums">{c.revisionList.distinct(distinct)}</span>
-                </>
-              )}
-              {group.filteredOut > 0 && (
-                <>
-                  <span aria-hidden>·</span>
-                  <span className="tabular-nums">{c.revisionList.hiddenByFilter(group.filteredOut)}</span>
-                </>
-              )}
-            </span>
-          </span>
-          <GroupProgress pending={counts.pending} total={counts.total} />
-        </button>
-        <button
-          type="button"
-          aria-pressed={highlightsHidden}
-          aria-label={highlightsHidden ? c.revisionList.showNamed(meta.label) : c.revisionList.hideNamed(meta.label)}
-          title={highlightsHidden ? c.revisionList.showInDocument : c.revisionList.hideInDocument}
-          onClick={onToggleHighlights}
-          className={`mr-1.5 grid size-7 shrink-0 place-items-center rounded-md transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1 ${
-            highlightsHidden ? "text-ink-2" : "text-ink-dim"
-          }`}
-        >
-          {highlightsHidden ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
-        </button>
-      </div>
+      {guided ? null : (
+        <div className="row-hit flex w-full items-center rounded-lg hover:bg-surface-2">
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={panelId}
+            onClick={onToggle}
+            className={`flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-3 py-2.5 text-left transition-opacity duration-150 ${
+              highlightsHidden ? "opacity-55" : ""
+            }`}
+          >
+            {heading}
+          </button>
+          <button
+            type="button"
+            aria-pressed={highlightsHidden}
+            aria-label={highlightsHidden ? c.revisionList.showNamed(meta.label) : c.revisionList.hideNamed(meta.label)}
+            title={highlightsHidden ? c.revisionList.showInDocument : c.revisionList.hideInDocument}
+            onClick={onToggleHighlights}
+            className={`mr-1.5 grid size-7 shrink-0 place-items-center rounded-md transition-colors duration-150 hover:bg-surface-3 hover:text-ink-1 ${
+              highlightsHidden ? "text-ink-2" : "text-ink-dim"
+            }`}
+          >
+            {highlightsHidden ? <EyeOffIcon className="size-3.5" /> : <EyeIcon className="size-3.5" />}
+          </button>
+        </div>
+      )}
 
       {open && (
         <div id={panelId} className="flex flex-col gap-0.5 pl-2">
@@ -121,19 +133,21 @@ export function CriterionGroup({
               <ProvenanceTag tag={tagFor(diagnostic, group.criterion, lang)} />
               <HumanScopeNote items={allOfCriterion} />
               <span className="flex-1" />
-              <button
-                type="button"
-                aria-pressed={scoped}
-                title={c.revisionList.scopeHint(allOfCriterion.length)}
-                onClick={onScope}
-                className={`rounded-md border px-2 py-1 text-[11.5px] transition-colors duration-150 ${
-                  scoped
-                    ? "border-accent-line bg-accent-weak text-accent"
-                    : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-0"
-                }`}
-              >
-                {scoped ? c.revisionList.scopeOff : c.revisionList.scopeOn}
-              </button>
+              {!guided && (
+                <button
+                  type="button"
+                  aria-pressed={scoped}
+                  title={c.revisionList.scopeHint(allOfCriterion.length)}
+                  onClick={onScope}
+                  className={`rounded-md border px-2 py-1 text-[11.5px] transition-colors duration-150 ${
+                    scoped
+                      ? "border-accent-line bg-accent-weak text-accent"
+                      : "border-rule-2 text-ink-2 hover:bg-surface-2 hover:text-ink-0"
+                  }`}
+                >
+                  {scoped ? c.revisionList.scopeOff : c.revisionList.scopeOn}
+                </button>
+              )}
               {counts.total - counts.pending > 0 && (
                 <button
                   type="button"

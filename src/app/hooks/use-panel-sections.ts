@@ -18,9 +18,6 @@ export interface PanelSectionNav {
   goTo: (id: PanelSectionId) => void;
 }
 
-const reducedMotion = (): boolean =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 function offsetWithin(scroller: HTMLElement, el: HTMLElement): number {
   return el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
 }
@@ -98,8 +95,17 @@ export function usePanelSections(
     const el = find(id);
     if (!el) return;
     scroller.querySelector<HTMLElement>(`#${sectionHeadingId(id)}`)?.focus({ preventScroll: true });
-    scroller.scrollTo({ top: offsetWithin(scroller, el), behavior: reducedMotion() ? "auto" : "smooth" });
+
+    scroller.scrollTop = offsetWithin(scroller, el);
     setActiveId(id);
+
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        const settled = find(id);
+        if (settled) scroller.scrollTop = offsetWithin(scroller, settled);
+      });
+    });
+    return () => cancelAnimationFrame(frame);
   }, [navTick, scrollRef, find]);
 
   const rememberAnchor = useCallback(

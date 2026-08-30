@@ -187,6 +187,26 @@ export const COPY_EN: UiCopy = {
     readingCaveat:
       "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
       "text is clear.",
+    balanceLabel: "Before and after",
+    balanceNone: "No change has been recorded yet.",
+    balanceTotal: (before, after) => `Audit weight ${before} → ${after}`,
+    balanceCount: (before, after) => `${before} → ${after}`,
+    balanceDirection: { improved: "improved", regressed: "got worse", unchanged: "no change" },
+    balanceKind: {
+      resolved: "resolved",
+      kept: "kept",
+      reshaped: "rewritten, still flagged",
+      introduced: "introduced",
+      transformed: "became something else",
+      indirect: "knock-on effect",
+    },
+    balanceTransformed: (before, after) => `${before} became ${after}`,
+    balanceIndirectNote:
+      "Changed outside the passage you edited: heading criteria compare one block with another, so touching one changes the verdict on its neighbour.",
+    balanceTypingNote:
+      "Passage rewritten by hand. The comparison covers the whole region: inside it there is no telling which occurrence is which.",
+    balanceCaveat:
+      "Less weight is not an approved text. The comparison says what the criteria find before and after, not whether the reader understood.",
     trailLabel: "Recorded changes",
     trailWeight: (before, after, changes) =>
       `Audit weight ${before} → ${after} · ${changes} recorded ${plural(changes, "change", "changes")}`,
@@ -221,6 +241,8 @@ export const COPY_EN: UiCopy = {
   revisionList: {
     regionLabel: "Audit index",
     title: "Audit index",
+    indexLabel: "All criteria",
+    indexHint: "The whole list, ordered by severity. The path above is a suggested route over these very points.",
     filterLabel: "Filter annotations",
     bucketAll: "All",
     bucketSafe: "Direct swap",
@@ -549,28 +571,118 @@ export const COPY_EN: UiCopy = {
     done: "Close",
   },
 
+  guided: {
+    routeLabel: "Guided review",
+    trailLabel: "Steps in the path",
+    trailStep: (index, total, label, state) => `Step ${index} of ${total}: ${label}, ${state}`,
+    stepOf: (index, total) => `Step ${index} of ${total}`,
+    overall: (reviewed, total) => `${reviewed}/${total} in the path`,
+    overallTitle: (reviewed, total) => `${reviewed} of ${total} occurrences reviewed across the whole path`,
+    todo: (pending) =>
+      pending === 1
+        ? "1 occurrence left. Open it and mark it as seen or dismissed."
+        : `${pending} occurrences left. Open them one by one and mark each as seen or dismissed.`,
+    within: (reviewed, total) =>
+      `${reviewed} of ${total} ${total === 1 ? "occurrence reviewed" : "occurrences reviewed"}`,
+    withinShort: (reviewed, total) => `${reviewed} of ${total} reviewed`,
+    start: "Start this step",
+    resume: "Pick up where you left off",
+    nextUp: (index, label) => `Then: step ${index} · ${label}`,
+    advance: (index, label) => `Continue to step ${index} · ${label}`,
+    finishedTitle: (label) => `Step finished: ${label}`,
+    finishedCount: (n) => `${n} ${n === 1 ? "occurrence reviewed" : "occurrences reviewed"}`,
+    reviewAgain: "Go through this step again",
+    allDoneTitle: "Path finished",
+    allDoneCount: (reviewed, steps) =>
+      `${reviewed} ${reviewed === 1 ? "occurrence reviewed" : "occurrences reviewed"} across ${steps} ${steps === 1 ? "step" : "steps"}.`,
+    allDone:
+      "A reviewed occurrence is not a resolved one: resolved is what left the text. The score stays the same until the text changes.",
+    allDoneNext: "Export › Audit report keeps a record of what was walked.",
+    leave: "Leave the path",
+    leaveDone: "Back to the audit",
+    states: { "not-started": "not started", "in-progress": "in progress", done: "finished" },
+    stepCrumb: (index, label) => `Step ${index} · ${label}`,
+    occurrenceOf: (index, total) => `Occurrence ${index} of ${total}`,
+    backToStep: "Back to the step",
+    markAndAdvance: "Mark as seen and move on",
+    markAndFinish: "Mark as seen and finish the step",
+    seenChip: "Seen",
+    nextOccurrence: "Next occurrence",
+    stepOccurrences: "Occurrences in this step",
+    stepProgressLabel: "Step progress",
+    routeProgressLabel: "Path progress",
+  },
+
   startHere: {
-    label: "Start here",
+    label: "Guided review",
     volume: (total, criteria) =>
-      `${total} ${plural(total, "occurrence", "occurrences")} across ${criteria} ${plural(criteria, "criterion", "criteria")}.`,
+      `${total} ${plural(total, "occurrence", "occurrences")} across ${criteria} ${plural(criteria, "criterion", "criteria")}`,
     lead: (hasSwaps) =>
       hasSwaps
-        ? "Reading it all at once does not work. An order that does: the mechanical ones first, then one " +
-          "criterion at a time."
-        : "Reading it all at once does not work. There are no direct swaps to make here, so the order that " +
-          "works is one criterion at a time.",
-    safeStep: "Direct swaps",
-    safeBody:
-      "These carry a curated 1:1 equivalent. They are the quickest calls and they cut the volume — the swap is " +
-      "yours to make, the tool only points at it.",
+        ? "One criterion at a time, heaviest first. You can enter at any step."
+        : "One criterion at a time, heaviest first — there are no direct swaps to make here. You can enter at any step.",
     safeAction: (n) => `See the ${n} direct ${plural(n, "swap", "swaps")}`,
-    criterionStep: "One criterion at a time",
-    criterionBody:
-      "The same problem repeated takes the same frame of mind. Walking one whole criterion is less tiring than " +
-      "switching criterion at every finding.",
+    shortcutLabel: "Shortcut",
     criterionAction: (label, n) => `Walk “${label}” (${n})`,
+    stepDone: "finished",
+    stepPending: (n) => `${n} pending`,
+    stepPartial: (reviewed, total) => `${reviewed}/${total} reviewed`,
+    stepsDone: (done, total) => `${done} of ${total} ${plural(total, "step finished", "steps finished")}`,
+    routeReviewed: (reviewed, total) => `${reviewed} of ${total} reviewed`,
+    startTag: "start here",
+    resumeTag: "pick up here",
+    entryLead: (total) =>
+      `Reading ${total} points at once does not work. The path splits the review into steps — one ` +
+      "criterion at a time, heaviest first.",
+    beginRoute: "Start the path",
+    resumeRoute: "Continue the path",
+    nextStepHint: (index, label) => `Starts at step ${index} · ${label}`,
+    resumeStepHint: (index, label) => `You stopped at step ${index} · ${label}`,
+    beginAt: (index, label) => `Start at step ${index} · ${label}`,
+    resumeAt: (index, label) => `Resume step ${index} · ${label}`,
+    progressLabel: "Where the review stands",
+    progressCounts: (pending, seen, dismissed) => `${pending} pending · ${seen} seen · ${dismissed} dismissed`,
+    progressResolved: (resolved, introduced) =>
+      introduced === 0 ? `${resolved} left the text` : `${resolved} left the text · ${introduced} came in`,
+    progressDone: "Nothing pending. A point marked as seen or dismissed is not a point resolved.",
     caveat:
       "A suggested order, not a rule: the findings are the same in any sequence, and order never changes the score.",
+  },
+
+  presets: {
+    label: "What the text is for",
+    lead: "The thresholds do not come from the standard — ABNT fixes no numbers. Choosing a purpose swaps them for a declared set, and the score holds only inside it.",
+    current: (name) => `In use: ${name}`,
+    adjustedOn: (name, n) => `${name}, with ${n} of your own ${n === 1 ? "adjustment" : "adjustments"}`,
+    stamp: (name, version, hash) => `${name} v${version} · ${hash}`,
+    names: {
+      base: "Default",
+      normativo: "Normative or contractual",
+      publico: "Leaflet and notice to the citizen",
+      digital: "Service page and web content",
+    },
+    purposes: {
+      base: "No declared purpose. Lucid's reference thresholds, the same for any text.",
+      normativo:
+        "Law, decree, tender, contract. Accepts longer sentences and paragraphs, because the legal structure imposes them — and still calls out jargon, passives and nominalisation.",
+      publico:
+        "Written for someone outside the field. Short sentence, short paragraph, little subordination; the strictest profile of the set.",
+      digital:
+        "Read on a screen, in jumps. Asks for short paragraphs and short headings, because people scan before they read.",
+    },
+    limits: {
+      base: "Comparable with any other default score.",
+      normativo:
+        "A score from this profile compares neither with a default one nor with the others: the same text has fewer long sentences here because the limit is different.",
+      publico:
+        "Applied to legal text, this profile flags almost every sentence. That is neither the text's fault nor the profile's — it is the wrong profile for that document.",
+      digital:
+        "Applied to text with no headings or lists, four criteria have nothing to judge and the score stays silent about them.",
+    },
+    changes: (n) => `${n} ${n === 1 ? "difference" : "differences"} from the default`,
+    noChanges: "This is the reference configuration.",
+    caveat:
+      "Changing the purpose changes what is measured, not the text. Two scores only compare with the same profile and the same hash.",
   },
 
   profile: {
@@ -692,6 +804,7 @@ export const COPY_EN: UiCopy = {
     manual: "Author's edit",
     ai: "AI rewrite",
     glossary: "Direct swap from the glossary",
+    typing: "Passage rewritten by hand",
   },
 
   readability: {

@@ -19,6 +19,8 @@ import {
   severityRank,
   SEVERITY_LABEL,
 } from "./criteria";
+import { revisionBalance } from "./attribution";
+import { adjustmentsOver, PROFILE_VERSION, profileHash, type ProfileId } from "./profiles";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 import { readabilityOf } from "./readability";
 
@@ -84,13 +86,40 @@ function renderBriefingMarkdown(briefing: BriefingReport | null): string {
   return out.join("\n");
 }
 
-function renderProfileMarkdown(config: Config | null): string {
+const PRESET_PT: Record<ProfileId, string> = {
+  base: "Padrão",
+  normativo: "Normativo ou contratual",
+  publico: "Cartilha e comunicado ao cidadão",
+  digital: "Página de serviço e conteúdo web",
+};
+
+const PRESET_LIMIT_PT: Record<ProfileId, string> = {
+  base: "Comparável a qualquer outro placar padrão.",
+  normativo:
+    "Um placar deste perfil não é comparável a um padrão nem aos demais: o mesmo texto tem menos frases longas aqui porque o limite é outro.",
+  publico:
+    "Aplicado a texto jurídico, este perfil aponta quase toda frase — é o perfil errado para aquele documento, não um defeito do texto.",
+  digital: "Aplicado a texto sem títulos nem listas, quatro critérios ficam sem objeto e o placar cala sobre eles.",
+};
+
+function renderProfileMarkdown(config: Config | null, profileId: ProfileId | null): string {
   if (config === null) return "";
+  const preset = profileId ?? "base";
+  const adjustments = adjustmentsOver(config, preset);
   const deviations = configDeviations(config);
-  if (deviations.length === 0) return "";
+  if (adjustments.length === 0 && preset === "base") return "";
 
   const off = disabledCriteria(config);
   const out: string[] = ["## Perfil editorial", ""];
+  out.push(`**Finalidade declarada:** ${PRESET_PT[preset]} · versão ${PROFILE_VERSION} · \`${profileHash(preset)}\``);
+  out.push("");
+  out.push(PRESET_LIMIT_PT[preset]);
+  out.push("");
+  if (adjustments.length === 0) {
+    out.push("_Os limiares são exatamente os do perfil, sem ajuste manual._");
+    out.push("");
+    return out.join("\n");
+  }
   out.push(
     `Esta auditoria **não** rodou com os limiares padrão do Lucid. ${deviations.length} ` +
       `${deviations.length === 1 ? "ajuste foi declarado" : "ajustes foram declarados"} por quem auditou:`,
@@ -110,6 +139,41 @@ function renderProfileMarkdown(config: Config | null): string {
     "_A norma não fixa números; o limiar é escolha editorial. O perfil carimbado no cabeçalho identifica " +
       "exatamente estes ajustes._",
   );
+  out.push("");
+  return out.join("\n");
+}
+
+const DIRECTION_PT: Record<string, string> = {
+  improved: "melhorou",
+  regressed: "piorou",
+  unchanged: "sem mudança",
+};
+
+function renderBalanceMarkdown(before: readonly Finding[] | null, after: readonly Finding[]): string {
+  if (before === null) return "";
+  const summary = revisionBalance(before, after);
+  const moved = summary.byCriterion.filter((row) => row.direction !== "unchanged");
+  if (moved.length === 0 && summary.countBefore === summary.countAfter) return "";
+
+  const out: string[] = ["## Antes e depois", ""];
+  out.push(
+    "Comparação entre o texto de entrada e o texto atual, critério a critério. Diz o que os critérios " +
+      "encontram nos dois momentos — não diz se o leitor entendeu, e peso menor não é aprovação.",
+  );
+  out.push("");
+  out.push(
+    `**Peso da auditoria:** ${fmtNum(summary.weightBefore)} → ${fmtNum(summary.weightAfter)} · ` +
+      `${summary.countBefore} → ${summary.countAfter} ${plural(summary.countAfter, "anotação", "anotações")}.`,
+  );
+  out.push("");
+  out.push("| Critério | Antes | Depois | Peso | |");
+  out.push("|---|--:|--:|---|---|");
+  for (const row of moved) {
+    out.push(
+      `| ${metaFor(row.criterion).label} | ${row.before} | ${row.after} | ` +
+        `${fmtNum(row.weightBefore)} → ${fmtNum(row.weightAfter)} | ${DIRECTION_PT[row.direction]} |`,
+    );
+  }
   out.push("");
   return out.join("\n");
 }
@@ -162,6 +226,8 @@ export function buildAuditReport(
   briefing: BriefingReport | null = null,
   config: Config | null = null,
   originalText: string | null = null,
+  originalFindings: readonly Finding[] | null = null,
+  profileId: ProfileId | null = null,
 ): string {
   const m = diagnostic.metrics;
   const engine = diagnostic.meta;
@@ -291,7 +357,7 @@ export function buildAuditReport(
     });
   }
 
-  const profileSection = renderProfileMarkdown(config);
+  const profileSection = renderProfileMarkdown(config, profileId);
   if (profileSection) {
     out.push(profileSection);
   }
@@ -299,6 +365,11 @@ export function buildAuditReport(
   const briefingSection = renderBriefingMarkdown(briefing);
   if (briefingSection) {
     out.push(briefingSection);
+  }
+
+  const balance = renderBalanceMarkdown(originalFindings, findings);
+  if (balance) {
+    out.push(balance);
   }
 
   const trail = renderLedgerMarkdown(ledger);

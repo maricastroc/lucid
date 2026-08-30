@@ -6,6 +6,10 @@ if (typeof Element.prototype.scrollIntoView !== "function") {
   Element.prototype.scrollIntoView = () => {};
 }
 
+if (typeof Element.prototype.scrollTo !== "function") {
+  Element.prototype.scrollTo = () => {};
+}
+
 if (typeof window.matchMedia !== "function") {
   window.matchMedia = (query: string): MediaQueryList =>
     ({

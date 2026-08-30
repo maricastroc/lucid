@@ -61,7 +61,13 @@ function editableUnits(blocks: readonly Block[]): EditableUnit[] {
   return units;
 }
 
-function affixSplice(before: string, after: string): { start: number; end: number; replacement: string } {
+export interface TextSplice {
+  readonly start: number;
+  readonly end: number;
+  readonly replacement: string;
+}
+
+export function affixSplice(before: string, after: string): TextSplice {
   const max = Math.min(before.length, after.length);
   let prefix = 0;
   while (prefix < max && before[prefix] === after[prefix]) prefix++;

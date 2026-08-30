@@ -140,6 +140,16 @@ export interface UiCopy {
     readonly scoreCaveat: string;
     readonly readingLabel: string;
     readonly readingCaveat: string;
+    readonly balanceLabel: string;
+    readonly balanceNone: string;
+    readonly balanceTotal: (before: string, after: string) => string;
+    readonly balanceCount: (before: number, after: number) => string;
+    readonly balanceDirection: Record<"improved" | "regressed" | "unchanged", string>;
+    readonly balanceKind: Record<"resolved" | "kept" | "reshaped" | "introduced" | "transformed" | "indirect", string>;
+    readonly balanceTransformed: (before: number, after: number) => string;
+    readonly balanceIndirectNote: string;
+    readonly balanceTypingNote: string;
+    readonly balanceCaveat: string;
     readonly trailLabel: string;
     readonly trailWeight: (before: string, after: string, changes: number) => string;
     readonly trailCaveat: string;
@@ -168,6 +178,8 @@ export interface UiCopy {
   readonly revisionList: {
     readonly regionLabel: string;
     readonly title: string;
+    readonly indexLabel: string;
+    readonly indexHint: string;
     readonly filterLabel: string;
     readonly bucketAll: string;
     readonly bucketSafe: string;
@@ -411,16 +423,81 @@ export interface UiCopy {
     readonly done: string;
   };
 
+  readonly guided: {
+    readonly routeLabel: string;
+    readonly trailLabel: string;
+    readonly trailStep: (index: number, total: number, label: string, state: string) => string;
+    readonly stepOf: (index: number, total: number) => string;
+    readonly overall: (reviewed: number, total: number) => string;
+    readonly overallTitle: (reviewed: number, total: number) => string;
+    readonly todo: (pending: number) => string;
+    readonly within: (reviewed: number, total: number) => string;
+    readonly withinShort: (reviewed: number, total: number) => string;
+    readonly start: string;
+    readonly resume: string;
+    readonly nextUp: (index: number, label: string) => string;
+    readonly advance: (index: number, label: string) => string;
+    readonly finishedTitle: (label: string) => string;
+    readonly finishedCount: (n: number) => string;
+    readonly reviewAgain: string;
+    readonly allDoneTitle: string;
+    readonly allDoneCount: (reviewed: number, steps: number) => string;
+    readonly allDone: string;
+    readonly allDoneNext: string;
+    readonly leave: string;
+    readonly leaveDone: string;
+    readonly states: Record<"not-started" | "in-progress" | "done", string>;
+    readonly stepCrumb: (index: number, label: string) => string;
+    readonly occurrenceOf: (index: number, total: number) => string;
+    readonly backToStep: string;
+    readonly markAndAdvance: string;
+    readonly markAndFinish: string;
+    readonly seenChip: string;
+    readonly nextOccurrence: string;
+    readonly stepOccurrences: string;
+    readonly stepProgressLabel: string;
+    readonly routeProgressLabel: string;
+  };
+
   readonly startHere: {
     readonly label: string;
     readonly volume: (total: number, criteria: number) => string;
     readonly lead: (hasSwaps: boolean) => string;
-    readonly safeStep: string;
-    readonly safeBody: string;
     readonly safeAction: (n: number) => string;
-    readonly criterionStep: string;
-    readonly criterionBody: string;
+    readonly shortcutLabel: string;
     readonly criterionAction: (label: string, n: number) => string;
+    readonly stepDone: string;
+    readonly stepPending: (n: number) => string;
+    readonly stepPartial: (reviewed: number, total: number) => string;
+    readonly stepsDone: (done: number, total: number) => string;
+    readonly routeReviewed: (reviewed: number, total: number) => string;
+    readonly startTag: string;
+    readonly resumeTag: string;
+    readonly entryLead: (total: number) => string;
+    readonly beginRoute: string;
+    readonly resumeRoute: string;
+    readonly nextStepHint: (index: number, label: string) => string;
+    readonly resumeStepHint: (index: number, label: string) => string;
+    readonly beginAt: (index: number, label: string) => string;
+    readonly resumeAt: (index: number, label: string) => string;
+    readonly progressLabel: string;
+    readonly progressCounts: (pending: number, seen: number, dismissed: number) => string;
+    readonly progressResolved: (resolved: number, introduced: number) => string;
+    readonly progressDone: string;
+    readonly caveat: string;
+  };
+
+  readonly presets: {
+    readonly label: string;
+    readonly lead: string;
+    readonly current: (name: string) => string;
+    readonly adjustedOn: (name: string, n: number) => string;
+    readonly stamp: (name: string, version: number, hash: string) => string;
+    readonly names: Record<"base" | "normativo" | "publico" | "digital", string>;
+    readonly purposes: Record<"base" | "normativo" | "publico" | "digital", string>;
+    readonly limits: Record<"base" | "normativo" | "publico" | "digital", string>;
+    readonly changes: (n: number) => string;
+    readonly noChanges: string;
     readonly caveat: string;
   };
 

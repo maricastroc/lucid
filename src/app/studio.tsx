@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
+  analyze,
   checkBriefing,
   DEFAULT_CONFIG,
   EMPTY_BRIEFING,
@@ -11,7 +12,7 @@ import {
   type ReaderBriefing,
   type Span,
 } from "@/lucid";
-import { isSafe, orderFindingsForIndex } from "./lib/criteria";
+import { findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
 import { EMPTY_MARKS } from "./lib/review-marks";
 import { rewriteTargetAt } from "./lib/paragraphs";
@@ -26,6 +27,7 @@ import { useFindingNavigation } from "./hooks/use-finding-navigation";
 import { useOccurrenceNavigation } from "./hooks/use-occurrence-navigation";
 import { useDocumentEdits } from "./hooks/use-document-edits";
 import { useReadingPosition } from "./hooks/use-reading-position";
+import { isProfileId, profileConfig, type ProfileId } from "./lib/profiles";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -41,6 +43,14 @@ export function Studio() {
   const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
   const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
   const [config, setConfig] = useState<Config>(restored?.config ?? DEFAULT_CONFIG);
+  const [profileId, setProfileId] = useState<ProfileId>(isProfileId(restored?.profileId) ? restored.profileId : "base");
+
+  const [openedStep, setGuidedStep] = useState<string | null>(restored?.guidedStep ?? null);
+
+  const chooseProfile = useCallback((id: ProfileId) => {
+    setProfileId(id);
+    setConfig(profileConfig(id));
+  }, []);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [goHomeOpen, setGoHomeOpen] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
@@ -77,6 +87,7 @@ export function Studio() {
     applyChange: recordChange,
     undo,
     noteFreeEdit,
+    closeTypingSession,
     reset: resetHistory,
   } = useRevisionHistory(text, setText, isSettled, restored?.ledger);
 
@@ -84,9 +95,16 @@ export function Studio() {
 
   const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
 
-  const { query, setCriterion, setBucket, setState, setSearch, setOrder, clearFilters, filtered } = useFindingQuery();
+  const { query, setCriterion, setBucket, setState, setSearch, setOrder, clearFilters, filtered } = useFindingQuery(
+    restored?.guidedStep ?? null,
+  );
 
   const findings = useMemo(() => orderFindingsForIndex(diagnostic.findings), [diagnostic]);
+
+  const guidedStep = useMemo(
+    () => (openedStep !== null && findings.some((finding) => finding.criterion === openedStep) ? openedStep : null),
+    [openedStep, findings],
+  );
   const { hiddenHighlights, toggleHighlights } = useHighlightVisibility();
   const safeCount = useMemo(() => findings.filter(isSafe).length, [findings]);
   const humanCount = findings.length - safeCount;
@@ -113,8 +131,19 @@ export function Studio() {
       clearWorkspace();
       return;
     }
-    writeWorkspace({ text, originalText, blocks: rawBlocks, ledger, mode, briefing, config, reviewMarks: marks });
-  }, [isSettled, isEmpty, text, originalText, rawBlocks, ledger, mode, briefing, config, marks]);
+    writeWorkspace({
+      text,
+      originalText,
+      blocks: rawBlocks,
+      ledger,
+      mode,
+      briefing,
+      config,
+      profileId,
+      reviewMarks: marks,
+      guidedStep,
+    });
+  }, [isSettled, isEmpty, text, originalText, rawBlocks, ledger, mode, briefing, config, profileId, marks, guidedStep]);
 
   const revealSheet = useCallback(() => setSheetOpen(true), []);
   const {
@@ -152,6 +181,7 @@ export function Studio() {
     resetHistory();
     setBriefing(EMPTY_BRIEFING);
     resetMarks();
+    setGuidedStep(null);
     clearFilters();
   }, [clearSelection, resetHistory, resetMarks, clearFilters]);
 
@@ -187,6 +217,19 @@ export function Studio() {
     discardAndGoHome();
   }, [isEmpty, mode, discardAndGoHome]);
 
+  const changeMode = useCallback(
+    (next: Mode) => {
+      closeTypingSession();
+      setMode(next);
+    },
+    [closeTypingSession],
+  );
+
+  const originalFindings = useMemo(
+    () => (originalText === null || originalText.trim() === "" ? null : analyze(originalText, config).findings),
+    [originalText, config],
+  );
+
   const reading = useReadingPosition(scrollRef, mode, text);
 
   const shiftAllForEdit = useCallback(
@@ -209,13 +252,66 @@ export function Studio() {
     clearSelection,
   });
 
+  const goToStep = useCallback(
+    (criterion: string) => {
+      setGuidedStep(criterion);
+      clearFilters();
+      setCriterion(criterion);
+      clearSelection();
+    },
+    [clearFilters, setCriterion, clearSelection],
+  );
+
+  const scopeCriterion = useCallback(
+    (criterion: string | null) => {
+      if (criterion === null) setGuidedStep(null);
+      else setGuidedStep((step) => (step === null ? null : criterion));
+      setCriterion(criterion);
+    },
+    [setCriterion],
+  );
+
+  const clearAllFilters = useCallback(() => {
+    setGuidedStep(null);
+    clearFilters();
+  }, [clearFilters]);
+
+  const openFirstPending = useCallback(() => {
+    const next = visible.find((finding) => marks[findingId(finding)] === undefined) ?? visible[0];
+    if (next !== undefined) select(next);
+  }, [visible, marks, select]);
+
+  const advancePast = useCallback(
+    (marked: Finding) => {
+      const markedId = findingId(marked);
+      const size = visible.length;
+      const from = visible.findIndex((finding) => findingId(finding) === markedId);
+      for (let step = 1; step <= size; step++) {
+        const candidate = visible[(from + step + size) % size];
+        if (findingId(candidate) === markedId) continue;
+        if (marks[findingId(candidate)] === undefined) {
+          select(candidate);
+          return;
+        }
+      }
+      clearSelection();
+    },
+    [visible, marks, select, clearSelection],
+  );
+
+  const leaveGuided = useCallback(() => {
+    setGuidedStep(null);
+    setCriterion(null);
+    clearSelection();
+  }, [setCriterion, clearSelection]);
+
   const selectFinding = useCallback(
     (finding: Finding) => {
       setMode("audit");
-      setCriterion(finding.criterion);
+      scopeCriterion(finding.criterion);
       select(finding);
     },
-    [select, setCriterion],
+    [select, scopeCriterion],
   );
 
   const onFreeTypeText = useCallback(
@@ -244,6 +340,7 @@ export function Studio() {
     humanCount,
     ledger,
     originalText,
+    originalFindings,
     blocks,
     silentCriteria,
     missingBlockKinds,
@@ -255,8 +352,8 @@ export function Studio() {
       state: setState,
       search: setSearch,
       order: setOrder,
-      criterion: setCriterion,
-      clear: clearFilters,
+      criterion: scopeCriterion,
+      clear: clearAllFilters,
     },
     navigation: {
       selectedFinding,
@@ -269,10 +366,17 @@ export function Studio() {
       onBackToList: clearSelection,
       onBackToOverview: () => {
         clearSelection();
-        setCriterion(null);
+        scopeCriterion(null);
       },
     },
     review: { marks, onMark: mark, onMarkMany: markMany },
+    guided: {
+      step: guidedStep,
+      onGo: goToStep,
+      onLeave: leaveGuided,
+      onOpen: openFirstPending,
+      onAdvance: advancePast,
+    },
     highlights: { hidden: hiddenHighlights, onToggle: toggleHighlights },
     edits: { onApplyRewrite: applyRewrite, onManualEdit: applyManualEdit, onApplyCuratedSwap: applyCuratedSwap },
     settings: {
@@ -281,6 +385,8 @@ export function Studio() {
       onBriefingChange: setBriefing,
       config,
       onConfigChange: setConfig,
+      profileId,
+      onProfileChange: chooseProfile,
     },
     occurrences: {
       cursor: occurrences.cursor,
@@ -293,7 +399,7 @@ export function Studio() {
     <div className="flex h-dvh flex-col overflow-hidden bg-desk">
       <Masthead
         mode={mode}
-        onChangeMode={setMode}
+        onChangeMode={changeMode}
         onOpenDocument={openDocument}
         onGoHome={goHome}
         importing={importing}
@@ -341,6 +447,7 @@ export function Studio() {
             occurrences={occurrences.spans}
             activeOccurrence={occurrences.active}
             onChangeText={onFreeTypeText}
+            onLeaveDraft={closeTypingSession}
             onPasteDocument={onPasteDocument}
             onSelectFinding={selectFinding}
             onOpenDocument={openDocument}

@@ -566,7 +566,6 @@ textarea.prose-doc:focus-visible {
   }
 }
 
-/* The audit on paper. Off screen entirely; on print it is the only thing left standing. */
 #relatorio-impresso {
   display: none;
 }
@@ -696,7 +695,6 @@ textarea.prose-doc:focus-visible {
     font-size: 0.9em;
   }
 
-  /* The entry text is the whole document: it wraps and breaks across pages like any prose. */
   #relatorio-impresso pre.report-source {
     margin: 0.6rem 0;
     padding: 0.6rem 0.75rem;

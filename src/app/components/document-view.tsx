@@ -24,6 +24,7 @@ interface Props {
   occurrences: readonly Span[];
   activeOccurrence: Span | null;
   onChangeText: (value: string) => void;
+  onLeaveDraft: () => void;
   onPasteDocument: (value: string, html: string | null) => void;
   onSelectFinding: (finding: Finding) => void;
   onOpenDocument: (file: File) => void;
@@ -235,6 +236,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
     occurrences,
     activeOccurrence,
     onChangeText,
+    onLeaveDraft,
     onPasteDocument,
     onSelectFinding,
     onOpenDocument,
@@ -306,6 +308,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
                     onPasteDocument(plain, e.clipboardData.getData("text/html") || null);
                   }}
                   onChange={(e) => onChangeText(e.target.value)}
+                  onBlur={onLeaveDraft}
                   spellCheck={false}
                   autoFocus={text === ""}
                   aria-label={c.documentView.textareaLabel}

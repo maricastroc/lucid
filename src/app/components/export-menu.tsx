@@ -6,6 +6,7 @@ import { buildAuditReport } from "../lib/audit-report";
 import { documentToDocx, exportableBlocks } from "../lib/export-document";
 import { renderReportHtml } from "../lib/report-html";
 import type { LedgerEntry } from "../lib/ledger";
+import type { ProfileId } from "../lib/profiles";
 import { useCopy } from "../i18n/use-copy";
 import { PrintReport } from "./print-report";
 import { ReportRecordDialog } from "./report-record-dialog";
@@ -18,6 +19,8 @@ export interface ExportMenuProps {
   findings: readonly Finding[];
   ledger: readonly LedgerEntry[];
   originalText: string | null;
+  originalFindings: readonly Finding[] | null;
+  profileId: ProfileId;
   blocks: readonly Block[] | null;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
@@ -30,6 +33,8 @@ export function ExportMenu({
   findings,
   ledger,
   originalText,
+  originalFindings,
+  profileId,
   blocks,
   briefing,
   briefingCheck,
@@ -51,6 +56,8 @@ export function ExportMenu({
       { briefing, check: briefingCheck },
       config,
       originalText,
+      originalFindings,
+      profileId,
     );
 
   const exportAudit = () => {

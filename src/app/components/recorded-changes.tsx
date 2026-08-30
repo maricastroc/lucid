@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ChangeKind, CriterionChange } from "../lib/attribution";
+import { metaFor } from "../lib/criteria";
 import { burdenMove, entryLabel, type LedgerEntry } from "../lib/ledger";
 import { useCopy } from "../i18n/use-copy";
 import { ChevronDownIcon } from "./icons";
@@ -56,13 +58,20 @@ export function RecordedChanges({
                       </span>
                     </span>
                   </div>
-                  {e.before !== undefined && e.after !== undefined && (
+                  {e.before !== undefined && e.after !== undefined && e.before !== "" && (
                     <ChangePassage before={e.before} after={e.after} />
                   )}
+                  {(e.attribution?.changes.length ?? 0) > 0 && <ChangeEffects changes={e.attribution!.changes} />}
                 </li>
               );
             })}
           </ol>
+          {entries.some((e) => e.source === "typing") && (
+            <p className="mt-3 text-[11.5px] leading-relaxed text-ink-3">{c.overview.balanceTypingNote}</p>
+          )}
+          {entries.some((e) => e.attribution?.changes.some((x) => x.scope === "indirect")) && (
+            <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.overview.balanceIndirectNote}</p>
+          )}
           <p className="mt-3 text-[11.5px] italic leading-relaxed text-ink-3">{c.overview.trailCaveat}</p>
         </>
       )}
@@ -70,6 +79,32 @@ export function RecordedChanges({
       <EntryText text={originalText} afterChanges={hasChanges} />
     </div>
   );
+}
+
+function ChangeEffects({ changes }: { changes: readonly CriterionChange[] }) {
+  const { c, lang } = useCopy();
+  return (
+    <ul className="mt-1.5 flex flex-col gap-0.5">
+      {changes.map((change, i) => (
+        <li key={i} className="flex items-baseline justify-between gap-3 text-[11.5px]">
+          <span className="min-w-0 truncate text-ink-2">{metaFor(change.criterion, lang).label}</span>
+          <span className={`shrink-0 ${toneOf(change.kind)}`}>
+            {change.kind === "transformed"
+              ? c.overview.balanceTransformed(change.before, change.after)
+              : change.kind === "indirect"
+                ? `${c.overview.balanceCount(change.before, change.after)} · ${c.overview.balanceKind.indirect}`
+                : c.overview.balanceKind[change.kind]}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function toneOf(kind: ChangeKind): string {
+  if (kind === "resolved") return "text-safe";
+  if (kind === "introduced") return "text-human";
+  return "text-ink-3";
 }
 
 function ChangePassage({ before, after }: { before: string; after: string }) {

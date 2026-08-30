@@ -15,11 +15,14 @@ import { disabledCriteria } from "../lib/profile";
 import { readabilityOf } from "../lib/readability";
 import type { LedgerEntry } from "../lib/ledger";
 import { tally, type ReviewMarks } from "../lib/review-marks";
+import { progressOf, startHerePlan } from "../lib/start-here";
 import { copyFor } from "../i18n/copy";
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import type { ImportNotes } from "../hooks/use-document-source";
+import { GuidedEntry } from "./guided-entry";
 import { RecordedChanges } from "./recorded-changes";
+import { RevisionBalanceSection } from "./revision-balance";
 
 function flattenedLabel(notes: ImportNotes, c: ReturnType<typeof copyFor>): string | null {
   const parts: string[] = [];
@@ -47,6 +50,7 @@ interface Props {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   originalText: string | null;
+  originalFindings: readonly Finding[] | null;
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
@@ -55,6 +59,8 @@ interface Props {
   briefingCheck: BriefingCheck;
   config: Config;
   marks: ReviewMarks;
+  guidedActive: boolean;
+  onStartStep: (criterion: string) => void;
 }
 
 export function AuditOverview({
@@ -64,11 +70,14 @@ export function AuditOverview({
   humanCount,
   ledger,
   originalText,
+  originalFindings,
   silentCriteria,
   missingBlockKinds,
   importNotes,
   config,
   marks,
+  guidedActive,
+  onStartStep,
 }: Props) {
   const { c, lang } = useCopy();
   const total = findings.length;
@@ -139,7 +148,12 @@ export function AuditOverview({
                 )}
               </div>
             )}
-            <ReviewProgress marks={marks} findings={findings} />
+            <ReviewProgress marks={marks} findings={findings} originalFindings={originalFindings} />
+            <GuidedEntry
+              plan={startHerePlan(findings, marks, false, originalFindings)}
+              active={guidedActive}
+              onStart={onStartStep}
+            />
           </>
         )}
 
@@ -172,6 +186,10 @@ export function AuditOverview({
           </span>
         </p>
       </div>
+
+      {originalFindings !== null && (
+        <RevisionBalanceSection before={originalFindings} after={findings} entries={ledger} />
+      )}
 
       <RecordedChanges entries={ledger} originalText={originalText} />
     </div>
@@ -208,10 +226,20 @@ export function ReadingSection({ diagnostic }: { diagnostic: Diagnostic }) {
   );
 }
 
-function ReviewProgress({ marks, findings }: { marks: ReviewMarks; findings: readonly Finding[] }) {
+function ReviewProgress({
+  marks,
+  findings,
+  originalFindings,
+}: {
+  marks: ReviewMarks;
+  findings: readonly Finding[];
+  originalFindings: readonly Finding[] | null;
+}) {
   const { c } = useCopy();
   const t = tally(marks, findings);
-  if (t.total === 0 || t.pending === t.total) return null;
+  const p = progressOf(findings, marks, originalFindings);
+  const moved = p.resolved > 0 || p.introduced > 0;
+  if (t.total === 0 || (t.pending === t.total && !moved)) return null;
   const done = t.total - t.pending;
   return (
     <div className="mt-4 border-t border-rule-1 pt-3">
@@ -226,6 +254,14 @@ function ReviewProgress({ marks, findings }: { marks: ReviewMarks; findings: rea
       >
         <span className="block h-full rounded-full bg-ink-2" style={{ width: `${(done / t.total) * 100}%` }} />
       </div>
+      <p className="mt-1.5 text-[11.5px] tabular-nums text-ink-2">
+        {c.startHere.progressCounts(p.pending, p.seen, p.dismissed)}
+      </p>
+      {moved && (
+        <p className="mt-0.5 text-[11.5px] tabular-nums text-ink-2">
+          {c.startHere.progressResolved(p.resolved, p.introduced)}
+        </p>
+      )}
       <p className="mt-1.5 text-[11px] leading-relaxed text-ink-3">{c.revisionList.progressCaveat}</p>
     </div>
   );

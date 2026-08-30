@@ -30,6 +30,7 @@ interface Props {
   groups: readonly FindingGroup[];
   visible: readonly Finding[];
   allFindings: readonly Finding[];
+  originalFindings: readonly Finding[] | null;
   query: FindingQuery;
   marks: ReviewMarks;
   filtered: boolean;
@@ -39,6 +40,8 @@ interface Props {
   onSearch: (s: string) => void;
   onOrder: (o: SortOrder) => void;
   onCriterion: (criterion: string | null) => void;
+  onStartStep: (criterion: string) => void;
+  guided: boolean;
   onClearFilters: () => void;
   onSelect: (finding: Finding) => void;
   hiddenHighlights: ReadonlySet<string>;
@@ -52,6 +55,7 @@ export function RevisionList({
   groups,
   visible,
   allFindings,
+  originalFindings,
   query,
   marks,
   filtered,
@@ -61,6 +65,8 @@ export function RevisionList({
   onSearch,
   onOrder,
   onCriterion,
+  onStartStep,
+  guided,
   onClearFilters,
   onSelect,
   hiddenHighlights,
@@ -73,7 +79,7 @@ export function RevisionList({
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   const sifting = allFindings.length >= FILTER_THRESHOLD;
-  const plan = startHerePlan(allFindings, marks, filtered);
+  const plan = startHerePlan(allFindings, marks, filtered, originalFindings);
   const hiddenCount = hiddenHighlightCount(groups, hiddenHighlights);
 
   const clean = cleanCriteria(diagnostic);
@@ -88,25 +94,33 @@ export function RevisionList({
 
   return (
     <div>
-      <StartHerePlan plan={plan} onBucket={onBucket} onCriterion={onCriterion} />
-      <FindingFilters
-        query={query}
-        sifting={sifting}
-        filtered={filtered}
-        visibleCount={visible.length}
-        totalCount={allFindings.length}
-        hiddenCount={hiddenCount}
-        onQuery={{
-          bucket: onBucket,
-          state: onState,
-          search: onSearch,
-          order: onOrder,
-          criterion: onCriterion,
-          clear: onClearFilters,
-        }}
-      />
+      <StartHerePlan plan={guided ? null : plan} onBucket={onBucket} onStart={onStartStep} />
+      {!guided && plan !== null && (
+        <div className="mx-4 mb-2.5 border-t border-rule-1 pt-3">
+          <h4 className="u-label text-ink-2">{c.revisionList.indexLabel}</h4>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.indexHint}</p>
+        </div>
+      )}
+      {!guided && (
+        <FindingFilters
+          query={query}
+          sifting={sifting}
+          filtered={filtered}
+          visibleCount={visible.length}
+          totalCount={allFindings.length}
+          hiddenCount={hiddenCount}
+          onQuery={{
+            bucket: onBucket,
+            state: onState,
+            search: onSearch,
+            order: onOrder,
+            criterion: onCriterion,
+            clear: onClearFilters,
+          }}
+        />
+      )}
 
-      {filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
+      {!guided && filtered && visible.length > 0 && tally(marks, visible).pending < visible.length && (
         <div className="mx-6 mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-rule-1 bg-surface-2/60 px-2.5 py-2">
           <span className="u-sublabel text-ink-3">{c.revisionList.batchLabel}</span>
           <button
@@ -132,7 +146,8 @@ export function RevisionList({
               group={group}
               diagnostic={diagnostic}
               marks={marks}
-              open={open.has(group.criterion) || query.criterion === group.criterion}
+              guided={guided}
+              open={guided || open.has(group.criterion) || query.criterion === group.criterion}
               scoped={query.criterion === group.criterion}
               selectedId={selectedId}
               onToggle={() => toggleGroup(group.criterion)}
@@ -147,7 +162,7 @@ export function RevisionList({
         )}
       </div>
 
-      <CleanCriteriaDisclosure criteria={clean} />
+      {!guided && <CleanCriteriaDisclosure criteria={clean} />}
 
       <p className="px-4 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
     </div>

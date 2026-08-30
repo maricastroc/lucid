@@ -32,6 +32,7 @@ describe("workspace — round trip through storage", () => {
   it("restores a plain-text document with no structure", () => {
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "O prazo venceu ontem.",
       blocks: null,
       ledger: [],
@@ -39,8 +40,10 @@ describe("workspace — round trip through storage", () => {
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
     expect(readWorkspace()).toEqual({
+      profileId: "base",
       originalText: null,
       text: "O prazo venceu ontem.",
       blocks: null,
@@ -49,6 +52,7 @@ describe("workspace — round trip through storage", () => {
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
   });
 
@@ -66,6 +70,7 @@ describe("workspace — round trip through storage", () => {
     ];
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Texto revisado.",
       blocks: null,
       ledger,
@@ -73,6 +78,7 @@ describe("workspace — round trip through storage", () => {
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
     const restored = readWorkspace();
     expect(restored?.ledger).toEqual(ledger);
@@ -83,6 +89,7 @@ describe("workspace — round trip through storage", () => {
     const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: imported.source,
       blocks: toRawBlocks(imported.blocks),
       ledger: [],
@@ -90,6 +97,7 @@ describe("workspace — round trip through storage", () => {
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
 
     const restored = readWorkspace();
@@ -115,6 +123,7 @@ describe("workspace — the reader briefing (ADR-079)", () => {
     };
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -122,6 +131,7 @@ describe("workspace — the reader briefing (ADR-079)", () => {
       briefing,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
     expect(readWorkspace()?.briefing).toEqual(briefing);
   });
@@ -174,6 +184,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
     };
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -181,6 +192,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       briefing: EMPTY_BRIEFING,
       config,
       reviewMarks: {},
+      guidedStep: null,
     });
     const restored = readWorkspace();
     expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25, errorAbove: 40 });
@@ -309,6 +321,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
     });
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Documento grande.",
       blocks: null,
       ledger: [],
@@ -316,6 +329,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
     expect(getSaveFailed()).toBe(true);
   });
@@ -324,6 +338,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
     installStorage();
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Documento pequeno.",
       blocks: null,
       ledger: [],
@@ -331,6 +346,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks: {},
+      guidedStep: null,
     });
     expect(getSaveFailed()).toBe(false);
   });
@@ -355,6 +371,7 @@ describe("workspace — the author's review marks", () => {
     const reviewMarks = { "jargon:10:22": "seen" as const, "passive_voice:40:53": "dismissed" as const };
     writeWorkspace({
       originalText: null,
+      profileId: "base",
       text: "Texto.",
       blocks: null,
       ledger: [],
@@ -362,6 +379,7 @@ describe("workspace — the author's review marks", () => {
       briefing: EMPTY_BRIEFING,
       config: DEFAULT_CONFIG,
       reviewMarks,
+      guidedStep: null,
     });
     expect(readWorkspace()?.reviewMarks).toEqual(reviewMarks);
   });
@@ -394,6 +412,7 @@ describe("workspace — the author's review marks", () => {
         briefing: EMPTY_BRIEFING,
         config: DEFAULT_CONFIG,
         reviewMarks: { "jargon:1:2": "approved" },
+        guidedStep: null,
       }),
     );
     expect(readWorkspace()).toBeNull();
@@ -407,6 +426,7 @@ describe("workspace — the entry text", () => {
   });
 
   const base = {
+    profileId: "base" as const,
     text: "O prazo foi prorrogado.",
     blocks: null,
     ledger: [],
@@ -414,6 +434,7 @@ describe("workspace — the entry text", () => {
     briefing: EMPTY_BRIEFING,
     config: DEFAULT_CONFIG,
     reviewMarks: {},
+    guidedStep: null,
   } as const;
 
   it("survives a reload with the document it belongs to", () => {

@@ -14,8 +14,8 @@ export interface FindingQueryControls {
   filtered: boolean;
 }
 
-export function useFindingQuery(): FindingQueryControls {
-  const [criterion, setCriterion] = useState<string | null>(null);
+export function useFindingQuery(initialCriterion: string | null = null): FindingQueryControls {
+  const [criterion, setCriterion] = useState<string | null>(initialCriterion);
   const [bucket, setBucket] = useState<Bucket>("all");
   const [state, setState] = useState<StateFilter>("all");
   const [search, setSearch] = useState("");

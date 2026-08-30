@@ -1,11 +1,12 @@
 import { DEFAULT_CONFIG, EMPTY_BRIEFING, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
+import { isProfileId, type ProfileId } from "./profiles";
 import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 5;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5];
+const SCHEMA_VERSION = 7;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
@@ -15,7 +16,9 @@ export interface WorkspaceSnapshot {
   readonly mode: Mode;
   readonly briefing: ReaderBriefing;
   readonly config: Config;
+  readonly profileId: ProfileId;
   readonly reviewMarks: ReviewMarks;
+  readonly guidedStep: string | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -36,9 +39,31 @@ function isRawBlock(value: unknown): value is RawBlock {
   return false;
 }
 
+function isAttribution(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const { region, changes } = value;
+  if (!isRecord(region)) return false;
+  if (typeof region.start !== "number" || typeof region.end !== "number" || typeof region.length !== "number") {
+    return false;
+  }
+  if (!Array.isArray(changes)) return false;
+  return changes.every(
+    (change) =>
+      isRecord(change) &&
+      typeof change.criterion === "string" &&
+      typeof change.before === "number" &&
+      typeof change.after === "number" &&
+      (change.scope === "region" || change.scope === "indirect") &&
+      typeof change.kind === "string",
+  );
+}
+
+const LEDGER_SOURCES: readonly string[] = ["manual", "ai", "glossary", "typing"];
+
 function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (!isRecord(value)) return false;
-  if (value.source !== "manual" && value.source !== "ai" && value.source !== "glossary") return false;
+  if (typeof value.source !== "string" || !LEDGER_SOURCES.includes(value.source)) return false;
+  if (value.attribution !== undefined && !isAttribution(value.attribution)) return false;
   if (typeof value.label !== "string") return false;
   if (value.proposerId !== undefined && typeof value.proposerId !== "string") return false;
   if (typeof value.burdenBefore !== "number" || typeof value.burdenAfter !== "number") return false;
@@ -113,7 +138,12 @@ function parse(raw: string): WorkspaceSnapshot | null {
     return null;
   }
 
+  if (value.guidedStep !== undefined && value.guidedStep !== null && typeof value.guidedStep !== "string") {
+    return null;
+  }
+
   return {
+    profileId: isProfileId(value.profileId) ? value.profileId : "base",
     text: value.text,
     originalText: typeof value.originalText === "string" ? value.originalText : null,
     blocks,
@@ -122,6 +152,7 @@ function parse(raw: string): WorkspaceSnapshot | null {
     briefing,
     config,
     reviewMarks,
+    guidedStep: typeof value.guidedStep === "string" ? value.guidedStep : null,
   };
 }
 

@@ -10,7 +10,7 @@ const sourceOf = (html: string): string => buildStructuredDocument(blocksOf(html
 describe("a real Google Docs paste — the structure the clipboard already carried", () => {
   it("reads the document as the blocks it is, not as the ones a newline rule can guess", () => {
     const declared = blocksOf(GDOCS_HTML);
-    
+
     const guessed = buildDocument(GDOCS_PLAIN).blocks;
 
     expect(declared.length).toBe(201);

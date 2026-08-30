@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ImportNotes } from "../hooks/use-document-source";
 import {
   configDeviations,
@@ -14,8 +14,12 @@ import {
 } from "@/lucid";
 import { BriefingPanel } from "./briefing-panel";
 import { ProfilePanel } from "./profile-panel";
+import { PurposePresets } from "./purpose-presets";
+import { GuidedStepHeader, routeFor } from "./guided-step";
+import { planSteps } from "../lib/start-here";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
+import type { ProfileId } from "../lib/profiles";
 import { buildPanelSections, type PanelSectionId } from "../lib/panel-sections";
 import type { FindingGroup, FindingQuery } from "../lib/finding-query";
 import type { QueryActions } from "./revision-list/finding-filters";
@@ -68,6 +72,8 @@ export interface AnalysisSettings {
   onBriefingChange: (briefing: ReaderBriefing) => void;
   config: Config;
   onConfigChange: (config: Config) => void;
+  profileId: ProfileId;
+  onProfileChange: (id: ProfileId) => void;
 }
 
 export interface OccurrenceSurface {
@@ -86,6 +92,7 @@ export interface AuditPanelProps {
   humanCount: number;
   ledger: readonly LedgerEntry[];
   originalText: string | null;
+  originalFindings: readonly Finding[] | null;
   blocks: readonly Block[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
@@ -95,6 +102,13 @@ export interface AuditPanelProps {
   onQuery: QueryActions;
   navigation: NoteNavigation;
   review: ReviewSurface;
+  guided: {
+    step: string | null;
+    onGo: (criterion: string) => void;
+    onLeave: () => void;
+    onOpen: () => void;
+    onAdvance: (marked: Finding) => void;
+  };
   highlights: HighlightVisibility;
   edits: DocumentEditActions;
   settings: AnalysisSettings;
@@ -110,29 +124,72 @@ export function AuditPanel(props: AuditPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const hasProbe = props.probeExcerpt !== undefined;
 
+  const guidedStep = props.guided.step;
+  const sectionCount = guidedStep === null ? props.visible.length : props.findings.length;
   const sections = useMemo(
-    () => buildPanelSections({ findingCount: props.visible.length, hasProbe }, c),
-    [props.visible.length, hasProbe, c],
+    () => buildPanelSections({ findingCount: sectionCount, hasProbe }, c),
+    [sectionCount, hasProbe, c],
   );
   const nav = usePanelSections(sections, scrollRef, props.navigation.selectedFinding === null);
 
+  const goTo = nav.goTo;
+  const selectedId = props.navigation.selectedId;
+  useEffect(() => {
+    if (guidedStep !== null && selectedId === null) goTo("findings");
+  }, [guidedStep, selectedId, goTo]);
+
+  const noteRef = useRef<HTMLDivElement>(null);
+  const noteWasOpen = useRef(false);
+  useEffect(() => {
+    const open = selectedId !== null;
+    if (open && !noteWasOpen.current) noteRef.current?.focus({ preventScroll: true });
+    noteWasOpen.current = open;
+  }, [selectedId]);
+
+  const route = guidedStep === null ? null : routeFor(planSteps(props.findings, props.review.marks), guidedStep);
+  const guidedHeader = (compact: boolean) =>
+    route === null ? null : (
+      <GuidedStepHeader
+        route={route}
+        compact={compact}
+        onGo={props.guided.onGo}
+        onLeave={props.guided.onLeave}
+        onOpen={props.guided.onOpen}
+      />
+    );
+
   if (props.navigation.selectedFinding) {
+    const selected = props.navigation.selectedFinding;
+    const pendingHere = props.review.marks[findingId(selected)] === undefined;
     return (
       <>
+        {guidedHeader(true)}
         <NoteNav
           index={props.navigation.index}
           total={props.navigation.total}
-          criterion={props.navigation.selectedFinding.criterion}
-          mark={props.review.marks[findingId(props.navigation.selectedFinding)] ?? null}
-          onMark={(value) => props.review.onMark(props.navigation.selectedFinding as Finding, value)}
+          criterion={selected.criterion}
+          mark={props.review.marks[findingId(selected)] ?? null}
+          guided={route === null ? null : { willFinishStep: pendingHere && route.current.pending === 1 }}
+          onMark={(value) => {
+            props.review.onMark(selected, value);
+            if (value === null || route === null) return;
+            props.guided.onAdvance(selected);
+          }}
           onPrev={props.navigation.onPrev}
           onNext={props.navigation.onNext}
           onBackToList={props.navigation.onBackToList}
           onBackToOverview={props.navigation.onBackToOverview}
         />
-        <div key={props.navigation.selectedId ?? "note"} className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          key={props.navigation.selectedId ?? "note"}
+          ref={noteRef}
+          tabIndex={-1}
+          role="region"
+          aria-label={c.guided.occurrenceOf(props.navigation.index, props.navigation.total)}
+          className="min-h-0 flex-1 overflow-y-auto focus:outline-none"
+        >
           <RevisionNote
-            finding={props.navigation.selectedFinding}
+            finding={selected}
             source={props.diagnostic.text}
             onApplyRewrite={props.edits.onApplyRewrite}
             onManualEdit={props.edits.onManualEdit}
@@ -154,6 +211,7 @@ export function AuditPanel(props: AuditPanelProps) {
             humanCount={props.humanCount}
             ledger={props.ledger}
             originalText={props.originalText}
+            originalFindings={props.originalFindings}
             blocks={props.blocks}
             silentCriteria={props.silentCriteria}
             missingBlockKinds={props.missingBlockKinds}
@@ -162,6 +220,8 @@ export function AuditPanel(props: AuditPanelProps) {
             briefingCheck={props.settings.briefingCheck}
             config={props.settings.config}
             marks={props.review.marks}
+            guidedActive={guidedStep !== null}
+            onStartStep={props.guided.onGo}
           />
         );
       case "findings":
@@ -171,6 +231,7 @@ export function AuditPanel(props: AuditPanelProps) {
             groups={props.groups}
             visible={props.visible}
             allFindings={props.findings}
+            originalFindings={props.originalFindings}
             query={props.query}
             marks={props.review.marks}
             filtered={props.filtered}
@@ -180,6 +241,8 @@ export function AuditPanel(props: AuditPanelProps) {
             onSearch={props.onQuery.search}
             onOrder={props.onQuery.order}
             onCriterion={props.onQuery.criterion}
+            onStartStep={props.guided.onGo}
+            guided={guidedStep !== null}
             onClearFilters={props.onQuery.clear}
             onSelect={props.navigation.onSelect}
             hiddenHighlights={props.highlights.hidden}
@@ -200,6 +263,11 @@ export function AuditPanel(props: AuditPanelProps) {
               onChange={props.settings.onBriefingChange}
               onSelectOccurrence={props.occurrences.onSelect}
               onStepOccurrence={props.occurrences.onStep}
+            />
+            <PurposePresets
+              config={props.settings.config}
+              selected={props.settings.profileId}
+              onSelect={props.settings.onProfileChange}
             />
             <ProfilePanel config={props.settings.config} onChange={props.settings.onConfigChange} />
             <div className="border-t border-rule-1 px-4 py-4">
@@ -235,12 +303,15 @@ export function AuditPanel(props: AuditPanelProps) {
   return (
     <>
       <PanelNav sections={sections} activeId={nav.activeId} onGo={nav.goTo} />
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto [overflow-anchor:none]">
+      {guidedHeader(false)}
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
         {sections.map((section) => (
           <PanelSection
             key={section.id}
             id={section.id}
-            title={sectionTitle(section.id, c)}
+            title={
+              section.id === "findings" && guidedStep !== null ? c.guided.stepOccurrences : sectionTitle(section.id, c)
+            }
             summary={sectionSummary(section.id, props, c)}
             collapsible={section.collapsible}
             open={nav.isOpen(section.id)}
