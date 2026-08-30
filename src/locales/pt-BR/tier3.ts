@@ -218,6 +218,31 @@ export const RE_THIRD_PERSON_AGENT_SUBJECT_PT = new RegExp(
   "giu",
 );
 
+const DEONTIC_IN_SOURCE = [
+  "dever[\\u00e1\\u00e3eo]\\p{L}*",
+  "deve|devem",
+  "obrigat\\u00f3ri\\p{L}+",
+  "obrigad\\p{L}+",
+  "vedad\\p{L}+",
+  "proibid\\p{L}+",
+  "compete|incumbe|cabe",
+  "caber[\\u00e1\\u00e3]\\p{L}*",
+  "necess\\u00e1ri\\p{L}+",
+  "exigid\\p{L}+",
+  "exige\\p{L}*",
+  "precisa\\p{L}*",
+  "\\p{L}+-se-[\\u00e1\\u00e3]\\p{L}*",
+  "ter[\\u00e1\\u00e3]\\s+de",
+  "t[\\u00eae]m\\s+de",
+];
+
+export const RE_DEONTIC_SOURCE_PT = new RegExp(`${WORD_START}(?:${DEONTIC_IN_SOURCE.join("|")})`, "iu");
+
+export const RE_DEONTIC_INTRODUCED_PT = new RegExp(
+  `${WORD_START}(?:dever[\\u00e1\\u00e3eo]\\p{L}*|deve|devem|\\u00e9\\s+obrigat\\u00f3ri\\p{L}+|fica\\s+obrigad\\p{L}+|ter[\\u00e1\\u00e3]\\s+de|t[\\u00eae]m\\s+de)`,
+  "iu",
+);
+
 export const rewriteLocalePtBR = {
   id: "pt-BR",
   analyze: (text: string): Diagnostic => analyzeWithLocale(text, localePtBR),
@@ -225,4 +250,6 @@ export const rewriteLocalePtBR = {
   jargonCriterionId: "jargon",
   thirdPersonAgentNouns: RE_THIRD_PERSON_AGENT_NOUN_PT,
   thirdPersonAgentSubject: RE_THIRD_PERSON_AGENT_SUBJECT_PT,
+  deonticInSource: RE_DEONTIC_SOURCE_PT,
+  deonticIntroduced: RE_DEONTIC_INTRODUCED_PT,
 };

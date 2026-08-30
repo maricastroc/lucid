@@ -2,15 +2,15 @@
   {
     "target": "planalto-leis__1989-1994-l7992.txt#322-529",
     "material": true,
-    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere",
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       }
     ]
   },
@@ -21,11 +21,11 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -36,26 +36,41 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l7993.txt#478-633",
+    "material": false,
+    "reason": "só redação",
+    "versions": [
+      {
+        "letter": "X",
+        "candidate": "lucid@v2"
+      },
+      {
+        "letter": "Y",
+        "candidate": "lucid@v1"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l7994.txt#445-692",
     "material": true,
-    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere",
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -66,41 +81,56 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
+      }
+    ]
+  },
+  {
+    "target": "planalto-leis__1989-1994-l7999.txt#2654-2823",
+    "material": false,
+    "reason": "só redação",
+    "versions": [
+      {
+        "letter": "X",
+        "candidate": "lucid@v1"
+      },
+      {
+        "letter": "Y",
+        "candidate": "lucid@v2"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l7999.txt#2825-3097",
     "material": true,
-    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere; estrutura resultante difere",
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8000.txt#6934-7435",
-    "material": false,
-    "reason": "só redação",
+    "material": true,
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -111,11 +141,11 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -126,86 +156,86 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8007.txt#529-1098",
     "material": true,
-    "reason": "veredito de fidelidade difere",
+    "reason": "provas reprovadas diferem; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8010.txt#1119-1451",
     "material": true,
-    "reason": "provas reprovadas diferem",
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8013.txt#844-1221",
     "material": true,
-    "reason": "provas reprovadas diferem; estrutura resultante difere",
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8014.txt#325-604",
-    "material": false,
-    "reason": "só redação",
+    "material": true,
+    "reason": "uma das versões foi vetada e a outra não; provas reprovadas diferem; veredito de fidelidade difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8016.txt#2059-2437",
-    "material": false,
-    "reason": "só redação",
+    "material": true,
+    "reason": "veredito de fidelidade difere; estrutura resultante difere",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -216,41 +246,41 @@
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   },
   {
-    "target": "planalto-leis__1989-1994-l8022.txt#348-685",
+    "target": "planalto-leis__1989-1994-l8018.txt#794-963",
     "material": false,
     "reason": "só redação",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v1"
       }
     ]
   },
   {
     "target": "planalto-leis__1989-1994-l8026.txt#821-1182",
-    "material": true,
-    "reason": "estrutura resultante difere",
+    "material": false,
+    "reason": "só redação",
     "versions": [
       {
         "letter": "X",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "Y",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       }
     ]
   }

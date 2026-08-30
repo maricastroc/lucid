@@ -8,6 +8,8 @@ export interface RewriteLocale {
   readonly jargonCriterionId: string;
   readonly thirdPersonAgentNouns: RegExp;
   readonly thirdPersonAgentSubject: RegExp;
+  readonly deonticInSource: RegExp;
+  readonly deonticIntroduced: RegExp;
 }
 
 export interface AgentDeclaration {
@@ -51,7 +53,7 @@ export interface Proof {
 }
 
 export interface VerificationSignal {
-  check: "entities_preserved" | "meaning_preserved" | "possible_invented_agent";
+  check: "entities_preserved" | "meaning_preserved" | "possible_invented_agent" | "possible_invented_obligation";
   flagged: boolean;
   detail: string;
 }

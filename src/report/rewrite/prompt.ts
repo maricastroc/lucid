@@ -1,13 +1,13 @@
 import type { Finding, Span } from "../../lucid/core/types";
 import type { AgentDeclaration } from "./types";
 
-import { buildRewritePromptV3 } from "./prompt-v3";
+import { buildRewritePromptV4 } from "./prompt-v4";
 
 export type RewriteStrategy = "correct" | "rewrite" | "rewrite2" | "directed";
 
 export const STRATEGY_VERSION: Record<RewriteStrategy, string> = {
   correct: "correct@1",
-  rewrite: "rewrite@3",
+  rewrite: "rewrite@5",
   rewrite2: "rewrite@2",
   directed: "directed@4",
 };
@@ -208,5 +208,5 @@ export function buildRewritePrompt(
     return buildDirectedPrompt(fullText, target, options.findings ?? [], options.declarations ?? []);
   }
   if (strategy === "rewrite2") return buildFreePrompt(fullText, target, options.criterion);
-  return buildRewritePromptV3(fullText, target, options.findings ?? []);
+  return buildRewritePromptV4(fullText, target, options.findings ?? []);
 }

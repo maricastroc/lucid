@@ -626,7 +626,9 @@
   #relatorio-impresso h1,
   #relatorio-impresso h2,
   #relatorio-impresso h3,
-  #relatorio-impresso h4 {
+  #relatorio-impresso h4,
+  #relatorio-impresso h5,
+  #relatorio-impresso h6 {
     break-after: avoid;
     break-inside: avoid;
   }
@@ -656,6 +658,20 @@
     margin: 0 0 0.6rem;
     padding-left: 1.1rem;
     list-style: disc;
+  }
+
+  #relatorio-impresso ol {
+    margin: 0 0 0.6rem;
+    padding-left: 1.35rem;
+    list-style: decimal;
+  }
+
+  #relatorio-impresso h5,
+  #relatorio-impresso h6 {
+    font-family: var(--font-sans);
+    font-size: 10pt;
+    font-weight: 600;
+    margin: 0.8rem 0 0.3rem;
   }
 
   #relatorio-impresso li {

@@ -1,10 +1,10 @@
 # A/B do prompt de reescrita
 
-Harness da rodada do **ADR-089**. Compara prompts de reescrita sobre o corpus público, com
+Harness de A/B do prompt de reescrita. Compara prompts sobre o corpus público, com
 métricas determinísticas offline e amostra cega para julgamento humano.
 
-**Nada aqui é produção.** `src/report/rewrite` é importado só para a linha de base;
-`REWRITE_PROMPT_VERSION` continua `rewrite@2`.
+**Nada aqui é produção.** `src/report/rewrite` é importado para construir os braços; o prompt
+que sai hoje é o `rewrite@4` (`src/report/rewrite/prompt-v4.ts`).
 
 ## Como rodar
 
@@ -24,7 +24,7 @@ Etapa 1 — roda os candidatos. `AB_CANDIDATES` e `AB_MODELS` estreitam o braço
 `AB_MAX_CALLS` e `AB_MAX_TOKENS` mudam o teto. Ver **Rede** abaixo.
 
 ```bash
-AB_STAGE2=1 AB_WINNER=iaris@v20+briefing npx vitest run test/eval/rewrite-ab/ab.test.ts
+AB_STAGE2=1 AB_WINNER=lucid@v2 npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
 
 Etapa 2 — o mesmo prompt com documento inteiro × janela de ±1, ±2 e ±3 parágrafos. **Não
@@ -34,7 +34,7 @@ globais por definição (`eval/rewrite-context.json`).
 
 ```bash
 AB_REPORT=1 npx vitest run test/eval/rewrite-ab/ab.test.ts
-AB_FINAL=1 AB_FINALISTS="iaris@v20+briefing,iaris@v20-porta" npx vitest run test/eval/rewrite-ab/ab.test.ts
+AB_FINAL=1 AB_FINALISTS="lucid@v1,lucid@v2" npx vitest run test/eval/rewrite-ab/ab.test.ts
 ```
 
 Pontuação e relatórios. **Offline, zero chamadas** — reexecutar não custa nada. `AB_REPORT`
@@ -54,18 +54,17 @@ finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
 
 ## Arquivos
 
-|                       |                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `targets.ts`          | seleção determinística dos alvos, com a regra escrita por extenso                                                         |
-| `candidates.ts`       | os construtores de prompt e o registro dos candidatos                                                                     |
-| `briefing.ts`         | os achados da engine renderizados como briefing                                                                           |
-| `iaris-baseline.ts`   | a v20 da IAris copiada byte a byte, com `INCOMPATIBLE` e `PATCHED`                                                        |
-| `iaris-drift.test.ts` | falha se a cópia divergir da fonte; pula sem o repo vizinho                                                               |
-| `fidelity.ts`         | métricas offline: referência jurídica, relação entre normas, marcadores deônticos, as regras que a IAris declara sobre si |
-| `score.ts`            | verificação determinística + estrutura ADR-088 + round-trip `.docx`                                                       |
-| `veto-anatomy.ts`     | abre o `veto%` por prova, sem transformar veto em não-veto                                                                |
-| `report.ts`           | agregação, recorte balanceado, amostra cega e duelo de duas                                                               |
-| `runner.ts`           | rede: teto, reaproveitamento, parada por cota                                                                             |
+|                      |                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `targets.ts`         | seleção determinística dos alvos, com a regra escrita por extenso                                             |
+| `candidates.ts`      | os construtores de prompt e o registro dos candidatos                                                         |
+| `briefing.ts`        | os achados da engine renderizados como briefing                                                               |
+| `lucid-v1-frozen.ts` | o texto exato do braço `lucid@v1`, congelado para a medição continuar reproduzível                            |
+| `fidelity.ts`        | métricas offline: referência jurídica, relação entre normas, marcadores deônticos, inchaço e divisão de frase |
+| `score.ts`           | verificação determinística + estrutura ADR-088 + round-trip `.docx`                                           |
+| `veto-anatomy.ts`    | abre o `veto%` por prova, sem transformar veto em não-veto                                                    |
+| `report.ts`          | agregação, recorte balanceado, amostra cega e duelo de duas                                                   |
+| `runner.ts`          | rede: teto, reaproveitamento, parada por cota                                                                 |
 
 Saídas em `eval/rewrite-ab/`: `runs.jsonl` (chamadas cruas), `relatorio.md`, `final-*.md`,
 `duelo-*.md` e as chaves das amostras cegas.

@@ -52,7 +52,12 @@ export type {
 export { asLocaleId } from "./core/contracts/locale";
 
 export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
-export { affixSplice, buildStructuredDocument, spliceStructuredDocument, toRawBlocks } from "./core/document/structured";
+export {
+  affixSplice,
+  buildStructuredDocument,
+  spliceStructuredDocument,
+  toRawBlocks,
+} from "./core/document/structured";
 export type { RawBlock, SpliceRefusal, StructuredSplice, TextSplice } from "./core/document/structured";
 
 export { buildCoverageReport, criteriaWithoutObject, missingBlockKinds } from "./core/coverage/build";

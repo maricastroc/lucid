@@ -25,13 +25,14 @@
   <a href="#-llm-proposes-engine-verifies">The idea</a> •
   <a href="#-30-seconds">30 seconds</a> •
   <a href="#-what-it-does--what-it-refuses-to-do">Does / Refuses</a> •
+  <a href="#-the-review">The review</a> •
   <a href="#-inside-the-engine">Inside</a> •
   <a href="#-run-it">Run it</a> •
   <a href="#-license">License</a>
 </p>
 
 <p align="center">
-  🔗 <strong>Live demo:</strong> <a href="https://lucid.marianacastro.dev/">lucid.marianacastro.dev</a> · <em>The interface is in Portuguese — the JSON output below is not.</em>
+  🔗 <strong>Live demo:</strong> <a href="https://lucid.marianacastro.dev/">lucid.marianacastro.dev</a> · <em>The interface speaks Portuguese or English; the analysis is Portuguese-only, and the JSON below is neither.</em>
 </p>
 
 <br/>
@@ -149,6 +150,41 @@ The refusals are not missing features. They are the design.
 
 <br/>
 
+## 🔁 The review
+
+Finding 25 violations is the easy half. The hard half is that a list of 25 is not a task — it is a wall, and the reader who is looking at it has no idea where to start, what changes if they act, or when they are done. So the audit is also a **path**, and the path is held to the same rule as everything else: **it may reorder the work, never the verdict.**
+
+### One criterion at a time
+
+The findings are grouped by criterion and ordered by weight — the same `error 3 · warning 1 · info 0.3` the rewrite verifier already runs on, so a criterion with four errors outranks one with ten notes. Heaviest first. Each step is one criterion: you walk its occurrences with the same frame of mind instead of switching problem at every point. The header stays with you the whole way, and answers the three questions in the order they get asked — _where am I_ (step N of M, with the trail of what is behind you), _what do I do_ (open the pending occurrences and settle each one), _how do I advance_ (the next step, always one click and always visible).
+
+Order is a **suggestion, not a rule**: you can enter at any step, and the findings — and the score — are identical in any sequence.
+
+**A walked step is not a clean document.** Marking an occurrence as seen or dismissed is the author's note to themselves about their own review; it never touches the score, and the interface says so where you can't miss it: _a reviewed point is not a resolved one — resolved is what stopped existing in the text._
+
+### Before × after, attributed to the criterion
+
+When a change lands — your edit, a curated swap, or an accepted LLM rewrite — the engine re-analyzes and reports what moved, per criterion. The attribution is computed **at the moment of the change, with both texts in hand**, never by replaying offsets afterwards:
+
+| What the ledger says       | What it means                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `resolved`                 | the finding stopped existing                                                                           |
+| `kept`                     | same finding, same text, still there                                                                   |
+| `rewritten, still flagged` | the passage changed; the criterion still fires                                                         |
+| `flagged after the change` | the edit introduced it                                                                                 |
+| `became something else`    | the count changed — reported as "N became M", with no pretence about which one is the survivor         |
+| `knock-on effect`          | a finding **outside** the edited region moved, and is labeled as such rather than credited to the edit |
+
+That last row is the point of the whole mechanism. Deleting a heading changes the verdict on a heading far below it; an honest delta has to name that instead of quietly folding it into what you just did.
+
+### Profiles: the threshold is a declaration, not a default
+
+A benefit ruling and an app screen do not fail at the same sentence length. Four named profiles carry the purpose — `base`, `normativo`, `publico`, `digital` — and each is a different set of thresholds, not a different set of rules: no criterion is switched off, no clause is reinterpreted.
+
+Each profile hashes differently (`ebb6dee9`, `b79cf231`, `d93c9ea5`, `6c42ea02`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
+
+<br/>
+
 ## 🔬 Inside the engine
 
 ### The pipeline is pure
@@ -210,7 +246,7 @@ Three things about that table are unusual, and deliberate:
 2. **Known limitations count _against_ the score.** A false positive we chose not to fix is left in the corpus, so `jargon` publishes 0.963 instead of a prettier 1.000.
 3. **The artifact flags its own circular numbers.** Recall for a curated-lexicon detector is measured against a corpus built from that same lexicon — so it reports "the code reads its own list," not "the instrument finds the phenomenon." That caveat ships _inside_ the JSON.
 
-Test strength itself is measured: **1393 tests**, with [Stryker](https://stryker-mutator.io/) mutation testing over the criteria. Survivors are triaged into real gaps versus provably-equivalent mutants — because a mutation score you haven't triaged is also just a number.
+Test strength itself is measured: **2073 tests**, with [Stryker](https://stryker-mutator.io/) mutation testing over the criteria. Survivors are triaged into real gaps versus provably-equivalent mutants — because a mutation score you haven't triaged is also just a number.
 
 <br/>
 
@@ -280,7 +316,7 @@ spans, `line:column`. The `justification` prose and the human-readable text outp
 because they are written for the person revising a Portuguese document. You can read the structure
 without reading the language._
 
-Accepts `.txt`, `.md`, `.docx` and stdin. **The exit codes are the honest part:**
+Accepts `.txt`, `.md`, `.docx`, `.pdf` and stdin. **The exit codes are the honest part:**
 
 | Code | Meaning                                                     |
 | ---- | ----------------------------------------------------------- |
@@ -303,7 +339,7 @@ npm run dev     # → http://localhost:3000
 ### The checks
 
 ```bash
-npm run test        # 1393 Vitest tests + byte-identical golden snapshots
+npm run test        # 2073 Vitest tests + byte-identical golden snapshots
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint (incl. the no-Date/no-random rule inside core)
 npm run depcheck    # dependency-cruiser — the layer fence

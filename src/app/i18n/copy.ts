@@ -122,6 +122,10 @@ export interface UiCopy {
     readonly printAudit: string;
     readonly printNote: string;
     readonly exportDocx: string;
+    readonly exportDocumentMd: string;
+    readonly printDocument: string;
+    readonly groupAudit: string;
+    readonly groupDocument: string;
     readonly exportTxt: string;
     readonly docxError: string;
     readonly docxNote: string;

@@ -6,31 +6,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-B@1"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "C",
-        "candidate": "iaris@v20-porta"
-      },
-      {
-        "letter": "D",
         "candidate": "ab-A@1"
       },
       {
+        "letter": "D",
+        "candidate": "lucid@v3"
+      },
+      {
         "letter": "E",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "F",
-        "candidate": "rewrite@2"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "G",
-        "candidate": "ab-C@1"
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-B@1"
       }
     ]
   },
@@ -41,31 +45,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-B@1"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20+briefing"
-      },
-      {
-        "letter": "C",
-        "candidate": "rewrite@2"
-      },
-      {
-        "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
-      },
-      {
-        "letter": "E",
         "candidate": "ab-C@1"
       },
       {
+        "letter": "C",
+        "candidate": "lucid@v2"
+      },
+      {
+        "letter": "D",
+        "candidate": "lucid@v3"
+      },
+      {
+        "letter": "E",
+        "candidate": "lucid@v1"
+      },
+      {
         "letter": "F",
-        "candidate": "ab-A@1"
+        "candidate": "rewrite@2"
       },
       {
         "letter": "G",
-        "candidate": "iaris@v20-porta"
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-B@1"
       }
     ]
   },
@@ -76,30 +84,34 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20-porta"
-      },
-      {
-        "letter": "C",
-        "candidate": "rewrite@2"
-      },
-      {
-        "letter": "D",
-        "candidate": "ab-B@1"
-      },
-      {
-        "letter": "E",
         "candidate": "ab-A@1"
       },
       {
+        "letter": "C",
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "D",
+        "candidate": "lucid@v3"
+      },
+      {
+        "letter": "E",
+        "candidate": "lucid@v2"
+      },
+      {
         "letter": "F",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "rewrite@2"
       },
       {
         "letter": "G",
+        "candidate": "lucid@v1"
+      },
+      {
+        "letter": "H",
         "candidate": "ab-C@1"
       }
     ]
@@ -111,31 +123,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-B@1"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "B",
-        "candidate": "ab-A@1"
+        "candidate": "ab-B@1"
       },
       {
         "letter": "C",
-        "candidate": "iaris@v20-porta"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "E",
-        "candidate": "rewrite@2"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "F",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "G",
-        "candidate": "ab-C@1"
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "rewrite@2"
       }
     ]
   },
@@ -146,31 +162,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-A@1"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "ab-A@1"
       },
       {
         "letter": "C",
-        "candidate": "ab-C@1"
-      },
-      {
-        "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
-      },
-      {
-        "letter": "E",
-        "candidate": "rewrite@2"
-      },
-      {
-        "letter": "F",
         "candidate": "ab-B@1"
       },
       {
+        "letter": "D",
+        "candidate": "lucid@v4"
+      },
+      {
+        "letter": "E",
+        "candidate": "lucid@v3"
+      },
+      {
+        "letter": "F",
+        "candidate": "rewrite@2"
+      },
+      {
         "letter": "G",
-        "candidate": "iaris@v20-porta"
+        "candidate": "lucid@v2"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-C@1"
       }
     ]
   },
@@ -181,7 +201,7 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-C@1"
+        "candidate": "ab-B@1"
       },
       {
         "letter": "B",
@@ -189,23 +209,27 @@
       },
       {
         "letter": "C",
-        "candidate": "ab-A@1"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "ab-A@1"
       },
       {
         "letter": "E",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "F",
-        "candidate": "iaris@v20-porta"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "G",
-        "candidate": "ab-B@1"
+        "candidate": "lucid@v3"
+      },
+      {
+        "letter": "H",
+        "candidate": "lucid@v2"
       }
     ]
   },
@@ -216,31 +240,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "rewrite@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "B",
-        "candidate": "ab-A@1"
+        "candidate": "ab-B@1"
       },
       {
         "letter": "C",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "ab-A@1"
       },
       {
         "letter": "D",
-        "candidate": "ab-C@1"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "E",
-        "candidate": "iaris@v20-porta"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "F",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "G",
-        "candidate": "ab-B@1"
+        "candidate": "ab-C@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "rewrite@2"
       }
     ]
   },
@@ -251,31 +279,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-A@1"
-      },
-      {
-        "letter": "B",
-        "candidate": "iaris@v20+briefing"
-      },
-      {
-        "letter": "C",
         "candidate": "ab-B@1"
       },
       {
-        "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "letter": "B",
+        "candidate": "lucid@v4"
       },
       {
-        "letter": "E",
+        "letter": "C",
         "candidate": "rewrite@2"
       },
       {
+        "letter": "D",
+        "candidate": "lucid@v3"
+      },
+      {
+        "letter": "E",
+        "candidate": "lucid@v1"
+      },
+      {
         "letter": "F",
-        "candidate": "iaris@v20-porta"
+        "candidate": "ab-A@1"
       },
       {
         "letter": "G",
         "candidate": "ab-C@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "lucid@v2"
       }
     ]
   },
@@ -286,31 +318,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20-porta"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "C",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "D",
-        "candidate": "ab-A@1"
-      },
-      {
-        "letter": "E",
         "candidate": "rewrite@2"
       },
       {
+        "letter": "E",
+        "candidate": "ab-A@1"
+      },
+      {
         "letter": "F",
-        "candidate": "ab-C@1"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "G",
         "candidate": "ab-B@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "lucid@v3"
       }
     ]
   },
@@ -321,19 +357,19 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-B@1"
-      },
-      {
-        "letter": "B",
         "candidate": "ab-A@1"
       },
       {
+        "letter": "B",
+        "candidate": "lucid@v3"
+      },
+      {
         "letter": "C",
-        "candidate": "iaris@v20-porta"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "D",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "E",
@@ -341,11 +377,15 @@
       },
       {
         "letter": "F",
-        "candidate": "ab-C@1"
+        "candidate": "ab-B@1"
       },
       {
         "letter": "G",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v4"
+      },
+      {
+        "letter": "H",
+        "candidate": "lucid@v1"
       }
     ]
   },
@@ -356,31 +396,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-C@1"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "B",
-        "candidate": "iaris@v20-porta"
-      },
-      {
-        "letter": "C",
         "candidate": "ab-A@1"
       },
       {
+        "letter": "C",
+        "candidate": "ab-B@1"
+      },
+      {
         "letter": "D",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "E",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "F",
-        "candidate": "ab-B@1"
+        "candidate": "ab-C@1"
       },
       {
         "letter": "G",
         "candidate": "rewrite@2"
+      },
+      {
+        "letter": "H",
+        "candidate": "lucid@v4"
       }
     ]
   },
@@ -391,11 +435,11 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-A@1"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "B",
-        "candidate": "ab-B@1"
+        "candidate": "lucid@v1"
       },
       {
         "letter": "C",
@@ -403,19 +447,23 @@
       },
       {
         "letter": "D",
-        "candidate": "rewrite@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "E",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "F",
-        "candidate": "iaris@v20-porta"
+        "candidate": "rewrite@2"
       },
       {
         "letter": "G",
-        "candidate": "iaris@v20+briefing"
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-A@1"
       }
     ]
   },
@@ -426,31 +474,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "rewrite@2"
-      },
-      {
-        "letter": "B",
-        "candidate": "iaris@v20+briefing"
-      },
-      {
-        "letter": "C",
-        "candidate": "iaris@v20+briefing+lista@2"
-      },
-      {
-        "letter": "D",
         "candidate": "ab-B@1"
       },
       {
+        "letter": "B",
+        "candidate": "ab-A@1"
+      },
+      {
+        "letter": "C",
+        "candidate": "lucid@v4"
+      },
+      {
+        "letter": "D",
+        "candidate": "rewrite@2"
+      },
+      {
         "letter": "E",
-        "candidate": "ab-C@1"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "F",
-        "candidate": "iaris@v20-porta"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "G",
-        "candidate": "ab-A@1"
+        "candidate": "lucid@v1"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-C@1"
       }
     ]
   },
@@ -461,31 +513,35 @@
     "versions": [
       {
         "letter": "A",
-        "candidate": "ab-A@1"
+        "candidate": "lucid@v4"
       },
       {
         "letter": "B",
-        "candidate": "ab-B@1"
+        "candidate": "lucid@v3"
       },
       {
         "letter": "C",
-        "candidate": "iaris@v20+briefing"
-      },
-      {
-        "letter": "D",
-        "candidate": "iaris@v20-porta"
-      },
-      {
-        "letter": "E",
         "candidate": "ab-C@1"
       },
       {
+        "letter": "D",
+        "candidate": "rewrite@2"
+      },
+      {
+        "letter": "E",
+        "candidate": "lucid@v1"
+      },
+      {
         "letter": "F",
-        "candidate": "iaris@v20+briefing+lista@2"
+        "candidate": "lucid@v2"
       },
       {
         "letter": "G",
-        "candidate": "rewrite@2"
+        "candidate": "ab-B@1"
+      },
+      {
+        "letter": "H",
+        "candidate": "ab-A@1"
       }
     ]
   }

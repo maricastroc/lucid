@@ -29,16 +29,7 @@ export async function proposeAndVerify(
 export { StubRewriteProposer } from "./proposer";
 export { LlmRewriteProposer, parseRewrite } from "./llm-proposer";
 export { buildRewritePrompt, REWRITE_PROMPT_VERSION, STRATEGY_VERSION } from "./prompt";
-export {
-  buildRewritePromptV3,
-  composePrompt,
-  IARIS_SOURCE,
-  INCOMPATIBLE,
-  PATCHED,
-  PROMPT_PARTS,
-  VERBATIM_RANGES,
-  withFirstBullet,
-} from "./prompt-v3";
+export { buildRewritePromptV4, composePromptV4, PROMPT_V4_PARTS } from "./prompt-v4";
 export { criterionLabel, renderBriefing } from "./briefing";
 export type { RewriteStrategy } from "./prompt";
 export { applyProposal, totalBurden, verifyRewrite } from "./verify";

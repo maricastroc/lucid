@@ -302,6 +302,17 @@ export async function verifyRewrite(
         : "sem sinal de agente em 3ª pessoa fabricado (heurística, não prova)",
   });
 
+  const sourceIsDeontic = new RegExp(locale.deonticInSource.source, "iu").test(proposal.original);
+  const introduced = sourceIsDeontic ? null : new RegExp(locale.deonticIntroduced.source, "iu").exec(proposal.proposed);
+  signals.push({
+    check: "possible_invented_obligation",
+    flagged: introduced !== null,
+    detail:
+      introduced !== null
+        ? `o original não impõe dever e a proposta escreve «${introduced[0]}» — confira se descrever virou obrigar`
+        : "sem sinal de dever introduzido (heurística, não prova)",
+  });
+
   if (options.probe && options.question) {
     try {
       const [originalResult, proposedResult] = await Promise.all([

@@ -407,7 +407,6 @@ export function orderFindingsForIndex(findings: readonly Finding[]): Finding[] {
   });
 }
 
-/** The audit weight is a decimal, and a decimal is written differently in each locale. */
 export function formatWeight(value: number, lang: UiLang): string {
   if (Number.isInteger(value)) return String(value);
   return value.toLocaleString(lang === "pt-BR" ? "pt-BR" : "en-US", {

@@ -185,7 +185,7 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   }
 
   out.push("");
-  out.push("### 6b. As regras que a IAris declara sobre si — medidas igual para todos");
+  out.push("### 6b. Inchaço, divisão de frase e marcação — medidas igual para todos");
   out.push("");
   out.push(
     "| Sistema | n | inchaço médio | inflou >40% | perdeu parágrafo% | frases >20 palavras (antes→depois) | frases curtas criadas (méd.) | parênteses novos (méd.) | marcação proibida% | virou lista% |",

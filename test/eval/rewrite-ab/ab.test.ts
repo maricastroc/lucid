@@ -156,8 +156,8 @@ describe.runIf(process.env.AB_REPORT === "1")("relatório (offline, zero chamada
       "",
       "Este relatório compara PROMPTS com o modelo fixo. Ele **não** mostra que um prompt é o",
       "melhor em geral — mostra qual é o melhor para este modelo. O segundo braço",
-      "(`openai/gpt-oss-120b`) foi abandonado por cota diária do provedor esgotada, com a",
-      "baseline da IAris em 1 e 0 respostas de 20: naquele modelo não havia com o que comparar.",
+      "(`openai/gpt-oss-120b`) foi abandonado por cota diária do provedor esgotada, sem",
+      "respostas suficientes para comparar naquele modelo.",
       "",
       "Que a diferença entre modelos é real, e não hipótese: nos dados parciais do Groq o",
       "`rewrite@2` preservou número em 83% dos casos, contra 25% no Gemini. Um vencedor eleito",
@@ -194,7 +194,7 @@ describe.runIf(process.env.AB_REPORT === "1")("relatório (offline, zero chamada
 describe.runIf(process.env.AB_FINAL === "1")("decisão final entre as duas finalistas (offline)", () => {
   it("abre o veto, refaz as métricas sobre os 20 pares completos e monta a amostra cega reduzida", async () => {
     const model = process.env.AB_MODEL ?? "gemini-2.5-flash";
-    const finalists = (process.env.AB_FINALISTS ?? "iaris@v20-porta,iaris@v20+briefing")
+    const finalists = (process.env.AB_FINALISTS ?? "lucid@v1,lucid@v2")
       .split(",")
       .map((c) => c.trim())
       .filter(Boolean);
@@ -219,10 +219,10 @@ describe.runIf(process.env.AB_FINAL === "1")("decisão final entre as duas final
     const duel = buildDuelSample(pairs, finalists[0], finalists[1]);
 
     const HEAD = [
-      "# Decisão final — as duas portas da IAris",
+      "# Decisão final — as duas finalistas",
       "",
       `Modelo fixo: \`${model}\`. **${targets.size} alvos**, os pares completos das duas finalistas —`,
-      "sem o recorte de 14 alvos, que existia só para equilibrar a tabela de seis braços.",
+      "sem o recorte que existe só para equilibrar a tabela de todos os braços.",
       "",
       "A limitação de modelo único continua valendo: isto elege o melhor prompt PARA ESTE MODELO.",
       "",

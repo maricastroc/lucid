@@ -1,16 +1,12 @@
-import { buildRewritePrompt } from "@/report/rewrite";
+import { buildRewritePrompt, buildRewritePromptV4 } from "@/report/rewrite";
+import { buildLucidV1 } from "./lucid-v1-frozen";
+import { buildLucidV2 } from "./lucid-v2-frozen";
+import { buildLucidV3 } from "./lucid-v3-frozen";
 import { renderFullBriefing } from "./briefing";
-import { buildIarisListGate2, buildIarisPort, buildIarisWithBriefing } from "./iaris-baseline";
 import type { EvalTarget } from "./targets";
 
 export type CandidateId =
-  | "rewrite@2"
-  | "ab-A@1"
-  | "ab-B@1"
-  | "ab-C@1"
-  | "iaris@v20-porta"
-  | "iaris@v20+briefing"
-  | "iaris@v20+briefing+lista@2";
+  "rewrite@2" | "ab-A@1" | "ab-B@1" | "ab-C@1" | "lucid@v1" | "lucid@v2" | "lucid@v3" | "lucid@v4";
 
 const NO_INVENTION_RULES = `- NÃO acrescente fato, exemplo, número, data ou explicação que não esteja no trecho;
 - NÃO invente quem praticou a ação — se o texto não diz o agente, NÃO diga (não crie "nós", "a
@@ -138,7 +134,7 @@ export interface Candidate {
 export const CANDIDATES: readonly Candidate[] = [
   {
     id: "rewrite@2",
-    description: "a linha de base que o rewrite@3 substituiu — documento inteiro + dica de um critério só",
+    description: "a linha de base anterior — documento inteiro + dica de um critério só",
     build: (target, fullText) =>
       buildRewritePrompt(fullText, target.span, { strategy: "rewrite2", criterion: target.primaryCriterion }),
   },
@@ -150,21 +146,25 @@ export const CANDIDATES: readonly Candidate[] = [
     build: buildC,
   },
   {
-    id: "iaris@v20-porta",
-    description: "o prompt vigente da IAris (v20), portado com o mínimo que o contrato obriga",
-    build: buildIarisPort,
+    id: "lucid@v1",
+    description: "primeira versão do prompt próprio: norma pública + as provas que a engine já executa",
+    build: (target, fullText) => buildLucidV1(fullText, target.span, target.findings),
   },
   {
-    id: "iaris@v20+briefing",
-    description: "a porta da IAris + briefing da engine + portão condicionado de lista",
-    build: buildIarisWithBriefing,
+    id: "lucid@v2",
+    description: "lucid@v1 com o teto de 20 palavras declarado como condição de aceitação, não como preferência",
+    build: (target, fullText) => buildLucidV2(fullText, target.span, target.findings),
   },
   {
-    id: "iaris@v20+briefing+lista@2",
+    id: "lucid@v3",
     description:
-      "idêntico ao anterior, exceto o gatilho da cláusula de lista: paralelismo semântico " +
-      "em vez da presença de prose_enumeration",
-    build: buildIarisListGate2,
+      "lucid@v2 mais o bloco do que a divisão não pode quebrar: ressalva, dever inventado e nome da categoria",
+    build: (target, fullText) => buildLucidV3(fullText, target.span, target.findings),
+  },
+  {
+    id: "lucid@v4",
+    description: "lucid@v3 com o rótulo do dispositivo e a proibição de lista elevados a condição de aceitação",
+    build: (target, fullText) => buildRewritePromptV4(fullText, target.span, target.findings),
   },
 ];
 

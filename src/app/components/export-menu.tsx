@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
-import { documentToDocx, exportableBlocks } from "../lib/export-document";
+import { documentToDocx, documentToHtml, documentToMarkdown, exportableBlocks } from "../lib/export-document";
 import { renderReportHtml } from "../lib/report-html";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
@@ -93,6 +93,17 @@ export function ExportMenu({
     close(false);
   };
 
+  const exportDocumentMd = () => {
+    const markdown = documentToMarkdown(exportableBlocks(diagnostic.text, blocks));
+    downloadFile("documento-revisado.md", markdown, "text/markdown;charset=utf-8");
+    close(false);
+  };
+
+  const printDocument = () => {
+    setPrintHtml(documentToHtml(exportableBlocks(diagnostic.text, blocks)));
+    close(false);
+  };
+
   return (
     <div ref={boxRef} className="relative" onKeyDown={onKeyDown}>
       <Button ref={triggerRef} shape="pill" aria-haspopup="menu" aria-expanded={open} onClick={toggle}>
@@ -109,14 +120,20 @@ export function ExportMenu({
           aria-label={c.panel.exportMenuLabel}
           className="rise absolute right-0 z-30 mt-1.5 w-76 rounded-lg border border-rule-2 bg-sheet p-1.5 shadow-(--shadow-pop)"
         >
+          <GroupLabel>{c.overview.groupAudit}</GroupLabel>
           <MenuItem onClick={exportAudit}>{c.overview.exportAudit}</MenuItem>
           <MenuItem onClick={printAudit} note={c.overview.printNote}>
             {c.overview.printAudit}
           </MenuItem>
-          <MenuItem onClick={exportDocx} note={c.overview.docxNote}>
-            {c.overview.exportDocx}
-          </MenuItem>
-          <MenuItem onClick={exportTxt}>{c.overview.exportTxt}</MenuItem>
+
+          <div className="mt-1.5 border-t border-rule-1 pt-1.5">
+            <GroupLabel>{c.overview.groupDocument}</GroupLabel>
+            <MenuItem onClick={exportDocumentMd}>{c.overview.exportDocumentMd}</MenuItem>
+            <MenuItem onClick={exportDocx}>{c.overview.exportDocx}</MenuItem>
+            <MenuItem onClick={printDocument}>{c.overview.printDocument}</MenuItem>
+            <MenuItem onClick={exportTxt}>{c.overview.exportTxt}</MenuItem>
+            <p className="px-2.5 pb-1 pt-1 text-[11px] leading-relaxed text-ink-3">{c.overview.docxNote}</p>
+          </div>
           {docxError !== null && (
             <p role="alert" className="px-2.5 pb-1.5 pt-1 text-[11.5px] leading-relaxed text-sev-error">
               {docxError}
@@ -148,6 +165,10 @@ export function ExportMenu({
       />
     </div>
   );
+}
+
+function GroupLabel({ children }: { children: React.ReactNode }) {
+  return <span className="u-sublabel block px-2.5 pb-1 pt-0.5 text-ink-3">{children}</span>;
 }
 
 function MenuItem({
