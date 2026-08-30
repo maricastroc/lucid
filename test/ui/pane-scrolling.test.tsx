@@ -10,14 +10,6 @@ const LONG = Array.from(
     `administrativo destinado à verificação das condições supracitadas exigidas para a concessão do benefício.`,
 ).join("\n\n");
 
-/**
- * jsdom does no layout, so height cannot be measured here. What can be checked is the
- * structural cause: a flex item whose height must be bounded by its parent needs
- * `min-h-0`, otherwise its automatic minimum size is its content and the scroller inside
- * grows with the document instead of scrolling. Measured in a real browser before this
- * guard existed: the document scroller reported clientHeight 33584 for a 24-paragraph
- * document, and scrollTop never moved.
- */
 function flexChainTo(element: Element, stopAt: (el: Element) => boolean): Element[] {
   const chain: Element[] = [];
   let node = element.parentElement;
