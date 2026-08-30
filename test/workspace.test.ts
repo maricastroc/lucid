@@ -43,6 +43,7 @@ describe("workspace — round trip through storage", () => {
       guidedStep: null,
     });
     expect(readWorkspace()).toEqual({
+      baseline: null,
       profileId: "base",
       originalText: null,
       text: "O prazo venceu ontem.",
@@ -367,8 +368,11 @@ describe("workspace — the author's review marks", () => {
     clearWorkspace();
   });
 
-  it("round-trips the marks so a long review survives closing the tab", () => {
-    const reviewMarks = { "jargon:10:22": "seen" as const, "passive_voice:40:53": "dismissed" as const };
+  it("round-trips the marks and their reasons so a long review survives closing the tab", () => {
+    const reviewMarks = {
+      "jargon:10:22": { kind: "seen" as const },
+      "passive_voice:40:53": { kind: "dismissed" as const, note: "voz passiva exigida pelo modelo do órgão" },
+    };
     writeWorkspace({
       originalText: null,
       profileId: "base",
@@ -382,6 +386,28 @@ describe("workspace — the author's review marks", () => {
       guidedStep: null,
     });
     expect(readWorkspace()?.reviewMarks).toEqual(reviewMarks);
+  });
+
+  it("upgrades marks saved before reasons existed, without losing any of them", () => {
+    localStorage.setItem(
+      "lucid-workspace",
+      JSON.stringify({
+        version: 7,
+        text: "Texto.",
+        originalText: null,
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        briefing: EMPTY_BRIEFING,
+        config: DEFAULT_CONFIG,
+        reviewMarks: { "jargon:10:22": "seen", "passive_voice:40:53": "dismissed" },
+        guidedStep: null,
+      }),
+    );
+    expect(readWorkspace()?.reviewMarks).toEqual({
+      "jargon:10:22": { kind: "seen" },
+      "passive_voice:40:53": { kind: "dismissed" },
+    });
   });
 
   it("reads a workspace saved before the marks existed as an empty set", () => {

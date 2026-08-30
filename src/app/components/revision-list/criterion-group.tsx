@@ -4,7 +4,7 @@ import type { Diagnostic, Finding } from "@/lucid";
 import { metaFor, provenanceTag, severityInkVar } from "../../lib/criteria";
 import { distinctTexts, type FindingGroup } from "../../lib/finding-query";
 import { findingId } from "../../lib/criteria";
-import { reviewStateOf, tally, type ReviewMark, type ReviewMarks } from "../../lib/review-marks";
+import { reviewStateOf, tally, type ReviewMarkKind, type ReviewMarks } from "../../lib/review-marks";
 import { useCopy } from "../../i18n/use-copy";
 import type { UiLang } from "../../i18n/types";
 import { CriterionMark, HumanScopeNote } from "../badges";
@@ -40,8 +40,8 @@ export function CriterionGroup({
   highlightsHidden: boolean;
   onToggleHighlights: () => void;
   onSelect: (finding: Finding) => void;
-  onMark: (finding: Finding, mark: ReviewMark | null) => void;
-  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+  onMark: (finding: Finding, mark: ReviewMarkKind | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMarkKind | null) => void;
 }) {
   const { c, lang } = useCopy();
   const meta = metaFor(group.criterion, lang);

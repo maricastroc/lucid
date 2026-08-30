@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { analyze, DEFAULT_CONFIG } from "../src/lucid";
 import { buildAuditReport } from "../src/app/lib/audit-report";
+import { EMPTY_MARKS, withMark, withNote } from "../src/app/lib/review-marks";
+import { buildBaseline, compareToBaseline } from "../src/app/lib/baseline";
 
 const SAMPLE =
   "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
@@ -213,5 +215,133 @@ describe("buildAuditReport — the stamp that makes the audit re-runnable", () =
     expect(withProfile).toContain("## Perfil editorial");
     expect(withProfile).not.toContain("`configHash` acima");
     expect(withProfile).toContain("O perfil carimbado no cabeçalho");
+  });
+});
+
+describe("buildAuditReport — the human decision, kept apart from the measurement", () => {
+  const audit = () => analyze(SAMPLE);
+  const marksOver = (d: ReturnType<typeof analyze>) => {
+    const jargon = d.findings.filter((f) => f.criterion === "jargon");
+    let marks = withMark(EMPTY_MARKS, jargon[0], "seen");
+    marks = withNote(marks, jargon[0], "Termo do edital-padrão do órgão.");
+    return withMark(marks, jargon[1], "dismissed");
+  };
+
+  it("records what was examined and kept, with the reason when the author wrote one", () => {
+    const d = audit();
+    const md = buildAuditReport(d, d.findings, META, [], null, null, null, null, null, marksOver(d));
+
+    expect(md).toContain("## Pontos examinados e mantidos");
+    expect(md).toContain("**2 pontos examinados**");
+    expect(md).toContain("**Motivo:** Termo do edital-padrão do órgão.");
+    expect(md).toContain("_Sem motivo registrado._");
+  });
+
+  it("says out loud that the record is a human decision and moves nothing", () => {
+    const d = audit();
+    const md = buildAuditReport(d, d.findings, META, [], null, null, null, null, null, marksOver(d));
+
+    expect(md).toContain("Registro de decisão humana, não medição da ferramenta");
+    expect(md).toMatch(/não altera o placar, o resultado da auditoria nem qualquer estado de conformidade/);
+  });
+
+  it("counts what nobody examined without listing it — the items are already under Anotações", () => {
+    const d = audit();
+    const md = buildAuditReport(d, d.findings, META, [], null, null, null, null, null, marksOver(d));
+    const section = md.slice(md.indexOf("## Pontos examinados e mantidos"));
+
+    expect(section).toMatch(/\d+ pontos ainda não foram examinados/);
+    expect(section).toContain("não são listados aqui");
+  });
+
+  it("names the state instead of staying silent when nobody examined anything", () => {
+    const d = audit();
+    const md = buildAuditReport(d, d.findings, META);
+
+    expect(md).toContain("**Nenhum ponto foi examinado nesta sessão.**");
+    expect(md).not.toContain("**Motivo:**");
+  });
+
+  it("leaves the scorecard byte-identical: a reason is not a measurement", () => {
+    const d = audit();
+    const plain = buildAuditReport(d, d.findings, META);
+    const decided = buildAuditReport(d, d.findings, META, [], null, null, null, null, null, marksOver(d));
+
+    const scorecard = (md: string) => md.slice(md.indexOf("## Placar"), md.indexOf("## Anotações por critério"));
+    expect(scorecard(decided)).toBe(scorecard(plain));
+    expect(decided.slice(0, decided.indexOf("## Placar"))).toBe(plain.slice(0, plain.indexOf("## Placar")));
+  });
+
+  it("keeps the record out of the audit's own numbers, whatever was marked", () => {
+    const d = audit();
+    const decided = buildAuditReport(d, d.findings, META, [], null, null, null, null, null, marksOver(d));
+    const annotations = (md: string) => (md.match(/^### \d+\. /gm) ?? []).length;
+
+    expect(annotations(decided)).toBe(d.findings.length);
+  });
+});
+
+describe("buildAuditReport — the comparison with a starting point", () => {
+  const V2 = "A comissão analisou o documento em sede de procedimento administrativo.";
+
+  const baselineOf = () => {
+    const d = analyze(SAMPLE);
+    const kept = d.findings.find((f) => f.span.text === "em sede de")!;
+    const marks = withNote(withMark(EMPTY_MARKS, kept, "dismissed"), kept, "Termo do edital-padrão.");
+    return buildBaseline({
+      title: "Edital 04/2026 — v1",
+      savedAt: "30/08/2026",
+      text: SAMPLE,
+      blocks: null,
+      diagnostic: d,
+      findings: d.findings,
+      profileId: "base",
+      config: DEFAULT_CONFIG,
+      marks,
+    });
+  };
+
+  const reportWith = (config = DEFAULT_CONFIG) => {
+    const current = analyze(V2, config);
+    const comparison = compareToBaseline(baselineOf(), current, config);
+    return buildAuditReport(current, current.findings, META, [], null, null, null, null, null, {}, comparison);
+  };
+
+  it("leads with the one fact that makes the numbers legible: the ruler is the same", () => {
+    const md = reportWith();
+    expect(md).toContain("## Comparação com o ponto de partida");
+    expect(md).toContain("**A régua é a mesma nos dois lados.**");
+    expect(md).toContain("Edital 04/2026 — v1");
+  });
+
+  it("names the audit of the time and the re-measured one as different things", () => {
+    const md = reportWith();
+    expect(md).toMatch(/A auditoria emitida à época registrou \d+ anotações\. Reanalisado agora, o mesmo texto dá \d+/);
+  });
+
+  it("attributes a difference between them to the ruler, never to the text", () => {
+    const noJargon = { ...DEFAULT_CONFIG, jargon: { ...DEFAULT_CONFIG.jargon, enabled: false } };
+    const md = reportWith(noJargon);
+
+    expect(md).toMatch(/de diferença vêm da mudança da régua, não do texto/);
+    expect(md).toContain("perfil editorial");
+  });
+
+  it("reports only what survived, and refuses the causal claim", () => {
+    const md = reportWith();
+    const section = md.slice(md.indexOf("### O que você apontou e continua lá"));
+
+    expect(section).toContain("em sede de");
+    expect(section).toContain("já ignorado: Termo do edital-padrão.");
+    expect(section).toContain("não é possível dizer qual edição produziu qual mudança");
+
+    const listed = section.split("\n").filter((line) => line.startsWith("- "));
+    expect(listed.length).toBeGreaterThan(0);
+    for (const line of listed) expect(line).not.toMatch(/resolvid|corrigid|saiu do texto/i);
+  });
+
+  it("replaces the in-session before/after, so the report has one starting point only", () => {
+    const md = reportWith();
+    expect(md).not.toContain("## Antes e depois");
   });
 });

@@ -287,6 +287,7 @@ export const COPY_PT: UiCopy = {
     hiddenByFilter: (n) => `${n} fora do filtro`,
     statePending: "Pendentes",
     stateSeen: "Revisados",
+    stateDismissedOne: "Ignorado",
     stateDismissed: "Ignorados",
     searchLabel: "Buscar nos pontos",
     searchPlaceholder: "Buscar nos pontos…",
@@ -715,6 +716,17 @@ export const COPY_PT: UiCopy = {
     routeProgressLabel: "Progresso do percurso",
   },
 
+  decision: {
+    label: "Decisão registrada",
+    kinds: { seen: "Revisado", dismissed: "Ignorado" },
+    fieldLabel: "Por que você manteve este ponto",
+    placeholder: "Por que manter este ponto? (opcional)",
+    caveat:
+      "Registro seu, não medição do Lucid: não altera o placar, o resultado da auditoria nem qualquer estado de " +
+      "conformidade. Vai para o relatório como decisão humana.",
+    reportPointer: "Aparece em Exportar › Auditoria, na seção “Pontos examinados e mantidos”.",
+  },
+
   changes: {
     emptyTitle: "Nenhuma alteração ainda",
     emptyBody:
@@ -731,6 +743,68 @@ export const COPY_PT: UiCopy = {
       "aprovado: mostra apenas o que os critérios automáticos encontraram — não se o público compreendeu o texto.",
     stillOpen: (n) => `${n} ${plural(n, "ponto continua no texto", "pontos continuam no texto")}`,
     none: "Nenhum critério mudou de contagem.",
+  },
+
+  baseline: {
+    label: "Ponto de partida",
+    saveAction: "Salvar ponto de partida…",
+    attachAction: "Anexar ponto de partida",
+    detach: "Desanexar",
+    dialogTitle: "Salvar ponto de partida",
+    dialogLead:
+      "Guarda esta auditoria para comparar com uma versão futura do mesmo documento, mesmo depois de o texto ser " +
+      "reescrito fora do Lucid.",
+    titleLabel: "Nome do documento",
+    titleHint: "Obrigatório. É a única identidade que o arquivo carrega — o Lucid não guarda o nome do arquivo aberto.",
+    titlePlaceholder: "Ex.: Edital 04/2026 — versão enviada à procuradoria",
+    fileNotice:
+      "Este arquivo contém o documento inteiro — o texto, a estrutura, a auditoria desta sessão e os motivos que " +
+      "você registrou. Ele fica no seu computador e não é enviado a lugar nenhum, mas trate-o como trataria o " +
+      "próprio documento ao compartilhá-lo.",
+    save: "Salvar arquivo",
+    savedAt: (when) => `salvo em ${when}`,
+    emptyLead:
+      "Anexe um ponto de partida salvo em uma auditoria anterior para comparar esta versão com ela — inclusive " +
+      "quando o texto foi reescrito fora do Lucid.",
+    sameRuler:
+      "A régua é a mesma nos dois lados: o texto do ponto de partida foi reanalisado com o motor, o perfil e os " +
+      "dados em vigor agora. Nenhum número abaixo compara medições feitas com réguas diferentes.",
+    historical: (count) => `${count} ${plural(count, "ponto na auditoria da época", "pontos na auditoria da época")}`,
+    rebased: (count) => `${count} ${plural(count, "ponto agora", "pontos agora")}, com a régua atual`,
+    engineDrift: (delta) =>
+      `${Math.abs(delta)} ${plural(Math.abs(delta), "ponto de diferença vem", "pontos de diferença vêm")} da mudança ` +
+      "da régua, não do texto.",
+    divergenceLabel: "O que mudou na régua desde então",
+    divergenceFields: {
+      lucidVersion: "versão do Lucid",
+      localeId: "idioma",
+      configHash: "perfil editorial",
+      dataHash: "dados curados",
+      standardVersion: "versão da norma",
+    },
+    adoptProfile: "Adotar o perfil do ponto de partida",
+    adoptProfileHint:
+      "A comparação usa o perfil em vigor agora. Adotar o perfil salvo refaz a auditoria inteira com os limiares " +
+      "que estavam valendo lá.",
+    stillThereLabel: "O que você apontou e continua lá",
+    stillThereCount: (n) => `${n} ${plural(n, "ponto continua", "pontos continuam")}`,
+    stillThereLead:
+      "Trechos que a auditoria anterior apontou e que a versão atual aponta de novo, palavra por palavra. Esta " +
+      "lista não afirma que nada foi resolvido: ela diz apenas o que sobreviveu.",
+    stillThereNone: "Nenhum dos trechos apontados antes aparece de novo com as mesmas palavras.",
+    occurrences: (n) => `${n}×`,
+    alreadyDecided: { seen: "já examinado e mantido", dismissed: "já ignorado" },
+    noReason: "sem motivo registrado",
+    refusal: {
+      unreadable: "Este arquivo não é um ponto de partida do Lucid, ou foi alterado depois de salvo.",
+      schema: "Este ponto de partida foi salvo por uma versão de formato que esta não sabe ler.",
+      locale:
+        "Este ponto de partida foi auditado em outro idioma. Não é uma régua diferente, é outro assunto: o motor " +
+        "pt-BR não tem o que dizer sobre ele.",
+    },
+    caveat:
+      "Entre duas versões editadas fora do Lucid não é possível dizer qual edição produziu qual mudança. Os " +
+      "números são contagens do mesmo detector sobre dois textos, e peso menor não é aprovação.",
   },
 
   metricsView: {

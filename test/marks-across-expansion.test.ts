@@ -60,7 +60,7 @@ function applyWithMarks(replacement: string): Applied {
   const block = doc.blocks[2];
   const target: Span = { start: block.start, end: block.end, text: block.text };
 
-  const marks: ReviewMarks = Object.fromEntries(findings.map((f) => [findingId(f), "seen" as const]));
+  const marks: ReviewMarks = Object.fromEntries(findings.map((f) => [findingId(f), { kind: "seen" as const }]));
 
   const next = doc.source.slice(0, target.start) + replacement + doc.source.slice(target.end);
   const result = spliceStructuredDocument(doc, next, ptDocumentServices);
@@ -101,17 +101,17 @@ describe("review marks across an applied rewrite", () => {
     const applied = applyWithMarks(AS_ONE_LINE);
     expect(applied.realDelta).toBe(applied.naiveDelta);
     expect(count(applied.survivors)).toBe(applied.all.length - applied.inside.length);
-    for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toBe("seen");
+    for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toEqual({ kind: "seen" });
   });
 
   it("a structural expansion also costs only the marks inside the edited excerpt", () => {
     const applied = applyWithMarks(AS_LIST);
     expect(applied.realDelta).not.toBe(applied.naiveDelta);
     expect(count(applied.survivors)).toBe(applied.all.length - applied.inside.length);
-    for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toBe("seen");
+    for (const finding of applied.before) expect(applied.survivors[findingId(finding)]).toEqual({ kind: "seen" });
     expect(applied.after.length).toBeGreaterThan(0);
     for (const finding of applied.after) {
-      expect(applied.survivors[shiftKey(findingId(finding), applied.realDelta)]).toBe("seen");
+      expect(applied.survivors[shiftKey(findingId(finding), applied.realDelta)]).toEqual({ kind: "seen" });
     }
   });
 

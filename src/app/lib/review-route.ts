@@ -49,7 +49,7 @@ export function planSteps(findings: readonly Finding[], marks: ReviewMarks): Rou
     entry.weight += WEIGHT[finding.severity] ?? 0;
     const mark = marks[findingId(finding)];
     if (mark === undefined) entry.pending += 1;
-    else if (mark === "dismissed") entry.dismissed += 1;
+    else if (mark.kind === "dismissed") entry.dismissed += 1;
     byCriterion.set(finding.criterion, entry);
   }
 

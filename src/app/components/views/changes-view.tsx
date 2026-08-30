@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import type { Finding } from "@/lucid";
+import type { Config, Finding } from "@/lucid";
 import type { ChangeKind, CriterionChange } from "../../lib/attribution";
 import { revisionBalance } from "../../lib/attribution";
 import { formatWeight, metaFor } from "../../lib/criteria";
 import { burdenMove, entryLabel, type LedgerEntry } from "../../lib/ledger";
 import { useCopy } from "../../i18n/use-copy";
+import { BaselinePanel, StillTherePanel, type BaselineSurface } from "./baseline-panel";
 import { ChevronDownIcon, HistoryIcon } from "../icons";
 
 const PASSAGE_LIMIT = 120;
@@ -28,16 +29,31 @@ interface Props {
   findings: readonly Finding[];
   canUndo: boolean;
   onUndo: () => void;
+  baseline: BaselineSurface;
+  config: Config;
 }
 
-export function ChangesView({ entries, originalText, originalFindings, findings, canUndo, onUndo }: Props) {
+export function ChangesView({
+  entries,
+  originalText,
+  originalFindings,
+  findings,
+  canUndo,
+  onUndo,
+  baseline,
+  config,
+}: Props) {
   const { c, lang } = useCopy();
   const hasChanges = entries.length > 0;
+  const comparison = baseline.comparison;
 
-  if (!hasChanges) {
+  const before = comparison !== null ? comparison.rebased : originalFindings;
+
+  if (!hasChanges && comparison === null) {
     return (
       <div className="fade-in px-4 py-6">
-        <div className="rounded-xl border border-dashed border-rule-2 px-4 py-6 text-center">
+        <BaselinePanel surface={baseline} config={config} />
+        <div className="mt-5 rounded-xl border border-dashed border-rule-2 px-4 py-6 text-center">
           <span className="mx-auto grid size-9 place-items-center rounded-full bg-surface-2 text-ink-3">
             <HistoryIcon className="size-4.5" />
           </span>
@@ -54,7 +70,10 @@ export function ChangesView({ entries, originalText, originalFindings, findings,
 
   return (
     <div className="fade-in px-4 py-4">
-      {originalFindings !== null && <Balance before={originalFindings} after={findings} />}
+      <BaselinePanel surface={baseline} config={config} />
+
+      {before !== null && <Balance before={before} after={findings} className="mt-5" />}
+      {comparison !== null && <StillTherePanel comparison={comparison} />}
 
       <section aria-labelledby="alteracoes-lista" className="mt-5">
         <div className="flex items-baseline justify-between gap-3">
@@ -101,7 +120,15 @@ export function ChangesView({ entries, originalText, originalFindings, findings,
   );
 }
 
-function Balance({ before, after }: { before: readonly Finding[]; after: readonly Finding[] }) {
+function Balance({
+  before,
+  after,
+  className = "",
+}: {
+  before: readonly Finding[];
+  after: readonly Finding[];
+  className?: string;
+}) {
   const { c, lang } = useCopy();
   const total = revisionBalance(before, after);
   const moved = total.byCriterion.filter((row) => row.direction !== "unchanged");
@@ -109,7 +136,7 @@ function Balance({ before, after }: { before: readonly Finding[]; after: readonl
   return (
     <section
       aria-labelledby="alteracoes-balanco"
-      className="rounded-xl border border-rule-1 bg-surface-2/60 px-3.5 py-3"
+      className={`rounded-xl border border-rule-1 bg-surface-2/60 px-3.5 py-3 ${className}`}
     >
       <h3 id="alteracoes-balanco" className="u-label text-ink-3">
         {c.overview.balanceLabel}

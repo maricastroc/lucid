@@ -32,6 +32,9 @@ export function AuditRail({ probeExcerpt, onClearProbeExcerpt, ...panel }: RailP
         briefingCheck={panel.settings.briefingCheck}
         onBriefingChange={panel.settings.onBriefingChange}
         config={panel.settings.config}
+        marks={panel.review.marks}
+        rawBlocks={panel.rawBlocks}
+        comparison={panel.baseline.comparison}
       />
       <AuditPanel
         {...panel}

@@ -22,6 +22,8 @@ import {
 import { revisionBalance } from "./attribution";
 import { adjustmentsOver, PROFILE_VERSION, profileHash, type ProfileId } from "./profiles";
 import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
+import { keptPoints, type ReviewMarks } from "./review-marks";
+import type { BaselineComparison, StampField } from "./baseline";
 import { readabilityOf } from "./readability";
 
 export interface AuditReportMeta {
@@ -218,6 +220,130 @@ function longestBacktickRun(text: string): number {
   return longest;
 }
 
+const STAMP_PT: Record<StampField, string> = {
+  lucidVersion: "versão do Lucid",
+  localeId: "idioma",
+  configHash: "perfil editorial",
+  dataHash: "dados curados",
+  standardVersion: "versão da norma",
+};
+
+const DECISION_PT: Record<"seen" | "dismissed", string> = {
+  seen: "já examinado e mantido",
+  dismissed: "já ignorado",
+};
+
+function renderBaselineMarkdown(comparison: BaselineComparison | null): string {
+  if (comparison === null) return "";
+
+  const out: string[] = ["## Comparação com o ponto de partida", ""];
+  out.push(`**${comparison.title}** · ${comparison.savedAt}`);
+  out.push("");
+  out.push(
+    "**A régua é a mesma nos dois lados.** O texto do ponto de partida foi reanalisado com o motor, o perfil e os " +
+      "dados carimbados no cabeçalho deste relatório. Nenhum número abaixo compara medições feitas com réguas " +
+      "diferentes.",
+  );
+  out.push("");
+
+  const drift = comparison.rebasedCount - comparison.historicalCount;
+  out.push(
+    `A auditoria emitida à época registrou ${comparison.historicalCount} ` +
+      `${plural(comparison.historicalCount, "anotação", "anotações")}. Reanalisado agora, o mesmo texto dá ` +
+      `${comparison.rebasedCount}.`,
+  );
+  if (drift !== 0) {
+    out.push("");
+    out.push(
+      `${Math.abs(drift)} ${plural(Math.abs(drift), "anotação de diferença vem", "anotações de diferença vêm")} da ` +
+        "mudança da régua, não do texto.",
+    );
+  }
+  if (comparison.divergence.length > 0) {
+    out.push("");
+    out.push(`Mudou na régua desde então: ${comparison.divergence.map((field) => STAMP_PT[field]).join(", ")}.`);
+  }
+  out.push("");
+
+  const moved = comparison.byCriterion.filter((row) => row.direction !== "unchanged");
+  if (moved.length > 0) {
+    out.push("| Critério | Ponto de partida | Agora | |");
+    out.push("|---|--:|--:|---|");
+    for (const row of moved) {
+      out.push(`| ${metaFor(row.criterion).label} | ${row.before} | ${row.after} | ${DIRECTION_PT[row.direction]} |`);
+    }
+    out.push("");
+  }
+
+  out.push("### O que você apontou e continua lá");
+  out.push("");
+  out.push(
+    `**${comparison.stillThereCount} ${plural(comparison.stillThereCount, "ponto continua", "pontos continuam")}** ` +
+      "no texto com as mesmas palavras.",
+  );
+  out.push("");
+  if (comparison.stillThere.length === 0) {
+    out.push("_Nenhum dos trechos apontados antes aparece de novo com as mesmas palavras._");
+  } else {
+    for (const point of comparison.stillThere) {
+      const times = point.count > 1 ? ` · ${point.count}×` : "";
+      out.push(`- **${metaFor(point.criterion).label}**${times} — “${collapse(point.excerpt)}”`);
+      if (point.decision !== null) {
+        const reason = point.decision.note === null ? "sem motivo registrado" : collapse(point.decision.note);
+        out.push(`  _${DECISION_PT[point.decision.kind]}: ${reason}_`);
+      }
+    }
+  }
+  out.push("");
+  out.push(
+    "_Esta lista não afirma que algo foi resolvido: ela diz o que sobreviveu. Entre duas versões editadas fora do " +
+      "Lucid não é possível dizer qual edição produziu qual mudança, e peso menor não é aprovação._",
+  );
+  out.push("");
+  return out.join("\n");
+}
+
+const KIND_PT: Record<"seen" | "dismissed", string> = { seen: "revisado", dismissed: "ignorado" };
+
+function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[]): string {
+  if (findings.length === 0) return "";
+  const kept = keptPoints(marks, findings);
+  const unexamined = findings.length - kept.length;
+  const withReason = kept.filter((point) => point.note !== null).length;
+
+  const out: string[] = ["## Pontos examinados e mantidos", ""];
+  out.push(
+    "_Registro de decisão humana, não medição da ferramenta. Marcar um ponto não altera o placar, o resultado " +
+      "da auditoria nem qualquer estado de conformidade: os números acima são os mesmos com ou sem esta seção._",
+  );
+  out.push("");
+  out.push(
+    kept.length === 0
+      ? "**Nenhum ponto foi examinado nesta sessão.** Isto não é atestado sobre o texto nem defeito dele — " +
+          "é o estado da revisão, dito em voz alta para que a ausência de registro não passe por revisão feita."
+      : `**${kept.length} ${plural(kept.length, "ponto examinado", "pontos examinados")}** e mantidos no texto · ` +
+          `${withReason} com motivo registrado.`,
+  );
+  if (unexamined > 0) {
+    out.push("");
+    out.push(
+      `${unexamined} ${plural(unexamined, "ponto ainda não foi examinado", "pontos ainda não foram examinados")}. ` +
+        "Os itens não examinados não são listados aqui: eles já estão em “Anotações”, com a mesma severidade.",
+    );
+  }
+  out.push("");
+
+  for (const point of [...kept].sort((a, b) => bySeverityThenPosition(a.finding, b.finding))) {
+    out.push(`**${metaFor(point.finding.criterion).label}** — ${KIND_PT[point.kind]}`);
+    out.push("");
+    out.push(`> ${collapse(point.finding.span.text)}`);
+    out.push("");
+    out.push(point.note === null ? "_Sem motivo registrado._" : `**Motivo:** ${collapse(point.note)}`);
+    out.push("");
+  }
+  return out.join("\n");
+}
+
 export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
@@ -228,6 +354,8 @@ export function buildAuditReport(
   originalText: string | null = null,
   originalFindings: readonly Finding[] | null = null,
   profileId: ProfileId | null = null,
+  marks: ReviewMarks = {},
+  comparison: BaselineComparison | null = null,
 ): string {
   const m = diagnostic.metrics;
   const engine = diagnostic.meta;
@@ -367,9 +495,19 @@ export function buildAuditReport(
     out.push(briefingSection);
   }
 
-  const balance = renderBalanceMarkdown(originalFindings, findings);
+  const comparisonSection = renderBaselineMarkdown(comparison);
+  if (comparisonSection) {
+    out.push(comparisonSection);
+  }
+
+  const balance = comparison === null ? renderBalanceMarkdown(originalFindings, findings) : "";
   if (balance) {
     out.push(balance);
+  }
+
+  const decisions = renderDecisionsMarkdown(marks, findings);
+  if (decisions) {
+    out.push(decisions);
   }
 
   const trail = renderLedgerMarkdown(ledger);

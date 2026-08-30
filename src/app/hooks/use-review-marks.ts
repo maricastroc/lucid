@@ -8,14 +8,16 @@ import {
   reanchorMarks,
   withMark,
   withMarks,
-  type ReviewMark,
+  withNote,
+  type ReviewMarkKind,
   type ReviewMarks,
 } from "../lib/review-marks";
 
 export interface ReviewMarkControls {
   marks: ReviewMarks;
-  mark: (finding: Finding, value: ReviewMark | null) => void;
-  markMany: (findings: readonly Finding[], value: ReviewMark | null) => void;
+  mark: (finding: Finding, value: ReviewMarkKind | null) => void;
+  markMany: (findings: readonly Finding[], value: ReviewMarkKind | null) => void;
+  note: (finding: Finding, text: string) => void;
   shiftForEdit: (target: Span, delta: number) => void;
   snapshot: (current: ReviewMarks) => void;
   restore: () => void;
@@ -42,14 +44,16 @@ export function useReviewMarks(
   }, [findings, isSettled]);
 
   const mark = useCallback(
-    (finding: Finding, value: ReviewMark | null) => setMarks((prev) => withMark(prev, finding, value)),
+    (finding: Finding, value: ReviewMarkKind | null) => setMarks((prev) => withMark(prev, finding, value)),
     [],
   );
 
   const markMany = useCallback(
-    (targets: readonly Finding[], value: ReviewMark | null) => setMarks((prev) => withMarks(prev, targets, value)),
+    (targets: readonly Finding[], value: ReviewMarkKind | null) => setMarks((prev) => withMarks(prev, targets, value)),
     [],
   );
+
+  const note = useCallback((finding: Finding, text: string) => setMarks((prev) => withNote(prev, finding, text)), []);
 
   const shiftForEdit = useCallback((target: Span, delta: number) => {
     shifting.current = true;
@@ -77,5 +81,5 @@ export function useReviewMarks(
     setMarks(EMPTY_MARKS);
   }, []);
 
-  return { marks, mark, markMany, shiftForEdit, snapshot, restore, forgetHistory, reset };
+  return { marks, mark, markMany, note, shiftForEdit, snapshot, restore, forgetHistory, reset };
 }

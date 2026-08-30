@@ -2,20 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ImportNotes } from "../hooks/use-document-source";
-import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing, Span } from "@/lucid";
+import type { Block, BriefingCheck, Config, Diagnostic, Finding, RawBlock, ReaderBriefing, Span } from "@/lucid";
 import type { RewriteProposal } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
 import { buildAuditViews, viewPanelId, viewTabId, type AuditViewId } from "../lib/audit-views";
 import type { FindingGroup, FindingQuery } from "../lib/finding-query";
 import type { QueryActions } from "./revision-list/finding-filters";
-import type { ReviewMark, ReviewMarks } from "../lib/review-marks";
+import { noteOf, reviewStateOf, type ReviewMarkKind, type ReviewMarks } from "../lib/review-marks";
 import { reviewRoute } from "../lib/review-route";
-import { findingId } from "../lib/criteria";
 import type { OccurrenceCursor } from "../lib/occurrence-cursor";
 import { useAuditView, type ReviewMode } from "../hooks/use-audit-view";
 import { AuditNav } from "./audit-nav";
 import { RouteHeader } from "./route/route-header";
+import type { BaselineSurface } from "./views/baseline-panel";
 import { ChangesView } from "./views/changes-view";
 import { MetricsView } from "./views/metrics-view";
 import { OverviewView } from "./views/overview-view";
@@ -23,6 +23,7 @@ import { ReviewView } from "./views/review-view";
 import { SettingsView } from "./views/settings-view";
 import { ViewHeader } from "./views/view-header";
 import { ProbePanel } from "./probe-panel";
+import { DecisionNote } from "./revision-note/decision-note";
 import { RevisionNote } from "./revision-note";
 import { NoteNav } from "./revision-note/note-nav";
 import { useCopy } from "../i18n/use-copy";
@@ -41,8 +42,9 @@ export interface NoteNavigation {
 
 export interface ReviewSurface {
   marks: ReviewMarks;
-  onMark: (finding: Finding, mark: ReviewMark | null) => void;
-  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+  onMark: (finding: Finding, mark: ReviewMarkKind | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMarkKind | null) => void;
+  onNote: (finding: Finding, text: string) => void;
 }
 
 export interface HighlightVisibility {
@@ -84,6 +86,7 @@ export interface AuditPanelProps {
   originalText: string | null;
   originalFindings: readonly Finding[] | null;
   blocks: readonly Block[] | null;
+  rawBlocks: readonly RawBlock[] | null;
   silentCriteria: readonly string[];
   missingBlockKinds: readonly string[];
   importNotes: ImportNotes | null;
@@ -104,6 +107,7 @@ export interface AuditPanelProps {
   settings: AnalysisSettings;
   occurrences: OccurrenceSurface;
   history: { canUndo: boolean; onUndo: () => void };
+  baseline: BaselineSurface;
   settingsOpen: boolean;
   onCloseSettings: () => void;
   probeExcerpt?: string;
@@ -181,7 +185,8 @@ export function AuditPanel(props: AuditPanelProps) {
 
   if (props.navigation.selectedFinding) {
     const selected = props.navigation.selectedFinding;
-    const pendingHere = props.review.marks[findingId(selected)] === undefined;
+    const state = reviewStateOf(props.review.marks, selected);
+    const pendingHere = state === "pending";
     const walking = route.open !== null;
     return (
       <>
@@ -198,11 +203,12 @@ export function AuditPanel(props: AuditPanelProps) {
           index={props.navigation.index}
           total={props.navigation.total}
           criterion={selected.criterion}
-          mark={props.review.marks[findingId(selected)] ?? null}
+          mark={reviewStateOf(props.review.marks, selected)}
           guided={walking ? { willFinishStep: pendingHere && route.open!.step.pending === 1 } : null}
           onMark={(value) => {
             props.review.onMark(selected, value);
-            if (value === null || !walking) return;
+
+            if (value !== "seen" || !walking) return;
             props.route.onAdvance(selected);
           }}
           onPrev={props.navigation.onPrev}
@@ -218,6 +224,13 @@ export function AuditPanel(props: AuditPanelProps) {
           aria-label={c.guided.occurrenceOf(props.navigation.index, props.navigation.total)}
           className="min-h-0 flex-1 overflow-y-auto focus:outline-none"
         >
+          {state !== "pending" && (
+            <DecisionNote
+              kind={state}
+              note={noteOf(props.review.marks, selected)}
+              onNote={(text) => props.review.onNote(selected, text)}
+            />
+          )}
           <RevisionNote
             finding={selected}
             source={props.diagnostic.text}
@@ -307,6 +320,8 @@ export function AuditPanel(props: AuditPanelProps) {
             findings={props.findings}
             canUndo={props.history.canUndo}
             onUndo={props.history.onUndo}
+            baseline={props.baseline}
+            config={props.settings.config}
           />
         )}
         {active.id === "metrics" && <MetricsView diagnostic={props.diagnostic} />}

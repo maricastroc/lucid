@@ -13,6 +13,7 @@ import {
   type Span,
   type SpliceRefusal,
 } from "@/lucid";
+import { acceptBaseline, compareToBaseline, parseBaseline, type Baseline, type BaselineRefusal } from "./lib/baseline";
 import { findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
 import { EMPTY_MARKS } from "./lib/review-marks";
@@ -48,6 +49,8 @@ export function Studio() {
   const [profileId, setProfileId] = useState<ProfileId>(isProfileId(restored?.profileId) ? restored.profileId : "base");
 
   const [openedStep, setGuidedStep] = useState<string | null>(restored?.guidedStep ?? null);
+  const [baseline, setBaseline] = useState<Baseline | null>(restored?.baseline ?? null);
+  const [baselineRefusal, setBaselineRefusal] = useState<BaselineRefusal | null>(null);
 
   const chooseProfile = useCallback((id: ProfileId) => {
     setProfileId(id);
@@ -115,6 +118,7 @@ export function Studio() {
     marks,
     mark,
     markMany,
+    note: noteMark,
     shiftForEdit,
     snapshot: snapshotMarks,
     restore: restoreMarks,
@@ -149,8 +153,23 @@ export function Studio() {
       profileId,
       reviewMarks: marks,
       guidedStep,
+      baseline,
     });
-  }, [isSettled, isEmpty, text, originalText, rawBlocks, ledger, mode, briefing, config, profileId, marks, guidedStep]);
+  }, [
+    isSettled,
+    isEmpty,
+    text,
+    originalText,
+    rawBlocks,
+    ledger,
+    mode,
+    briefing,
+    config,
+    profileId,
+    marks,
+    guidedStep,
+    baseline,
+  ]);
 
   const revealSheet = useCallback(() => setSheetOpen(true), []);
   const {
@@ -212,6 +231,8 @@ export function Studio() {
   const discardAndGoHome = useCallback(() => {
     clearWorkspace();
     clearDocument();
+    setBaseline(null);
+    setBaselineRefusal(null);
     afterDocumentReplaced();
   }, [clearDocument, afterDocumentReplaced]);
 
@@ -236,6 +257,34 @@ export function Studio() {
     () => (originalText === null || originalText.trim() === "" ? null : analyze(originalText, config).findings),
     [originalText, config],
   );
+
+  const comparison = useMemo(
+    () => (baseline === null ? null : compareToBaseline(baseline, diagnostic, config)),
+    [baseline, diagnostic, config],
+  );
+
+  const attachBaseline = useCallback(
+    async (file: File) => {
+      const parsed = parseBaseline(await file.text());
+      if (!parsed.ok) return setBaselineRefusal(parsed.refusal);
+      const refusal = acceptBaseline(parsed.baseline, diagnostic.meta);
+      if (refusal !== null) return setBaselineRefusal(refusal);
+      setBaselineRefusal(null);
+      setBaseline(parsed.baseline);
+    },
+    [diagnostic],
+  );
+
+  const detachBaseline = useCallback(() => {
+    setBaselineRefusal(null);
+    setBaseline(null);
+  }, []);
+
+  const adoptBaselineProfile = useCallback(() => {
+    if (baseline === null) return;
+    setProfileId(baseline.historical.profileId);
+    setConfig(baseline.historical.config);
+  }, [baseline]);
 
   const reading = useReadingPosition(scrollRef, mode, text);
 
@@ -350,6 +399,7 @@ export function Studio() {
     originalText,
     originalFindings,
     blocks,
+    rawBlocks,
     silentCriteria,
     missingBlockKinds,
     importNotes,
@@ -377,8 +427,17 @@ export function Studio() {
         scopeCriterion(null);
       },
     },
-    review: { marks, onMark: mark, onMarkMany: markMany },
+    review: { marks, onMark: mark, onMarkMany: markMany, onNote: noteMark },
     history: { canUndo, onUndo: undoChange },
+    baseline: {
+      attached: baseline,
+      comparison,
+      refusal: baselineRefusal,
+      onAttach: attachBaseline,
+      onDetach: detachBaseline,
+      onAdoptProfile: adoptBaselineProfile,
+      onDismissRefusal: () => setBaselineRefusal(null),
+    },
     route: {
       step: guidedStep,
       onOpenStep: goToStep,

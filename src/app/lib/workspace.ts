@@ -1,12 +1,13 @@
 import { DEFAULT_CONFIG, EMPTY_BRIEFING, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
+import { parseBaseline, serializeBaseline, type Baseline } from "./baseline";
 import { isProfileId, type ProfileId } from "./profiles";
 import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 7;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7];
+const SCHEMA_VERSION = 9;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
@@ -19,6 +20,7 @@ export interface WorkspaceSnapshot {
   readonly profileId: ProfileId;
   readonly reviewMarks: ReviewMarks;
   readonly guidedStep: string | null;
+  readonly baseline?: Baseline | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -143,6 +145,7 @@ function parse(raw: string): WorkspaceSnapshot | null {
   }
 
   return {
+    baseline: parseAttachedBaseline(value.baseline),
     profileId: isProfileId(value.profileId) ? value.profileId : "base",
     text: value.text,
     originalText: typeof value.originalText === "string" ? value.originalText : null,
@@ -154,6 +157,12 @@ function parse(raw: string): WorkspaceSnapshot | null {
     reviewMarks,
     guidedStep: typeof value.guidedStep === "string" ? value.guidedStep : null,
   };
+}
+
+function parseAttachedBaseline(value: unknown): Baseline | null {
+  if (typeof value !== "string") return null;
+  const parsed = parseBaseline(value);
+  return parsed.ok ? parsed.baseline : null;
 }
 
 export function readWorkspace(): WorkspaceSnapshot | null {
@@ -187,7 +196,15 @@ export function getSaveFailed(): boolean {
 
 export function writeWorkspace(snapshot: WorkspaceSnapshot): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: SCHEMA_VERSION, ...snapshot }));
+    const { baseline = null, ...rest } = snapshot;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        version: SCHEMA_VERSION,
+        ...rest,
+        baseline: baseline === null ? null : serializeBaseline(baseline),
+      }),
+    );
     setSaveFailed(false);
   } catch {
     setSaveFailed(true);

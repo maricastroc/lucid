@@ -1,18 +1,22 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { Block, BriefingCheck, Config, Diagnostic, Finding, ReaderBriefing } from "@/lucid";
+import type { Block, BriefingCheck, Config, Diagnostic, Finding, RawBlock, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
+import { buildBaseline, serializeBaseline } from "../lib/baseline";
 import { documentToDocx, documentToHtml, documentToMarkdown, exportableBlocks } from "../lib/export-document";
 import { renderReportHtml } from "../lib/report-html";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
+import type { BaselineComparison } from "../lib/baseline";
+import type { ReviewMarks } from "../lib/review-marks";
 import { useCopy } from "../i18n/use-copy";
+import { BaselineSaveDialog } from "./baseline-save-dialog";
 import { PrintReport } from "./print-report";
 import { ReportRecordDialog } from "./report-record-dialog";
 import { downloadFile } from "./export-menu/download-file";
 import { useDismissableMenu } from "./export-menu/use-dismissable-menu";
-import { ArrowDownIcon, ChevronDownIcon, PenNibIcon } from "./icons";
+import { ArrowDownIcon, ChevronDownIcon, HistoryIcon, PenNibIcon } from "./icons";
 import { Button } from "./ui/button";
 
 export interface ExportMenuProps {
@@ -27,6 +31,9 @@ export interface ExportMenuProps {
   briefingCheck: BriefingCheck;
   onBriefingChange: (briefing: ReaderBriefing) => void;
   config: Config;
+  marks: ReviewMarks;
+  rawBlocks: readonly RawBlock[] | null;
+  comparison: BaselineComparison | null;
 }
 
 export function ExportMenu({
@@ -41,10 +48,14 @@ export function ExportMenu({
   briefingCheck,
   onBriefingChange,
   config,
+  marks,
+  rawBlocks,
+  comparison,
 }: ExportMenuProps) {
   const { c } = useCopy();
   const [docxError, setDocxError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
+  const [baselineOpen, setBaselineOpen] = useState(false);
   const [printHtml, setPrintHtml] = useState<string | null>(null);
   const { open, boxRef, triggerRef, toggle, close, setOpen, onKeyDown } = useDismissableMenu(() => setDocxError(null));
 
@@ -59,6 +70,8 @@ export function ExportMenu({
       originalText,
       originalFindings,
       profileId,
+      marks,
+      comparison,
     );
 
   const exportAudit = () => {
@@ -86,6 +99,22 @@ export function ExportMenu({
     } catch {
       setDocxError(c.overview.docxError);
     }
+  };
+
+  const saveBaseline = (title: string) => {
+    const savedAt = new Date().toLocaleDateString("pt-BR");
+    const baseline = buildBaseline({
+      title,
+      savedAt,
+      text: diagnostic.text,
+      blocks: rawBlocks,
+      diagnostic,
+      findings,
+      profileId,
+      config,
+      marks,
+    });
+    downloadFile(`${slug(title)}.lucid.json`, serializeBaseline(baseline), "application/json;charset=utf-8");
   };
 
   const exportTxt = () => {
@@ -142,6 +171,16 @@ export function ExportMenu({
 
           <div className="mt-1.5 border-t border-rule-1 pt-1.5">
             <MenuItem
+              icon={<HistoryIcon className="size-3.5 text-ink-3" />}
+              onClick={() => {
+                setOpen(false);
+                setBaselineOpen(true);
+              }}
+              note={c.baseline.dialogLead}
+            >
+              {c.baseline.saveAction}
+            </MenuItem>
+            <MenuItem
               icon={<PenNibIcon className="size-3.5 text-ink-3" />}
               onClick={() => {
                 setOpen(false);
@@ -156,6 +195,8 @@ export function ExportMenu({
       )}
 
       {printHtml !== null && <PrintReport html={printHtml} onPrinted={printed} />}
+
+      <BaselineSaveDialog open={baselineOpen} onOpenChange={setBaselineOpen} onSave={saveBaseline} />
 
       <ReportRecordDialog
         open={recordOpen}
@@ -196,4 +237,14 @@ function MenuItem({
       {note !== undefined && <span className="text-[11px] leading-relaxed text-ink-3">{note}</span>}
     </button>
   );
+}
+
+function slug(title: string): string {
+  const plain = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return plain === "" ? "ponto-de-partida" : plain.slice(0, 60);
 }

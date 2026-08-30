@@ -11,7 +11,7 @@ import {
   type SortOrder,
   type StateFilter,
 } from "../../lib/finding-query";
-import { tally, type ReviewMark, type ReviewMarks } from "../../lib/review-marks";
+import { tally, type ReviewMarkKind, type ReviewMarks } from "../../lib/review-marks";
 import { useCopy } from "../../i18n/use-copy";
 import { Button } from "../ui/button";
 import { CleanCriteriaDisclosure } from "./clean-criteria-disclosure";
@@ -39,8 +39,8 @@ interface Props {
   onSelect: (finding: Finding) => void;
   hiddenHighlights: ReadonlySet<string>;
   onToggleHighlights: (criterion: string) => void;
-  onMark: (finding: Finding, mark: ReviewMark | null) => void;
-  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+  onMark: (finding: Finding, mark: ReviewMarkKind | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMarkKind | null) => void;
 }
 
 export function PointBrowser({

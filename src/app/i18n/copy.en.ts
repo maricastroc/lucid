@@ -282,6 +282,7 @@ export const COPY_EN: UiCopy = {
     hiddenByFilter: (n) => `${n} outside the filter`,
     statePending: "Pending",
     stateSeen: "Reviewed",
+    stateDismissedOne: "Dismissed",
     stateDismissed: "Ignored",
     searchLabel: "Search the points",
     searchPlaceholder: "Search the points…",
@@ -716,6 +717,17 @@ export const COPY_EN: UiCopy = {
     routeProgressLabel: "Path progress",
   },
 
+  decision: {
+    label: "Decision on record",
+    kinds: { seen: "Reviewed", dismissed: "Dismissed" },
+    fieldLabel: "Why you kept this point",
+    placeholder: "Why keep this point? (optional)",
+    caveat:
+      "Your record, not a Lucid measurement: it does not move the score, the audit result or any conformance " +
+      "state. It goes into the report as a human decision.",
+    reportPointer: "It shows up in Export › Audit, under “Points examined and kept”.",
+  },
+
   changes: {
     emptyTitle: "No changes yet",
     emptyBody:
@@ -732,6 +744,70 @@ export const COPY_EN: UiCopy = {
       "shows what the automatic criteria found — not whether the audience understood the text.",
     stillOpen: (n) => `${n} ${plural(n, "point is still in the text", "points are still in the text")}`,
     none: "No criterion changed its count.",
+  },
+
+  baseline: {
+    label: "Starting point",
+    saveAction: "Save a starting point…",
+    attachAction: "Attach a starting point",
+    detach: "Detach",
+    dialogTitle: "Save a starting point",
+    dialogLead:
+      "Keeps this audit so you can compare it with a later version of the same document, even after the text has " +
+      "been rewritten outside Lucid.",
+    titleLabel: "Document name",
+    titleHint:
+      "Required. It is the only identity the file carries — Lucid does not keep the name of the file you opened.",
+    titlePlaceholder: "e.g. Notice 04/2026 — version sent to legal",
+    fileNotice:
+      "This file holds the whole document — the text, the structure, this session's audit and the reasons you " +
+      "recorded. It stays on your computer and is sent nowhere, but treat it the way you would treat the document " +
+      "itself when sharing it.",
+    save: "Save file",
+    savedAt: (when) => `saved on ${when}`,
+    emptyLead:
+      "Attach a starting point saved from an earlier audit to compare this version against it — including when the " +
+      "text was rewritten outside Lucid.",
+    sameRuler:
+      "The ruler is the same on both sides: the starting point's text was re-analysed with the engine, profile and " +
+      "data in force now. No number below compares measurements made with different rulers.",
+    historical: (count) =>
+      `${count} ${plural(count, "point in the audit of the time", "points in the audit of the time")}`,
+    rebased: (count) => `${count} ${plural(count, "point now", "points now")}, under the current ruler`,
+    engineDrift: (delta) =>
+      `${Math.abs(delta)} ${plural(Math.abs(delta), "point of that difference comes", "points of that difference come")} ` +
+      "from the ruler changing, not the text.",
+    divergenceLabel: "What changed in the ruler since then",
+    divergenceFields: {
+      lucidVersion: "Lucid version",
+      localeId: "language",
+      configHash: "editorial profile",
+      dataHash: "curated data",
+      standardVersion: "standard version",
+    },
+    adoptProfile: "Adopt the starting point's profile",
+    adoptProfileHint:
+      "The comparison uses the profile in force now. Adopting the saved one re-runs the whole audit with the " +
+      "thresholds that applied back then.",
+    stillThereLabel: "What you raised and is still there",
+    stillThereLead:
+      "Excerpts the earlier audit raised that the current version raises again, word for word. This list claims " +
+      "nothing about anything having been resolved: it says only what survived.",
+    stillThereCount: (n) => `${n} ${plural(n, "point remains", "points remain")}`,
+    stillThereNone: "None of the excerpts raised before shows up again with the same words.",
+    occurrences: (n) => `${n}×`,
+    alreadyDecided: { seen: "already examined and kept", dismissed: "already dismissed" },
+    noReason: "no reason on record",
+    refusal: {
+      unreadable: "This file is not a Lucid starting point, or it was changed after being saved.",
+      schema: "This starting point was saved in a format version this one cannot read.",
+      locale:
+        "This starting point was audited in another language. That is not a different ruler, it is a different " +
+        "subject: the pt-BR engine has nothing to say about it.",
+    },
+    caveat:
+      "Between two versions edited outside Lucid it is not possible to say which edit produced which change. The " +
+      "numbers are counts from the same detector over two texts, and a smaller weight is not approval.",
   },
 
   metricsView: {

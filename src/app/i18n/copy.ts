@@ -211,6 +211,7 @@ export interface UiCopy {
     readonly hiddenByFilter: (n: number) => string;
     readonly statePending: string;
     readonly stateSeen: string;
+    readonly stateDismissedOne: string;
     readonly stateDismissed: string;
     readonly searchLabel: string;
     readonly searchPlaceholder: string;
@@ -518,6 +519,15 @@ export interface UiCopy {
     readonly routeProgressLabel: string;
   };
 
+  readonly decision: {
+    readonly label: string;
+    readonly kinds: Record<"seen" | "dismissed", string>;
+    readonly fieldLabel: string;
+    readonly placeholder: string;
+    readonly caveat: string;
+    readonly reportPointer: string;
+  };
+
   readonly changes: {
     readonly emptyTitle: string;
     readonly emptyBody: string;
@@ -529,6 +539,42 @@ export interface UiCopy {
     readonly weightMeaning: string;
     readonly stillOpen: (n: number) => string;
     readonly none: string;
+  };
+
+  readonly baseline: {
+    readonly label: string;
+    readonly saveAction: string;
+    readonly attachAction: string;
+    readonly detach: string;
+    readonly dialogTitle: string;
+    readonly dialogLead: string;
+    readonly titleLabel: string;
+    readonly titleHint: string;
+    readonly titlePlaceholder: string;
+    readonly fileNotice: string;
+    readonly save: string;
+    readonly savedAt: (when: string) => string;
+    readonly emptyLead: string;
+    readonly sameRuler: string;
+    readonly historical: (count: number) => string;
+    readonly rebased: (count: number) => string;
+    readonly engineDrift: (delta: number) => string;
+    readonly divergenceLabel: string;
+    readonly divergenceFields: Record<
+      "lucidVersion" | "localeId" | "configHash" | "dataHash" | "standardVersion",
+      string
+    >;
+    readonly adoptProfile: string;
+    readonly adoptProfileHint: string;
+    readonly stillThereLabel: string;
+    readonly stillThereCount: (n: number) => string;
+    readonly stillThereLead: string;
+    readonly stillThereNone: string;
+    readonly occurrences: (n: number) => string;
+    readonly alreadyDecided: Record<"seen" | "dismissed", string>;
+    readonly noReason: string;
+    readonly refusal: Record<"unreadable" | "schema" | "locale", string>;
+    readonly caveat: string;
   };
 
   readonly metricsView: {

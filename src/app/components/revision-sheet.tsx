@@ -46,6 +46,9 @@ export function RevisionSheet({ onDismiss, ...panel }: RevisionSheetProps) {
           briefingCheck={panel.settings.briefingCheck}
           onBriefingChange={panel.settings.onBriefingChange}
           config={panel.settings.config}
+          marks={panel.review.marks}
+          rawBlocks={panel.rawBlocks}
+          comparison={panel.baseline.comparison}
         />
         <AuditPanel {...panel} settingsOpen={settingsOpen} onCloseSettings={() => setSettingsOpen(false)} />
       </div>

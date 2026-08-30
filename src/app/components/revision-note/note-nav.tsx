@@ -1,9 +1,9 @@
 "use client";
 
-import type { ReviewMark } from "../../lib/review-marks";
+import type { ReviewMarkKind, ReviewState } from "../../lib/review-marks";
 import { metaFor } from "../../lib/criteria";
 import { useCopy } from "../../i18n/use-copy";
-import { CheckIcon, ChevronLeftIcon, ChevronRightIcon } from "../icons";
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon } from "../icons";
 import { Button } from "../ui/button";
 
 export interface GuidedOccurrence {
@@ -25,9 +25,9 @@ export function NoteNav({
   index: number;
   total: number;
   criterion: string;
-  mark: ReviewMark | null;
+  mark: ReviewState;
   guided: GuidedOccurrence | null;
-  onMark: (mark: ReviewMark | null) => void;
+  onMark: (mark: ReviewMarkKind | null) => void;
   onPrev: () => void;
   onNext: () => void;
   onBackToList: () => void;
@@ -56,11 +56,26 @@ export function NoteNav({
         </div>
 
         <div className="flex items-center gap-2 border-t border-rule-1 px-2.5 py-2">
-          {seen ? (
+          {mark === "pending" ? (
             <>
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-safe-weak px-2.5 py-1.5 text-[12px] font-medium text-safe">
+              <Button variant="primary" onClick={() => onMark("seen")} className="min-w-0 flex-1 py-2">
                 <CheckIcon className="size-3.5" />
-                {g.seenChip}
+                <span className="truncate">{guided.willFinishStep ? g.markAndFinish : g.markAndAdvance}</span>
+              </Button>
+              <Button variant="ghost" size="sm" shape="pill" onClick={() => onMark("dismissed")} className="shrink-0">
+                <CloseIcon className="size-3.5" />
+                {c.revisionList.dismiss}
+              </Button>
+            </>
+          ) : (
+            <>
+              <span
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] font-medium ${
+                  seen ? "bg-safe-weak text-safe" : "bg-surface-3 text-ink-1"
+                }`}
+              >
+                {seen ? <CheckIcon className="size-3.5" /> : <CloseIcon className="size-3.5" />}
+                {seen ? g.seenChip : c.revisionList.stateDismissedOne}
               </span>
               <Button variant="ghost" size="sm" shape="pill" onClick={() => onMark(null)} className="shrink-0">
                 {c.revisionList.unmark}
@@ -70,11 +85,6 @@ export function NoteNav({
                 <ChevronRightIcon className="size-3.5" />
               </Button>
             </>
-          ) : (
-            <Button variant="primary" block onClick={() => onMark("seen")} className="py-2">
-              <CheckIcon className="size-3.5" />
-              {guided.willFinishStep ? g.markAndFinish : g.markAndAdvance}
-            </Button>
           )}
         </div>
       </div>
@@ -117,17 +127,22 @@ export function NoteNav({
             {c.note.backToList}
           </Button>
         </div>
-        <button
-          type="button"
-          aria-pressed={mark === "seen"}
-          onClick={() => onMark(mark === "seen" ? null : "seen")}
-          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] transition-colors duration-150 ${
-            mark === "seen" ? "bg-surface-3 text-ink-1" : "text-ink-2 hover:bg-surface-2 hover:text-ink-0"
-          }`}
-        >
-          <CheckIcon className="size-3.5" />
-          {mark === "seen" ? c.revisionList.unmark : c.revisionList.markSeen}
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <MarkToggle
+            pressed={mark === "seen"}
+            label={mark === "seen" ? c.revisionList.unmark : c.revisionList.markSeen}
+            onClick={() => onMark(mark === "seen" ? null : "seen")}
+          >
+            <CheckIcon className="size-3.5" />
+          </MarkToggle>
+          <MarkToggle
+            pressed={mark === "dismissed"}
+            label={mark === "dismissed" ? c.revisionList.unmark : c.revisionList.dismiss}
+            onClick={() => onMark(mark === "dismissed" ? null : "dismissed")}
+          >
+            <CloseIcon className="size-3.5" />
+          </MarkToggle>
+        </div>
       </div>
     </div>
   );
@@ -142,6 +157,32 @@ function IconBtn({ label, onClick, children }: { label: string; onClick: () => v
       className="grid size-8 place-items-center rounded-full text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
     >
       {children}
+    </button>
+  );
+}
+
+function MarkToggle({
+  pressed,
+  label,
+  onClick,
+  children,
+}: {
+  pressed: boolean;
+  label: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[12px] transition-colors duration-150 ${
+        pressed ? "bg-surface-3 text-ink-1" : "text-ink-2 hover:bg-surface-2 hover:text-ink-0"
+      }`}
+    >
+      {children}
+      {label}
     </button>
   );
 }

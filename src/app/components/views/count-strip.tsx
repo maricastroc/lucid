@@ -3,11 +3,6 @@
 import type { ReviewRoute } from "../../lib/review-route";
 import { useCopy } from "../../i18n/use-copy";
 
-/**
- * The counting vocabulary, rendered in one place so the same words always mean the same
- * things. "Found" is deliberately absent: it is the headline figure this strip sits
- * under, and repeating it is what made the old panel read as contradictory.
- */
 export function CountStrip({ route, className = "" }: { route: ReviewRoute; className?: string }) {
   const { c } = useCopy();
   const n = c.counts;

@@ -4,7 +4,7 @@ import type { Diagnostic, Finding } from "@/lucid";
 import { metaFor } from "../../lib/criteria";
 import type { Bucket, FindingGroup, FindingQuery, SortOrder, StateFilter } from "../../lib/finding-query";
 import type { ReviewRoute } from "../../lib/review-route";
-import type { ReviewMark, ReviewMarks } from "../../lib/review-marks";
+import type { ReviewMarkKind, ReviewMarks } from "../../lib/review-marks";
 import type { ReviewMode } from "../../hooks/use-audit-view";
 import { useCopy } from "../../i18n/use-copy";
 import { CheckIcon, ChevronLeftIcon } from "../icons";
@@ -34,8 +34,8 @@ interface Props {
   onSelect: (finding: Finding) => void;
   hiddenHighlights: ReadonlySet<string>;
   onToggleHighlights: (criterion: string) => void;
-  onMark: (finding: Finding, mark: ReviewMark | null) => void;
-  onMarkMany: (findings: readonly Finding[], mark: ReviewMark | null) => void;
+  onMark: (finding: Finding, mark: ReviewMarkKind | null) => void;
+  onMarkMany: (findings: readonly Finding[], mark: ReviewMarkKind | null) => void;
   onOpenStep: (criterion: string) => void;
   onLeaveRoute: () => void;
   onOpenFirstPending: () => void;
@@ -196,8 +196,8 @@ function StepOccurrences(props: Props) {
   };
 
   return (
-    <div className="px-3 pb-4 pt-3">
-      <h3 className="u-label px-1 pb-2 text-ink-3">{c.guided.stepOccurrences}</h3>
+    <div className="px-3 pb-4 pt-4">
+      <h3 className="u-label px-1 pb-2 text-ink-2">{c.guided.stepOccurrences}</h3>
       <CriterionGroup
         group={group}
         diagnostic={props.diagnostic}

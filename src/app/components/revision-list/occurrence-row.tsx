@@ -1,7 +1,7 @@
 "use client";
 
 import type { Finding } from "@/lucid";
-import type { ReviewMark } from "../../lib/review-marks";
+import type { ReviewMarkKind, ReviewState } from "../../lib/review-marks";
 import { useCopy } from "../../i18n/use-copy";
 import { ActionBadge, SeverityDot } from "../badges";
 import { CheckIcon, CloseIcon } from "../icons";
@@ -19,10 +19,10 @@ export function OccurrenceRow({
   finding: Finding;
   ordinal: number;
   context: string;
-  state: "pending" | ReviewMark;
+  state: ReviewState;
   selected: boolean;
   onSelect: () => void;
-  onMark: (mark: ReviewMark | null) => void;
+  onMark: (mark: ReviewMarkKind | null) => void;
 }) {
   const { c } = useCopy();
   const excerpt = excerptOf(finding);
