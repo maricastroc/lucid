@@ -266,7 +266,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
 
   return (
     <section
-      className="relative flex min-w-0 flex-1 flex-col bg-desk"
+      className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-desk"
       aria-label={c.documentView.regionLabel}
       {...drop.handlers}
     >
