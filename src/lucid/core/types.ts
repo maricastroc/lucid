@@ -94,7 +94,29 @@ export interface ListBlock extends BlockBase {
   readonly items: readonly ListItemBlock[];
 }
 
-export type Block = ParagraphBlock | HeadingBlock | ListBlock;
+export interface TableCellBlock extends BlockBase {
+  readonly kind: "tableCell";
+  readonly blocks: readonly ParagraphBlock[];
+  readonly colSpan: number;
+  readonly rowSpan: number;
+  readonly header: boolean;
+  readonly row: number;
+  readonly column: number;
+  readonly wordCount: number;
+}
+
+export interface TableRowBlock extends BlockBase {
+  readonly kind: "tableRow";
+  readonly cells: readonly TableCellBlock[];
+}
+
+export interface TableBlock extends BlockBase {
+  readonly kind: "table";
+  readonly rows: readonly TableRowBlock[];
+  readonly columns: number;
+}
+
+export type Block = ParagraphBlock | HeadingBlock | ListBlock | TableBlock;
 
 export type BlockKind = Block["kind"];
 export interface Document {
@@ -127,6 +149,13 @@ export interface CohesionMetrics {
   connectivesByClass: Record<ConnectiveClass, number>;
 }
 
+export interface TableMetrics {
+  tables: number;
+  cells: number;
+  words: number;
+  sentences: number;
+}
+
 export interface Metrics {
   fleschPt: number | null;
   words: number;
@@ -135,6 +164,7 @@ export interface Metrics {
   wordsPerSentence: number;
   syllablesPerWord: number;
   cohesion: CohesionMetrics;
+  tables?: TableMetrics;
 }
 
 export type ReadabilityUnmeasurableCause = "no_words" | "no_sentences";

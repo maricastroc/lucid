@@ -5,7 +5,11 @@ import { normalizeNumber } from "../services/normalize-number";
 const CRITERION = "heading_body_mismatch";
 
 function sentencesOf(block: Block): readonly Sentence[] {
-  return block.kind === "list" ? block.items.flatMap((item) => item.sentences) : block.sentences;
+  if (block.kind === "list") return block.items.flatMap((item) => item.sentences);
+  if (block.kind === "table") {
+    return block.rows.flatMap((row) => row.cells.flatMap((cell) => cell.blocks.flatMap((p) => p.sentences)));
+  }
+  return block.sentences;
 }
 
 function canonical(lower: string, nominalizations: ReadonlyMap<string, NominalizationEntry>): string {

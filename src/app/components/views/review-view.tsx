@@ -49,7 +49,7 @@ export function ReviewView(props: Props) {
 
   if (route.found === 0) {
     return (
-      <div className="fade-in px-4 py-6">
+      <div className="fade-in px-4 py-4">
         <div className="rounded-xl border border-dashed border-rule-2 px-4 py-6 text-center">
           <span className="mx-auto grid size-9 place-items-center rounded-full bg-safe-weak text-safe">
             <CheckIcon className="size-4.5" />
@@ -197,7 +197,7 @@ function StepOccurrences(props: Props) {
 
   return (
     <div className="px-3 pb-4 pt-4">
-      <h3 className="u-label px-1 pb-2 text-ink-2">{c.guided.stepOccurrences}</h3>
+      <h3 className="u-label px-1 pb-2 text-ink-3">{c.guided.stepOccurrences}</h3>
       <CriterionGroup
         group={group}
         diagnostic={props.diagnostic}

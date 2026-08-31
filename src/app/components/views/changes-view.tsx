@@ -51,7 +51,7 @@ export function ChangesView({
 
   if (!hasChanges && comparison === null) {
     return (
-      <div className="fade-in px-4 py-6">
+      <div className="fade-in px-4 py-4">
         <BaselinePanel surface={baseline} config={config} />
         <div className="mt-5 rounded-xl border border-dashed border-rule-2 px-4 py-6 text-center">
           <span className="mx-auto grid size-9 place-items-center rounded-full bg-surface-2 text-ink-3">

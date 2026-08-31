@@ -78,6 +78,7 @@ export const COPY_EN: UiCopy = {
     },
     spliceRefused: {
       crosses_units: "This change spans more than one block of the imported document.",
+      crosses_cells: "This change spans more than one table cell. Applying it would move text between cells.",
       unsupported_unit: "Applying a multi-line change inside a heading or a list item is not supported yet.",
       introduces_heading: "This change would create a new heading, altering the document's outline.",
       rebuild_mismatch: "The document could not be rebuilt while preserving the other blocks.",
@@ -168,7 +169,9 @@ export const COPY_EN: UiCopy = {
     groupDocument: "Revised text",
     exportTxt: "Download text (.txt)",
     docxError: "The .docx could not be generated. Use the .txt export instead.",
-    docxNote: "Contains the revised text, without the original formatting: bold, tables, images and headers.",
+    docxNote:
+      "Contains the revised text with its headings, lists and tables — rows, columns and merged cells. What " +
+      "it leaves out is the rest of the original formatting: bold, images, headers and footers.",
     importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
     importRuledRegions: (n: number) =>
@@ -184,6 +187,10 @@ export const COPY_EN: UiCopy = {
       `${what} became paragraphs. The content is audited, but the original arrangement is not.`,
     importFromPdf: (what: string) =>
       `Reading the PDF: ${what}. A PDF declares no headings and no lists, so everything enters as a paragraph.`,
+    importPdfRuled:
+      "A PDF draws lines; it does not declare cells. Where there is a grid, Lucid does not rebuild the table: " +
+      "rebuilding would mean guessing where each cell starts, and a wrong guess changes what the text says. The " +
+      "same table in a .docx comes in with its rows and columns intact.",
     structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
     structureMissingJoin: " or ",
     structureCaveat: (missing: string, count: number) =>
@@ -814,6 +821,13 @@ export const COPY_EN: UiCopy = {
     notAScore:
       "These measures describe the surface of the text. They support reading the criteria and never replace the " +
       "judgement of whoever wrote it, nor do they signal approval.",
+    tablesLabel: "Outside the averages",
+    tablesApart: (tables, cells, words) =>
+      `${tables} ${tables === 1 ? "table" : "tables"}, ${cells} ${cells === 1 ? "cell" : "cells"} and ` +
+      `${words} ${words === 1 ? "word" : "words"} sit outside the figures above.`,
+    tablesAudited:
+      "A cell is not a sentence: counting it as prose would shorten words-per-sentence and move readability " +
+      "without anyone having written worse. The text inside cells is still audited against every criterion.",
     explainShow: "What this measure means",
     explainHide: "Hide explanation",
     meaningLabel: "Measures",
@@ -985,6 +999,10 @@ export const COPY_EN: UiCopy = {
     list: "List",
     orderedList: "Numbered list",
     listItems: (n) => (n === 1 ? " · 1 item" : ` · ${n} items`),
+    table: "Table",
+    tableShape: (rows, columns) =>
+      ` · ${rows} ${rows === 1 ? "row" : "rows"} × ${columns} ${columns === 1 ? "column" : "columns"}`,
+    tableLabel: "Document table",
     segmentLabel: (label, text, severity) => `${label}: “${text}”. ${severity}.`,
     sheetLabel: "Revisions",
     sheetClose: "Close",

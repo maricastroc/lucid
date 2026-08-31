@@ -11,6 +11,7 @@ export function MetricsView({ diagnostic }: { diagnostic: Diagnostic }) {
   const { c, lang } = useCopy();
   const rows = metricRows(diagnostic, lang);
   const notes = readabilityOf(diagnostic.metrics, lang).notes;
+  const tables = diagnostic.metrics.tables;
   const [open, setOpen] = useState<MetricRowKey | null>(null);
 
   return (
@@ -62,6 +63,21 @@ export function MetricsView({ diagnostic }: { diagnostic: Diagnostic }) {
             </li>
           ))}
         </ul>
+      )}
+
+      {tables !== undefined && (
+        <section
+          aria-labelledby="metricas-tabelas"
+          className="mt-4 rounded-xl border border-rule-1 bg-surface-2/60 px-3.5 py-3"
+        >
+          <h3 id="metricas-tabelas" className="u-label text-ink-3">
+            {c.metricsView.tablesLabel}
+          </h3>
+          <p className="mt-2 text-[12.5px] tabular-nums text-ink-1">
+            {c.metricsView.tablesApart(tables.tables, tables.cells, tables.words)}
+          </p>
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-2">{c.metricsView.tablesAudited}</p>
+        </section>
       )}
 
       <p className="mt-4 rounded-lg border border-rule-1 bg-surface-2/60 px-3 py-2.5 text-[11.5px] leading-relaxed text-ink-2">

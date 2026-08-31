@@ -71,7 +71,7 @@ export function OverviewView({
   const flattened = importNotes === null ? null : flattenedLabel(importNotes, c);
 
   return (
-    <div className="fade-in flex flex-col gap-5 px-4 py-5">
+    <div className="fade-in flex flex-col gap-5 px-4 py-4">
       {total > 0 && <RouteResume route={route} onContinue={onContinue} onOpenReview={onOpenReview} />}
 
       <section aria-labelledby="panorama-achados">
@@ -188,6 +188,9 @@ export function OverviewView({
                 ? c.overview.importFromPdf(flattened)
                 : c.overview.importFlattened(flattened)}
             </li>
+          )}
+          {importNotes?.format === "pdf" && importNotes.ruledRegions > 0 && (
+            <li className="text-ink-2">{c.overview.importPdfRuled}</li>
           )}
           <li className="text-ink-2">{c.overview.scoreCaveat}</li>
         </ul>

@@ -65,7 +65,8 @@ export function analyzeDocumentWithLocale(
   });
   const findings = sortFindings(rawFindings);
 
-  const score = buildScore(findings, locale.passes, metrics.words, config);
+  const scoredWords = doc.tokens.reduce((n, token) => (token.isWord ? n + 1 : n), 0);
+  const score = buildScore(findings, locale.passes, scoredWords, config);
 
   const dataIds: string[] = [
     ...locale.data.documentDatasets,

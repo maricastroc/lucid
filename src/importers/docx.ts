@@ -8,6 +8,7 @@ import type { DocumentBuildServices } from "@/lucid/core/document/model";
 export type DocxRefusalKind = "unreadable" | "tracked_changes" | "no_readable_content";
 
 export interface DocxNotes {
+  readonly tablesPreserved: number;
   readonly tablesFlattened: number;
   readonly textBoxesInlined: number;
   readonly headingStylesRecovered: readonly string[];
@@ -129,12 +130,16 @@ export async function importDocx(
   const blocks = htmlToRawBlocks(html);
   if (blocks.length === 0) return { ok: false, refusal: "no_readable_content" };
 
+  const tablesPreserved = blocks.filter((block) => block.kind === "table").length;
+  const tablesInFile = countOf(documentXml, RE_TABLE);
+
   return {
     ok: true,
     value: {
       doc: buildStructuredDocument(blocks, services),
       notes: {
-        tablesFlattened: countOf(documentXml, RE_TABLE),
+        tablesPreserved,
+        tablesFlattened: Math.max(0, tablesInFile - tablesPreserved),
         textBoxesInlined: countOf(documentXml, RE_TEXT_BOX),
         headingStylesRecovered: map.names,
         unrecognisedParagraphStyles: unrecognisedParagraphStyles(messages),

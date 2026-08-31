@@ -143,6 +143,7 @@ export interface UiCopy {
     readonly importRecovered: (styles: string) => string;
     readonly importFlattened: (what: string) => string;
     readonly importFromPdf: (what: string) => string;
+    readonly importPdfRuled: string;
     readonly structureMissing: Record<string, string>;
     readonly structureMissingJoin: string;
     readonly structureCaveat: (missing: string, count: number) => string;
@@ -579,6 +580,9 @@ export interface UiCopy {
 
   readonly metricsView: {
     readonly notAScore: string;
+    readonly tablesLabel: string;
+    readonly tablesApart: (tables: number, cells: number, words: number) => string;
+    readonly tablesAudited: string;
     readonly explainShow: string;
     readonly explainHide: string;
     readonly meaningLabel: string;
@@ -683,6 +687,9 @@ export interface UiCopy {
     readonly list: string;
     readonly orderedList: string;
     readonly listItems: (n: number) => string;
+    readonly table: string;
+    readonly tableShape: (rows: number, columns: number) => string;
+    readonly tableLabel: string;
     readonly segmentLabel: (label: string, text: string, severity: string) => string;
     readonly sheetLabel: string;
     readonly sheetClose: string;

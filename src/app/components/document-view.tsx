@@ -211,6 +211,57 @@ function BlockView({
           );
         }
 
+        if (block.kind === "table") {
+          return (
+            <div key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+              {tick}
+              <div className="u-sublabel mb-1.5 text-ink-3">
+                {c.documentView.table}
+                {c.documentView.tableShape(block.rows.length, block.columns)}
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-[0.94em]" aria-label={c.documentView.tableLabel}>
+                  <tbody>
+                    {block.rows.map((row, ri) => (
+                      <tr key={ri}>
+                        {row.cells.map((cell, ci) => {
+                          const Cell = cell.header ? "th" : "td";
+                          return (
+                            <Cell
+                              key={ci}
+                              colSpan={cell.colSpan > 1 ? cell.colSpan : undefined}
+                              rowSpan={cell.rowSpan > 1 ? cell.rowSpan : undefined}
+                              scope={cell.header ? "col" : undefined}
+                              className={`border border-rule-1 px-2.5 py-1.5 align-top ${
+                                cell.header ? "bg-surface-2/60 font-semibold text-ink-0" : "text-left"
+                              }`}
+                            >
+                              {cell.blocks.map((paragraph, pi) => (
+                                <p key={pi} data-start={paragraph.start} className={pi === 0 ? "" : "mt-[0.6em]"}>
+                                  <Segments
+                                    segments={segmentRange(
+                                      diagnostic.text,
+                                      diagnostic.findings,
+                                      paragraph.start,
+                                      paragraph.end,
+                                      occurrences,
+                                    )}
+                                    ctx={ctx}
+                                  />
+                                </p>
+                              ))}
+                            </Cell>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <p key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
             {tick}

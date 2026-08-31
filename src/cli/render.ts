@@ -46,6 +46,12 @@ function importLines(file: AuditedFile): string[] {
         `${notes.headingStylesRecovered.join(", ")}.`,
     );
   }
+  if (notes.tablesPreserved > 0) {
+    out.push(
+      `${file.name}: ${notes.tablesPreserved} ${plural(notes.tablesPreserved, "tabela preservada", "tabelas preservadas")} ` +
+        "com linhas, colunas e células — o texto das células entra na auditoria e fica fora das médias de prosa.",
+    );
+  }
   const flattened: string[] = [];
   if (notes.tablesFlattened > 0) {
     flattened.push(`${notes.tablesFlattened} ${plural(notes.tablesFlattened, "tabela", "tabelas")}`);
@@ -56,7 +62,7 @@ function importLines(file: AuditedFile): string[] {
   if (flattened.length > 0) {
     out.push(
       `${file.name}: ${flattened.join(" e ")} ${plural(flattened.length, "foi achatada", "foram achatadas")} em parágrafos — ` +
-        "o conteúdo entra na auditoria, a disposição não. Célula e prosa são medidas com a mesma régua.",
+        "o conteúdo entra na auditoria, a disposição não.",
     );
   }
   return out;

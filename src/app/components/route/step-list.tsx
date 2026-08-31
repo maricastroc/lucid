@@ -104,7 +104,7 @@ export function StepList({
 
   return (
     <div className="px-4 pb-5 pt-4">
-      <h3 className="u-label text-ink-2">{r.stepsLabel}</h3>
+      <h3 className="u-label text-ink-3">{r.stepsLabel}</h3>
 
       <ol className="mt-2.5 flex flex-col gap-1">
         {route.steps.map((step, i) => (

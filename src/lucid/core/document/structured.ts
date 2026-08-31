@@ -1,13 +1,35 @@
-import type { Block, Document, ListItemBlock, Sentence, Token } from "../types";
+import type {
+  Block,
+  Document,
+  ListItemBlock,
+  ParagraphBlock,
+  Sentence,
+  TableCellBlock,
+  TableRowBlock,
+  Token,
+} from "../types";
 import type { DocumentBuildServices } from "./model";
 import { normalize } from "./normalize";
+import { cellPositions, resolveTableGrid } from "./table-grid";
 import { buildTextDocument } from "./text-blocks";
 import { attachTokens, tokenize } from "./tokenize";
+
+export interface RawTableCell {
+  readonly blocks: readonly string[];
+  readonly colSpan?: number;
+  readonly rowSpan?: number;
+  readonly header?: boolean;
+}
+
+export interface RawTableRow {
+  readonly cells: readonly RawTableCell[];
+}
 
 export type RawBlock =
   | { readonly kind: "paragraph"; readonly text: string }
   | { readonly kind: "heading"; readonly level: number; readonly text: string }
-  | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] };
+  | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] }
+  | { readonly kind: "table"; readonly rows: readonly RawTableRow[] };
 
 export function toRawBlocks(blocks: readonly Block[]): RawBlock[] {
   return blocks.map((block) => {
@@ -15,8 +37,62 @@ export function toRawBlocks(blocks: readonly Block[]): RawBlock[] {
     if (block.kind === "list") {
       return { kind: "list", ordered: block.ordered, items: block.items.map((item) => item.text) };
     }
+    if (block.kind === "table") {
+      return {
+        kind: "table",
+        rows: block.rows.map((row) => ({
+          cells: row.cells.map((cell) => ({
+            blocks: cell.blocks.map((paragraph) => paragraph.text),
+            colSpan: cell.colSpan > 1 ? cell.colSpan : undefined,
+            rowSpan: cell.rowSpan > 1 ? cell.rowSpan : undefined,
+            header: cell.header ? true : undefined,
+          })),
+        })),
+      };
+    }
     return { kind: "paragraph", text: block.text };
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isRawTableCell(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  if (!Array.isArray(value.blocks) || !value.blocks.every((text) => typeof text === "string")) return false;
+  for (const span of ["colSpan", "rowSpan"]) {
+    if (value[span] !== undefined && typeof value[span] !== "number") return false;
+  }
+  return value.header === undefined || typeof value.header === "boolean";
+}
+
+export function isRawBlock(value: unknown): value is RawBlock {
+  if (!isRecord(value)) return false;
+  if (value.kind === "paragraph") return typeof value.text === "string";
+  if (value.kind === "heading") return typeof value.level === "number" && typeof value.text === "string";
+  if (value.kind === "list") {
+    return (
+      typeof value.ordered === "boolean" &&
+      Array.isArray(value.items) &&
+      value.items.every((item) => typeof item === "string")
+    );
+  }
+  if (value.kind === "table") {
+    return (
+      Array.isArray(value.rows) &&
+      value.rows.every((row: unknown) => isRecord(row) && Array.isArray(row.cells) && row.cells.every(isRawTableCell))
+    );
+  }
+  return false;
+}
+
+export function rawUnitTexts(block: RawBlock): string[] {
+  if (block.kind === "list") return [...block.items];
+  if (block.kind === "table") {
+    return block.rows.flatMap((row) => row.cells.flatMap((cell) => [...cell.blocks]));
+  }
+  return [block.text];
 }
 
 function shiftToken(t: Token, off: number): Token {
@@ -40,8 +116,7 @@ export function segmentAt(
 }
 
 interface EditableUnit {
-  readonly blockIndex: number;
-  readonly itemIndex: number | null;
+  readonly path: readonly number[];
   readonly start: number;
   readonly end: number;
   readonly text: string;
@@ -52,13 +127,32 @@ function editableUnits(blocks: readonly Block[]): EditableUnit[] {
   blocks.forEach((block, blockIndex) => {
     if (block.kind === "list") {
       block.items.forEach((item, itemIndex) =>
-        units.push({ blockIndex, itemIndex, start: item.start, end: item.end, text: item.text }),
+        units.push({ path: [blockIndex, itemIndex], start: item.start, end: item.end, text: item.text }),
       );
       return;
     }
-    units.push({ blockIndex, itemIndex: null, start: block.start, end: block.end, text: block.text });
+    if (block.kind === "table") {
+      block.rows.forEach((row, rowIndex) => {
+        row.cells.forEach((cell, cellIndex) => {
+          cell.blocks.forEach((paragraph, paragraphIndex) => {
+            units.push({
+              path: [blockIndex, rowIndex, cellIndex, paragraphIndex],
+              start: paragraph.start,
+              end: paragraph.end,
+              text: paragraph.text,
+            });
+          });
+        });
+      });
+      return;
+    }
+    units.push({ path: [blockIndex], start: block.start, end: block.end, text: block.text });
   });
   return units;
+}
+
+function tableOf(unit: EditableUnit): number | null {
+  return unit.path.length === 4 ? unit.path[0] : null;
 }
 
 export interface TextSplice {
@@ -83,18 +177,36 @@ export function affixSplice(before: string, after: string): TextSplice {
 }
 
 function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string): RawBlock[] {
+  const [blockIndex, ...rest] = unit.path;
   return toRawBlocks(blocks).map((raw, index) => {
-    if (index !== unit.blockIndex) return raw;
-    if (raw.kind === "list" && unit.itemIndex !== null) {
-      return { ...raw, items: raw.items.map((item, i) => (i === unit.itemIndex ? text : item)) };
+    if (index !== blockIndex) return raw;
+    if (raw.kind === "list") {
+      const [itemIndex] = rest;
+      return { ...raw, items: raw.items.map((item, i) => (i === itemIndex ? text : item)) };
     }
-    if (raw.kind === "heading") return { ...raw, text };
-    if (raw.kind === "paragraph") return { ...raw, text };
-    return raw;
+    if (raw.kind === "table") {
+      const [rowIndex, cellIndex, paragraphIndex] = rest;
+      return {
+        ...raw,
+        rows: raw.rows.map((row, r) =>
+          r !== rowIndex
+            ? row
+            : {
+                cells: row.cells.map((cell, c) =>
+                  c !== cellIndex
+                    ? cell
+                    : { ...cell, blocks: cell.blocks.map((p, i) => (i === paragraphIndex ? text : p)) },
+                ),
+              },
+        ),
+      };
+    }
+    return { ...raw, text };
   });
 }
 
-export type SpliceRefusal = "crosses_units" | "unsupported_unit" | "introduces_heading" | "rebuild_mismatch";
+export type SpliceRefusal =
+  "crosses_units" | "crosses_cells" | "unsupported_unit" | "introduces_heading" | "rebuild_mismatch";
 
 export type StructuredSplice =
   { readonly ok: true; readonly document: Document } | { readonly ok: false; readonly reason: SpliceRefusal };
@@ -151,6 +263,26 @@ function rebuildFromUnits(
       continue;
     }
 
+    if (block.kind === "table") {
+      const rows: RawTableRow[] = block.rows.map((row) => ({
+        cells: row.cells.map((cell) => {
+          const blocks: string[] = [];
+          for (let i = 0; i < cell.blocks.length; i++) {
+            const text = unitTexts[cursor++];
+            if (text !== null) blocks.push(text);
+          }
+          return {
+            blocks,
+            colSpan: cell.colSpan > 1 ? cell.colSpan : undefined,
+            rowSpan: cell.rowSpan > 1 ? cell.rowSpan : undefined,
+            header: cell.header ? true : undefined,
+          };
+        }),
+      }));
+      raw.push({ kind: "table", rows });
+      continue;
+    }
+
     const text = unitTexts[cursor++];
     if (text === null) continue;
     raw.push(block.kind === "heading" ? { kind: "heading", level: block.level, text } : { kind: "paragraph", text });
@@ -178,6 +310,11 @@ function spliceAcrossUnits(
   for (let i = units.length - 1; i >= 0; i--) if (units[i].end >= end) lastIndex = i;
   if (firstIndex === -1 || lastIndex === -1 || lastIndex < firstIndex) {
     return { ok: false, reason: "crosses_units" };
+  }
+
+  for (let i = firstIndex; i <= lastIndex; i++) {
+    if (i !== firstIndex && tableOf(units[i]) === null && tableOf(units[firstIndex]) === null) continue;
+    if (firstIndex !== lastIndex && tableOf(units[i]) !== null) return { ok: false, reason: "crosses_cells" };
   }
 
   const first = units[firstIndex];
@@ -237,19 +374,18 @@ export function spliceStructuredDocument(
     return rebuilt.source === target ? { ok: true, document: rebuilt } : { ok: false, reason: "rebuild_mismatch" };
   }
 
-  const block = doc.blocks[unit.blockIndex];
-  if (unit.itemIndex !== null || block.kind !== "paragraph") {
-    return { ok: false, reason: "unsupported_unit" };
-  }
+  if (unit.path.length !== 1) return { ok: false, reason: "unsupported_unit" };
+  const block = doc.blocks[unit.path[0]];
+  if (block.kind !== "paragraph") return { ok: false, reason: "unsupported_unit" };
 
   const expanded = expandParagraph(local, services);
   if (expanded === null) return { ok: false, reason: "introduces_heading" };
 
   const before = toRawBlocks(doc.blocks);
-  const nextBlocks = replaceBlockAt(doc.blocks, unit.blockIndex, expanded);
+  const nextBlocks = replaceBlockAt(doc.blocks, unit.path[0], expanded);
   const rebuilt = buildStructuredDocument(nextBlocks, services);
 
-  if (!untouchedBlocksSurvived(before, toRawBlocks(rebuilt.blocks), unit.blockIndex, expanded.length)) {
+  if (!untouchedBlocksSurvived(before, toRawBlocks(rebuilt.blocks), unit.path[0], expanded.length)) {
     return { ok: false, reason: "rebuild_mismatch" };
   }
   return { ok: true, document: rebuilt };
@@ -268,16 +404,26 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
     return { start, end: source.length };
   };
 
+  const segment = (start: number, end: number): { sentences: Sentence[]; wordCount: number } => {
+    const seg = segmentAt(source.slice(start, end), start, services);
+    sentences.push(...seg.sentences);
+    tokens.push(...seg.tokens);
+    return { sentences: seg.sentences, wordCount: seg.wordCount };
+  };
+
   for (const rb of rawBlocks) {
     if (rb.kind === "paragraph" || rb.kind === "heading") {
       const { start, end } = place(rb.text, "\n\n");
-      const seg = segmentAt(source.slice(start, end), start, services);
-      sentences.push(...seg.sentences);
-      tokens.push(...seg.tokens);
+      const seg = segment(start, end);
       const base = { start, end, text: source.slice(start, end), sentences: seg.sentences, wordCount: seg.wordCount };
       blocks.push(
         rb.kind === "heading" ? { kind: "heading", level: rb.level, ...base } : { kind: "paragraph", ...base },
       );
+      continue;
+    }
+
+    if (rb.kind === "table") {
+      blocks.push(...buildTable(rb, place, segment, () => source));
       continue;
     }
 
@@ -286,9 +432,7 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
     rb.items.forEach((itemText, idx) => {
       const { start, end } = place(itemText, idx === 0 ? "\n\n" : "\n");
       if (idx === 0) listStart = start;
-      const seg = segmentAt(source.slice(start, end), start, services);
-      sentences.push(...seg.sentences);
-      tokens.push(...seg.tokens);
+      const seg = segment(start, end);
       items.push({
         kind: "listItem",
         start,
@@ -312,4 +456,74 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
   }
 
   return { source, sentences, tokens, blocks };
+}
+
+function buildTable(
+  rb: Extract<RawBlock, { kind: "table" }>,
+  place: (text: string, separator: string) => { start: number; end: number },
+  segment: (start: number, end: number) => { sentences: Sentence[]; wordCount: number },
+  sourceNow: () => string,
+): Block[] {
+  const rows: TableRowBlock[] = [];
+  let placedAny = false;
+  const grid = resolveTableGrid(rb.rows);
+  const positions = cellPositions(rb.rows);
+
+  rb.rows.forEach((row, rowIndex) => {
+    const cells: TableCellBlock[] = [];
+
+    row.cells.forEach((cell, cellIndex) => {
+      const paragraphs: ParagraphBlock[] = [];
+      let wordCount = 0;
+
+      cell.blocks.forEach((text, paragraphIndex) => {
+        const separator = !placedAny ? "\n\n" : paragraphIndex > 0 ? "\n" : cellIndex > 0 ? "\t" : "\n";
+        const { start, end } = place(text, separator);
+        placedAny = true;
+        const seg = segment(start, end);
+        wordCount += seg.wordCount;
+        paragraphs.push({
+          kind: "paragraph",
+          start,
+          end,
+          text: sourceNow().slice(start, end),
+          sentences: seg.sentences,
+          wordCount: seg.wordCount,
+        });
+      });
+
+      const cellStart = paragraphs.length > 0 ? paragraphs[0].start : sourceNow().length;
+      const cellEnd = paragraphs.length > 0 ? paragraphs[paragraphs.length - 1].end : cellStart;
+      const colSpan = Math.max(1, cell.colSpan ?? 1);
+
+      cells.push({
+        kind: "tableCell",
+        start: cellStart,
+        end: cellEnd,
+        text: sourceNow().slice(cellStart, cellEnd),
+        blocks: paragraphs,
+        colSpan,
+        rowSpan: Math.max(1, cell.rowSpan ?? 1),
+        header: cell.header === true,
+        row: rowIndex,
+        column: positions.get(`${rowIndex}:${cellIndex}`)?.column ?? cellIndex,
+        wordCount,
+      });
+    });
+
+    const rowStart = cells.length > 0 ? cells[0].start : sourceNow().length;
+    const rowEnd = cells.length > 0 ? cells[cells.length - 1].end : rowStart;
+    rows.push({
+      kind: "tableRow",
+      start: rowStart,
+      end: rowEnd,
+      text: sourceNow().slice(rowStart, rowEnd),
+      cells,
+    });
+  });
+
+  if (rows.length === 0) return [];
+  const start = rows[0].start;
+  const end = rows[rows.length - 1].end;
+  return [{ kind: "table", start, end, text: sourceNow().slice(start, end), rows, columns: grid.columns }];
 }

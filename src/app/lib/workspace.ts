@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, EMPTY_BRIEFING, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
+import { DEFAULT_CONFIG, EMPTY_BRIEFING, isRawBlock, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
 import { parseBaseline, serializeBaseline, type Baseline } from "./baseline";
@@ -25,20 +25,6 @@ export interface WorkspaceSnapshot {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function isRawBlock(value: unknown): value is RawBlock {
-  if (!isRecord(value)) return false;
-  if (value.kind === "paragraph") return typeof value.text === "string";
-  if (value.kind === "heading") return typeof value.level === "number" && typeof value.text === "string";
-  if (value.kind === "list") {
-    return (
-      typeof value.ordered === "boolean" &&
-      Array.isArray(value.items) &&
-      value.items.every((item) => typeof item === "string")
-    );
-  }
-  return false;
 }
 
 function isAttribution(value: unknown): boolean {

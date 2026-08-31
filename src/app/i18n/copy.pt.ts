@@ -78,6 +78,8 @@ export const COPY_PT: UiCopy = {
     },
     spliceRefused: {
       crosses_units: "Esta alteração atravessa mais de um bloco do documento importado.",
+      crosses_cells:
+        "Esta alteração atravessa mais de uma célula da tabela. Aplicar moveria texto de uma célula para outra.",
       unsupported_unit:
         "Ainda não sabemos aplicar uma alteração em várias linhas dentro de um título ou de um item de lista.",
       introduces_heading: "Esta alteração criaria um título novo, o que mudaria a estrutura do documento.",
@@ -172,7 +174,9 @@ export const COPY_PT: UiCopy = {
     groupDocument: "Texto revisado",
     exportTxt: "Baixar texto (.txt)",
     docxError: "Não foi possível gerar o .docx. Use a exportação em .txt.",
-    docxNote: "Contém o texto revisado, sem a formatação original: negrito, tabelas, imagens e cabeçalhos.",
+    docxNote:
+      "Contém o texto revisado com títulos, listas e tabelas — linhas, colunas e células mescladas. Fica de " +
+      "fora o resto da formatação original: negrito, imagens, cabeçalhos e rodapés.",
     importTables: (n: number) => `${n} ${n === 1 ? "tabela achatada" : "tabelas achatadas"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "caixa de texto embutida" : "caixas de texto embutidas"}`,
     importRuledRegions: (n: number) =>
@@ -189,6 +193,10 @@ export const COPY_PT: UiCopy = {
       `${what} viraram parágrafos. O conteúdo entra na auditoria, mas a disposição original não.`,
     importFromPdf: (what: string) =>
       `Leitura do PDF: ${what}. O PDF não declara títulos nem listas, então tudo entra como parágrafo.`,
+    importPdfRuled:
+      "Um PDF desenha linhas, não declara células. Onde há grade, o Lucid não reconstrói a tabela: reconstruir " +
+      "significaria adivinhar onde cada célula começa, e um erro aí muda o que o texto diz. Um .docx da mesma " +
+      "tabela entra com linhas e colunas preservadas.",
     structureMissing: { heading: "títulos", list: "listas" } as Record<string, string>,
     structureMissingJoin: " nem ",
     structureCaveat: (missing: string, count: number) =>
@@ -811,6 +819,13 @@ export const COPY_PT: UiCopy = {
     notAScore:
       "Estas medidas descrevem a superfície do texto. Elas apoiam a leitura dos critérios e nunca substituem " +
       "a avaliação de quem escreveu, nem indicam aprovação.",
+    tablesLabel: "Fora das médias",
+    tablesApart: (tables, cells, words) =>
+      `${tables} ${tables === 1 ? "tabela" : "tabelas"}, ${cells} ${cells === 1 ? "célula" : "células"} e ` +
+      `${words} ${words === 1 ? "palavra" : "palavras"} ficam fora dos números acima.`,
+    tablesAudited:
+      "Uma célula não é uma frase: contá-la como prosa encurtaria a média de palavras por frase e mexeria na " +
+      "leiturabilidade sem que ninguém tivesse escrito pior. O texto das células continua sendo auditado pelos critérios.",
     explainShow: "O que esta medida quer dizer",
     explainHide: "Ocultar explicação",
     meaningLabel: "O que mede",
@@ -981,6 +996,10 @@ export const COPY_PT: UiCopy = {
     list: "Lista",
     orderedList: "Lista numerada",
     listItems: (n) => (n === 1 ? " · 1 item" : ` · ${n} itens`),
+    table: "Tabela",
+    tableShape: (rows, columns) =>
+      ` · ${rows} ${rows === 1 ? "linha" : "linhas"} × ${columns} ${columns === 1 ? "coluna" : "colunas"}`,
+    tableLabel: "Tabela do documento",
     segmentLabel: (label, text, severity) => `${label}: “${text}”. ${severity}.`,
     sheetLabel: "Revisões",
     sheetClose: "Fechar",

@@ -31,6 +31,9 @@ export type {
   Sentence,
   Severity,
   Span,
+  TableBlock,
+  TableCellBlock,
+  TableRowBlock,
   Token,
 } from "./core/types";
 
@@ -56,10 +59,21 @@ export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindi
 export {
   affixSplice,
   buildStructuredDocument,
+  isRawBlock,
+  rawUnitTexts,
   spliceStructuredDocument,
   toRawBlocks,
 } from "./core/document/structured";
-export type { RawBlock, SpliceRefusal, StructuredSplice, TextSplice } from "./core/document/structured";
+export type {
+  RawBlock,
+  RawTableCell,
+  RawTableRow,
+  SpliceRefusal,
+  StructuredSplice,
+  TextSplice,
+} from "./core/document/structured";
+export { cellPositions, resolveTableGrid } from "./core/document/table-grid";
+export type { GridSlot, ResolvedGrid } from "./core/document/table-grid";
 
 export { buildCoverageReport, criteriaWithoutObject, missingBlockKinds } from "./core/coverage/build";
 export type { CoverageOptions } from "./core/coverage/build";

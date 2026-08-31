@@ -2,15 +2,16 @@ import {
   analyze,
   analyzeDocument,
   buildStructuredDocument,
-  hashConfig,
-  ptDocumentServices,
-  stableHash,
   type Config,
   type Diagnostic,
   type DiagnosticMeta,
+  ptDocumentServices,
   type Finding,
+  hashConfig,
+  isRawBlock,
   type RawBlock,
   type Severity,
+  stableHash,
 } from "@/lucid";
 import { balance, type CriterionBalance } from "./attribution";
 import { findingId } from "./criteria";
@@ -200,21 +201,7 @@ const KINDS: readonly string[] = ["seen", "dismissed"];
 function parseRawBlocks(value: unknown): readonly RawBlock[] | null | undefined {
   if (value === null) return null;
   if (!Array.isArray(value)) return undefined;
-  for (const block of value) {
-    if (!isRecord(block)) return undefined;
-    if (block.kind === "paragraph" && typeof block.text === "string") continue;
-    if (block.kind === "heading" && typeof block.text === "string" && typeof block.level === "number") continue;
-    if (
-      block.kind === "list" &&
-      typeof block.ordered === "boolean" &&
-      Array.isArray(block.items) &&
-      block.items.every((item) => typeof item === "string")
-    ) {
-      continue;
-    }
-    return undefined;
-  }
-  return value as RawBlock[];
+  return value.every(isRawBlock) ? (value as RawBlock[]) : undefined;
 }
 
 function parseStamp(value: unknown): DiagnosticMeta | null {

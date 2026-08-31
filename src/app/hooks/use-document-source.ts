@@ -6,6 +6,7 @@ import {
   missingBlockKindsIn,
   buildDocument,
   buildStructuredDocument,
+  rawUnitTexts,
   ptDocumentServices,
   silentCriteriaIn,
   spliceStructuredDocument,
@@ -181,7 +182,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         return;
       }
 
-      const units = blocks.flatMap((block) => (block.kind === "list" ? block.items : [block.text]));
+      const units = blocks.flatMap(rawUnitTexts);
       if (!refinesPastedLines(units, value)) {
         enter(null, value);
         return;

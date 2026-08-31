@@ -83,7 +83,7 @@ export function PointBrowser({
   return (
     <div className="fade-in">
       <div className="px-4 pt-4">
-        <h3 className="u-label text-ink-2">{c.revisionList.browseLabel}</h3>
+        <h3 className="u-label text-ink-3">{c.revisionList.browseLabel}</h3>
       </div>
 
       <div className="pt-2.5">

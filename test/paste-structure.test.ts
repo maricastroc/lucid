@@ -13,13 +13,15 @@ describe("a real Google Docs paste — the structure the clipboard already carri
 
     const guessed = buildDocument(GDOCS_PLAIN).blocks;
 
-    expect(declared.length).toBe(201);
+    expect(declared.length).toBe(185);
+    expect(declared.filter((block) => block.kind === "table")).not.toHaveLength(0);
     expect(guessed.length).toBe(85);
   });
 
   it("does not glue several paragraphs into one long one", () => {
     const longest = buildDocument(GDOCS_PLAIN).blocks.reduce(
-      (most, block) => (block.kind === "list" ? most : Math.max(most, block.sentences.length)),
+      (most, block) =>
+        block.kind === "list" || block.kind === "table" ? most : Math.max(most, block.sentences.length),
       0,
     );
 

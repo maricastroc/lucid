@@ -1,4 +1,4 @@
-import type { RawBlock } from "@/lucid";
+import { resolveTableGrid, type RawBlock, type RawTableCell, type RawTableRow } from "@/lucid";
 import { zip, type ZipEntry } from "./zip";
 
 const BULLET_NUM_ID = 1;
@@ -22,6 +22,48 @@ function paragraph(text: string, properties = ""): string {
   return `<w:p>${properties}${run(text)}</w:p>`;
 }
 
+const TABLE_WIDTH_TWIPS = 9360;
+
+const TABLE_PROPERTIES =
+  '<w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>' +
+  ["top", "left", "bottom", "right", "insideH", "insideV"]
+    .map((edge) => `<w:${edge} w:val="single" w:sz="4" w:space="0" w:color="auto"/>`)
+    .join("") +
+  "</w:tblBorders></w:tblPr>";
+
+function cellXml(cell: RawTableCell | null, colSpan: number, rowSpan: number, width: number): string {
+  const properties = [
+    `<w:tcW w:w="${width}" w:type="dxa"/>`,
+    colSpan > 1 ? `<w:gridSpan w:val="${colSpan}"/>` : "",
+    rowSpan > 1 ? `<w:vMerge w:val="${cell === null ? "continue" : "restart"}"/>` : "",
+  ].join("");
+
+  const emphasis = cell?.header === true ? "<w:pPr><w:rPr><w:b/></w:rPr></w:pPr>" : "";
+  const paragraphs = cell === null || cell.blocks.length === 0 ? [""] : cell.blocks;
+  const body = paragraphs.map((text) => paragraph(text, emphasis)).join("");
+  return `<w:tc><w:tcPr>${properties}</w:tcPr>${body}</w:tc>`;
+}
+
+function tableToXml(rows: readonly RawTableRow[]): string {
+  const grid = resolveTableGrid(rows);
+  if (grid.columns === 0) return "";
+
+  const column = Math.floor(TABLE_WIDTH_TWIPS / grid.columns);
+  const gridXml = `<w:tblGrid>${Array.from({ length: grid.columns }, () => `<w:gridCol w:w="${column}"/>`).join("")}</w:tblGrid>`;
+
+  const body = grid.rows
+    .map((slots) => {
+      const cells = slots.map((slot) => cellXml(slot.cell, slot.colSpan, slot.rowSpan, column * slot.colSpan)).join("");
+      const declared = slots.filter((slot) => slot.cell !== null);
+      const isHeaderRow = declared.length > 0 && declared.every((slot) => slot.cell?.header === true);
+      const properties = isHeaderRow ? "<w:trPr><w:tblHeader/></w:trPr>" : "";
+      return `<w:tr>${properties}${cells}</w:tr>`;
+    })
+    .join("");
+
+  return `<w:tbl>${TABLE_PROPERTIES}${gridXml}${body}</w:tbl><w:p/>`;
+}
+
 function blockToXml(block: RawBlock): string {
   if (block.kind === "heading") {
     const level = Math.min(Math.max(Math.trunc(block.level), 1), 6);
@@ -38,6 +80,7 @@ function blockToXml(block: RawBlock): string {
       )
       .join("");
   }
+  if (block.kind === "table") return tableToXml(block.rows);
   return paragraph(block.text);
 }
 

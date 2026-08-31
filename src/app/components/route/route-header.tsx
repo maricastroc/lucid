@@ -72,7 +72,7 @@ export function RouteHeader({ route, onGo, onLeave, onOpen, compact = false }: P
       </div>
 
       {route.allDone ? (
-        <div role="status" className="mt-3 rounded-xl border border-safe-line bg-safe-weak p-3">
+        <div role="status" className="mt-3 rounded-xl border border-safe-line bg-safe-weak px-3.5 py-3">
           <p className="flex items-center gap-2 text-[14px] font-semibold text-ink-0">
             <span className="grid size-6 shrink-0 place-items-center rounded-full bg-safe text-on-safe">
               <CheckIcon className="size-3.5" />
@@ -90,7 +90,7 @@ export function RouteHeader({ route, onGo, onLeave, onOpen, compact = false }: P
           <p className="mt-2 pl-8 text-[11px] leading-relaxed text-ink-3">{r.allDoneNext}</p>
         </div>
       ) : stepDone ? (
-        <div role="status" className="mt-3 rounded-xl border border-safe-line bg-safe-weak p-3">
+        <div role="status" className="mt-3 rounded-xl border border-safe-line bg-safe-weak px-3.5 py-3">
           <p className="flex items-center gap-2 text-[13.5px] font-semibold text-ink-0">
             <span className="grid size-5 shrink-0 place-items-center rounded-full bg-safe text-on-safe">
               <CheckIcon className="size-3" />

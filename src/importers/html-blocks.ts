@@ -1,4 +1,4 @@
-import type { RawBlock } from "@/lucid/core/document/structured";
+import type { RawBlock, RawTableCell, RawTableRow } from "@/lucid/core/document/structured";
 
 function decodeEntities(s: string): string {
   return s
@@ -50,9 +50,71 @@ function extractListItems(inner: string): string[] {
   return items;
 }
 
+function spanAttribute(openTag: string, name: string): number | undefined {
+  const raw = new RegExp(`\\b${name}\\s*=\\s*"?(\\d+)`, "i").exec(openTag)?.[1];
+  if (raw === undefined) return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 1 ? Math.trunc(value) : undefined;
+}
+
+function extractCellParagraphs(inner: string): string[] {
+  const paragraphs: string[] = [];
+  const childRe = /<(p|li|h[1-6])\b[^>]*>/gi;
+
+  for (let m = childRe.exec(inner); m !== null; m = childRe.exec(inner)) {
+    const tag = m[1].toLowerCase();
+    const openEnd = childRe.lastIndex;
+    const closeStart = findMatchingClose(inner, tag, openEnd);
+    if (closeStart === null) break;
+    const text = textOf(inner.slice(openEnd, closeStart));
+    if (text) paragraphs.push(text);
+    childRe.lastIndex = closeStart + `</${tag}>`.length;
+  }
+
+  if (paragraphs.length > 0) return paragraphs;
+
+  return inner
+    .split(/<br\b[^>]*>/i)
+    .map(textOf)
+    .filter((text) => text !== "");
+}
+
+function extractTableRows(inner: string): RawTableRow[] {
+  const rows: RawTableRow[] = [];
+  const trRe = /<tr\b[^>]*>/gi;
+
+  for (let m = trRe.exec(inner); m !== null; m = trRe.exec(inner)) {
+    const openEnd = trRe.lastIndex;
+    const closeStart = findMatchingClose(inner, "tr", openEnd);
+    if (closeStart === null) break;
+    const rowInner = inner.slice(openEnd, closeStart);
+    trRe.lastIndex = closeStart + "</tr>".length;
+
+    const cells: RawTableCell[] = [];
+    const cellRe = /<(td|th)\b([^>]*)>/gi;
+    for (let c = cellRe.exec(rowInner); c !== null; c = cellRe.exec(rowInner)) {
+      const tag = c[1].toLowerCase();
+      const cellOpenEnd = cellRe.lastIndex;
+      const cellCloseStart = findMatchingClose(rowInner, tag, cellOpenEnd);
+      if (cellCloseStart === null) break;
+      cells.push({
+        blocks: extractCellParagraphs(rowInner.slice(cellOpenEnd, cellCloseStart)),
+        colSpan: spanAttribute(c[2], "colspan"),
+        rowSpan: spanAttribute(c[2], "rowspan"),
+        header: tag === "th" ? true : undefined,
+      });
+      cellRe.lastIndex = cellCloseStart + `</${tag}>`.length;
+    }
+
+    if (cells.length > 0) rows.push({ cells });
+  }
+
+  return rows;
+}
+
 export function htmlToRawBlocks(html: string): RawBlock[] {
   const blocks: RawBlock[] = [];
-  const topOpenRe = /<(h[1-6]|p|ul|ol)\b[^>]*>/gi;
+  const topOpenRe = /<(h[1-6]|p|ul|ol|table)\b[^>]*>/gi;
 
   for (let m = topOpenRe.exec(html); m !== null; m = topOpenRe.exec(html)) {
     const tag = m[1].toLowerCase();
@@ -70,6 +132,11 @@ export function htmlToRawBlocks(html: string): RawBlock[] {
     if (/^h[1-6]$/.test(tag)) {
       const text = textOf(inner);
       if (text) blocks.push({ kind: "heading", level: Number(tag[1]), text });
+      continue;
+    }
+    if (tag === "table") {
+      const rows = extractTableRows(inner);
+      if (rows.length > 0) blocks.push({ kind: "table", rows });
       continue;
     }
 

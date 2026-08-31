@@ -131,8 +131,8 @@ describe("import rebuilds headings from the outline level the file declares", ()
   });
 });
 
-describe("import declares what it flattened instead of pretending it kept it", () => {
-  it("counts the tables whose cells became paragraphs", async () => {
+describe("import declares what it kept and what it could not", () => {
+  it("brings a .docx table in as a grid, not as loose paragraphs", async () => {
     const { doc, notes } = value(
       await importOf({
         "word/document.xml": documentXml(
@@ -143,13 +143,21 @@ describe("import declares what it flattened instead of pretending it kept it", (
       }),
     );
 
+    expect(notes.tablesPreserved).toBe(1);
+    expect(notes.tablesFlattened).toBe(0);
+    expect(doc.blocks.map((block) => block.kind)).toEqual(["paragraph", "table", "paragraph"]);
+
+    const table = doc.blocks[1];
+    if (table.kind !== "table") throw new Error("expected a table");
+    expect(table.rows[0].cells.map((cell) => cell.text)).toEqual(["Prazo", "30 dias"]);
+  });
+
+  it("counts a table it could not recover instead of claiming it kept one", async () => {
+    const nested = `<w:tbl><w:tr><w:tc>${para("Externa")}<w:tbl><w:tr><w:tc>${para("Interna")}</w:tc></w:tr></w:tbl></w:tc></w:tr></w:tbl>`;
+    const { notes } = value(await importOf({ "word/document.xml": documentXml(nested) }));
+
+    expect(notes.tablesPreserved).toBe(1);
     expect(notes.tablesFlattened).toBe(1);
-    expect(doc.blocks.map((block) => block.text)).toEqual([
-      "Antes da tabela.",
-      "Prazo",
-      "30 dias",
-      "Depois da tabela.",
-    ]);
   });
 
   it("counts the text boxes whose content joined the reading order", async () => {
@@ -168,6 +176,7 @@ describe("import declares what it flattened instead of pretending it kept it", (
   it("reports nothing flattened when nothing was", async () => {
     const { notes } = value(await importOf({ "word/document.xml": documentXml(para("Texto simples.")) }));
     expect(notes).toEqual({
+      tablesPreserved: 0,
       tablesFlattened: 0,
       textBoxesInlined: 0,
       headingStylesRecovered: [],

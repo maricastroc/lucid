@@ -78,7 +78,7 @@ export function BaselinePanel({ surface, config }: { surface: BaselineSurface; c
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 id="ponto-de-partida" className="u-label flex items-center gap-1.5 text-ink-2">
+          <h3 id="ponto-de-partida" className="u-label flex items-center gap-1.5 text-ink-3">
             <HistoryIcon className="size-3.5 text-accent" />
             {b.label}
           </h3>

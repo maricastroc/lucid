@@ -226,6 +226,7 @@ describe("silence — the audit says what it could not look at", () => {
 
 describe("import — what the audit says about the file it was handed", () => {
   const notes = {
+    tablesPreserved: 0,
     tablesFlattened: 0,
     textBoxesInlined: 0,
     headingStylesRecovered: [] as readonly string[],

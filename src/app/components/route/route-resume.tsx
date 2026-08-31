@@ -25,7 +25,7 @@ export function RouteResume({
 
   if (route.allDone) {
     return (
-      <div role="status" className="rounded-xl border border-safe-line bg-safe-weak p-3.5">
+      <div role="status" className="rounded-xl border border-safe-line bg-safe-weak px-3.5 py-3">
         <p className="flex items-center gap-2 text-[14px] font-semibold text-ink-0">
           <span className="grid size-6 shrink-0 place-items-center rounded-full bg-safe text-on-safe">
             <CheckIcon className="size-3.5" />
@@ -46,8 +46,8 @@ export function RouteResume({
 
   const entry = route.entry;
   return (
-    <div className="rounded-xl border border-accent-line bg-accent-weak p-3.5">
-      <h3 className="u-label flex items-center gap-1.5 text-ink-1">
+    <div className="rounded-xl border border-accent-line bg-accent-weak px-3.5 py-3">
+      <h3 className="u-label flex items-center gap-1.5 text-ink-3">
         <RouteIcon className="size-3.5 text-accent" />
         {r.label}
       </h3>

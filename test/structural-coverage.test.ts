@@ -39,13 +39,23 @@ function asMarkdown(blocks: readonly RawBlock[]): string {
         ? `${"#".repeat(block.level)} ${block.text}`
         : block.kind === "list"
           ? block.items.map((item) => `- ${item}`).join("\n")
-          : block.text,
+          : block.kind === "table"
+            ? block.rows.map((row) => row.cells.map((cell) => cell.blocks.join("\n")).join(" | ")).join("\n")
+            : block.text,
     )
     .join("\n\n");
 }
 
 function asProse(blocks: readonly RawBlock[]): string {
-  return blocks.map((block) => (block.kind === "list" ? block.items.join("\n") : block.text)).join("\n\n");
+  return blocks
+    .map((block) => {
+      if (block.kind === "list") return block.items.join("\n");
+      if (block.kind === "table") {
+        return block.rows.map((row) => row.cells.map((cell) => cell.blocks.join("\n")).join("\n")).join("\n");
+      }
+      return block.text;
+    })
+    .join("\n\n");
 }
 
 const criteriaOf = (findings: readonly Finding[]): string[] => [...new Set(findings.map((f) => f.criterion))].sort();
