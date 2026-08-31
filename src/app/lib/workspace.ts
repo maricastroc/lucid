@@ -1,4 +1,5 @@
 import { DEFAULT_CONFIG, EMPTY_BRIEFING, isRawBlock, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
+import type { ImportNotes } from "../hooks/use-document-source";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
 import { parseBaseline, serializeBaseline, type Baseline } from "./baseline";
@@ -6,8 +7,8 @@ import { isProfileId, type ProfileId } from "./profiles";
 import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 9;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const SCHEMA_VERSION = 10;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export interface WorkspaceSnapshot {
   readonly text: string;
@@ -20,6 +21,7 @@ export interface WorkspaceSnapshot {
   readonly profileId: ProfileId;
   readonly reviewMarks: ReviewMarks;
   readonly guidedStep: string | null;
+  readonly importNotes?: ImportNotes | null;
   readonly baseline?: Baseline | null;
 }
 
@@ -131,6 +133,7 @@ function parse(raw: string): WorkspaceSnapshot | null {
   }
 
   return {
+    importNotes: parseImportNotes(value.importNotes),
     baseline: parseAttachedBaseline(value.baseline),
     profileId: isProfileId(value.profileId) ? value.profileId : "base",
     text: value.text,
@@ -143,6 +146,32 @@ function parse(raw: string): WorkspaceSnapshot | null {
     reviewMarks,
     guidedStep: typeof value.guidedStep === "string" ? value.guidedStep : null,
   };
+}
+
+function parseImportNotes(value: unknown): ImportNotes | null {
+  if (!isRecord(value)) return null;
+  const numbers = (keys: readonly string[]): boolean => keys.every((k) => typeof value[k] === "number");
+  const strings = (key: string): boolean => Array.isArray(value[key]) && value[key].every((v) => typeof v === "string");
+
+  if (value.format === "docx") {
+    if (!numbers(["tablesPreserved", "tablesFlattened", "textBoxesInlined"])) return null;
+    if (!strings("headingStylesRecovered") || !strings("unrecognisedParagraphStyles")) return null;
+    return value as unknown as ImportNotes;
+  }
+  if (value.format === "pdf") {
+    const keys = [
+      "pages",
+      "emptyPages",
+      "removedHeaders",
+      "removedFooters",
+      "removedPageNumbers",
+      "dehyphenated",
+      "shortLineBreaks",
+      "ruledRegions",
+    ];
+    return numbers(keys) ? (value as unknown as ImportNotes) : null;
+  }
+  return null;
 }
 
 function parseAttachedBaseline(value: unknown): Baseline | null {

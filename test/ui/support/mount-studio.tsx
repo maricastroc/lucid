@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DEFAULT_CONFIG, EMPTY_BRIEFING, type RawBlock, type ReaderBriefing } from "@/lucid";
+import type { ImportNotes } from "@/app/hooks/use-document-source";
 import { EMPTY_MARKS, type ReviewMarks } from "@/app/lib/review-marks";
 import { writeWorkspace } from "@/app/lib/workspace";
 import { Studio } from "@/app/studio";
@@ -12,6 +13,7 @@ export interface MountOptions {
   blocks?: readonly RawBlock[] | null;
   reviewMarks?: ReviewMarks;
   guidedStep?: string | null;
+  importNotes?: ImportNotes | null;
 }
 
 export function mountStudio({
@@ -21,6 +23,7 @@ export function mountStudio({
   blocks = null,
   reviewMarks = EMPTY_MARKS,
   guidedStep = null,
+  importNotes = null,
 }: MountOptions = {}) {
   if (text !== undefined) {
     writeWorkspace({
@@ -34,6 +37,7 @@ export function mountStudio({
       config: DEFAULT_CONFIG,
       reviewMarks,
       guidedStep,
+      importNotes,
     });
   }
 

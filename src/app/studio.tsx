@@ -153,6 +153,7 @@ export function Studio() {
       profileId,
       reviewMarks: marks,
       guidedStep,
+      importNotes,
       baseline,
     });
   }, [
@@ -168,6 +169,7 @@ export function Studio() {
     profileId,
     marks,
     guidedStep,
+    importNotes,
     baseline,
   ]);
 

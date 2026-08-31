@@ -44,6 +44,7 @@ describe("workspace — round trip through storage", () => {
     });
     expect(readWorkspace()).toEqual({
       baseline: null,
+      importNotes: null,
       profileId: "base",
       originalText: null,
       text: "O prazo venceu ontem.",
@@ -503,5 +504,56 @@ describe("workspace — the entry text", () => {
   it("accepts an explicit null, which is what an unrecorded document writes back", () => {
     writeWorkspace({ ...base, originalText: null });
     expect(readWorkspace()?.originalText).toBeNull();
+  });
+
+  it("keeps the import caveat, because the flattening it explains also survives the reload", () => {
+    writeWorkspace({
+      originalText: null,
+      profileId: "base",
+      text: "Categoria Qtd Motivo",
+      blocks: [{ kind: "paragraph", text: "Categoria Qtd Motivo" }],
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+      guidedStep: null,
+      importNotes: {
+        format: "docx",
+        tablesPreserved: 0,
+        tablesFlattened: 1,
+        textBoxesInlined: 0,
+        headingStylesRecovered: [],
+        unrecognisedParagraphStyles: [],
+      },
+    });
+
+    const back = readWorkspace();
+    expect(back?.importNotes).toEqual({
+      format: "docx",
+      tablesPreserved: 0,
+      tablesFlattened: 1,
+      textBoxesInlined: 0,
+      headingStylesRecovered: [],
+      unrecognisedParagraphStyles: [],
+    });
+  });
+
+  it("refuses a malformed caveat instead of restoring half of it", () => {
+    writeWorkspace({
+      originalText: null,
+      profileId: "base",
+      text: "texto",
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+      guidedStep: null,
+      importNotes: { format: "docx", tablesFlattened: 1 } as never,
+    });
+
+    expect(readWorkspace()?.importNotes).toBeNull();
   });
 });

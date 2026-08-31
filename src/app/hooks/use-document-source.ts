@@ -98,7 +98,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const [refusedEdit, setRefusedEdit] = useState<{ reason: SpliceRefusal; text: string } | null>(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<ImportError | null>(null);
-  const [importNotes, setImportNotes] = useState<ImportNotes | null>(null);
+  const [importNotes, setImportNotes] = useState<ImportNotes | null>(initial?.importNotes ?? null);
   const [originalText, setOriginalText] = useState<string | null>(() => (initial === null ? "" : initial.originalText));
 
   const adopt = useCallback((doc: Document | null, value: string) => {
@@ -112,6 +112,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
     (doc: Document | null, value: string) => {
       adopt(doc, value);
       setOriginalText(value);
+      setImportNotes(null);
     },
     [adopt],
   );
@@ -208,8 +209,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
             setImportError(result.refusal);
             return false;
           }
-          setImportNotes({ format: "pdf", ...result.value.notes });
           enter(result.value.doc, result.value.doc.source);
+          setImportNotes({ format: "pdf", ...result.value.notes });
           return true;
         }
 
@@ -219,8 +220,8 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
           setImportError(result.refusal);
           return false;
         }
-        setImportNotes({ format: "docx", ...result.value.notes });
         enter(result.value.doc, result.value.doc.source);
+        setImportNotes({ format: "docx", ...result.value.notes });
         return true;
       } catch {
         setImportError("unreadable");

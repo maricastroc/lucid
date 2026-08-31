@@ -32,10 +32,7 @@ describe("both panes scroll, whatever the document's length", () => {
 
     expect(chain.length).toBeGreaterThan(0);
     for (const ancestor of chain) {
-      expect(
-        ancestor.classList.contains("min-h-0"),
-        `flex ancestor without min-h-0: ${ancestor.className}`,
-      ).toBe(true);
+      expect(ancestor.classList.contains("min-h-0"), `flex ancestor without min-h-0: ${ancestor.className}`).toBe(true);
     }
   });
 
@@ -48,10 +45,7 @@ describe("both panes scroll, whatever the document's length", () => {
 
     expect(chain.length).toBeGreaterThan(0);
     for (const ancestor of chain) {
-      expect(
-        ancestor.classList.contains("min-h-0"),
-        `flex ancestor without min-h-0: ${ancestor.className}`,
-      ).toBe(true);
+      expect(ancestor.classList.contains("min-h-0"), `flex ancestor without min-h-0: ${ancestor.className}`).toBe(true);
     }
   });
 
