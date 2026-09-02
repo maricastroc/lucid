@@ -282,10 +282,6 @@ export function serializeBaseline(baseline: Baseline): string {
 
 export const BASELINE_MIME = "application/json;charset=utf-8";
 
-/**
- * O nome do arquivo sai do título declarado pelo humano — a única identidade que o produto tem.
- * Um título sem nenhuma letra ou dígito ainda precisa virar arquivo: aí vale o nome genérico.
- */
 export function baselineFileName(title: string): string {
   const plain = title
     .normalize("NFD")
@@ -297,7 +293,6 @@ export function baselineFileName(title: string): string {
   return `${slug}.lucid.json`;
 }
 
-/** O arquivo do ponto de partida, pronto para baixar — usado pela exportação e pela troca de documento. */
 export function baselineFile(input: BaselineInput): { readonly name: string; readonly content: string } {
   return { name: baselineFileName(input.title), content: serializeBaseline(buildBaseline(input)) };
 }

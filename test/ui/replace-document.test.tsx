@@ -14,8 +14,6 @@ const INCOMING = "A comissão indeferiu o pedido porque faltaram os 3 documentos
 
 const reviewedPoint = () => withMark(EMPTY_MARKS, analyze(PASSIVE_AND_JARGON).findings[0], "seen");
 
-// Enquanto o diálogo está aberto ele é modal: o resto do app sai da árvore de acessibilidade.
-// `hidden: true` alcança o documento nos dois estados, que é o que estas provas comparam.
 const draft = () =>
   screen.getByRole("textbox", { name: /texto do documento/i, hidden: true }) as HTMLTextAreaElement;
 const dialog = () => screen.queryByRole("alertdialog", { name: /abrir outro documento/i });

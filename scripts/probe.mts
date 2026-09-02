@@ -1,6 +1,3 @@
-// Sonda de investigação: roda o analisador em frases soltas e imprime os findings.
-// Uso: npx tsx scripts/probe.mts "frase 1" "frase 2" ...
-//      npx tsx scripts/probe.mts --file caminho.txt   (uma frase por linha)
 import { readFileSync } from "node:fs";
 import { analyze } from "../src/lucid";
 

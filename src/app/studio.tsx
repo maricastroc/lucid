@@ -52,7 +52,6 @@ import { ReplaceDocumentDialog } from "./components/replace-document-dialog";
 import { downloadFile } from "./components/export-menu/download-file";
 import { Button } from "./components/ui/button";
 
-/** A abertura pedida e ainda não cumprida, enquanto o autor decide o que fazer com o que está aberto. */
 type DocumentIntent =
   | { readonly kind: "file"; readonly file: File }
   | { readonly kind: "paste"; readonly text: string; readonly html: string | null };
@@ -115,8 +114,6 @@ export function Studio() {
     reset: resetHistory,
   } = useRevisionHistory(text, setText, isSettled, restored?.ledger);
 
-  // A mesma seleção serve a dois destinos: o trecho candidato a termo do vocabulário e, quando a
-  // sonda estiver de volta, o trecho a sondar.
   const { excerpt: probeExcerpt, clear: clearProbeExcerpt } = useDocumentSelection(scrollRef);
 
   const briefingCheck = useMemo(() => checkBriefing(diagnostic.text, briefing), [diagnostic, briefing]);
@@ -244,9 +241,6 @@ export function Studio() {
     afterDocumentReplaced();
   }, [loadExampleDocument, afterDocumentReplaced]);
 
-  // Abrir outro documento — por arquivo ou colando por cima do inteiro — destrói a auditoria em
-  // andamento. A intenção fica retida até o autor decidir o que fazer com o que está aqui; só passa
-  // direto quando não há nada a perder, e é a lib que responde o que é "nada".
   const workAtRisk = useMemo(
     () => pendingWork({ text, originalText, ledger, marks, briefing }),
     [text, originalText, ledger, marks, briefing],
@@ -291,8 +285,6 @@ export function Studio() {
     if (intent !== null) void replaceDocument(intent);
   }, [pendingIntent, replaceDocument]);
 
-  // Salvar antes de trocar é a mesma gravação da exportação — inclusive o título obrigatório, que é
-  // a única identidade do arquivo. Só depois de o arquivo sair é que o documento é substituído.
   const saveThenReplace = useCallback(
     (title: string) => {
       const file = baselineFile({
@@ -361,8 +353,6 @@ export function Studio() {
       setBaselineRefusal(null);
       setBaseline(parsed.baseline);
 
-      // O vocabulário do arquivo é da casa, não daquela medição: ele vale para o documento aberto
-      // agora. Os termos que já estão declarados aqui ficam; os do arquivo entram junto.
       const incoming = parsed.baseline.vocabulary;
       if (incoming.length > 0) {
         setConfig((current) => {

@@ -22,8 +22,6 @@ export function ReplaceDocumentDialog({
   return (
     <RadixAlertDialog.Root
       open={work !== null}
-      // As duas escolhas fecham o diálogo mudando `work` de fora, sem passar por aqui. O que chega
-      // a este ponto é só a desistência — o botão Cancelar e a tecla Esc.
       onOpenChange={(next) => {
         if (!next) onCancel();
       }}

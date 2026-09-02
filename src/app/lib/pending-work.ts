@@ -3,23 +3,11 @@ import type { UiCopy } from "../i18n/copy";
 import type { LedgerEntry } from "./ledger";
 import type { ReviewMarks } from "./review-marks";
 
-/**
- * O que se perde quando o documento aberto é substituído por outro.
- *
- * Só entra aqui o que a máquina NÃO recompõe. A auditoria em si fica de fora de propósito: ela é
- * recalculada do texto a qualquer momento, e um aviso que a incluísse dispararia em toda abertura
- * — treinando o autor a passar direto pelo aviso que existe para o caso em que há perda real.
- */
 export interface PendingWork {
-  /** Alterações registradas na trilha. */
   readonly changes: number;
-  /** Pontos marcados como revisados. */
   readonly reviewed: number;
-  /** Pontos marcados como ignorados. */
   readonly dismissed: number;
-  /** O briefing do leitor foi respondido (elicitação do Princípio 1). */
   readonly briefing: boolean;
-  /** O texto mudou desde que entrou — inclui digitação que a trilha ainda não registrou. */
   readonly editedText: boolean;
 }
 
@@ -40,18 +28,11 @@ export function briefingAnswered(briefing: ReaderBriefing): boolean {
   );
 }
 
-/**
- * `originalText` é `null` quando o texto de entrada não foi registrado (sessão salva antes do campo
- * existir). `null` não é `""`: um diz "não sei", o outro diz "escrito aqui dentro". Diante do "não
- * sei", havendo texto, o aviso aparece — errar para o lado do aviso custa um clique; errar para o
- * lado do silêncio custa o trabalho.
- */
 function textWasEdited(text: string, originalText: string | null): boolean {
   if (text.trim() === "") return false;
   return originalText === null || text !== originalText;
 }
 
-/** `null` quando não há nada a perder — nesse caso o documento é substituído sem perguntar. */
 export function pendingWork(input: PendingWorkInput): PendingWork | null {
   let reviewed = 0;
   let dismissed = 0;
@@ -74,10 +55,6 @@ export function pendingWork(input: PendingWorkInput): PendingWork | null {
   return empty ? null : work;
 }
 
-/**
- * O que está em risco, na ordem em que dói: primeiro o texto e as decisões do autor, depois o
- * briefing. Cada linha nomeia o que se perde — número nenhum aparece sem substantivo.
- */
 export function atRiskItems(work: PendingWork, copy: UiCopy["studio"]["replaceDocument"]): readonly string[] {
   const items: string[] = [];
   if (work.editedText) items.push(copy.editedText);

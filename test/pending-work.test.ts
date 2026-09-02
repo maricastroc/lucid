@@ -62,8 +62,6 @@ describe("what is at risk when the open document is replaced", () => {
   });
 
   it("sees typing that the trail has not recorded yet", () => {
-    // A edição livre não gera entrada na trilha enquanto a sessão de digitação não fecha: sem esta
-    // perna, quem escreveu um documento do zero e abriu um arquivo perderia o texto sem aviso.
     const work = pendingWork(input({ text: `${TEXT} Novo parágrafo em digitação.`, ledger: [] }));
     expect(work?.editedText).toBe(true);
     expect(work?.changes).toBe(0);
@@ -74,8 +72,6 @@ describe("what is at risk when the open document is replaced", () => {
   });
 
   it("warns when the entry text was never recorded, because not knowing is not the same as nothing", () => {
-    // `originalText: null` é sessão salva antes de o campo existir. Diante do "não sei", o aviso
-    // aparece: errar para o lado do aviso custa um clique, errar para o do silêncio custa o trabalho.
     expect(pendingWork(input({ originalText: null }))?.editedText).toBe(true);
   });
 
@@ -91,8 +87,6 @@ describe("what is at risk when the open document is replaced", () => {
   });
 
   it("does not treat the audit itself as work at risk — it is recomputed from the text", () => {
-    // O documento aberto tem apontamentos e nada além disso. Contá-los faria o aviso disparar em
-    // toda abertura, treinando o autor a passar direto pelo aviso que existe para a perda real.
     expect(analyze(TEXT).findings.length).toBeGreaterThan(0);
     expect(pendingWork(input())).toBeNull();
   });

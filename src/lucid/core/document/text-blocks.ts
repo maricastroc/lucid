@@ -47,7 +47,6 @@ interface ItemRange {
 
 const MAX_LIST_LEVEL = 5;
 
-// Recuo marca o nível: um tab, ou cada dois espaços, desce um degrau.
 function levelFromIndent(indent: string): number {
   const tabs = (indent.match(/\t/gu) ?? []).length;
   const spaces = indent.length - tabs;
