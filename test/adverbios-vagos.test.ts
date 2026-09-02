@@ -46,3 +46,31 @@ describe("adverbios_vagos — precision (it is not 'any -mente adverb')", () => 
     ).toEqual([]);
   });
 });
+
+describe("ampliação do léxico contra o critério declarado (A-20)", () => {
+  const hits = (text: string): string[] =>
+    analyze(text)
+      .findings.filter((f) => f.criterion === "adverbios_vagos")
+      .map((f) => f.span.text);
+
+  it("aponta o reforço vazio típico do burocratês", () => {
+    expect(hits("O formulário devidamente preenchido deve ser entregue.")).toEqual(["devidamente"]);
+    expect(hits("O prazo é razoavelmente adequado.")).toEqual(["razoavelmente"]);
+    expect(hits("O pedido é relativamente simples.")).toEqual(["relativamente"]);
+    expect(hits("A regra é perfeitamente clara.")).toEqual(["perfeitamente"]);
+  });
+
+  it("continua fora o advérbio que carrega conteúdo — remover mudaria o que a frase afirma", () => {
+    for (const text of [
+      "Provavelmente o pedido será deferido.",
+      "O pagamento é feito mensalmente.",
+      "Somente o titular pode pedir.",
+      "O valor é de aproximadamente mil reais.",
+      "Geralmente o prazo é de dez dias.",
+      "Eventualmente o setor recusa o pedido.",
+    ]) {
+      expect(hits(text), text).toEqual([]);
+    }
+  });
+});
+

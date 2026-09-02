@@ -38,15 +38,15 @@ export const NARRATIVE_PT: NarrativeSet = {
   },
   passive_voice: {
     headline: (f) =>
-      metaStr(f, "eventiveness") === "ambiguous_present"
-        ? "Pode ser voz passiva"
+      metaStr(f, "eventiveness") === "postposed_subject"
+        ? "Voz passiva com sujeito posposto"
         : metaBool(f, "hasAgent")
           ? "Voz passiva com agente"
           : "Voz passiva sem agente",
     prose: (f) => {
       const trecho = `«${flat(f.span.text)}» combina uma forma do verbo “ser” com um particípio.`;
-      if (metaStr(f, "eventiveness") === "ambiguous_present") {
-        return `${trecho} No presente e sem agente, a mesma construção serve para uma ação sofrida, para um estado e para uma característica — e a ferramenta não distingue as três.`;
+      if (metaStr(f, "eventiveness") === "postposed_subject") {
+        return `${trecho} A oração começa no verbo e o sujeito vem depois do particípio — ordem que só a passiva admite. O texto não diz quem pratica a ação.`;
       }
       return `${trecho} ${
         metaBool(f, "hasAgent") ? "O agente aparece no próprio trecho." : "O texto não diz quem praticou a ação."
@@ -54,8 +54,8 @@ export const NARRATIVE_PT: NarrativeSet = {
     },
     confidence: (f) =>
       assistida(
-        metaStr(f, "eventiveness") === "ambiguous_present"
-          ? `Antes de reescrever, decida o que a frase faz: se descreve uma ação, a ativa pede que você diga quem a pratica; se descreve um estado ou uma característica, não há passiva aqui e o ponto pode ser marcado como visto. Essa leitura é sua — a ferramenta só aponta a construção.`
+        metaStr(f, "eventiveness") === "postposed_subject"
+          ? `A ordem verbo-sujeito confirma a passiva, mas o agente não está no texto: virar para a ativa exigiria dizer quem pratica a ação, e isso a ferramenta se recusa a inventar.`
           : metaBool(f, "hasAgent")
             ? `O agente está no texto, então a informação existe — mas virar para a ativa exige reordenar sujeito e objeto e reconjugar o verbo. Isso está fora da garantia mecânica: a ferramenta monta o andaime, a frase final é sua.`
             : `Além de reordenar e reconjugar, aqui o agente não está no texto: reescrever na ativa exigiria inventar quem praticou a ação. A ferramenta se recusa a fabricar e devolve a decisão a você.`,

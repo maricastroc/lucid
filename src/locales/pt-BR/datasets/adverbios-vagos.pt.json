@@ -1,5 +1,5 @@
 {
-  "_comentario": "Advérbios vagos (reforço/hedge) — critério de inclusão: advérbio que, removido, NÃO altera a proposição da frase, só o 'volume' (ênfase/atenuação). EXCLUI advérbios de modo com conteúdo real (rapidamente, mensalmente, judicialmente, digitalmente) para não empurrar a reescrita para perífrases do tipo 'de forma rápida' (que o critério perifrase_inflada penalizaria). Curadoria própria (ADR-058). Fronteiriços deixados FORA da lista inicial por risco de foco/conteúdo: 'particularmente' (= em especial) e 'naturalmente' (advérbio de modo real). Disparo por presença (cada ocorrência vira um info).",
+  "_comentario": "Advérbios vagos (reforço/hedge) — critério de inclusão: advérbio que, removido, NÃO altera a proposição da frase, só o 'volume' (ênfase/atenuação). EXCLUI advérbios de modo com conteúdo real (rapidamente, mensalmente, judicialmente, digitalmente) para não empurrar a reescrita para perífrases do tipo 'de forma rápida' (que o critério perifrase_inflada penalizaria). Curadoria própria (ADR-058). Fronteiriços deixados FORA da lista inicial por risco de foco/conteúdo: 'particularmente' (= em especial) e 'naturalmente' (advérbio de modo real). Disparo por presença (cada ocorrência vira um info). Ampliado em set/2026 com 6 formas (devidamente, relativamente, razoavelmente, perfeitamente, plenamente, inteiramente) — todas passam no mesmo teste de remoção, e 'devidamente' foi medido como o reforço vazio mais frequente do corpus real. Recusados na mesma passagem, por carregarem conteúdo: provavelmente, possivelmente, aproximadamente, geralmente, normalmente, somente, eventualmente, expressamente, estritamente, exatamente.",
   "forms": [
     "basicamente",
     "efetivamente",
@@ -16,6 +16,12 @@
     "totalmente",
     "completamente",
     "claramente",
-    "sinceramente"
+    "sinceramente",
+    "devidamente",
+    "relativamente",
+    "razoavelmente",
+    "perfeitamente",
+    "plenamente",
+    "inteiramente"
   ]
 }

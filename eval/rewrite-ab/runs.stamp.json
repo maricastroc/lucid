@@ -1,0 +1,7 @@
+{
+  "stale": true,
+  "motivo": "Gravado antes da correção A-13 (voz passiva no presente: discriminador estrutural em vez do balde `ambiguous_present`) e A-15 (paradigma dos verbos leves). O prompt de reescrita embute a lista de findings, então os prompts medidos deixaram de ser os prompts que saem — o alvo l7992#322-529, por exemplo, encolheu 227 caracteres porque 'Para atendimento … são criados' deixou de ser apontado. Os números do A/B (agregados.json, relatorio.md) continuam válidos como registro do que foi medido à época e NÃO como medida da régua atual. Rodar de novo antes de decidir qualquer coisa com eles.",
+  "lucidVersion": "0.1.0",
+  "dataHash": "pre-a13",
+  "configHash": "pre-a13"
+}

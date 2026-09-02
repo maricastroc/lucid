@@ -31,9 +31,45 @@ const RE_REGULAR_PARTICIPLE_SUFFIX = /^(.{2,}?)(ad|id|íd)[ao]s?$/u;
 
 const RE_STEM_STRESS_ACCENT = /[áàâãéêíóôõú]/u;
 
-type Eventiveness = "agent" | "eventive_tense" | "ambiguous_present";
+type Eventiveness = "agent" | "eventive_tense" | "postposed_subject";
 
 const PRESENT_INDICATIVE_SER = new Set(["sou", "és", "é", "somos", "sois", "são"]);
+
+const ITEM_MARKERS = new Set([
+  "art",
+  "artigo",
+  "artigos",
+  "parágrafo",
+  "parágrafos",
+  "inciso",
+  "incisos",
+  "alínea",
+  "alíneas",
+  "item",
+  "itens",
+  "anexo",
+  "capítulo",
+  "seção",
+  "subseção",
+  "título",
+  "único",
+  "única",
+]);
+
+const RE_ORDINAL_OR_NUMBER = /^(?:\d+[ºª°]?|[ºª°])$/u;
+const RE_ROMAN_NUMERAL = /^[ivxlcdm]+$/u;
+
+function hasPreverbalSubject(tokens: readonly Token[], anchorIndex: number): boolean {
+  for (let i = 0; i < anchorIndex; i++) {
+    const token = tokens[i];
+    if (!token.isWord) continue;
+    if (ITEM_MARKERS.has(token.lower)) continue;
+    if (RE_ORDINAL_OR_NUMBER.test(token.lower)) continue;
+    if (RE_ROMAN_NUMERAL.test(token.lower)) continue;
+    return true;
+  }
+  return false;
+}
 
 const DEONTIC_PARTICIPLES = new Set(["obrigado", "obrigada", "obrigados", "obrigadas"]);
 
@@ -281,11 +317,11 @@ function buildJustification(eventiveness: Eventiveness, agentTruncated: boolean)
       "e colar o resto da frase ao objeto, corrompendo o sentido."
     );
   }
-  if (eventiveness === "ambiguous_present") {
+  if (eventiveness === "postposed_subject") {
     return (
-      "Possível voz passiva: “ser” no presente + particípio, sem agente explícito. Como essa " +
-      "construção também pode indicar estado ou característica, confirme o sentido pelo contexto. " +
-      "Até lá, o apontamento fica registrado com peso menor que o de uma passiva confirmada."
+      "Frase na voz passiva: a oração começa no verbo e o sujeito vem depois do particípio " +
+      "(“É vedada a cobrança” = “a cobrança é vedada”). Falta dizer quem pratica a ação. Indique o " +
+      "agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente."
     );
   }
   return (
@@ -336,11 +372,16 @@ export const passiveVoicePass: Pass = {
         const agentExtent = hasAgent ? extendAgentPhraseEnd(tokens, agentMatch.markerIndex) : null;
         const agentTruncated = agentExtent?.truncated ?? false;
 
-        const eventiveness: Eventiveness = hasAgent
-          ? "agent"
-          : PRESENT_INDICATIVE_SER.has(anchor.lower)
-            ? "ambiguous_present"
-            : "eventive_tense";
+        let eventiveness: Eventiveness;
+        if (hasAgent) {
+          eventiveness = "agent";
+        } else if (!PRESENT_INDICATIVE_SER.has(anchor.lower)) {
+          eventiveness = "eventive_tense";
+        } else if (!hasPreverbalSubject(tokens, i)) {
+          eventiveness = "postposed_subject";
+        } else {
+          continue;
+        }
 
         const start = compositeStart(tokens, i) ?? anchor.start;
         const end = agentExtent ? agentExtent.end : participle.end;
@@ -364,7 +405,7 @@ export const passiveVoicePass: Pass = {
           criterion: CRITERION,
           category: "syntactic",
           span: { start, end, text: ctx.doc.source.slice(start, end) },
-          severity: eventiveness === "ambiguous_present" ? "info" : "warning",
+          severity: "warning",
           requiresHuman: !hasAgent || agentTruncated,
           justification: buildJustification(eventiveness, agentTruncated),
           meta,

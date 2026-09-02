@@ -361,36 +361,30 @@ describe("passiveVoicePass — eventiveness at four levels (A-1)", () => {
     }
   });
 
-  it("present tense with no agent → 'ambiguous_present': it is STILL flagged (a missing agent does not turn the sentence into a state)", () => {
-    for (const text of [
-      "O benefício é concedido após a análise.",
-      "A inscrição é realizada exclusivamente pela internet.",
-      "Os documentos são enviados diariamente.",
-      "O servidor é qualificado.",
-    ]) {
+  it("present tense with no agent → reported only when the subject is postposed (A-13)", () => {
+    for (const text of ["É vedada a cobrança.", "Art. 4º São criadas as funções."]) {
       const findings = passiveFindings(text);
       expect(findings, text).toHaveLength(1);
-      expect(findings[0].meta, text).toMatchObject({ hasAgent: false, eventiveness: "ambiguous_present" });
-      expect(findings[0].requiresHuman, text).toBe(true);
-      expect(findings[0].severity, text).toBe("info");
-      expect(findings[0].justification, text).toContain("estado ou característica");
+      expect(findings[0].meta, text).toMatchObject({ hasAgent: false, eventiveness: "postposed_subject" });
+    }
+    for (const text of ["O servidor é qualificado.", "A cobrança é vedada."]) {
+      expect(passiveFindings(text), text).toHaveLength(0);
     }
   });
 
-  it("names the other readings and asks for the context, asserting none of them", () => {
-    const [f] = passiveFindings("O servidor é qualificado.");
-    expect(f.justification).toContain("Possível voz passiva");
-    expect(f.justification).toContain("estado ou característica");
-    expect(f.justification).toContain("confirme o sentido pelo contexto");
-    expect(f.justification).not.toContain("Frase na voz passiva,");
+  it("names the verb-subject order as the reason, instead of hedging about three readings", () => {
+    const [f] = passiveFindings("É vedada a cobrança.");
+    expect(f.justification).toContain("o sujeito vem depois do particípio");
+    expect(f.justification).not.toContain("Possível voz passiva");
+    expect(f.justification).not.toContain("peso menor");
   });
 
-  it("weighs less than a confirmed passive, and says so", () => {
-    const [ambiguo] = passiveFindings("O servidor é qualificado.");
+  it("weighs the same as any other agentless passive, because it is one", () => {
+    const [posposto] = passiveFindings("É vedada a cobrança.");
     const [confirmada] = passiveFindings("O pedido foi aprovado.");
-    expect(ambiguo.severity).toBe("info");
+    expect(posposto.severity).toBe("warning");
     expect(confirmada.severity).toBe("warning");
-    expect(ambiguo.justification).toContain("peso menor");
+    expect(posposto.requiresHuman).toBe(true);
   });
 
   it("the deontic 'ser obrigado a' WITHOUT an agent is excluded from the passive (covered by leitor_terceira_pessoa)", () => {

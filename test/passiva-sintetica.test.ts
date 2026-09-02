@@ -135,3 +135,22 @@ describe("passiva_sintetica — mesoclisis coexists without double counting unde
     expect(d.findings.some((f) => f.criterion === "passiva_sintetica")).toBe(false);
   });
 });
+
+describe("verbo inerentemente pronominal em qualquer flexão (A-18)", () => {
+  const spans = (text: string): string[] =>
+    analyze(text)
+      .findings.filter((f) => f.criterion === "passiva_sintetica")
+      .map((f) => f.span.text);
+
+  it("a supressão não pode depender da flexão em que o verbo aparece", () => {
+    expect(spans("Quando se tratar de matéria urgente, o prazo dobra.")).toEqual([]);
+    expect(spans("Os que se encontravam impedidos não votaram.")).toEqual([]);
+    expect(spans("A quem se dispuser a adquiri-la, o vendedor entrega.")).toEqual([]);
+  });
+
+  it("sem tocar no que a próclise e a ênclise já apontavam", () => {
+    expect(spans("Aplica-se a multa ao infrator.")).toEqual(["Aplica-se"]);
+    expect(spans("Não se aplica a multa neste caso.")).toEqual(["se aplica"]);
+  });
+});
+

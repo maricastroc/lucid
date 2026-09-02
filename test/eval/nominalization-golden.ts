@@ -185,4 +185,25 @@ export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
       "fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela " +
       "aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar",
   },
+
+  { texto: "Fazemos a análise do pedido em cinco dias.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Fizemos a análise do pedido na semana passada.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Faremos a análise do pedido ainda hoje.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Faço a verificação dos dados todo mês.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Fiz a verificação dos dados ontem.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Farei a verificação dos dados amanhã.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Realizamos o pagamento da taxa no prazo.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Efetuamos o pagamento da taxa no prazo.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Procedemos à análise dos autos.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  {
+    texto: "Promovemos a divulgação do edital.",
+    expectedCount: 1,
+    estado: "limitacao_conhecida",
+    motivo:
+      "Teto do léxico curado, não lacuna de paradigma: 'promovemos' agora é reconhecido, mas " +
+      "'divulgação' não está em nominalizacoes.pt.json (24 entradas). Crescer o léxico é curadoria " +
+      "de domínio com avaliação própria, fora do recorte desta rodada",
+  },
+  { texto: "Se fizermos a análise do pedido, o prazo cai.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
+  { texto: "Quando fizéssemos a análise, o prazo cairia.", expectedCount: 1, expectRequiresHuman: false, estado: "correto" },
 ];

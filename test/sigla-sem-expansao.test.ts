@@ -102,3 +102,37 @@ describe("sigla_sem_expansao — a letter run welded to digits is a fragment, no
     expect(spans("Em 2025 a LGPD completou sete anos.")).toEqual(["LGPD"]);
   });
 });
+
+describe("sigla composta por hífen (A-16)", () => {
+  it("reconhece a forma órgão-UF, que o tokenizador entrega num token só", () => {
+    expect(spans("O TCE-PE publicou o manual.")).toEqual(["TCE-PE"]);
+    expect(spans("O TJ-SP julgou o recurso.")).toEqual(["TJ-SP"]);
+    expect(spans("O código TJDF-AJ consta do anexo.")).toEqual(["TJDF-AJ"]);
+  });
+
+  it("cala quando cada parte já foi apresentada — a UF já é conhecida, a outra parte foi definida", () => {
+    expect(spans("O Tribunal de Contas do Estado (TCE) publicou o manual. O TCE-PE também o adotou.")).toEqual([]);
+  });
+
+  it("segue calando a sigla soldada a dígitos, que é código e não sigla por apresentar", () => {
+    expect(spans("O código TJDF-AJ-020 consta do anexo.")).toEqual([]);
+    expect(spans("A COVID-19 mudou o atendimento.")).toEqual([]);
+  });
+});
+
+describe("palavra comum em caixa alta não é sigla (A-17)", () => {
+  it("usa o próprio documento como evidência: a forma minúscula prova que é palavra", () => {
+    expect(spans("PRAZO para recurso. O prazo é de dez dias.")).toEqual([]);
+    expect(spans("TÍTULO I Das disposições. O título trata do recurso.")).toEqual([]);
+    expect(spans("MULTA aplicada. A multa vale para o caso.")).toEqual([]);
+  });
+
+  it("sem a forma minúscula no texto, a palavra em caixa alta segue com forma de sigla", () => {
+    expect(spans("PRAZO para recurso.")).toEqual(["PRAZO"]);
+  });
+
+  it("caixa de título NÃO conta como evidência, senão calaria a sigla escrita como nome", () => {
+    expect(spans("O INCRA decidiu. O Incra publicou a portaria.")).toEqual(["INCRA"]);
+  });
+});
+

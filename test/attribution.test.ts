@@ -87,8 +87,8 @@ describe("balance — the whole revision, criterion by criterion", () => {
   });
 
   it("weighs an observation less than a warning, as the audit does", () => {
-    const observacao = balance([], findings("O caso é complicado."));
-    expect(observacao.find((b) => b.criterion === "passive_voice")!.weightAfter).toBeCloseTo(0.3);
+    const observacao = balance([], findings("O prazo venceu, obviamente."));
+    expect(observacao.find((b) => b.criterion === "adverbios_vagos")!.weightAfter).toBeCloseTo(0.3);
   });
 
   it("totals the revision without hiding what got worse", () => {

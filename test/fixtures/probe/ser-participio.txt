@@ -1,0 +1,49 @@
+# --- ADJETIVO PREDICATIVO (esperado: SILÊNCIO) ---
+O servidor é qualificado para a função.
+A equipe é qualificada.
+Os candidatos são qualificados.
+O procedimento é complicado.
+A regra é conhecida de todos.
+O prazo é adequado ao caso.
+A medida é necessária.
+O texto é claro e é objetivo.
+Ele é experiente e é dedicado.
+A sala é reservada aos servidores.
+O documento é datado de ontem.
+A resposta é limitada ao pedido.
+O caso é isolado.
+A conduta é reiterada.
+O servidor é aposentado.
+A empresa é privada.
+O valor é elevado.
+O risco é reduzido.
+A informação é detalhada.
+O sistema é integrado.
+O processo é digitalizado.
+O prédio é arborizado.
+O terreno é murado.
+A decisão é motivada.
+O relatório é fundamentado.
+# --- MODIFICAÇÃO DE GRAU (adjetivo inequívoco) ---
+O servidor é muito qualificado.
+O servidor é bastante qualificado.
+O servidor é pouco qualificado.
+O servidor é altamente qualificado.
+O servidor é mais qualificado que o outro.
+O servidor é tão qualificado quanto o outro.
+O servidor é extremamente dedicado.
+# --- PASSIVA LEGÍTIMA NO PRESENTE (esperado: APONTAR) ---
+O benefício é concedido após a análise.
+O pedido é indeferido pela comissão.
+O prazo é contado em dias úteis.
+A multa é aplicada ao infrator.
+O recurso é julgado pelo relator.
+O edital é publicado no diário oficial.
+Os autos são remetidos ao arquivo.
+A taxa é cobrada no ato da inscrição.
+# --- PASSIVA EM TEMPO EVENTIVO (esperado: APONTAR) ---
+O pedido foi indeferido.
+O projeto será aprovado amanhã.
+A lei era aplicada com rigor.
+O documento tinha sido assinado.
+O contrato está sendo revisado pela equipe.

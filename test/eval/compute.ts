@@ -5,6 +5,7 @@ import type { CriterionId } from "../../src/lucid";
 import { createDataView, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
 import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
+import { siglaSemExpansaoPass } from "../../src/locales/pt-BR/passes/sigla-sem-expansao";
 import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalization";
 import { passiveVoicePass } from "../../src/locales/pt-BR/passes/passive-voice";
 import { countSyllables } from "../../src/locales/pt-BR/services/syllables";
@@ -23,6 +24,7 @@ import type {
   SyllableSummary,
 } from "../../src/report/eval/contract";
 import { buildDocument } from "../support/pt";
+import { GOLDEN_SIGLA } from "./acronym-golden";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
@@ -30,8 +32,16 @@ import { GOLDEN_SILABAS } from "./silabas-golden";
 import { GOLDEN_INTEGRADO } from "../golden/integrated-golden";
 
 const ctx = () => ({ doc: buildDocument(""), config: DEFAULT_CONFIG, data: createDataView([]) });
-const runPass = (pass: { run: (c: ReturnType<typeof ctx>) => unknown[] }, text: string): unknown[] =>
-  pass.run({ doc: buildDocument(text), config: DEFAULT_CONFIG, data: createDataView([]) });
+
+const runPass = (
+  pass: { dataDeps?: readonly string[]; run: (c: ReturnType<typeof ctx>) => unknown[] },
+  text: string,
+): unknown[] =>
+  pass.run({
+    doc: buildDocument(text),
+    config: DEFAULT_CONFIG,
+    data: createDataView((pass.dataDeps ?? []) as readonly DatasetId[]),
+  });
 
 const round = (v: number, places = 4): number => {
   const f = 10 ** places;
@@ -213,6 +223,26 @@ export function evaluatePassiveVoice(): {
   return { criterion: "passive_voice", results, summary: summarize(results) };
 }
 
+export function evaluateAcronym(): {
+  criterion: "sigla_sem_expansao";
+  results: EntryResult[];
+  summary: CountSummary;
+} {
+  const results = GOLDEN_SIGLA.map((entry): EntryResult => {
+    const actualCount = runPass(siglaSemExpansaoPass, entry.texto).length;
+    return {
+      texto: entry.texto,
+      expectedCount: entry.expectedCount,
+      actualCount,
+      estado: entry.estado,
+      motivo: entry.motivo,
+      ...scoreCounts(entry.expectedCount, actualCount),
+    };
+  });
+
+  return { criterion: "sigla_sem_expansao", results, summary: summarize(results) };
+}
+
 export interface SyllableEntryResult {
   palavra: string;
   real: number;
@@ -261,6 +291,7 @@ export const DETECTOR_EVALUATORS: readonly DetectorEvaluator[] = [
   { criterion: "jargon", evaluate: evaluateJargon },
   { criterion: "nominalization", evaluate: evaluateNominalization },
   { criterion: "passive_voice", evaluate: evaluatePassiveVoice },
+  { criterion: "sigla_sem_expansao", evaluate: evaluateAcronym },
 ];
 
 export interface CoverageInputs {
@@ -297,12 +328,14 @@ export function hashGoldens(
     jargon: readonly unknown[];
     nominalization: readonly unknown[];
     passiveVoice: readonly unknown[];
+    acronym: readonly unknown[];
     syllables: readonly unknown[];
     integrated: readonly unknown[];
   } = {
     jargon: GOLDEN_JARGAO,
     nominalization: GOLDEN_NOMINALIZACAO,
     passiveVoice: GOLDEN_VOZ_PASSIVA,
+    acronym: GOLDEN_SIGLA,
     syllables: GOLDEN_SILABAS,
     integrated: GOLDEN_INTEGRADO,
   },
@@ -311,6 +344,7 @@ export function hashGoldens(
     ["jargon", goldens.jargon],
     ["nominalization", goldens.nominalization],
     ["passive_voice", goldens.passiveVoice],
+    ["sigla_sem_expansao", goldens.acronym],
     ["syllables", goldens.syllables],
     ["integrated", goldens.integrated],
   ]);

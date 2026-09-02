@@ -39,15 +39,15 @@ export const NARRATIVE_EN: NarrativeSet = {
   },
   passive_voice: {
     headline: (f) =>
-      metaStr(f, "eventiveness") === "ambiguous_present"
-        ? "This may be the passive voice"
+      metaStr(f, "eventiveness") === "postposed_subject"
+        ? "Passive voice with a postposed subject"
         : metaBool(f, "hasAgent")
           ? "Passive voice with agent"
           : "Passive voice without agent",
     prose: (f) => {
       const passage = `«${flat(f.span.text)}» combines a form of the verb “ser” with a participle.`;
-      if (metaStr(f, "eventiveness") === "ambiguous_present") {
-        return `${passage} In the present with no agent, the same construction carries an action undergone, a state and a plain characteristic alike — and the tool tells none of the three apart.`;
+      if (metaStr(f, "eventiveness") === "postposed_subject") {
+        return `${passage} The clause opens on the verb and the subject follows the participle — an order only the passive allows. The text does not say who performs the action.`;
       }
       return `${passage} ${
         metaBool(f, "hasAgent")
@@ -57,8 +57,8 @@ export const NARRATIVE_EN: NarrativeSet = {
     },
     confidence: (f) =>
       assistida(
-        metaStr(f, "eventiveness") === "ambiguous_present"
-          ? `Before rewriting, settle what the sentence does: if it describes an action, the active voice asks you to say who performs it; if it describes a state or a characteristic, there is no passive here and the point can be marked as seen. That reading is yours — the tool only points at the construction.`
+        metaStr(f, "eventiveness") === "postposed_subject"
+          ? `The verb-subject order confirms the passive, but the agent is not in the text: turning it active would mean saying who performs the action, and the tool refuses to invent that.`
           : metaBool(f, "hasAgent")
             ? `The agent is in the text, so the information exists — but turning it active means reordering subject and object and reconjugating the verb. That is outside any mechanical guarantee: the tool builds the scaffolding, the final sentence is yours.`
             : `Beyond reordering and reconjugating, the agent is not in the text here: rewriting in the active voice would mean inventing who performed the action. The tool refuses to fabricate and hands the decision back to you.`,

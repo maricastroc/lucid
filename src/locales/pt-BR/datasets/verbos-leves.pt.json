@@ -350,6 +350,691 @@
       "form": "procedendo",
       "lemma": "proceder",
       "pattern": "a"
+    },
+    {
+      "form": "faço",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazes",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazemos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazeis",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fiz",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizeste",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizemos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizestes",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "farei",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "farás",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faremos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fareis",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faríamos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faríeis",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazíamos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fazíeis",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "faças",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "façamos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "façais",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizesse",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizesses",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizéssemos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizésseis",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizessem",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizer",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizeres",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizermos",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizerdes",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "fizerem",
+      "lemma": "fazer",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizo",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizas",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizamos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizais",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizei",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaste",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizastes",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizarei",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizarás",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaremos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizareis",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaríamos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizaríeis",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizávamos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizáveis",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizes",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizemos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizeis",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizasse",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizasses",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizássemos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizásseis",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizassem",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizarmos",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizarem",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizares",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "realizardes",
+      "lemma": "realizar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuo",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuas",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuamos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuais",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuei",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaste",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuastes",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuarei",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuarás",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaremos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuareis",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaríamos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuaríeis",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuávamos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuáveis",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetues",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuemos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetueis",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuasse",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuasses",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuássemos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuásseis",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuassem",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuarmos",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuarem",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuares",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "efetuardes",
+      "lemma": "efetuar",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovo",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoves",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovemos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveis",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovi",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveste",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovestes",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverei",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverás",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveremos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovereis",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveríamos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveríeis",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovíamos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovíeis",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovas",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovamos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovais",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovesse",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovesses",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovêssemos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovêsseis",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovessem",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promovermos",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverem",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoveres",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "promoverdes",
+      "lemma": "promover",
+      "pattern": "direct"
+    },
+    {
+      "form": "procedo",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedes",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedemos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedeis",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedi",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedeste",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedestes",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederei",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederás",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederemos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedereis",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederíamos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederíeis",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedíamos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedíeis",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedas",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedamos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedais",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedesse",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedesses",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedêssemos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedêsseis",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedessem",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procedermos",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederem",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederes",
+      "lemma": "proceder",
+      "pattern": "a"
+    },
+    {
+      "form": "procederdes",
+      "lemma": "proceder",
+      "pattern": "a"
     }
   ]
 }

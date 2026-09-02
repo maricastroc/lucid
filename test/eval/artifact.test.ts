@@ -13,6 +13,7 @@ import {
   summarize,
 } from "./compute";
 import { EVAL_SCHEMA_VERSION } from "../../src/report/eval/contract";
+import { GOLDEN_SIGLA } from "./acronym-golden";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { GOLDEN_VOZ_PASSIVA } from "./passive-voice-golden";
@@ -38,6 +39,7 @@ describe("eval artifact — publication invariants", () => {
       jargon: [...GOLDEN_JARGAO, { texto: "synthetic entry", expectedCount: 1 }],
       nominalization: GOLDEN_NOMINALIZACAO,
       passiveVoice: GOLDEN_VOZ_PASSIVA,
+      acronym: GOLDEN_SIGLA,
       syllables: GOLDEN_SILABAS,
       integrated: GOLDEN_INTEGRADO,
     });

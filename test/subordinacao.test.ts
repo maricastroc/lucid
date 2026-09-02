@@ -41,10 +41,14 @@ describe("subordinacao_densa — phrasal connectives count as one clause each", 
 });
 
 describe("subordinacao_densa — precision: polysemous words do NOT count", () => {
-  it("relative 'que', 'se' and 'caso' (the noun) do not inflate the count", () => {
+  it("'se' and 'caso' (the noun) still do not inflate the count", () => {
     const text =
       "O documento que foi assinado, o caso que analisamos e o recurso que segue, se possível, vão em anexo.";
-    expect(subordinationFindings(text)).toHaveLength(0);
+    const [f] = subordinationFindings(text);
+    expect(f).toBeDefined();
+    expect(f.meta?.clauses).toBe(3);
+
+    expect(subordinationFindings("O caso segue, se possível, em anexo.")).toHaveLength(0);
   });
 });
 
@@ -54,3 +58,32 @@ describe("subordinacao_densa — switchable off and deterministic", () => {
     expect(subordinationFindings(text)).toEqual(subordinationFindings(text));
   });
 });
+
+describe("o \u201cque\u201d simples entra, com a ambiguidade tratada (A-19)", () => {
+  it("encadeamento de relativas agora dispara — era o buraco que deixava o critério inerte", () => {
+    const text =
+      "O requerente que apresentar o documento que comprove a renda que foi declarada receberá o benefício.";
+    const [f] = subordinationFindings(text);
+    expect(f).toBeDefined();
+    expect(f.meta?.clauses).toBe(3);
+  });
+
+  it("conta a relativa mesmo separada por vírgula", () => {
+    expect(subordinationFindings("A norma que trata do prazo, que é de dez dias, e que consta do art. 5º.")).toHaveLength(1);
+  });
+
+  it("não conta o \u201cque\u201d comparativo, que não abre oração", () => {
+    expect(subordinationFindings("Ele é mais alto que o irmão e mais rápido que o primo e mais forte que o pai.")).toHaveLength(0);
+    expect(subordinationFindings("O prazo é tão curto que assusta, tão curto que espanta, tão curto que dói.")).toHaveLength(0);
+  });
+
+  it("não conta o \u201cque\u201d da clivada", () => {
+    expect(subordinationFindings("O que importa é que o prazo venceu.")).toHaveLength(0);
+  });
+
+  it("a pontuação encerra a janela: uma vírgula separa a comparação da relativa seguinte", () => {
+    const text = "O prazo é mais curto, e a norma que trata dele, que é antiga, e que ninguém lê, confunde.";
+    expect(subordinationFindings(text)).toHaveLength(1);
+  });
+});
+

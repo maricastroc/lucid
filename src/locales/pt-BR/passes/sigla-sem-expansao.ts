@@ -4,6 +4,8 @@ const CRITERION = "sigla_sem_expansao";
 
 const RE_ACRONYM = /^\p{Lu}{2,6}$/u;
 
+const RE_COMPOUND_ACRONYM = /^\p{Lu}{2,6}(?:-\p{Lu}{2,6}){1,2}$/u;
+
 const RE_ROMAN = /^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
 
 function isRomanNumeral(text: string): boolean {
@@ -11,7 +13,19 @@ function isRomanNumeral(text: string): boolean {
 }
 
 function isAcronymShape(token: Token): boolean {
-  return token.isWord && RE_ACRONYM.test(token.text) && !isRomanNumeral(token.text);
+  if (!token.isWord) return false;
+  if (RE_COMPOUND_ACRONYM.test(token.text)) return true;
+  return RE_ACRONYM.test(token.text) && !isRomanNumeral(token.text);
+}
+
+const segmentsOf = (acronym: string): readonly string[] => acronym.split("-");
+
+function lowercaseFormsIn(tokens: readonly Token[]): ReadonlySet<string> {
+  const forms = new Set<string>();
+  for (const token of tokens) {
+    if (token.isWord && token.text === token.lower) forms.add(token.lower);
+  }
+  return forms;
 }
 
 function isAllCapsWord(token: Token | undefined): boolean {
@@ -55,6 +69,7 @@ export const siglaSemExpansaoPass: Pass = {
 
     const known = ctx.data.get<ReadonlySet<string>>("siglas-conhecidas.pt");
     const tokens = ctx.doc.tokens;
+    const writtenInLowercase = lowercaseFormsIn(tokens);
     const defined = new Set<string>();
     const flagged = new Set<string>();
     const findings: PassFinding[] = [];
@@ -64,6 +79,7 @@ export const siglaSemExpansaoPass: Pass = {
       if (!isAcronymShape(tok)) continue;
       const key = tok.text;
       if (known.has(key)) continue;
+      if (writtenInLowercase.has(tok.lower)) continue;
 
       const prev = tokens[i - 1];
       const next = tokens[i + 1];
@@ -77,6 +93,7 @@ export const siglaSemExpansaoPass: Pass = {
       if (isAllCapsWord(prev) || isAllCapsWord(next)) continue;
       if (isWeldedToDigits(tokens, i)) continue;
 
+      if (segmentsOf(key).every((part) => defined.has(part) || known.has(part))) continue;
       if (defined.has(key) || flagged.has(key)) continue;
       flagged.add(key);
 

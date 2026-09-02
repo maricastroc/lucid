@@ -64,7 +64,10 @@ function readableAsWord(token: string): boolean {
         i = ahead;
         continue;
       }
-      if (!LEGAL_CODAS.has(coda[0]) && !LEGAL_ONSETS.has(coda.slice(0, 2))) return false;
+
+      if (LEGAL_ONSETS.has(coda.slice(0, 2))) continue;
+      if (!LEGAL_CODAS.has(coda[0])) return false;
+      i += 1;
     }
   }
 

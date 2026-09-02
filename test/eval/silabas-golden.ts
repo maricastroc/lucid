@@ -91,4 +91,21 @@ export const GOLDEN_SILABAS: readonly EntradaGolden[] = [
     estado: "limitacao_conhecida",
     motivo: "sigla com vogal, mas convencionalmente soletrada na fala — indistinguível de ONU/PIB pela grafia",
   },
+
+  { palavra: "COMISSÃO", real: 3, estado: "correto" },
+  { palavra: "INDEFERIDO", real: 5, estado: "correto" },
+  { palavra: "REQUERENTE", real: 4, estado: "correto" },
+  { palavra: "CONSIDERANDO", real: 5, estado: "correto" },
+  { palavra: "PEDIDO", real: 3, estado: "correto" },
+  { palavra: "ANÁLISE", real: 4, estado: "correto" },
+  { palavra: "DISPOSIÇÕES", real: 4, estado: "correto" },
+  { palavra: "PARÁGRAFO", real: 4, estado: "correto" },
+
+  { palavra: "INSS", real: 4, estado: "correto" },
+  { palavra: "CNPJ", real: 4, estado: "correto" },
+  { palavra: "IBGE", real: 4, estado: "correto" },
+  { palavra: "PDF", real: 3, estado: "correto" },
+
+  { palavra: "ANVISA", real: 3, estado: "correto" },
+  { palavra: "SUS", real: 1, estado: "correto" },
 ];

@@ -5,7 +5,7 @@ exports[`snapshots of the full Diagnostic > 'admin_simples_sem_finding' 1`] = `
   "findings": [],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -350,7 +350,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -678,7 +678,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1003,7 +1003,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1404,7 +1404,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1684,7 +1684,7 @@ exports[`snapshots of the full Diagnostic > 'termos_protegidos_por_guardas' 1`] 
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1939,7 +1939,7 @@ exports[`snapshots of the full Diagnostic > 'texto_vazio' 1`] = `
   "findings": [],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2219,7 +2219,7 @@ exports[`snapshots of the full Diagnostic > 'unicode_aspas_travessao' 1`] = `
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2528,7 +2528,7 @@ exports[`snapshots of the full Diagnostic > 'voz_passiva_com_e_sem_agente' 1`] =
   ],
   "meta": {
     "configHash": "44521072",
-    "dataHash": "12660a83",
+    "dataHash": "aa82277c",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
