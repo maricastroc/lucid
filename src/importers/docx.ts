@@ -12,6 +12,7 @@ export interface DocxNotes {
   readonly tablesFlattened: number;
   readonly textBoxesInlined: number;
   readonly headingStylesRecovered: readonly string[];
+  readonly headingStylesInferred: readonly string[];
   readonly unrecognisedParagraphStyles: readonly string[];
 }
 
@@ -48,36 +49,100 @@ interface OutlineStyle {
   readonly level: number;
 }
 
-function outlineStyles(stylesXml: string): Map<string, OutlineStyle> {
-  const found = new Map<string, OutlineStyle>();
+interface ParagraphStyle {
+  readonly name: string;
+  readonly outline: number | null;
+  readonly basedOn: string | null;
+}
+
+function paragraphStyles(stylesXml: string): Map<string, ParagraphStyle> {
+  const found = new Map<string, ParagraphStyle>();
   const re = new RegExp(RE_STYLE.source, "g");
   for (let m = re.exec(stylesXml); m !== null; m = re.exec(stylesXml)) {
     const [, attributes, inner] = m;
     if (!/w:type="paragraph"/.test(attributes)) continue;
     const id = /w:styleId="([^"]*)"/.exec(attributes)?.[1];
     const name = /<w:name\s+w:val="([^"]*)"/.exec(inner)?.[1];
+    if (id === undefined || name === undefined) continue;
     const outline = /<w:outlineLvl\s+w:val="(\d+)"/.exec(inner)?.[1];
-    if (id === undefined || name === undefined || outline === undefined) continue;
-    found.set(id, { name, level: Number(outline) + 1 });
+    found.set(id, {
+      name,
+      outline: outline === undefined ? null : Number(outline) + 1,
+      basedOn: /<w:basedOn\s+w:val="([^"]*)"/.exec(inner)?.[1] ?? null,
+    });
   }
   return found;
 }
 
-export function headingStyleMap(stylesXml: string, documentXml: string): { entries: string[]; names: string[] } {
+function outlineStyles(stylesXml: string): Map<string, OutlineStyle> {
+  const found = new Map<string, OutlineStyle>();
+  for (const [id, style] of paragraphStyles(stylesXml)) {
+    if (style.outline === null) continue;
+    found.set(id, { name: style.name, level: style.outline });
+  }
+  return found;
+}
+
+const RE_HEADING_NAME = /(?:^|[\s_-])(?:h|heading\s*|t[ií]tulo\s*|n[ií]vel\s*)([1-6])$/iu;
+
+function levelFromName(name: string): number | null {
+  const level = RE_HEADING_NAME.exec(name.trim())?.[1];
+  return level === undefined ? null : Number(level);
+}
+
+function inheritedOutline(id: string, styles: Map<string, ParagraphStyle>): number | null {
+  const seen = new Set<string>();
+  let current: string | null = id;
+  while (current !== null && !seen.has(current)) {
+    seen.add(current);
+    const style: ParagraphStyle | undefined = styles.get(current);
+    if (style === undefined) return null;
+    if (style.outline !== null) return style.outline;
+    current = style.basedOn;
+  }
+  return null;
+}
+
+export function headingStyleMap(
+  stylesXml: string,
+  documentXml: string,
+): { entries: string[]; names: string[]; inferred: string[] } {
   const used = referencedStyleIds(documentXml);
+  const styles = paragraphStyles(stylesXml);
   const levelByName = new Map<string, number>();
+  const inferred = new Set<string>();
+
+  const offer = (name: string, level: number, guessed: boolean): void => {
+    if (level < 1 || level > MAX_HEADING_LEVEL) return;
+    if (name.includes("'")) return;
+    if (levelByName.has(name)) return;
+    levelByName.set(name, level);
+    if (guessed) inferred.add(name);
+  };
 
   for (const [id, style] of outlineStyles(stylesXml)) {
-    if (!used.has(id)) continue;
-    if (style.level < 1 || style.level > MAX_HEADING_LEVEL) continue;
-    if (style.name.includes("'")) continue;
-    levelByName.set(style.name, style.level);
+    if (used.has(id)) offer(style.name, style.level, false);
+  }
+
+  for (const id of used) {
+    const style = styles.get(id);
+    if (style === undefined || style.outline !== null) continue;
+    const level = inheritedOutline(id, styles);
+    if (level !== null) offer(style.name, level, false);
+  }
+
+  for (const id of used) {
+    const style = styles.get(id);
+    if (style === undefined) continue;
+    const level = levelFromName(style.name);
+    if (level !== null) offer(style.name, level, true);
   }
 
   const names = [...levelByName.keys()].sort();
   return {
     entries: names.map((name) => `p[style-name='${name}'] => h${levelByName.get(name)}:fresh`),
     names,
+    inferred: [...inferred].sort(),
   };
 }
 
@@ -142,6 +207,7 @@ export async function importDocx(
         tablesFlattened: Math.max(0, tablesInFile - tablesPreserved),
         textBoxesInlined: countOf(documentXml, RE_TEXT_BOX),
         headingStylesRecovered: map.names,
+        headingStylesInferred: map.inferred,
         unrecognisedParagraphStyles: unrecognisedParagraphStyles(messages),
       },
     },

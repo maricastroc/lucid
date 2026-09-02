@@ -29,6 +29,8 @@ export const CRITERION_TAXONOMY: Record<CriterionId, CriterionTaxonomyEntry> = {
   mesoclise: { source: "editorial-pt-br", principleGroup: "understandable" },
   adverbio_mente_denso: { source: "editorial-pt-br", principleGroup: "understandable" },
   adverbios_vagos: { source: "editorial-pt-br", principleGroup: "understandable" },
+  vocabulario_da_organizacao: { source: "organizational", principleGroup: "understandable" },
+
   single_item_list: { source: "structural-heuristic", principleGroup: "findable" },
   heading_body_mismatch: { source: "structural-heuristic", principleGroup: "findable" },
 };

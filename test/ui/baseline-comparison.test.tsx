@@ -36,6 +36,7 @@ function baselineFile(over: Record<string, unknown> = {}, text = V1): File {
     profileId: "base",
     config: DEFAULT_CONFIG,
     marks,
+    vocabulary: [],
   });
   const payload = JSON.parse(serializeBaseline(baseline)) as Record<string, unknown>;
   return new File([JSON.stringify({ ...payload, ...over })], "v1.lucid.json", { type: "application/json" });

@@ -1,27 +1,16 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
 import { analyze, type Span } from "../src/lucid";
-import {
-  DeepSeekProvider,
-  DEEPSEEK_MODELS,
-  GeminiProvider,
-  GEMINI_MODELS,
-  GroqProvider,
-  GROQ_MODELS,
-  type ChatProvider,
-} from "../src/llm";
+import { GeminiProvider, GEMINI_MODELS, type ChatProvider } from "../src/llm";
 import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
 import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
 const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-const PROBE_GROQ_MODEL = "openai/gpt-oss-120b";
 const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
 interface Keys {
-  groq: string | null;
   gemini: string | null;
-  deepseek: string | null;
 }
 
 function loadKey(name: string): string | null {
@@ -35,26 +24,15 @@ function loadKey(name: string): string | null {
 }
 
 function providerFor(model: string, keys: Keys): { provider: ChatProvider; tokens: () => number } {
-  if ((GROQ_MODELS as readonly string[]).includes(model)) {
-    if (!keys.groq) throw new Error(`GROQ_API_KEY ausente para ${model}`);
-    const p = new GroqProvider(keys.groq);
-    return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
-  }
   if ((GEMINI_MODELS as readonly string[]).includes(model)) {
     if (!keys.gemini) throw new Error(`GEMINI_API_KEY ausente para ${model}`);
     const p = new GeminiProvider(keys.gemini);
-    return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
-  }
-  if ((DEEPSEEK_MODELS as readonly string[]).includes(model)) {
-    if (!keys.deepseek) throw new Error(`DEEPSEEK_API_KEY ausente para ${model}`);
-    const p = new DeepSeekProvider(keys.deepseek);
     return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
   }
   throw new Error(`modelo sem provider conhecido: ${model}`);
 }
 
 function buildProbe(keys: Keys): LlmComprehensionProbe {
-  if (keys.groq) return new LlmComprehensionProbe(new GroqProvider(keys.groq), PROBE_GROQ_MODEL);
   if (keys.gemini) return new LlmComprehensionProbe(new GeminiProvider(keys.gemini), PROBE_GEMINI_MODEL);
   throw new Error("nenhuma chave disponível para a sonda");
 }
@@ -163,16 +141,10 @@ function pct(bools: boolean[]): number {
 
 describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", () => {
   it("compara (modelo × estratégia) nas 6 dimensões", async () => {
-    const keys: Keys = {
-      groq: loadKey("GROQ_API_KEY"),
-      gemini: loadKey("GEMINI_API_KEY"),
-      deepseek: loadKey("DEEPSEEK_API_KEY"),
-    };
-    if (!keys.groq && !keys.gemini) {
-      throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
-    }
+    const keys: Keys = { gemini: loadKey("GEMINI_API_KEY") };
+    if (!keys.gemini) throw new Error("GEMINI_API_KEY ausente — exporte ou ponha no .env");
 
-    const models = (process.env.BENCHMARK_MODELS ?? "openai/gpt-oss-120b,gemini-2.5-flash")
+    const models = (process.env.BENCHMARK_MODELS ?? "gemini-2.5-flash")
       .split(",")
       .map((m) => m.trim())
       .filter(Boolean);

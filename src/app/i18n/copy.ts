@@ -128,6 +128,10 @@ export interface UiCopy {
     readonly exportDocx: string;
     readonly exportDocumentMd: string;
     readonly printDocument: string;
+    readonly exportPdf: string;
+    readonly exportPdfNote: string;
+    readonly pdfPageLabel: (page: number, total: number) => string;
+    readonly pdfError: string;
     readonly groupAudit: string;
     readonly groupDocument: string;
     readonly exportTxt: string;
@@ -136,13 +140,16 @@ export interface UiCopy {
     readonly importTables: (n: number) => string;
     readonly importTextBoxes: (n: number) => string;
     readonly importRuledRegions: (n: number) => string;
+    readonly importPdfTables: (n: number) => string;
     readonly importFurniture: (n: number) => string;
     readonly importDehyphenated: (n: number) => string;
     readonly importAnd: string;
     readonly importAlso: string;
     readonly importRecovered: (styles: string) => string;
+    readonly importInferred: (styles: string) => string;
     readonly importFlattened: (what: string) => string;
     readonly importFromPdf: (what: string) => string;
+    readonly importPdfInferred: (headings: number, items: number, references: string) => string;
     readonly importPdfRuled: string;
     readonly structureMissing: Record<string, string>;
     readonly structureMissingJoin: string;
@@ -207,6 +214,9 @@ export interface UiCopy {
     readonly hiddenCriteria: (n: number) => string;
     readonly highlightsOff: string;
     readonly absenceCaveat: string;
+    readonly zeroCurated: string;
+    readonly zeroProductive: string;
+    readonly zeroDeclared: (n: number) => string;
     readonly occurrences: (n: number) => string;
     readonly distinct: (n: number) => string;
     readonly hiddenByFilter: (n: number) => string;
@@ -270,6 +280,9 @@ export interface UiCopy {
     readonly footerDeterministic: string;
 
     readonly safeHeader: string;
+    readonly declaredHeader: string;
+    readonly declaredEquivalent: string;
+    readonly declaredApplyNote: string;
     readonly safeTerm: string;
     readonly safePlain: string;
     readonly safeEquivalent: string;
@@ -337,6 +350,7 @@ export interface UiCopy {
     readonly saltoDeNivelTitulo: string;
     readonly longHeading: string;
     readonly singleItemList: string;
+    readonly vocabularioDaOrganizacao: string;
     readonly headingBodyMismatch: string;
     readonly jargon: string;
 
@@ -400,6 +414,28 @@ export interface UiCopy {
     readonly agentRecorded: (agent: string) => string;
   };
 
+  readonly vocabulary: {
+    readonly label: string;
+    readonly chip: string;
+    readonly lead: string;
+    readonly fromSelection: string;
+    readonly useSelection: string;
+    readonly termLabel: string;
+    readonly termPlaceholder: string;
+    readonly plainLabel: string;
+    readonly plainHint: string;
+    readonly plainPlaceholder: string;
+    readonly reasonLabel: string;
+    readonly reasonPlaceholder: string;
+    readonly add: string;
+    readonly duplicate: string;
+    readonly declaredLabel: (n: number) => string;
+    readonly occurrences: (n: number) => string;
+    readonly signalOnly: string;
+    readonly swapsTo: (plain: string) => string;
+    readonly remove: (term: string) => string;
+    readonly authorityCaveat: string;
+  };
   readonly briefing: {
     readonly label: string;
     readonly chip: string;
@@ -687,6 +723,7 @@ export interface UiCopy {
     readonly list: string;
     readonly orderedList: string;
     readonly listItems: (n: number) => string;
+    readonly listLevels: (n: number) => string;
     readonly table: string;
     readonly tableShape: (rows: number, columns: number) => string;
     readonly tableLabel: string;
@@ -704,6 +741,9 @@ export interface UiCopy {
     readonly editorialExtensionTag: string;
     readonly editorialExtensionTitle: string;
     readonly structuralHeuristic: string;
+    readonly organizational: string;
+    readonly organizationalTag: string;
+    readonly organizationalTitle: string;
     readonly structuralHeuristicTag: string;
     readonly structuralHeuristicTitle: string;
   };

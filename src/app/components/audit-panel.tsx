@@ -112,6 +112,8 @@ export interface AuditPanelProps {
   onCloseSettings: () => void;
   probeExcerpt?: string;
   onClearProbeExcerpt?: () => void;
+  selection: string;
+  onClearSelection: () => void;
 }
 
 export function AuditPanel(props: AuditPanelProps) {
@@ -131,6 +133,16 @@ export function AuditPanel(props: AuditPanelProps) {
       ),
     [route.pending, props.ledger.length, props.probeExcerpt, c],
   );
+
+  const vocabularyCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const finding of props.findings) {
+      if (finding.criterion !== "vocabulario_da_organizacao") continue;
+      const term = typeof finding.meta?.term === "string" ? finding.meta.term : finding.span.text;
+      counts.set(term, (counts.get(term) ?? 0) + 1);
+    }
+    return counts;
+  }, [props.findings]);
 
   const nav = useAuditView(views, scrollRef);
   const { goToRoute, goTo, setReviewMode } = nav;
@@ -179,6 +191,9 @@ export function AuditPanel(props: AuditPanelProps) {
         onSelectOccurrence={props.occurrences.onSelect}
         onStepOccurrence={props.occurrences.onStep}
         onClose={closeSettings}
+        selection={props.selection}
+        onClearSelection={props.onClearSelection}
+        vocabularyCounts={vocabularyCounts}
       />
     );
   }
@@ -279,6 +294,7 @@ export function AuditPanel(props: AuditPanelProps) {
         {active.id === "review" && (
           <ReviewView
             diagnostic={props.diagnostic}
+            declaredTerms={props.settings.config.vocabulario.terms.length}
             route={route}
             groups={props.groups}
             visible={props.visible}

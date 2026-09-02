@@ -70,6 +70,8 @@ export function Guidance({ finding, source, allFindings, declaration, onDeclare 
       return <GuideText>{g.singleItemList}</GuideText>;
     case "heading_body_mismatch":
       return <GuideText>{g.headingBodyMismatch}</GuideText>;
+    case "vocabulario_da_organizacao":
+      return <GuideText>{g.vocabularioDaOrganizacao}</GuideText>;
     default:
       return assertNever(criterion);
   }

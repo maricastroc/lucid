@@ -5,7 +5,7 @@ import {
   type ChatCompletionOptions,
   type ChatProvider,
 } from "./types";
-import type { TokenUsage } from "./groq";
+import type { TokenUsage } from "./types";
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 

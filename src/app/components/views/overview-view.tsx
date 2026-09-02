@@ -18,7 +18,9 @@ function flattenedLabel(notes: ImportNotes, c: ReturnType<typeof copyFor>): stri
     if (notes.tablesFlattened > 0) parts.push(c.overview.importTables(notes.tablesFlattened));
     if (notes.textBoxesInlined > 0) parts.push(c.overview.importTextBoxes(notes.textBoxesInlined));
   } else {
-    if (notes.ruledRegions > 0) parts.push(c.overview.importRuledRegions(notes.ruledRegions));
+    if (notes.tablesRecovered > 0) parts.push(c.overview.importPdfTables(notes.tablesRecovered));
+    const unread = notes.ruledRegions - notes.tablesRecovered;
+    if (unread > 0) parts.push(c.overview.importRuledRegions(unread));
     const furniture = notes.removedHeaders + notes.removedFooters + notes.removedPageNumbers;
     if (furniture > 0) parts.push(c.overview.importFurniture(furniture));
     if (notes.dehyphenated > 0) parts.push(c.overview.importDehyphenated(notes.dehyphenated));
@@ -68,6 +70,10 @@ export function OverviewView({
   for (const f of findings) sev[f.severity]++;
   const deviations = configDeviations(config);
   const offCount = disabledCriteria(config, lang).length;
+  const declaredStyles =
+    importNotes?.format === "docx"
+      ? importNotes.headingStylesRecovered.filter((name) => !importNotes.headingStylesInferred.includes(name))
+      : [];
   const flattened = importNotes === null ? null : flattenedLabel(importNotes, c);
 
   return (
@@ -179,8 +185,20 @@ export function OverviewView({
               )}
             </li>
           )}
-          {importNotes?.format === "docx" && importNotes.headingStylesRecovered.length > 0 && (
-            <li className="text-ink-2">{c.overview.importRecovered(importNotes.headingStylesRecovered.join(", "))}</li>
+          {importNotes?.format === "docx" && declaredStyles.length > 0 && (
+            <li className="text-ink-2">{c.overview.importRecovered(declaredStyles.join(", "))}</li>
+          )}
+          {importNotes?.format === "pdf" && importNotes.headingsInferred + importNotes.itemsInferred > 0 && (
+            <li className="text-ink-2">
+              {c.overview.importPdfInferred(
+                importNotes.headingsInferred,
+                importNotes.itemsInferred,
+                importNotes.structureReferences.join("; "),
+              )}
+            </li>
+          )}
+          {importNotes?.format === "docx" && importNotes.headingStylesInferred.length > 0 && (
+            <li className="text-ink-2">{c.overview.importInferred(importNotes.headingStylesInferred.join(", "))}</li>
           )}
           {flattened !== null && (
             <li className="text-ink-2">

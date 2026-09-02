@@ -325,9 +325,11 @@
   background-clip: padding-box;
 }
 
+/* Muda o corpo do texto NA TELA. O tamanho do documento exportado mora em `page-theme.ts`, que não
+   lê nada daqui — os dois são decisões separadas de propósito. */
 .prose-doc {
   font-family: var(--font-serif);
-  font-size: 1.28rem;
+  font-size: 1.15rem;
   line-height: 1.85;
   letter-spacing: 0.001em;
   color: var(--ink-0);
@@ -664,6 +666,14 @@
     margin: 0 0 0.6rem;
     padding-left: 1.35rem;
     list-style: decimal;
+  }
+
+  #relatorio-impresso li p {
+    margin: 0 0 0.25rem;
+  }
+
+  #relatorio-impresso li p:last-child {
+    margin-bottom: 0;
   }
 
   #relatorio-impresso h5,

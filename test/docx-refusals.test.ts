@@ -180,6 +180,7 @@ describe("import declares what it kept and what it could not", () => {
       tablesFlattened: 0,
       textBoxesInlined: 0,
       headingStylesRecovered: [],
+      headingStylesInferred: [],
       unrecognisedParagraphStyles: [],
     });
   });

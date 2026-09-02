@@ -4,7 +4,13 @@ import { useCallback, useState } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, RawBlock, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
 import { buildBaseline, serializeBaseline } from "../lib/baseline";
-import { documentToDocx, documentToHtml, documentToMarkdown, exportableBlocks } from "../lib/export-document";
+import {
+  documentToDocx,
+  documentToHtml,
+  documentToMarkdown,
+  documentToPdf,
+  exportableBlocks,
+} from "../lib/export-document";
 import { renderReportHtml } from "../lib/report-html";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
@@ -53,11 +59,11 @@ export function ExportMenu({
   comparison,
 }: ExportMenuProps) {
   const { c } = useCopy();
-  const [docxError, setDocxError] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
   const [baselineOpen, setBaselineOpen] = useState(false);
   const [printHtml, setPrintHtml] = useState<string | null>(null);
-  const { open, boxRef, triggerRef, toggle, close, setOpen, onKeyDown } = useDismissableMenu(() => setDocxError(null));
+  const { open, boxRef, triggerRef, toggle, close, setOpen, onKeyDown } = useDismissableMenu(() => setFileError(null));
 
   const auditMarkdown = () =>
     buildAuditReport(
@@ -87,7 +93,7 @@ export function ExportMenu({
   const printed = useCallback(() => setPrintHtml(null), []);
 
   const exportDocx = async () => {
-    setDocxError(null);
+    setFileError(null);
     try {
       const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks));
       downloadFile(
@@ -97,7 +103,18 @@ export function ExportMenu({
       );
       close(false);
     } catch {
-      setDocxError(c.overview.docxError);
+      setFileError(c.overview.docxError);
+    }
+  };
+
+  const exportPdfFile = async () => {
+    setFileError(null);
+    try {
+      const bytes = await documentToPdf(exportableBlocks(diagnostic.text, blocks), c.overview.pdfPageLabel);
+      downloadFile("documento-revisado.pdf", bytes as BlobPart, "application/pdf");
+      close(false);
+    } catch {
+      setFileError(c.overview.pdfError);
     }
   };
 
@@ -113,6 +130,7 @@ export function ExportMenu({
       profileId,
       config,
       marks,
+      vocabulary: config.vocabulario.terms,
     });
     downloadFile(`${slug(title)}.lucid.json`, serializeBaseline(baseline), "application/json;charset=utf-8");
   };
@@ -122,14 +140,14 @@ export function ExportMenu({
     close(false);
   };
 
-  const exportDocumentMd = () => {
-    const markdown = documentToMarkdown(exportableBlocks(diagnostic.text, blocks));
-    downloadFile("documento-revisado.md", markdown, "text/markdown;charset=utf-8");
+  const printDocument = () => {
+    setPrintHtml(documentToHtml(exportableBlocks(diagnostic.text, blocks)));
     close(false);
   };
 
-  const printDocument = () => {
-    setPrintHtml(documentToHtml(exportableBlocks(diagnostic.text, blocks)));
+  const exportDocumentMd = () => {
+    const markdown = documentToMarkdown(exportableBlocks(diagnostic.text, blocks));
+    downloadFile("documento-revisado.md", markdown, "text/markdown;charset=utf-8");
     close(false);
   };
 
@@ -157,15 +175,20 @@ export function ExportMenu({
 
           <div className="mt-1.5 border-t border-rule-1 pt-1.5">
             <GroupLabel>{c.overview.groupDocument}</GroupLabel>
-            <MenuItem onClick={exportDocumentMd}>{c.overview.exportDocumentMd}</MenuItem>
+            <MenuItem onClick={exportPdfFile} note={c.overview.exportPdfNote}>
+              {c.overview.exportPdf}
+            </MenuItem>
             <MenuItem onClick={exportDocx}>{c.overview.exportDocx}</MenuItem>
-            <MenuItem onClick={printDocument}>{c.overview.printDocument}</MenuItem>
+            <MenuItem onClick={exportDocumentMd}>{c.overview.exportDocumentMd}</MenuItem>
             <MenuItem onClick={exportTxt}>{c.overview.exportTxt}</MenuItem>
+            <MenuItem onClick={printDocument} note={c.overview.printNote}>
+              {c.overview.printDocument}
+            </MenuItem>
             <p className="px-2.5 pb-1 pt-1 text-[11px] leading-relaxed text-ink-3">{c.overview.docxNote}</p>
           </div>
-          {docxError !== null && (
+          {fileError !== null && (
             <p role="alert" className="px-2.5 pb-1.5 pt-1 text-[11.5px] leading-relaxed text-sev-error">
-              {docxError}
+              {fileError}
             </p>
           )}
 

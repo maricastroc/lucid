@@ -6,8 +6,22 @@ const BLOCKS: RawBlock[] = [
   { kind: "heading", level: 1, text: "Concessão do benefício" },
   { kind: "paragraph", text: "O pedido foi indeferido pela comissão." },
   { kind: "heading", level: 2, text: "Como recorrer" },
-  { kind: "list", ordered: false, items: ["Reúna os documentos", "Preencha o formulário"] },
-  { kind: "list", ordered: true, items: ["Primeiro passo", "Segundo passo"] },
+  {
+    kind: "list",
+    ordered: false,
+    items: [
+      { blocks: ["Reúna os documentos"], level: 0, ordered: false },
+      { blocks: ["Preencha o formulário"], level: 0, ordered: false },
+    ],
+  },
+  {
+    kind: "list",
+    ordered: true,
+    items: [
+      { blocks: ["Primeiro passo"], level: 0, ordered: true },
+      { blocks: ["Segundo passo"], level: 0, ordered: true },
+    ],
+  },
 ];
 
 describe("the revised document leaves as Markdown", () => {
@@ -56,8 +70,8 @@ describe("the revised document leaves as a printable page", () => {
     expect(html).toContain("<h1>Concessão do benefício</h1>");
     expect(html).toContain("<h2>Como recorrer</h2>");
     expect(html).toContain("<p>O pedido foi indeferido pela comissão.</p>");
-    expect(html).toContain("<ul><li>Reúna os documentos</li><li>Preencha o formulário</li></ul>");
-    expect(html).toContain("<ol><li>Primeiro passo</li><li>Segundo passo</li></ol>");
+    expect(html).toContain("<ul><li><p>Reúna os documentos</p></li><li><p>Preencha o formulário</p></li></ul>");
+    expect(html).toContain("<ol><li><p>Primeiro passo</p></li><li><p>Segundo passo</p></li></ol>");
   });
 
   it("escapes the document instead of letting it write markup into the page", () => {

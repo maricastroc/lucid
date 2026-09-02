@@ -19,7 +19,7 @@ const num = (name: string, fallback: number): number => {
 };
 
 const TARGET_COUNT = num("AB_TARGETS", 20);
-const MODELS = (process.env.AB_MODELS ?? "openai/gpt-oss-120b,gemini-2.5-flash")
+const MODELS = (process.env.AB_MODELS ?? "gemini-2.5-flash")
   .split(",")
   .map((m) => m.trim())
   .filter(Boolean);
@@ -156,13 +156,10 @@ describe.runIf(process.env.AB_REPORT === "1")("relatório (offline, zero chamada
       "",
       "Este relatório compara PROMPTS com o modelo fixo. Ele **não** mostra que um prompt é o",
       "melhor em geral — mostra qual é o melhor para este modelo. O segundo braço",
-      "(`openai/gpt-oss-120b`) foi abandonado por cota diária do provedor esgotada, sem",
-      "respostas suficientes para comparar naquele modelo.",
+      "O Lucid fala com um provedor só (ADR-097), então esta é a única leitura disponível —",
+      "e ela continua sendo sobre ESTE modelo, não sobre prompts em geral.",
       "",
-      "Que a diferença entre modelos é real, e não hipótese: nos dados parciais do Groq o",
-      "`rewrite@2` preservou número em 83% dos casos, contra 25% no Gemini. Um vencedor eleito",
-      "aqui vale para o Gemini até que o outro braço seja refeito.",
-      "",
+
       `**Recorte das tabelas:** ${covered.size} alvos em que TODOS os candidatos responderam ` +
         `(de ${new Set(onModel.map((r) => r.row.targetId)).size} com alguma resposta). Comparar candidatos sobre`,
       "conjuntos de alvos diferentes deixaria um alvo fácil inflar quem por acaso o pegou. A visão",

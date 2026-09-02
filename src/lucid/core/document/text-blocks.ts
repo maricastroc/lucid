@@ -1,4 +1,4 @@
-import type { AbbreviationLexicon, Block, Document, ListItemBlock, Sentence, Token } from "../types";
+import type { AbbreviationLexicon, Block, Document, ListItemBlock, ParagraphBlock, Sentence, Token } from "../types";
 import type { DocumentBuildServices } from "./model";
 import { segmentAt } from "./structured";
 
@@ -41,6 +41,17 @@ interface ParagraphRange {
 interface ItemRange {
   readonly start: number;
   readonly end: number;
+  readonly level: number;
+  readonly ordered: boolean;
+}
+
+const MAX_LIST_LEVEL = 5;
+
+// Recuo marca o nível: um tab, ou cada dois espaços, desce um degrau.
+function levelFromIndent(indent: string): number {
+  const tabs = (indent.match(/\t/gu) ?? []).length;
+  const spaces = indent.length - tabs;
+  return Math.min(MAX_LIST_LEVEL, tabs + Math.floor(spaces / 2));
 }
 interface ListRange {
   readonly kind: "list";
@@ -60,7 +71,11 @@ function matchListItem(line: Line): { ordered: boolean; range: ItemRange } | nul
   const m = RE_LIST.exec(line.text);
   if (!m) return null;
   const contentStart = line.start + m[1].length + m[2].length + m[3].length;
-  return { ordered: /\d/.test(m[2]), range: { start: contentStart, end: contentStart + m[4].length } };
+  const ordered = /\d/.test(m[2]);
+  return {
+    ordered,
+    range: { start: contentStart, end: contentStart + m[4].length, level: levelFromIndent(m[1]), ordered },
+  };
 }
 
 function lastWord(text: string): string | null {
@@ -211,13 +226,24 @@ export function buildTextDocument(source: string, services: DocumentBuildService
       const seg = segmentRange(source, item.start, item.end, services);
       if (!seg) continue;
       collect(seg);
-      items.push({
-        kind: "listItem",
+      const paragraph: ParagraphBlock = {
+        kind: "paragraph",
         start: seg.start,
         end: seg.end,
         text: source.slice(seg.start, seg.end),
         sentences: seg.sentences,
         wordCount: seg.wordCount,
+      };
+      items.push({
+        kind: "listItem",
+        start: seg.start,
+        end: seg.end,
+        text: paragraph.text,
+        sentences: seg.sentences,
+        wordCount: seg.wordCount,
+        level: item.level,
+        ordered: item.ordered,
+        blocks: [paragraph],
       });
     }
     if (items.length === 0) continue;

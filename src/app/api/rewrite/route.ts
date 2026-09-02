@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Finding, Span } from "@/lucid";
-import {
-  ChatProviderError,
-  DeepSeekProvider,
-  DEEPSEEK_MODELS,
-  GeminiProvider,
-  GEMINI_MODELS,
-  GroqProvider,
-  GROQ_MODELS,
-} from "@/llm";
+import { ChatProviderError, GeminiProvider, GEMINI_MODELS } from "@/llm";
 import {
   LlmRewriteProposer,
   proposeAndVerify,
@@ -75,14 +67,6 @@ function isDeclarationLike(value: unknown, textLength: number): value is AgentDe
 }
 
 function buildProposer(providerId: string, model: string): RewriteProposer | { error: string; status: number } {
-  if (providerId === "groq") {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) return { error: "GROQ_API_KEY não configurada no servidor", status: 400 };
-    if (!GROQ_MODELS.includes(model as (typeof GROQ_MODELS)[number])) {
-      return { error: `modelo não permitido para o Groq: ${model}`, status: 400 };
-    }
-    return new LlmRewriteProposer(new GroqProvider(apiKey), model);
-  }
   if (providerId === "gemini") {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return { error: "GEMINI_API_KEY não configurada no servidor", status: 400 };
@@ -91,23 +75,10 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
     }
     return new LlmRewriteProposer(new GeminiProvider(apiKey), model);
   }
-  if (providerId === "deepseek") {
-    const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) return { error: "DEEPSEEK_API_KEY não configurada no servidor", status: 400 };
-    if (!DEEPSEEK_MODELS.includes(model as (typeof DEEPSEEK_MODELS)[number])) {
-      return { error: `modelo não permitido para o DeepSeek: ${model}`, status: 400 };
-    }
-    return new LlmRewriteProposer(new DeepSeekProvider(apiKey), model);
-  }
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
-const PROBE_GROQ_MODEL = "openai/gpt-oss-120b";
-
 function buildProbe(): ComprehensionProbe | null {
-  if (process.env.GROQ_API_KEY) {
-    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), PROBE_GROQ_MODEL);
-  }
   if (process.env.GEMINI_API_KEY) {
     return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
   }

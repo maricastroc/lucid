@@ -57,7 +57,7 @@ Two layers, and a hard fence between them that the build enforces:
 ┌─────────────────────────────────────────────────────────────┐
 │  LAYER 1 — the deterministic engine          THE PRODUCT    │
 │  zero LLM · zero network · same input → byte-identical out  │
-│  23 detectors, each citing the ISO clause it enforces       │
+│  24 detectors, each declaring the authority behind it       │
 │  It can judge. It cannot write.                             │
 └─────────────────────────────────────────────────────────────┘
                     ▲                        ▲
@@ -145,6 +145,7 @@ The refusals are not missing features. They are the design.
 | Verify a rewrite — yours or an LLM's — against the same checks   | Certify a document as compliant                                  |
 | Report what it did **not** look for                              | Let a silent absence read as an all-clear                        |
 | Show curated equivalents as information                          | Pretend a lexicon covers a whole language                        |
+| Let you declare the vocabulary your own readers stumble on       | Let your list borrow the standard's authority                    |
 
 **There is no green check anywhere in the system, and the type system enforces it.** The comprehension probe's result type is `flag | neutral` — there is no `approved` variant to return. Passing a floor test is the _absence of one failure_, never evidence of clarity, so the compiler makes "it approved the text" unrepresentable.
 
@@ -181,7 +182,24 @@ That last row is the point of the whole mechanism. Deleting a heading changes th
 
 A benefit ruling and an app screen do not fail at the same sentence length. Four named profiles carry the purpose — `base`, `normativo`, `publico`, `digital` — and each is a different set of thresholds, not a different set of rules: no criterion is switched off, no clause is reinterpreted.
 
-Each profile hashes differently (`ebb6dee9`, `b79cf231`, `d93c9ea5`, `6c42ea02`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
+Each profile hashes differently (`44521072`, `0cc01df9`, `d73a7e54`, `126cfd71`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
+
+### The organisation's vocabulary
+
+A curated glossary is precise and small: only what has been verified one by one gets in, so Lucid's jargon list holds **38 entries** and its nominalization list **24**. Run the engine over **113,522 words of real Brazilian public-sector documents** — grant calls, official letters, booklets — and those two detectors fire **5 times** and **2 times** respectively.
+
+The control is in the same table. `nominalizacao_encadeada` answers to the same clause (5.3.3) as `nominalization`, but recognises a morphological pattern instead of consulting a list, and it fires **581 times** — roughly 290 to 1 against its curated sibling. The two lexical criteria that stay silent on real documents are exactly the two whose recall is bounded by a list. The bottleneck was never the phenomenon; it was the curation.
+
+No central list knows what a given office's readers stumble on — `termo de fomento`, `e-Parcerias`, `instrumento congênere`. So the office declares them, from a passage selected in the document: the term, the plain equivalent, and why. They are then looked for in every document audited with that vocabulary loaded, and they travel in the `.lucid.json` alongside the baseline.
+
+What keeps this from becoming a hole in the authority model:
+
+- **It is a criterion of its own**, not the jargon list with more rows — so the report keeps the two apart, and the reader of a report can always tell which findings the standard backs and which ones you do.
+- **It never cites a clause.** `source: "organizational"`, no `normativeReference`, enforced by the same union as everything else.
+- **A term with no recorded equivalent only signals.** Without an attested 1:1 swap, proposing one would mean inventing what nobody stated — so the finding is `requiresHuman` and carries no `suggestion`.
+- **It travels in the stamp.** The vocabulary lives in the `Config`, which means a different vocabulary produces a different `configHash`. **No result can hide which lexicon measured it** — the same guarantee that already covers a loosened threshold.
+
+And because a zero now means two different things depending on the detector, the interface says which: a list-bound criterion reports _"this zero says the list did not match, not that the text is clear of it"_, a productive one reports _"this zero is a measurement."_
 
 <br/>
 
@@ -192,7 +210,7 @@ Each profile hashes differently (`ebb6dee9`, `b79cf231`, `d93c9ea5`, `6c42ea02`)
 ```
 analyze(text):
   buildDocument   normalize (NFC) → segment sentences → tokenize → group blocks
-  passes          23 deterministic detectors, each emitting findings with provenance
+  passes          24 deterministic detectors, each emitting findings with provenance
   score           per-criterion counts + density — measures, never approves
   → Diagnostic    { text, findings, score, metrics, meta(configHash, dataHash) }
 ```
@@ -208,8 +226,9 @@ Not everything worth flagging is in the standard, and pretending otherwise would
 | `iso-24495-1`          | Derived from a numbered clause of the standard     | **Yes** — `normativeReference` required |
 | `editorial-pt-br`      | A Portuguese editorial convention, not in the norm | **No** — the field cannot exist         |
 | `structural-heuristic` | A weak structural signal, honestly labeled         | **No**                                  |
+| `organizational`       | A term **you** declared unfamiliar to your reader  | **No**                                  |
 
-`normativeReference ⟺ source === "iso-24495-1"` is a discriminated union: an editorial rule **cannot** be given a clause number, because that code does not compile.
+`normativeReference ⟺ source === "iso-24495-1"` is a discriminated union: an editorial rule **cannot** be given a clause number, because that code does not compile. The fourth row is the same rule pointed outwards: your own vocabulary carries real weight in the audit and still cannot borrow the standard's.
 
 ### Generator × verifier
 
@@ -242,7 +261,7 @@ A diagnostic you cannot reproduce is an opinion. Every run is stamped with the e
 
 Three things about that table are unusual, and deliberate:
 
-1. **Only 3 of 23 detectors are there.** The rest have no honest precision/recall number, so none is invented. The artifact says which is which.
+1. **Only 3 of 24 detectors are there.** The rest have no honest precision/recall number, so none is invented. The artifact says which is which.
 2. **Known limitations count _against_ the score.** A false positive we chose not to fix is left in the corpus, so `jargon` publishes 0.963 instead of a prettier 1.000.
 3. **The artifact flags its own circular numbers.** Recall for a curated-lexicon detector is measured against a corpus built from that same lexicon — so it reports "the code reads its own list," not "the instrument finds the phenomenon." That caveat ships _inside_ the JSON.
 
@@ -265,7 +284,7 @@ Lucid implements the **Brazilian adoption** (`ABNT NBR ISO 24495-1:2024`), which
 
 **The standard explicitly says plain language rests on reader success, not on mechanical formulas.** Rather than treating that as an inconvenience, Lucid uses it to divide the work honestly:
 
-- **Principles 2 and 3 → 23 deterministic detectors.** These are the mechanically checkable ones. This is where rules are strong.
+- **Principles 2 and 3 → 23 deterministic detectors.** (A 24th is yours — see [the organisation's vocabulary](#the-organisations-vocabulary).) These are the mechanically checkable ones. This is where rules are strong.
 - **Principle 1 → no detector, and there never will be one.** "Relevant _to whom?_" depends on the reader, the purpose, and what the author chose to cut. So Lucid **asks** instead: it poses the standard's own questions, records the answers as the author's declaration, and verifies only what is literally verifiable. Undeclared reads **"not declared"** — never "compliant."
 - **Principle 4 → testing with real readers. Lucid does not cover it.** A synthetic floor-reader (the comprehension probe) was built as the cheap floor _before_ human testing: it reads _only_ the passage, may never use outside knowledge, and reports where it stalls — it can fail a text, never pass one. It is **not exposed in the product**: re-run against the model currently wired in, it failed the recall floor this repo already had (it read "the text does not say" and still reported that it could answer), so shipping it would have implied a coverage nobody validated. The code, the labelled golden set and the harness stay in the tree; the section comes back only when a live meta-eval clears both floors. Until then Principle 4 is answered the way the standard answers it — with human readers.
 
@@ -296,7 +315,7 @@ Readability likewise reuses rather than rebuilds: **Flesch adapted to Brazilian 
 
 ## 💻 Run it
 
-**Layer 1 needs no keys and no network.** It is pure and offline. Only the AI rewrite reads `GROQ_API_KEY` or `GEMINI_API_KEY` (the comprehension probe does too, but it is currently hidden from the interface — see Principle 4 above).
+**Layer 1 needs no keys and no network.** It is pure and offline. Only the AI rewrite reads `GEMINI_API_KEY` (the comprehension probe does too, but it is currently hidden from the interface — see Principle 4 above).
 
 ```bash
 git clone https://github.com/maricastroc/lucid
@@ -344,22 +363,22 @@ npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint (incl. the no-Date/no-random rule inside core)
 npm run depcheck    # dependency-cruiser — the layer fence
 npm run eval        # regenerate the self-evaluation artifact
-npm run mutation:passes   # Stryker over the 23 criteria (~26 min, off CI)
+npm run mutation:passes   # Stryker over the 24 criteria (~26 min, off CI)
 ```
 
 <br/>
 
 ## 🧰 Tech stack
 
-| Category               | Technologies                                                                                           |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| **Deterministic core** | Framework-free TypeScript — pure passes over a canonical document model. No DOM, no React, no network  |
-| **App**                | Next.js 16 (App Router), React 19, Tailwind CSS v4                                                     |
-| **CLI**                | esbuild-bundled single file, Layer 1 only                                                              |
-| **LLM layer (opt-in)** | Groq + Google Gemini via raw `fetch`, no SDK, `temperature 0`, versioned prompts, behind one interface |
-| **Standard**           | ISO 24495-1 / ABNT NBR ISO 24495-1:2024 — the sole authority for every `normativeReference`            |
-| **Reused data**        | PortiLexicon-UD (CC-BY 4.0) morphology; Flesch-PT (Martins et al., 1996)                               |
-| **Testing**            | Vitest, golden snapshots, **Stryker** mutation testing, **dependency-cruiser** for the layer fence     |
+| Category               | Technologies                                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Deterministic core** | Framework-free TypeScript — pure passes over a canonical document model. No DOM, no React, no network |
+| **App**                | Next.js 16 (App Router), React 19, Tailwind CSS v4                                                    |
+| **CLI**                | esbuild-bundled single file, Layer 1 only                                                             |
+| **LLM layer (opt-in)** | Google Gemini via raw `fetch`, no SDK, `temperature 0`, versioned prompts, behind one interface       |
+| **Standard**           | ISO 24495-1 / ABNT NBR ISO 24495-1:2024 — the sole authority for every `normativeReference`           |
+| **Reused data**        | PortiLexicon-UD (CC-BY 4.0) morphology; Flesch-PT (Martins et al., 1996)                              |
+| **Testing**            | Vitest, golden snapshots, **Stryker** mutation testing, **dependency-cruiser** for the layer fence    |
 
 <br/>
 

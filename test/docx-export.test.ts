@@ -12,8 +12,22 @@ const BLOCKS: RawBlock[] = [
   { kind: "heading", level: 1, text: "Prazos e documentos" },
   { kind: "paragraph", text: "O interessado deve entregar os documentos até 30/04/2025." },
   { kind: "heading", level: 2, text: "Quem pode pedir" },
-  { kind: "list", ordered: false, items: ["Servidor efetivo", "Servidor cedido"] },
-  { kind: "list", ordered: true, items: ["Preencher o formulário", "Anexar o comprovante"] },
+  {
+    kind: "list",
+    ordered: false,
+    items: [
+      { blocks: ["Servidor efetivo"], level: 0, ordered: false },
+      { blocks: ["Servidor cedido"], level: 0, ordered: false },
+    ],
+  },
+  {
+    kind: "list",
+    ordered: true,
+    items: [
+      { blocks: ["Preencher o formulário"], level: 0, ordered: true },
+      { blocks: ["Anexar o comprovante"], level: 0, ordered: true },
+    ],
+  },
 ];
 
 function writeTemp(bytes: Uint8Array): string {
@@ -60,6 +74,7 @@ describe("blocksToDocx — the exported file is a valid .docx", () => {
       "_rels/.rels",
       "word/_rels/document.xml.rels",
       "word/document.xml",
+      "word/footer1.xml",
       "word/numbering.xml",
       "word/styles.xml",
     ]);
@@ -86,9 +101,23 @@ describe("blocksToDocx — round trip through the project's own importer", () =>
 
   it("keeps ordered and unordered lists apart", async () => {
     const lists: RawBlock[] = [
-      { kind: "list", ordered: true, items: ["Primeiro", "Segundo"] },
+      {
+        kind: "list",
+        ordered: true,
+        items: [
+          { blocks: ["Primeiro"], level: 0, ordered: true },
+          { blocks: ["Segundo"], level: 0, ordered: true },
+        ],
+      },
       { kind: "paragraph", text: "Entre as listas." },
-      { kind: "list", ordered: false, items: ["Um item", "Outro item"] },
+      {
+        kind: "list",
+        ordered: false,
+        items: [
+          { blocks: ["Um item"], level: 0, ordered: false },
+          { blocks: ["Outro item"], level: 0, ordered: false },
+        ],
+      },
     ];
     expect(await reimport(blocksToDocx(lists))).toEqual(lists);
   });

@@ -1,4 +1,4 @@
-import type { RawBlock, RawTableCell, RawTableRow } from "@/lucid/core/document/structured";
+import type { RawBlock, RawListItem, RawTableCell, RawTableRow } from "@/lucid/core/document/structured";
 
 function decodeEntities(s: string): string {
   return s
@@ -36,17 +36,66 @@ function findMatchingClose(html: string, tagName: string, from: number): number 
   return null;
 }
 
-function extractListItems(inner: string): string[] {
-  const items: string[] = [];
+const MAX_LIST_LEVEL = 5;
+
+function ownParagraphs(inner: string): string[] {
+  let depth = 0;
+  let ownHtml = "";
+  const tagRe = /<(\/?)(ol|ul)\b[^>]*>/gi;
+  let cursor = 0;
+  for (let m = tagRe.exec(inner); m !== null; m = tagRe.exec(inner)) {
+    if (m[1] === "") {
+      if (depth === 0) ownHtml += inner.slice(cursor, m.index);
+      depth += 1;
+    } else {
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) cursor = m.index + m[0].length;
+    }
+  }
+  if (depth === 0) ownHtml += inner.slice(cursor);
+
+  const paragraphs: string[] = [];
+  const childRe = /<(p|h[1-6])\b[^>]*>/gi;
+  for (let m = childRe.exec(ownHtml); m !== null; m = childRe.exec(ownHtml)) {
+    const tag = m[1].toLowerCase();
+    const openEnd = childRe.lastIndex;
+    const closeStart = findMatchingClose(ownHtml, tag, openEnd);
+    if (closeStart === null) break;
+    const text = textOf(ownHtml.slice(openEnd, closeStart));
+    if (text) paragraphs.push(text);
+    childRe.lastIndex = closeStart + `</${tag}>`.length;
+  }
+  if (paragraphs.length > 0) return paragraphs;
+
+  const flat = textOf(ownHtml);
+  return flat ? [flat] : [];
+}
+
+function extractListItems(inner: string, ordered: boolean, level = 0): RawListItem[] {
+  const items: RawListItem[] = [];
   const liOpenRe = /<li\b[^>]*>/gi;
+
   for (let m = liOpenRe.exec(inner); m !== null; m = liOpenRe.exec(inner)) {
     const openEnd = liOpenRe.lastIndex;
     const closeStart = findMatchingClose(inner, "li", openEnd);
     if (closeStart === null) break;
-    const text = textOf(inner.slice(openEnd, closeStart));
-    if (text) items.push(text);
+    const body = inner.slice(openEnd, closeStart);
     liOpenRe.lastIndex = closeStart + "</li>".length;
+
+    const blocks = ownParagraphs(body);
+    if (blocks.length > 0) items.push({ blocks, level, ordered });
+
+    if (level >= MAX_LIST_LEVEL) continue;
+    const nestedRe = /<(ol|ul)\b[^>]*>/gi;
+    for (let n = nestedRe.exec(body); n !== null; n = nestedRe.exec(body)) {
+      const nestedOpenEnd = nestedRe.lastIndex;
+      const nestedClose = findMatchingClose(body, n[1], nestedOpenEnd);
+      if (nestedClose === null) break;
+      items.push(...extractListItems(body.slice(nestedOpenEnd, nestedClose), n[1].toLowerCase() === "ol", level + 1));
+      nestedRe.lastIndex = nestedClose + `</${n[1]}>`.length;
+    }
   }
+
   return items;
 }
 
@@ -140,8 +189,9 @@ export function htmlToRawBlocks(html: string): RawBlock[] {
       continue;
     }
 
-    const items = extractListItems(inner);
-    if (items.length > 0) blocks.push({ kind: "list", ordered: tag === "ol", items });
+    const ordered = tag === "ol";
+    const items = extractListItems(inner, ordered);
+    if (items.length > 0) blocks.push({ kind: "list", ordered, items });
   }
 
   return blocks;

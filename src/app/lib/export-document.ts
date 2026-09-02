@@ -1,4 +1,12 @@
-import { buildDocument, resolveTableGrid, toRawBlocks, type Block, type RawBlock, type RawTableRow } from "@/lucid";
+import {
+  buildDocument,
+  normalizeListItem,
+  resolveTableGrid,
+  toRawBlocks,
+  type Block,
+  type RawBlock,
+  type RawTableRow,
+} from "@/lucid";
 import { escapeHtml } from "./report-html";
 
 export function exportableBlocks(text: string, structured: readonly Block[] | null): RawBlock[] {
@@ -13,6 +21,11 @@ export function hasRecoverableStructure(blocks: readonly RawBlock[]): boolean {
 export async function documentToDocx(blocks: readonly RawBlock[]): Promise<Uint8Array> {
   const { blocksToDocx } = await import("@/exporters/docx");
   return blocksToDocx(blocks);
+}
+
+export async function documentToPdf(blocks: readonly RawBlock[], pageLabel: (page: number, total: number) => string) {
+  const { exportPdf } = await import("@/exporters/pdf");
+  return exportPdf(blocks, { footer: pageLabel });
 }
 
 function tableToMarkdown(rows: readonly RawTableRow[]): string {
@@ -33,13 +46,43 @@ function tableToMarkdown(rows: readonly RawTableRow[]): string {
   return [lines[0], divider, ...lines.slice(1)].join("\n");
 }
 
+type StoredItems = Extract<RawBlock, { kind: "list" }>["items"];
+
+function listToMarkdown(items: StoredItems, ordered: boolean): string {
+  const counters: number[] = [];
+  return items
+    .map((stored) => {
+      const item = normalizeListItem(stored, ordered);
+      counters.length = item.level + 1;
+      counters[item.level] = (counters[item.level] ?? 0) + 1;
+      const indent = "  ".repeat(item.level);
+      const marker = item.ordered ? `${counters[item.level]}.` : "-";
+      const [first, ...rest] = item.blocks;
+      const head = `${indent}${marker} ${first}`;
+      const tail = rest.map((paragraph: string) => `\n${indent}  ${paragraph}`).join("");
+      return head + tail;
+    })
+    .join("\n");
+}
+
+function listToHtml(items: StoredItems, ordered: boolean): string {
+  const tag = ordered ? "ol" : "ul";
+  const cells = items
+    .map((stored) => {
+      const item = normalizeListItem(stored, ordered);
+      const body = item.blocks.map((paragraph: string) => `<p>${escapeHtml(paragraph)}</p>`).join("");
+      const style = item.level > 0 ? ` style="margin-left:${item.level * 1.4}em"` : "";
+      return `<li${style}>${body}</li>`;
+    })
+    .join("");
+  return `<${tag}>${cells}</${tag}>`;
+}
+
 export function documentToMarkdown(blocks: readonly RawBlock[]): string {
   if (blocks.length === 0) return "";
   const out = blocks.map((block) => {
     if (block.kind === "heading") return `${"#".repeat(block.level)} ${block.text}`;
-    if (block.kind === "list") {
-      return block.items.map((item, i) => (block.ordered ? `${i + 1}. ${item}` : `- ${item}`)).join("\n");
-    }
+    if (block.kind === "list") return listToMarkdown(block.items, block.ordered);
     if (block.kind === "table") return tableToMarkdown(block.rows);
     return block.text;
   });
@@ -53,11 +96,7 @@ export function documentToHtml(blocks: readonly RawBlock[]): string {
         const level = Math.min(6, Math.max(1, block.level));
         return `<h${level}>${escapeHtml(block.text)}</h${level}>`;
       }
-      if (block.kind === "list") {
-        const tag = block.ordered ? "ol" : "ul";
-        const items = block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-        return `<${tag}>${items}</${tag}>`;
-      }
+      if (block.kind === "list") return listToHtml(block.items, block.ordered);
       if (block.kind === "table") {
         const rows = block.rows
           .map((row) => {

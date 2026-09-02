@@ -28,6 +28,7 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "long_heading",
   "single_item_list",
   "heading_body_mismatch",
+  "vocabulario_da_organizacao",
 ];
 
 function findActual(diagnostic: Diagnostic, expected: ExpectedFinding): Finding | undefined {
@@ -137,6 +138,7 @@ describe("integrated golden — integrated summary (global and per-criterion met
     long_heading: zero(),
     single_item_list: zero(),
     heading_body_mismatch: zero(),
+    vocabulario_da_organizacao: zero(),
   };
   let findingsOnUnforeseenTerms = 0;
   let totalExpected = 0;

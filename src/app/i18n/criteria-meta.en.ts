@@ -39,6 +39,13 @@ export const CRITERION_TEXT_EN: Record<CriterionId, CriterionText> = {
     signal: "exact match against a curated glossary (longest match first)",
     why: "A term that is unfamiliar outside its domain pushes the non-specialist reader away.",
   },
+  vocabulario_da_organizacao: {
+    label: "Organisation's vocabulary",
+    kind: "Lexical choice",
+    principleName: "Familiar words",
+    signal: "exact match against a term the organisation declared (longest match first)",
+    why: "The organisation declared this term unfamiliar to its own reader. The standard does not know a given office's vocabulary; the office does.",
+  },
   sigla_sem_expansao: {
     label: "Unexpanded acronym",
     kind: "Lexical choice",

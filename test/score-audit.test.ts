@@ -35,6 +35,7 @@ describe("score — shape and bounds", () => {
       "leitor_terceira_pessoa",
       "salto_de_nivel_titulo",
       "long_heading",
+      "vocabulario_da_organizacao",
       "single_item_list",
       "heading_body_mismatch",
     ]);
@@ -134,7 +135,7 @@ describe("score — empty and very short text", () => {
   it("empty text: criteria zeroed, density 0 (no division by zero)", () => {
     const d = analyze("");
     expect(d.score.totalFindings).toBe(0);
-    expect(d.score.byCriterion).toHaveLength(23);
+    expect(d.score.byCriterion).toHaveLength(24);
     for (const c of d.score.byCriterion) {
       expect(c.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(c.densityPer100Words).toBe(0);

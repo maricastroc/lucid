@@ -48,6 +48,7 @@ export function routeLabel(
   policy: RoutingPolicy,
   auditDraw: number,
 ): RoutingDecision {
+  if (runs.length < 2) return { route: "human_single_labeler", needsHuman: true };
   if (runs.some((run) => !run.ok)) return { route: "human_labeler_failure", needsHuman: true };
   if (!agreement.countMatch || !agreement.binaryMatch) return { route: "human_divergence", needsHuman: true };
   if (agreement.spanExactRate !== null && agreement.spanExactRate < 1) {

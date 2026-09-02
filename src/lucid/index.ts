@@ -40,7 +40,7 @@ export type {
 export type { CriterionId } from "../locales/pt-BR/criteria";
 export { CRITERION_IDS, isCriterionId } from "../locales/pt-BR/criteria";
 
-export type { Config, ConfigDeviation, ConfigValue } from "./core/config";
+export type { Config, ConfigDeviation, ConfigValue, OrgTerm } from "./core/config";
 export { configDeviations, DEFAULT_CONFIG, hashConfig, isDefaultConfig } from "./core/config";
 export { stableHash, stableStringify } from "./core/hash";
 
@@ -60,12 +60,15 @@ export {
   affixSplice,
   buildStructuredDocument,
   isRawBlock,
+  normalizeListItem,
   rawUnitTexts,
   spliceStructuredDocument,
   toRawBlocks,
 } from "./core/document/structured";
 export type {
   RawBlock,
+  RawListItem,
+  StoredListItem,
   RawTableCell,
   RawTableRow,
   SpliceRefusal,

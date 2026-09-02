@@ -11,8 +11,15 @@ describe("htmlToRawBlocks — mammoth's semantic HTML → neutral blocks", () =>
       { kind: "heading", level: 1, text: "Título" },
       { kind: "paragraph", text: "Um parágrafo." },
       { kind: "heading", level: 2, text: "Sub" },
-      { kind: "list", ordered: false, items: ["item a", "item b"] },
-      { kind: "list", ordered: true, items: ["primeiro"] },
+      {
+        kind: "list",
+        ordered: false,
+        items: [
+          { blocks: ["item a"], level: 0, ordered: false },
+          { blocks: ["item b"], level: 0, ordered: false },
+        ],
+      },
+      { kind: "list", ordered: true, items: [{ blocks: ["primeiro"], level: 0, ordered: true }] },
     ]);
   });
 
@@ -26,10 +33,20 @@ describe("htmlToRawBlocks — mammoth's semantic HTML → neutral blocks", () =>
     expect(htmlToRawBlocks("<p></p><p>   </p><ul><li></li></ul>")).toEqual([]);
   });
 
-  it("a list with a nested sub-list: no sibling item disappears, and nothing runs together without a space", () => {
+  it("a nested sub-list becomes items of its own, one level down, in reading order", () => {
     const html = "<ul><li>Item 1</li><li>Item 2<ul><li>Sub A</li><li>Sub B</li></ul></li><li>Item 3</li></ul>";
     expect(htmlToRawBlocks(html)).toEqual([
-      { kind: "list", ordered: false, items: ["Item 1", "Item 2 Sub A Sub B", "Item 3"] },
+      {
+        kind: "list",
+        ordered: false,
+        items: [
+          { blocks: ["Item 1"], level: 0, ordered: false },
+          { blocks: ["Item 2"], level: 0, ordered: false },
+          { blocks: ["Sub A"], level: 1, ordered: false },
+          { blocks: ["Sub B"], level: 1, ordered: false },
+          { blocks: ["Item 3"], level: 0, ordered: false },
+        ],
+      },
     ]);
   });
 
@@ -38,14 +55,35 @@ describe("htmlToRawBlocks — mammoth's semantic HTML → neutral blocks", () =>
       "<h1>Título</h1><ol><li>Primeiro passo</li><li>Segundo passo<ol><li>Sub-passo A</li></ol></li><li>Terceiro passo</li></ol><p>Depois.</p>";
     expect(htmlToRawBlocks(html)).toEqual([
       { kind: "heading", level: 1, text: "Título" },
-      { kind: "list", ordered: true, items: ["Primeiro passo", "Segundo passo Sub-passo A", "Terceiro passo"] },
+      {
+        kind: "list",
+        ordered: true,
+        items: [
+          { blocks: ["Primeiro passo"], level: 0, ordered: true },
+          { blocks: ["Segundo passo"], level: 0, ordered: true },
+          { blocks: ["Sub-passo A"], level: 1, ordered: true },
+          { blocks: ["Terceiro passo"], level: 0, ordered: true },
+        ],
+      },
       { kind: "paragraph", text: "Depois." },
     ]);
   });
 
-  it("multi-level nesting: the sibling after the deep nesting does not vanish", () => {
+  it("multi-level nesting keeps every level, and the sibling after the deep nesting", () => {
     const html = "<ul><li>A<ul><li>B<ul><li>C</li></ul></li><li>D</li></ul></li><li>E</li></ul>";
-    expect(htmlToRawBlocks(html)).toEqual([{ kind: "list", ordered: false, items: ["A B C D", "E"] }]);
+    expect(htmlToRawBlocks(html)).toEqual([
+      {
+        kind: "list",
+        ordered: false,
+        items: [
+          { blocks: ["A"], level: 0, ordered: false },
+          { blocks: ["B"], level: 1, ordered: false },
+          { blocks: ["C"], level: 2, ordered: false },
+          { blocks: ["D"], level: 1, ordered: false },
+          { blocks: ["E"], level: 0, ordered: false },
+        ],
+      },
+    ]);
   });
 });
 

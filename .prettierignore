@@ -14,3 +14,6 @@ eval/report.json
 
 # Dados curados: a formatação atual é revisada à mão, uma entrada por linha
 src/locales/pt-BR/datasets/
+
+# Fixtures byte-exatos: reformatar muda o que o teste mede.
+test/fixtures/

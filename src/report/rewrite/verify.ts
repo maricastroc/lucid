@@ -313,6 +313,28 @@ export async function verifyRewrite(
         : "sem sinal de dever introduzido (heurística, não prova)",
   });
 
+  const strip = (value: string): string =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/gu, "")
+      .toLowerCase();
+  const proposedFolded = strip(proposal.proposed);
+  const categoriesDropped = [
+    ...new Set(
+      [...proposal.original.matchAll(new RegExp(locale.legalCategories.source, "giu"))]
+        .map((match) => match[0])
+        .filter((term) => !proposedFolded.includes(strip(term))),
+    ),
+  ];
+  signals.push({
+    check: "possible_category_narrowed",
+    flagged: categoriesDropped.length > 0,
+    detail:
+      categoriesDropped.length > 0
+        ? `a proposta não repete a categoria do original — confira se ela não passou a valer para mais gente: ${categoriesDropped.join(", ")}`
+        : "sem sinal de categoria jurídica encolhida (heurística, não prova)",
+  });
+
   if (options.probe && options.question) {
     try {
       const [originalResult, proposedResult] = await Promise.all([

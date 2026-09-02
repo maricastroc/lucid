@@ -243,6 +243,25 @@ export const RE_DEONTIC_INTRODUCED_PT = new RegExp(
   "iu",
 );
 
+const LEGAL_CATEGORIES = [
+  "concession\u00e1ri[ao]s?",
+  "permission\u00e1ri[ao]s?",
+  "autarquias?",
+  "funda\u00e7\u00f5es? p\u00fablicas?|funda\u00e7\u00e3o p\u00fablica",
+  "sociedades? de economia mista",
+  "empresas? p\u00fablicas?",
+  "entidades? sem fins lucrativos",
+  "servidor(?:es)? p\u00fablicos?",
+  "agentes? p\u00fablicos?",
+  "\u00f3rg\u00e3os? p\u00fablicos?",
+  "microempresas?",
+  "empresas? de pequeno porte",
+  "cons\u00f3rcios? p\u00fablicos?",
+  "organiza\u00e7\u00f5es? sociais?",
+];
+
+export const RE_LEGAL_CATEGORY_PT = new RegExp(`${WORD_START}(?:${LEGAL_CATEGORIES.join("|")})${WORD_END}`, "giu");
+
 export const rewriteLocalePtBR = {
   id: "pt-BR",
   analyze: (text: string): Diagnostic => analyzeWithLocale(text, localePtBR),
@@ -252,4 +271,5 @@ export const rewriteLocalePtBR = {
   thirdPersonAgentSubject: RE_THIRD_PERSON_AGENT_SUBJECT_PT,
   deonticInSource: RE_DEONTIC_SOURCE_PT,
   deonticIntroduced: RE_DEONTIC_INTRODUCED_PT,
+  legalCategories: RE_LEGAL_CATEGORY_PT,
 };

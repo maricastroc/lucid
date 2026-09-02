@@ -37,6 +37,7 @@ describe("analyze — empty document", () => {
         { criterion: "leitor_terceira_pessoa", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "salto_de_nivel_titulo", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "long_heading", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
+        { criterion: "vocabulario_da_organizacao", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "single_item_list", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
         { criterion: "heading_body_mismatch", count: { info: 0, warning: 0, error: 0 }, densityPer100Words: 0 },
       ],
@@ -65,7 +66,7 @@ describe("analyze — document with no findings", () => {
 
     expect(diagnostic.findings).toEqual([]);
     expect(diagnostic.score.totalFindings).toBe(0);
-    expect(diagnostic.score.byCriterion).toHaveLength(23);
+    expect(diagnostic.score.byCriterion).toHaveLength(24);
     for (const entry of diagnostic.score.byCriterion) {
       expect(entry.count).toEqual({ info: 0, warning: 0, error: 0 });
       expect(entry.densityPer100Words).toBe(0);

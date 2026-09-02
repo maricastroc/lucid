@@ -54,7 +54,7 @@ export const SEMANTIC_REGRESSIONS: readonly SemanticRegression[] = [
     why:
       "«concessionária de serviço público» é categoria jurídica com regime próprio. «Empresa de energia " +
       "elétrica» abrange quem não é concessionária e muda quem está dentro da regra.",
-    detectable: false,
+    detectable: true,
   },
   {
     id: "l8026-descricao-virou-dever",

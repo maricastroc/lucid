@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { metaFor } from "../../lib/criteria";
+import { coverageOf, metaFor } from "../../lib/criteria";
 import { useCopy } from "../../i18n/use-copy";
 import { CriterionMark } from "../badges";
 import { ChevronDownIcon } from "../icons";
 
-export function CleanCriteriaDisclosure({ criteria }: { criteria: readonly string[] }) {
+export function CleanCriteriaDisclosure({
+  criteria,
+  declaredTerms,
+}: {
+  criteria: readonly string[];
+  declaredTerms: number;
+}) {
   const { c, lang } = useCopy();
   const [coverageOpen, setCoverageOpen] = useState(false);
   if (criteria.length === 0) return null;
@@ -31,10 +37,19 @@ export function CleanCriteriaDisclosure({ criteria }: { criteria: readonly strin
           {criteria.map((criterion) => {
             const meta = metaFor(criterion, lang);
             return (
-              <div key={criterion} className="flex items-center gap-2.5 px-3 py-1.5">
-                <CriterionMark criterion={criterion} className="opacity-45" />
-                <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-3">{meta.label}</span>
-                <span className="tabular-nums text-[12px] text-ink-dim">0</span>
+              <div key={criterion} className="px-3 py-1.5">
+                <div className="flex items-center gap-2.5">
+                  <CriterionMark criterion={criterion} className="opacity-45" />
+                  <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-3">{meta.label}</span>
+                  <span className="tabular-nums text-[12px] text-ink-dim">0</span>
+                </div>
+                <span className="mt-0.5 block pl-6.5 text-[11px] leading-relaxed text-ink-dim">
+                  {criterion === "vocabulario_da_organizacao"
+                    ? c.revisionList.zeroDeclared(declaredTerms)
+                    : coverageOf(criterion) === "curated"
+                      ? c.revisionList.zeroCurated
+                      : c.revisionList.zeroProductive}
+                </span>
               </div>
             );
           })}

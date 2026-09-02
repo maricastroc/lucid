@@ -1,4 +1,12 @@
-import { DEFAULT_CONFIG, EMPTY_BRIEFING, isRawBlock, type Config, type RawBlock, type ReaderBriefing } from "@/lucid";
+import {
+  DEFAULT_CONFIG,
+  EMPTY_BRIEFING,
+  isRawBlock,
+  type Config,
+  type OrgTerm,
+  type RawBlock,
+  type ReaderBriefing,
+} from "@/lucid";
 import type { ImportNotes } from "../hooks/use-document-source";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
@@ -71,6 +79,21 @@ function parseBriefing(value: unknown): ReaderBriefing | null {
   return { audience, purpose, priorKnowledge, mustFind: mustFind as string[] };
 }
 
+export function parseOrgTerms(value: unknown): OrgTerm[] | null {
+  if (!Array.isArray(value)) return null;
+
+  const terms: OrgTerm[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) return null;
+    if (typeof item.term !== "string" || item.term.trim() === "") return null;
+    if (item.plain !== null && typeof item.plain !== "string") return null;
+    if (typeof item.reason !== "string") return null;
+    terms.push({ term: item.term, plain: item.plain === "" ? null : item.plain, reason: item.reason });
+  }
+
+  return terms;
+}
+
 function parseConfig(value: unknown): Config | null {
   if (value === undefined) return DEFAULT_CONFIG;
   if (!isRecord(value)) return null;
@@ -84,6 +107,12 @@ function parseConfig(value: unknown): Config | null {
     for (const [field, fallback] of Object.entries(defaults)) {
       const candidate = incoming[field];
       if (candidate === undefined) continue;
+      if (section === "vocabulario" && field === "terms") {
+        const terms = parseOrgTerms(candidate);
+        if (terms === null) return null;
+        next[field] = terms;
+        continue;
+      }
       if (typeof candidate !== typeof fallback) return null;
       if (typeof candidate === "number" && !Number.isFinite(candidate)) return null;
       next[field] = candidate;
@@ -156,6 +185,9 @@ function parseImportNotes(value: unknown): ImportNotes | null {
   if (value.format === "docx") {
     if (!numbers(["tablesPreserved", "tablesFlattened", "textBoxesInlined"])) return null;
     if (!strings("headingStylesRecovered") || !strings("unrecognisedParagraphStyles")) return null;
+    if (value.headingStylesInferred !== undefined && !strings("headingStylesInferred")) return null;
+    if (value.headingStylesInferred === undefined)
+      return { ...value, headingStylesInferred: [] } as unknown as ImportNotes;
     return value as unknown as ImportNotes;
   }
   if (value.format === "pdf") {
@@ -169,7 +201,9 @@ function parseImportNotes(value: unknown): ImportNotes | null {
       "shortLineBreaks",
       "ruledRegions",
     ];
-    return numbers(keys) ? (value as unknown as ImportNotes) : null;
+    if (!numbers(keys)) return null;
+    if (typeof value.tablesRecovered !== "number") return { ...value, tablesRecovered: 0 } as unknown as ImportNotes;
+    return value as unknown as ImportNotes;
   }
   return null;
 }

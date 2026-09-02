@@ -9,6 +9,7 @@ import {
   type Finding,
   hashConfig,
   isRawBlock,
+  type OrgTerm,
   type RawBlock,
   type Severity,
   stableHash,
@@ -16,9 +17,12 @@ import {
 import { balance, type CriterionBalance } from "./attribution";
 import { findingId } from "./criteria";
 import { isProfileId, type ProfileId } from "./profiles";
+import { parseOrgTerms } from "./workspace";
 import type { ReviewMarkKind, ReviewMarks } from "./review-marks";
 
-export const BASELINE_SCHEMA_VERSION = 1;
+export const BASELINE_SCHEMA_VERSION = 2;
+
+const READABLE_SCHEMA_VERSIONS: readonly number[] = [1, 2];
 
 export interface BaselineDecision {
   readonly criterion: string;
@@ -49,6 +53,7 @@ export interface Baseline {
     readonly findings: readonly BaselineFinding[];
   };
   readonly decisions: readonly BaselineDecision[];
+  readonly vocabulary: readonly OrgTerm[];
 }
 
 export const STAMP_FIELDS = ["lucidVersion", "localeId", "configHash", "dataHash", "standardVersion"] as const;
@@ -75,6 +80,7 @@ export function buildBaseline(input: {
   profileId: ProfileId;
   config: Config;
   marks: ReviewMarks;
+  vocabulary: readonly OrgTerm[];
 }): Baseline {
   const decisions: BaselineDecision[] = [];
   for (const finding of input.findings) {
@@ -104,6 +110,7 @@ export function buildBaseline(input: {
       })),
     },
     decisions,
+    vocabulary: input.vocabulary,
   };
 }
 
@@ -224,7 +231,7 @@ export function parseBaseline(raw: string): BaselineParse {
   if (!isRecord(value)) return refuse("unreadable");
 
   if (typeof value.schemaVersion !== "number") return refuse("unreadable");
-  if (value.schemaVersion !== BASELINE_SCHEMA_VERSION) return refuse("schema");
+  if (!READABLE_SCHEMA_VERSIONS.includes(value.schemaVersion)) return refuse("schema");
 
   const { title, savedAt, source, historical, decisions } = value;
   if (typeof title !== "string" || title.trim() === "") return refuse("unreadable");
@@ -257,7 +264,10 @@ export function parseBaseline(raw: string): BaselineParse {
     if (decision.note !== null && typeof decision.note !== "string") return refuse("unreadable");
   }
 
-  return { ok: true, baseline: value as unknown as Baseline };
+  const vocabulary = value.vocabulary === undefined ? [] : parseOrgTerms(value.vocabulary);
+  if (vocabulary === null) return refuse("unreadable");
+
+  return { ok: true, baseline: { ...(value as unknown as Baseline), vocabulary } };
 }
 
 export function acceptBaseline(baseline: Baseline, current: DiagnosticMeta): BaselineRefusal | null {

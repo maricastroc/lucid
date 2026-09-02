@@ -4,12 +4,8 @@
 
 Este relatório compara PROMPTS com o modelo fixo. Ele **não** mostra que um prompt é o
 melhor em geral — mostra qual é o melhor para este modelo. O segundo braço
-(`openai/gpt-oss-120b`) foi abandonado por cota diária do provedor esgotada, sem
-respostas suficientes para comparar naquele modelo.
-
-Que a diferença entre modelos é real, e não hipótese: nos dados parciais do Groq o
-`rewrite@2` preservou número em 83% dos casos, contra 25% no Gemini. Um vencedor eleito
-aqui vale para o Gemini até que o outro braço seja refeito.
+O Lucid fala com um provedor só (ADR-097), então esta é a única leitura disponível —
+e ela continua sendo sobre ESTE modelo, não sobre prompts em geral.
 
 **Recorte das tabelas:** 14 alvos em que TODOS os candidatos responderam (de 20 com alguma resposta). Comparar candidatos sobre
 conjuntos de alvos diferentes deixaria um alvo fácil inflar quem por acaso o pegou. A visão
@@ -32,14 +28,14 @@ sem esse recorte vem no fim, com o n de cada braço.
 
 | Sistema                      |   n | reescreveu% | provas OK (méd.) | veto% | peso região antes→depois | região piorou% | Δpeso total | total piorou% | critérios novos na região (méd.) |
 | ---------------------------- | --: | ----------: | ---------------: | ----: | -----------------------: | -------------: | ----------: | ------------: | -------------------------------: |
-| ab-A@1 · gemini-2.5-flash    |  14 |         100 |          5.9/7.0 |    57 |                3.5 → 2.1 |             14 |        -1.4 |            14 |                              0.3 |
-| ab-B@1 · gemini-2.5-flash    |  14 |         100 |          6.2/7.0 |    43 |                3.5 → 1.9 |             14 |        -1.5 |            14 |                              0.4 |
-| ab-C@1 · gemini-2.5-flash    |  14 |         100 |          5.9/7.0 |    64 |                3.5 → 2.2 |             14 |        -1.3 |            14 |                              0.3 |
-| lucid@v1 · gemini-2.5-flash  |  14 |         100 |          6.0/7.0 |    57 |                3.5 → 2.5 |             21 |        -0.9 |            21 |                              0.2 |
-| lucid@v2 · gemini-2.5-flash  |  14 |         100 |          6.9/7.0 |    14 |                3.5 → 1.4 |              0 |        -2.0 |             0 |                              0.4 |
-| lucid@v3 · gemini-2.5-flash  |  14 |         100 |          6.8/7.0 |    21 |                3.5 → 0.9 |              0 |        -2.5 |             0 |                              0.3 |
-| lucid@v4 · gemini-2.5-flash  |  14 |         100 |          6.5/7.0 |    36 |                3.5 → 1.6 |              7 |        -1.9 |             7 |                              0.4 |
-| rewrite@2 · gemini-2.5-flash |  14 |         100 |          5.8/7.0 |    79 |                3.5 → 1.9 |             14 |        -1.5 |            14 |                              0.4 |
+| ab-A@1 · gemini-2.5-flash    |  14 |         100 |          5.9/7.0 |    57 |                2.2 → 1.7 |             14 |        -0.5 |            14 |                              0.3 |
+| ab-B@1 · gemini-2.5-flash    |  14 |         100 |          6.1/7.0 |    50 |                2.2 → 1.6 |             21 |        -0.5 |            21 |                              0.4 |
+| ab-C@1 · gemini-2.5-flash    |  14 |         100 |          5.7/7.0 |    64 |                2.2 → 1.9 |             21 |        -0.3 |            21 |                              0.3 |
+| lucid@v1 · gemini-2.5-flash  |  14 |         100 |          5.9/7.0 |    57 |                2.2 → 1.9 |             29 |        -0.2 |            29 |                              0.2 |
+| lucid@v2 · gemini-2.5-flash  |  14 |         100 |          6.6/7.0 |    21 |                2.2 → 1.4 |             14 |        -0.8 |            14 |                              0.4 |
+| lucid@v3 · gemini-2.5-flash  |  14 |         100 |          6.6/7.0 |    29 |                2.2 → 0.9 |              7 |        -1.2 |             7 |                              0.3 |
+| lucid@v4 · gemini-2.5-flash  |  14 |         100 |          6.5/7.0 |    36 |                2.2 → 1.6 |              7 |        -0.6 |             7 |                              0.4 |
+| rewrite@2 · gemini-2.5-flash |  14 |         100 |          5.8/7.0 |    79 |                2.2 → 1.8 |             14 |        -0.4 |            14 |                              0.4 |
 
 ### 6b. Inchaço, divisão de frase e marcação — medidas igual para todos
 
@@ -83,11 +79,11 @@ sem esse recorte vem no fim, com o n de cada braço.
 ### Provas reprovadas, por prova
 
 - **ab-A@1 · gemini-2.5-flash** — numbers_preserved=6, target_resolved=5, no_new_findings=2, region_improved=2
-- **ab-B@1 · gemini-2.5-flash** — target_resolved=4, numbers_preserved=3, no_new_findings=2, region_improved=2
-- **ab-C@1 · gemini-2.5-flash** — numbers_preserved=7, target_resolved=5, no_new_findings=2, region_improved=2
-- **lucid@v1 · gemini-2.5-flash** — target_resolved=8, no_new_findings=3, region_improved=3
-- **lucid@v2 · gemini-2.5-flash** — target_resolved=2
-- **lucid@v3 · gemini-2.5-flash** — target_resolved=2, numbers_preserved=1
+- **ab-B@1 · gemini-2.5-flash** — target_resolved=4, no_new_findings=3, numbers_preserved=3, region_improved=3
+- **ab-C@1 · gemini-2.5-flash** — numbers_preserved=7, target_resolved=5, no_new_findings=3, region_improved=3
+- **lucid@v1 · gemini-2.5-flash** — target_resolved=8, no_new_findings=4, region_improved=4
+- **lucid@v2 · gemini-2.5-flash** — no_new_findings=2, region_improved=2, target_resolved=2
+- **lucid@v3 · gemini-2.5-flash** — target_resolved=2, no_new_findings=1, numbers_preserved=1, region_improved=1
 - **lucid@v4 · gemini-2.5-flash** — target_resolved=5, no_new_findings=1, region_improved=1
 - **rewrite@2 · gemini-2.5-flash** — numbers_preserved=10, target_resolved=3, no_new_findings=2, region_improved=2
 
@@ -123,14 +119,14 @@ sem esse recorte vem no fim, com o n de cada braço.
 
 | Sistema                      |   n | reescreveu% | provas OK (méd.) | veto% | peso região antes→depois | região piorou% | Δpeso total | total piorou% | critérios novos na região (méd.) |
 | ---------------------------- | --: | ----------: | ---------------: | ----: | -----------------------: | -------------: | ----------: | ------------: | -------------------------------: |
-| ab-A@1 · gemini-2.5-flash    |  16 |         100 |          5.9/7.0 |    63 |                3.7 → 2.1 |             13 |        -1.6 |            13 |                              0.3 |
-| ab-B@1 · gemini-2.5-flash    |  15 |         100 |          6.2/7.0 |    47 |                3.6 → 2.0 |             13 |        -1.6 |            13 |                              0.3 |
-| ab-C@1 · gemini-2.5-flash    |  15 |         100 |          5.9/7.0 |    67 |                3.6 → 2.2 |             13 |        -1.4 |            13 |                              0.3 |
-| lucid@v1 · gemini-2.5-flash  |  20 |         100 |          6.1/7.0 |    60 |                3.5 → 2.1 |             15 |        -1.4 |            15 |                              0.3 |
-| lucid@v2 · gemini-2.5-flash  |  20 |         100 |          6.8/7.0 |    25 |                3.5 → 1.3 |              0 |        -2.2 |             0 |                              0.3 |
-| lucid@v3 · gemini-2.5-flash  |  20 |         100 |          6.7/7.0 |    30 |                3.5 → 1.0 |              0 |        -2.5 |             0 |                              0.3 |
-| lucid@v4 · gemini-2.5-flash  |  20 |         100 |          6.5/7.0 |    40 |                3.5 → 1.5 |              5 |        -2.0 |             5 |                              0.3 |
-| rewrite@2 · gemini-2.5-flash |  20 |         100 |          5.8/7.0 |    85 |                3.5 → 1.9 |             10 |        -1.6 |            10 |                              0.3 |
+| ab-A@1 · gemini-2.5-flash    |  16 |         100 |          5.9/7.0 |    63 |                2.3 → 1.7 |             13 |        -0.6 |            13 |                              0.3 |
+| ab-B@1 · gemini-2.5-flash    |  15 |         100 |          6.1/7.0 |    53 |                2.2 → 1.7 |             20 |        -0.5 |            20 |                              0.3 |
+| ab-C@1 · gemini-2.5-flash    |  15 |         100 |          5.7/7.0 |    67 |                2.2 → 1.9 |             20 |        -0.4 |            20 |                              0.3 |
+| lucid@v1 · gemini-2.5-flash  |  20 |         100 |          6.0/7.0 |    60 |                2.2 → 1.7 |             20 |        -0.5 |            20 |                              0.3 |
+| lucid@v2 · gemini-2.5-flash  |  20 |         100 |          6.5/7.0 |    30 |                2.2 → 1.3 |             10 |        -0.9 |            10 |                              0.3 |
+| lucid@v3 · gemini-2.5-flash  |  20 |         100 |          6.6/7.0 |    35 |                2.2 → 1.0 |              5 |        -1.2 |             5 |                              0.3 |
+| lucid@v4 · gemini-2.5-flash  |  20 |         100 |          6.5/7.0 |    40 |                2.2 → 1.5 |              5 |        -0.7 |             5 |                              0.3 |
+| rewrite@2 · gemini-2.5-flash |  20 |         100 |          5.8/7.0 |    85 |                2.2 → 1.7 |             10 |        -0.5 |            10 |                              0.3 |
 
 ### 6b. Inchaço, divisão de frase e marcação — medidas igual para todos
 
@@ -174,11 +170,11 @@ sem esse recorte vem no fim, com o n de cada braço.
 ### Provas reprovadas, por prova
 
 - **ab-A@1 · gemini-2.5-flash** — numbers_preserved=7, target_resolved=7, no_new_findings=2, region_improved=2
-- **ab-B@1 · gemini-2.5-flash** — target_resolved=5, numbers_preserved=3, no_new_findings=2, region_improved=2
-- **ab-C@1 · gemini-2.5-flash** — numbers_preserved=7, target_resolved=6, no_new_findings=2, region_improved=2
-- **lucid@v1 · gemini-2.5-flash** — target_resolved=12, no_new_findings=3, region_improved=3
-- **lucid@v2 · gemini-2.5-flash** — target_resolved=5
-- **lucid@v3 · gemini-2.5-flash** — target_resolved=5, numbers_preserved=1
+- **ab-B@1 · gemini-2.5-flash** — target_resolved=5, no_new_findings=3, numbers_preserved=3, region_improved=3
+- **ab-C@1 · gemini-2.5-flash** — numbers_preserved=7, target_resolved=6, no_new_findings=3, region_improved=3
+- **lucid@v1 · gemini-2.5-flash** — target_resolved=12, no_new_findings=4, region_improved=4
+- **lucid@v2 · gemini-2.5-flash** — target_resolved=5, no_new_findings=2, region_improved=2
+- **lucid@v3 · gemini-2.5-flash** — target_resolved=5, no_new_findings=1, numbers_preserved=1, region_improved=1
 - **lucid@v4 · gemini-2.5-flash** — target_resolved=8, no_new_findings=1, region_improved=1
 - **rewrite@2 · gemini-2.5-flash** — numbers_preserved=16, target_resolved=4, no_new_findings=2, region_improved=2
 

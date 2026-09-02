@@ -169,18 +169,26 @@ export const COPY_PT: UiCopy = {
     printNote: "Abre a caixa de impressão do navegador — escolha “Salvar como PDF”.",
     exportDocx: "Baixar texto revisado (.docx)",
     exportDocumentMd: "Baixar texto revisado (.md)",
-    printDocument: "Imprimir texto revisado (PDF)",
+    printDocument: "Imprimir texto revisado",
+    exportPdf: "Baixar texto revisado (.pdf)",
+    exportPdfNote: "Diagramado pelo Lucid: A4, títulos, listas com os níveis do documento e tabelas paginadas.",
+    pdfPageLabel: (page: number, total: number) => `${page} de ${total}`,
+    pdfError: "Não foi possível gerar o PDF. Use a exportação em .txt.",
     groupAudit: "Auditoria",
     groupDocument: "Texto revisado",
     exportTxt: "Baixar texto (.txt)",
     docxError: "Não foi possível gerar o .docx. Use a exportação em .txt.",
     docxNote:
-      "Contém o texto revisado com títulos, listas e tabelas — linhas, colunas e células mescladas. Fica de " +
-      "fora o resto da formatação original: negrito, imagens, cabeçalhos e rodapés.",
+      "PDF e .docx saem com a mesma diagramação: mesmos tamanhos, espaços e hierarquia. Contêm o texto " +
+      "revisado com títulos, listas e tabelas — linhas, colunas e células mescladas. Fica de fora o resto da " +
+      "formatação original: negrito, imagens, cabeçalhos e rodapés. As fontes da marca não são embutidas. " +
+      "Nenhum dos dois é caminho de volta: reimportar aqui não devolve a mesma estrutura.",
     importTables: (n: number) => `${n} ${n === 1 ? "tabela achatada" : "tabelas achatadas"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "caixa de texto embutida" : "caixas de texto embutidas"}`,
     importRuledRegions: (n: number) =>
       `${n} ${n === 1 ? "região com grade, lida" : "regiões com grade, lidas"} como texto corrido`,
+    importPdfTables: (n: number) =>
+      `${n} ${n === 1 ? "tabela reconstruída" : "tabelas reconstruídas"} a partir da grade desenhada no arquivo`,
     importFurniture: (n: number) =>
       `${n} ${n === 1 ? "linha repetida de cabeçalho, rodapé ou número de página" : "linhas repetidas de cabeçalho, rodapé ou número de página"} fora da auditoria`,
     importDehyphenated: (n: number) =>
@@ -189,14 +197,23 @@ export const COPY_PT: UiCopy = {
     importAlso: ", ",
     importRecovered: (styles: string) =>
       `Reconhecemos os títulos do arquivo (${styles}). Sem isso, eles entrariam como parágrafo comum.`,
+    importInferred: (styles: string) =>
+      `Os títulos abaixo foram INFERIDOS pelo nome do estilo (${styles}). O arquivo não declara o nível deles, ` +
+      `então isto é leitura nossa, não afirmação do documento — confira se algum parágrafo virou título sem ser.`,
     importFlattened: (what: string) =>
       `${what} viraram parágrafos. O conteúdo entra na auditoria, mas a disposição original não.`,
     importFromPdf: (what: string) =>
-      `Leitura do PDF: ${what}. O PDF não declara títulos nem listas, então tudo entra como parágrafo.`,
+      `Leitura do PDF: ${what}. O PDF não declara estrutura — ele desenha caracteres numa página.`,
+    importPdfInferred: (headings: number, items: number, references: string) =>
+      `Títulos e itens deste PDF foram INFERIDOS, não lidos de uma declaração: ${headings} ` +
+      `${headings === 1 ? "título" : "títulos"} e ${items} ${items === 1 ? "item" : "itens"}, pela articulação ` +
+      `normativa (${references}) somada ao tamanho e à posição do texto na página. Confira antes de confiar: ` +
+      `o que o arquivo afirma é só o desenho.`,
     importPdfRuled:
-      "Um PDF desenha linhas, não declara células. Onde há grade, o Lucid não reconstrói a tabela: reconstruir " +
-      "significaria adivinhar onde cada célula começa, e um erro aí muda o que o texto diz. Um .docx da mesma " +
-      "tabela entra com linhas e colunas preservadas.",
+      "Um PDF desenha linhas, não declara células. O Lucid reconstrói a tabela apenas onde a grade está " +
+      "DESENHADA no arquivo: as colunas são os traços verticais, as linhas são os horizontais, e a célula " +
+      "mesclada é a que não tem traço fechando o lado. Onde não há grade desenhada, não há tabela a recuperar " +
+      "aqui — alinhamento por si só não é célula, e adivinhar mudaria o que o texto diz.",
     structureMissing: { heading: "títulos", list: "listas" } as Record<string, string>,
     structureMissingJoin: " nem ",
     structureCaveat: (missing: string, count: number) =>
@@ -329,6 +346,12 @@ export const COPY_PT: UiCopy = {
       "aprovam o texto.",
     progressTitle: (done, total) => `${done} de ${total} revisados`,
     absenceCaveat: "A ausência de anotações não é atestado de clareza — é a cobertura da auditoria.",
+    zeroCurated: "Confere uma lista curada. Este zero diz que a lista não bateu, não que o texto está livre.",
+    zeroProductive: "Reconhece o padrão no texto, sem depender de lista. Este zero é medida.",
+    zeroDeclared: (n: number) =>
+      n === 0
+        ? "Depende do vocabulário que você declarar. Nenhum termo declarado ainda: este zero não mediu nada."
+        : `Confere os ${n} ${n === 1 ? "termo declarado" : "termos declarados"} por você. Fora deles, não procura.`,
   },
 
   badges: {
@@ -358,6 +381,11 @@ export const COPY_PT: UiCopy = {
     footerDeterministic: "Análise automática baseada na",
 
     safeHeader: "Troca direta · equivalente curado",
+    declaredHeader: "Troca direta · equivalente declarado pela organização",
+    declaredEquivalent: "equivalente registrado no seu vocabulário",
+    declaredApplyNote:
+      "Quem assina esta equivalência é a sua organização, não o glossário do Lucid nem a norma. A ferramenta " +
+      "apenas aplica o que ela registrou, uma ocorrência de cada vez, e re-audita o texto depois.",
     safeTerm: "Termo",
     safePlain: "Comum",
     safeEquivalent: "equivalente 1:1 do glossário",
@@ -468,6 +496,10 @@ export const COPY_PT: UiCopy = {
     longHeading:
       "Encurte o título até virar um rótulo que o leitor use para localizar a seção — e, se ele fechou como frase, " +
       "tire o ponto final e reduza à etiqueta essencial. O corte é seu.",
+    vocabularioDaOrganizacao:
+      "Este termo está no vocabulário que a sua organização declarou. Quem decide se ele fica é você: às vezes o " +
+      "termo técnico é obrigatório e o que falta é explicá-lo na primeira vez. Se a organização registrou um " +
+      "equivalente, ele aparece como troca direta; se não registrou, aqui só cabe o aviso.",
     singleItemList:
       "Uma lista de um item só não separa nada: acrescente os itens que faltam, ou traga o conteúdo de volta para o " +
       "texto corrido. A escolha depende do conteúdo — sua.",
@@ -559,6 +591,34 @@ export const COPY_PT: UiCopy = {
       `Registrado como requisito: a versão final deve nomear «${agent}». A ferramenta não monta a frase — ela verifica quem montou.`,
   },
 
+  vocabulary: {
+    label: "Vocabulário da organização",
+    chip: "declarado por você",
+    lead:
+      "O glossário do Lucid é curado e pequeno de propósito: só entra nele o que foi verificado um a um. " +
+      "Ele não conhece as palavras da sua casa. Estas você declara — e elas passam a ser procuradas em todo " +
+      "documento que você auditar com este vocabulário carregado.",
+    fromSelection: "Do trecho selecionado no documento:",
+    useSelection: "Usar este trecho como termo",
+    termLabel: "Termo",
+    termPlaceholder: "Ex.: termo de fomento",
+    plainLabel: "Equivalente simples",
+    plainHint: "Deixe em branco se não houver troca segura. Sem equivalente, o termo só é sinalizado.",
+    plainPlaceholder: "Ex.: acordo de repasse",
+    reasonLabel: "Motivo",
+    reasonPlaceholder: "Ex.: ninguém fora da administração usa esta expressão",
+    add: "Declarar termo",
+    duplicate: "Este termo já está declarado.",
+    declaredLabel: (n: number) => `${n} ${n === 1 ? "termo declarado" : "termos declarados"}`,
+    occurrences: (n: number) => `· ${n} ${n === 1 ? "ocorrência" : "ocorrências"}`,
+    signalOnly: "Sem equivalente registrado — só sinaliza, não propõe troca.",
+    swapsTo: (plain: string) => `Equivalente registrado: “${plain}”.`,
+    remove: (term: string) => `Remover “${term}” do vocabulário`,
+    authorityCaveat:
+      "Quem assina estes termos é a sua organização, não a norma. Eles nunca citam cláusula da ISO 24495-1 e " +
+      "aparecem separados do glossário curado no relatório. O vocabulário viaja no carimbo da análise: " +
+      "resultado nenhum consegue esconder com que léxico foi medido.",
+  },
   briefing: {
     label: "Palavras e expressões obrigatórias",
     chip: "A Lucid procura no texto",
@@ -996,6 +1056,7 @@ export const COPY_PT: UiCopy = {
     list: "Lista",
     orderedList: "Lista numerada",
     listItems: (n) => (n === 1 ? " · 1 item" : ` · ${n} itens`),
+    listLevels: (n) => ` · ${n} níveis`,
     table: "Tabela",
     tableShape: (rows, columns) =>
       ` · ${rows} ${rows === 1 ? "linha" : "linhas"} × ${columns} ${columns === 1 ? "coluna" : "colunas"}`,
@@ -1018,6 +1079,10 @@ export const COPY_PT: UiCopy = {
     editorialExtension: "Extensão editorial PT-BR",
     editorialExtensionTag: "PT-BR",
     editorialExtensionTitle: "Extensão editorial PT-BR — fora da norma ISO",
+    organizational: "Vocabulário da organização",
+    organizationalTag: "declarado",
+    organizationalTitle:
+      "Termo declarado pela sua organização. Não vem da norma e não cita cláusula — quem atesta que ele trava o leitor é quem conhece esse leitor.",
     structuralHeuristic: "Heurística estrutural",
     structuralHeuristicTag: "estrut.",
     structuralHeuristicTitle: "Heurística estrutural — fora da norma ISO",

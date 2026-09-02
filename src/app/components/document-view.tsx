@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useMemo, useRef } from "react";
-import type { Block, Diagnostic, Finding, Span } from "@/lucid";
+import type { Block, Diagnostic, Finding, ListItemBlock, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
 import { findingId, metaFor, severityInkVar, severityLabel } from "../lib/criteria";
 import { severityRank } from "../lib/criteria";
@@ -46,6 +46,113 @@ function occurrenceAttrs(seg: LineSegment, active: Span | null) {
   const key = occurrenceKey(seg.mark);
   const isActive = active !== null && occurrenceKey(active) === key;
   return { key, isActive, className: isActive ? "occ occ-active" : "occ" };
+}
+
+interface ListNode {
+  readonly item: ListItemBlock;
+  readonly children: ListNode[];
+}
+
+function listTree(items: readonly ListItemBlock[]): ListNode[] {
+  const roots: ListNode[] = [];
+  const stack: ListNode[] = [];
+  const base = items.reduce((n, item) => Math.min(n, item.level), Number.POSITIVE_INFINITY);
+
+  for (const item of items) {
+    const level = item.level - base;
+    const node: ListNode = { item, children: [] };
+    while (stack.length > 0 && stack[stack.length - 1].item.level - base >= level) stack.pop();
+    if (stack.length === 0) roots.push(node);
+    else stack[stack.length - 1].children.push(node);
+    stack.push(node);
+  }
+
+  return roots;
+}
+
+function LabelledList({
+  items,
+  ctx,
+  diagnostic,
+  occurrences,
+}: {
+  items: readonly ListItemBlock[];
+  ctx: SegmentContext;
+  diagnostic: Diagnostic;
+  occurrences: readonly Span[];
+}) {
+  const base = items.reduce((n, item) => Math.min(n, item.level), Number.POSITIVE_INFINITY);
+
+  return (
+    <ol className="list-none space-y-1 pl-0">
+      {items.map((item, index) => (
+        <li key={index} className="flex gap-2" style={{ marginLeft: `${(item.level - base) * 1.6}em` }}>
+          <span className="shrink-0 tabular-nums text-ink-2">{item.marker}</span>
+          <div className="min-w-0 flex-1">
+            {item.blocks.map((paragraph, pi) => (
+              <p key={pi} className={pi === 0 ? "" : "mt-1"}>
+                <Segments
+                  segments={segmentRange(
+                    diagnostic.text,
+                    diagnostic.findings,
+                    paragraph.start,
+                    paragraph.end,
+                    occurrences,
+                  )}
+                  ctx={ctx}
+                />
+              </p>
+            ))}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function ListLevel({
+  nodes,
+  ctx,
+  diagnostic,
+  occurrences,
+}: {
+  nodes: readonly ListNode[];
+  ctx: SegmentContext;
+  diagnostic: Diagnostic;
+  occurrences: readonly Span[];
+}) {
+  if (nodes.length === 0) return null;
+  const ordered = nodes[0].item.ordered;
+  const labelled = nodes.every((node) => node.item.marker !== undefined);
+  const ListTag = ordered ? "ol" : "ul";
+  const style = labelled ? "list-none pl-0" : `${ordered ? "list-decimal" : "list-disc"} pl-[1.4em]`;
+
+  return (
+    <ListTag className={`${style} space-y-1 marker:text-ink-3`}>
+      {nodes.map((node, index) => (
+        <li key={index} className={labelled ? "flex gap-2" : "pl-1"}>
+          {labelled && <span className="shrink-0 tabular-nums text-ink-2">{node.item.marker}</span>}
+          <div className={labelled ? "min-w-0 flex-1" : "contents"}>
+            {node.item.blocks.map((paragraph, pi) => (
+              <p key={pi} className={pi === 0 ? "" : "mt-1"}>
+                <Segments
+                  segments={segmentRange(
+                    diagnostic.text,
+                    diagnostic.findings,
+                    paragraph.start,
+                    paragraph.end,
+                    occurrences,
+                  )}
+                  ctx={ctx}
+                />
+              </p>
+            ))}
+            <ListLevel nodes={node.children} ctx={ctx} diagnostic={diagnostic} occurrences={occurrences} />
+          </div>
+        </li>
+      ))}
+    </ListTag>
+  );
 }
 
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
@@ -139,7 +246,8 @@ function MarginTick({
 }
 
 function headingSize(level: number): string {
-  return `${Math.max(1.5 - (level - 1) * 0.14, 1.05).toFixed(2)}em`;
+  if (level <= 1) return "1.85em";
+  return `${Math.max(1.42 - (level - 2) * 0.13, 1.05).toFixed(2)}em`;
 }
 
 function BlockView({
@@ -173,10 +281,19 @@ function BlockView({
         if (block.kind === "heading") {
           const Tag = `h${Math.min(Math.max(block.level + 1, 2), 6)}` as "h2" | "h3" | "h4" | "h5" | "h6";
           return (
-            <div key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.9em]"}`}>
+            <div
+              key={bi}
+              data-start={block.start}
+              className={`relative ${bi === 0 ? "" : block.level <= 1 ? "mt-[2.4em]" : "mt-[1.9em]"} ${
+                block.level <= 1 ? "pb-[0.55em]" : ""
+              }`}
+            >
               {tick}
               <div className="u-sublabel mb-1 text-ink-3">{c.documentView.headingLevel(block.level)}</div>
-              <Tag className="font-semibold leading-snug text-ink-0" style={{ fontSize: headingSize(block.level) }}>
+              <Tag
+                className={`font-semibold leading-snug text-ink-0 ${block.level <= 1 ? "tracking-[-0.012em]" : ""}`}
+                style={{ fontSize: headingSize(block.level) }}
+              >
                 <Segments
                   segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
                   ctx={ctx}
@@ -187,26 +304,20 @@ function BlockView({
         }
 
         if (block.kind === "list") {
-          const ListTag = block.ordered ? "ol" : "ul";
+          const deepest = block.items.reduce((n, item) => Math.max(n, item.level), 0);
           return (
             <div key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
               {tick}
               <div className="u-sublabel mb-1.5 text-ink-3">
                 {block.ordered ? c.documentView.orderedList : c.documentView.list}
                 {c.documentView.listItems(block.items.length)}
+                {deepest > 0 && c.documentView.listLevels(deepest + 1)}
               </div>
-              <ListTag
-                className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-1 pl-[1.4em] marker:text-ink-3`}
-              >
-                {block.items.map((item, ii) => (
-                  <li key={ii} className="pl-1">
-                    <Segments
-                      segments={segmentRange(diagnostic.text, diagnostic.findings, item.start, item.end, occurrences)}
-                      ctx={ctx}
-                    />
-                  </li>
-                ))}
-              </ListTag>
+              {block.items.every((item) => item.marker !== undefined) ? (
+                <LabelledList items={block.items} ctx={ctx} diagnostic={diagnostic} occurrences={occurrences} />
+              ) : (
+                <ListLevel nodes={listTree(block.items)} ctx={ctx} diagnostic={diagnostic} occurrences={occurrences} />
+              )}
             </div>
           );
         }
@@ -220,7 +331,10 @@ function BlockView({
                 {c.documentView.tableShape(block.rows.length, block.columns)}
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-[0.94em]" aria-label={c.documentView.tableLabel}>
+                <table
+                  className="w-full border-collapse text-[0.94em] leading-snug"
+                  aria-label={c.documentView.tableLabel}
+                >
                   <tbody>
                     {block.rows.map((row, ri) => (
                       <tr key={ri}>
@@ -237,7 +351,7 @@ function BlockView({
                               }`}
                             >
                               {cell.blocks.map((paragraph, pi) => (
-                                <p key={pi} data-start={paragraph.start} className={pi === 0 ? "" : "mt-[0.6em]"}>
+                                <p key={pi} data-start={paragraph.start} className={pi === 0 ? "" : "mt-[0.5em]"}>
                                   <Segments
                                     segments={segmentRange(
                                       diagnostic.text,

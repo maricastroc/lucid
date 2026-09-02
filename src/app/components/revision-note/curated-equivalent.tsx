@@ -15,6 +15,7 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
 
   const after = matchLeadingCase(before, finding.suggestion!);
   const rationale = buildConfidence(finding, lang).rationale;
+  const declared = finding.source === "organizational";
 
   const copy = async () => {
     try {
@@ -28,7 +29,7 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
     <div className="overflow-hidden rounded-xl border border-safe-line bg-safe-weak">
       <div className="flex items-center gap-2 px-3 pt-3.5 text-[12.5px] font-semibold text-safe">
         <CheckIcon className="size-4" />
-        {c.note.safeHeader}
+        {declared ? c.note.declaredHeader : c.note.safeHeader}
       </div>
 
       <div className="px-3 py-3">
@@ -38,7 +39,9 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
           </DiffRow>
           <div className="flex items-center gap-2 border-t border-rule-1 px-3.5 py-1">
             <ArrowDownIcon className="size-3.5 text-safe" />
-            <span className="u-sublabel text-ink-3">{c.note.safeEquivalent}</span>
+            <span className="u-sublabel text-ink-3">
+              {declared ? c.note.declaredEquivalent : c.note.safeEquivalent}
+            </span>
           </div>
           <DiffRow label={c.note.safePlain} tone="safe">
             <span className="font-serif text-[15.5px] font-medium text-ink-0">{after}</span>
@@ -54,7 +57,9 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
           </Button>
         </div>
 
-        <p className="mt-3 text-[12px] leading-relaxed text-ink-2">{c.note.safeApplyNote}</p>
+        <p className="mt-3 text-[12px] leading-relaxed text-ink-2">
+          {declared ? c.note.declaredApplyNote : c.note.safeApplyNote}
+        </p>
         <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.safeNote}</p>
       </div>

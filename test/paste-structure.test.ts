@@ -82,9 +82,9 @@ describe("inline markup inside a block is not a word boundary", () => {
     ]);
   });
 
-  it("separates the paragraphs a list item wraps around", () => {
+  it("keeps the paragraphs of one list item apart, instead of running them together", () => {
     expect(htmlToRawBlocks("<ul><li><p>Um</p><p>Dois</p></li></ul>")).toEqual([
-      { kind: "list", ordered: false, items: ["Um Dois"] },
+      { kind: "list", ordered: false, items: [{ blocks: ["Um", "Dois"], level: 0, ordered: false }] },
     ]);
   });
 });

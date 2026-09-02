@@ -1,5 +1,4 @@
 import { GeminiProvider } from "../../src/llm/gemini";
-import { GroqProvider } from "../../src/llm/groq";
 import type { ChatProvider } from "../../src/llm/types";
 import { criterionById } from "./lib/criteria";
 import { appendJsonl, readJsonl } from "./lib/jsonl";
@@ -26,11 +25,9 @@ function buildLabelers(useStub: boolean): Array<{ spec: LabelerSpec; provider: C
   }
 
   const gemini = process.env.GEMINI_API_KEY;
-  const groq = process.env.GROQ_API_KEY;
-  const missing = [gemini ? null : "GEMINI_API_KEY", groq ? null : "GROQ_API_KEY"].filter(Boolean);
-  if (missing.length > 0) {
+  if (!gemini) {
     throw new Error(
-      `faltam chaves: ${missing.join(", ")}. Rode com --stub para exercitar o pipeline sem rede ` +
+      "falta a chave GEMINI_API_KEY. Rode com --stub para exercitar o pipeline sem rede " +
         "(o resultado não é publicável como métrica).",
     );
   }
@@ -38,11 +35,7 @@ function buildLabelers(useStub: boolean): Array<{ spec: LabelerSpec; provider: C
   return [
     {
       spec: { id: "gemini", model: "gemini-2.5-flash", promptVersion: "", temperature: 0 },
-      provider: new GeminiProvider(gemini as string),
-    },
-    {
-      spec: { id: "groq", model: "openai/gpt-oss-120b", promptVersion: "", temperature: 0 },
-      provider: new GroqProvider(groq as string),
+      provider: new GeminiProvider(gemini),
     },
   ];
 }

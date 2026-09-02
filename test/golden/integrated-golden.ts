@@ -21,7 +21,8 @@ export type IntegratedCriterion =
   | "salto_de_nivel_titulo"
   | "long_heading"
   | "single_item_list"
-  | "heading_body_mismatch";
+  | "heading_body_mismatch"
+  | "vocabulario_da_organizacao";
 
 export interface ExpectedFinding {
   criterion: IntegratedCriterion;

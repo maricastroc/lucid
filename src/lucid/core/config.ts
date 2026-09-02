@@ -1,5 +1,11 @@
 import { stableHash } from "./hash";
 
+export interface OrgTerm {
+  readonly term: string;
+  readonly plain: string | null;
+  readonly reason: string;
+}
+
 export interface Config {
   sentenceLength: {
     warnAbove: number;
@@ -77,6 +83,10 @@ export interface Config {
   headingBodyMismatch: {
     enabled: boolean;
     minBodyContentWords: number;
+  };
+  vocabulario: {
+    enabled: boolean;
+    terms: readonly OrgTerm[];
   };
   metrics: {
     decimalPlaces: number;
@@ -161,6 +171,10 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
     minBodyContentWords: 6,
   },
+  vocabulario: {
+    enabled: true,
+    terms: [],
+  },
   metrics: {
     decimalPlaces: 1,
   },
@@ -190,7 +204,9 @@ export function configDeviations(config: Config): ConfigDeviation[] {
     if (values === undefined) continue;
     for (const field of Object.keys(defaults)) {
       const value = values[field];
-      if (value === undefined || value === defaults[field]) continue;
+
+      if (typeof value !== "number" && typeof value !== "boolean") continue;
+      if (value === defaults[field]) continue;
       deviations.push({ section, field, value, fallback: defaults[field] });
     }
   }

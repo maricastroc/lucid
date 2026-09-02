@@ -8,6 +8,7 @@ const LABEL: Record<string, string> = {
   mais_que_perfeito_sintetico: "Mais-que-perfeito sintético",
   gerundismo: "Gerundismo",
   jargon: "Jargão",
+  vocabulario_da_organizacao: "Vocabulário da organização",
   sigla_sem_expansao: "Sigla sem expansão",
   adverbios_vagos: "Advérbios vagos",
   adverbio_mente_denso: "Advérbios em -mente (descontinuado)",

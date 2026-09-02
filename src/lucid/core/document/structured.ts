@@ -25,17 +25,45 @@ export interface RawTableRow {
   readonly cells: readonly RawTableCell[];
 }
 
+export interface RawListItem {
+  readonly blocks: readonly string[];
+  readonly level: number;
+  readonly ordered: boolean;
+  readonly marker?: string;
+}
+
+export type StoredListItem = string | RawListItem;
+
+export function normalizeListItem(item: StoredListItem, listOrdered: boolean): RawListItem {
+  if (typeof item === "string") return { blocks: [item], level: 0, ordered: listOrdered };
+  return {
+    blocks: item.blocks,
+    level: Number.isFinite(item.level) ? Math.max(0, Math.trunc(item.level)) : 0,
+    ordered: typeof item.ordered === "boolean" ? item.ordered : listOrdered,
+    ...(typeof item.marker === "string" ? { marker: item.marker } : {}),
+  };
+}
+
 export type RawBlock =
   | { readonly kind: "paragraph"; readonly text: string }
   | { readonly kind: "heading"; readonly level: number; readonly text: string }
-  | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly string[] }
+  | { readonly kind: "list"; readonly ordered: boolean; readonly items: readonly StoredListItem[] }
   | { readonly kind: "table"; readonly rows: readonly RawTableRow[] };
 
 export function toRawBlocks(blocks: readonly Block[]): RawBlock[] {
   return blocks.map((block) => {
     if (block.kind === "heading") return { kind: "heading", level: block.level, text: block.text };
     if (block.kind === "list") {
-      return { kind: "list", ordered: block.ordered, items: block.items.map((item) => item.text) };
+      return {
+        kind: "list",
+        ordered: block.ordered,
+        items: block.items.map((item) => ({
+          blocks: item.blocks.map((paragraph) => paragraph.text),
+          level: item.level,
+          ordered: item.ordered,
+          ...(item.marker === undefined ? {} : { marker: item.marker }),
+        })),
+      };
     }
     if (block.kind === "table") {
       return {
@@ -67,16 +95,21 @@ function isRawTableCell(value: unknown): boolean {
   return value.header === undefined || typeof value.header === "boolean";
 }
 
+function isStoredListItem(value: unknown): boolean {
+  if (typeof value === "string") return true;
+  if (!isRecord(value)) return false;
+  if (!Array.isArray(value.blocks) || !value.blocks.every((b) => typeof b === "string")) return false;
+  if (value.level !== undefined && typeof value.level !== "number") return false;
+  if (value.marker !== undefined && typeof value.marker !== "string") return false;
+  return value.ordered === undefined || typeof value.ordered === "boolean";
+}
+
 export function isRawBlock(value: unknown): value is RawBlock {
   if (!isRecord(value)) return false;
   if (value.kind === "paragraph") return typeof value.text === "string";
   if (value.kind === "heading") return typeof value.level === "number" && typeof value.text === "string";
   if (value.kind === "list") {
-    return (
-      typeof value.ordered === "boolean" &&
-      Array.isArray(value.items) &&
-      value.items.every((item) => typeof item === "string")
-    );
+    return typeof value.ordered === "boolean" && Array.isArray(value.items) && value.items.every(isStoredListItem);
   }
   if (value.kind === "table") {
     return (
@@ -88,7 +121,9 @@ export function isRawBlock(value: unknown): value is RawBlock {
 }
 
 export function rawUnitTexts(block: RawBlock): string[] {
-  if (block.kind === "list") return [...block.items];
+  if (block.kind === "list") {
+    return block.items.flatMap((item) => [...normalizeListItem(item, block.ordered).blocks]);
+  }
   if (block.kind === "table") {
     return block.rows.flatMap((row) => row.cells.flatMap((cell) => [...cell.blocks]));
   }
@@ -126,9 +161,16 @@ function editableUnits(blocks: readonly Block[]): EditableUnit[] {
   const units: EditableUnit[] = [];
   blocks.forEach((block, blockIndex) => {
     if (block.kind === "list") {
-      block.items.forEach((item, itemIndex) =>
-        units.push({ path: [blockIndex, itemIndex], start: item.start, end: item.end, text: item.text }),
-      );
+      block.items.forEach((item, itemIndex) => {
+        item.blocks.forEach((paragraph, paragraphIndex) => {
+          units.push({
+            path: [blockIndex, itemIndex, paragraphIndex],
+            start: paragraph.start,
+            end: paragraph.end,
+            text: paragraph.text,
+          });
+        });
+      });
       return;
     }
     if (block.kind === "table") {
@@ -181,8 +223,15 @@ function withUnitText(blocks: readonly Block[], unit: EditableUnit, text: string
   return toRawBlocks(blocks).map((raw, index) => {
     if (index !== blockIndex) return raw;
     if (raw.kind === "list") {
-      const [itemIndex] = rest;
-      return { ...raw, items: raw.items.map((item, i) => (i === itemIndex ? text : item)) };
+      const [itemIndex, paragraphIndex] = rest;
+      return {
+        ...raw,
+        items: raw.items.map((stored, i) => {
+          const item = normalizeListItem(stored, raw.ordered);
+          if (i !== itemIndex) return item;
+          return { ...item, blocks: item.blocks.map((p, j) => (j === paragraphIndex ? text : p)) };
+        }),
+      };
     }
     if (raw.kind === "table") {
       const [rowIndex, cellIndex, paragraphIndex] = rest;
@@ -253,10 +302,21 @@ function rebuildFromUnits(
 
   for (const block of doc.blocks) {
     if (block.kind === "list") {
-      const items: string[] = [];
-      for (let i = 0; i < block.items.length; i++) {
-        const text = unitTexts[cursor++];
-        if (text !== null) items.push(text);
+      const items: RawListItem[] = [];
+      for (const item of block.items) {
+        const blocks: string[] = [];
+        for (let i = 0; i < item.blocks.length; i++) {
+          const text = unitTexts[cursor++];
+          if (text !== null) blocks.push(text);
+        }
+        if (blocks.length > 0) {
+          items.push({
+            blocks,
+            level: item.level,
+            ordered: item.ordered,
+            ...(item.marker === undefined ? {} : { marker: item.marker }),
+          });
+        }
       }
 
       if (items.length > 0) raw.push({ kind: "list", ordered: block.ordered, items });
@@ -429,17 +489,38 @@ export function buildStructuredDocument(rawBlocks: readonly RawBlock[], services
 
     const items: ListItemBlock[] = [];
     let listStart = -1;
-    rb.items.forEach((itemText, idx) => {
-      const { start, end } = place(itemText, idx === 0 ? "\n\n" : "\n");
-      if (idx === 0) listStart = start;
-      const seg = segment(start, end);
+    let placed = 0;
+    rb.items.forEach((stored) => {
+      const item = normalizeListItem(stored, rb.ordered);
+      const paragraphs: ParagraphBlock[] = [];
+      for (const text of item.blocks) {
+        const { start, end } = place(text, placed === 0 ? "\n\n" : "\n");
+        if (placed === 0) listStart = start;
+        placed += 1;
+        const seg = segment(start, end);
+        paragraphs.push({
+          kind: "paragraph",
+          start,
+          end,
+          text: source.slice(start, end),
+          sentences: seg.sentences,
+          wordCount: seg.wordCount,
+        });
+      }
+      if (paragraphs.length === 0) return;
+      const start = paragraphs[0].start;
+      const end = paragraphs[paragraphs.length - 1].end;
       items.push({
         kind: "listItem",
         start,
         end,
         text: source.slice(start, end),
-        sentences: seg.sentences,
-        wordCount: seg.wordCount,
+        sentences: paragraphs.flatMap((p) => p.sentences),
+        wordCount: paragraphs.reduce((n, p) => n + p.wordCount, 0),
+        level: item.level,
+        ordered: item.ordered,
+        marker: item.marker,
+        blocks: paragraphs,
       });
     });
     if (items.length > 0) {

@@ -115,7 +115,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
     expect(passives.every((f) => f.requiresHuman)).toBe(true);
   });
 
-  it("Groq 70B (live): resolved jargon/long sentence; the passive was never askable here — PASSES (correcting the original finding)", async () => {
+  it("captura ao vivo: resolved jargon/long sentence; the passive was never askable here — PASSES (correcting the original finding)", async () => {
     const findings = analyze(PARAGRAPH).findings;
     const proposed =
       "Foi feita uma análise do documento. Isso foi feito para verificar as condições necessárias " +
@@ -124,7 +124,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
     const v = await verifyRewrite(
       PARAGRAPH,
       target,
-      { proposerId: "groq-70b-live", original: PARAGRAPH, proposed },
+      { proposerId: "captura-ao-vivo", original: PARAGRAPH, proposed },
       {
         findings,
       },

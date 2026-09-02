@@ -7,6 +7,25 @@ import {
   SEMANTIC_REGRESSIONS,
 } from "./eval/rewrite-ab/semantic-regressions";
 
+const categoryNarrowed = (original: string, proposed: string): boolean => {
+  const strip = (v: string) =>
+    v
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/gu, "")
+      .toLowerCase();
+  const folded = strip(proposed);
+  return [...original.matchAll(new RegExp(rewriteLocalePtBR.legalCategories.source, "giu"))].some(
+    (m) => !folded.includes(strip(m[0])),
+  );
+};
+
+const detects = (r: { kind: string; original: string; offending: string }): boolean =>
+  r.kind === "invented_obligation"
+    ? introducedObligation(r.original, r.offending)
+    : r.kind === "category_narrowed"
+      ? categoryNarrowed(r.original, r.offending)
+      : false;
+
 const introducedObligation = (original: string, proposed: string): boolean => {
   const sourceIsDeontic = new RegExp(rewriteLocalePtBR.deonticInSource.source, "iu").test(original);
   if (sourceIsDeontic) return false;
@@ -18,10 +37,20 @@ describe("regressões de sentido — o que passou pelo placar de provas", () => 
     expect(SEMANTIC_REGRESSIONS.length).toBeGreaterThanOrEqual(6);
   });
 
-  it("o sinal de dever inventado aponta todas as que se declarou capaz de apontar", () => {
+  it("os sinais apontam todas as regressões que se declarou capaz de apontar", () => {
     for (const r of detectableRegressions()) {
-      expect(introducedObligation(r.original, r.offending), r.id).toBe(true);
+      expect(detects(r), r.id).toBe(true);
     }
+  });
+
+  it("a categoria jurídica é curada: cala quando a reescrita a mantém", () => {
+    expect(
+      categoryNarrowed(
+        "Os saldos das concessionárias de serviços públicos de energia elétrica",
+        "Os saldos das concessionárias de serviços públicos de energia elétrica serão aprovados.",
+      ),
+    ).toBe(false);
+    expect(categoryNarrowed("Os saldos das empresas de energia elétrica", "Os saldos das empresas")).toBe(false);
   });
 
   it("não acusa a descrição original de impor dever", () => {
@@ -52,8 +81,8 @@ describe("regressões de sentido — o que a engine NÃO apanha, declarado", () 
     const kinds = new Set(declaredUndetectable().map((r) => r.kind));
 
     expect(kinds).toContain("reservation_scope");
-    expect(kinds).toContain("category_narrowed");
     expect(kinds).toContain("invented_addressee");
+    expect(kinds).not.toContain("category_narrowed");
     for (const r of declaredUndetectable()) expect(r.why.length).toBeGreaterThan(40);
   });
 

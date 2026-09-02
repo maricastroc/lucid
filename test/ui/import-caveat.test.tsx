@@ -13,6 +13,7 @@ const docxNotes = (tablesFlattened: number) =>
     tablesFlattened,
     textBoxesInlined: 0,
     headingStylesRecovered: [],
+    headingStylesInferred: [],
     unrecognisedParagraphStyles: [],
   }) as const;
 

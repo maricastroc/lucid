@@ -344,6 +344,56 @@ function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[
   return out.join("\n");
 }
 
+function renderVocabularyMarkdown(config: Config | null, findings: readonly Finding[]): string {
+  const terms = config?.vocabulario.terms ?? [];
+  if (terms.length === 0) return "";
+
+  const hits = new Map<string, number>();
+  for (const f of findings) {
+    if (f.criterion !== "vocabulario_da_organizacao") continue;
+    const declared = typeof f.meta?.term === "string" ? f.meta.term : f.span.text;
+    hits.set(declared, (hits.get(declared) ?? 0) + 1);
+  }
+
+  const withPlain = terms.filter((t) => t.plain !== null && t.plain.trim() !== "").length;
+  const out: string[] = ["## Vocabulário da organização", ""];
+  out.push(
+    "Estes termos **não vêm da norma**. Quem declarou que eles não são familiares ao leitor deste " +
+      "documento foi a organização. O relatório os mantém separados do glossário curado porque a " +
+      "autoridade sobre cada lista é de uma parte diferente, e uma não empresta peso à outra.",
+  );
+  out.push("");
+  out.push(
+    `- **${terms.length}** ${plural(terms.length, "termo declarado", "termos declarados")}: ` +
+      `${withPlain} com equivalente registrado, ${terms.length - withPlain} apenas sinalizados`,
+  );
+  out.push(
+    `- **${[...hits.values()].reduce((n, v) => n + v, 0)}** ${plural(
+      [...hits.values()].reduce((n, v) => n + v, 0),
+      "ocorrência encontrada",
+      "ocorrências encontradas",
+    )} neste texto`,
+  );
+  out.push("");
+  out.push("| Termo | Equivalente registrado | Motivo declarado | Ocorrências |");
+  out.push("| --- | --- | --- | --- |");
+  for (const term of terms) {
+    const plain = term.plain !== null && term.plain.trim() !== "" ? term.plain.trim() : "—";
+    const reason = term.reason.trim() === "" ? "—" : term.reason.trim();
+    out.push(`| ${cell(term.term)} | ${cell(plain)} | ${cell(reason)} | ${hits.get(term.term) ?? 0} |`);
+  }
+  out.push("");
+  out.push(
+    "_Termo sem equivalente registrado é sinalização, não proposta: sem uma troca atestada, sugerir " +
+      "uma substituição seria a ferramenta inventar o que a organização não disse._",
+  );
+  out.push("");
+
+  return out.join("\n");
+}
+
+const cell = (text: string): string => text.replace(/\|/g, "\\|").replace(/\n/g, " ");
+
 export function buildAuditReport(
   diagnostic: Diagnostic,
   findings: readonly Finding[],
@@ -488,6 +538,11 @@ export function buildAuditReport(
   const profileSection = renderProfileMarkdown(config, profileId);
   if (profileSection) {
     out.push(profileSection);
+  }
+
+  const vocabularySection = renderVocabularyMarkdown(config, findings);
+  if (vocabularySection) {
+    out.push(vocabularySection);
   }
 
   const briefingSection = renderBriefingMarkdown(briefing);

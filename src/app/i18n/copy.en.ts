@@ -164,18 +164,26 @@ export const COPY_EN: UiCopy = {
     printNote: "Opens the browser's print dialog — choose “Save as PDF”.",
     exportDocx: "Download revised text (.docx)",
     exportDocumentMd: "Download the revised text (.md)",
-    printDocument: "Print the revised text (PDF)",
+    printDocument: "Print the revised text",
+    exportPdf: "Download revised text (.pdf)",
+    exportPdfNote: "Laid out by Lucid: A4, headings, lists at the document's own levels, paginated tables.",
+    pdfPageLabel: (page: number, total: number) => `${page} of ${total}`,
+    pdfError: "The PDF could not be generated. Use the .txt export instead.",
     groupAudit: "Audit",
     groupDocument: "Revised text",
     exportTxt: "Download text (.txt)",
     docxError: "The .docx could not be generated. Use the .txt export instead.",
     docxNote:
-      "Contains the revised text with its headings, lists and tables — rows, columns and merged cells. What " +
-      "it leaves out is the rest of the original formatting: bold, images, headers and footers.",
+      "The PDF and the .docx are laid out the same way: same sizes, spacing and hierarchy. They contain the " +
+      "revised text with its headings, lists and tables — rows, columns and merged cells. What they leave out " +
+      "is the rest of the original formatting: bold, images, headers and footers. The brand fonts are not " +
+      "embedded. Neither is a way back: reimporting here does not return the same structure.",
     importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
     importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
     importRuledRegions: (n: number) =>
       `${n} ${n === 1 ? "region drawn as a grid" : "regions drawn as a grid"} read as running text`,
+    importPdfTables: (n: number) =>
+      `${n} ${n === 1 ? "table rebuilt" : "tables rebuilt"} from the grid drawn in the file`,
     importFurniture: (n: number) =>
       `${n} repeated ${n === 1 ? "line" : "lines"} of header, footer or page number left out of the audit`,
     importDehyphenated: (n: number) => `${n} ${n === 1 ? "word" : "words"} rejoined across a line break`,
@@ -183,14 +191,23 @@ export const COPY_EN: UiCopy = {
     importAlso: ", ",
     importRecovered: (styles: string) =>
       `We recognised the headings in the file (${styles}). Without that, they would come in as ordinary paragraphs.`,
+    importInferred: (styles: string) =>
+      `The headings below were INFERRED from the style name (${styles}). The file does not declare their level, ` +
+      `so this is our reading, not the document's — check whether a paragraph became a heading without being one.`,
     importFlattened: (what: string) =>
       `${what} became paragraphs. The content is audited, but the original arrangement is not.`,
     importFromPdf: (what: string) =>
-      `Reading the PDF: ${what}. A PDF declares no headings and no lists, so everything enters as a paragraph.`,
+      `Reading the PDF: ${what}. A PDF declares no structure — it draws characters on a page.`,
+    importPdfInferred: (headings: number, items: number, references: string) =>
+      `Headings and items in this PDF were INFERRED, not read from a declaration: ${headings} ` +
+      `${headings === 1 ? "heading" : "headings"} and ${items} ${items === 1 ? "item" : "items"}, from the ` +
+      `Brazilian drafting rules (${references}) plus the size and position of the text on the page. Check before ` +
+      `trusting it: all the file states is the drawing.`,
     importPdfRuled:
-      "A PDF draws lines; it does not declare cells. Where there is a grid, Lucid does not rebuild the table: " +
-      "rebuilding would mean guessing where each cell starts, and a wrong guess changes what the text says. The " +
-      "same table in a .docx comes in with its rows and columns intact.",
+      "A PDF draws lines; it does not declare cells. Lucid rebuilds a table only where the grid is DRAWN in the " +
+      "file: the columns are the vertical strokes, the rows the horizontal ones, and a merged cell is one with no " +
+      "stroke closing its side. Where no grid is drawn there is no table to recover here — alignment alone is not " +
+      "a cell, and guessing would change what the text says.",
     structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
     structureMissingJoin: " or ",
     structureCaveat: (missing: string, count: number) =>
@@ -322,6 +339,12 @@ export const COPY_EN: UiCopy = {
       "These marks only help you keep track of your review. They do not change the audit result or approve the text.",
     progressTitle: (done, total) => `${done} of ${total} reviewed`,
     absenceCaveat: "No annotations is not a certificate of clarity — it is the coverage of the audit.",
+    zeroCurated: "Checks a curated list. This zero says the list did not match, not that the text is clear of it.",
+    zeroProductive: "Recognises the pattern in the text, with no list involved. This zero is a measurement.",
+    zeroDeclared: (n: number) =>
+      n === 0
+        ? "Depends on the vocabulary you declare. No term declared yet: this zero measured nothing."
+        : `Checks the ${n} ${n === 1 ? "term" : "terms"} you declared. Beyond them, it does not look.`,
   },
 
   badges: {
@@ -351,6 +374,14 @@ export const COPY_EN: UiCopy = {
     footerDeterministic: "Automated analysis based on the",
 
     safeHeader: "Direct swap · curated equivalent",
+
+    declaredHeader: "Direct swap · equivalent declared by the organisation",
+
+    declaredEquivalent: "equivalent recorded in your vocabulary",
+
+    declaredApplyNote:
+      "Your organisation signs this equivalence, not Lucid's glossary and not the standard. The tool only " +
+      "applies what it recorded, one occurrence at a time, and re-audits the text afterwards.",
     safeTerm: "Term",
     safePlain: "Plain",
     safeEquivalent: "1:1 equivalent from the glossary",
@@ -464,6 +495,10 @@ export const COPY_EN: UiCopy = {
     longHeading:
       "Shorten the heading until it becomes a label the reader can use to locate the section — and if it closed like a " +
       "sentence, drop the period and reduce it to the essential tag. The cut is yours.",
+    vocabularioDaOrganizacao:
+      "This term is in the vocabulary your organisation declared. Whether it stays is your call: sometimes the " +
+      "technical term is required and what is missing is explaining it the first time. If the organisation " +
+      "recorded an equivalent, it shows as a direct swap; if it did not, all that fits here is the notice.",
     singleItemList:
       "A one-item list separates nothing: add the missing items, or fold the content back into running text. The " +
       "choice depends on the content — it is yours.",
@@ -559,6 +594,34 @@ export const COPY_EN: UiCopy = {
       `Recorded as a requirement: the final version must name «${agent}». The tool does not assemble the sentence — it verifies whoever did.`,
   },
 
+  vocabulary: {
+    label: "The organisation's vocabulary",
+    chip: "declared by you",
+    lead:
+      "Lucid's glossary is curated and small on purpose: only what has been verified one by one gets in. " +
+      "It does not know your own office's words. You declare these — and they are looked for in every " +
+      "document you audit with this vocabulary loaded.",
+    fromSelection: "From the passage selected in the document:",
+    useSelection: "Use this passage as the term",
+    termLabel: "Term",
+    termPlaceholder: "e.g. termo de fomento",
+    plainLabel: "Plain equivalent",
+    plainHint: "Leave blank if there is no safe swap. With no equivalent, the term is only signalled.",
+    plainPlaceholder: "e.g. acordo de repasse",
+    reasonLabel: "Reason",
+    reasonPlaceholder: "e.g. nobody outside the administration uses this phrase",
+    add: "Declare term",
+    duplicate: "This term is already declared.",
+    declaredLabel: (n: number) => `${n} ${n === 1 ? "term declared" : "terms declared"}`,
+    occurrences: (n: number) => `· ${n} ${n === 1 ? "occurrence" : "occurrences"}`,
+    signalOnly: "No equivalent recorded — it only signals, it proposes no swap.",
+    swapsTo: (plain: string) => `Recorded equivalent: “${plain}”.`,
+    remove: (term: string) => `Remove “${term}” from the vocabulary`,
+    authorityCaveat:
+      "Your organisation signs these terms, not the standard. They never cite a clause of ISO 24495-1 and " +
+      "they appear apart from the curated glossary in the report. The vocabulary travels in the run's stamp: " +
+      "no result can hide which lexicon measured it.",
+  },
   briefing: {
     label: "Required words and expressions",
     chip: "Lucid looks for these",
@@ -999,6 +1062,7 @@ export const COPY_EN: UiCopy = {
     list: "List",
     orderedList: "Numbered list",
     listItems: (n) => (n === 1 ? " · 1 item" : ` · ${n} items`),
+    listLevels: (n) => ` · ${n} levels`,
     table: "Table",
     tableShape: (rows, columns) =>
       ` · ${rows} ${rows === 1 ? "row" : "rows"} × ${columns} ${columns === 1 ? "column" : "columns"}`,
@@ -1021,6 +1085,10 @@ export const COPY_EN: UiCopy = {
     editorialExtension: "PT-BR editorial extension",
     editorialExtensionTag: "PT-BR",
     editorialExtensionTitle: "PT-BR editorial extension — outside the ISO standard",
+    organizational: "The organisation's vocabulary",
+    organizationalTag: "declared",
+    organizationalTitle:
+      "A term your organisation declared. It does not come from the standard and cites no clause — whoever attests that it trips the reader is whoever knows that reader.",
     structuralHeuristic: "Structural heuristic",
     structuralHeuristicTag: "struct.",
     structuralHeuristicTitle: "Structural heuristic — outside the ISO standard",

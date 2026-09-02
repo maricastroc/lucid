@@ -136,4 +136,13 @@ describe("wilsonInterval", () => {
     expect(interval.low).toBeLessThan(0.05);
     expect(interval.high).toBeGreaterThan(0.05);
   });
+
+  it("refuses to call one opinion a consensus", () => {
+    const runs = [run({ labelerId: "gemini" })];
+
+    expect(routeLabel(runs, compareRuns(runs), POLICY, 0.9)).toEqual({
+      route: "human_single_labeler",
+      needsHuman: true,
+    });
+  });
 });

@@ -230,6 +230,7 @@ describe("import — what the audit says about the file it was handed", () => {
     tablesFlattened: 0,
     textBoxesInlined: 0,
     headingStylesRecovered: [] as readonly string[],
+    headingStylesInferred: [] as readonly string[],
     unrecognisedParagraphStyles: [] as readonly string[],
   };
   const audited = (over: Partial<typeof notes>) => ({

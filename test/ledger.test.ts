@@ -13,7 +13,7 @@ const ENTRIES: LedgerEntry[] = [
   },
   {
     source: "ai",
-    label: "Reescrita por IA · groq:llama",
+    label: "Reescrita por IA · gemini:2.5-flash",
     before: "Foi realizada a análise",
     after: "A comissão analisou",
     burdenBefore: 5,
@@ -48,7 +48,7 @@ describe("ledger — provenance trail", () => {
     expect(md).toContain("## Alterações registradas");
     expect(md).toContain("Peso da auditoria na sessão:** 6 → 2");
     expect(md).toContain("**1. Edição do autor · Jargão** — peso 6 → 5 ↓");
-    expect(md).toContain("**2. Reescrita por IA · groq:llama** — peso 5 → 2 ↓");
+    expect(md).toContain("**2. Reescrita por IA · gemini:2.5-flash** — peso 5 → 2 ↓");
     expect(md).toContain('_de:_ "em sede de" · _para:_ "durante"');
     expect(md).toContain("não um atestado de qualidade");
     expect(md).toContain("não é o histórico completo de edição");

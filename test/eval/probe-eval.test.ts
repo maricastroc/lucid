@@ -4,7 +4,7 @@ import { interpret } from "../../src/lucid/probe/interpret";
 import { StubComprehensionProbe } from "../../src/lucid/probe/stub-probe";
 import { LlmComprehensionProbe } from "../../src/lucid/probe/llm-probe";
 import type { ComprehensionProbe } from "../../src/lucid/probe/types";
-import { GeminiProvider, GroqProvider } from "../../src/llm";
+import { GeminiProvider } from "../../src/llm";
 import { GOLDEN_SONDA, oracleFixtures, oracleResult, type ProbeGoldenCase } from "./probe-golden";
 
 const RUN_LIVE = process.env.PROBE_EVAL === "1";
@@ -141,20 +141,10 @@ function loadKey(name: string): string | null {
 }
 
 function buildLiveProbe(): LlmComprehensionProbe {
-  const groq = loadKey("GROQ_API_KEY");
   const gemini = loadKey("GEMINI_API_KEY");
-  const override = process.env.PROBE_EVAL_MODEL?.trim();
-  if (override) {
-    if (override.startsWith("gemini-")) {
-      if (!gemini) throw new Error(`GEMINI_API_KEY ausente para ${override}`);
-      return new LlmComprehensionProbe(new GeminiProvider(gemini), override);
-    }
-    if (!groq) throw new Error(`GROQ_API_KEY ausente para ${override}`);
-    return new LlmComprehensionProbe(new GroqProvider(groq), override);
-  }
-  if (groq) return new LlmComprehensionProbe(new GroqProvider(groq), "openai/gpt-oss-120b");
-  if (gemini) return new LlmComprehensionProbe(new GeminiProvider(gemini), "gemini-2.5-flash");
-  throw new Error("nenhuma chave (GROQ_API_KEY / GEMINI_API_KEY) — exporte ou ponha no .env");
+  if (!gemini) throw new Error("GEMINI_API_KEY ausente — exporte ou ponha no .env");
+  const model = process.env.PROBE_EVAL_MODEL?.trim() || "gemini-2.5-flash";
+  return new LlmComprehensionProbe(new GeminiProvider(gemini), model);
 }
 
 describe.runIf(RUN_LIVE)("meta-eval da sonda — ao vivo (rede)", () => {

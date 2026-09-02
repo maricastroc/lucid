@@ -29,6 +29,7 @@ export const CRITERION_ORDER: readonly Criterion[] = [
   "mais_que_perfeito_sintetico",
   "gerundismo",
   "jargon",
+  "vocabulario_da_organizacao",
   "sigla_sem_expansao",
   "adverbios_vagos",
   "adverbio_mente_denso",
@@ -99,6 +100,16 @@ export const CRITERION_META: Record<Criterion, CriterionMeta> = {
     markStyleClass: "mark-solid",
     signal: "correspondência exata num glossário curado (maior correspondência primeiro)",
     why: "Termo pouco familiar fora do domínio afasta o leitor não especialista.",
+  },
+  vocabulario_da_organizacao: {
+    label: "Vocabulário da organização",
+    ruleId: "vocabulario_da_organizacao",
+    kind: "Escolha lexical",
+    principleName: "Palavras familiares",
+    channel: "inline",
+    markStyleClass: "mark-solid",
+    signal: "correspondência exata com um termo declarado pela organização (maior correspondência primeiro)",
+    why: "A organização declarou que este termo não é familiar ao leitor dela. A norma não conhece o vocabulário de uma casa; ela conhece.",
   },
   sigla_sem_expansao: {
     label: "Sigla sem expansão",
@@ -374,6 +385,7 @@ export function provenanceLabel(f: Finding, lang: UiLang = DEFAULT_UI_LANG): str
     return `${f.normativeReference.standard} · ${f.normativeReference.section}`;
   }
   if (f.source === "editorial-pt-br") return t.editorialExtension;
+  if (f.source === "organizational") return t.organizational;
   return t.structuralHeuristic;
 }
 
@@ -387,6 +399,9 @@ export function provenanceTag(f: Finding, lang: UiLang = DEFAULT_UI_LANG): { tex
   }
   if (f.source === "editorial-pt-br") {
     return { text: t.editorialExtensionTag, title: t.editorialExtensionTitle };
+  }
+  if (f.source === "organizational") {
+    return { text: t.organizationalTag, title: t.organizationalTitle };
   }
   return { text: t.structuralHeuristicTag, title: t.structuralHeuristicTitle };
 }

@@ -23,6 +23,7 @@ export const FILTER_THRESHOLD = 10;
 
 interface Props {
   diagnostic: Diagnostic;
+  declaredTerms: number;
   groups: readonly FindingGroup[];
   visible: readonly Finding[];
   allFindings: readonly Finding[];
@@ -45,6 +46,7 @@ interface Props {
 
 export function PointBrowser({
   diagnostic,
+  declaredTerms,
   groups,
   visible,
   allFindings,
@@ -145,7 +147,7 @@ export function PointBrowser({
         )}
       </div>
 
-      <CleanCriteriaDisclosure criteria={clean} />
+      <CleanCriteriaDisclosure criteria={clean} declaredTerms={declaredTerms} />
 
       <p className="px-4 pb-5 text-[11.5px] leading-relaxed text-ink-3">{c.revisionList.lexiconCaveat}</p>
     </div>

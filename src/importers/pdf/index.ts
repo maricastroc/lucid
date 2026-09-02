@@ -1,4 +1,5 @@
 import type { Document } from "@/lucid";
+import { recoverStructure } from "./structure";
 import { buildStructuredDocument, type RawBlock } from "@/lucid/core/document/structured";
 import type { DocumentBuildServices } from "@/lucid/core/document/model";
 import { cleanRunningLines } from "./clean";
@@ -8,12 +9,16 @@ import { assembleLines } from "./lines";
 import { buildParagraphs, metricsOf } from "./paragraphs";
 import { emptyPages, isGlued, isScanned, qualityOf } from "./quality";
 import { countRuledRegions } from "./ruled-regions";
+import { findTables, insideTable, spliceTables, tableText } from "./tables";
 
 export type { PdfPageGeometry, PdfTextItem, PdfRule } from "./geometry";
 
 export type PdfRefusalKind = "unreadable" | "scanned" | "columns" | "glued" | "invariant" | "no_readable_content";
 
 export interface PdfNotes {
+  readonly headingsInferred: number;
+  readonly itemsInferred: number;
+  readonly structureReferences: readonly string[];
   readonly pages: number;
   readonly emptyPages: number;
   readonly removedHeaders: number;
@@ -22,6 +27,7 @@ export interface PdfNotes {
   readonly dehyphenated: number;
   readonly shortLineBreaks: number;
   readonly ruledRegions: number;
+  readonly tablesRecovered: number;
 }
 
 export interface PdfImport {
@@ -69,7 +75,10 @@ export function importPdfPages(pages: readonly PdfPageGeometry[], services: Docu
   const pageHeight = median(pages.map((page) => page.height));
   const pageWidth = median(pages.map((page) => page.width));
 
-  const cleaned = cleanRunningLines(lines, pageHeight);
+  const tables = findTables(pages);
+  const prose = tables.length === 0 ? lines : lines.filter((line) => !insideTable(line, tables));
+
+  const cleaned = cleanRunningLines(prose, pageHeight);
   const metrics = metricsOf(cleaned.lines, pageWidth);
   const built = buildParagraphs(cleaned.lines, metrics);
 
@@ -79,11 +88,14 @@ export function importPdfPages(pages: readonly PdfPageGeometry[], services: Docu
   const missing = missingDigits(
     lines.flatMap((line) => digitsOf(line.text)),
     cleaned.removedText.flatMap(digitsOf),
-    built.text,
+    `${built.text}\n${tableText(tables)}`,
   );
   if (missing.length > 0) return refuse("invariant");
 
-  const blocks = toParagraphs(built.paragraphs);
+  const bodyHeight = median(built.shapes.map((shape) => shape.height));
+  const recovered = recoverStructure(built.paragraphs, built.shapes, bodyHeight);
+  const withoutTables = recovered.blocks.length > 0 ? recovered.blocks : toParagraphs(built.paragraphs);
+  const blocks = spliceTables(withoutTables, recovered.blocks.length > 0 ? recovered.anchors : built.shapes, tables);
   if (blocks.length === 0) return refuse("no_readable_content");
 
   return {
@@ -98,7 +110,11 @@ export function importPdfPages(pages: readonly PdfPageGeometry[], services: Docu
         removedPageNumbers: cleaned.removed.pageNumber,
         dehyphenated: built.dehyphenated,
         shortLineBreaks: built.shortLineBreaks,
+        headingsInferred: recovered.headings,
+        itemsInferred: recovered.items,
+        structureReferences: recovered.references,
         ruledRegions: countRuledRegions(pages),
+        tablesRecovered: tables.length,
       },
     },
   };

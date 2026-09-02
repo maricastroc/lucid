@@ -16,7 +16,7 @@ import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 const ACTIVE_LOCALE_ID = "pt-BR";
 
 export interface RewriteModel {
-  providerId: "stub" | "groq" | "gemini" | "deepseek";
+  providerId: "stub" | "gemini";
   model: string;
   name: string;
 }

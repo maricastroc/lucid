@@ -1,14 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import {
-  DeepSeekProvider,
-  DEEPSEEK_MODELS,
-  GeminiProvider,
-  GEMINI_MODELS,
-  GroqProvider,
-  GROQ_MODELS,
-  type ChatProvider,
-} from "@/llm";
+import { GeminiProvider, GEMINI_MODELS, type ChatProvider } from "@/llm";
 import { parseRewrite } from "@/report/rewrite";
 import { candidateById } from "./candidates";
 import type { EvalTarget } from "./targets";
@@ -63,9 +55,7 @@ function appendRow(file: string, row: RunRow): void {
 }
 
 export interface Keys {
-  groq: string | null;
   gemini: string | null;
-  deepseek: string | null;
 }
 
 export function loadKey(name: string): string | null {
@@ -80,9 +70,7 @@ export function loadKey(name: string): string | null {
 
 export function loadKeys(): Keys {
   return {
-    groq: loadKey("GROQ_API_KEY"),
     gemini: loadKey("GEMINI_API_KEY"),
-    deepseek: loadKey("DEEPSEEK_API_KEY"),
   };
 }
 
@@ -98,19 +86,9 @@ export function providerFor(model: string, keys: Keys): Bound {
       completion: p.lastUsage?.completionTokens ?? 0,
       total: p.lastUsage?.totalTokens ?? 0,
     });
-  if ((GROQ_MODELS as readonly string[]).includes(model)) {
-    if (!keys.groq) throw new Error(`GROQ_API_KEY ausente para ${model}`);
-    const p = new GroqProvider(keys.groq);
-    return { provider: p, usage: usageOf(p) };
-  }
   if ((GEMINI_MODELS as readonly string[]).includes(model)) {
     if (!keys.gemini) throw new Error(`GEMINI_API_KEY ausente para ${model}`);
     const p = new GeminiProvider(keys.gemini);
-    return { provider: p, usage: usageOf(p) };
-  }
-  if ((DEEPSEEK_MODELS as readonly string[]).includes(model)) {
-    if (!keys.deepseek) throw new Error(`DEEPSEEK_API_KEY ausente para ${model}`);
-    const p = new DeepSeekProvider(keys.deepseek);
     return { provider: p, usage: usageOf(p) };
   }
   throw new Error(`modelo sem provider conhecido: ${model}`);

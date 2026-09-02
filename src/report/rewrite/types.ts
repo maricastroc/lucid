@@ -10,6 +10,7 @@ export interface RewriteLocale {
   readonly thirdPersonAgentSubject: RegExp;
   readonly deonticInSource: RegExp;
   readonly deonticIntroduced: RegExp;
+  readonly legalCategories: RegExp;
 }
 
 export interface AgentDeclaration {
@@ -53,7 +54,12 @@ export interface Proof {
 }
 
 export interface VerificationSignal {
-  check: "entities_preserved" | "meaning_preserved" | "possible_invented_agent" | "possible_invented_obligation";
+  check:
+    | "entities_preserved"
+    | "meaning_preserved"
+    | "possible_invented_agent"
+    | "possible_invented_obligation"
+    | "possible_category_narrowed";
   flagged: boolean;
   detail: string;
 }

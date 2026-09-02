@@ -4,7 +4,7 @@ export type Severity = "info" | "warning" | "error";
 
 export type Category = "lexical" | "syntactic" | "structural" | "metric";
 
-export type CriterionSource = "iso-24495-1" | "editorial-pt-br" | "structural-heuristic";
+export type CriterionSource = "iso-24495-1" | "editorial-pt-br" | "structural-heuristic" | "organizational";
 
 export type PrincipleGroup = "relevant" | "findable" | "understandable" | "usable";
 
@@ -16,7 +16,8 @@ export interface NormativeReference {
 export type CriterionTaxonomyEntry =
   | { source: "iso-24495-1"; principleGroup: PrincipleGroup; normativeReference: NormativeReference }
   | { source: "editorial-pt-br"; principleGroup: PrincipleGroup }
-  | { source: "structural-heuristic"; principleGroup: PrincipleGroup };
+  | { source: "structural-heuristic"; principleGroup: PrincipleGroup }
+  | { source: "organizational"; principleGroup: PrincipleGroup };
 
 export type CriterionTaxonomy = Record<string, CriterionTaxonomyEntry>;
 
@@ -86,6 +87,10 @@ export interface ListItemBlock extends BlockBase {
   readonly kind: "listItem";
   readonly sentences: readonly Sentence[];
   readonly wordCount: number;
+  readonly level: number;
+  readonly ordered: boolean;
+  readonly marker?: string;
+  readonly blocks: readonly ParagraphBlock[];
 }
 
 export interface ListBlock extends BlockBase {

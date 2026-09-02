@@ -22,6 +22,7 @@ export const CRITERION_IDS = [
   "long_heading",
   "single_item_list",
   "heading_body_mismatch",
+  "vocabulario_da_organizacao",
 ] as const;
 
 export type CriterionId = (typeof CRITERION_IDS)[number];

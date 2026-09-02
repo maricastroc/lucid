@@ -1,3 +1,9 @@
+export interface TokenUsage {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
 export interface ChatCompletionOptions {
   model: string;
   temperature: number;

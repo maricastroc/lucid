@@ -21,6 +21,7 @@ import { leitorTerceiraPessoaPass } from "./leitor-terceira-pessoa";
 import { hierarquiaTitulosPass } from "./hierarquia-titulos";
 import { longHeadingPass } from "./long-heading";
 import { singleItemListPass } from "./single-item-list";
+import { vocabularioOrganizacaoPass } from "./vocabulario-organizacao";
 import { headingBodyMismatchPass } from "./heading-body-mismatch";
 
 export const PASSES: readonly Pass[] = [
@@ -45,6 +46,7 @@ export const PASSES: readonly Pass[] = [
   leitorTerceiraPessoaPass,
   hierarquiaTitulosPass,
   longHeadingPass,
+  vocabularioOrganizacaoPass,
   singleItemListPass,
   headingBodyMismatchPass,
 ];

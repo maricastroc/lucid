@@ -298,6 +298,7 @@ describe("buildAuditReport — the comparison with a starting point", () => {
       profileId: "base",
       config: DEFAULT_CONFIG,
       marks,
+      vocabulary: [],
     });
   };
 

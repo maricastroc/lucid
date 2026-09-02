@@ -22,8 +22,17 @@ export interface ParagraphMetrics {
   readonly byPage: ReadonlyMap<number, PageMargins>;
 }
 
+export interface ParagraphShape {
+  readonly height: number;
+  readonly left: number;
+  readonly lines: number;
+  readonly page: number;
+  readonly top: number;
+}
+
 export interface ParagraphResult {
   readonly paragraphs: readonly string[];
+  readonly shapes: readonly ParagraphShape[];
   readonly text: string;
   readonly dehyphenated: number;
   readonly shortLineBreaks: number;
@@ -92,12 +101,24 @@ function isLineBreakHyphen(previous: PdfLine, next: PdfLine, metrics: ParagraphM
 
 export function buildParagraphs(lines: readonly PdfLine[], metrics: ParagraphMetrics): ParagraphResult {
   const blocks: string[] = [];
+  const shapes: { height: number; left: number; lines: number; page: number; top: number }[] = [];
   let dehyphenated = 0;
   let shortLineBreaks = 0;
 
+  const open = (line: PdfLine): void => {
+    blocks.push(line.text);
+    shapes.push({ height: line.height, left: line.left, lines: 1, page: line.page, top: line.top });
+  };
+  const extend = (line: PdfLine): void => {
+    const shape = shapes[shapes.length - 1];
+    shape.height = Math.max(shape.height, line.height);
+    shape.left = Math.min(shape.left, line.left);
+    shape.lines += 1;
+  };
+
   for (const [index, line] of lines.entries()) {
     if (index === 0) {
-      blocks.push(line.text);
+      open(line);
       continue;
     }
 
@@ -111,17 +132,18 @@ export function buildParagraphs(lines: readonly PdfLine[], metrics: ParagraphMet
     const short = samePage && previous.right < bodyRight - (bodyRight - bodyLeft) * SHORT_LINE;
 
     if (byGap || byStructure) {
-      blocks.push(line.text);
+      open(line);
       continue;
     }
 
     if (short) {
       shortLineBreaks += 1;
-      blocks.push(line.text);
+      open(line);
       continue;
     }
 
     const at = blocks.length - 1;
+    extend(line);
 
     if (isLineBreakHyphen(previous, line, metrics)) {
       blocks[at] = blocks[at].replace(/-$/, "") + line.text;
@@ -132,10 +154,12 @@ export function buildParagraphs(lines: readonly PdfLine[], metrics: ParagraphMet
     blocks[at] += ` ${line.text}`;
   }
 
-  const paragraphs = blocks.map((block) => block.trimEnd()).filter((block) => block !== "");
+  const kept = blocks.map((block, i) => ({ text: block.trimEnd(), shape: shapes[i] })).filter((b) => b.text !== "");
+  const paragraphs = kept.map((b) => b.text);
 
   return {
     paragraphs,
+    shapes: kept.map((b) => b.shape),
     text: paragraphs.join("\n\n"),
     dehyphenated,
     shortLineBreaks,

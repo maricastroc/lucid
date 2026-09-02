@@ -15,6 +15,7 @@ import { StepList } from "../route/step-list";
 
 interface Props {
   diagnostic: Diagnostic;
+  declaredTerms: number;
   route: ReviewRoute;
   groups: readonly FindingGroup[];
   visible: readonly Finding[];
@@ -103,6 +104,7 @@ export function ReviewView(props: Props) {
             </div>
           )}
           <PointBrowser
+            declaredTerms={props.declaredTerms}
             diagnostic={props.diagnostic}
             groups={props.groups}
             visible={props.visible}

@@ -36,6 +36,7 @@ function baselineOf(text = V1, config: Config = DEFAULT_CONFIG, marks = EMPTY_MA
     profileId: "base",
     config,
     marks,
+    vocabulary: [],
   });
 }
 
@@ -219,5 +220,48 @@ describe("the starting point — travelling as a file", () => {
       },
     };
     expect(acceptBaseline(older, analyze(V1).meta)).toBeNull();
+  });
+});
+
+describe("the vocabulary rides in the .lucid.json", () => {
+  const TERMS = [{ term: "pactuação", plain: "acordo", reason: "porque sim" }];
+
+  const saved = () => {
+    const d = analyze("A pactuação segue.");
+    return buildBaseline({
+      title: "Edital 04/2026",
+      savedAt: "01/01/2026",
+      text: d.text,
+      blocks: null,
+      diagnostic: d,
+      findings: d.findings,
+      profileId: "base",
+      config: DEFAULT_CONFIG,
+      marks: {},
+      vocabulary: TERMS,
+    });
+  };
+
+  it("comes back with the same terms after a round trip through the file", () => {
+    const parsed = parseBaseline(serializeBaseline(saved()));
+
+    expect(parsed.ok && parsed.baseline.vocabulary).toEqual(TERMS);
+  });
+
+  it("still reads a file written before vocabularies existed, with an empty one", () => {
+    const older = JSON.parse(serializeBaseline(saved()));
+    delete older.vocabulary;
+    older.schemaVersion = 1;
+
+    const parsed = parseBaseline(JSON.stringify(older));
+
+    expect(parsed.ok && parsed.baseline.vocabulary).toEqual([]);
+  });
+
+  it("refuses a file whose vocabulary is not a list of terms, instead of loading junk", () => {
+    const broken = JSON.parse(serializeBaseline(saved()));
+    broken.vocabulary = [{ term: 42 }];
+
+    expect(parseBaseline(JSON.stringify(broken))).toEqual({ ok: false, refusal: "unreadable" });
   });
 });

@@ -4,7 +4,7 @@
     "lucidVersion": "0.1.0",
     "localeId": "pt-BR",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
-    "configHash": "e5341089",
+    "configHash": "44521072",
     "dataHash": "91c09d7d",
     "goldenHash": "4c975a74"
   },
@@ -126,8 +126,8 @@
     "syllables": {
       "words": 56,
       "limitations": 5,
-      "exactRate": 0.9107,
-      "meanAbsoluteError": 0.1429
+      "exactRate": 0.9286,
+      "meanAbsoluteError": 0.0893
     }
   },
   "criteriaCoverage": {
@@ -158,8 +158,9 @@
       "paragraph_length",
       "prose_enumeration",
       "mesoclise",
-      "dupla_negacao"
+      "dupla_negacao",
+      "vocabulario_da_organizacao"
     ],
-    "total": 23
+    "total": 24
   }
 }

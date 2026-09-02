@@ -112,6 +112,22 @@ export const NARRATIVE_EN: NarrativeSet = {
       );
     },
   },
+  vocabulario_da_organizacao: {
+    headline: () => "Organisation's vocabulary",
+    prose: (f) =>
+      `«${flat(f.span.text)}» is in the vocabulary your organisation declared unfamiliar to its own reader. ` +
+      `This does not come from the standard — it comes from whoever knows this document's audience.`,
+    confidence: (f) => {
+      if (f.suggestion !== undefined)
+        return {
+          level: "segura",
+          rationale: `The organisation recorded “${f.suggestion}” as this term's equivalent. It signs the equivalence — not the tool, not the standard; the change in the text is still yours.`,
+        };
+      return assistida(
+        "The organisation declared the term but recorded no equivalent. Without an attested swap, all that fits here is a signal: proposing a replacement would mean inventing what nobody stated.",
+      );
+    },
+  },
   sigla_sem_expansao: {
     headline: (f) => {
       const a = metaStr(f, "acronym");

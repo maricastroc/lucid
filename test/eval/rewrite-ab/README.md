@@ -43,9 +43,8 @@ finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
 
 ## Rede — o que a rodada aprendeu na marra
 
-- **Cota diária existe.** Groq `on_demand` = 200.000 tokens/dia **por modelo**. Checar a cota
-  antes de subir o teto do experimento. O runner para na primeira cota diária: nenhuma espera
-  dentro da corrida recupera isso.
+- **Um provedor só.** O Lucid fala com o Gemini (ADR-097). O runner para na primeira cota diária:
+  nenhuma espera dentro da corrida recupera isso.
 - **Rodar sob `caffeinate -i`, em blocos com teto próprio.** A máquina suspende e o
   `AbortSignal.timeout` dorme junto — uma chamada chegou a marcar 33 min com mediana real de
   2,5s. Em blocos, uma suspensão custa um bloco, nunca a corrida.

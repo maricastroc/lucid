@@ -5,6 +5,7 @@ import type { OccurrenceCursor } from "../../lib/occurrence-cursor";
 import type { ProfileId } from "../../lib/profiles";
 import { useCopy } from "../../i18n/use-copy";
 import { BriefingPanel } from "../briefing-panel";
+import { VocabularyPanel } from "../vocabulary-panel";
 import { ChevronLeftIcon } from "../icons";
 import { ProfilePanel } from "../profile-panel";
 import { PurposePresets } from "../purpose-presets";
@@ -23,6 +24,9 @@ interface Props {
   onSelectOccurrence: (expression: string, index: number) => void;
   onStepOccurrence: (delta: number) => void;
   onClose: () => void;
+  selection: string;
+  onClearSelection: () => void;
+  vocabularyCounts: ReadonlyMap<string, number>;
 }
 
 export function SettingsView(props: Props) {
@@ -53,6 +57,15 @@ export function SettingsView(props: Props) {
           onChange={props.onBriefingChange}
           onSelectOccurrence={props.onSelectOccurrence}
           onStepOccurrence={props.onStepOccurrence}
+        />
+        <VocabularyPanel
+          terms={props.config.vocabulario.terms}
+          excerpt={props.selection}
+          counts={props.vocabularyCounts}
+          onChange={(terms) =>
+            props.onConfigChange({ ...props.config, vocabulario: { ...props.config.vocabulario, terms } })
+          }
+          onClearExcerpt={props.onClearSelection}
         />
         <PurposePresets config={props.config} selected={props.profileId} onSelect={props.onProfileChange} />
         <ProfilePanel config={props.config} onChange={props.onConfigChange} />

@@ -20,7 +20,14 @@ function installStorage(overrides: Partial<Storage> = {}): Map<string, string> {
 const BLOCKS: RawBlock[] = [
   { kind: "heading", level: 1, text: "Prazos e documentos" },
   { kind: "paragraph", text: "O interessado deve entregar os documentos." },
-  { kind: "list", ordered: true, items: ["Requerimento assinado", "Comprovante de residência"] },
+  {
+    kind: "list",
+    ordered: true,
+    items: [
+      { blocks: ["Requerimento assinado"], level: 0, ordered: true },
+      { blocks: ["Comprovante de residência"], level: 0, ordered: true },
+    ],
+  },
 ];
 
 describe("workspace — round trip through storage", () => {
@@ -524,6 +531,7 @@ describe("workspace — the entry text", () => {
         tablesFlattened: 1,
         textBoxesInlined: 0,
         headingStylesRecovered: [],
+        headingStylesInferred: [],
         unrecognisedParagraphStyles: [],
       },
     });
@@ -535,6 +543,7 @@ describe("workspace — the entry text", () => {
       tablesFlattened: 1,
       textBoxesInlined: 0,
       headingStylesRecovered: [],
+      headingStylesInferred: [],
       unrecognisedParagraphStyles: [],
     });
   });

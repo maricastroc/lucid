@@ -109,6 +109,22 @@ export const NARRATIVE_PT: NarrativeSet = {
       );
     },
   },
+  vocabulario_da_organizacao: {
+    headline: () => "Vocabulário da organização",
+    prose: (f) =>
+      `«${flat(f.span.text)}» está no vocabulário que a sua organização declarou como não familiar ao leitor dela. ` +
+      `Isto não vem da norma — vem de quem conhece o público deste documento.`,
+    confidence: (f) => {
+      if (f.suggestion !== undefined)
+        return {
+          level: "segura",
+          rationale: `A organização registrou “${f.suggestion}” como equivalente deste termo. Quem assina a equivalência é ela, não a ferramenta nem a norma; a troca no texto continua sendo sua.`,
+        };
+      return assistida(
+        "A organização declarou o termo, mas não registrou equivalente. Sem uma troca atestada, aqui só cabe sinalizar: propor uma substituição seria a ferramenta inventar o que ninguém disse.",
+      );
+    },
+  },
   sigla_sem_expansao: {
     headline: (f) => {
       const a = metaStr(f, "acronym");

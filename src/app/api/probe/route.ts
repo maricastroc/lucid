@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server";
 import { PROBE_MAX_EXCERPT as MAX_TEXT_LENGTH } from "../../lib/probe-excerpt";
-import { ChatProviderError, GeminiProvider, GroqProvider } from "@/llm";
+import { ChatProviderError, GeminiProvider } from "@/llm";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import { interpret } from "@/lucid/probe/interpret";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
 
 export const runtime = "nodejs";
 
-const PROBE_GROQ_MODEL = "openai/gpt-oss-120b";
-
 function buildFloorProbe(): ComprehensionProbe | { error: string } {
-  if (process.env.GROQ_API_KEY) {
-    return new LlmComprehensionProbe(new GroqProvider(process.env.GROQ_API_KEY), PROBE_GROQ_MODEL);
-  }
   if (process.env.GEMINI_API_KEY) {
     return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
   }
-  return { error: "nenhum provedor de LLM configurado no servidor (GROQ_API_KEY ou GEMINI_API_KEY)" };
+  return { error: "nenhum provedor de LLM configurado no servidor (GEMINI_API_KEY)" };
 }
 
 interface ProbeRequestBody {

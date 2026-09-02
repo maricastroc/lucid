@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION } from "../src/report/rewrite";
-import { ChatProviderError, GroqProvider, GROQ_MODELS, type ChatProvider } from "../src/llm";
+import { ChatProviderError, GEMINI_MODELS, GeminiProvider, type ChatProvider } from "../src/llm";
 import type { Span } from "../src/lucid/core/types";
 
 class MockChatProvider implements ChatProvider {
@@ -106,17 +106,17 @@ describe("LlmRewriteProposer", () => {
   });
 });
 
-describe("GroqProvider — allow-list (no network)", () => {
+describe("GeminiProvider — allow-list (no network)", () => {
   it("rejects a model outside the allow-list before any fetch", async () => {
-    const provider = new GroqProvider("fake-key");
+    const provider = new GeminiProvider("fake-key");
     await expect(provider.complete("oi", { model: "nonexistent-model", temperature: 0 })).rejects.toBeInstanceOf(
       ChatProviderError,
     );
   });
 
   it("exposes exactly the allow-list, and the allow-list is not empty", () => {
-    expect(GROQ_MODELS.length).toBeGreaterThan(0);
-    expect(new GroqProvider("x").models).toEqual(GROQ_MODELS);
-    expect(new Set(GROQ_MODELS).size).toBe(GROQ_MODELS.length);
+    expect(GEMINI_MODELS.length).toBeGreaterThan(0);
+    expect(new GeminiProvider("x").models).toEqual(GEMINI_MODELS);
+    expect(new Set(GEMINI_MODELS).size).toBe(GEMINI_MODELS.length);
   });
 });
