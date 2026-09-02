@@ -70,6 +70,20 @@ export interface UiCopy {
       readonly body: string;
       readonly confirm: string;
     };
+    readonly replaceDocument: {
+      readonly title: string;
+      readonly lead: string;
+      readonly changes: (n: number) => string;
+      readonly reviewed: (n: number) => string;
+      readonly dismissed: (n: number) => string;
+      readonly editedText: string;
+      readonly briefing: string;
+      readonly kept: string;
+      readonly save: string;
+      readonly saveHint: string;
+      readonly discard: string;
+      readonly cancel: string;
+    };
     readonly spliceRefused: Record<SpliceRefusal, string>;
     readonly spliceRefusedKept: string;
     readonly spliceAcceptPlain: string;

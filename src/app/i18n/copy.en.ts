@@ -76,6 +76,21 @@ export const COPY_EN: UiCopy = {
       body: "The text under review and the trail of changes will be discarded. This cannot be undone — export the report first if you want to keep the audit.",
       confirm: "Discard and go back",
     },
+    replaceDocument: {
+      title: "Open another document?",
+      lead: "There is an audit under way here. Opening another document replaces it, and the following does not come back:",
+      changes: (n) => `${n} recorded ${plural(n, "change", "changes")}`,
+      reviewed: (n) => `${n} reviewed ${plural(n, "point", "points")}`,
+      dismissed: (n) => `${n} dismissed ${plural(n, "point", "points")}`,
+      editedText: "the edits made to the text since it was opened",
+      briefing: "the reader briefing you answered",
+      kept: "The editorial profile and the organisation's vocabulary stay in place — they belong to the house, not to this document.",
+      save: "Save starting point…",
+      saveHint:
+        "Downloads this audit as a file before the other document is opened. That file is what makes comparing the two versions possible later.",
+      discard: "Discard and open",
+      cancel: "Cancel opening",
+    },
     spliceRefused: {
       crosses_units: "This change spans more than one block of the imported document.",
       crosses_cells: "This change spans more than one table cell. Applying it would move text between cells.",

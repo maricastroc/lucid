@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { analyze, DEFAULT_CONFIG, type Config } from "../src/lucid";
 import {
   acceptBaseline,
+  baselineFile,
+  baselineFileName,
   buildBaseline,
   compareToBaseline,
   divergenceOf,
@@ -263,5 +265,58 @@ describe("the vocabulary rides in the .lucid.json", () => {
     broken.vocabulary = [{ term: 42 }];
 
     expect(parseBaseline(JSON.stringify(broken))).toEqual({ ok: false, refusal: "unreadable" });
+  });
+});
+
+describe("saving the starting point before another document takes this one's place", () => {
+  const fileOf = (title: string) => {
+    const diagnostic = analyze(V1);
+    return baselineFile({
+      title,
+      savedAt: "30/08/2026",
+      text: V1,
+      blocks: null,
+      diagnostic,
+      findings: diagnostic.findings,
+      profileId: "base",
+      config: DEFAULT_CONFIG,
+      marks: withMark(EMPTY_MARKS, diagnostic.findings[0], "dismissed"),
+      vocabulary: [],
+    });
+  };
+
+  it("writes a file the product can attach again — that is the whole point of saving first", () => {
+    const parsed = parseBaseline(fileOf("Edital 04/2026 — v1").content);
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.baseline.source.text).toBe(V1);
+    expect(parsed.baseline.decisions).toHaveLength(1);
+    expect(acceptBaseline(parsed.baseline, analyze(V2).meta)).toBeNull();
+  });
+
+  it("compares against the next version once attached, which is what the saved file buys", () => {
+    const parsed = parseBaseline(fileOf("Edital 04/2026 — v1").content);
+    if (!parsed.ok) throw new Error("baseline should parse");
+
+    const comparison = compareToBaseline(parsed.baseline, analyze(V2), DEFAULT_CONFIG);
+    expect(comparison.title).toBe("Edital 04/2026 — v1");
+    expect(comparison.rebasedCount).toBeGreaterThan(0);
+  });
+
+  it("names the file after the title the human declared", () => {
+    expect(fileOf("Edital 04/2026 — v1").name).toBe("edital-04-2026-v1.lucid.json");
+    expect(baselineFileName("Ofício nº 12 — Ação Civil")).toBe("oficio-n-12-acao-civil.lucid.json");
+  });
+
+  it("still produces a file when the title carries no letters, instead of writing '.lucid.json'", () => {
+    expect(baselineFileName("——")).toBe("ponto-de-partida.lucid.json");
+  });
+
+  it("does not leave a dangling separator when a long title is cut", () => {
+    const name = baselineFileName(`${"a".repeat(59)} palavra cortada`);
+
+    expect(name.endsWith("-.lucid.json")).toBe(false);
+    expect(name).toBe(`${"a".repeat(59)}.lucid.json`);
   });
 });

@@ -70,18 +70,20 @@ export function textHashOf(text: string): string {
   return stableHash(text.normalize("NFC"));
 }
 
-export function buildBaseline(input: {
-  title: string;
-  savedAt: string;
-  text: string;
-  blocks: readonly RawBlock[] | null;
-  diagnostic: Diagnostic;
-  findings: readonly Finding[];
-  profileId: ProfileId;
-  config: Config;
-  marks: ReviewMarks;
-  vocabulary: readonly OrgTerm[];
-}): Baseline {
+export interface BaselineInput {
+  readonly title: string;
+  readonly savedAt: string;
+  readonly text: string;
+  readonly blocks: readonly RawBlock[] | null;
+  readonly diagnostic: Diagnostic;
+  readonly findings: readonly Finding[];
+  readonly profileId: ProfileId;
+  readonly config: Config;
+  readonly marks: ReviewMarks;
+  readonly vocabulary: readonly OrgTerm[];
+}
+
+export function buildBaseline(input: BaselineInput): Baseline {
   const decisions: BaselineDecision[] = [];
   for (const finding of input.findings) {
     const mark = input.marks[findingId(finding)];
@@ -276,4 +278,26 @@ export function acceptBaseline(baseline: Baseline, current: DiagnosticMeta): Bas
 
 export function serializeBaseline(baseline: Baseline): string {
   return JSON.stringify(baseline, null, 2);
+}
+
+export const BASELINE_MIME = "application/json;charset=utf-8";
+
+/**
+ * O nome do arquivo sai do título declarado pelo humano — a única identidade que o produto tem.
+ * Um título sem nenhuma letra ou dígito ainda precisa virar arquivo: aí vale o nome genérico.
+ */
+export function baselineFileName(title: string): string {
+  const plain = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const slug = plain === "" ? "ponto-de-partida" : plain.slice(0, 60).replace(/-+$/, "");
+  return `${slug}.lucid.json`;
+}
+
+/** O arquivo do ponto de partida, pronto para baixar — usado pela exportação e pela troca de documento. */
+export function baselineFile(input: BaselineInput): { readonly name: string; readonly content: string } {
+  return { name: baselineFileName(input.title), content: serializeBaseline(buildBaseline(input)) };
 }

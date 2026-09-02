@@ -13,10 +13,19 @@ import {
   type Span,
   type SpliceRefusal,
 } from "@/lucid";
-import { acceptBaseline, compareToBaseline, parseBaseline, type Baseline, type BaselineRefusal } from "./lib/baseline";
+import {
+  acceptBaseline,
+  baselineFile,
+  BASELINE_MIME,
+  compareToBaseline,
+  parseBaseline,
+  type Baseline,
+  type BaselineRefusal,
+} from "./lib/baseline";
 import { findingId, isSafe, orderFindingsForIndex } from "./lib/criteria";
 import { queryFindings } from "./lib/finding-query";
 import { EMPTY_MARKS } from "./lib/review-marks";
+import { pendingWork } from "./lib/pending-work";
 import { rewriteTargetAt } from "./lib/paragraphs";
 import { clearWorkspace, getSaveFailed, readWorkspace, subscribeSaveStatus, writeWorkspace } from "./lib/workspace";
 import { useCopy } from "./i18n/use-copy";
@@ -38,7 +47,15 @@ import { RevisionSheet } from "./components/revision-sheet";
 import { Welcome } from "./components/welcome";
 import { ArrowDownIcon } from "./components/icons";
 import { ConfirmDialog } from "./components/ui/confirm-dialog";
+import { BaselineSaveDialog } from "./components/baseline-save-dialog";
+import { ReplaceDocumentDialog } from "./components/replace-document-dialog";
+import { downloadFile } from "./components/export-menu/download-file";
 import { Button } from "./components/ui/button";
+
+/** A abertura pedida e ainda não cumprida, enquanto o autor decide o que fazer com o que está aberto. */
+type DocumentIntent =
+  | { readonly kind: "file"; readonly file: File }
+  | { readonly kind: "paste"; readonly text: string; readonly html: string | null };
 
 export function Studio() {
   const { c } = useCopy();
@@ -58,6 +75,8 @@ export function Studio() {
   }, []);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [goHomeOpen, setGoHomeOpen] = useState(false);
+  const [pendingIntent, setPendingIntent] = useState<DocumentIntent | null>(null);
+  const [saveBeforeReplacing, setSaveBeforeReplacing] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -225,11 +244,77 @@ export function Studio() {
     afterDocumentReplaced();
   }, [loadExampleDocument, afterDocumentReplaced]);
 
-  const openDocument = useCallback(
-    async (file: File) => {
-      if (await importDocumentFile(file)) afterDocumentReplaced();
+  // Abrir outro documento — por arquivo ou colando por cima do inteiro — destrói a auditoria em
+  // andamento. A intenção fica retida até o autor decidir o que fazer com o que está aqui; só passa
+  // direto quando não há nada a perder, e é a lib que responde o que é "nada".
+  const workAtRisk = useMemo(
+    () => pendingWork({ text, originalText, ledger, marks, briefing }),
+    [text, originalText, ledger, marks, briefing],
+  );
+
+  const replaceDocument = useCallback(
+    async (intent: DocumentIntent) => {
+      if (intent.kind === "paste") {
+        enterPastedDocument(intent.text, intent.html);
+        afterDocumentEntered();
+        return;
+      }
+      if (await importDocumentFile(intent.file)) afterDocumentReplaced();
     },
-    [importDocumentFile, afterDocumentReplaced],
+    [enterPastedDocument, afterDocumentEntered, importDocumentFile, afterDocumentReplaced],
+  );
+
+  const requestDocument = useCallback(
+    (intent: DocumentIntent) => {
+      if (workAtRisk === null) {
+        void replaceDocument(intent);
+        return;
+      }
+      setPendingIntent(intent);
+    },
+    [workAtRisk, replaceDocument],
+  );
+
+  const openDocument = useCallback(
+    (file: File) => requestDocument({ kind: "file", file }),
+    [requestDocument],
+  );
+
+  const cancelDocumentChange = useCallback(() => {
+    setPendingIntent(null);
+    setSaveBeforeReplacing(false);
+  }, []);
+
+  const discardAndReplace = useCallback(() => {
+    const intent = pendingIntent;
+    setPendingIntent(null);
+    if (intent !== null) void replaceDocument(intent);
+  }, [pendingIntent, replaceDocument]);
+
+  // Salvar antes de trocar é a mesma gravação da exportação — inclusive o título obrigatório, que é
+  // a única identidade do arquivo. Só depois de o arquivo sair é que o documento é substituído.
+  const saveThenReplace = useCallback(
+    (title: string) => {
+      const file = baselineFile({
+        title,
+        savedAt: new Date().toLocaleDateString("pt-BR"),
+        text: diagnostic.text,
+        blocks: rawBlocks,
+        diagnostic,
+        findings,
+        profileId,
+        config,
+        marks,
+        vocabulary: config.vocabulario.terms,
+      });
+      downloadFile(file.name, file.content, BASELINE_MIME);
+
+      const intent = pendingIntent;
+      setSaveBeforeReplacing(false);
+      setPendingIntent(null);
+      if (intent !== null) void replaceDocument(intent);
+    },
+    [diagnostic, rawBlocks, findings, profileId, config, marks, pendingIntent, replaceDocument],
   );
 
   const discardAndGoHome = useCallback(() => {
@@ -400,11 +485,8 @@ export function Studio() {
   );
 
   const onPasteDocument = useCallback(
-    (value: string, html: string | null) => {
-      enterPastedDocument(value, html);
-      afterDocumentEntered();
-    },
-    [enterPastedDocument, afterDocumentEntered],
+    (value: string, html: string | null) => requestDocument({ kind: "paste", text: value, html }),
+    [requestDocument],
   );
 
   const panelProps = {
@@ -573,6 +655,19 @@ export function Studio() {
           }}
         />
       )}
+
+      <ReplaceDocumentDialog
+        work={pendingIntent === null || saveBeforeReplacing ? null : workAtRisk}
+        onSave={() => setSaveBeforeReplacing(true)}
+        onDiscard={discardAndReplace}
+        onCancel={cancelDocumentChange}
+      />
+
+      <BaselineSaveDialog
+        open={saveBeforeReplacing}
+        onOpenChange={(next) => setSaveBeforeReplacing(next)}
+        onSave={saveThenReplace}
+      />
 
       <ConfirmDialog
         open={goHomeOpen}

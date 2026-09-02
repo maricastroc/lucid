@@ -195,6 +195,9 @@ describe("the record of a document · pasting a document in", () => {
     await user.click(draft());
     await user.keyboard("{Control>}a{/Control}");
     await user.paste(PASTED);
+    // Colar por cima do documento inteiro é abrir outro documento: a troca só acontece depois de o
+    // autor decidir o que fazer com a auditoria que estava aqui.
+    await user.click(screen.getByRole("button", { name: /descartar e abrir/i }));
     await user.click(screen.getByRole("tab", { name: /^revisar$/i }));
     await auditReady();
     await openChanges(user);

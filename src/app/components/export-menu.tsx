@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, RawBlock, ReaderBriefing } from "@/lucid";
 import { buildAuditReport } from "../lib/audit-report";
-import { buildBaseline, serializeBaseline } from "../lib/baseline";
+import { baselineFile, BASELINE_MIME } from "../lib/baseline";
 import {
   documentToDocx,
   documentToHtml,
@@ -119,10 +119,9 @@ export function ExportMenu({
   };
 
   const saveBaseline = (title: string) => {
-    const savedAt = new Date().toLocaleDateString("pt-BR");
-    const baseline = buildBaseline({
+    const file = baselineFile({
       title,
-      savedAt,
+      savedAt: new Date().toLocaleDateString("pt-BR"),
       text: diagnostic.text,
       blocks: rawBlocks,
       diagnostic,
@@ -132,7 +131,7 @@ export function ExportMenu({
       marks,
       vocabulary: config.vocabulario.terms,
     });
-    downloadFile(`${slug(title)}.lucid.json`, serializeBaseline(baseline), "application/json;charset=utf-8");
+    downloadFile(file.name, file.content, BASELINE_MIME);
   };
 
   const exportTxt = () => {
@@ -260,14 +259,4 @@ function MenuItem({
       {note !== undefined && <span className="text-[11px] leading-relaxed text-ink-3">{note}</span>}
     </button>
   );
-}
-
-function slug(title: string): string {
-  const plain = title
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return plain === "" ? "ponto-de-partida" : plain.slice(0, 60);
 }

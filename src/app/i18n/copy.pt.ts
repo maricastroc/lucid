@@ -76,6 +76,21 @@ export const COPY_PT: UiCopy = {
       body: "O texto em revisão e a trilha de alterações serão descartados. Esta ação não pode ser desfeita — exporte o relatório antes se quiser guardar a auditoria.",
       confirm: "Descartar e voltar",
     },
+    replaceDocument: {
+      title: "Abrir outro documento?",
+      lead: "Há uma auditoria em andamento aqui. Abrir outro documento substitui esta, e o que segue não volta:",
+      changes: (n) => `${n} ${plural(n, "alteração registrada", "alterações registradas")}`,
+      reviewed: (n) => `${n} ${plural(n, "ponto revisado", "pontos revisados")}`,
+      dismissed: (n) => `${n} ${plural(n, "ponto ignorado", "pontos ignorados")}`,
+      editedText: "as edições feitas no texto desde que ele foi aberto",
+      briefing: "o briefing do leitor respondido",
+      kept: "O perfil editorial e o vocabulário da organização continuam valendo — eles são da casa, não deste documento.",
+      save: "Salvar ponto de partida…",
+      saveHint:
+        "Baixa esta auditoria como arquivo antes de abrir o outro documento. É o que permite comparar as duas versões depois.",
+      discard: "Descartar e abrir",
+      cancel: "Cancelar a abertura",
+    },
     spliceRefused: {
       crosses_units: "Esta alteração atravessa mais de um bloco do documento importado.",
       crosses_cells:
