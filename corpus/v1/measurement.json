@@ -8,7 +8,7 @@
     "passages": "33a8b1ca633e1d6243bf5214122a14e1d3beb71de8c5533ee229bbc66b930ee6",
     "labels": {
       "sigla_sem_expansao": "f30e11ef48ec33f7a5f5dd807c403ab930abb86dcb2b19bf835469c81e960557",
-      "prose_enumeration": "01b28fa782258e88e2a9e0de5e915dac78b103eaaefb4c233eee40da8193f909",
+      "prose_enumeration": "174ff92e2cc6e7c9af402681924825ad6d144571053cec24a3d1e6abd3995766",
       "perifrase_inflada": "92eaa68a6bc495b1d414cba38c5dd332d0c6b7df08da5e8e49aee908bf8bee3b"
     }
   },
@@ -73,7 +73,7 @@
       },
       "agreementFloor": 0.7,
       "promoted": false,
-      "withheldReason": "AC1 abaixo do piso de 0.7",
+      "withheldReason": "AC1 abaixo do piso de 0,7",
       "strata": {
         "random": {
           "cases": 9,
@@ -115,7 +115,7 @@
       "criterion": "prose_enumeration",
       "split": "dev",
       "composition": {
-        "human": 0,
+        "human": 1,
         "consensus": 15,
         "modelOnly": 0
       },
@@ -127,12 +127,12 @@
         "positiveRate": 0
       },
       "agreementFloor": 0.7,
-      "promoted": false,
-      "withheldReason": "amostra de auditoria do consenso ainda não revisada por pessoa",
+      "promoted": true,
+      "withheldReason": null,
       "strata": {
         "random": {
-          "cases": 15,
-          "negatives": 15,
+          "cases": 16,
+          "negatives": 16,
           "tp": 0,
           "fp": 0,
           "fn": 0,
@@ -154,10 +154,13 @@
         }
       },
       "consensusAudit": {
-        "n": 0,
+        "n": 1,
         "disagreements": 0,
-        "errorRate": null,
-        "interval": null
+        "errorRate": 0,
+        "interval": {
+          "low": 0,
+          "high": 0.7935
+        }
       }
     },
     {
@@ -177,7 +180,7 @@
       },
       "agreementFloor": 0.7,
       "promoted": false,
-      "withheldReason": "AC1 abaixo do piso de 0.7",
+      "withheldReason": "AC1 abaixo do piso de 0,7",
       "strata": {
         "random": {
           "cases": 6,

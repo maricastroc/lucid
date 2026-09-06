@@ -73,4 +73,3 @@ describe("ampliação do léxico contra o critério declarado (A-20)", () => {
     }
   });
 });
-

@@ -23,6 +23,7 @@ import type {
   Regression,
   SyllableSummary,
 } from "../../src/report/eval/contract";
+import { buildAssistedCorpus } from "./assisted-corpus";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_SIGLA } from "./acronym-golden";
 import { GOLDEN_JARGAO } from "./jargon-golden";
@@ -366,6 +367,7 @@ export function evalStamp(): EvalStamp {
 const CAVEAT_ORDER: readonly CaveatId[] = [
   "count_scoring",
   "circular_recall_curated",
+  "assisted_supervision",
   "known_limitations_counted",
   "unmeasured_criteria",
   "no_layer_2",
@@ -376,11 +378,14 @@ const CAVEAT_TEXT: Record<CaveatId, string> = {
     "Pontuação por contagem de findings por trecho, não por posição do span: um falso positivo que caia onde havia um falso negativo se anula. É um piso, não uma medida de alinhamento de span.",
   circular_recall_curated:
     "Recall de critério de cobertura 'curada' é CIRCULAR: os positivos do golden foram construídos a partir do mesmo léxico curado que o detector consulta, então o número mede 'o código lê a própria lista', não 'o instrumento acha o fenômeno na língua'. Recall honesto exige rotular documento real, cego ao léxico.",
+  assisted_supervision:
+    "A faixa 'assistida por corpus' responde à ressalva acima com supervisão de outra natureza, e por isso NUNCA se funde com 'measured': os positivos vêm de ato oficial que ninguém redigiu pensando no detector, rotulados por dois modelos independentes e adjudicados por pessoa onde divergiram — não de um golden autoral. Ela tem portão próprio: sem concordância acima do piso e sem auditoria humana do consenso, o critério é medido e RETIDO, e o artefato publica a contagem sem a taxa.",
   known_limitations_counted:
     "Entradas 'limitacao_conhecida' contam CONTRA a métrica em vez de serem excluídas: a precisão publicada é a honesta, não a bonita.",
   unmeasured_criteria:
     "Critérios fora de 'measured' não têm precisão/recall. Teste unitário é escrito a partir da implementação e não mede recall sobre texto que ninguém antecipou — ausência de número não é ausência de defeito.",
-  no_layer_2: "Nenhum dado deste artefato vem da Camada 2 (sonda/LLM): é tudo determinístico e offline.",
+  no_layer_2:
+    "A MEDIÇÃO é determinística e offline: nenhum número deste artefato saiu de rodar um modelo sobre texto, e a sonda (Camada 2) não contribui com nada. A exceção a declarar está nos RÓTULOS da faixa assistida — a referência contra a qual o detector foi comparado ali foi proposta por dois modelos independentes e adjudicada por pessoa onde divergiram. O detector nunca encontrou um modelo; encontrou o rótulo.",
 };
 
 const METHOD_CAVEATS: readonly MethodCaveat[] = CAVEAT_ORDER.map((id) => ({ id, text: CAVEAT_TEXT[id] }));
@@ -424,6 +429,7 @@ export function buildEvalArtifact(): EvalArtifact {
     detectors,
     services: { syllables: evaluateSyllables().summary },
     criteriaCoverage: { ...criteriaCoverage(), total: CRITERION_IDS.length },
+    assistedCorpus: buildAssistedCorpus(),
   };
 }
 

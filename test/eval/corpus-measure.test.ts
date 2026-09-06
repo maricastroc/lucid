@@ -204,7 +204,7 @@ describe("corpus assistido — medição", () => {
       withheldReason: stubbed
         ? "corpus rotulado pelo provedor de demonstração"
         : belowFloor
-          ? `AC1 abaixo do piso de ${floor}`
+          ? `AC1 abaixo do piso de ${String(floor).replace(".", ",")}`
           : auditMissing
             ? "amostra de auditoria do consenso ainda não revisada por pessoa"
             : randomRows.length === 0

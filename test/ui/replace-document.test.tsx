@@ -14,8 +14,7 @@ const INCOMING = "A comissão indeferiu o pedido porque faltaram os 3 documentos
 
 const reviewedPoint = () => withMark(EMPTY_MARKS, analyze(PASSIVE_AND_JARGON).findings[0], "seen");
 
-const draft = () =>
-  screen.getByRole("textbox", { name: /texto do documento/i, hidden: true }) as HTMLTextAreaElement;
+const draft = () => screen.getByRole("textbox", { name: /texto do documento/i, hidden: true }) as HTMLTextAreaElement;
 const dialog = () => screen.queryByRole("alertdialog", { name: /abrir outro documento/i });
 
 async function pasteOverEverything(user: User): Promise<void> {
@@ -31,9 +30,7 @@ const docxWith = (text: string): File =>
   });
 
 const openDocumentInput = () =>
-  screen
-    .getByRole("region", { name: /documento em revisão/i })
-    .querySelector<HTMLInputElement>('input[type="file"]')!;
+  screen.getByRole("region", { name: /documento em revisão/i }).querySelector<HTMLInputElement>('input[type="file"]')!;
 
 describe("opening another document over an audit under way", () => {
   it("asks first, naming what will not come back", async () => {

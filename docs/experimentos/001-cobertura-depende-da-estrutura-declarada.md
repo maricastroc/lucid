@@ -83,7 +83,7 @@ O custo é direto e cai na cláusula: o mapa credita 4 detectores ao 5.2 (Princ�
 
 Custa também admitir que o mapa entregue no ADR-083 está incompleto no dia em que nasceu. Preferível a descobrir isso depois de alguém publicar um laudo com ele.
 
-## 6. Correção aplicada — [ADR-084](../decisoes/adr-084-cobertura-condicionada-ao-documento.md)
+## 6. Correção aplicada — ADR-084
 
 Os quatro pontos propostos foram implementados:
 

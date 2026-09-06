@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { coverageLabel, metaFor } from "../lib/criteria";
+import { precisionState, recallState, silentStratumReading, type RateState } from "../lib/assisted-rate";
 import rawReport from "../../../eval/report.json";
-import { EVAL_SCHEMA_VERSION, type CaveatId, type DetectorReport, type EvalArtifact } from "@/report/eval/contract";
+import {
+  EVAL_SCHEMA_VERSION,
+  type AssistedMeasurement,
+  type AssistedStratum,
+  type CaveatId,
+  type DetectorReport,
+  type EvalArtifact,
+} from "@/report/eval/contract";
 import { EvidenceNav } from "./evidence-nav";
 import { CopyRunSignature } from "./run-signature";
 
@@ -24,6 +32,7 @@ const SECTIONS = [
   { id: "metodo", label: "Método" },
   { id: "camadas", label: "Camadas de evidência" },
   { id: "criterios", label: "Critérios medidos" },
+  { id: "corpus", label: "Corpus assistido" },
   { id: "falhas", label: "Falhas declaradas" },
   { id: "procedencia", label: "Procedência" },
 ] as const;
@@ -49,7 +58,7 @@ const TIERS = [
 export default function AvaliacaoPage() {
   if (artifact.schemaVersion !== SUPPORTED_SCHEMA_VERSION) return <Incompatible found={artifact.schemaVersion} />;
 
-  const { stamp, method, detectors, services, criteriaCoverage } = artifact;
+  const { stamp, method, detectors, services, criteriaCoverage, assistedCorpus } = artifact;
 
   const layers = [
     { key: "measured", label: "com métrica publicada", criteria: criteriaCoverage.measured },
@@ -123,7 +132,7 @@ export default function AvaliacaoPage() {
                 <li
                   key={caveat.id}
                   id={`nota-${caveat.id}`}
-                  className="grid scroll-mt-20 grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-rule-1 py-3 transition-colors first:border-t-0 target:bg-accent-weak lg:[&:nth-child(2)]:border-t-0"
+                  className="grid scroll-mt-20 grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 border-t border-rule-1 py-3 transition-colors first:border-t-0 target:bg-accent-weak lg:nth-2:border-t-0"
                 >
                   <span aria-hidden className="pt-px font-mono text-[11px] tabular-nums text-ink-1">
                     {i + 1}
@@ -225,6 +234,8 @@ export default function AvaliacaoPage() {
             </p>
           </Band>
 
+          {assistedCorpus && <AssistedBand corpus={assistedCorpus} noteNumber={noteNumber} />}
+
           <Band id="falhas" label="Falhas declaradas" aside="com motivo, contando contra a métrica">
             <div className="flex flex-col gap-11">
               {detectors.map((d) => (
@@ -316,7 +327,7 @@ export default function AvaliacaoPage() {
             <span className="text-ink-dim" aria-hidden>
               ·
             </span>
-            Nenhum dado desta página vem de modelo de linguagem
+            Nenhum número desta página saiu de um modelo — na faixa assistida, os rótulos de referência sim
             <Link
               href="/"
               className="ml-auto rounded-sm underline decoration-rule-3 underline-offset-4 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
@@ -566,7 +577,7 @@ function Quoted({ children }: { children: string }) {
 function Incompatible({ found }: { found: number }) {
   return (
     <main className="grid min-h-dvh place-items-center bg-desk px-4">
-      <div className="w-full max-w-[34rem] overflow-hidden rounded-xl border border-rule-1 bg-sheet px-6 py-9 shadow-(--shadow-sheet) sm:px-10">
+      <div className="w-full max-w-136 overflow-hidden rounded-xl border border-rule-1 bg-sheet px-6 py-9 shadow-(--shadow-sheet) sm:px-10">
         <p className="u-label flex items-center gap-2 text-ink-2">
           <span className="size-1.5 rounded-full bg-accent" aria-hidden />
           Avaliação do motor
@@ -590,5 +601,223 @@ function Incompatible({ found }: { found: number }) {
         </Link>
       </div>
     </main>
+  );
+}
+
+function AssistedBand({
+  corpus,
+  noteNumber,
+}: {
+  corpus: NonNullable<EvalArtifact["assistedCorpus"]>;
+  noteNumber: (id: CaveatId) => number | null;
+}) {
+  const promoted = corpus.measuredAssisted.length;
+  const models = [...new Set(corpus.labelers.map((l) => l.model))];
+
+  return (
+    <Band id="corpus" label="Corpus assistido" aside="medido contra texto que ninguém escreveu para o detector">
+      <p className="max-w-[64ch] text-[15px] leading-[1.65] text-ink-1">
+        O recall dos critérios de léxico curado acima é circular
+        <NoteRef n={noteNumber("circular_recall_curated")} id="circular_recall_curated" /> — os positivos do golden
+        saíram da mesma lista que o detector consulta. Esta faixa é a resposta a essa ressalva:{" "}
+        <Tabular>{corpus.criteria.length}</Tabular> critérios medidos contra <Tabular>{corpus.passages}</Tabular>{" "}
+        trechos de <Tabular>{corpus.documents}</Tabular> atos oficiais federais, rotulados por dois modelos
+        independentes e adjudicados por pessoa onde divergiram.
+      </p>
+
+      <p className="mt-4 max-w-[64ch] text-[13px] leading-relaxed text-ink-1">
+        Ela <span className="text-ink-0">não</span> se funde com a faixa autoral
+        <NoteRef n={noteNumber("assisted_supervision")} id="assisted_supervision" />: a supervisão é de outra natureza,
+        e um critério que apareça nas duas tem duas medições de origens diferentes — não uma medição mais forte.
+      </p>
+
+      <div className="mt-7 flex flex-wrap items-end gap-x-12 gap-y-5 border-y border-rule-1 py-5">
+        <div>
+          <p
+            className={`font-serif text-[34px] leading-none tabular-nums ${promoted === 0 ? "text-ink-2" : "text-ink-0"}`}
+          >
+            {promoted}
+          </p>
+          <p className="mt-2 text-[12.5px] leading-snug text-ink-0">com métrica promovida</p>
+          <p className="mt-1 max-w-[24ch] text-[11.5px] leading-snug text-ink-1">
+            passou no piso de concordância e teve o consenso auditado
+          </p>
+        </div>
+        <div>
+          <p className="font-serif text-[34px] leading-none tabular-nums text-human">{corpus.withheld.length}</p>
+          <p className="mt-2 text-[12.5px] leading-snug text-ink-0">medidos e retidos</p>
+          <p className="mt-1 max-w-[24ch] text-[11.5px] leading-snug text-ink-1">
+            a medição existe; o portão recusou publicá-la, e diz por quê
+          </p>
+        </div>
+        <p className="ml-auto max-w-[30ch] text-[11.5px] leading-relaxed text-ink-1">
+          Split <Mono>{corpus.split}</Mono>
+          {corpus.sealed ? " · selado" : " · não selado"} · corpus <Mono>{corpus.corpusVersion}</Mono>
+        </p>
+      </div>
+
+      <div className="mt-8 flex flex-col gap-4">
+        {corpus.criteria.map((c) => (
+          <AssistedCard key={c.criterion} m={c} />
+        ))}
+      </div>
+
+      <div className="mt-9 rounded-lg border border-rule-2 bg-surface-2 px-5 py-5">
+        <p className="u-sublabel text-ink-1">procedência dos rótulos</p>
+        <p className="mt-2.5 max-w-[64ch] text-[12.5px] leading-relaxed text-ink-1">
+          Rotuladores:{" "}
+          {models.map((m, i) => (
+            <span key={m}>
+              {i > 0 && <span className="text-ink-dim"> · </span>}
+              <MonoTag>{m}</MonoTag>
+            </span>
+          ))}{" "}
+          · temperatura <Tabular>0</Tabular> · prompt versionado por critério. Nenhum arquivo do pipeline de rotulagem
+          importa o detector — a cerca é verificada pelo <Mono>dependency-cruiser</Mono>.
+        </p>
+        <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 border-t border-rule-1 pt-4 sm:grid-cols-2">
+          <Field term="hash dos documentos" value={corpus.hashes.documents.slice(0, 16)} />
+          <Field term="hash dos trechos" value={corpus.hashes.passages.slice(0, 16)} />
+        </dl>
+      </div>
+
+      <ol className="mt-7 flex flex-col gap-3">
+        {corpus.caveats.map((caveat) => (
+          <li key={caveat.id} className="border-t border-rule-1 pt-3 first:border-t-0 first:pt-0">
+            <p className="max-w-[68ch] text-[12.5px] leading-[1.6] text-ink-1">
+              {caveat.text} <MonoTag className="ml-0.5 align-[1px]">{caveat.id}</MonoTag>
+            </p>
+          </li>
+        ))}
+      </ol>
+    </Band>
+  );
+}
+
+function AssistedCard({ m }: { m: AssistedMeasurement }) {
+  const floorMet = m.agreement.gwetAc1 !== null && m.agreement.gwetAc1 >= m.agreementFloor;
+  const silent = silentStratumReading(m.strata.random);
+
+  return (
+    <section
+      className={`rounded-lg border px-5 py-4 ${m.promoted ? "border-rule-2 bg-surface" : "border-human-line bg-human-weak"}`}
+    >
+      <header className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
+        <h3 className="text-[14px] text-ink-0">{metaFor(m.criterion).label}</h3>
+        <MonoTag>{m.criterion}</MonoTag>
+        <span
+          className={`ml-auto rounded-full px-2.5 py-0.5 text-[11px] ${
+            m.promoted ? "bg-surface-3 text-ink-0" : "border border-human-line text-human"
+          }`}
+        >
+          {m.promoted ? "publicado" : "retido"}
+        </span>
+      </header>
+
+      {m.withheldReason !== null && (
+        <p className="mt-3 max-w-[62ch] text-[12.5px] leading-relaxed text-ink-1">
+          <span className="u-sublabel text-ink-1">por que não sai</span>
+          <br />
+          {m.withheldReason}
+        </p>
+      )}
+
+      {m.promoted && silent !== null && (
+        <p className="mt-3 max-w-[62ch] text-[12.5px] leading-relaxed text-ink-1">
+          <span className="u-sublabel text-ink-1">o que foi publicado</span>
+          <br />O detector ficou calado nos <Tabular>{silent.cases}</Tabular> trechos do estrato aleatório, e o rótulo
+          revisado concorda: <span className="text-ink-0">nenhum falso positivo</span>. Precisão e recall ficam sem
+          denominador — o achado é a ausência, e uma taxa aqui seria inventada.
+        </p>
+      )}
+
+      <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-4 border-t border-rule-1 pt-4 sm:grid-cols-4">
+        <Field
+          term={`AC1 de Gwet · piso ${decimal(m.agreementFloor, 1)}`}
+          value={`${decimal(m.agreement.gwetAc1)}${floorMet ? "" : " ↓"}`}
+        />
+        <Field term="κ de Cohen" value={decimal(m.agreement.cohenKappa)} />
+        <Field term="pares comparados" value={String(m.agreement.n)} />
+        <Field term="rótulos: pessoa/consenso" value={`${m.composition.human}/${m.composition.consensus}`} />
+      </dl>
+
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <StratumBlock
+          title="estrato aleatório"
+          note="amostra sem viés de superfície — o único onde recall significa alguma coisa"
+          s={m.strata.random}
+          promoted={m.promoted}
+          enriched={false}
+        />
+        <StratumBlock
+          title="estrato enriquecido"
+          note="entrou por cue de superfície: precisão é legítima, recall mediria a cue"
+          s={m.strata.cued}
+          promoted={m.promoted}
+          enriched
+        />
+      </div>
+    </section>
+  );
+}
+
+function StratumBlock({
+  title,
+  note,
+  s,
+  promoted,
+  enriched,
+}: {
+  title: string;
+  note: string;
+  s: AssistedStratum;
+  promoted: boolean;
+  enriched: boolean;
+}) {
+  return (
+    <div>
+      <p className="u-sublabel text-ink-1">{title}</p>
+      <p className="mt-1.5 max-w-[34ch] text-[11.5px] leading-snug text-ink-1">{note}</p>
+      <dl className="mt-3 flex flex-col gap-2 border-t border-rule-1 pt-3">
+        <Row term="casos · negativos" value={`${s.cases} · ${s.negatives}`} />
+        <Row term="tp · fp · fn" value={`${s.tp} · ${s.fp} · ${s.fn}`} />
+        <RateRow term="precisão" state={precisionState(s, promoted)} interval={s.precisionInterval} />
+        <RateRow term="recall" state={recallState(s, promoted, enriched)} interval={s.recallInterval} />
+      </dl>
+    </div>
+  );
+}
+
+function RateRow({
+  term,
+  state,
+  interval,
+}: {
+  term: string;
+  state: RateState;
+  interval: AssistedStratum["precisionInterval"];
+}) {
+  if (state.kind === "value") {
+    const value =
+      interval === null ? rate(state.value) : `${rate(state.value)} [${rate(interval.low)}–${rate(interval.high)}]`;
+    return <Row term={term} value={value} />;
+  }
+
+  const label = state.kind === "withheld" ? "retido" : state.kind === "unmeasurable" ? "não se mede" : "—";
+  const tone = state.kind === "withheld" ? "text-human" : "text-ink-1";
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+      <dt className="font-mono text-[10.5px] tracking-tight text-ink-1">{term}</dt>
+      <dd className={`font-mono text-[12px] tracking-tight ${tone}`}>{label}</dd>
+    </div>
+  );
+}
+
+function Row({ term, value }: { term: string; value: string }) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+      <dt className="font-mono text-[10.5px] tracking-tight text-ink-1">{term}</dt>
+      <dd className="font-mono text-[12px] tabular-nums tracking-tight text-ink-0">{value}</dd>
+    </div>
   );
 }

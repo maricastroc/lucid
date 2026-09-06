@@ -13,6 +13,12 @@ Este corpus é a resposta a essa ressalva. A medição que ele produz **não** e
 `measured` — vai para uma faixa própria, `measuredAssisted`, porque a supervisão é
 de outra natureza.
 
+Ela é publicada em `eval/report.json` sob `assistedCorpus` e renderizada em
+[`/avaliacao#corpus`](../src/app/avaliacao/page.tsx). Critério que não atravessa o
+portão aparece lá **medido e retido**, com o motivo — as contagens saem, as taxas
+não. O estado de hoje, e por que ele é assim, está em
+[`docs/experimentos/002`](../docs/experimentos/002-o-que-o-corpus-assistido-consegue-publicar.md).
+
 ---
 
 ## Os sete estágios

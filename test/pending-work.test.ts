@@ -139,11 +139,6 @@ describe("naming what is at risk", () => {
       }),
     )!;
 
-    expect(atRiskItems(work, pt)).toEqual([
-      pt.editedText,
-      "1 alteração registrada",
-      "1 ponto ignorado",
-      pt.briefing,
-    ]);
+    expect(atRiskItems(work, pt)).toEqual([pt.editedText, "1 alteração registrada", "1 ponto ignorado", pt.briefing]);
   });
 });

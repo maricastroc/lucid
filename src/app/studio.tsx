@@ -269,10 +269,7 @@ export function Studio() {
     [workAtRisk, replaceDocument],
   );
 
-  const openDocument = useCallback(
-    (file: File) => requestDocument({ kind: "file", file }),
-    [requestDocument],
-  );
+  const openDocument = useCallback((file: File) => requestDocument({ kind: "file", file }), [requestDocument]);
 
   const cancelDocumentChange = useCallback(() => {
     setPendingIntent(null);

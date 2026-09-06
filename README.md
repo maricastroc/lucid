@@ -270,7 +270,29 @@ Three things about that table are unusual, and deliberate:
 2. **Known limitations count _against_ the score.** A false positive we chose not to fix is left in the corpus, so `jargon` publishes 0.963 instead of a prettier 1.000. The same rule is why `passive_voice` publishes 0.830 recall rather than the 0.943 it once showed: `ser` in the present with no agent and a subject before the verb (“o benefício é concedido”) is structurally identical to a predicative adjective (“o servidor é qualificado”), no deterministic signal separates them, and the detector now stays silent there. The recall those silences cost is in the number, not in a footnote.
 3. **The artifact flags its own circular numbers.** Recall for a curated-lexicon detector is measured against a corpus built from that same lexicon — so it reports "the code reads its own list," not "the instrument finds the phenomenon." That caveat ships _inside_ the JSON.
 
-Test strength itself is measured: **2463 tests**, with [Stryker](https://stryker-mutator.io/) mutation testing over the criteria. Survivors are triaged into real gaps versus provably-equivalent mutants — because a mutation score you haven't triaged is also just a number.
+### The corpus that answers the circular number
+
+A caveat you publish and never act on is a caveat you have learned to live with. So the third point above has an apparatus behind it: **149 passages from 16 real federal laws** — text nobody wrote with a detector in mind — labelled by a pipeline whose whole design is that the labeller must not see the detector (`dependency-cruiser` fails the build if `scripts/corpus/` reaches for a pass or a dataset).
+
+Two independent models propose every label; where they disagree, where either declares low confidence, and on a random audit sample of the ones they agreed on, **a person decides**. Agreement between the two is measured with Cohen's κ and Gwet's AC1, rates carry Wilson intervals, and the sample is stratified — a random stratum, where recall means something, and a cue-enriched one, where it would only measure the cue.
+
+**One of three criteria clears the gate — and what it publishes is an absence, not a rate:**
+
+| Criterion            |   AC1 | Result                                                    |
+| -------------------- | ----: | --------------------------------------------------------- |
+| `prose_enumeration`  | 1.000 | **published** — 0 false positives over 16 random passages |
+| `sigla_sem_expansao` | 0.558 | withheld — inter-labeller agreement below the 0.7 floor   |
+| `perifrase_inflada`  | 0.321 | withheld — inter-labeller agreement below the 0.7 floor   |
+
+The published one is worth reading closely: the detector stayed silent on all 16 passages and the human-audited labels agree it should have, so **both denominators are empty and precision stays `—`**. A rule engine that fired zero times does not get to publish 100% precision. The finding is the silence, and the artifact says so instead of manufacturing a number at the best point of the scale.
+
+That is the band working, not the band failing. The counts stay in the artifact so a dissenter can recompute; the **rates** are redacted, because a rate is a claim and this is precisely the claim the floor refused. And the interface keeps three absences apart — `—` is _no measurement was possible_, `retido` is _measured and not published_, `não se mede` is _a number that would be a lie_ — with a test that fails if they ever collapse into one.
+
+The two below the floor cannot be rescued by more reviewing — and this was measured, not assumed: adjudicating the one queued audit item promoted `prose_enumeration` and moved neither of the others, because AC1 is a property of the model runs, not of the adjudication. What their low agreement measures is **how well-defined the criterion is** — and publishing that instead of a precision number is the more useful admission.
+
+_See [`eval/report.json`](eval/report.json) → `assistedCorpus`, rendered at [`/avaliacao`](https://lucid.marianacastro.dev/avaliacao#corpus), method in [`corpus/README.md`](corpus/README.md), and the measurement written up — prediction, miss and all — in [`docs/experimentos/002`](docs/experimentos/002-o-que-o-corpus-assistido-consegue-publicar.md)._
+
+Test strength itself is measured: **2503 tests**, with [Stryker](https://stryker-mutator.io/) mutation testing over the criteria. Survivors are triaged into real gaps versus provably-equivalent mutants — because a mutation score you haven't triaged is also just a number.
 
 <br/>
 
@@ -363,11 +385,12 @@ npm run dev     # → http://localhost:3000
 ### The checks
 
 ```bash
-npm run test        # 2463 Vitest tests + byte-identical golden snapshots
+npm run test        # 2503 Vitest tests + byte-identical golden snapshots
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint (incl. the no-Date/no-random rule inside core)
 npm run depcheck    # dependency-cruiser — the layer fence
 npm run eval        # regenerate the self-evaluation artifact
+npm run corpus:measure    # re-score the assisted corpus (offline: reads closed labels, no key)
 npm run mutation:passes   # Stryker over the 24 criteria (~26 min, off CI)
 ```
 

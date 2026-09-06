@@ -49,8 +49,7 @@ export function pendingWork(input: PendingWorkInput): PendingWork | null {
     editedText: textWasEdited(input.text, input.originalText),
   };
 
-  const empty =
-    work.changes === 0 && work.reviewed === 0 && work.dismissed === 0 && !work.briefing && !work.editedText;
+  const empty = work.changes === 0 && work.reviewed === 0 && work.dismissed === 0 && !work.briefing && !work.editedText;
 
   return empty ? null : work;
 }

@@ -66,4 +66,6 @@ if (argv[0] === "--dir") {
 }
 
 const total = [...tally.values()].reduce((a, b) => a + b, 0);
-console.error(`${total} apontamentos${tally.size === 0 ? "" : ` — ${[...tally].map(([k, v]) => `${k}=${v}`).join(" · ")}`}`);
+console.error(
+  `${total} apontamentos${tally.size === 0 ? "" : ` — ${[...tally].map(([k, v]) => `${k}=${v}`).join(" · ")}`}`,
+);

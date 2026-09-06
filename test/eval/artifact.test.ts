@@ -164,6 +164,7 @@ describe("eval artifact — publication invariants", () => {
     expect(ids).toEqual([
       "count_scoring",
       "circular_recall_curated",
+      "assisted_supervision",
       "known_limitations_counted",
       "unmeasured_criteria",
       "no_layer_2",

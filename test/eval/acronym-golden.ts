@@ -30,7 +30,11 @@ export const GOLDEN_SIGLA: readonly EntradaGolden[] = [
     estado: "correto",
   },
 
-  { texto: "LEI Nº 7.992, DE 3 DE JANEIRO DE 1990. Esta lei cria cargos de 3 categorias.", expectedCount: 0, estado: "correto" },
+  {
+    texto: "LEI Nº 7.992, DE 3 DE JANEIRO DE 1990. Esta lei cria cargos de 3 categorias.",
+    expectedCount: 0,
+    estado: "correto",
+  },
   { texto: "TÍTULO I Das disposições gerais. O título trata do prazo de 5 dias.", expectedCount: 0, estado: "correto" },
   { texto: "PRAZO para recurso. O prazo é de dez dias corridos.", expectedCount: 0, estado: "correto" },
   { texto: "MULTA aplicada. A multa vale para o caso de 3 faltas.", expectedCount: 0, estado: "correto" },

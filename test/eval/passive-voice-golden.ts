@@ -123,11 +123,27 @@ export const GOLDEN_VOZ_PASSIVA: readonly EntradaGolden[] = [
   { texto: "O servidor é mais qualificado que o outro.", expectedCount: 0, estado: "correto" },
   { texto: "O prazo é razoavelmente adequado.", expectedCount: 0, estado: "correto" },
 
-  { texto: "Art. 4º São criadas, na Tabela de Gratificação, as funções de assessoramento.", expectedCount: 1, estado: "correto" },
-  { texto: "Art. 1º É incluída, no Quadro de Pessoal, a categoria funcional de analista.", expectedCount: 1, estado: "correto" },
-  { texto: "Art. 19. É vedada o início de qualquer projeto novo até 31 de março.", expectedCount: 1, estado: "correto" },
+  {
+    texto: "Art. 4º São criadas, na Tabela de Gratificação, as funções de assessoramento.",
+    expectedCount: 1,
+    estado: "correto",
+  },
+  {
+    texto: "Art. 1º É incluída, no Quadro de Pessoal, a categoria funcional de analista.",
+    expectedCount: 1,
+    estado: "correto",
+  },
+  {
+    texto: "Art. 19. É vedada o início de qualquer projeto novo até 31 de março.",
+    expectedCount: 1,
+    estado: "correto",
+  },
   { texto: "§ 2º É assegurada a manutenção do crédito do imposto.", expectedCount: 1, estado: "correto" },
-  { texto: "Art. 1º É transferida para a Secretaria a competência de administração.", expectedCount: 1, estado: "correto" },
+  {
+    texto: "Art. 1º É transferida para a Secretaria a competência de administração.",
+    expectedCount: 1,
+    estado: "correto",
+  },
   { texto: "São criados, no Quadro Permanente, os cargos em comissão.", expectedCount: 1, estado: "correto" },
 
   {

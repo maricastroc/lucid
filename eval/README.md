@@ -64,6 +64,35 @@ contract both sides depend on: the tooling that produces the artifact and the
   the detector consults), so it measures "the code reads its own list," not "the instrument finds
   the phenomenon in the language."
 
+- **`assistedCorpus`** — the **corpus-assisted band**, and the standing answer to
+  `circular_recall_curated`. Same detectors, different supervision: the reference labels come from
+  passages of real federal law that nobody wrote with a detector in mind, proposed by two
+  independent models and adjudicated by a person where they diverged. `null` when the corpus was
+  not built in this tree — never an empty band, which would read as a measurement of zero.
+
+  It **never merges into `criteriaCoverage`**. That partition stays the authored-evidence one; a
+  criterion appearing in both has two measurements of different provenance, not one stronger
+  measurement. The band carries its own promotion gate:
+
+  - `measuredAssisted` — criteria whose metric cleared the gate (inter-labeler agreement at or
+    above `agreementFloor`, and a person having audited the model-consensus sample).
+  - `withheld` — criteria that were **measured and not published**, each with a `withheldReason`
+    that names the gate it failed.
+
+  For a withheld criterion the artifact keeps the **counts** (`cases`, `negatives`, `tp`, `fp`,
+  `fn`) and nulls the **rates** and intervals. Counts are an observation; a rate is a claim, and the
+  claim is the part the project declared it does not sustain. The full unredacted numbers stay in
+  [`corpus/v1/measurement.json`](../corpus/v1/measurement.json) for anyone who disagrees with the
+  floor and wants to recompute.
+
+  `strata.cued.recall` is `null` whatever the gate says: that stratum entered by a surface cue, so
+  recall there would measure the cue rather than the language.
+
+  The page keeps three absences apart, and
+  [`test/eval/assisted-rate.test.ts`](../test/eval/assisted-rate.test.ts) locks the distinction:
+  **"—"** is no denominator (no measurement was possible), **"retido"** is a measurement withheld,
+  and **"não se mede"** is a number that could be computed and would be a lie.
+
 ## The artifact cannot go stale
 
 [`test/eval/artifact-drift.test.ts`](../test/eval/artifact-drift.test.ts) runs in the normal suite
@@ -83,4 +112,12 @@ The artifact is **byte-identical** for the same code and the same data — Layer
 promise extended to the measurement itself. A run's identity is the stamp triple, not the clock; the
 date lives in git history.
 
-Nothing here comes from Layer 2 (the probe/LLM): it is all deterministic and offline.
+## What did and did not come from a model
+
+The **measurement** is deterministic and offline throughout: no number in this file was produced by
+running a model over text, and the comprehension probe (Layer 2) contributes nothing.
+
+The exception worth declaring is in the **labels** of `assistedCorpus`. The reference the detector
+was scored against there was proposed by two language models and adjudicated by a person where they
+disagreed. The detector never met a model — it met the label. That is what `no_layer_2` says, and
+why it is worded as a distinction rather than a denial.

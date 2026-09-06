@@ -153,4 +153,3 @@ describe("verbo inerentemente pronominal em qualquer flexão (A-18)", () => {
     expect(spans("Não se aplica a multa neste caso.")).toEqual(["se aplica"]);
   });
 });
-

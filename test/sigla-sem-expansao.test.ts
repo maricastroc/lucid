@@ -135,4 +135,3 @@ describe("palavra comum em caixa alta não é sigla (A-17)", () => {
     expect(spans("O INCRA decidiu. O Incra publicou a portaria.")).toEqual(["INCRA"]);
   });
 });
-

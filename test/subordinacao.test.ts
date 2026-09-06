@@ -61,20 +61,25 @@ describe("subordinacao_densa — switchable off and deterministic", () => {
 
 describe("o \u201cque\u201d simples entra, com a ambiguidade tratada (A-19)", () => {
   it("encadeamento de relativas agora dispara — era o buraco que deixava o critério inerte", () => {
-    const text =
-      "O requerente que apresentar o documento que comprove a renda que foi declarada receberá o benefício.";
+    const text = "O requerente que apresentar o documento que comprove a renda que foi declarada receberá o benefício.";
     const [f] = subordinationFindings(text);
     expect(f).toBeDefined();
     expect(f.meta?.clauses).toBe(3);
   });
 
   it("conta a relativa mesmo separada por vírgula", () => {
-    expect(subordinationFindings("A norma que trata do prazo, que é de dez dias, e que consta do art. 5º.")).toHaveLength(1);
+    expect(
+      subordinationFindings("A norma que trata do prazo, que é de dez dias, e que consta do art. 5º."),
+    ).toHaveLength(1);
   });
 
   it("não conta o \u201cque\u201d comparativo, que não abre oração", () => {
-    expect(subordinationFindings("Ele é mais alto que o irmão e mais rápido que o primo e mais forte que o pai.")).toHaveLength(0);
-    expect(subordinationFindings("O prazo é tão curto que assusta, tão curto que espanta, tão curto que dói.")).toHaveLength(0);
+    expect(
+      subordinationFindings("Ele é mais alto que o irmão e mais rápido que o primo e mais forte que o pai."),
+    ).toHaveLength(0);
+    expect(
+      subordinationFindings("O prazo é tão curto que assusta, tão curto que espanta, tão curto que dói."),
+    ).toHaveLength(0);
   });
 
   it("não conta o \u201cque\u201d da clivada", () => {
@@ -86,4 +91,3 @@ describe("o \u201cque\u201d simples entra, com a ambiguidade tratada (A-19)", ()
     expect(subordinationFindings(text)).toHaveLength(1);
   });
 });
-
