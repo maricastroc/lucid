@@ -12,7 +12,7 @@ module.exports = {
       severity: "error",
       comment: "Camada 1 é pura: sem React/Next. UI consome a lib, nunca o contrário.",
       from: { path: "^src/lucid/core" },
-      to: { path: "^(react|react-dom|next)($|/)" },
+      to: { path: "^(node_modules/)?(react|react-dom|next)($|/)" },
     },
     {
       name: "core-sem-rede",
@@ -71,7 +71,7 @@ module.exports = {
       severity: "error",
       comment: "Um exportador é puro: transforma blocos em bytes. Sem React/Next, sem rede, sem app.",
       from: { path: "^src/exporters" },
-      to: { path: "^(src/app|src/llm|react|react-dom|next|(node:)?https?)($|/)" },
+      to: { path: "^(src/app|src/llm)($|/)|^(node_modules/)?(react|react-dom|next)($|/)|^(node:)?https?$" },
     },
     {
       name: "locale-e-puro-como-o-core",
@@ -81,7 +81,7 @@ module.exports = {
         "zero React/Next. Ele FORNECE dados/passes/prompts; quem os executa (probe/report) importa " +
         "o locale, nunca o contrário.",
       from: { path: "^src/locales" },
-      to: { path: "^(src/lucid/probe|src/report|src/app|src/llm|react|react-dom|next)($|/)" },
+      to: { path: "^(src/lucid/probe|src/report|src/app|src/llm)($|/)|^(node_modules/)?(react|react-dom|next)($|/)" },
     },
     {
       name: "locale-sem-rede",

@@ -13,6 +13,10 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/maricastroc/lucid/actions/workflows/ci.yml"><img src="https://github.com/maricastroc/lucid/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/ISO_24495--1-1A1813?style=for-the-badge" alt="ISO 24495-1" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />

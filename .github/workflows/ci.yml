@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint · typecheck · layer fence · tests · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # The README and the project page both claim that the fence between the
+      # deterministic engine and the LLM layer is "enforced by the build". This
+      # step is what makes that literally true instead of a local convention:
+      # dependency-cruiser fails the run if core ever reaches for probe, network,
+      # React, locale, importer or exporter.
+      - name: Layer fence (dependency-cruiser)
+        run: npm run depcheck
+
+      # ~2.4k tests. No API key is required: the LLM-backed eval suites are gated
+      # behind env flags and skip themselves when the keys are absent, so the
+      # deterministic engine is what gets verified here.
+      - name: Unit tests
+        run: npm run test
+
+      # The LLM keys are read inside the route handlers, which are dynamic, so
+      # nothing secret is needed to compile.
+      - name: Production build
+        run: npm run build
