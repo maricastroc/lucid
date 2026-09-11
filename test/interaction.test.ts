@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 
 const FOUR_IN_ONE_SENTENCE =
   "É preciso fazer a verificação do relatório supramencionado, que foi assinado pelo gestor " +

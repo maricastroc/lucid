@@ -1,4 +1,5 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "passiva_sintetica";
 
@@ -47,7 +48,7 @@ const PROCLISIS_ATTRACTORS: ReadonlySet<string> = new Set([
   "raramente",
 ]);
 
-export const passivaSinteticaPass: Pass = {
+export const passivaSinteticaPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["verbos-pronominais.pt", "stopwords.pt"],

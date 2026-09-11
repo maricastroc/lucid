@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { analyze, DEFAULT_CONFIG, type Config } from "../src/lucid";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
+import { analyze } from "../src/locales/pt-BR";
 import {
   acceptBaseline,
   baselineFile,
@@ -16,6 +18,9 @@ import {
 } from "../src/app/lib/baseline";
 import { profileConfig } from "../src/app/lib/profiles";
 import { EMPTY_MARKS, withMark, withNote } from "../src/app/lib/review-marks";
+import { analysisLocale } from "../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 const V1 =
   "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
@@ -77,22 +82,22 @@ describe("the starting point — what it carries", () => {
 describe("the starting point — one ruler on both sides", () => {
   it("re-measures the saved text instead of trusting the numbers stored with it", () => {
     const baseline = baselineOf();
-    expect(rebaseline(baseline, DEFAULT_CONFIG).length).toBe(analyze(V1).findings.length);
+    expect(rebaseline(baseline, DEFAULT_CONFIG, PT).length).toBe(analyze(V1).findings.length);
   });
 
   it("re-measures under the profile in force now, not the one saved with it", () => {
     const noJargon: Config = { ...DEFAULT_CONFIG, jargon: { ...DEFAULT_CONFIG.jargon, enabled: false } };
     const baseline = baselineOf(V1, DEFAULT_CONFIG);
 
-    const underSaved = rebaseline(baseline, DEFAULT_CONFIG).length;
-    const underCurrent = rebaseline(baseline, noJargon).length;
+    const underSaved = rebaseline(baseline, DEFAULT_CONFIG, PT).length;
+    const underCurrent = rebaseline(baseline, noJargon, PT).length;
     expect(underCurrent).toBeLessThan(underSaved);
-    expect(compareToBaseline(baseline, analyze(V2, noJargon), noJargon).rebasedCount).toBe(underCurrent);
+    expect(compareToBaseline(baseline, analyze(V2, noJargon), noJargon, PT).rebasedCount).toBe(underCurrent);
   });
 
   it("compares the re-measured count, never the historical one", () => {
     const noJargon: Config = { ...DEFAULT_CONFIG, jargon: { ...DEFAULT_CONFIG.jargon, enabled: false } };
-    const comparison = compareToBaseline(baselineOf(), analyze(V2, noJargon), noJargon);
+    const comparison = compareToBaseline(baselineOf(), analyze(V2, noJargon), noJargon, PT);
 
     expect(comparison.historicalCount).toBe(analyze(V1).findings.length);
     expect(comparison.rebasedCount).toBe(analyze(V1, noJargon).findings.length);
@@ -103,7 +108,7 @@ describe("the starting point — one ruler on both sides", () => {
   });
 
   it("re-measuring is a no-op when the ruler has not moved — that is why it is unconditional", () => {
-    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG, PT);
     expect(comparison.rebasedCount).toBe(comparison.historicalCount);
     expect(comparison.divergence).toEqual([]);
   });
@@ -119,28 +124,28 @@ describe("the starting point — one ruler on both sides", () => {
 
   it("knows whether the saved profile is the one in force, so adopting it can be offered", () => {
     const baseline = baselineOf();
-    expect(profileMatches(baseline, DEFAULT_CONFIG)).toBe(true);
-    expect(profileMatches(baseline, profileConfig("publico"))).toBe(false);
+    expect(profileMatches(baseline, DEFAULT_CONFIG, PT)).toBe(true);
+    expect(profileMatches(baseline, profileConfig("publico", PT), PT)).toBe(false);
   });
 });
 
 describe("the starting point — what survived, and nothing more", () => {
   it("lists an excerpt the earlier audit raised that the current text raises again", () => {
-    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG, PT);
     const jargon = comparison.stillThere.filter((point) => point.criterion === "jargon");
 
     expect(jargon.map((point) => point.excerpt)).toContain("em sede de");
   });
 
   it("leaves out an excerpt the current text no longer raises", () => {
-    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG, PT);
     expect(comparison.stillThere.map((point) => point.excerpt)).not.toContain("supracitadas");
   });
 
   it("counts repeated excerpts by the smaller side, never claiming which occurrence is which", () => {
     const twice = "Foi indeferido em sede de análise. O pedido foi negado em sede de recurso.";
     const once = "A comissão negou o pedido em sede de recurso.";
-    const comparison = compareToBaseline(baselineOf(twice), analyze(once), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(twice), analyze(once), DEFAULT_CONFIG, PT);
     const point = comparison.stillThere.find((item) => item.excerpt === "em sede de");
 
     expect(point?.count).toBe(1);
@@ -155,7 +160,7 @@ describe("the starting point — what survived, and nothing more", () => {
     const diagnostic = analyze(V1);
     const kept = diagnostic.findings.find((f) => f.span.text === "em sede de")!;
     const marks = withNote(withMark(EMPTY_MARKS, kept, "dismissed"), kept, "Termo do edital-padrão.");
-    const comparison = compareToBaseline(baselineOf(V1, DEFAULT_CONFIG, marks), analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(V1, DEFAULT_CONFIG, marks), analyze(V2), DEFAULT_CONFIG, PT);
 
     const point = comparison.stillThere.find((item) => item.excerpt === "em sede de");
     expect(point?.decision).toEqual({
@@ -167,7 +172,7 @@ describe("the starting point — what survived, and nothing more", () => {
   });
 
   it("says nothing about what left the text: only what survived is reported", () => {
-    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(baselineOf(), analyze(V2), DEFAULT_CONFIG, PT);
     expect(Object.keys(comparison)).not.toContain("resolved");
     expect(Object.keys(comparison)).not.toContain("gone");
     expect(comparison.stillThereCount).toBeLessThanOrEqual(comparison.rebasedCount);
@@ -299,7 +304,7 @@ describe("saving the starting point before another document takes this one's pla
     const parsed = parseBaseline(fileOf("Edital 04/2026 — v1").content);
     if (!parsed.ok) throw new Error("baseline should parse");
 
-    const comparison = compareToBaseline(parsed.baseline, analyze(V2), DEFAULT_CONFIG);
+    const comparison = compareToBaseline(parsed.baseline, analyze(V2), DEFAULT_CONFIG, PT);
     expect(comparison.title).toBe("Edital 04/2026 — v1");
     expect(comparison.rebasedCount).toBeGreaterThan(0);
   });

@@ -1,30 +1,24 @@
-import { clauseSplitPoints, isCriterionId, type Finding, type SplitPoint } from "@/lucid";
-import { metaFor } from "./criteria";
-import { assistida, metaNum, type Confidence, type NarrativeSet } from "./narrative-types";
-import { NARRATIVE_PT } from "./narrative.pt";
-import { NARRATIVE_EN } from "./narrative.en";
+import { type Finding } from "@/lucid";
+import type { SplitPoint } from "@/locales/pt-BR";
+import type { AnalysisLocale, AnalysisLocaleId } from "../locale/active";
+import { metaFor, narrativeFor } from "../presentation/registry";
+import { assistida, metaNum, type Confidence } from "./narrative-types";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 export type { Confidence, ConfidenceLevel } from "./narrative-types";
 
-const NARRATIVE: Record<UiLang, NarrativeSet> = { "pt-BR": NARRATIVE_PT, en: NARRATIVE_EN };
-
-export function detectionHeadline(f: Finding, lang: UiLang = DEFAULT_UI_LANG): string {
-  const c = f.criterion;
-  if (!isCriterionId(c)) return c;
-  return NARRATIVE[lang][c].headline?.(f) ?? metaFor(c, lang).label;
+export function detectionHeadline(f: Finding, localeId: AnalysisLocaleId, lang: UiLang = DEFAULT_UI_LANG): string {
+  const narrative = narrativeFor(localeId, f.criterion, lang);
+  if (narrative === null) return f.criterion;
+  return narrative.headline?.(f) ?? metaFor(localeId, f.criterion, lang).label;
 }
 
-export function detectedProse(f: Finding, lang: UiLang = DEFAULT_UI_LANG): string {
-  const c = f.criterion;
-  if (!isCriterionId(c)) return f.justification;
-  return NARRATIVE[lang][c].prose?.(f) ?? f.justification;
+export function detectedProse(f: Finding, localeId: AnalysisLocaleId, lang: UiLang = DEFAULT_UI_LANG): string {
+  return narrativeFor(localeId, f.criterion, lang)?.prose?.(f) ?? f.justification;
 }
 
-export function buildConfidence(f: Finding, lang: UiLang = DEFAULT_UI_LANG): Confidence {
-  const c = f.criterion;
-  if (!isCriterionId(c)) return assistida(f.justification);
-  return NARRATIVE[lang][c].confidence(f);
+export function buildConfidence(f: Finding, localeId: AnalysisLocaleId, lang: UiLang = DEFAULT_UI_LANG): Confidence {
+  return narrativeFor(localeId, f.criterion, lang)?.confidence(f) ?? assistida(f.justification);
 }
 
 export interface LongSentenceGuidance {
@@ -34,17 +28,16 @@ export interface LongSentenceGuidance {
   candidates: SplitPoint[];
 }
 
-const SUBORD_RE = /\b(que|quando|porque|embora|cuj[ao]s?|onde|caso|conforme|porquanto|ainda que|de modo que)\b/gi;
-
-export function longSentenceGuidance(f: Finding, source: string): LongSentenceGuidance {
+export function longSentenceGuidance(f: Finding, source: string, locale: AnalysisLocale): LongSentenceGuidance {
   const span = f.span.text;
   const words = metaNum(f, "words");
   const threshold = metaNum(f, "threshold");
 
   const commas = (span.match(/,/g) ?? []).length;
-  const subs = (span.match(SUBORD_RE) ?? []).length;
+  const guidance = locale.clauseGuidance;
+  const subs = guidance === null ? 0 : (span.match(guidance.subordinators) ?? []).length;
   const subordination = commas + subs;
 
-  const candidates = clauseSplitPoints(source, f.span);
+  const candidates = guidance === null ? [] : guidance.splitPoints(source, f.span);
   return { words, threshold, subordination, candidates };
 }

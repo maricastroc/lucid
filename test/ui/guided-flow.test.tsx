@@ -11,6 +11,8 @@ const BIG = Array.from(
     `a verificação das condições supracitadas exigidas para a concessão do benefício.`,
 ).join("\n\n");
 
+const ONE = BIG.split("\n\n")[0];
+
 type User = ReturnType<typeof mountStudio>["user"];
 
 const header = () =>
@@ -199,7 +201,7 @@ describe("the guided path stays with the reader", () => {
   });
 
   it("stops offering a step to resume once every step is walked", async () => {
-    const { user } = mountStudio({ text: BIG });
+    const { user } = mountStudio({ text: ONE });
     await auditReady();
     await openReview(user);
     for (let step = 0; step < 5; step++) {

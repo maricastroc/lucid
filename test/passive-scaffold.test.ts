@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { passiveScaffold } from "../src/locales/pt-BR/actions/passive-scaffold";
 import type { Finding } from "../src/lucid/core/types";
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { burdenMove, documentBurden, renderLedgerMarkdown, sourceLabel, type LedgerEntry } from "../src/app/lib/ledger";
 
 const ENTRIES: LedgerEntry[] = [
@@ -40,11 +40,11 @@ describe("ledger — provenance trail", () => {
   });
 
   it("renderLedgerMarkdown: empty → empty string (the caller omits the section)", () => {
-    expect(renderLedgerMarkdown([])).toBe("");
+    expect(renderLedgerMarkdown([], "pt-BR")).toBe("");
   });
 
   it("renderLedgerMarkdown: heading, burden summary, entries with before→after and caveat", () => {
-    const md = renderLedgerMarkdown(ENTRIES);
+    const md = renderLedgerMarkdown(ENTRIES, "pt-BR");
     expect(md).toContain("## Alterações registradas");
     expect(md).toContain("Peso da auditoria na sessão:** 6 → 2");
     expect(md).toContain("**1. Edição do autor · Jargão** — peso 6 → 5 ↓");
@@ -55,7 +55,7 @@ describe("ledger — provenance trail", () => {
   });
 
   it("deterministic: same entries → byte-identical markdown", () => {
-    expect(renderLedgerMarkdown(ENTRIES)).toBe(renderLedgerMarkdown(ENTRIES));
+    expect(renderLedgerMarkdown(ENTRIES, "pt-BR")).toBe(renderLedgerMarkdown(ENTRIES, "pt-BR"));
   });
 });
 
@@ -76,13 +76,13 @@ describe("ledger — a tie is not a fall", () => {
   });
 
   it("says a change left the weight where it was, instead of drawing a fall", () => {
-    const md = renderLedgerMarkdown([at(15.9, 15.9)]);
+    const md = renderLedgerMarkdown([at(15.9, 15.9)], "pt-BR");
     expect(md).toContain("peso 15.9 → 15.9 (sem mudança de peso)");
     expect(md).not.toContain("↓");
   });
 
   it("still marks a real fall and a real rise", () => {
-    expect(renderLedgerMarkdown([at(6, 5)])).toContain("peso 6 → 5 ↓");
-    expect(renderLedgerMarkdown([at(5, 6)])).toContain("peso 5 → 6 ↑");
+    expect(renderLedgerMarkdown([at(6, 5)], "pt-BR")).toContain("peso 6 → 5 ↓");
+    expect(renderLedgerMarkdown([at(5, 6)], "pt-BR")).toContain("peso 5 → 6 ↑");
   });
 });

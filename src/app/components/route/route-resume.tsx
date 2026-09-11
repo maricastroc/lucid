@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { metaFor } from "../../lib/criteria";
 import { routeStarted, type ReviewRoute } from "../../lib/review-route";
 import { useCopy } from "../../i18n/use-copy";
@@ -17,6 +18,7 @@ export function RouteResume({
   onOpenReview: () => void;
 }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const r = c.route;
   if (route.steps.length === 0) return null;
 
@@ -81,8 +83,8 @@ export function RouteResume({
           </Button>
           <p className="mt-1.5 text-center text-[11px] text-ink-2">
             {started
-              ? r.resumeHint(entry.index + 1, metaFor(entry.step.criterion, lang).label)
-              : r.beginHint(entry.index + 1, metaFor(entry.step.criterion, lang).label)}
+              ? r.resumeHint(entry.index + 1, metaFor(locale.id, entry.step.criterion, lang).label)
+              : r.beginHint(entry.index + 1, metaFor(locale.id, entry.step.criterion, lang).label)}
           </p>
         </>
       )}

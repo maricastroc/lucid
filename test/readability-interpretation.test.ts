@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { interpretFleschPt } from "../src/locales/pt-BR/readability/flesch-pt";
 import { countSyllables } from "../src/locales/pt-BR/services/syllables";
 import { describeReadability } from "../src/app/lib/readability";
@@ -48,7 +48,7 @@ describe("readability interpretation — never alters the measured value", () =>
 describe("causes of a missing measurement — explicit, never generic", () => {
   it("text with no word returns `no_words` (and the value is null, not 0)", () => {
     const d = analyze("!!! ??? ...");
-    expect(d.metrics.fleschPt).toBeNull();
+    expect(d.metrics.readability).toBeNull();
     expect(interpretFleschPt(d.metrics)).toEqual({ kind: "unmeasurable", cause: "no_words" });
   });
 

@@ -37,11 +37,21 @@ export type {
   Token,
 } from "./core/types";
 
-export type { CriterionId } from "../locales/pt-BR/criteria";
-export { CRITERION_IDS, isCriterionId } from "../locales/pt-BR/criteria";
-
-export type { Config, ConfigDeviation, ConfigValue, OrgTerm } from "./core/config";
-export { configDeviations, DEFAULT_CONFIG, hashConfig, isDefaultConfig } from "./core/config";
+export type {
+  Config,
+  ConfigDeviation,
+  ConfigField,
+  ConfigSchema,
+  ConfigSection,
+  ConfigSectionRole,
+  ConfigSectionSchema,
+  ConfigValue,
+  OrgTerm,
+  ThresholdBasis,
+  ThresholdStatus,
+} from "./core/config";
+export { configDeviations, configSections, hashConfig, isDefaultConfig, pickSections } from "./core/config";
+export { assertLocaleBundle } from "./core/contracts/validate";
 export { stableHash, stableStringify } from "./core/hash";
 
 export type {
@@ -56,6 +66,10 @@ export type {
 export { asLocaleId } from "./core/contracts/locale";
 
 export { analyzeDocumentWithLocale, analyzeWithLocale, createAnalyzer, sortFindings } from "./core/analyzer";
+export { readabilityReadingOf } from "./core/metrics";
+export { buildDocument } from "./core/document/model";
+export type { DocumentBuildServices } from "./core/document/model";
+export { sentenceSpanAt } from "./core/document/locate";
 export {
   affixSplice,
   buildStructuredDocument,
@@ -95,25 +109,3 @@ export type {
 export { checkBriefing, isBriefingDeclared } from "./core/briefing/check";
 export { EMPTY_BRIEFING } from "./core/briefing/types";
 export type { BriefingCheck, BriefingCoverage, ReaderBriefing } from "./core/briefing/types";
-
-export { countPii, isValidCnpj, isValidCpf } from "../locales/pt-BR/privacy/pii";
-export type { PiiCount, PiiKind } from "../locales/pt-BR/privacy/pii";
-
-export {
-  analyze,
-  analyzeDocument,
-  analyzeWithPasses,
-  buildDocument,
-  coverageReport,
-  localePtBR,
-  missingBlockKindsIn,
-  silentCriteriaIn,
-  ptDocumentServices,
-  READABILITY_REFERENCE_RANGE,
-} from "../locales/pt-BR";
-
-export { clauseSplitPoints } from "../locales/pt-BR/actions/split-sentence";
-export type { SplitPoint, SplitKind } from "../locales/pt-BR/actions/split-sentence";
-export { passiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
-export type { PassiveScaffold } from "../locales/pt-BR/actions/passive-scaffold";
-export { sentenceSpanAt } from "../locales/pt-BR";

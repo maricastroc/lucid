@@ -1,4 +1,5 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "mais_que_perfeito_sintetico";
 
@@ -9,7 +10,7 @@ const JUSTIFICATION =
   "fala e de leitura difícil. Considere a forma composta (tinha/havia + particípio); a ferramenta " +
   "não reescreve automaticamente porque a troca depende do contexto.";
 
-export const maisQuePerfeitoPass: Pass = {
+export const maisQuePerfeitoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["mais-que-perfeito.pt"],

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../../src/lucid";
+import { analyze } from "../../src/locales/pt-BR";
 import { GOLDEN_INTEGRADO } from "./integrated-golden";
 
 const SNAPSHOT_IDS = [

@@ -1,18 +1,8 @@
 import type { DocxNotes } from "@/importers/docx";
 import type { PdfNotes } from "@/importers/pdf";
 import type { BlockKind } from "@/lucid";
-import {
-  analyzeDocument,
-  buildDocument,
-  coverageReport,
-  missingBlockKindsIn,
-  sortFindings,
-  type CriterionId,
-  type Diagnostic,
-  type Document,
-  type Finding,
-  type Severity,
-} from "@/lucid";
+import { sortFindings, type Diagnostic, type Document, type Finding, type Severity } from "@/lucid";
+import { analyzeDocument, buildDocument, coverageReport, missingBlockKindsIn, type CriterionId } from "@/locales/pt-BR";
 
 export interface Position {
   readonly line: number;

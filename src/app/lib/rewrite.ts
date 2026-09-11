@@ -1,4 +1,5 @@
-import { analyze, type Finding, type Span } from "@/lucid";
+import { type Finding, type Span } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { GEMINI_MODELS } from "@/llm";
 import {
   proposeAndVerify,

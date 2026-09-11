@@ -51,11 +51,18 @@ function assertAcyclicParents(bySection: Map<string, ClauseNode>, standard: stri
   }
 }
 
-function criteriaBySection(taxonomy: CriterionTaxonomy): Map<string, string[]> {
+function criteriaBySection(taxonomy: CriterionTaxonomy, referenceName: string): Map<string, string[]> {
   const bySection = new Map<string, string[]>();
   for (const criterion of Object.keys(taxonomy).sort()) {
     const entry = taxonomy[criterion];
     if (entry.source !== "iso-24495-1") continue;
+    if (entry.normativeReference.standard !== referenceName) {
+      throw new Error(
+        `o critério "${criterion}" cita a norma "${entry.normativeReference.standard}", mas a árvore ` +
+          `transcrita deste locale declara "${referenceName}". Um critério não pode citar autoridade ` +
+          "que a árvore do próprio locale não declara.",
+      );
+    }
     const section = entry.normativeReference.section;
     const list = bySection.get(section);
     if (list) list.push(criterion);
@@ -172,7 +179,7 @@ export function buildCoverageReport(
   const bySection = indexNodes(tree);
   assertAcyclicParents(bySection, tree.standard);
 
-  const bySectionCriteria = criteriaBySection(taxonomy);
+  const bySectionCriteria = criteriaBySection(taxonomy, tree.referenceName);
   for (const [section, criteria] of bySectionCriteria) {
     if (!bySection.has(section)) {
       throw new Error(

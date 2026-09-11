@@ -1,16 +1,12 @@
 import { describe, expect, it } from "vitest";
-import {
-  analyze,
-  buildDocument,
-  buildStructuredDocument,
-  ptDocumentServices,
-  toRawBlocks,
-  type Document,
-  type RawBlock,
-} from "@/lucid";
+import { buildStructuredDocument, toRawBlocks, type Document, type RawBlock } from "@/lucid";
+import { analyze, buildDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { spliceStructuredDocument } from "../src/lucid/core/document/structured";
 import { documentToDocx, exportableBlocks } from "../src/app/lib/export-document";
 import { applyProposal } from "../src/report/rewrite";
+import { analysisLocale } from "../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 const PREAMBLE =
   "A Secretária da Diversidade, no uso de suas atribuições legais, com fundamento na Lei Federal nº 13.019/2014, " +
@@ -157,7 +153,7 @@ describe("multiline rewrite — export", () => {
     const target = { start: 0, end: PREAMBLE.length, text: PREAMBLE };
     const next = applyProposal(text, target, { proposerId: "c", original: PREAMBLE, proposed: LIST_PROPOSAL });
 
-    const blocks = exportableBlocks(next, null);
+    const blocks = exportableBlocks(next, null, PT);
     expect(blocks.some((b) => b.kind === "list")).toBe(true);
     const bytes = await documentToDocx(blocks);
     expect(bytes.byteLength).toBeGreaterThan(0);

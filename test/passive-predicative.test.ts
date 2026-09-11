@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, type Finding } from "@/lucid";
+import { type Finding } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { buildConfidence, detectedProse, detectionHeadline } from "@/app/lib/narrative";
 
 const passivas = (text: string): Finding[] => analyze(text).findings.filter((f) => f.criterion === "passive_voice");
@@ -76,18 +77,18 @@ describe("o que o leitor vê quando o sujeito está posposto", () => {
 
   it("afirma a passiva em vez de sugerir que talvez seja uma", () => {
     for (const lang of ["pt-BR", "en"] as const) {
-      const headline = detectionHeadline(finding(), lang);
+      const headline = detectionHeadline(finding(), "pt-BR", lang);
       expect(headline.toLowerCase()).not.toMatch(/pode ser|may be/);
       expect(headline.toLowerCase()).toMatch(/posposto|postposed/);
     }
   });
 
   it("nomeia a ordem verbo-sujeito como a razão, nos dois idiomas", () => {
-    expect(detectedProse(finding(), "pt-BR")).toMatch(/sujeito vem depois|começa no verbo/i);
-    expect(detectedProse(finding(), "en")).toMatch(/subject follows|opens on the verb/i);
+    expect(detectedProse(finding(), "pt-BR", "pt-BR")).toMatch(/sujeito vem depois|começa no verbo/i);
+    expect(detectedProse(finding(), "pt-BR", "en")).toMatch(/subject follows|opens on the verb/i);
   });
 
   it("continua se recusando a inventar o agente ausente", () => {
-    expect(buildConfidence(finding(), "pt-BR").rationale).toMatch(/não está no texto|recusa a inventar/i);
+    expect(buildConfidence(finding(), "pt-BR", "pt-BR").rationale).toMatch(/não está no texto|recusa a inventar/i);
   });
 });

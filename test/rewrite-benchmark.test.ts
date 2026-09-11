@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { analyze, type Span } from "../src/lucid";
+import { type Span } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { GeminiProvider, GEMINI_MODELS, type ChatProvider } from "../src/llm";
 import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
 import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
@@ -115,9 +116,9 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
     samples.push({
       changed: proposal.proposed !== proposal.original,
       dFlesch:
-        verification.metrics.fleschPtAfter === null || verification.metrics.fleschPtBefore === null
+        verification.metrics.readabilityAfter === null || verification.metrics.readabilityBefore === null
           ? 0
-          : verification.metrics.fleschPtAfter - verification.metrics.fleschPtBefore,
+          : verification.metrics.readabilityAfter - verification.metrics.readabilityBefore,
       dWords: verification.metrics.wordsAfter - verification.metrics.wordsBefore,
       findingsAfter,
       proofsPreserved:

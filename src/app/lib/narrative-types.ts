@@ -1,4 +1,5 @@
-import type { CriterionId, Finding } from "@/lucid";
+import type { Finding } from "@/lucid";
+import type { CriterionId } from "@/locales/pt-BR";
 
 export function metaNum(f: Finding, k: string): number | null {
   const v = f.meta?.[k];
@@ -35,4 +36,4 @@ export interface CriterionNarrative {
   confidence: (f: Finding) => Confidence;
 }
 
-export type NarrativeSet = Record<CriterionId, CriterionNarrative>;
+export type PtNarrativeSet = Record<CriterionId, CriterionNarrative>;

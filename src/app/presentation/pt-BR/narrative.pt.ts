@@ -1,4 +1,4 @@
-import { assistida, flat, metaBool, metaNum, metaStr, type NarrativeSet } from "./narrative-types";
+import { assistida, flat, metaBool, metaNum, metaStr, type PtNarrativeSet } from "../../lib/narrative-types";
 
 const DOMAIN_PT: Record<string, string> = {
   administrative: "administrativo",
@@ -6,7 +6,7 @@ const DOMAIN_PT: Record<string, string> = {
   general: "técnico",
 };
 
-export const NARRATIVE_PT: NarrativeSet = {
+const BASE: PtNarrativeSet = {
   long_sentence: {
     headline: (f) => {
       const w = metaNum(f, "words");
@@ -16,12 +16,16 @@ export const NARRATIVE_PT: NarrativeSet = {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       if (w == null || th == null) return "O comprimento desta frase está acima do gatilho de inspeção.";
+      const standard = f.normativeReference?.standard ?? "ISO 24495-1";
+      const parameter =
+        metaStr(f, "thresholdStatus") === "provisional"
+          ? "esse número é provisório para este idioma de análise, sem validação, e não um limite da norma"
+          : "esse número é um parâmetro metodológico do produto, e não um limite da norma";
       return (
-        `Esta frase tem ${w} palavras. O Lucid inspeciona frases acima de ${th} palavras — esse número é um ` +
-        "parâmetro metodológico do produto, e não um limite da norma: a ABNT NBR ISO 24495-1 pede frases " +
-        "concisas e variação de tamanho, sem estabelecer contagem. A verificação principal é outra: veja se a " +
-        "frase carrega mais de uma ideia. Uma frase extensa com uma ideia só pode estar adequada e não " +
-        "precisa necessariamente ser dividida."
+        `Esta frase tem ${w} palavras. O Lucid inspeciona frases acima de ${th} palavras — ${parameter}: ` +
+        `a ${standard} pede frases concisas e variação de tamanho, sem estabelecer contagem. A verificação ` +
+        "principal é outra: veja se a frase carrega mais de uma ideia. Uma frase extensa com uma ideia só pode " +
+        "estar adequada e não precisa necessariamente ser dividida."
       );
     },
     confidence: (f) => {
@@ -297,3 +301,5 @@ export const NARRATIVE_PT: NarrativeSet = {
       ),
   },
 };
+
+export const NARRATIVE_UI_PT = BASE;

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { metaFor } from "../../lib/criteria";
 import type { ReviewRoute } from "../../lib/review-route";
 import { useCopy } from "../../i18n/use-copy";
@@ -18,6 +19,7 @@ export function StepTrail({
   size?: "regular" | "compact";
 }) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const g = c.guided;
   const box = size === "compact" ? "size-5 text-[10px]" : "size-6 text-[11px]";
   const nextIndex = route.next?.index ?? -1;
@@ -28,7 +30,7 @@ export function StepTrail({
       {route.steps.map((step, i) => {
         const here = i === openIndex;
         const done = step.state === "done";
-        const label = metaFor(step.criterion, lang).label;
+        const label = metaFor(locale.id, step.criterion, lang).label;
 
         const tone = here
           ? "bg-accent text-accent-ink ring-2 ring-accent-line ring-offset-1 ring-offset-surface-2"

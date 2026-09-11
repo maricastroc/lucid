@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import type { Span } from "../src/lucid/core/types";
 import { buildRewritePrompt, LlmRewriteProposer, STRATEGY_VERSION } from "../src/report/rewrite";
 import type { ChatProvider } from "../src/llm";

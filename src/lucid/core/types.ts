@@ -1,21 +1,22 @@
+import type { Config } from "./config";
 import type { DataView } from "./data/types";
 
 export type Severity = "info" | "warning" | "error";
 
 export type Category = "lexical" | "syntactic" | "structural" | "metric";
 
-export type CriterionSource = "iso-24495-1" | "editorial-pt-br" | "structural-heuristic" | "organizational";
+export type CriterionSource = "iso-24495-1" | "editorial" | "structural-heuristic" | "organizational";
 
 export type PrincipleGroup = "relevant" | "findable" | "understandable" | "usable";
 
 export interface NormativeReference {
-  standard: "ABNT NBR ISO 24495-1";
+  standard: string;
   section: string;
 }
 
 export type CriterionTaxonomyEntry =
   | { source: "iso-24495-1"; principleGroup: PrincipleGroup; normativeReference: NormativeReference }
-  | { source: "editorial-pt-br"; principleGroup: PrincipleGroup }
+  | { source: "editorial"; principleGroup: PrincipleGroup }
   | { source: "structural-heuristic"; principleGroup: PrincipleGroup }
   | { source: "organizational"; principleGroup: PrincipleGroup };
 
@@ -131,18 +132,19 @@ export interface Document {
   readonly blocks: readonly Block[];
 }
 
-export interface PassContext {
+export interface PassContext<C extends Config = Config> {
   readonly doc: Document;
-  readonly config: import("./config").Config;
+  readonly config: C;
   readonly data: DataView;
 }
 
-export interface Pass {
+export interface Pass<C extends Config = Config> {
   readonly criterion: string;
   readonly category: Category;
   readonly dataDeps?: readonly string[];
   readonly requires?: readonly BlockKind[];
-  run(ctx: PassContext): PassFinding[];
+  readonly engine?: "shared";
+  run(ctx: PassContext<C>): PassFinding[];
 }
 
 export type ConnectiveClass = "additive" | "adversative" | "causal" | "temporal" | "conclusive";
@@ -162,13 +164,13 @@ export interface TableMetrics {
 }
 
 export interface Metrics {
-  fleschPt: number | null;
+  readability: number | null;
   words: number;
   sentences: number;
-  syllables: number;
+  syllables: number | null;
   wordsPerSentence: number;
-  syllablesPerWord: number;
-  cohesion: CohesionMetrics;
+  syllablesPerWord: number | null;
+  cohesion: CohesionMetrics | null;
   tables?: TableMetrics;
 }
 
@@ -193,6 +195,7 @@ export interface ReadabilityBand {
 }
 
 export type ReadabilityReading =
+  | { readonly kind: "unavailable" }
   | { readonly kind: "unmeasurable"; readonly cause: ReadabilityUnmeasurableCause }
   | {
       readonly kind: "measured";

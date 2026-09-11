@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const spans = (text: string, criterion: string): string[] =>
   analyze(text)

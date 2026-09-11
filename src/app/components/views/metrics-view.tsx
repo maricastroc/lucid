@@ -6,11 +6,16 @@ import { metricRows, type MetricRowKey } from "../../lib/metric-rows";
 import { readabilityOf } from "../../lib/readability";
 import { useCopy } from "../../i18n/use-copy";
 import { ChevronDownIcon } from "../icons";
+import { requireAnalysisLocale } from "../../locale/active";
 
 export function MetricsView({ diagnostic }: { diagnostic: Diagnostic }) {
   const { c, lang } = useCopy();
   const rows = metricRows(diagnostic, lang);
-  const notes = readabilityOf(diagnostic.metrics, lang).notes;
+  const notes = readabilityOf(
+    diagnostic.metrics,
+    lang,
+    requireAnalysisLocale(diagnostic.meta.localeId).readability,
+  ).notes;
   const tables = diagnostic.metrics.tables;
   const [open, setOpen] = useState<MetricRowKey | null>(null);
 

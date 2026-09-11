@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDataView } from "../../src/locales/pt-BR/datasets/registry";
 import { nominalizationPass } from "../../src/locales/pt-BR/passes/nominalization";
-import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../../src/locales/pt-BR";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_NOMINALIZACAO } from "./nominalization-golden";
 import { formatRate, evaluateNominalization } from "./compute";

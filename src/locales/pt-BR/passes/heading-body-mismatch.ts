@@ -1,6 +1,7 @@
 import type { Block, PassFinding, Pass, Sentence } from "@/lucid/core/types";
 import type { NominalizationEntry } from "../datasets/types";
 import { normalizeNumber } from "../services/normalize-number";
+import type { PtConfig } from "../config";
 
 const CRITERION = "heading_body_mismatch";
 
@@ -32,7 +33,7 @@ function contentWords(
   return words;
 }
 
-export const headingBodyMismatchPass: Pass = {
+export const headingBodyMismatchPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "structural",
   requires: ["heading"],

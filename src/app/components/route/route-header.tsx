@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { metaFor } from "../../lib/criteria";
 import type { ReviewRoute } from "../../lib/review-route";
 import { useCopy } from "../../i18n/use-copy";
@@ -18,12 +19,13 @@ interface Props {
 
 export function RouteHeader({ route, onGo, onLeave, onOpen, compact = false }: Props) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const r = c.route;
   const open = route.open;
   if (open === null) return null;
 
   const step = open.step;
-  const label = metaFor(step.criterion, lang).label;
+  const label = metaFor(locale.id, step.criterion, lang).label;
   const stepDone = step.pending === 0;
   const stepWalked = step.count - step.pending;
   const routeWalked = route.reviewed + route.dismissed;
@@ -103,7 +105,7 @@ export function RouteHeader({ route, onGo, onLeave, onOpen, compact = false }: P
           <div className="mt-2.5 flex flex-wrap items-center gap-2 pl-7">
             {route.next !== null && (
               <Button variant="primary" onClick={() => onGo(route.next!.step.criterion)}>
-                {r.advance(route.next.index + 1, metaFor(route.next.step.criterion, lang).label)}
+                {r.advance(route.next.index + 1, metaFor(locale.id, route.next.step.criterion, lang).label)}
                 <ArrowRightIcon className="size-3.5" />
               </Button>
             )}
@@ -143,7 +145,7 @@ export function RouteHeader({ route, onGo, onLeave, onOpen, compact = false }: P
             </Button>
             {route.next !== null && (
               <span className="min-w-0 truncate text-[11.5px] text-ink-3">
-                {r.nextUp(route.next.index + 1, metaFor(route.next.step.criterion, lang).label)}
+                {r.nextUp(route.next.index + 1, metaFor(locale.id, route.next.step.criterion, lang).label)}
               </span>
             )}
           </div>

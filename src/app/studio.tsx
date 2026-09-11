@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
-  analyze,
   checkBriefing,
-  DEFAULT_CONFIG,
+  configDeviations,
   EMPTY_BRIEFING,
   isDefaultConfig,
   type Config,
@@ -13,6 +12,7 @@ import {
   type Span,
   type SpliceRefusal,
 } from "@/lucid";
+import { analysisLocale, DEFAULT_ANALYSIS_LOCALE_ID, isAnalysisLocaleId, type AnalysisLocaleId } from "./locale/active";
 import {
   acceptBaseline,
   baselineFile,
@@ -38,7 +38,7 @@ import { useFindingNavigation } from "./hooks/use-finding-navigation";
 import { useOccurrenceNavigation } from "./hooks/use-occurrence-navigation";
 import { useDocumentEdits } from "./hooks/use-document-edits";
 import { useReadingPosition } from "./hooks/use-reading-position";
-import { isProfileId, profileConfig, type ProfileId } from "./lib/profiles";
+import { isProfileAvailable, isProfileId, profileConfig, type ProfileId } from "./lib/profiles";
 import { useRevisionHistory } from "./hooks/use-revision-history";
 import { Masthead } from "./components/masthead";
 import { DocumentView, type Mode } from "./components/document-view";
@@ -49,8 +49,12 @@ import { ArrowDownIcon } from "./components/icons";
 import { ConfirmDialog } from "./components/ui/confirm-dialog";
 import { BaselineSaveDialog } from "./components/baseline-save-dialog";
 import { ReplaceDocumentDialog } from "./components/replace-document-dialog";
+import { LocaleSwitchDialog } from "./components/locale-switch-dialog";
+import { discardsWork, localeSwitchDiscard } from "./locale/switch";
 import { downloadFile } from "./components/export-menu/download-file";
 import { Button } from "./components/ui/button";
+import { AnalysisLocaleProvider } from "./locale/context";
+import { termKey, vocabularyTerms, withVocabularyTerms } from "./locale/vocabulary";
 
 type DocumentIntent =
   | { readonly kind: "file"; readonly file: File }
@@ -61,20 +65,30 @@ export function Studio() {
   const [restored] = useState(readWorkspace);
   const [mode, setMode] = useState<Mode>(restored?.mode ?? "audit");
   const [briefing, setBriefing] = useState<ReaderBriefing>(restored?.briefing ?? EMPTY_BRIEFING);
-  const [config, setConfig] = useState<Config>(restored?.config ?? DEFAULT_CONFIG);
-  const [profileId, setProfileId] = useState<ProfileId>(isProfileId(restored?.profileId) ? restored.profileId : "base");
+  const [localeId, setLocaleId] = useState<AnalysisLocaleId>(
+    isAnalysisLocaleId(restored?.localeId) ? restored.localeId : DEFAULT_ANALYSIS_LOCALE_ID,
+  );
+  const locale = useMemo(() => analysisLocale(localeId), [localeId]);
+  const [config, setConfig] = useState<Config>(() => restored?.config ?? locale.defaultConfig);
+  const [profileId, setProfileId] = useState<ProfileId>(() =>
+    isProfileId(restored?.profileId) && isProfileAvailable(restored.profileId, locale) ? restored.profileId : "base",
+  );
 
   const [openedStep, setGuidedStep] = useState<string | null>(restored?.guidedStep ?? null);
   const [baseline, setBaseline] = useState<Baseline | null>(restored?.baseline ?? null);
   const [baselineRefusal, setBaselineRefusal] = useState<BaselineRefusal | null>(null);
 
-  const chooseProfile = useCallback((id: ProfileId) => {
-    setProfileId(id);
-    setConfig(profileConfig(id));
-  }, []);
+  const chooseProfile = useCallback(
+    (id: ProfileId) => {
+      setProfileId(id);
+      setConfig(profileConfig(id, locale));
+    },
+    [locale],
+  );
   const [sheetOpen, setSheetOpen] = useState(false);
   const [goHomeOpen, setGoHomeOpen] = useState(false);
   const [pendingIntent, setPendingIntent] = useState<DocumentIntent | null>(null);
+  const [pendingLocale, setPendingLocale] = useState<AnalysisLocaleId | null>(null);
   const [saveBeforeReplacing, setSaveBeforeReplacing] = useState(false);
   const saveFailed = useSyncExternalStore(subscribeSaveStatus, getSaveFailed, () => false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -102,7 +116,7 @@ export function Studio() {
     openDocument: importDocumentFile,
     originalText,
     enterPastedDocument,
-  } = useDocumentSource(restored, config);
+  } = useDocumentSource(restored, config, locale);
 
   const {
     ledger,
@@ -112,7 +126,7 @@ export function Studio() {
     noteFreeEdit,
     closeTypingSession,
     reset: resetHistory,
-  } = useRevisionHistory(text, setText, isSettled, restored?.ledger);
+  } = useRevisionHistory(text, setText, isSettled, locale, restored?.ledger);
 
   const { excerpt: probeExcerpt, clear: clearProbeExcerpt } = useDocumentSelection(scrollRef);
 
@@ -156,11 +170,18 @@ export function Studio() {
 
   useEffect(() => {
     if (!isSettled) return;
-    if (isEmpty && ledger.length === 0 && briefing === EMPTY_BRIEFING && isDefaultConfig(config)) {
+    if (
+      isEmpty &&
+      ledger.length === 0 &&
+      briefing === EMPTY_BRIEFING &&
+      isDefaultConfig(config, locale.defaultConfig) &&
+      localeId === DEFAULT_ANALYSIS_LOCALE_ID
+    ) {
       clearWorkspace();
       return;
     }
     writeWorkspace({
+      localeId,
       text,
       originalText,
       blocks: rawBlocks,
@@ -177,6 +198,8 @@ export function Studio() {
   }, [
     isSettled,
     isEmpty,
+    localeId,
+    locale,
     text,
     originalText,
     rawBlocks,
@@ -217,9 +240,9 @@ export function Studio() {
   const rewriteTarget = useMemo(
     () =>
       selectedFinding && !isSafe(selectedFinding)
-        ? rewriteTargetAt(diagnostic.text, selectedFinding.span.start).span
+        ? rewriteTargetAt(diagnostic.text, selectedFinding.span.start, locale).span
         : null,
-    [selectedFinding, diagnostic],
+    [selectedFinding, diagnostic, locale],
   );
 
   const afterDocumentEntered = useCallback(() => {
@@ -235,6 +258,53 @@ export function Studio() {
     afterDocumentEntered();
     setMode("audit");
   }, [afterDocumentEntered]);
+
+  const localeDiscard = useMemo(
+    () =>
+      localeSwitchDiscard({
+        ledger,
+        marks,
+        hasBaseline: baseline !== null,
+        vocabulary: vocabularyTerms(config, locale),
+        profileId,
+        adjustments: configDeviations(config, profileConfig(profileId, locale)).length,
+      }),
+    [ledger, marks, baseline, config, locale, profileId],
+  );
+
+  const switchAnalysisLocale = useCallback(
+    (next: AnalysisLocaleId) => {
+      clearSelection();
+      clearFilters();
+      setGuidedStep(null);
+      resetHistory();
+      resetMarks();
+      setBaseline(null);
+      setBaselineRefusal(null);
+      setProfileId("base");
+      setConfig(analysisLocale(next).defaultConfig);
+      setLocaleId(next);
+    },
+    [clearSelection, clearFilters, resetHistory, resetMarks],
+  );
+
+  const changeAnalysisLocale = useCallback(
+    (next: AnalysisLocaleId) => {
+      if (next === localeId) return;
+      if (discardsWork(localeDiscard)) {
+        setPendingLocale(next);
+        return;
+      }
+      switchAnalysisLocale(next);
+    },
+    [localeId, localeDiscard, switchAnalysisLocale],
+  );
+
+  const confirmLocaleSwitch = useCallback(() => {
+    const next = pendingLocale;
+    setPendingLocale(null);
+    if (next !== null) switchAnalysisLocale(next);
+  }, [pendingLocale, switchAnalysisLocale]);
 
   const loadExample = useCallback(() => {
     loadExampleDocument();
@@ -294,7 +364,7 @@ export function Studio() {
         profileId,
         config,
         marks,
-        vocabulary: config.vocabulario.terms,
+        vocabulary: vocabularyTerms(config, locale),
       });
       downloadFile(file.name, file.content, BASELINE_MIME);
 
@@ -303,7 +373,7 @@ export function Studio() {
       setPendingIntent(null);
       if (intent !== null) void replaceDocument(intent);
     },
-    [diagnostic, rawBlocks, findings, profileId, config, marks, pendingIntent, replaceDocument],
+    [diagnostic, rawBlocks, findings, profileId, config, marks, pendingIntent, replaceDocument, locale],
   );
 
   const discardAndGoHome = useCallback(() => {
@@ -332,13 +402,13 @@ export function Studio() {
   );
 
   const originalFindings = useMemo(
-    () => (originalText === null || originalText.trim() === "" ? null : analyze(originalText, config).findings),
-    [originalText, config],
+    () => (originalText === null || originalText.trim() === "" ? null : locale.analyze(originalText, config).findings),
+    [originalText, config, locale],
   );
 
   const comparison = useMemo(
-    () => (baseline === null ? null : compareToBaseline(baseline, diagnostic, config)),
-    [baseline, diagnostic, config],
+    () => (baseline === null ? null : compareToBaseline(baseline, diagnostic, config, locale)),
+    [baseline, diagnostic, config, locale],
   );
 
   const attachBaseline = useCallback(
@@ -353,17 +423,15 @@ export function Studio() {
       const incoming = parsed.baseline.vocabulary;
       if (incoming.length > 0) {
         setConfig((current) => {
-          const known = new Set(current.vocabulario.terms.map((t) => t.term.toLocaleLowerCase("pt-BR")));
-          const added = incoming.filter((t) => !known.has(t.term.toLocaleLowerCase("pt-BR")));
+          const existing = vocabularyTerms(current, locale);
+          const known = new Set(existing.map((t) => termKey(t.term, locale)));
+          const added = incoming.filter((t) => !known.has(termKey(t.term, locale)));
           if (added.length === 0) return current;
-          return {
-            ...current,
-            vocabulario: { ...current.vocabulario, terms: [...current.vocabulario.terms, ...added] },
-          };
+          return withVocabularyTerms(current, locale, [...existing, ...added]);
         });
       }
     },
-    [diagnostic, setConfig],
+    [diagnostic, setConfig, locale],
   );
 
   const detachBaseline = useCallback(() => {
@@ -538,6 +606,8 @@ export function Studio() {
     highlights: { hidden: hiddenHighlights, onToggle: toggleHighlights },
     edits: { onApplyRewrite: applyRewrite, onManualEdit: applyManualEdit, onApplyCuratedSwap: applyCuratedSwap },
     settings: {
+      locale,
+      onLocaleChange: changeAnalysisLocale,
       briefing,
       briefingCheck,
       onBriefingChange: setBriefing,
@@ -554,117 +624,128 @@ export function Studio() {
     },
   };
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-desk">
-      <Masthead onGoHome={goHome} />
-      {importError !== null && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
-        >
-          <span>{c.studio.importRefusal[importError]}</span>
-          <Button variant="ghost" size="sm" onClick={dismissImportError}>
-            {c.common.close}
-          </Button>
-        </div>
-      )}
-
-      {saveFailed && (
-        <div
-          role="alert"
-          className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
-        >
-          <span>{c.studio.saveFailed}</span>
-        </div>
-      )}
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {isEmpty && mode === "audit" ? (
-          <Welcome
-            onWrite={() => setMode("edit")}
-            onOpenDocument={openDocument}
-            onLoadExample={loadExample}
-            importing={importing}
-          />
-        ) : (
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
-            <DocumentView
-              ref={scrollRef}
-              mode={mode}
-              onChangeMode={changeMode}
-              importing={importing}
-              text={text}
-              diagnostic={diagnostic}
-              blocks={blocks}
-              selectedId={selectedId}
-              flashId={flashId}
-              hiddenHighlights={hiddenHighlights}
-              rewriteTarget={rewriteTarget}
-              occurrences={occurrences.spans}
-              activeOccurrence={occurrences.active}
-              onChangeText={onFreeTypeText}
-              onLeaveDraft={closeTypingSession}
-              onPasteDocument={onPasteDocument}
-              onSelectFinding={selectFinding}
-              onOpenDocument={openDocument}
-            />
-            <DocumentNotices
-              refusedEdit={refusedEdit}
-              canUndo={canUndo}
-              changeKey={ledger.length}
-              onAcceptPlain={acceptAsPlainText}
-              onDiscardRefused={discardRefusedEdit}
-              onUndo={undoChange}
-            />
+    <AnalysisLocaleProvider locale={locale}>
+      <div className="flex h-dvh flex-col overflow-hidden bg-desk">
+        <Masthead onGoHome={goHome} />
+        {importError !== null && (
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 border-b border-sev-error/40 bg-sev-error/10 px-6 py-2 text-[12.5px] text-ink-1"
+          >
+            <span>{c.studio.importRefusal[importError]}</span>
+            <Button variant="ghost" size="sm" onClick={dismissImportError}>
+              {c.common.close}
+            </Button>
           </div>
         )}
 
-        {!isEmpty && <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />}
-      </div>
+        {saveFailed && (
+          <div
+            role="alert"
+            className="flex items-center justify-between gap-3 border-b border-sev-warning/40 bg-sev-warning/10 px-6 py-2 text-[12.5px] text-ink-1"
+          >
+            <span>{c.studio.saveFailed}</span>
+          </div>
+        )}
 
-      {mode === "audit" && findings.length > 0 && !sheetOpen && (
-        <Button
-          variant="primary"
-          size="xl"
-          shape="pill"
-          onClick={revealSheet}
-          className="fixed bottom-5 right-5 z-30 shadow-(--shadow-pop) lg:hidden"
-        >
-          {c.studio.openAudit(pendingCount)}
-        </Button>
-      )}
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          {isEmpty && mode === "audit" ? (
+            <Welcome
+              onWrite={() => setMode("edit")}
+              onOpenDocument={openDocument}
+              onLoadExample={loadExample}
+              importing={importing}
+            />
+          ) : (
+            <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+              <DocumentView
+                ref={scrollRef}
+                mode={mode}
+                onChangeMode={changeMode}
+                importing={importing}
+                text={text}
+                diagnostic={diagnostic}
+                blocks={blocks}
+                selectedId={selectedId}
+                flashId={flashId}
+                hiddenHighlights={hiddenHighlights}
+                rewriteTarget={rewriteTarget}
+                occurrences={occurrences.spans}
+                activeOccurrence={occurrences.active}
+                onChangeText={onFreeTypeText}
+                onLeaveDraft={closeTypingSession}
+                onPasteDocument={onPasteDocument}
+                onSelectFinding={selectFinding}
+                onOpenDocument={openDocument}
+              />
+              <DocumentNotices
+                refusedEdit={refusedEdit}
+                canUndo={canUndo}
+                changeKey={ledger.length}
+                onAcceptPlain={acceptAsPlainText}
+                onDiscardRefused={discardRefusedEdit}
+                onUndo={undoChange}
+              />
+            </div>
+          )}
 
-      {mode === "audit" && sheetOpen && (
-        <RevisionSheet
-          {...panelProps}
-          onDismiss={() => {
-            setSheetOpen(false);
-            clearSelection();
-          }}
+          {!isEmpty && (
+            <AuditRail {...panelProps} probeExcerpt={probeExcerpt} onClearProbeExcerpt={clearProbeExcerpt} />
+          )}
+        </div>
+
+        {mode === "audit" && findings.length > 0 && !sheetOpen && (
+          <Button
+            variant="primary"
+            size="xl"
+            shape="pill"
+            onClick={revealSheet}
+            className="fixed bottom-5 right-5 z-30 shadow-(--shadow-pop) lg:hidden"
+          >
+            {c.studio.openAudit(pendingCount)}
+          </Button>
+        )}
+
+        {mode === "audit" && sheetOpen && (
+          <RevisionSheet
+            {...panelProps}
+            onDismiss={() => {
+              setSheetOpen(false);
+              clearSelection();
+            }}
+          />
+        )}
+
+        <ReplaceDocumentDialog
+          work={pendingIntent === null || saveBeforeReplacing ? null : workAtRisk}
+          onSave={() => setSaveBeforeReplacing(true)}
+          onDiscard={discardAndReplace}
+          onCancel={cancelDocumentChange}
         />
-      )}
 
-      <ReplaceDocumentDialog
-        work={pendingIntent === null || saveBeforeReplacing ? null : workAtRisk}
-        onSave={() => setSaveBeforeReplacing(true)}
-        onDiscard={discardAndReplace}
-        onCancel={cancelDocumentChange}
-      />
+        <LocaleSwitchDialog
+          target={pendingLocale}
+          discard={localeDiscard}
+          onConfirm={confirmLocaleSwitch}
+          onCancel={() => setPendingLocale(null)}
+        />
 
-      <BaselineSaveDialog
-        open={saveBeforeReplacing}
-        onOpenChange={(next) => setSaveBeforeReplacing(next)}
-        onSave={saveThenReplace}
-      />
+        <BaselineSaveDialog
+          open={saveBeforeReplacing}
+          onOpenChange={(next) => setSaveBeforeReplacing(next)}
+          onSave={saveThenReplace}
+        />
 
-      <ConfirmDialog
-        open={goHomeOpen}
-        onOpenChange={setGoHomeOpen}
-        title={c.studio.goHome.title}
-        body={c.studio.goHome.body}
-        confirmLabel={c.studio.goHome.confirm}
-        onConfirm={discardAndGoHome}
-      />
-    </div>
+        <ConfirmDialog
+          open={goHomeOpen}
+          onOpenChange={setGoHomeOpen}
+          title={c.studio.goHome.title}
+          body={c.studio.goHome.body}
+          confirmLabel={c.studio.goHome.confirm}
+          onConfirm={discardAndGoHome}
+        />
+      </div>
+    </AnalysisLocaleProvider>
   );
 }
 

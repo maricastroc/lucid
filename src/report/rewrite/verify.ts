@@ -364,8 +364,8 @@ export async function verifyRewrite(
   }
 
   const metrics: MetricsDelta = {
-    fleschPtBefore: before.metrics.fleschPt,
-    fleschPtAfter: after.metrics.fleschPt,
+    readabilityBefore: before.metrics.readability,
+    readabilityAfter: after.metrics.readability,
     wordsBefore: before.metrics.words,
     wordsAfter: after.metrics.words,
   };

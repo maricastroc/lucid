@@ -1,4 +1,5 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "gerundismo";
 
@@ -38,7 +39,7 @@ function isGerund(token: Token): boolean {
   return GERUND_SUFFIXES.some((suffix) => token.lower.endsWith(suffix));
 }
 
-export const gerundismoPass: Pass = {
+export const gerundismoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
 

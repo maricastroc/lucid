@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  analyze,
-  analyzeDocument,
-  buildCoverageReport,
-  buildDocument,
-  buildStructuredDocument,
-  coverageReport,
-  ptDocumentServices,
-} from "../src/lucid";
+import { buildCoverageReport, buildStructuredDocument } from "../src/lucid";
+import { analyze, analyzeDocument, buildDocument, coverageReport, ptDocumentServices } from "../src/locales/pt-BR";
 import type { ClauseTree, Finding, RawBlock } from "../src/lucid";
 import { hasStructuralMarkers } from "../src/lucid/core/document/text-blocks";
 import { metaFor } from "../src/app/lib/criteria";
@@ -153,7 +146,9 @@ describe("the coverage map answers for a document, not only for the instrument (
         limit: { kind: "unreachable", reason: "..." },
       },
     ] as unknown as ClauseTree["nodes"];
-    expect(() => buildCoverageReport({ standard: "T", transcription: "s", exhaustive: false, nodes }, {})).toThrow();
+    expect(() =>
+      buildCoverageReport({ standard: "T", referenceName: "T", transcription: "s", exhaustive: false, nodes }, {}),
+    ).toThrow();
   });
 });
 
@@ -161,7 +156,7 @@ describe("the interface says it too, in both languages (ADR-084)", () => {
   it("every criterion that can go silent has its own label — metaFor falls back to jargon otherwise", () => {
     for (const lang of ["pt-BR", "en"] as const) {
       for (const criterion of REQUIRES_DECLARED_STRUCTURE) {
-        expect(metaFor(criterion, lang).ruleId, `${criterion} @ ${lang}`).toBe(criterion);
+        expect(metaFor("pt-BR", criterion, lang).ruleId, `${criterion} @ ${lang}`).toBe(criterion);
       }
     }
   });

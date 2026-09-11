@@ -61,16 +61,9 @@ export interface NominalizationEntry {
   safeForSuggestion: boolean;
 }
 
-export interface PhraseEntry {
-  phrase: string;
-  plain: string | null;
-}
-export interface CompiledPhrase {
-  words: readonly string[];
-  entry: PhraseEntry;
-}
+import type { PhrasePrepared } from "../../_shared/phrase-match";
 
-export type PhrasePrepared = ReadonlyMap<string, readonly CompiledPhrase[]>;
+export type { CompiledPhrase, PhraseEntry, PhrasePrepared } from "../../_shared/phrase-match";
 
 export interface DataTypes {
   "abreviacoes.pt": AbbreviationLexicon;

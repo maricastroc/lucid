@@ -6,185 +6,49 @@ export interface OrgTerm {
   readonly reason: string;
 }
 
-export interface Config {
-  sentenceLength: {
-    warnAbove: number;
-  };
-  passiveVoice: {
-    enabled: boolean;
-  };
-  passivaSintetica: {
-    enabled: boolean;
-  };
-  nominalization: {
-    enabled: boolean;
-  };
-  nominalizacaoEncadeada: {
-    enabled: boolean;
-    minPorFrase: number;
-  };
-  jargon: {
-    enabled: boolean;
-    suggestFromGlossary: boolean;
-  };
-  siglaSemExpansao: {
-    enabled: boolean;
-  };
-  maisQuePerfeito: {
-    enabled: boolean;
-  };
-  gerundismo: {
-    enabled: boolean;
-  };
-  adverbioMente: {
-    enabled: boolean;
-    minPorFrase: number;
-  };
-  adverbiosVagos: {
-    enabled: boolean;
-  };
-  redundancia: {
-    enabled: boolean;
-  };
-  perifraseInflada: {
-    enabled: boolean;
-  };
-  paragraphLength: {
-    enabled: boolean;
-    maxSentences: number;
-  };
-  proseEnumeration: {
-    enabled: boolean;
-    minMarkers: number;
-  };
-  mesoclise: {
-    enabled: boolean;
-  };
-  duplaNegacao: {
-    enabled: boolean;
-  };
-  subordinacao: {
-    enabled: boolean;
-    minPorFrase: number;
-  };
-  leitorTerceiraPessoa: {
-    enabled: boolean;
-  };
-  hierarquiaTitulos: {
-    enabled: boolean;
-  };
-  longHeading: {
-    enabled: boolean;
-    maxWords: number;
-  };
-  singleItemList: {
-    enabled: boolean;
-  };
-  headingBodyMismatch: {
-    enabled: boolean;
-    minBodyContentWords: number;
-  };
-  vocabulario: {
-    enabled: boolean;
-    terms: readonly OrgTerm[];
-  };
-  metrics: {
-    decimalPlaces: number;
-  };
-}
-
-export const DEFAULT_CONFIG: Config = {
-  sentenceLength: {
-    warnAbove: 20,
-  },
-  passiveVoice: {
-    enabled: true,
-  },
-  passivaSintetica: {
-    enabled: true,
-  },
-  nominalization: {
-    enabled: true,
-  },
-  nominalizacaoEncadeada: {
-    enabled: true,
-    minPorFrase: 3,
-  },
-  jargon: {
-    enabled: true,
-    suggestFromGlossary: true,
-  },
-  siglaSemExpansao: {
-    enabled: true,
-  },
-  maisQuePerfeito: {
-    enabled: true,
-  },
-  gerundismo: {
-    enabled: true,
-  },
-  adverbioMente: {
-    enabled: false,
-    minPorFrase: 3,
-  },
-  adverbiosVagos: {
-    enabled: true,
-  },
-  redundancia: {
-    enabled: true,
-  },
-  perifraseInflada: {
-    enabled: true,
-  },
-  paragraphLength: {
-    enabled: true,
-    maxSentences: 5,
-  },
-  proseEnumeration: {
-    enabled: true,
-    minMarkers: 3,
-  },
-  mesoclise: {
-    enabled: true,
-  },
-  duplaNegacao: {
-    enabled: true,
-  },
-  subordinacao: {
-    enabled: true,
-    minPorFrase: 3,
-  },
-  leitorTerceiraPessoa: {
-    enabled: true,
-  },
-  hierarquiaTitulos: {
-    enabled: true,
-  },
-  longHeading: {
-    enabled: true,
-    maxWords: 12,
-  },
-  singleItemList: {
-    enabled: true,
-  },
-  headingBodyMismatch: {
-    enabled: true,
-    minBodyContentWords: 6,
-  },
-  vocabulario: {
-    enabled: true,
-    terms: [],
-  },
-  metrics: {
-    decimalPlaces: 1,
-  },
-};
-
-export function hashConfig(config: Config): string {
-  return stableHash(config);
-}
-
 export type ConfigValue = number | boolean;
+
+export type ConfigField = ConfigValue | readonly OrgTerm[];
+
+export type ConfigSection = Readonly<Record<string, ConfigField>>;
+
+export interface Config {
+  readonly metrics: { readonly decimalPlaces: number };
+}
+
+export type ThresholdStatus = "provisional" | "product-parameter";
+
+export interface ThresholdBasis {
+  readonly status: ThresholdStatus;
+  readonly basis: string;
+}
+
+export type ConfigSectionRole = "organization-vocabulary";
+
+export interface ConfigSectionSchema {
+  readonly criterion: string | null;
+  readonly role?: ConfigSectionRole;
+  readonly thresholds?: Readonly<Record<string, ThresholdBasis>>;
+}
+
+export type ConfigSchema = Readonly<Record<string, ConfigSectionSchema>>;
+
+export function configSections(config: Config): Readonly<Record<string, ConfigSection>> {
+  return config as unknown as Readonly<Record<string, ConfigSection>>;
+}
+
+export function pickSections(config: Config, sections: readonly string[]): Record<string, unknown> {
+  const record = configSections(config);
+  const picked: Record<string, unknown> = {};
+  for (const section of sections) {
+    if (section in record) picked[section] = record[section];
+  }
+  return picked;
+}
+
+export function hashConfig(config: Config, sections?: readonly string[]): string {
+  return stableHash(sections === undefined ? config : pickSections(config, sections));
+}
 
 export interface ConfigDeviation {
   readonly section: string;
@@ -193,10 +57,10 @@ export interface ConfigDeviation {
   readonly fallback: ConfigValue;
 }
 
-export function configDeviations(config: Config): ConfigDeviation[] {
+export function configDeviations(config: Config, baseConfig: Config): ConfigDeviation[] {
   const deviations: ConfigDeviation[] = [];
-  const base = DEFAULT_CONFIG as unknown as Record<string, Record<string, ConfigValue>>;
-  const current = config as unknown as Record<string, Record<string, ConfigValue>>;
+  const base = configSections(baseConfig);
+  const current = configSections(config);
 
   for (const section of Object.keys(base)) {
     const defaults = base[section];
@@ -204,16 +68,18 @@ export function configDeviations(config: Config): ConfigDeviation[] {
     if (values === undefined) continue;
     for (const field of Object.keys(defaults)) {
       const value = values[field];
+      const fallback = defaults[field];
 
       if (typeof value !== "number" && typeof value !== "boolean") continue;
-      if (value === defaults[field]) continue;
-      deviations.push({ section, field, value, fallback: defaults[field] });
+      if (typeof fallback !== "number" && typeof fallback !== "boolean") continue;
+      if (value === fallback) continue;
+      deviations.push({ section, field, value, fallback });
     }
   }
 
   return deviations;
 }
 
-export function isDefaultConfig(config: Config): boolean {
-  return configDeviations(config).length === 0;
+export function isDefaultConfig(config: Config, baseConfig: Config): boolean {
+  return configDeviations(config, baseConfig).length === 0;
 }

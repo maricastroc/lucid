@@ -1,18 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { analyze, CRITERION_IDS } from "../src/lucid";
-import type { CriterionId } from "../src/lucid";
+import { analyze, CRITERION_IDS } from "../src/locales/pt-BR";
+import type { CriterionId } from "../src/locales/pt-BR";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
 import { CRITERION_TAXONOMY } from "../src/locales/pt-BR/taxonomy";
-import { CRITERION_META, CRITERION_ORDER } from "../src/app/lib/criteria";
+import { CRITERION_ORDER } from "../src/app/lib/criteria";
+import { presentationOf } from "../src/app/presentation/registry";
+import { ANALYSIS_LOCALE_IDS } from "../src/app/locale/active";
+import { localeEnUS } from "../src/locales/en-US";
 import { localePtBR, ptDocumentServices } from "../src/locales/pt-BR";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { buildStructuredDocument } from "../src/lucid/core/document/structured";
 import type { Document, Pass, PassContext } from "../src/lucid/core/types";
 import { buildDocument } from "./support/pt";
+import { EN_CRITERION_IDS } from "../src/locales/en-US/criteria";
 
 function sorted(values: readonly string[]): string[] {
   return [...values].sort();
 }
+
+const UI_CRITERIA = sorted([...new Set<string>([...CRITERION_IDS, ...EN_CRITERION_IDS])]);
 
 describe("criterion registry (ADR-029)", () => {
   it("CRITERION_IDS has no duplicates", () => {
@@ -26,12 +32,29 @@ describe("criterion registry (ADR-029)", () => {
     expect(fromPasses).toEqual(sorted(CRITERION_IDS));
   });
 
-  it("CRITERION_META covers exactly the CRITERION_IDS (presentation completeness)", () => {
-    expect(sorted(Object.keys(CRITERION_META))).toEqual(sorted(CRITERION_IDS));
+  it("every analysis locale has its own presentation, covering exactly its own catalogue", () => {
+    const catalogues = { "pt-BR": localePtBR.criteria.ids, "en-US": localeEnUS.criteria.ids };
+    for (const id of ANALYSIS_LOCALE_IDS) {
+      const presentation = presentationOf(id);
+      expect(presentation, id).not.toBeNull();
+      expect(sorted(presentation!.ids), id).toEqual(sorted(catalogues[id]));
+      for (const lang of ["pt-BR", "en"] as const) {
+        expect(sorted(Object.keys(presentation!.meta[lang])), `${id} meta @ ${lang}`).toEqual(sorted(catalogues[id]));
+        expect(sorted(Object.keys(presentation!.narrative[lang])), `${id} narrative @ ${lang}`).toEqual(
+          sorted(catalogues[id]),
+        );
+      }
+    }
   });
 
-  it("CRITERION_ORDER is a permutation of CRITERION_IDS (every criterion is ordered, none left over)", () => {
-    expect(sorted(CRITERION_ORDER)).toEqual(sorted(CRITERION_IDS));
+  it("no presentation answers for a criterion of another catalogue", () => {
+    expect(presentationOf("en-US")!.ids).not.toContain("mesoclise");
+    expect(presentationOf("pt-BR")!.ids).not.toContain("organization_vocabulary");
+    expect(presentationOf("fr-FR")).toBeNull();
+  });
+
+  it("CRITERION_ORDER is a permutation of that union (every criterion is ordered, none left over)", () => {
+    expect(sorted(CRITERION_ORDER)).toEqual(UI_CRITERIA);
   });
 });
 

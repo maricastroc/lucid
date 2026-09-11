@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyzeDocument, buildStructuredDocument } from "../src/lucid";
+import { buildStructuredDocument } from "../src/lucid";
+import { analyzeDocument } from "../src/locales/pt-BR";
 import { htmlToRawBlocks } from "../src/importers/html-blocks";
 import { ptDocumentServices } from "../src/locales/pt-BR";
 

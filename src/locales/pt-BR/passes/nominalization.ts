@@ -1,6 +1,7 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { LightVerbForm, NominalizationEntry } from "../datasets/types";
 import { getPrepared } from "../datasets/registry";
+import type { PtConfig } from "../config";
 
 const CRITERION = "nominalization";
 
@@ -30,7 +31,7 @@ function buildJustification(safeMapping: boolean, baseVerb: string): string {
   );
 }
 
-export const nominalizationPass: Pass = {
+export const nominalizationPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["verbos-leves.pt", "nominalizacoes.pt"],

@@ -3,6 +3,8 @@
 import type { VerifiedRewrite } from "@/report/rewrite";
 import { useCopy } from "../../i18n/use-copy";
 import { Button } from "../ui/button";
+import { useAnalysisLocale } from "../../locale/context";
+import { engineOutputSuffix } from "../../locale/language";
 
 export function RewriteProposalCard({
   result,
@@ -13,13 +15,14 @@ export function RewriteProposalCard({
   currentOriginal: string;
   onApplyRewrite: () => void;
 }) {
-  const { c } = useCopy();
+  const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const { proposal, verification } = result;
   const blocked = verification.hasBlockingFailure;
 
   const stale = proposal.original !== currentOriginal;
-  const { fleschPtBefore, fleschPtAfter } = verification.metrics;
-  const dFlesch = fleschPtBefore === null || fleschPtAfter === null ? null : fleschPtAfter - fleschPtBefore;
+  const { readabilityBefore, readabilityAfter } = verification.metrics;
+  const dFlesch = readabilityBefore === null || readabilityAfter === null ? null : readabilityAfter - readabilityBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
   const passed = verification.proofs.filter((p) => p.passed).length;
 
@@ -59,7 +62,7 @@ export function RewriteProposalCard({
       <div className="px-3 py-3">
         <p className="u-sublabel mb-2 text-ink-3">
           {c.note.proofLabel}
-          {c.common.engineOutputSuffix}
+          {engineOutputSuffix(lang, locale.id)}
         </p>
         <ul className="flex flex-col gap-1.5">
           {verification.proofs.map((p) => (
@@ -72,7 +75,7 @@ export function RewriteProposalCard({
         <div className="border-t border-rule-1 px-3 py-3">
           <p className="u-sublabel mb-2 text-ink-3">
             {c.note.signalLabel}
-            {c.common.engineOutputSuffix}
+            {engineOutputSuffix(lang, locale.id)}
           </p>
           <ul className="flex flex-col gap-1.5">
             {verification.signals.map((s) => (

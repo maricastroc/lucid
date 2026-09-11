@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_CONFIG } from "@/lucid/core/config";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
 import { createDataView } from "@/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "@/locales/pt-BR/datasets/registry";
 import { siglaSemExpansaoPass } from "@/locales/pt-BR/passes/sigla-sem-expansao";

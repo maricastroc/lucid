@@ -1,6 +1,7 @@
 import type { Diagnostic } from "@/lucid";
 import { copyFor } from "../i18n/copy";
 import type { UiLang } from "../i18n/types";
+import { requireAnalysisLocale } from "../locale/active";
 import { readabilityOf } from "./readability";
 
 export const METRIC_ROW_KEYS = [
@@ -27,9 +28,15 @@ const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(
 
 export function metricRows(diagnostic: Diagnostic, lang: UiLang): readonly MetricRow[] {
   const o = copyFor(lang).overview;
+  const unavailable = copyFor(lang).readability.unavailable;
   const m = diagnostic.metrics;
   const co = m.cohesion;
-  const readability = readabilityOf(m, lang);
+  const locale = requireAnalysisLocale(diagnostic.meta.localeId);
+  const readability = readabilityOf(m, lang, locale.readability);
+  const cohesionRow = (key: MetricRowKey, label: string, pick: (c: NonNullable<typeof co>) => number): MetricRow =>
+    co === null
+      ? { key, label, value: "—", qualifier: unavailable, descriptor: true }
+      : { key, label, value: fmt(pick(co)), descriptor: true };
 
   return [
     { key: "words", label: o.metricWords, value: fmt(m.words), descriptor: false },
@@ -47,13 +54,8 @@ export function metricRows(diagnostic: Diagnostic, lang: UiLang): readonly Metri
       qualifier: readability.qualifier,
       descriptor: false,
     },
-    {
-      key: "referentialCohesion",
-      label: o.metricReferentialCohesion,
-      value: fmt(co.referentialOverlap),
-      descriptor: true,
-    },
-    { key: "adjacentGap", label: o.metricAdjacentGap, value: fmt(co.adjacentGapRatio), descriptor: true },
-    { key: "connectives", label: o.metricConnectives, value: fmt(co.connectivesPer100Words), descriptor: true },
+    cohesionRow("referentialCohesion", o.metricReferentialCohesion, (c) => c.referentialOverlap),
+    cohesionRow("adjacentGap", o.metricAdjacentGap, (c) => c.adjacentGapRatio),
+    cohesionRow("connectives", o.metricConnectives, (c) => c.connectivesPer100Words),
   ];
 }

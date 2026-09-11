@@ -1,13 +1,5 @@
-import {
-  analyze,
-  buildDocument,
-  buildStructuredDocument,
-  ptDocumentServices,
-  spliceStructuredDocument,
-  toRawBlocks,
-  type Document,
-  type RawBlock,
-} from "@/lucid";
+import { buildStructuredDocument, spliceStructuredDocument, toRawBlocks, type Document, type RawBlock } from "@/lucid";
+import { analyze, buildDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { applyProposal, totalBurden, verifyRewrite, type RewriteVerification } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { fidelityOf, styleOf, type FidelityReport, type StyleReport } from "./fidelity";

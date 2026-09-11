@@ -1,13 +1,15 @@
 "use client";
 
-import { isCriterionId, type Finding, type Span } from "@/lucid";
+import { type Finding, type Span } from "@/lucid";
 import type { AgentDeclaration, RewriteProposal } from "@/report/rewrite";
 import { buildConfidence } from "../../lib/narrative";
+import { humanLeadFor } from "../../presentation/registry";
 import { useCopy } from "../../i18n/use-copy";
 import { PenNibIcon } from "../icons";
 import { Guidance } from "../revision-note-guidance";
 import { AiRewritePanel } from "./ai-rewrite-panel";
 import { Disclosure } from "./note-disclosure";
+import { useAnalysisLocale } from "../../locale/context";
 
 export function HumanDecision({
   finding,
@@ -25,8 +27,9 @@ export function HumanDecision({
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const { c, lang } = useCopy();
-  const rationale = buildConfidence(finding, lang).rationale;
-  const humanLead = isCriterionId(finding.criterion) ? c.note.humanLeadByCriterion[finding.criterion] : undefined;
+  const locale = useAnalysisLocale();
+  const rationale = buildConfidence(finding, locale.id, lang).rationale;
+  const humanLead = humanLeadFor(locale.id, finding.criterion, lang);
   return (
     <div className="overflow-hidden rounded-xl border border-human-line border-l-[3px] border-l-human bg-human-weak">
       <div className="flex items-center gap-2 px-3 pt-3.5 text-[12.5px] font-semibold text-human">
@@ -48,7 +51,11 @@ export function HumanDecision({
           </div>
         </Disclosure>
 
-        <AiRewritePanel finding={finding} source={source} declaration={declaration} onApplyRewrite={onApplyRewrite} />
+        {locale.rewriteAvailable ? (
+          <AiRewritePanel finding={finding} source={source} declaration={declaration} onApplyRewrite={onApplyRewrite} />
+        ) : (
+          <p className="mt-4 text-[11.5px] leading-relaxed text-ink-3">{c.note.aiUnavailableForLocale}</p>
+        )}
       </div>
     </div>
   );

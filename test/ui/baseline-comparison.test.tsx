@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, DEFAULT_CONFIG } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
+import { analyze } from "@/locales/pt-BR";
 import { buildBaseline, serializeBaseline } from "@/app/lib/baseline";
 import { EMPTY_MARKS, withMark, withNote } from "@/app/lib/review-marks";
 import { readWorkspace } from "@/app/lib/workspace";

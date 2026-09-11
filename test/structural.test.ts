@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { analyze, type ParagraphBlock } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { type ParagraphBlock } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { buildDocument } from "./support/pt";
 
 const paragraphsOf = (text: string): ParagraphBlock[] =>

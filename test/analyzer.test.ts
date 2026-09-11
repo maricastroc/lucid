@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { analyze, sortFindings } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { sortFindings } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { buildDocument } from "./support/pt";
 import { runMetrics } from "./support/pt";
-import type { Config } from "../src/lucid/core/config";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
 
 describe("analyze — empty document", () => {
@@ -44,7 +45,7 @@ describe("analyze — empty document", () => {
       totalFindings: 0,
     });
     expect(diagnostic.metrics).toEqual({
-      fleschPt: null,
+      readability: null,
       words: 0,
       sentences: 0,
       syllables: 0,

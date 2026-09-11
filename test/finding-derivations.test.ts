@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { analyze, CRITERION_IDS } from "../src/lucid";
+import { analyze, CRITERION_IDS } from "../src/locales/pt-BR";
 import { CRITERION_ORDER } from "../src/app/lib/criteria";
 import { cleanCriteria, hiddenHighlightCount, occurrenceCount, type FindingGroup } from "../src/app/lib/finding-query";
+import { analyzeWithLocale } from "../src/lucid";
+import { EN_CRITERION_IDS, localeEnUS } from "../src/locales/en-US";
 
 const WITH_FINDINGS = "O pedido foi indeferido pela comissão por falta dos documentos supracitados.";
 const WITHOUT_FINDINGS = "Você tem dez dias para recorrer.";
@@ -46,6 +48,21 @@ describe("cleanCriteria — the criteria that ran and found nothing", () => {
 
   it("an empty document still lists every criterion — nothing ran, nothing found", () => {
     expect(cleanCriteria(analyze(""))).toHaveLength(CRITERION_IDS.length);
+  });
+
+  it("lists only the criteria of the locale that produced the diagnostic", () => {
+    const english = analyzeWithLocale("Send the form to us.", localeEnUS);
+    const clean = cleanCriteria(english);
+    expect([...clean].sort()).toEqual([...EN_CRITERION_IDS].sort());
+    for (const criterion of ["mesoclise", "gerundismo", "passiva_sintetica", "salto_de_nivel_titulo"]) {
+      expect(clean).not.toContain(criterion);
+    }
+  });
+
+  it("and a pt-BR diagnostic never lists an en-US-only criterion", () => {
+    const clean = cleanCriteria(analyze(WITHOUT_FINDINGS));
+    expect(clean).not.toContain("heading_level_skip");
+    expect(clean).not.toContain("organization_vocabulary");
   });
 });
 

@@ -1,5 +1,6 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
+import type { PtConfig } from "../config";
 
 const CRITERION = "passive_voice";
 
@@ -333,7 +334,7 @@ function buildJustification(eventiveness: Eventiveness, agentTruncated: boolean)
   );
 }
 
-export const passiveVoicePass: Pass = {
+export const passiveVoicePass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: [

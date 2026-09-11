@@ -1,4 +1,4 @@
-import { isCriterionId, type CriterionId } from "@/lucid";
+import { isCriterionId, type CriterionId } from "@/locales/pt-BR";
 
 export type OutputFormat = "text" | "json";
 export type FailOn = "never" | "info" | "warning" | "error";
@@ -87,6 +87,9 @@ USO
 
   Aceita .txt, .md, .docx e .pdf. Um PDF não declara título nem lista: tudo
   entra como parágrafo, e os critérios de estrutura ficam sem objeto.
+
+  Analisa em pt-BR. O catálogo en-US é experimental e existe só no Studio;
+  esta CLI não tem opção de idioma.
 
 OPÇÕES
   --format text|json     formato da saída (padrão: text)

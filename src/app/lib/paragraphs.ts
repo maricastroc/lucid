@@ -1,12 +1,17 @@
-import { sentenceSpanAt, type Span } from "@/lucid";
+import { type Span } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 
 const RE_BLANK_LINE = /\n[ \t]*\n/g;
 
 export type RewriteUnit = "paragraph" | "sentence";
 
-export function rewriteTargetAt(text: string, offset: number): { span: Span; unit: RewriteUnit } {
+export function rewriteTargetAt(
+  text: string,
+  offset: number,
+  locale: AnalysisLocale,
+): { span: Span; unit: RewriteUnit } {
   const hasParagraphBreaks = /\n[ \t]*\n/.test(text);
-  if (!hasParagraphBreaks) return { span: sentenceSpanAt(text, offset), unit: "sentence" };
+  if (!hasParagraphBreaks) return { span: locale.sentenceSpanAt(text, offset), unit: "sentence" };
   return { span: paragraphSpanAt(text, offset), unit: "paragraph" };
 }
 

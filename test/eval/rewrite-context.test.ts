@@ -1,9 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { analyze, type Finding, type Span } from "../../src/lucid";
+import { type Finding, type Span } from "../../src/lucid";
+import { analyze } from "../../src/locales/pt-BR";
 import { rewriteLocalePtBR } from "../../src/locales/pt-BR/tier3";
 import { rewriteTargetAt } from "../../src/app/lib/paragraphs";
+import { analysisLocale } from "../../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 const EMIT = process.env.CONTEXT_MEASURE === "1";
 const CORPUS_DIR = path.join(process.cwd(), "corpus/v1/text");
@@ -48,7 +52,7 @@ function measure(document: string, text: string): Row {
   const targets: Span[] = [];
   const seen = new Set<string>();
   for (const f of diagnostic.findings as readonly Finding[]) {
-    const { span } = rewriteTargetAt(text, f.span.start);
+    const { span } = rewriteTargetAt(text, f.span.start, PT);
     const key = `${span.start}:${span.end}`;
     if (seen.has(key)) continue;
     seen.add(key);

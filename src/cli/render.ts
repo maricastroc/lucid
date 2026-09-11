@@ -135,7 +135,7 @@ export function renderText(files: readonly AuditedFile[], quiet: boolean): strin
         out.push(`      ${collapse(finding.justification)}`);
         if (finding.suggestion !== undefined) out.push(`      equivalente curado: "${finding.suggestion}"`);
       });
-      const flesch = file.diagnostic.metrics.fleschPt;
+      const flesch = file.diagnostic.metrics.readability;
       out.push(
         `  ${file.diagnostic.metrics.words} palavras · ${file.diagnostic.metrics.sentences} frases · Flesch-PT ${
           flesch === null ? "não medido" : flesch.toFixed(1)

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const findingsOf = (text: string) => analyze(text).findings.filter((f) => f.criterion === "nominalizacao_encadeada");
 const spans = (text: string): string[] => findingsOf(text).map((f) => f.span.text);

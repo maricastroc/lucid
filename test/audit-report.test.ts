@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { analyze, DEFAULT_CONFIG } from "../src/lucid";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
+import { analyze } from "../src/locales/pt-BR";
 import { buildAuditReport } from "../src/app/lib/audit-report";
 import { EMPTY_MARKS, withMark, withNote } from "../src/app/lib/review-marks";
 import { buildBaseline, compareToBaseline } from "../src/app/lib/baseline";
+import { analysisLocale } from "../src/app/locale/active";
+import type { PtConfig } from "../src/locales/pt-BR";
+
+const PT = analysisLocale("pt-BR");
 
 const SAMPLE =
   "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
@@ -211,7 +216,7 @@ describe("buildAuditReport — the stamp that makes the audit re-runnable", () =
     const withProfile = buildAuditReport(d, d.findings, META, [], null, {
       ...DEFAULT_CONFIG,
       sentenceLength: { warnAbove: 25 },
-    });
+    } as PtConfig);
     expect(withProfile).toContain("## Perfil editorial");
     expect(withProfile).not.toContain("`configHash` acima");
     expect(withProfile).toContain("O perfil carimbado no cabeçalho");
@@ -304,7 +309,7 @@ describe("buildAuditReport — the comparison with a starting point", () => {
 
   const reportWith = (config = DEFAULT_CONFIG) => {
     const current = analyze(V2, config);
-    const comparison = compareToBaseline(baselineOf(), current, config);
+    const comparison = compareToBaseline(baselineOf(), current, config, PT);
     return buildAuditReport(current, current.findings, META, [], null, null, null, null, null, {}, comparison);
   };
 

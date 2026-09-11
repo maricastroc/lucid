@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
 import {
   applyProposal,

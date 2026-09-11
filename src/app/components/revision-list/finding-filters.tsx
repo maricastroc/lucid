@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { useState } from "react";
 import { metaFor } from "../../lib/criteria";
 import type { Bucket, FindingQuery, SortOrder, StateFilter } from "../../lib/finding-query";
@@ -27,6 +28,7 @@ interface Props {
 
 export function FindingFilters({ query, sifting, filtered, visibleCount, totalCount, hiddenCount, onQuery }: Props) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const [moreFilters, setMoreFilters] = useState(false);
 
   const buckets: Array<[Bucket, string]> = [
@@ -54,7 +56,9 @@ export function FindingFilters({ query, sifting, filtered, visibleCount, totalCo
             <ChevronLeftIcon className="size-3.5" />
             {c.note.crumbAll}
           </button>
-          <span className="min-w-0 truncate text-[12px] text-ink-2">{metaFor(query.criterion, lang).label}</span>
+          <span className="min-w-0 truncate text-[12px] text-ink-2">
+            {metaFor(locale.id, query.criterion, lang).label}
+          </span>
         </div>
       )}
 

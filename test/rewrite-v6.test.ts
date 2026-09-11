@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, type Finding, type Span } from "@/lucid";
+import { type Finding, type Span } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import {
   buildRewritePrompt,
   buildRewritePromptV4,
@@ -10,8 +11,9 @@ import {
   STRATEGY_VERSION,
   verifyRewrite,
 } from "@/report/rewrite";
-import { CRITERION_ORDER, metaFor } from "@/app/lib/criteria";
+import { metaFor } from "@/app/lib/criteria";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
+import { CRITERION_IDS as PT_CRITERION_IDS } from "../src/locales/pt-BR/criteria";
 
 const TEXT =
   "Art. 1º Para atendimento da nova composição do Tribunal Superior do Trabalho são criados, no Quadro de " +
@@ -147,8 +149,8 @@ describe("rewrite@6 — o que a troca preservou", () => {
 
 describe("rewrite@6 — o briefing fala a língua da interface", () => {
   it("chama cada critério pelo mesmo nome que a interface", () => {
-    for (const criterion of CRITERION_ORDER) {
-      expect(criterionLabel(criterion), criterion).toBe(metaFor(criterion).label);
+    for (const criterion of PT_CRITERION_IDS) {
+      expect(criterionLabel(criterion), criterion).toBe(metaFor("pt-BR", criterion).label);
     }
   });
 

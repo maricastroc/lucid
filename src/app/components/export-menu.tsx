@@ -24,6 +24,8 @@ import { downloadFile } from "./export-menu/download-file";
 import { useDismissableMenu } from "./export-menu/use-dismissable-menu";
 import { ArrowDownIcon, ChevronDownIcon, HistoryIcon, PenNibIcon } from "./icons";
 import { Button } from "./ui/button";
+import { useAnalysisLocale } from "../locale/context";
+import { vocabularyTerms } from "../locale/vocabulary";
 
 export interface ExportMenuProps {
   diagnostic: Diagnostic;
@@ -59,6 +61,7 @@ export function ExportMenu({
   comparison,
 }: ExportMenuProps) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const [fileError, setFileError] = useState<string | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
   const [baselineOpen, setBaselineOpen] = useState(false);
@@ -95,7 +98,7 @@ export function ExportMenu({
   const exportDocx = async () => {
     setFileError(null);
     try {
-      const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks));
+      const bytes = await documentToDocx(exportableBlocks(diagnostic.text, blocks, locale));
       downloadFile(
         "documento-revisado.docx",
         bytes as BlobPart,
@@ -110,7 +113,7 @@ export function ExportMenu({
   const exportPdfFile = async () => {
     setFileError(null);
     try {
-      const bytes = await documentToPdf(exportableBlocks(diagnostic.text, blocks), c.overview.pdfPageLabel);
+      const bytes = await documentToPdf(exportableBlocks(diagnostic.text, blocks, locale), c.overview.pdfPageLabel);
       downloadFile("documento-revisado.pdf", bytes as BlobPart, "application/pdf");
       close(false);
     } catch {
@@ -129,7 +132,7 @@ export function ExportMenu({
       profileId,
       config,
       marks,
-      vocabulary: config.vocabulario.terms,
+      vocabulary: vocabularyTerms(config, locale),
     });
     downloadFile(file.name, file.content, BASELINE_MIME);
   };
@@ -140,12 +143,12 @@ export function ExportMenu({
   };
 
   const printDocument = () => {
-    setPrintHtml(documentToHtml(exportableBlocks(diagnostic.text, blocks)));
+    setPrintHtml(documentToHtml(exportableBlocks(diagnostic.text, blocks, locale)));
     close(false);
   };
 
   const exportDocumentMd = () => {
-    const markdown = documentToMarkdown(exportableBlocks(diagnostic.text, blocks));
+    const markdown = documentToMarkdown(exportableBlocks(diagnostic.text, blocks, locale));
     downloadFile("documento-revisado.md", markdown, "text/markdown;charset=utf-8");
     close(false);
   };

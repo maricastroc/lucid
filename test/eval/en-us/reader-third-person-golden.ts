@@ -1,0 +1,51 @@
+import type { EnGoldenEntry } from "./measure";
+
+export const GOLDEN_READER_EN: readonly EnGoldenEntry[] = [
+  { text: "Applicants must submit Form 12 by May 1.", expectedCount: 1, status: "correct" },
+  { text: "The applicant shall be notified by registered mail.", expectedCount: 1, status: "correct" },
+  { text: "Lessees and operators are responsible for restoring the site.", expectedCount: 1, status: "correct" },
+  { text: "Each taxpayer should keep a copy of the return.", expectedCount: 1, status: "correct" },
+  { text: "Borrowers may request a deferment.", expectedCount: 1, status: "correct" },
+  { text: "Tenants need to give 30 days of notice.", expectedCount: 1, status: "correct" },
+  { text: "All employees are required to complete the training.", expectedCount: 1, status: "correct" },
+  { text: "The claimant has to provide proof of income.", expectedCount: 1, status: "correct" },
+  { text: "Beneficiaries cannot transfer their benefits.", expectedCount: 1, status: "correct" },
+  { text: "Any lessee who wishes to use timber shall file an application.", expectedCount: 1, status: "correct" },
+  { text: "A recipient is entitled to a hearing.", expectedCount: 1, status: "correct" },
+  { text: "Participants are expected to attend every session.", expectedCount: 1, status: "correct" },
+  { text: "If applicants miss the deadline, the agency may close the case.", expectedCount: 0, status: "correct" },
+  { text: "Under the new rule, eligible veterans must reapply each year.", expectedCount: 1, status: "correct" },
+  { text: "The form lists what applicants must provide.", expectedCount: 1, status: "correct" },
+
+  { text: "You must submit Form 12 by May 1.", expectedCount: 0, status: "correct" },
+  { text: "If you are the lessee, you must monitor the operator.", expectedCount: 0, status: "correct" },
+  { text: "We will notify the applicant.", expectedCount: 0, status: "correct" },
+  { text: "The agency must respond within 30 days.", expectedCount: 0, status: "correct" },
+  { text: "Send the form to the applicant.", expectedCount: 0, status: "correct" },
+  { text: "The applicant received a letter.", expectedCount: 0, status: "correct" },
+  { text: "Applicants who qualify will receive a letter.", expectedCount: 0, status: "correct" },
+  { text: "We review each application.", expectedCount: 0, status: "correct" },
+  { text: "Our staff must answer your call.", expectedCount: 0, status: "correct" },
+  { text: "How do I apply?", expectedCount: 0, status: "correct" },
+  { text: "Staff helps applicants who must file late.", expectedCount: 0, status: "correct" },
+  { text: "Payments to recipients must be made monthly.", expectedCount: 0, status: "correct" },
+
+  {
+    text: "The applicant's address must be current.",
+    expectedCount: 1,
+    status: "known_limitation",
+    reason: "A possessive ('the applicant's address') names the reader without being the subject the rule reads.",
+  },
+  {
+    text: "Applicants who were Federal employees at the time that the injury was sustained should have filed a request.",
+    expectedCount: 1,
+    status: "known_limitation",
+    reason: "The relative clause runs past the window between the reader noun and the modal.",
+  },
+  {
+    text: "Applicants may experience delays in the spring.",
+    expectedCount: 0,
+    status: "known_limitation",
+    reason: "An epistemic 'may' (possibility) is read as a deontic 'may' (permission).",
+  },
+];

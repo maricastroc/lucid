@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { segmentRange } from "../src/app/lib/editor-model";
 
 describe("segmentRange — M1: an inline finding nested inside a 'passage' channel finding", () => {
@@ -17,7 +17,7 @@ describe("segmentRange — M1: an inline finding nested inside a 'passage' chann
     expect(jargon!.span.start).toBeGreaterThanOrEqual(subordination!.span.start);
     expect(jargon!.span.end).toBeLessThanOrEqual(subordination!.span.end);
 
-    const segments = segmentRange(text, findings, 0, text.length);
+    const segments = segmentRange(text, findings, "pt-BR", 0, text.length);
     const segment = segments.find((s) => s.start <= jargon!.span.start && s.end >= jargon!.span.end);
 
     expect(segment?.inline?.criterion).toBe("jargon");

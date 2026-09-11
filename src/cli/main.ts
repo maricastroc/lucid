@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ptDocumentServices } from "@/lucid";
+import { ptDocumentServices } from "@/locales/pt-BR";
 import { auditDocument, auditText, crossesThreshold, type AuditedFile } from "./audit";
 import { HELP, parseArgs, type CliOptions } from "./args";
 import { renderCoverage, renderJson, renderText } from "./render";
@@ -56,7 +56,7 @@ async function auditPath(target: string, options: CliOptions): Promise<AuditedFi
 }
 
 async function versionLine(): Promise<string> {
-  const { analyze } = await import("@/lucid");
+  const { analyze } = await import("@/locales/pt-BR");
   const { meta } = analyze("Texto.");
   return `lucid ${meta.lucidVersion} · locale ${meta.localeId} · ${meta.standardVersion} · config ${meta.configHash} · dados ${meta.dataHash}`;
 }
@@ -78,7 +78,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     return 0;
   }
   if (options.coverage) {
-    const { coverageReport } = await import("@/lucid");
+    const { coverageReport } = await import("@/locales/pt-BR");
     const report = coverageReport();
     process.stdout.write(
       options.format === "json" ? `${JSON.stringify(report, null, 2)}\n` : `${renderCoverage(report, options.quiet)}\n`,

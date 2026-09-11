@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { detectedProse, detectionHeadline, longSentenceGuidance } from "../src/app/lib/narrative";
 import { findingsInsideSpan } from "../src/app/lib/finding-query";
 import { createDataView } from "../src/locales/pt-BR/datasets/registry";
 import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { buildDocument } from "./support/pt";
-import type { Config } from "../src/lucid/core/config";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
 import type { Document, PassContext, Sentence } from "../src/lucid/core/types";
+import { analysisLocale } from "../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 function sentence(overrides: Partial<Sentence>): Sentence {
   const text = overrides.text ?? "x".repeat(10);
@@ -24,7 +27,7 @@ function buildTestDocument(sentences: Sentence[]): Document {
   return { source: sentences.map((s) => s.text).join(" "), sentences, tokens: [], blocks: [] };
 }
 
-function buildContext(sentences: Sentence[], config: Config = DEFAULT_CONFIG): PassContext {
+function buildContext(sentences: Sentence[], config: Config = DEFAULT_CONFIG): PassContext<Config> {
   return { doc: buildTestDocument(sentences), config, data: createDataView([]) };
 }
 
@@ -143,7 +146,7 @@ describe("sentenceLengthPass — byte-identical on repeated runs", () => {
       "Esta segunda frase também é bem longa e deve ultrapassar o limite de erro que foi definido para o teste.";
     const doc = buildDocument(source);
     const config: Config = { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 5 } };
-    const ctx: PassContext = { doc, config, data: createDataView([]) };
+    const ctx: PassContext<Config> = { doc, config, data: createDataView([]) };
 
     const r1 = JSON.stringify(sentenceLengthPass.run(ctx));
     const r2 = JSON.stringify(sentenceLengthPass.run(ctx));
@@ -191,14 +194,14 @@ describe("long_sentence — the finding as the product presents it (ADR-094)", (
 
   it("the headline is the measured count, not a verdict on the sentence", () => {
     const finding = analyze(LONG).findings.find((f) => f.criterion === "long_sentence")!;
-    const headline = detectionHeadline(finding);
+    const headline = detectionHeadline(finding, "pt-BR");
     expect(headline).toBe("Frase com 24 palavras");
     expect(headline).not.toContain("longa");
   });
 
   it("the prose separates the standard's guideline from Lucid's own parameter", () => {
     const finding = analyze(LONG).findings.find((f) => f.criterion === "long_sentence")!;
-    const prose = detectedProse(finding);
+    const prose = detectedProse(finding, "pt-BR");
     expect(prose).toContain("parâmetro metodológico do produto");
     expect(prose).toContain("sem estabelecer contagem");
     expect(prose).toContain("mais de uma ideia");
@@ -215,7 +218,7 @@ describe("long_sentence — the finding as the product presents it (ADR-094)", (
 
   it("the guidance no longer prescribes how many sentences to split into", () => {
     const finding = analyze(LONG).findings.find((f) => f.criterion === "long_sentence")!;
-    const guide = longSentenceGuidance(finding, LONG);
+    const guide = longSentenceGuidance(finding, LONG, PT);
     expect(guide.words).toBe(24);
     expect(guide.threshold).toBe(20);
     expect(guide).not.toHaveProperty("targetSentences");

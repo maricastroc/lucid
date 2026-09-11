@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { analyze } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { candidateById } from "./candidates";
 import { resultRows } from "./runner";
 import { loadEvalTargets } from "./targets";

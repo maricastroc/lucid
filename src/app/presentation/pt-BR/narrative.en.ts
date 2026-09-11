@@ -1,4 +1,4 @@
-import { assistida, flat, metaBool, metaNum, metaStr, type NarrativeSet } from "./narrative-types";
+import { assistida, flat, metaBool, metaNum, metaStr, type PtNarrativeSet } from "../../lib/narrative-types";
 
 const DOMAIN_EN: Record<string, string> = {
   administrative: "administrative",
@@ -6,7 +6,7 @@ const DOMAIN_EN: Record<string, string> = {
   general: "technical",
 };
 
-export const NARRATIVE_EN: NarrativeSet = {
+const BASE: PtNarrativeSet = {
   long_sentence: {
     headline: (f) => {
       const w = metaNum(f, "words");
@@ -16,12 +16,16 @@ export const NARRATIVE_EN: NarrativeSet = {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       if (w == null || th == null) return "This sentence is above the inspection trigger for length.";
+      const standard = f.normativeReference?.standard ?? "ISO 24495-1";
+      const parameter =
+        metaStr(f, "thresholdStatus") === "provisional"
+          ? "that number is provisional for this analysis language, not validated, and not a limit set by the standard"
+          : "that number is a methodological parameter of this product, not a limit set by the standard";
       return (
-        `This sentence has ${w} words. Lucid inspects sentences above ${th} words — that number is a ` +
-        "methodological parameter of this product, not a limit set by the standard: ABNT NBR ISO 24495-1 asks " +
-        "for concise sentences and varied length without stating a count. The main check is a different one: " +
-        "see whether the sentence carries more than one idea. A long sentence carrying a single idea can be " +
-        "fine, and does not necessarily need to be split."
+        `This sentence has ${w} words. Lucid inspects sentences above ${th} words — ${parameter}: ` +
+        `${standard} asks for concise sentences and varied length without stating a count. The main check is ` +
+        "a different one: see whether the sentence carries more than one idea. A long sentence carrying a " +
+        "single idea can be fine, and does not necessarily need to be split."
       );
     },
     confidence: (f) => {
@@ -300,3 +304,5 @@ export const NARRATIVE_EN: NarrativeSet = {
       ),
   },
 };
+
+export const NARRATIVE_UI_EN = BASE;

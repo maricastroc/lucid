@@ -4,13 +4,13 @@ import { nominalizationPass } from "../src/locales/pt-BR/passes/nominalization";
 import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
 import { passiveVoicePass } from "../src/locales/pt-BR/passes/passive-voice";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { buildDocument } from "./support/pt";
-import type { Config } from "../src/lucid/core/config";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
 import type { PassContext } from "../src/lucid/core/types";
 
-function ctxFor(text: string, config: Config = DEFAULT_CONFIG): PassContext {
+function ctxFor(text: string, config: Config = DEFAULT_CONFIG): PassContext<Config> {
   return { doc: buildDocument(text), config, data: createDataView([]) };
 }
 

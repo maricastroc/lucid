@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { useState } from "react";
 import { coverageOf, metaFor } from "../../lib/criteria";
 import { useCopy } from "../../i18n/use-copy";
@@ -14,6 +15,7 @@ export function CleanCriteriaDisclosure({
   declaredTerms: number;
 }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const [coverageOpen, setCoverageOpen] = useState(false);
   if (criteria.length === 0) return null;
 
@@ -35,7 +37,7 @@ export function CleanCriteriaDisclosure({
       {coverageOpen && (
         <div className="mt-1 flex flex-col gap-0.5">
           {criteria.map((criterion) => {
-            const meta = metaFor(criterion, lang);
+            const meta = metaFor(locale.id, criterion, lang);
             return (
               <div key={criterion} className="px-3 py-1.5">
                 <div className="flex items-center gap-2.5">
@@ -46,7 +48,7 @@ export function CleanCriteriaDisclosure({
                 <span className="mt-0.5 block pl-6.5 text-[11px] leading-relaxed text-ink-dim">
                   {criterion === "vocabulario_da_organizacao"
                     ? c.revisionList.zeroDeclared(declaredTerms)
-                    : coverageOf(criterion) === "curated"
+                    : coverageOf(locale.id, criterion) === "curated"
                       ? c.revisionList.zeroCurated
                       : c.revisionList.zeroProductive}
                 </span>

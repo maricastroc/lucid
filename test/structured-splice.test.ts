@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildStructuredDocument, ptDocumentServices, type Document, type RawBlock } from "@/lucid";
+import { buildStructuredDocument, type Document, type RawBlock } from "@/lucid";
+import { ptDocumentServices } from "@/locales/pt-BR";
 import { spliceStructuredDocument } from "../src/lucid/core/document/structured";
 
 const BLOCKS: RawBlock[] = [
@@ -142,7 +143,7 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
 
 describe("spliceStructuredDocument — the Principle 2 criteria stop going silent (ADR-080)", () => {
   it("a heading-level jump is still detected after the body is edited", async () => {
-    const { analyzeDocument } = await import("@/lucid");
+    const { analyzeDocument } = await import("@/locales/pt-BR");
     const jumpy: RawBlock[] = [
       { kind: "heading", level: 1, text: "Título principal" },
       { kind: "heading", level: 3, text: "Subtítulo que pula um nível" },

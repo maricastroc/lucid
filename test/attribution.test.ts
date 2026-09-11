@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { affixSplice, analyze, type Finding } from "@/lucid";
+import { affixSplice, type Finding } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { attribute, balance, revisionBalance } from "@/app/lib/attribution";
 
 const findings = (text: string): Finding[] => analyze(text).findings;

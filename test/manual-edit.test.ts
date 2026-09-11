@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { rewriteTargetAt } from "../src/app/lib/paragraphs";
 import { verifyManualEdit } from "../src/app/lib/rewrite";
 import { isManualEditDirty, manualEditReplacement, spliceSpan } from "../src/app/lib/text-edit";
+import { analysisLocale } from "../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 function manualEditTargetFor(text: string, criterion: string) {
   const d = analyze(text);
   const finding = d.findings.find((f) => f.criterion === criterion);
   if (!finding) throw new Error(`no '${criterion}' finding in: ${text}`);
-  return { source: d.text, ...rewriteTargetAt(d.text, finding.span.start) };
+  return { source: d.text, ...rewriteTargetAt(d.text, finding.span.start, PT) };
 }
 
 describe("manualEditReplacement — trims the ends, preserves the middle", () => {

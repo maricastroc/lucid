@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
+import { provenanceLabel, provenanceTag } from "../src/app/lib/criteria";
 
 function assertCompleteProvenance(f: Finding, diagnosticText: string) {
   expect(f.criterion.length).toBeGreaterThan(0);
   expect(["lexical", "syntactic", "structural", "metric"]).toContain(f.category);
-  expect(["iso-24495-1", "editorial-pt-br", "structural-heuristic"]).toContain(f.source);
+  expect(["iso-24495-1", "editorial", "structural-heuristic"]).toContain(f.source);
   expect(["relevant", "findable", "understandable", "usable"]).toContain(f.principleGroup);
   expect(f.normativeReference !== undefined).toBe(f.source === "iso-24495-1");
   if (f.normativeReference) expect(f.normativeReference.section).toMatch(/^5\.\d/);
@@ -97,5 +98,41 @@ describe("provenance — NFC normalization and the offset convention", () => {
     expect(nominal.meta).toMatchObject({ baseVerb: "analisar" });
     expect(nominal.span.text).toBe("fazer a análise");
     expect(d.text.slice(nominal.span.start, nominal.span.end)).toBe("fazer a análise");
+  });
+});
+
+describe("provenance — the source names a tradition, not a language baked into the type", () => {
+  const editorial: Finding = {
+    criterion: "mesoclise",
+    category: "syntactic",
+    source: "editorial",
+    principleGroup: "understandable",
+    span: { start: 0, end: 7, text: "far-se-á" },
+    severity: "warning",
+    requiresHuman: true,
+    justification: "…",
+  };
+
+  it("pt-BR reads exactly as before the source became neutral", () => {
+    expect(provenanceLabel(editorial)).toBe("Extensão editorial PT-BR");
+    expect(provenanceTag(editorial)).toEqual({
+      text: "PT-BR",
+      title: "Extensão editorial PT-BR — fora da norma ISO",
+    });
+    expect(provenanceLabel(editorial, "en")).toBe("PT-BR editorial extension");
+  });
+
+  it("another locale names its own tradition through the same field", () => {
+    expect(provenanceLabel(editorial, "pt-BR", "en-US")).toBe("Extensão editorial EN-US");
+    expect(provenanceTag(editorial, "en", "en-US").text).toBe("EN-US");
+  });
+
+  it("an ISO finding cites the standard the locale declared, whatever it is", () => {
+    const iso: Finding = {
+      ...editorial,
+      source: "iso-24495-1",
+      normativeReference: { standard: "ISO 24495-1", section: "5.3.3" },
+    };
+    expect(provenanceLabel(iso, "en", "en-US")).toBe("ISO 24495-1 · 5.3.3");
   });
 });

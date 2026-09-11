@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "@/locales/pt-BR";
-import { checkBriefing, DEFAULT_CONFIG, EMPTY_BRIEFING, hashConfig, type OrgTerm } from "@/lucid";
+import { checkBriefing, EMPTY_BRIEFING, hashConfig, type OrgTerm } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
 import { buildAuditReport } from "@/app/lib/audit-report";
 
 const withTerms = (terms: readonly OrgTerm[]) => ({ vocabulario: { enabled: true, terms } });

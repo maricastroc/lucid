@@ -1,4 +1,5 @@
-import { analyze, type Finding } from "@/lucid";
+import { type Finding } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { applyProposal } from "@/report/rewrite";
 import type { ScoredRow } from "./score";
 

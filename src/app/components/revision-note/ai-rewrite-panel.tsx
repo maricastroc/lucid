@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { SendNotice } from "../send-notice";
 import { RewriteProposalCard } from "./rewrite-proposal-card";
 import { useRewriteDraft } from "./use-rewrite-draft";
+import { useAnalysisLocale } from "../../locale/context";
 
 export function AiRewritePanel({
   finding,
@@ -24,10 +25,11 @@ export function AiRewritePanel({
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const choice = REWRITE_MODELS[0];
   const [open, setOpen] = useState(false);
 
-  const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
+  const { span: target, unit } = rewriteTargetAt(source, finding.span.start, locale);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
 
   const { draft, run, cancel } = useRewriteDraft({

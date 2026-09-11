@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const spans = (text: string): string[] =>
   analyze(text)
@@ -18,7 +18,7 @@ describe("gerundismo — detection", () => {
     const f = analyze("Vou estar enviando o documento.").findings.find((x) => x.criterion === "gerundismo")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.source).toBe("editorial-pt-br");
+    expect(f.source).toBe("editorial");
   });
 });
 

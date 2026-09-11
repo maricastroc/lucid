@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { analyze, configDeviations, DEFAULT_CONFIG, hashConfig, isDefaultConfig, type Config } from "@/lucid";
+import { configDeviations, hashConfig, isDefaultConfig } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
+import type { PtConfig as Config } from "@/locales/pt-BR";
+import { analyze } from "@/locales/pt-BR";
 
 function withOverrides(overrides: Partial<Config>): Config {
   return { ...DEFAULT_CONFIG, ...overrides };
@@ -12,28 +15,28 @@ const LONG =
 
 describe("configDeviations — every departure from the default is nameable", () => {
   it("reports nothing for the default config", () => {
-    expect(configDeviations(DEFAULT_CONFIG)).toEqual([]);
-    expect(isDefaultConfig(DEFAULT_CONFIG)).toBe(true);
+    expect(configDeviations(DEFAULT_CONFIG, DEFAULT_CONFIG)).toEqual([]);
+    expect(isDefaultConfig(DEFAULT_CONFIG, DEFAULT_CONFIG)).toBe(true);
   });
 
   it("names a loosened threshold with the value it replaced", () => {
     const config = withOverrides({ sentenceLength: { warnAbove: 30 } });
-    expect(configDeviations(config)).toEqual([
+    expect(configDeviations(config, DEFAULT_CONFIG)).toEqual([
       { section: "sentenceLength", field: "warnAbove", value: 30, fallback: 20 },
     ]);
-    expect(isDefaultConfig(config)).toBe(false);
+    expect(isDefaultConfig(config, DEFAULT_CONFIG)).toBe(false);
   });
 
   it("names a disabled criterion", () => {
     const config = withOverrides({ passiveVoice: { enabled: false } });
-    expect(configDeviations(config)).toEqual([
+    expect(configDeviations(config, DEFAULT_CONFIG)).toEqual([
       { section: "passiveVoice", field: "enabled", value: false, fallback: true },
     ]);
   });
 
   it("names a criterion turned on that ships off", () => {
     const config = withOverrides({ adverbioMente: { enabled: true, minPorFrase: 3 } });
-    expect(configDeviations(config)).toEqual([
+    expect(configDeviations(config, DEFAULT_CONFIG)).toEqual([
       { section: "adverbioMente", field: "enabled", value: true, fallback: false },
     ]);
   });
@@ -44,9 +47,11 @@ describe("configDeviations — every departure from the default is nameable", ()
       sentenceLength: { warnAbove: 25 },
       passiveVoice: { enabled: false },
     });
-    const sections = configDeviations(config).map((d) => d.section);
+    const sections = configDeviations(config, DEFAULT_CONFIG).map((d) => d.section);
     expect(sections).toEqual(["sentenceLength", "passiveVoice", "mesoclise"]);
-    expect(JSON.stringify(configDeviations(config))).toBe(JSON.stringify(configDeviations(config)));
+    expect(JSON.stringify(configDeviations(config, DEFAULT_CONFIG))).toBe(
+      JSON.stringify(configDeviations(config, DEFAULT_CONFIG)),
+    );
   });
 });
 

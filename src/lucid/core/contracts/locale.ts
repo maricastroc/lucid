@@ -1,4 +1,4 @@
-import type { Config } from "../config";
+import type { Config, ConfigSchema } from "../config";
 import type {
   AbbreviationLexicon,
   CohesionMetrics,
@@ -23,14 +23,16 @@ export interface DocumentServices {
 
 export interface ReadabilityMetric {
   readonly id: string;
+  readonly name: string;
+  readonly referenceRange: { readonly min: number; readonly max: number };
   calculate(input: { wordsPerSentence: number; syllablesPerWord: number }): number;
   interpret(metrics: Metrics): ReadabilityReading;
 }
 
 export interface MetricServices {
-  countSyllables: (word: string) => number;
-  readability: ReadabilityMetric;
-  cohesion: (doc: Document) => CohesionMetrics;
+  countSyllables?: (word: string) => number;
+  readability?: ReadabilityMetric;
+  cohesion?: (doc: Document) => CohesionMetrics;
   readonly dataDeps?: readonly string[];
 }
 
@@ -43,13 +45,15 @@ export interface LocaleDataRegistry {
 
 export interface LocaleCriteria {
   readonly ids: readonly string[];
+  readonly canonical?: Readonly<Record<string, string>>;
 }
 
-export interface LocaleBundle {
+export interface LocaleBundle<C extends Config = Config> {
   readonly id: LocaleId;
   readonly standardVersion: string;
-  readonly passes: readonly Pass[];
-  readonly config: Config;
+  readonly passes: readonly Pass<C>[];
+  readonly config: C;
+  readonly configSchema: ConfigSchema;
   readonly services: DocumentServices;
   readonly metrics: MetricServices;
   readonly data: LocaleDataRegistry;

@@ -9,6 +9,7 @@ import { PenNibIcon } from "../icons";
 import { RewriteProposalCard } from "./rewrite-proposal-card";
 import { useManualEditDraft } from "./use-manual-edit-draft";
 import { Button } from "../ui/button";
+import { useAnalysisLocale } from "../../locale/context";
 
 export function ManualEditForm({
   finding,
@@ -22,7 +23,8 @@ export function ManualEditForm({
   onManualEdit: (target: Span, replacement: string) => void;
 }) {
   const { c, lang } = useCopy();
-  const { span: target, unit } = rewriteTargetAt(source, finding.span.start);
+  const locale = useAnalysisLocale();
+  const { span: target, unit } = rewriteTargetAt(source, finding.span.start, locale);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
   const original = target.text;
   const edit = useManualEditDraft({ source, target, criterion: finding.criterion, declaration, lang });
@@ -59,9 +61,20 @@ export function ManualEditForm({
           style={{ caretColor: "var(--accent)" }}
         />
         <div className="mt-2.5 flex items-center gap-2">
-          <Button variant="tonal-human" size="lg" disabled={!dirty || checking} onClick={edit.check}>
-            {checking ? c.note.manualVerifying : c.note.manualVerify}
-          </Button>
+          {locale.rewriteAvailable ? (
+            <Button variant="tonal-human" size="lg" disabled={!dirty || checking} onClick={edit.check}>
+              {checking ? c.note.manualVerifying : c.note.manualVerify}
+            </Button>
+          ) : (
+            <Button
+              variant="tonal-human"
+              size="lg"
+              disabled={!dirty}
+              onClick={() => onManualEdit(target, manualEditReplacement(draft))}
+            >
+              {c.note.manualApplyUnverified}
+            </Button>
+          )}
           <Button variant="outline" disabled={draft === original} onClick={edit.restore}>
             {c.common.restore}
           </Button>
@@ -75,7 +88,9 @@ export function ManualEditForm({
           />
         )}
 
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.manualNote}</p>
+        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+          {locale.rewriteAvailable ? c.note.manualNote : c.note.manualUnverifiedNote}
+        </p>
       </div>
     </div>
   );

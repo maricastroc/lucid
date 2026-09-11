@@ -1,8 +1,9 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "adverbio_mente_denso";
 
-export const adverbioMenteDensoPass: Pass = {
+export const adverbioMenteDensoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["adverbios-mente.pt"],

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { useState } from "react";
 import type { Config, Finding } from "@/lucid";
 import type { ChangeKind, CriterionChange } from "../../lib/attribution";
@@ -130,6 +131,7 @@ function Balance({
   className?: string;
 }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const total = revisionBalance(before, after);
   const moved = total.byCriterion.filter((row) => row.direction !== "unchanged");
 
@@ -162,7 +164,7 @@ function Balance({
         <ul className="mt-2.5 flex flex-col gap-1.5">
           {moved.map((row) => (
             <li key={row.criterion} className="flex items-baseline justify-between gap-3 text-[12px]">
-              <span className="min-w-0 truncate text-ink-1">{metaFor(row.criterion, lang).label}</span>
+              <span className="min-w-0 truncate text-ink-1">{metaFor(locale.id, row.criterion, lang).label}</span>
               <span className="flex shrink-0 items-baseline gap-1.5 tabular-nums text-ink-2">
                 <span>{c.overview.balanceCount(row.before, row.after)}</span>
                 <span aria-hidden>·</span>
@@ -194,6 +196,7 @@ function ChangeEntry({
   onUndo: (() => void) | null;
 }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const [open, setOpen] = useState(false);
   const move = burdenMove(entry);
   const effects = entry.attribution?.changes ?? [];
@@ -265,7 +268,9 @@ function ChangeEntry({
             <ul className="mt-1 flex flex-col gap-0.5">
               {effects.map((change, i) => (
                 <li key={i} className="flex items-baseline justify-between gap-3 text-[11.5px]">
-                  <span className="min-w-0 truncate text-ink-2">{metaFor(change.criterion, lang).label}</span>
+                  <span className="min-w-0 truncate text-ink-2">
+                    {metaFor(locale.id, change.criterion, lang).label}
+                  </span>
                   <span className={`shrink-0 ${toneOf(change.kind)}`}>{effectLabel(change, c)}</span>
                 </li>
               ))}

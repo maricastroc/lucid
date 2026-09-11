@@ -1,7 +1,8 @@
-import { DEFAULT_CONFIG, hashConfig } from "../../src/lucid/core/config";
+import { hashConfig } from "../../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../../src/locales/pt-BR";
 import { stableHash } from "../../src/lucid/core/hash";
-import { analyze, CRITERION_IDS, localePtBR } from "../../src/lucid";
-import type { CriterionId } from "../../src/lucid";
+import { analyze, CRITERION_IDS, localePtBR } from "../../src/locales/pt-BR";
+import type { CriterionId } from "../../src/locales/pt-BR";
 import { createDataView, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
 import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
@@ -394,7 +395,7 @@ function detectorReport(criterion: string, results: readonly EntryResult[], summ
   const failed = (r: EntryResult): boolean => r.fp > 0 || r.fn > 0;
   return {
     criterion,
-    coverage: coverageOf(criterion),
+    coverage: coverageOf("pt-BR", criterion),
     summary,
     knownLimitations: results
       .filter((r) => r.estado === "limitacao_conhecida")

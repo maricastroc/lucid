@@ -1,7 +1,7 @@
-import type { CriterionId } from "@/lucid";
-import type { CriterionText } from "../lib/criteria";
+import type { CriterionId } from "@/locales/pt-BR";
+import type { CriterionText } from "../types";
 
-export const CRITERION_TEXT_EN: Record<CriterionId, CriterionText> = {
+export const TEXT_UI_EN: Record<CriterionId, CriterionText> = {
   passive_voice: {
     label: "Passive voice",
     kind: "Syntactic construction",

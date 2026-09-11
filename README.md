@@ -9,7 +9,7 @@
 <h4 align="center">LLM proposes. Engine verifies.</h4>
 
 <p align="center">
-  A <strong>deterministic auditor</strong> that checks writing against <strong>ISO 24495-1</strong>, the international Plain Language standard — and a working answer to a question every AI writing tool dodges: <em>if a language model rewrote this, who checked the rewrite?</em>
+  A <strong>deterministic auditor</strong> that checks writing against <strong>ISO 24495-1</strong>, the international Plain Language standard — and verifies every rewrite, whether a person or a language model wrote it.
 </p>
 
 <p align="center">
@@ -26,78 +26,39 @@
 
 <p align="center">
   <a href="#-the-problem">The problem</a> •
-  <a href="#-llm-proposes-engine-verifies">The idea</a> •
   <a href="#-30-seconds">30 seconds</a> •
+  <a href="#-llm-proposes-engine-verifies">The idea</a> •
   <a href="#-what-it-does--what-it-refuses-to-do">Does / Refuses</a> •
-  <a href="#-the-review">The review</a> •
+  <a href="#-it-measures-itself">Measured</a> •
   <a href="#-inside-the-engine">Inside</a> •
-  <a href="#-run-it">Run it</a> •
-  <a href="#-license">License</a>
+  <a href="#-run-it">Run it</a>
 </p>
 
 <p align="center">
-  🔗 <strong>Live demo:</strong> <a href="https://lucid.marianacastro.dev/">lucid.marianacastro.dev</a> · <em>The interface speaks Portuguese or English; the analysis is Portuguese-only, and the JSON below is neither.</em>
+  🔗 <strong>Live demo:</strong> <a href="https://lucid.marianacastro.dev/">lucid.marianacastro.dev</a> · <em>Interface in Portuguese or English; the analysis is Portuguese, with an experimental US-English catalogue in the studio.</em>
 </p>
 
 <br/>
 
 ## 🎯 The problem
 
-**Every writing tool is now a language model — and the model that writes is also the model that grades.** Ask an LLM to simplify a contract and it will hand back something that _reads_ better. Ask whether the meaning survived, whether a number changed, whether it invented an actor that was never in the source, and the honest answer is: nobody checked. The generator is its own judge.
+**Every writing tool is now a language model — and the model that writes is also the model that grades.** It hands back something that _reads_ better. Whether a number changed, a date moved or an actor was invented: nobody checked. That is tolerable for a blog post. It is not tolerable for a benefit ruling, a tax notice or a consent form, where being _wrong_ is worse than being _dense_.
 
-That is tolerable for a blog post. It is not tolerable for the documents that actually need plain language — benefit rulings, tax notices, court decisions, consent forms — where being _wrong_ is worse than being _dense_, and where an organization may have to **prove** what it did, not just assert it.
+Readability scores don't fix it. One number over syllable counts cannot say _which sentence_ fails, _which rule_ it breaks, or _why_ — and it rewards text that is short, fluent and wrong.
 
-The usual alternative is a readability score. But "grade 8 reading level" is a single number over syllable counts: it cannot tell you _which sentence_ fails, _which rule_ it breaks, or _why_ — and it happily rewards text that is short, fluent and wrong.
-
-**Lucid takes the third path: separate the writer from the judge, and make the judge deterministic.**
-
-<br/>
-
-## 🧩 LLM proposes. Engine verifies.
-
-Two layers, and a hard fence between them that the build enforces:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  LAYER 1 — the deterministic engine          THE PRODUCT    │
-│  zero LLM · zero network · same input → byte-identical out  │
-│  24 detectors, each declaring the authority behind it       │
-│  It can judge. It cannot write.                             │
-└─────────────────────────────────────────────────────────────┘
-                    ▲                        ▲
-             verifies│                 verifies│
-                    │                        │
-        ┌───────────┴──────────┐  ┌──────────┴───────────┐
-        │  a human rewrite     │  │  an LLM rewrite      │
-        │  (the author)        │  │  (opt-in, Layer 2)   │
-        │  It can write.       │  │  It can write.       │
-        │  It cannot judge.    │  │  It cannot judge.    │
-        └──────────────────────┘  └──────────────────────┘
-```
-
-The engine **never writes a word into your document**. It detects, explains, cites the clause, and — when a rewrite shows up, from a person or a model — it re-analyzes and reports what it can _prove_ versus what it can only _signal_. No source is privileged: your own edit is judged by exactly the same checks as the model's.
-
-This inverts the usual arrangement. The component that can produce fluent text has no authority. The component with authority has no ability to produce text. **Neither can flatter the other.**
-
-<p align="center">
-<img width="3118" height="1950" alt="Lucid's review studio: the document on the left with inline annotations, the audit rail on the right showing the finding, its ISO clause and its justification" src="https://github.com/user-attachments/assets/6ff3d23a-5922-442b-9f2b-522b88699444" />
-</p>
-
-<p align="center"><em>The review studio. Left: the document, every finding underlined in place. Right: the selected finding — which criterion fired, which ISO subsection it maps to, and why it hurts the reader.</em></p>
+**Lucid separates the writer from the judge, and makes the judge deterministic.**
 
 <br/>
 
 ## 🚀 30 seconds
 
-You don't need Portuguese to read the output. Here is one sentence of Brazilian officialese:
+One sentence of Brazilian officialese:
 
 > **`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.`**
 >
-> _Word for word: "Was carried out the analysis of the document by the competent committee in the seat of administrative proceeding."_
->
-> A plain version would be: **"The committee analyzed the document."**
+> _Word for word: "Was carried out the analysis of the document by the competent committee in the seat of administrative proceeding." Plain: **"The committee analyzed the document."**_
 
-If that disease looks familiar, that is the point — **bureaucratic language is universal; only its symptoms are local.** English does the same thing with _"it was determined that"_ and _"the implementation of."_
+Bureaucratic language is universal; only its symptoms are local. English does the same with _"it was determined that"_.
 
 ```bash
 lucid edital.txt --format json
@@ -126,117 +87,47 @@ Two of the three findings it returns (real output, trimmed):
 }
 ```
 
-Read what those fields actually promise:
+- **`normativeReference`** cites a clause of the standard — and exists only when the criterion genuinely derives from it.
+- **`requiresHuman: true`** means the engine refuses to guess who acted. It reports the fact and stops.
+- **`suggestion`** is a curated 1:1 equivalent, displayed, never written into your file.
 
-- **`normativeReference`** — the finding cites a clause of a published international standard, not somebody's style preference. It is only present when the criterion genuinely derives from the norm (see [provenance](#provenance-every-finding-declares-its-authority)).
-- **`requiresHuman: true`** — the engine detected a passive with no stated agent and **refuses to guess who acted**. It reports the fact and stops. That is a feature, not a gap.
-- **`suggestion`** — appears only for a curated, context-free 1:1 equivalent, and is _displayed_, never written into your file.
-
-Every run also stamps `configHash` and `dataHash`. Same text + same config + same lexicons → the same JSON, byte for byte.
+Every run is stamped with `configHash` and `dataHash`: same text, config and lexicons → the same JSON, byte for byte.
 
 <br/>
 
-## 🚦 What it does / what it refuses to do
+## 🧩 LLM proposes. Engine verifies.
 
-The refusals are not missing features. They are the design.
-
-| ✅ It does                                                       | ❌ It refuses to                                                 |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Locate every violation, with character offsets and `line:column` | Rewrite your document, or apply any edit — ever                  |
-| Cite the ISO clause behind each finding                          | Invent authority: editorial rules never get a fake clause number |
-| Explain, in prose, why the reader is hurt                        | Emit a grade, a score out of 100, or a pass mark                 |
-| Mark what needs human judgment, **and why**                      | Guess a missing agent, or swap a word with more than one sense   |
-| Verify a rewrite — yours or an LLM's — against the same checks   | Certify a document as compliant                                  |
-| Report what it did **not** look for                              | Let a silent absence read as an all-clear                        |
-| Show curated equivalents as information                          | Pretend a lexicon covers a whole language                        |
-| Let you declare the vocabulary your own readers stumble on       | Let your list borrow the standard's authority                    |
-
-**There is no green check anywhere in the system, and the type system enforces it.** The comprehension probe's result type is `flag | neutral` — there is no `approved` variant to return. Passing a floor test is the _absence of one failure_, never evidence of clarity, so the compiler makes "it approved the text" unrepresentable.
-
-<br/>
-
-## 🔁 The review
-
-Finding 25 violations is the easy half. The hard half is that a list of 25 is not a task — it is a wall, and the reader who is looking at it has no idea where to start, what changes if they act, or when they are done. So the audit is also a **path**, and the path is held to the same rule as everything else: **it may reorder the work, never the verdict.**
-
-### One criterion at a time
-
-The findings are grouped by criterion and ordered by weight — the same `error 3 · warning 1 · info 0.3` the rewrite verifier already runs on, so a criterion with four errors outranks one with ten notes. Heaviest first. Each step is one criterion: you walk its occurrences with the same frame of mind instead of switching problem at every point. The header stays with you the whole way, and answers the three questions in the order they get asked — _where am I_ (step N of M, with the trail of what is behind you), _what do I do_ (open the pending occurrences and settle each one), _how do I advance_ (the next step, always one click and always visible).
-
-Order is a **suggestion, not a rule**: you can enter at any step, and the findings — and the score — are identical in any sequence.
-
-**A walked step is not a clean document.** Marking an occurrence as seen or dismissed is the author's note to themselves about their own review; it never touches the score, and the interface says so where you can't miss it: _a reviewed point is not a resolved one — resolved is what stopped existing in the text._
-
-### Before × after, attributed to the criterion
-
-When a change lands — your edit, a curated swap, or an accepted LLM rewrite — the engine re-analyzes and reports what moved, per criterion. The attribution is computed **at the moment of the change, with both texts in hand**, never by replaying offsets afterwards:
-
-| What the ledger says       | What it means                                                                                          |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `resolved`                 | the finding stopped existing                                                                           |
-| `kept`                     | same finding, same text, still there                                                                   |
-| `rewritten, still flagged` | the passage changed; the criterion still fires                                                         |
-| `flagged after the change` | the edit introduced it                                                                                 |
-| `became something else`    | the count changed — reported as "N became M", with no pretence about which one is the survivor         |
-| `knock-on effect`          | a finding **outside** the edited region moved, and is labeled as such rather than credited to the edit |
-
-That last row is the point of the whole mechanism. Deleting a heading changes the verdict on a heading far below it; an honest delta has to name that instead of quietly folding it into what you just did.
-
-### Profiles: the threshold is a declaration, not a default
-
-A benefit ruling and an app screen do not fail at the same sentence length. Four named profiles carry the purpose — `base`, `normativo`, `publico`, `digital` — and each is a different set of thresholds, not a different set of rules: no criterion is switched off, no clause is reinterpreted.
-
-Each profile hashes differently (`44521072`, `0cc01df9`, `d73a7e54`, `126cfd71`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
-
-### The organisation's vocabulary
-
-A curated glossary is precise and small: only what has been verified one by one gets in, so Lucid's jargon list holds **38 entries** and its nominalization list **24**. Run the engine over **113,522 words of real Brazilian public-sector documents** — grant calls, official letters, booklets — and those two detectors fire **5 times** and **2 times** respectively.
-
-The control is in the same table. `nominalizacao_encadeada` answers to the same clause (5.3.3) as `nominalization`, but recognises a morphological pattern instead of consulting a list, and it fires **581 times** — roughly 290 to 1 against its curated sibling. The two lexical criteria that stay silent on real documents are exactly the two whose recall is bounded by a list. The bottleneck was never the phenomenon; it was the curation.
-
-No central list knows what a given office's readers stumble on — `termo de fomento`, `e-Parcerias`, `instrumento congênere`. So the office declares them, from a passage selected in the document: the term, the plain equivalent, and why. They are then looked for in every document audited with that vocabulary loaded, and they travel in the `.lucid.json` alongside the baseline.
-
-What keeps this from becoming a hole in the authority model:
-
-- **It is a criterion of its own**, not the jargon list with more rows — so the report keeps the two apart, and the reader of a report can always tell which findings the standard backs and which ones you do.
-- **It never cites a clause.** `source: "organizational"`, no `normativeReference`, enforced by the same union as everything else.
-- **A term with no recorded equivalent only signals.** Without an attested 1:1 swap, proposing one would mean inventing what nobody stated — so the finding is `requiresHuman` and carries no `suggestion`.
-- **It travels in the stamp.** The vocabulary lives in the `Config`, which means a different vocabulary produces a different `configHash`. **No result can hide which lexicon measured it** — the same guarantee that already covers a loosened threshold.
-
-And because a zero now means two different things depending on the detector, the interface says which: a list-bound criterion reports _"this zero says the list did not match, not that the text is clear of it"_, a productive one reports _"this zero is a measurement."_
-
-<br/>
-
-## 🔬 Inside the engine
-
-### The pipeline is pure
+Two layers, and a fence between them that the build enforces:
 
 ```
-analyze(text):
-  buildDocument   normalize (NFC) → segment sentences → tokenize → group blocks
-  passes          24 deterministic detectors, each emitting findings with provenance
-  score           per-criterion counts + density — measures, never approves
-  → Diagnostic    { text, findings, score, metrics, meta(configHash, dataHash) }
+┌─────────────────────────────────────────────────────────────┐
+│  LAYER 1 — the deterministic engine          THE PRODUCT    │
+│  zero LLM · zero network · same input → byte-identical out  │
+│  24 detectors, each declaring the authority behind it       │
+│  It can judge. It cannot write.                             │
+└─────────────────────────────────────────────────────────────┘
+                    ▲                        ▲
+             verifies│                 verifies│
+                    │                        │
+        ┌───────────┴──────────┐  ┌──────────┴───────────┐
+        │  a human rewrite     │  │  an LLM rewrite      │
+        │  (the author)        │  │  (opt-in, Layer 2)   │
+        │  It can write.       │  │  It can write.       │
+        │  It cannot judge.    │  │  It cannot judge.    │
+        └──────────────────────┘  └──────────────────────┘
 ```
 
-No `Date`, no `Math.random`, no `localeCompare`, no network anywhere in the core — an ESLint rule fails the build if any appear. Findings sort canonically by `(start, end, criterion)`. One NFC normalization at the door. The result is a core that is **testable offline with fixtures** and locked by byte-identical snapshots: any drift is a red build, not a mystery.
+The engine **never writes a word into your document**. It detects, cites the clause and explains; when a rewrite arrives, it re-analyzes and separates what it can _prove_ from what it can only _signal_. Your own edit is judged by exactly the same checks as the model's. The component that writes has no authority; the component with authority cannot write.
 
-### Provenance: every finding declares its authority
+<p align="center">
+<img width="3118" height="1950" alt="Lucid's review studio: the document on the left with inline annotations, the audit rail on the right showing the finding, its ISO clause and its justification" src="https://github.com/user-attachments/assets/6ff3d23a-5922-442b-9f2b-522b88699444" />
+</p>
 
-Not everything worth flagging is in the standard, and pretending otherwise would be the easiest lie to tell. So each criterion declares where it comes from, and the type system enforces the boundary:
+<p align="center"><em>The review studio. Left: the document, every finding underlined in place. Right: the selected finding — which criterion fired, which ISO subsection it maps to, and why it hurts the reader.</em></p>
 
-| `source`               | Meaning                                            | Gets an ISO clause?                     |
-| ---------------------- | -------------------------------------------------- | --------------------------------------- |
-| `iso-24495-1`          | Derived from a numbered clause of the standard     | **Yes** — `normativeReference` required |
-| `editorial-pt-br`      | A Portuguese editorial convention, not in the norm | **No** — the field cannot exist         |
-| `structural-heuristic` | A weak structural signal, honestly labeled         | **No**                                  |
-| `organizational`       | A term **you** declared unfamiliar to your reader  | **No**                                  |
+The review walks one criterion at a time, heaviest first. Every change lands in a per-criterion ledger — `resolved`, `kept`, `flagged after the change`, `knock-on effect` — computed with both texts in hand. Marking a finding as reviewed never moves the score: _resolved is what stopped existing in the text._ → [The review in depth](docs/how-it-works.md#the-review)
 
-`normativeReference ⟺ source === "iso-24495-1"` is a discriminated union: an editorial rule **cannot** be given a clause number, because that code does not compile. The fourth row is the same rule pointed outwards: your own vocabulary carries real weight in the audit and still cannot borrow the standard's.
-
-### Generator × verifier
-
-Because the verifier is deterministic and independent, "which model should rewrite this?" stops being a vibe and becomes a measurement. The same referee scores every generator over the same stress texts, separating **PROOF** (deterministic: the target violation is gone, numbers and dates survived, no jargon or first person fabricated) from **SIGNAL** (the probe's non-deterministic read on meaning).
+Because the referee is deterministic, "which model should rewrite this?" becomes a measurement:
 
 | System                       | rewrote % |   ΔFlesch | proofs OK % | no-veto % | latency ms |
 | ---------------------------- | --------: | --------: | ----------: | --------: | ---------: |
@@ -245,17 +136,30 @@ Because the verifier is deterministic and independent, "which model should rewri
 | gemini-2.5-flash · `correct` |       100 |     +16.6 |          67 |        67 |       1440 |
 | gemini-2.5-flash · `rewrite` |       100 | **+71.5** |          67 |        33 |       1263 |
 
-The interesting row is the last one. Gemini produced the **biggest readability gain of the whole table** — and the deterministic gate still caught it altering a value or introducing new jargon on the numbers-and-dates text, dropping it to 67% proofs. **Better prose never buys a pass.** That is the entire thesis in one table.
+Gemini produced the biggest readability gain in the table — and the deterministic gate still caught it altering a value or introducing jargon on the numbers-and-dates text. **Better prose never buys a pass.** _(Single run, `temperature 0`, 3 texts: a floor signal, not a leaderboard.)_
 
-_Caveat, stated because it matters: single run, `temperature 0`, 3 texts. A floor signal, not a leaderboard. The harness is gated off CI ([`test/rewrite-benchmark.test.ts`](test/rewrite-benchmark.test.ts), `BENCHMARK=1`)._
+<br/>
 
-### Reproducibility is `(version, config, data)`
+## 🚦 What it does / what it refuses to do
 
-A diagnostic you cannot reproduce is an opinion. Every run is stamped with the engine version, a hash of the active configuration, and a hash of **every curated lexicon that influenced it**. Edit one entry in a jargon list and the `dataHash` changes, the golden snapshot breaks, and the build tells you — automatic governance over the data, not just the code.
+The refusals are the design, not missing features.
 
-### It measures itself, and publishes what it gets wrong
+| ✅ It does                                                       | ❌ It refuses to                                                 |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Locate every violation, with character offsets and `line:column` | Rewrite your document, or apply any edit on its own              |
+| Cite the ISO clause behind each finding                          | Invent authority: editorial rules never get a fake clause number |
+| Explain, in prose, why the reader is hurt                        | Emit a grade, a score out of 100, or a pass mark                 |
+| Mark what needs human judgment, **and why**                      | Guess a missing agent, or swap a word with more than one sense   |
+| Verify a rewrite — yours or an LLM's — against the same checks   | Certify a document as compliant                                  |
+| Report what it did **not** look for                              | Let a silent absence read as an all-clear                        |
 
-`npm run eval` produces a signed artifact ([`eval/report.json`](eval/report.json)) rendered at [`/avaliacao`](https://lucid.marianacastro.dev/avaliacao). Current measured detectors:
+**There is no green check anywhere, and the type system enforces it.** The comprehension probe's result type is `flag | neutral` — there is no `approved` variant to return.
+
+<br/>
+
+## 📏 It measures itself
+
+`npm run eval` produces a stamped artifact ([`eval/report.json`](eval/report.json)), rendered at [`/avaliacao`](https://lucid.marianacastro.dev/avaliacao):
 
 | Detector             | Precision | Recall | Coverage        |
 | -------------------- | --------: | -----: | --------------- |
@@ -264,66 +168,35 @@ A diagnostic you cannot reproduce is an opinion. Every run is stamped with the e
 | `jargon`             |     0.963 |  0.929 | curated lexicon |
 | `sigla_sem_expansao` |     0.867 |  1.000 | productive rule |
 
-Three things about that table are unusual, and deliberate:
+- **Only 4 of 24 detectors are listed.** The others have no defensible precision/recall number, so none is invented.
+- **Known limitations count against the score.** `passive_voice` publishes 0.830 recall, not the 0.943 it once showed: where no deterministic signal separates a passive from a predicative adjective, the detector now stays silent, and the cost is in the number.
+- **Circular numbers are flagged inside the JSON.** Recall of a curated-lexicon detector, measured on a corpus built from that lexicon, says "the code reads its own list" — and the artifact says so.
 
-1. **Only 4 of 24 detectors are there.** The rest have no honest precision/recall number, so none is invented. The artifact says which is which.
-2. **Known limitations count _against_ the score.** A false positive we chose not to fix is left in the corpus, so `jargon` publishes 0.963 instead of a prettier 1.000. The same rule is why `passive_voice` publishes 0.830 recall rather than the 0.943 it once showed: `ser` in the present with no agent and a subject before the verb (“o benefício é concedido”) is structurally identical to a predicative adjective (“o servidor é qualificado”), no deterministic signal separates them, and the detector now stays silent there. The recall those silences cost is in the number, not in a footnote.
-3. **The artifact flags its own circular numbers.** Recall for a curated-lexicon detector is measured against a corpus built from that same lexicon — so it reports "the code reads its own list," not "the instrument finds the phenomenon." That caveat ships _inside_ the JSON.
-
-### The corpus that answers the circular number
-
-A caveat you publish and never act on is a caveat you have learned to live with. So the third point above has an apparatus behind it: **149 passages from 16 real federal laws** — text nobody wrote with a detector in mind — labelled by a pipeline whose whole design is that the labeller must not see the detector (`dependency-cruiser` fails the build if `scripts/corpus/` reaches for a pass or a dataset).
-
-Two independent models propose every label; where they disagree, where either declares low confidence, and on a random audit sample of the ones they agreed on, **a person decides**. Agreement between the two is measured with Cohen's κ and Gwet's AC1, rates carry Wilson intervals, and the sample is stratified — a random stratum, where recall means something, and a cue-enriched one, where it would only measure the cue.
-
-**One of three criteria clears the gate — and what it publishes is an absence, not a rate:**
-
-| Criterion            |   AC1 | Result                                                    |
-| -------------------- | ----: | --------------------------------------------------------- |
-| `prose_enumeration`  | 1.000 | **published** — 0 false positives over 16 random passages |
-| `sigla_sem_expansao` | 0.558 | withheld — inter-labeller agreement below the 0.7 floor   |
-| `perifrase_inflada`  | 0.321 | withheld — inter-labeller agreement below the 0.7 floor   |
-
-The published one is worth reading closely: the detector stayed silent on all 16 passages and the human-audited labels agree it should have, so **both denominators are empty and precision stays `—`**. A rule engine that fired zero times does not get to publish 100% precision. The finding is the silence, and the artifact says so instead of manufacturing a number at the best point of the scale.
-
-That is the band working, not the band failing. The counts stay in the artifact so a dissenter can recompute; the **rates** are redacted, because a rate is a claim and this is precisely the claim the floor refused. And the interface keeps three absences apart — `—` is _no measurement was possible_, `retido` is _measured and not published_, `não se mede` is _a number that would be a lie_ — with a test that fails if they ever collapse into one.
-
-The two below the floor cannot be rescued by more reviewing — and this was measured, not assumed: adjudicating the one queued audit item promoted `prose_enumeration` and moved neither of the others, because AC1 is a property of the model runs, not of the adjudication. What their low agreement measures is **how well-defined the criterion is** — and publishing that instead of a precision number is the more useful admission.
-
-_See [`eval/report.json`](eval/report.json) → `assistedCorpus`, rendered at [`/avaliacao`](https://lucid.marianacastro.dev/avaliacao#corpus), method in [`corpus/README.md`](corpus/README.md), and the measurement written up — prediction, miss and all — in [`docs/experimentos/002`](docs/experimentos/002-o-que-o-corpus-assistido-consegue-publicar.md)._
-
-Test strength itself is measured: **2503 tests**, with [Stryker](https://stryker-mutator.io/) mutation testing over the criteria. Survivors are triaged into real gaps versus provably-equivalent mutants — because a mutation score you haven't triaged is also just a number.
+To break that circularity: **149 passages from 16 real federal laws**, labelled by two independent models that never see the detectors, with a person adjudicating disagreements and a random audit sample. Agreement is measured with Cohen's κ and Gwet's AC1. One of three criteria clears the 0.7 floor, and what it publishes is an absence — zero false positives over 16 random passages, precision `—` — not a rate. The other two are withheld. → [Method and results](docs/how-it-works.md#the-assisted-corpus)
 
 <br/>
 
-## 📐 Why ISO 24495-1
+## 🔬 Inside the engine
 
-**ISO 24495-1:2023** is the international standard for Plain Language. Not a style guide, not one government's manual — a published norm with four numbered principles:
+- **A pure pipeline.** Normalize (NFC) → segment → tokenize → 24 detectors → per-criterion score. No `Date`, no `Math.random`, no `localeCompare`, no network in the core; an ESLint rule fails the build if one appears. Byte-identical golden snapshots lock the output.
+- **Provenance is a type.** Every criterion declares where its authority comes from:
 
-| #   | Principle          | The reader…                  | Clause |
-| --- | ------------------ | ---------------------------- | ------ |
-| 1   | **Relevant**       | gets what they actually need | 5.1    |
-| 2   | **Findable**       | can locate it                | 5.2    |
-| 3   | **Understandable** | understands it               | 5.3    |
-| 4   | **Usable**         | can act on it                | 5.4    |
+  | `source`               | Meaning                                            | Gets an ISO clause?                     |
+  | ---------------------- | -------------------------------------------------- | --------------------------------------- |
+  | `iso-24495-1`          | Derived from a numbered clause of the standard     | **Yes** — `normativeReference` required |
+  | `editorial-pt-br`      | A Portuguese editorial convention, not in the norm | **No** — the field cannot exist         |
+  | `structural-heuristic` | A weak structural signal, labeled as such          | **No**                                  |
+  | `organizational`       | A term **your organisation** declared unfamiliar   | **No**                                  |
 
-Lucid implements the **Brazilian adoption** (`ABNT NBR ISO 24495-1:2024`), which is identical to the ISO text. That matters for anyone reading from elsewhere: the authority behind every finding is the international standard, and a second locale would cite the same clauses.
+  `normativeReference ⟺ source === "iso-24495-1"` is a discriminated union: an editorial rule cannot be given a clause number, because that code does not compile.
 
-**The standard explicitly says plain language rests on reader success, not on mechanical formulas.** Rather than treating that as an inconvenience, Lucid uses it to divide the work honestly:
+- **Reproducibility is `(version, config, data)`.** Every run hashes the configuration and every curated lexicon that influenced it. Edit one glossary entry and the golden snapshot breaks.
+- **The layers are fenced.** `dependency-cruiser` fails the build if the core reaches for the LLM layer or a locale. Languages arrive through a `LocaleBundle`; an experimental US-English catalogue with 12 criteria of its own proves the seam.
+- **2679 tests**, plus [Stryker](https://stryker-mutator.io/) mutation testing over the criteria, survivors triaged.
 
-- **Principles 2 and 3 → 23 deterministic detectors.** (A 24th is yours — see [the organisation's vocabulary](#the-organisations-vocabulary).) These are the mechanically checkable ones. This is where rules are strong.
-- **Principle 1 → no detector, and there never will be one.** "Relevant _to whom?_" depends on the reader, the purpose, and what the author chose to cut. So Lucid **asks** instead: it poses the standard's own questions, records the answers as the author's declaration, and verifies only what is literally verifiable. Undeclared reads **"not declared"** — never "compliant."
-- **Principle 4 → testing with real readers. Lucid does not cover it.** A synthetic floor-reader (the comprehension probe) was built as the cheap floor _before_ human testing: it reads _only_ the passage, may never use outside knowledge, and reports where it stalls — it can fail a text, never pass one. It is **not exposed in the product**: re-run against the model currently wired in, it failed the recall floor this repo already had (it read "the text does not say" and still reported that it could answer), so shipping it would have implied a coverage nobody validated. The code, the labelled golden set and the harness stay in the tree; the section comes back only when a live meta-eval clears both floors. Until then Principle 4 is answered the way the standard answers it — with human readers.
+### Why Portuguese first
 
-**Two of four principles are covered by rules, and the README says so** — because a tool that claimed all four would be lying about the two that need a person.
-
-<br/>
-
-## 🇧🇷 Why Portuguese first
-
-Not a limitation — a choice of hard mode, on top of a language-neutral core.
-
-Brazilian officialese has failure modes that no English tool has ever needed to model:
+Brazilian officialese has failure modes no English tool has needed to model:
 
 | Phenomenon               | Example              | What it is in English                                                                      |
 | ------------------------ | -------------------- | ------------------------------------------------------------------------------------------ |
@@ -332,17 +205,28 @@ Brazilian officialese has failure modes that no English tool has ever needed to 
 | **Synthetic passive**    | `aplica-se a multa`  | A passive built with a clitic, agent structurally absent and ambiguous with the impersonal |
 | **Gerundism**            | `vai estar enviando` | "will be sending" — a calque of English progressive future, stigmatized in Portuguese      |
 
-Handling those required real morphology, not pattern-matching. Rather than hand-writing a conjugator, a build step stream-filters **PortiLexicon-UD** (71 MB) down to an ~850 KB _unambiguous_ set: pluperfect forms that never appear with any other reading. `fora` (also an adverb) and `vira` (also a verb) drop out; the opaque irregulars survive. Ambiguity resolved once, offline, so the runtime detector is a membership test.
+Detecting them takes real morphology: a build step distils **PortiLexicon-UD** (71 MB) to an ~850 KB set of unambiguous forms, so the runtime check is a lookup. Readability uses **Flesch adapted to Brazilian Portuguese** (Martins et al., 1996), not the English coefficients.
 
-Meanwhile **the core never imports a locale.** Passes, lexicons, syllable counting, readability and criteria all arrive through a `LocaleBundle`; `dependency-cruiser` fails the build if `core` reaches for `locales`, and a synthetic test locale proves the seam. A second language slots in without a line changing in the pipeline.
+<br/>
 
-Readability likewise reuses rather than rebuilds: **Flesch adapted to Brazilian Portuguese** (Martins et al., 1996), never the English coefficients pointed at a language they were not fitted to.
+## 📐 ISO 24495-1: two of four principles
+
+Lucid implements the Brazilian adoption (`ABNT NBR ISO 24495-1:2024`), identical to the ISO text. The standard says plain language rests on reader success, not mechanical formulas — so Lucid covers only what rules can honestly check:
+
+| #   | Principle          | Clause | In Lucid                                                                                                                                     |
+| --- | ------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Relevant**       | 5.1    | No detector, ever. Lucid asks the standard's questions and records the author's answers; undeclared reads _"not declared"_, never compliant. |
+| 2   | **Findable**       | 5.2    | Deterministic detectors                                                                                                                      |
+| 3   | **Understandable** | 5.3    | Deterministic detectors                                                                                                                      |
+| 4   | **Usable**         | 5.4    | Needs real readers. A synthetic comprehension probe exists in the code but is off: it failed its own recall floor against the current model. |
+
+23 detectors cover principles 2 and 3; a 24th checks [your organisation's own vocabulary](docs/how-it-works.md#the-organisations-vocabulary) and never cites the standard.
 
 <br/>
 
 ## 💻 Run it
 
-**Layer 1 needs no keys and no network.** It is pure and offline. Only the AI rewrite reads `GEMINI_API_KEY` (the comprehension probe does too, but it is currently hidden from the interface — see Principle 4 above).
+**Layer 1 needs no keys and no network.** Only the AI rewrite reads `GEMINI_API_KEY`.
 
 ```bash
 git clone https://github.com/maricastroc/lucid
@@ -357,12 +241,7 @@ npm run build:cli && npm link     # puts `lucid` on your PATH
 lucid document.docx --format json
 ```
 
-_Honest note on language: the JSON is language-neutral — criterion ids, ISO clauses, severities,
-spans, `line:column`. The `justification` prose and the human-readable text output are in Portuguese,
-because they are written for the person revising a Portuguese document. You can read the structure
-without reading the language._
-
-Accepts `.txt`, `.md`, `.docx`, `.pdf` and stdin. **The exit codes are the honest part:**
+Accepts `.txt`, `.md`, `.docx`, `.pdf` and stdin; analyses `pt-BR` only. The JSON is language-neutral; the `justification` prose is Portuguese, written for the person revising the document. The exit codes refuse to approve:
 
 | Code | Meaning                                                     |
 | ---- | ----------------------------------------------------------- |
@@ -370,28 +249,19 @@ Accepts `.txt`, `.md`, `.docx`, `.pdf` and stdin. **The exit codes are the hones
 | `1`  | execution failed (unreadable file, bad flag)                |
 | `2`  | **a threshold _you_ declared** with `--fail-on` was crossed |
 
-Findings never move the exit code on their own. There is no built-in notion of "too many." If you want CI to fail, you say where the line is:
-
 ```bash
 lucid drafts/*.docx --fail-on error   # your policy, not the tool's
 ```
 
-### The studio
+### The studio and the checks
 
 ```bash
-npm run dev     # → http://localhost:3000
-```
-
-### The checks
-
-```bash
-npm run test        # 2503 Vitest tests + byte-identical golden snapshots
+npm run dev         # → http://localhost:3000
+npm run test        # 2679 Vitest tests + byte-identical golden snapshots
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint (incl. the no-Date/no-random rule inside core)
 npm run depcheck    # dependency-cruiser — the layer fence
 npm run eval        # regenerate the self-evaluation artifact
-npm run corpus:measure    # re-score the assisted corpus (offline: reads closed labels, no key)
-npm run mutation:passes   # Stryker over the 24 criteria (~26 min, off CI)
 ```
 
 <br/>
@@ -410,15 +280,11 @@ npm run mutation:passes   # Stryker over the 24 criteria (~26 min, off CI)
 
 <br/>
 
-## 📓 Engineering notes
+## 📚 Go deeper
 
-**Honesty as a compile-time invariant.** The hardest constraint in this project is a _refusal_, and refusals rot unless the compiler holds them. The probe cannot return `approved` because the variant does not exist. An editorial rule cannot cite the standard because the union forbids it. A finding either carries a provably 1:1 curated equivalent or is stamped `requiresHuman`. Keeping that discipline while detectors, an AI rewriter, a CLI and a UI grew around it was the through-line of the whole build.
-
-**Determinism stopped being a testing property and became a product one.** Byte-identical output is table stakes for snapshots. The payoff is elsewhere: it is what makes the rewrite verifier _credible_ (a reproducible referee, not a second opinion), what makes a conformance claim defensible, and — unexpectedly — what made structural editing work. When an imported `.docx` is edited, the engine re-applies the edit to the block model and **accepts the result only if the rebuilt source matches the requested text byte for byte**; otherwise it falls back and tells the user. The invariant became a feature.
-
-**Reusing 71 MB, minimally.** Detecting `fizera` needs morphology no regex can supply. Instead of vendoring PortiLexicon-UD, a build step distills it to the unambiguous pluperfect set — the ambiguity resolved once, offline, so runtime stays a plain lookup.
-
-**Why it audits instead of generating.** A frontier model will always out-write a rule engine at "make this simpler." So Lucid stopped competing there and became the referee: it _proves_ what got mechanically simpler against the norm, _flags_ where meaning may have slipped, and hands the decision back. **The defensible position is the verification, not the generation** — precisely the thing a chat interface cannot be.
+- **[How it works](docs/how-it-works.md)** — the review path and change ledger, profiles, the organisation's vocabulary, the full evaluation method, the US-English catalogue, engineering notes.
+- **[Experiments](docs/experimentos/)** _(in Portuguese)_ — measurements written up, prediction and miss included.
+- **[Corpus method](corpus/README.md)** — how the assisted corpus is labelled.
 
 <br/>
 
@@ -429,11 +295,3 @@ The **code** is [MIT](LICENSE) — use, study, fork and build on it, keeping the
 The **bundled linguistic data** derived from **PortiLexicon-UD** (`mais-que-perfeito.pt.json`, `adverbios-mente.pt.json`) is a derivative work under **CC-BY 4.0** — attribution required; see [`src/locales/pt-BR/datasets/README.md`](src/locales/pt-BR/datasets/README.md).
 
 © 2025–2026 [**Mariana Castro**](https://marianacastro.dev) · [Live demo](https://lucid.marianacastro.dev/)
-
-<br/>
-
-<div align="center">
-
-⭐ If this project is useful to you, give it a star.
-
-</div>

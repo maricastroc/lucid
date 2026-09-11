@@ -65,8 +65,8 @@ export interface VerificationSignal {
 }
 
 export interface MetricsDelta {
-  fleschPtBefore: number | null;
-  fleschPtAfter: number | null;
+  readabilityBefore: number | null;
+  readabilityAfter: number | null;
   wordsBefore: number;
   wordsAfter: number;
 }

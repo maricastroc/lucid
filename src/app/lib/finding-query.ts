@@ -126,7 +126,8 @@ export function occurrenceCount(diagnostic: Diagnostic, criterion: string): numb
 }
 
 export function cleanCriteria(diagnostic: Diagnostic): readonly string[] {
-  return CRITERION_ORDER.filter((criterion) => occurrenceCount(diagnostic, criterion) === 0);
+  const ran = new Set(diagnostic.score.byCriterion.map((score) => score.criterion));
+  return CRITERION_ORDER.filter((criterion) => ran.has(criterion) && occurrenceCount(diagnostic, criterion) === 0);
 }
 
 export function hiddenHighlightCount(groups: readonly FindingGroup[], hidden: ReadonlySet<string>): number {

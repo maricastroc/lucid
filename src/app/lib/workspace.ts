@@ -1,24 +1,22 @@
-import {
-  DEFAULT_CONFIG,
-  EMPTY_BRIEFING,
-  isRawBlock,
-  type Config,
-  type OrgTerm,
-  type RawBlock,
-  type ReaderBriefing,
-} from "@/lucid";
+import { EMPTY_BRIEFING, isRawBlock, type Config, type OrgTerm, type RawBlock, type ReaderBriefing } from "@/lucid";
 import type { ImportNotes } from "../hooks/use-document-source";
 import type { Mode } from "../components/document-view";
 import type { LedgerEntry } from "./ledger";
 import { parseBaseline, serializeBaseline, type Baseline } from "./baseline";
-import { isProfileId, type ProfileId } from "./profiles";
+import { isProfileAvailable, isProfileId, type ProfileId } from "./profiles";
 import { parseStoredMarks, type ReviewMarks } from "./review-marks";
+import { analysisLocale, isAnalysisLocaleId, type AnalysisLocaleId } from "../locale/active";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 10;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const SCHEMA_VERSION = 11;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+const LOCALE_STAMPED_FROM = 11;
+
+const PRE_LOCALE_SNAPSHOT_LOCALE: AnalysisLocaleId = "pt-BR";
 
 export interface WorkspaceSnapshot {
+  readonly localeId: AnalysisLocaleId;
   readonly text: string;
   readonly originalText: string | null;
   readonly blocks: readonly RawBlock[] | null;
@@ -56,7 +54,7 @@ function isAttribution(value: unknown): boolean {
   );
 }
 
-const LEDGER_SOURCES: readonly string[] = ["manual", "ai", "glossary", "typing"];
+const LEDGER_SOURCES: readonly string[] = ["manual", "ai", "glossary", "attested", "typing"];
 
 function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (!isRecord(value)) return false;
@@ -64,6 +62,8 @@ function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (value.attribution !== undefined && !isAttribution(value.attribution)) return false;
   if (typeof value.label !== "string") return false;
   if (value.proposerId !== undefined && typeof value.proposerId !== "string") return false;
+  if (value.attestedIn !== undefined && typeof value.attestedIn !== "string") return false;
+  if ((value.source === "attested") !== (value.attestedIn !== undefined)) return false;
   if (typeof value.burdenBefore !== "number" || typeof value.burdenAfter !== "number") return false;
   if (value.before !== undefined && typeof value.before !== "string") return false;
   if (value.after !== undefined && typeof value.after !== "string") return false;
@@ -94,12 +94,12 @@ export function parseOrgTerms(value: unknown): OrgTerm[] | null {
   return terms;
 }
 
-function parseConfig(value: unknown): Config | null {
-  if (value === undefined) return DEFAULT_CONFIG;
+function parseConfig(value: unknown, base: Config): Config | null {
+  if (value === undefined) return base;
   if (!isRecord(value)) return null;
-  const merged = { ...DEFAULT_CONFIG } as unknown as Record<string, Record<string, unknown>>;
-  const base = DEFAULT_CONFIG as unknown as Record<string, Record<string, unknown>>;
-  for (const [section, defaults] of Object.entries(base)) {
+  const defaultsBySection = base as unknown as Record<string, Record<string, unknown>>;
+  const merged: Record<string, Record<string, unknown>> = { ...defaultsBySection };
+  for (const [section, defaults] of Object.entries(defaultsBySection)) {
     const incoming = (value as Record<string, unknown>)[section];
     if (incoming === undefined) continue;
     if (!isRecord(incoming)) return null;
@@ -107,7 +107,7 @@ function parseConfig(value: unknown): Config | null {
     for (const [field, fallback] of Object.entries(defaults)) {
       const candidate = incoming[field];
       if (candidate === undefined) continue;
-      if (section === "vocabulario" && field === "terms") {
+      if (Array.isArray(fallback)) {
         const terms = parseOrgTerms(candidate);
         if (terms === null) return null;
         next[field] = terms;
@@ -147,7 +147,11 @@ function parse(raw: string): WorkspaceSnapshot | null {
   const briefing = parseBriefing(value.briefing);
   if (briefing === null) return null;
 
-  const config = parseConfig(value.config);
+  const localeId = parseLocaleId(value.version, value.localeId);
+  if (localeId === null) return null;
+  const locale = analysisLocale(localeId);
+
+  const config = parseConfig(value.config, locale.defaultConfig);
   if (config === null) return null;
 
   const reviewMarks = parseStoredMarks(value.reviewMarks);
@@ -162,9 +166,10 @@ function parse(raw: string): WorkspaceSnapshot | null {
   }
 
   return {
+    localeId,
     importNotes: parseImportNotes(value.importNotes),
     baseline: parseAttachedBaseline(value.baseline),
-    profileId: isProfileId(value.profileId) ? value.profileId : "base",
+    profileId: isProfileId(value.profileId) && isProfileAvailable(value.profileId, locale) ? value.profileId : "base",
     text: value.text,
     originalText: typeof value.originalText === "string" ? value.originalText : null,
     blocks,
@@ -175,6 +180,11 @@ function parse(raw: string): WorkspaceSnapshot | null {
     reviewMarks,
     guidedStep: typeof value.guidedStep === "string" ? value.guidedStep : null,
   };
+}
+
+function parseLocaleId(version: number, value: unknown): AnalysisLocaleId | null {
+  if (version < LOCALE_STAMPED_FROM) return PRE_LOCALE_SNAPSHOT_LOCALE;
+  return isAnalysisLocaleId(value) ? value : null;
 }
 
 function parseImportNotes(value: unknown): ImportNotes | null {

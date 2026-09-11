@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 
 describe("redundanciaPass — M3: false positives on legitimate usage removed from the curated lexicon", () => {
   it.each(["O programa vai criar novos empregos na região.", "Vamos manter o mesmo ritmo de trabalho."])(

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { copyFor } from "../src/app/i18n/copy";
 import { atRiskItems, briefingAnswered, pendingWork, type PendingWorkInput } from "../src/app/lib/pending-work";
 import { EMPTY_MARKS, withMark, withNote } from "../src/app/lib/review-marks";

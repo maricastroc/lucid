@@ -1,16 +1,18 @@
 import type { Finding } from "@/lucid";
 import type { Attribution } from "./attribution";
+import type { AnalysisLocaleId } from "../locale/active";
 import { metaFor } from "./criteria";
 import { totalBurden } from "@/report/rewrite";
 import { copyFor } from "../i18n/copy";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
-export type LedgerSource = "manual" | "ai" | "glossary" | "typing";
+export type LedgerSource = "manual" | "ai" | "glossary" | "attested" | "typing";
 
 export interface LedgerEntry {
   source: LedgerSource;
   label: string;
   proposerId?: string;
+  attestedIn?: string;
   before?: string;
   after?: string;
   burdenBefore: number;
@@ -24,6 +26,7 @@ export function sourceLabel(source: LedgerSource, lang: UiLang = DEFAULT_UI_LANG
 
 export function entryLabel(entry: LedgerEntry, lang: UiLang = DEFAULT_UI_LANG): string {
   const base = sourceLabel(entry.source, lang);
+  if (entry.attestedIn !== undefined) return `${base} · ${entry.attestedIn}`;
   return entry.proposerId === undefined ? base : `${base} · ${entry.proposerId}`;
 }
 
@@ -52,7 +55,7 @@ const collapse = (t: string): string => t.replace(/\s+/g, " ").trim();
 const truncate = (t: string, max = 90): string => (t.length > max ? `${t.slice(0, max - 1)}…` : t);
 const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
-export function renderLedgerMarkdown(entries: readonly LedgerEntry[]): string {
+export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: AnalysisLocaleId): string {
   if (entries.length === 0) return "";
   const out: string[] = [];
   out.push("## Alterações registradas");
@@ -80,11 +83,12 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[]): string {
     const move = burdenMove(e);
     const mark = move === "level" ? "(sem mudança de peso)" : move === "down" ? "↓" : "↑";
     out.push(`**${i + 1}. ${e.label}** — peso ${fmt(e.burdenBefore)} → ${fmt(e.burdenAfter)} ${mark}`);
+    if (e.attestedIn !== undefined) out.push(`_equivalência atestada em:_ ${e.attestedIn}`);
     if (e.before !== undefined && e.after !== undefined && e.before !== "") {
       out.push(`_de:_ "${truncate(collapse(e.before))}" · _para:_ "${truncate(collapse(e.after))}"`);
     }
     for (const change of e.attribution?.changes ?? []) {
-      const label = metaFor(change.criterion).label;
+      const label = metaFor(localeId, change.criterion).label;
       const verdict =
         change.kind === "transformed"
           ? `${change.before} virou ${change.after}`

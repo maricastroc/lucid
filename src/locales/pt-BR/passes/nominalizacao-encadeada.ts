@@ -1,4 +1,5 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "nominalizacao_encadeada";
 
@@ -60,7 +61,7 @@ function chainJustification(strongLink: boolean): string {
   );
 }
 
-export const nominalizacaoEncadeadaPass: Pass = {
+export const nominalizacaoEncadeadaPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["substantivos-acao.pt"],

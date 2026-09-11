@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  analyzeDocument,
-  buildStructuredDocument,
-  ptDocumentServices,
-  spliceStructuredDocument,
-  toRawBlocks,
-  type Document,
-  type RawBlock,
-} from "@/lucid";
+import { buildStructuredDocument, spliceStructuredDocument, toRawBlocks, type Document, type RawBlock } from "@/lucid";
+import { analyzeDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { documentToDocx } from "../src/app/lib/export-document";
 
 const PREAMBLE =

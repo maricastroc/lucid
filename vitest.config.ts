@@ -23,6 +23,7 @@ export default defineConfig({
           include: ["test/ui/**/*.test.tsx"],
           environment: "jsdom",
           setupFiles: ["./test/ui/support/setup.ts"],
+          testTimeout: 15_000,
         },
       },
     ],

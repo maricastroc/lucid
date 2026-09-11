@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createDataView } from "../../src/locales/pt-BR/datasets/registry";
 import { jargonPass } from "../../src/locales/pt-BR/passes/jargon";
-import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../../src/locales/pt-BR";
 import { buildDocument } from "../support/pt";
 import { GOLDEN_JARGAO } from "./jargon-golden";
 import { formatRate, evaluateJargon } from "./compute";

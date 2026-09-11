@@ -1,10 +1,11 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
-import { matchPhrasesInSentence } from "./phrase-match";
+import { matchPhrasesInSentence } from "../../_shared";
+import type { PtConfig } from "../config";
 
 const CRITERION = "dupla_negacao";
 
-export const duplaNegacaoPass: Pass = {
+export const duplaNegacaoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["duplas-negacoes.pt"],
