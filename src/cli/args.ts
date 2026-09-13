@@ -79,7 +79,8 @@ export function parseArgs(argv: readonly string[]): ParseResult {
   return { ok: true, options: { paths, format, failOn, criteria, quiet, coverage, help, version } };
 }
 
-export const HELP = `Lucid — auditor determinístico de Linguagem Simples (ABNT NBR ISO 24495-1)
+export const HELP = `Lucid — auditor textual determinístico
+  Cada apontamento cita o critério e a fonte que o fundamenta (ex.: ABNT NBR ISO 24495-1).
 
 USO
   lucid <arquivo...> [opções]

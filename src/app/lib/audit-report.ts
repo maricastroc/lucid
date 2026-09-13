@@ -427,7 +427,7 @@ export function buildAuditReport(
   const human = total - safe;
 
   const out: string[] = [];
-  out.push("# Auditoria de Linguagem Simples");
+  out.push("# Auditoria textual");
   out.push("");
   out.push(`Análise determinística · ${engine.standardVersion} · Lucid`);
   out.push(`Gerado em ${meta.generatedAt}${meta.documentTitle ? ` · ${meta.documentTitle}` : ""}`);

@@ -22,7 +22,7 @@ export const COPY_EN: UiCopy = {
 
   masthead: {
     home: "Back to start",
-    tagline: "Plain language auditor",
+    tagline: "Deterministic text auditor",
     openDocument: "Open document",
     opening: "Opening…",
     evaluation: "Evaluation",
@@ -35,24 +35,24 @@ export const COPY_EN: UiCopy = {
 
   welcome: {
     regionLabel: "Introducing Lucid",
-    kicker: "Plain Language auditor",
-    titleLead: "Lucid audits your text for clarity.",
-    titleTrail: "It does not rewrite it for you.",
+    kicker: "Same text, same diagnosis",
+    titleLead: "Lucid audits your text, criterion by criterion.",
+    titleTrail: "It does not decide for you.",
     lead:
-      "It checks every passage against the Plain Language principles of the ABNT/ISO standard: it shows what stops " +
-      "the reader, cites the criterion that fired, and explains why.",
-    leadStrong: "The final word is always yours.",
+      "Every finding carries the criterion that fired, the source behind it — such as the ABNT/ISO 24495-1 standard — " +
+      "and the exact passage: it shows what stops the reader and explains why.",
+    leadStrong: "An AI proposal only enters the document if you apply it.",
     doesLabel: "What it does",
     verbs: ["Analyzes", "Detects", "Explains", "Asks", "Verifies"],
     doesNotBefore: "What it does ",
     doesNotStrong: "not",
-    doesNotAfter: " do: write the text for you.",
+    doesNotAfter: " do: approve your text.",
     write: "Write or paste text",
     loadExample: "Load example",
     anatomyLabel: "Every passage becomes an annotation like this",
     cardCriterion: {
       title: "The criterion that fired",
-      body: "Passive voice, jargon, long sentence, nominalization — each tied to a principle of the standard.",
+      body: "Passive voice, jargon, long sentence, nominalization — each with the source behind it.",
     },
     cardWhy: {
       title: "Why it stops the reader",

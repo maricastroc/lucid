@@ -22,7 +22,7 @@ export const COPY_PT: UiCopy = {
 
   masthead: {
     home: "Voltar ao início",
-    tagline: "Auditor de linguagem simples",
+    tagline: "Auditor textual determinístico",
     openDocument: "Abrir documento",
     opening: "Abrindo…",
     evaluation: "Avaliação",
@@ -35,24 +35,24 @@ export const COPY_PT: UiCopy = {
 
   welcome: {
     regionLabel: "Apresentação do Lucid",
-    kicker: "Auditor de Linguagem Simples",
-    titleLead: "Lucid audita a clareza do seu texto.",
-    titleTrail: "Não reescreve por você.",
+    kicker: "Mesmo texto, mesmo diagnóstico",
+    titleLead: "Lucid audita o seu texto, critério a critério.",
+    titleTrail: "Não decide por você.",
     lead:
-      "Ele confronta cada trecho com os princípios de Linguagem Simples da norma ABNT: mostra o que trava o leitor, " +
-      "cita o critério que disparou e explica o porquê.",
-    leadStrong: "A palavra final é sempre sua.",
+      "Cada apontamento traz o critério que disparou, a fonte que o fundamenta — como a norma ABNT NBR ISO 24495-1 — " +
+      "e o trecho exato: mostra o que trava o leitor e explica o porquê.",
+    leadStrong: "Uma proposta da IA só entra no documento se você aplicar.",
     doesLabel: "O que ele faz",
     verbs: ["Analisa", "Detecta", "Explica", "Pergunta", "Verifica"],
     doesNotBefore: "O que ele ",
     doesNotStrong: "não",
-    doesNotAfter: " faz: escrever o texto no seu lugar.",
+    doesNotAfter: " faz: aprovar o seu texto.",
     write: "Escrever ou colar texto",
     loadExample: "Carregar exemplo",
     anatomyLabel: "Cada trecho vira uma anotação assim",
     cardCriterion: {
       title: "O critério que disparou",
-      body: "Voz passiva, jargão, frase longa, nominalização — cada um ligado a um princípio da norma.",
+      body: "Voz passiva, jargão, frase longa, nominalização — cada um com a fonte que o fundamenta.",
     },
     cardWhy: {
       title: "Por que trava o leitor",

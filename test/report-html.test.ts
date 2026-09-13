@@ -115,7 +115,7 @@ describe("renderReportHtml — a whole report reaches the page as prose", () => 
   it("renders every section the report can carry", () => {
     const html = renderReportHtml(fullReport());
     for (const section of [
-      "Auditoria de Linguagem Simples",
+      "Auditoria textual",
       "Placar",
       "Anotações por critério",
       "Perfil editorial",

@@ -6,10 +6,10 @@
   <br>
 </h1>
 
-<h4 align="center">LLM proposes. Engine verifies.</h4>
+<h4 align="center">Every finding, traced to its criterion and its source.</h4>
 
 <p align="center">
-  A <strong>deterministic auditor</strong> that checks writing against <strong>ISO 24495-1</strong>, the international Plain Language standard — and verifies every rewrite, whether a person or a language model wrote it.
+  A <strong>deterministic text auditor</strong>. Every finding names the criterion that fired and the source that criterion rests on — a clause of <strong>ISO 24495-1</strong>, a declared editorial convention, a structural heuristic or your organisation's own vocabulary — and the same input always produces the same output.
 </p>
 
 <p align="center">
@@ -27,7 +27,7 @@
 <p align="center">
   <a href="#-the-problem">The problem</a> •
   <a href="#-30-seconds">30 seconds</a> •
-  <a href="#-llm-proposes-engine-verifies">The idea</a> •
+  <a href="#-the-engine-judges-the-model-proposes">The idea</a> •
   <a href="#-what-it-does--what-it-refuses-to-do">Does / Refuses</a> •
   <a href="#-it-measures-itself">Measured</a> •
   <a href="#-inside-the-engine">Inside</a> •
@@ -42,11 +42,11 @@
 
 ## 🎯 The problem
 
-**Every writing tool is now a language model — and the model that writes is also the model that grades.** It hands back something that _reads_ better. Whether a number changed, a date moved or an actor was invented: nobody checked. That is tolerable for a blog post. It is not tolerable for a benefit ruling, a tax notice or a consent form, where being _wrong_ is worse than being _dense_.
+**A writing check is only as good as its answer to _"says who?"_.** A style checker flags a passive without saying on what authority. A single score over the whole text cannot point to the sentence, the rule or the reason. A language model gives a fluent opinion that may change on the next run. None of them can back a finding when someone asks for its basis.
 
-Readability scores don't fix it. One number over syllable counts cannot say _which sentence_ fails, _which rule_ it breaks, or _why_ — and it rewards text that is short, fluent and wrong.
+That gap matters most where a text has to be defended, not just improved — contracts, consent forms, policies, regulations — and where someone may have to show what was checked, and against what.
 
-**Lucid separates the writer from the judge, and makes the judge deterministic.**
+**Lucid treats every finding as a claim with a citation:** the criterion that fired, the source behind it, the exact span, and a stamp that lets anyone reproduce the run byte for byte.
 
 <br/>
 
@@ -56,7 +56,7 @@ One sentence of Brazilian officialese:
 
 > **`Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.`**
 >
-> _Word for word: "Was carried out the analysis of the document by the competent committee in the seat of administrative proceeding." Plain: **"The committee analyzed the document."**_
+> _Word for word: "Was carried out the analysis of the document by the competent committee in the seat of administrative proceeding." Direct: **"The committee analyzed the document."**_
 
 Bureaucratic language is universal; only its symptoms are local. English does the same with _"it was determined that"_.
 
@@ -95,7 +95,7 @@ Every run is stamped with `configHash` and `dataHash`: same text, config and lex
 
 <br/>
 
-## 🧩 LLM proposes. Engine verifies.
+## 🧩 The engine judges. The model proposes.
 
 Two layers, and a fence between them that the build enforces:
 
@@ -117,7 +117,7 @@ Two layers, and a fence between them that the build enforces:
         └──────────────────────┘  └──────────────────────┘
 ```
 
-The engine **never writes a word into your document**. It detects, cites the clause and explains; when a rewrite arrives, it re-analyzes and separates what it can _prove_ from what it can only _signal_. Your own edit is judged by exactly the same checks as the model's. The component that writes has no authority; the component with authority cannot write.
+The deterministic engine **never authors text**: it detects, cites the source and explains. Rewrites come from outside it — a language model, when you opt in, or your own edit — and when one arrives, the engine re-analyzes it and separates what it can _prove_ from what it can only _signal_. Your edit is judged by exactly the same checks as the model's, and nothing enters the document without your decision. The component that writes has no authority; the component with authority cannot write.
 
 <p align="center">
 <img width="3118" height="1950" alt="Lucid's review studio: the document on the left with inline annotations, the audit rail on the right showing the finding, its ISO clause and its justification" src="https://github.com/user-attachments/assets/6ff3d23a-5922-442b-9f2b-522b88699444" />
@@ -147,7 +147,7 @@ The refusals are the design, not missing features.
 | ✅ It does                                                       | ❌ It refuses to                                                 |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
 | Locate every violation, with character offsets and `line:column` | Rewrite your document, or apply any edit on its own              |
-| Cite the ISO clause behind each finding                          | Invent authority: editorial rules never get a fake clause number |
+| Cite the source behind each finding — the ISO clause, if any     | Invent authority: editorial rules never get a fake clause number |
 | Explain, in prose, why the reader is hurt                        | Emit a grade, a score out of 100, or a pass mark                 |
 | Mark what needs human judgment, **and why**                      | Guess a missing agent, or swap a word with more than one sense   |
 | Verify a rewrite — yours or an LLM's — against the same checks   | Certify a document as compliant                                  |
@@ -209,9 +209,9 @@ Detecting them takes real morphology: a build step distils **PortiLexicon-UD** (
 
 <br/>
 
-## 📐 ISO 24495-1: two of four principles
+## 📐 The standard behind the ISO criteria
 
-Lucid implements the Brazilian adoption (`ABNT NBR ISO 24495-1:2024`), identical to the ISO text. The standard says plain language rests on reader success, not mechanical formulas — so Lucid covers only what rules can honestly check:
+The ISO criteria come from `ABNT NBR ISO 24495-1:2024`, the Brazilian adoption — identical in text — of ISO 24495-1:2023, _Plain language — Part 1: Governing principles and guidelines_. The standard itself says its outcome rests on reader success, not on mechanical formulas — so Lucid covers only what rules can honestly check:
 
 | #   | Principle          | Clause | In Lucid                                                                                                                                     |
 | --- | ------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------- |

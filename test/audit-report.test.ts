@@ -20,7 +20,7 @@ describe("buildAuditReport — the audit as a deliverable", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
 
-    expect(md.startsWith("# Auditoria de Linguagem Simples")).toBe(true);
+    expect(md.startsWith("# Auditoria textual")).toBe(true);
     expect(md).toContain("Este relatório mede, não aprova");
     expect(md).toContain("## Placar");
     expect(md).toContain("## Anotações por critério");

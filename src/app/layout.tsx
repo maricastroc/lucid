@@ -19,9 +19,9 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Lucid — auditor determinístico de linguagem simples",
+  title: "Lucid — auditor textual determinístico",
   description:
-    "Motor determinístico de auditoria de Linguagem Simples (ABNT NBR ISO 24495-1:2024): regras auditáveis, proveniência por finding, sugestões mecanicamente seguras.",
+    "Auditoria textual determinística: cada apontamento rastreável ao critério e à fonte que o fundamenta — cláusulas da ABNT NBR ISO 24495-1:2024, convenções editoriais e heurísticas estruturais declaradas. Mede, não aprova.",
 };
 
 export default function RootLayout({
