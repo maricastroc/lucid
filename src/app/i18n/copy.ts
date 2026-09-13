@@ -1,4 +1,4 @@
-import type { CriterionId, PrincipleGroup, Severity, SpliceRefusal } from "@/lucid";
+import type { PrincipleGroup, Severity, SpliceRefusal } from "@/lucid";
 import type { AuditViewId } from "../lib/audit-views";
 import type { MetricRowKey } from "../lib/metric-rows";
 import type { CriterionCoverage } from "@/report/eval/contract";
@@ -17,7 +17,6 @@ export interface UiCopy {
     readonly copy: string;
     readonly copied: string;
     readonly words: string;
-    readonly engineOutputSuffix: string;
   };
 
   readonly language: {
@@ -127,6 +126,7 @@ export interface UiCopy {
     readonly movedLabel: string;
     readonly seeChanges: string;
     readonly limitsLabel: string;
+    readonly experimentalLimit: (name: string) => string;
     readonly annotations: (n: number) => string;
     readonly adjustedProfileBefore: string;
     readonly adjustedProfileStrong: string;
@@ -282,7 +282,7 @@ export interface UiCopy {
     readonly understandCriterion: string;
     readonly excerptMore: string;
     readonly excerptLess: string;
-    readonly engineOutput: string;
+    readonly engineOutput: (locale: string) => string;
     readonly engineOutputHint: string;
     readonly navPrev: string;
     readonly navNext: string;
@@ -307,7 +307,6 @@ export interface UiCopy {
     readonly humanHeader: string;
     readonly humanLead: string;
 
-    readonly humanLeadByCriterion: Partial<Record<CriterionId, string>>;
     readonly howToProceed: string;
 
     readonly manualOpen: string;
@@ -319,6 +318,9 @@ export interface UiCopy {
     readonly manualVerifying: string;
     readonly manualNote: string;
 
+    readonly aiUnavailableForLocale: string;
+    readonly manualApplyUnverified: string;
+    readonly manualUnverifiedNote: string;
     readonly aiTitle: string;
     readonly aiTarget: (unit: string) => string;
     readonly proposerManual: string;
@@ -389,10 +391,12 @@ export interface UiCopy {
     readonly statWords: string;
     readonly statTrigger: string;
     readonly statTriggerNote: string;
+    readonly statTriggerNoteProvisional: string;
     readonly standardSaysLabel: string;
-    readonly standardSays: string;
+    readonly standardSays: (standard: string) => string;
     readonly parameterSaysLabel: string;
     readonly parameterSays: (threshold: number) => string;
+    readonly parameterSaysProvisional: (threshold: number) => string;
     readonly coOccurringLabel: string;
     readonly coOccurringNote: string;
     readonly coOccurringNone: string;
@@ -674,6 +678,8 @@ export interface UiCopy {
     readonly deviationValue: (what: string, value: string, fallback: string) => string;
     readonly decrease: (label: string) => string;
     readonly increase: (label: string) => string;
+    readonly provisionalTag: string;
+    readonly provisionalNote: string;
     readonly knobSentenceWarn: string;
     readonly knobParagraph: string;
     readonly knobHeading: string;
@@ -751,9 +757,9 @@ export interface UiCopy {
     readonly severity: Record<Severity, string>;
     readonly principleGroup: Record<PrincipleGroup, string>;
     readonly coverage: Record<CriterionCoverage, string>;
-    readonly editorialExtension: string;
-    readonly editorialExtensionTag: string;
-    readonly editorialExtensionTitle: string;
+    readonly editorialExtension: (locale: string) => string;
+    readonly editorialExtensionTag: (locale: string) => string;
+    readonly editorialExtensionTitle: (locale: string) => string;
     readonly structuralHeuristic: string;
     readonly organizational: string;
     readonly organizationalTag: string;
@@ -764,7 +770,33 @@ export interface UiCopy {
 
   readonly ledger: Record<LedgerSource, string>;
 
+  readonly analysisLocale: {
+    readonly label: string;
+    readonly lead: string;
+    readonly current: string;
+    readonly onlyOne: string;
+    readonly switchWarning: string;
+    readonly name: Record<string, string>;
+    readonly experimentalTag: string;
+    readonly experimentalNote: string;
+    readonly switchDialog: {
+      readonly title: (target: string) => string;
+      readonly lead: string;
+      readonly changes: (n: number) => string;
+      readonly reviewed: (n: number) => string;
+      readonly baseline: string;
+      readonly vocabulary: (n: number) => string;
+      readonly profile: (name: string) => string;
+      readonly adjustments: (n: number) => string;
+      readonly kept: string;
+      readonly cancel: string;
+      readonly confirm: string;
+    };
+  };
+
   readonly readability: {
+    readonly unavailable: string;
+    readonly unavailableWhy: string;
     readonly noMeasure: string;
     readonly noWords: string;
     readonly noSentences: string;

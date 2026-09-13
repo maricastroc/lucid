@@ -1,17 +1,14 @@
-import {
-  buildDocument,
-  normalizeListItem,
-  resolveTableGrid,
-  toRawBlocks,
-  type Block,
-  type RawBlock,
-  type RawTableRow,
-} from "@/lucid";
+import { normalizeListItem, resolveTableGrid, toRawBlocks, type Block, type RawBlock, type RawTableRow } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 import { escapeHtml } from "./report-html";
 
-export function exportableBlocks(text: string, structured: readonly Block[] | null): RawBlock[] {
+export function exportableBlocks(
+  text: string,
+  structured: readonly Block[] | null,
+  locale: AnalysisLocale,
+): RawBlock[] {
   if (structured !== null) return toRawBlocks(structured);
-  return toRawBlocks(buildDocument(text).blocks);
+  return toRawBlocks(locale.buildDocument(text).blocks);
 }
 
 export function hasRecoverableStructure(blocks: readonly RawBlock[]): boolean {

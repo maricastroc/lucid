@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { affixSplice, analyze } from "@/lucid";
+import { affixSplice } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 import { attribute } from "../lib/attribution";
 import { documentBurden, sourceLabel, type LedgerEntry } from "../lib/ledger";
 
@@ -19,6 +20,7 @@ export function useRevisionHistory(
   text: string,
   setText: (value: string) => void,
   isSettled: boolean,
+  locale: AnalysisLocale,
   initialLedger: readonly LedgerEntry[] = [],
 ): RevisionHistory {
   const undoStack = useRef<string[]>([]);
@@ -29,15 +31,15 @@ export function useRevisionHistory(
   const typingFrom = useRef<string | null>(null);
   useEffect(() => {
     applying.current = false;
-  }, [text]);
+  }, [text, locale]);
 
   const closeTypingSession = useCallback(() => {
     const from = typingFrom.current;
     typingFrom.current = null;
     if (from === null || from === text) return;
 
-    const before = analyze(from).findings;
-    const after = analyze(text).findings;
+    const before = locale.analyze(from).findings;
+    const after = locale.analyze(text).findings;
     const splice = affixSplice(from, text);
     setLedger((prev) => [
       ...prev,
@@ -51,7 +53,7 @@ export function useRevisionHistory(
         attribution: attribute(before, after, splice),
       },
     ]);
-  }, [text]);
+  }, [text, locale]);
 
   const applyChange = useCallback(
     (entry: Omit<LedgerEntry, "burdenBefore" | "burdenAfter">, nextText: string): boolean => {
@@ -62,8 +64,8 @@ export function useRevisionHistory(
 
       closeTypingSession();
 
-      const before = analyze(text).findings;
-      const after = analyze(nextText).findings;
+      const before = locale.analyze(text).findings;
+      const after = locale.analyze(nextText).findings;
       undoStack.current.push(text);
       setCanUndo(true);
       setLedger((prev) => [
@@ -78,7 +80,7 @@ export function useRevisionHistory(
       setText(nextText);
       return true;
     },
-    [text, isSettled, setText, closeTypingSession],
+    [text, isSettled, setText, closeTypingSession, locale],
   );
 
   const undo = useCallback(() => {

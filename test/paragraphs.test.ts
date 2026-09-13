@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { paragraphSpanAt, rewriteTargetAt } from "../src/app/lib/paragraphs";
-import { sentenceSpanAt } from "../src/lucid";
+import { sentenceSpanAt } from "../src/locales/pt-BR";
+import { analysisLocale } from "../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 const DOC = "Primeiro parágrafo aqui.\n\nSegundo parágrafo, mais longo, no meio.\n\nTerceiro e último.";
 
@@ -48,14 +51,14 @@ describe("sentenceSpanAt", () => {
 describe("rewriteTargetAt — the right unit (never the whole document)", () => {
   it("text WITH paragraphs: the target is the paragraph", () => {
     const t = "Parágrafo um, primeiro.\n\nParágrafo dois, com uma frase. E outra frase aqui.";
-    const r = rewriteTargetAt(t, t.indexOf("outra"));
+    const r = rewriteTargetAt(t, t.indexOf("outra"), PT);
     expect(r.unit).toBe("paragraph");
     expect(r.span.text).toBe("Parágrafo dois, com uma frase. E outra frase aqui.");
   });
 
   it("a continuous BLOCK (no blank line): the target is the SENTENCE, not the whole text", () => {
     const t = "Primeira frase do bloco corrido. Segunda frase, bem mais longa, do mesmo bloco sem quebras.";
-    const r = rewriteTargetAt(t, t.indexOf("Segunda"));
+    const r = rewriteTargetAt(t, t.indexOf("Segunda"), PT);
     expect(r.unit).toBe("sentence");
     expect(r.span.text).toBe("Segunda frase, bem mais longa, do mesmo bloco sem quebras.");
     expect(r.span.text).not.toBe(t);

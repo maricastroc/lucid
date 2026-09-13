@@ -3,13 +3,16 @@
 import type { Config, ReaderBriefing, BriefingCheck } from "@/lucid";
 import type { OccurrenceCursor } from "../../lib/occurrence-cursor";
 import type { ProfileId } from "../../lib/profiles";
+import type { AnalysisLocale, AnalysisLocaleId } from "../../locale/active";
 import { useCopy } from "../../i18n/use-copy";
 import { BriefingPanel } from "../briefing-panel";
 import { VocabularyPanel } from "../vocabulary-panel";
 import { ChevronLeftIcon } from "../icons";
+import { AnalysisLocalePanel } from "../analysis-locale-panel";
 import { ProfilePanel } from "../profile-panel";
 import { PurposePresets } from "../purpose-presets";
 import { Button } from "../ui/button";
+import { vocabularyTerms, withVocabularyTerms } from "../../locale/vocabulary";
 
 interface Props {
   briefing: ReaderBriefing;
@@ -17,6 +20,8 @@ interface Props {
   cursor: OccurrenceCursor | null;
   index: number;
   config: Config;
+  locale: AnalysisLocale;
+  onLocaleChange: (id: AnalysisLocaleId) => void;
   profileId: ProfileId;
   onBriefingChange: (briefing: ReaderBriefing) => void;
   onConfigChange: (config: Config) => void;
@@ -58,17 +63,18 @@ export function SettingsView(props: Props) {
           onSelectOccurrence={props.onSelectOccurrence}
           onStepOccurrence={props.onStepOccurrence}
         />
-        <VocabularyPanel
-          terms={props.config.vocabulario.terms}
-          excerpt={props.selection}
-          counts={props.vocabularyCounts}
-          onChange={(terms) =>
-            props.onConfigChange({ ...props.config, vocabulario: { ...props.config.vocabulario, terms } })
-          }
-          onClearExcerpt={props.onClearSelection}
-        />
+        {props.locale.vocabularySection !== null && (
+          <VocabularyPanel
+            terms={vocabularyTerms(props.config, props.locale)}
+            excerpt={props.selection}
+            counts={props.vocabularyCounts}
+            onChange={(terms) => props.onConfigChange(withVocabularyTerms(props.config, props.locale, terms))}
+            onClearExcerpt={props.onClearSelection}
+          />
+        )}
         <PurposePresets config={props.config} selected={props.profileId} onSelect={props.onProfileChange} />
-        <ProfilePanel config={props.config} onChange={props.onConfigChange} />
+        <AnalysisLocalePanel locale={props.locale} onChange={props.onLocaleChange} />
+        <ProfilePanel config={props.config} locale={props.locale} onChange={props.onConfigChange} />
 
         <div className="border-t border-rule-1 px-4 py-4">
           <Button variant="primary" size="lg" onClick={props.onClose} className="text-[12.5px]">

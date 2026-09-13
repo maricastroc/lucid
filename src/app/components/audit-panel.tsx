@@ -21,12 +21,14 @@ import { MetricsView } from "./views/metrics-view";
 import { OverviewView } from "./views/overview-view";
 import { ReviewView } from "./views/review-view";
 import { SettingsView } from "./views/settings-view";
+import type { AnalysisLocale, AnalysisLocaleId } from "../locale/active";
 import { ViewHeader } from "./views/view-header";
 import { ProbePanel } from "./probe-panel";
 import { DecisionNote } from "./revision-note/decision-note";
 import { RevisionNote } from "./revision-note";
 import { NoteNav } from "./revision-note/note-nav";
 import { useCopy } from "../i18n/use-copy";
+import { vocabularyTerms } from "../locale/vocabulary";
 
 export interface NoteNavigation {
   selectedFinding: Finding | null;
@@ -55,10 +57,12 @@ export interface HighlightVisibility {
 export interface DocumentEditActions {
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onManualEdit: (target: Span, replacement: string) => void;
-  onApplyCuratedSwap: (target: Span, replacement: string) => void;
+  onApplyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
 }
 
 export interface AnalysisSettings {
+  locale: AnalysisLocale;
+  onLocaleChange: (id: AnalysisLocaleId) => void;
   briefing: ReaderBriefing;
   briefingCheck: BriefingCheck;
   onBriefingChange: (briefing: ReaderBriefing) => void;
@@ -184,6 +188,8 @@ export function AuditPanel(props: AuditPanelProps) {
         cursor={props.occurrences.cursor}
         index={props.occurrences.index}
         config={props.settings.config}
+        locale={props.settings.locale}
+        onLocaleChange={props.settings.onLocaleChange}
         profileId={props.settings.profileId}
         onBriefingChange={props.settings.onBriefingChange}
         onConfigChange={props.settings.onConfigChange}
@@ -294,7 +300,7 @@ export function AuditPanel(props: AuditPanelProps) {
         {active.id === "review" && (
           <ReviewView
             diagnostic={props.diagnostic}
-            declaredTerms={props.settings.config.vocabulario.terms.length}
+            declaredTerms={vocabularyTerms(props.settings.config, props.settings.locale).length}
             route={route}
             groups={props.groups}
             visible={props.visible}

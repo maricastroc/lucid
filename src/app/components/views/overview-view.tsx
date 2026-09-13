@@ -10,6 +10,7 @@ import type { ImportNotes } from "../../hooks/use-document-source";
 import { ArrowRightIcon } from "../icons";
 import { RouteResume } from "../route/route-resume";
 import { CountStrip } from "./count-strip";
+import { useAnalysisLocale } from "../../locale/context";
 
 function flattenedLabel(notes: ImportNotes, c: ReturnType<typeof copyFor>): string | null {
   const parts: string[] = [];
@@ -65,11 +66,12 @@ export function OverviewView({
   onSeeChanges,
 }: Props) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
-  const deviations = configDeviations(config);
-  const offCount = disabledCriteria(config, lang).length;
+  const deviations = configDeviations(config, locale.defaultConfig);
+  const offCount = disabledCriteria(config, lang, locale).length;
   const declaredStyles =
     importNotes?.format === "docx"
       ? importNotes.headingStylesRecovered.filter((name) => !importNotes.headingStylesInferred.includes(name))
@@ -209,6 +211,11 @@ export function OverviewView({
           )}
           {importNotes?.format === "pdf" && importNotes.ruledRegions > 0 && (
             <li className="text-ink-2">{c.overview.importPdfRuled}</li>
+          )}
+          {locale.experimental && (
+            <li style={{ color: "var(--sev-warn)" }}>
+              {c.overview.experimentalLimit(c.analysisLocale.name[locale.id] ?? locale.id)}
+            </li>
           )}
           <li className="text-ink-2">{c.overview.scoreCaveat}</li>
         </ul>

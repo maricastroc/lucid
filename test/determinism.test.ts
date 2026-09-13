@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { analyze, analyzeWithPasses } from "../src/lucid";
+import { analyze, analyzeWithPasses } from "../src/locales/pt-BR";
 import { sentenceLengthPass } from "../src/locales/pt-BR/passes/sentence-length";
 import { passiveVoicePass } from "../src/locales/pt-BR/passes/passive-voice";
 import { nominalizationPass } from "../src/locales/pt-BR/passes/nominalization";
 import { jargonPass, compileJargonEntries } from "../src/locales/pt-BR/passes/jargon";
 import jargaoData from "../src/locales/pt-BR/datasets/jargao.pt.json";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import type { Config } from "../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
 import type { Pass } from "../src/lucid/core/types";
 
 const RICH_TEXT =

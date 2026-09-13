@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, type Finding } from "../src/lucid";
+import { type Finding } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 
 function readerFindings(text: string): Finding[] {
   return analyze(text).findings.filter((f) => f.criterion === "leitor_terceira_pessoa");

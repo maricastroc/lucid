@@ -1,11 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { screen, within } from "@testing-library/dom";
 import userEvent from "@testing-library/user-event";
-import { analyze, DEFAULT_CONFIG, type OrgTerm } from "@/lucid";
+import { type OrgTerm } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
+import { analyze } from "@/locales/pt-BR";
 import { buildBaseline, serializeBaseline } from "@/app/lib/baseline";
 import { readWorkspace } from "@/app/lib/workspace";
 import { mountStudio } from "./support/mount-studio";
 import { auditReady } from "./support/points";
+import { vocabularyTerms } from "@/app/locale/vocabulary";
+import { analysisLocale } from "@/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 const TEXT =
   "O termo de fomento será assinado pela comissão.\n\n" +
@@ -52,7 +58,7 @@ describe("declaring a term the curated glossary never had", () => {
     await user.type(screen.getByLabelText(/^Termo$/i), "pactuação");
     await user.click(screen.getByRole("button", { name: /declarar termo/i }));
 
-    expect(readWorkspace()?.config.vocabulario.terms).toEqual([{ term: "pactuação", plain: null, reason: "" }]);
+    expect(vocabularyTerms(readWorkspace()!.config, PT)).toEqual([{ term: "pactuação", plain: null, reason: "" }]);
   });
 
   it("refuses to declare the same term twice", async () => {
@@ -155,7 +161,7 @@ describe("carrying the vocabulary between documents", () => {
     const picker = document.querySelector<HTMLInputElement>('input[type="file"][accept*="json"]')!;
     await user.upload(picker, file);
 
-    const terms = readWorkspace()!.config.vocabulario.terms.map((t) => t.term);
+    const terms = vocabularyTerms(readWorkspace()!.config, PT).map((t) => t.term);
     expect(terms).toEqual(["pactuação", "instrumento congênere"]);
   });
 });

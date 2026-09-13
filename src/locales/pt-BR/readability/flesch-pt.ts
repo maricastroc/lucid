@@ -36,12 +36,12 @@ function positionOf(value: number): ReadabilityScalePosition {
 }
 
 export function interpretFleschPt(metrics: Metrics): ReadabilityReading {
-  if (metrics.fleschPt === null) {
+  if (metrics.readability === null) {
     return { kind: "unmeasurable", cause: metrics.words === 0 ? "no_words" : "no_sentences" };
   }
 
   const anomalies: ReadabilityAnomaly[] = [];
-  if (metrics.syllablesPerWord > MAX_PLAUSIBLE_SYLLABLES_PER_WORD) {
+  if (metrics.syllablesPerWord !== null && metrics.syllablesPerWord > MAX_PLAUSIBLE_SYLLABLES_PER_WORD) {
     anomalies.push({
       cause: "syllables_per_word_impossible",
       syllablesPerWord: metrics.syllablesPerWord,
@@ -59,12 +59,12 @@ export function interpretFleschPt(metrics: Metrics): ReadabilityReading {
     anomalies.push({ cause: "small_sample", words: metrics.words, threshold: MIN_INTERPRETABLE_WORDS });
   }
 
-  const position = positionOf(metrics.fleschPt);
+  const position = positionOf(metrics.readability);
   return {
     kind: "measured",
-    value: metrics.fleschPt,
+    value: metrics.readability,
     position,
-    band: position === "in_range" ? bandFor(metrics.fleschPt) : null,
+    band: position === "in_range" ? bandFor(metrics.readability) : null,
     anomalies,
   };
 }

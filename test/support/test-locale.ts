@@ -1,7 +1,6 @@
 import type { LocaleBundle, LocaleDataRegistry } from "../../src/lucid/core/contracts/locale";
 import { asLocaleId } from "../../src/lucid/core/contracts/locale";
 import type { PassFinding, Pass } from "../../src/lucid/core/types";
-import { DEFAULT_CONFIG } from "../../src/lucid/core/config";
 import { segmentSentences } from "../../src/lucid/core/document/segment-sentences";
 import { createRegistry } from "../../src/lucid/core/data/registry";
 
@@ -45,42 +44,54 @@ const data: LocaleDataRegistry = {
   abbreviations: { blocking: new Set<string>(), units: new Set<string>() },
 };
 
+const emptyCohesion = () => ({
+  referentialOverlap: 0,
+  adjacentGapRatio: 0,
+  connectivesPer100Words: 0,
+  connectivesByClass: { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 },
+});
+
 export const testLocale: LocaleBundle = {
   id: asLocaleId("test-LOCALE"),
   standardVersion: "TEST-STD",
   passes: [testMarkerPass],
-  config: DEFAULT_CONFIG,
+  config: { metrics: { decimalPlaces: 1 } },
+  configSchema: { metrics: { criterion: null } },
   services: { segmentSentences },
   metrics: {
     countSyllables: () => 1,
     readability: {
       id: "fake-constant-42",
+      name: "Fake-42",
+      referenceRange: { min: 0, max: 100 },
       calculate: () => 42,
       interpret: (metrics) =>
-        metrics.fleschPt === null
+        metrics.readability === null
           ? { kind: "unmeasurable", cause: metrics.words === 0 ? "no_words" : "no_sentences" }
           : {
               kind: "measured",
-              value: metrics.fleschPt,
+              value: metrics.readability,
               position: "in_range",
               band: { id: "test_band", min: 0, max: 100, label: "faixa de teste" },
               anomalies: [],
             },
     },
-    cohesion: () => ({
-      referentialOverlap: 0,
-      adjacentGapRatio: 0,
-      connectivesPer100Words: 0,
-      connectivesByClass: { additive: 0, adversative: 0, causal: 0, temporal: 0, conclusive: 0 },
-    }),
+    cohesion: emptyCohesion,
   },
   data,
   criteria: { ids: ["test_marker"] },
   taxonomy: { test_marker: { source: "structural-heuristic", principleGroup: "understandable" } },
   clauses: {
     standard: "TEST-STD",
+    referenceName: "TEST-STD",
     transcription: "árvore sintética (somente teste)",
     exhaustive: false,
     nodes: [],
   },
+};
+
+export const metricLessLocale: LocaleBundle = {
+  ...testLocale,
+  id: asLocaleId("no-METRICS"),
+  metrics: {},
 };

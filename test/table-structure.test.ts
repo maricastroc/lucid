@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  analyzeDocument,
   buildStructuredDocument,
   isRawBlock,
-  ptDocumentServices,
   resolveTableGrid,
   spliceStructuredDocument,
   toRawBlocks,
@@ -11,6 +9,7 @@ import {
   type RawBlock,
   type TableBlock,
 } from "@/lucid";
+import { analyzeDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { htmlToRawBlocks } from "@/importers/html-blocks";
 import { documentToHtml, documentToMarkdown } from "@/app/lib/export-document";
 import { blocksToDocx } from "@/exporters/docx";
@@ -219,7 +218,7 @@ describe("the audit reads cells as text without pretending they are prose", () =
     const withoutTable = analyzeDocument(build([{ kind: "paragraph", text: prose }]));
     const withTable = analyzeDocument(build([{ kind: "paragraph", text: prose }, ...SIMPLE]));
 
-    expect(withTable.metrics.fleschPt).toBe(withoutTable.metrics.fleschPt);
+    expect(withTable.metrics.readability).toBe(withoutTable.metrics.readability);
     expect(withTable.metrics.words).toBe(withoutTable.metrics.words);
     expect(withTable.metrics.sentences).toBe(withoutTable.metrics.sentences);
 

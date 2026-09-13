@@ -38,14 +38,23 @@ module.exports = {
       to: { path: "^src/(report|app)" },
     },
     {
-      name: "core-nao-importa-locale",
+      name: "lucid-nao-importa-locale",
       severity: "error",
       comment:
-        "Fronteira de locale (ADR-031): o core é NEUTRO de idioma e nunca importa uma implementação " +
-        "de locale. A dependência é sempre locale -> core. O default pt-BR é composto no barrel " +
-        "(src/lucid/index.ts), não no core.",
-      from: { path: "^src/lucid/core" },
+        "Fronteira de locale (ADR-031, endurecida no ADR-102): src/lucid inteiro — core, probe E o " +
+        "barrel público — é NEUTRO de idioma e nunca importa uma implementação de locale. A dependência " +
+        "é sempre locale -> lucid. Quem quer o pt-BR importa @/locales/pt-BR, explicitamente.",
+      from: { path: "^src/lucid" },
       to: { path: "^src/locales" },
+    },
+    {
+      name: "shared-nao-importa-locale-concreto",
+      severity: "error",
+      comment:
+        "src/locales/_shared guarda o motor language-neutral que os locales instanciam. Se ele importar " +
+        "um locale concreto deixa de ser compartilhado e vira pt-BR com outro nome.",
+      from: { path: "^src/locales/_shared" },
+      to: { path: "^src/locales/(?!_shared)" },
     },
     {
       name: "core-e-locale-nao-importam-importer",

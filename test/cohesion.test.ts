@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 
-const cohesionOf = (text: string) => analyze(text).metrics.cohesion;
+const cohesionOf = (text: string) => {
+  const cohesion = analyze(text).metrics.cohesion;
+  if (cohesion === null) throw new Error("pt-BR declares a cohesion battery; it must never be null here");
+  return cohesion;
+};
 
 describe("lexical referential cohesion (ADR-061)", () => {
   it("sentences repeating content words have high overlap and zero gap", () => {

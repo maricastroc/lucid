@@ -12,7 +12,6 @@ export const COPY_EN: UiCopy = {
     copy: "Copy",
     copied: "Copied",
     words: "words",
-    engineOutputSuffix: " · pt-BR",
   },
 
   language: {
@@ -23,7 +22,7 @@ export const COPY_EN: UiCopy = {
 
   masthead: {
     home: "Back to start",
-    tagline: "Plain language auditor",
+    tagline: "Deterministic text auditor",
     openDocument: "Open document",
     opening: "Opening…",
     evaluation: "Evaluation",
@@ -36,24 +35,24 @@ export const COPY_EN: UiCopy = {
 
   welcome: {
     regionLabel: "Introducing Lucid",
-    kicker: "Plain Language auditor",
-    titleLead: "Lucid audits your text for clarity.",
-    titleTrail: "It does not rewrite it for you.",
+    kicker: "Same text, same diagnosis",
+    titleLead: "Lucid audits your text, criterion by criterion.",
+    titleTrail: "It does not decide for you.",
     lead:
-      "It checks every passage against the Plain Language principles of the ABNT/ISO standard: it shows what stops " +
-      "the reader, cites the criterion that fired, and explains why.",
-    leadStrong: "The final word is always yours.",
+      "Every finding carries the criterion that fired, the source behind it — such as the ABNT/ISO 24495-1 standard — " +
+      "and the exact passage: it shows what stops the reader and explains why.",
+    leadStrong: "An AI proposal only enters the document if you apply it.",
     doesLabel: "What it does",
     verbs: ["Analyzes", "Detects", "Explains", "Asks", "Verifies"],
     doesNotBefore: "What it does ",
     doesNotStrong: "not",
-    doesNotAfter: " do: write the text for you.",
+    doesNotAfter: " do: approve your text.",
     write: "Write or paste text",
     loadExample: "Load example",
     anatomyLabel: "Every passage becomes an annotation like this",
     cardCriterion: {
       title: "The criterion that fired",
-      body: "Passive voice, jargon, long sentence, nominalization — each tied to a principle of the standard.",
+      body: "Passive voice, jargon, long sentence, nominalization — each with the source behind it.",
     },
     cardWhy: {
       title: "Why it stops the reader",
@@ -157,6 +156,9 @@ export const COPY_EN: UiCopy = {
     movedLabel: "What has changed",
     seeChanges: "See the changes",
     limitsLabel: "Limits of this analysis",
+    experimentalLimit: (name) =>
+      `Analysis in ${name}, experimental: no validation on an independent corpus, no readability, cohesion ` +
+      "or AI rewriting.",
     annotations: (n) => plural(n, "point to review", "points to review"),
     adjustedProfileBefore: "This audit uses a ",
     adjustedProfileStrong: "custom profile",
@@ -376,7 +378,7 @@ export const COPY_EN: UiCopy = {
     understandCriterion: "Understand this criterion",
     excerptMore: "Show the full excerpt",
     excerptLess: "Collapse the excerpt",
-    engineOutput: "Engine output · pt-BR",
+    engineOutput: (locale) => `Engine output · ${locale}`,
     engineOutputHint:
       "The justification comes from the analysis engine, which audits Portuguese — it is not translated along with the interface.",
     navPrev: "Previous (k)",
@@ -411,11 +413,6 @@ export const COPY_EN: UiCopy = {
     humanLead:
       "This point calls for reading the context. Review the passage and choose the change that best preserves the " +
       "original meaning.",
-    humanLeadByCriterion: {
-      long_sentence:
-        "Read the sentence and decide whether it carries more than one idea. If it does, you choose where to " +
-        "separate and how to recompose; if it carries one, mark it as seen — length alone compels nothing.",
-    },
     howToProceed: "How to proceed",
 
     manualOpen: "Edit or paste my version",
@@ -429,6 +426,13 @@ export const COPY_EN: UiCopy = {
       "Write or paste your version. When you apply it, it is saved as a draft and checked against the same " +
       "criteria used for the AI rewrite.",
 
+    aiUnavailableForLocale:
+      "AI rewriting does not exist yet for this analysis language: the verifier that judges a proposal was " +
+      "written for Portuguese. Edit the passage by hand; the engine measures the document again.",
+    manualApplyUnverified: "Apply edit",
+    manualUnverifiedNote:
+      "This analysis language has no rewrite verifier: the edit is applied without the preservation proofs " +
+      "(numbers, dates, declared agent), and the engine measures the document again.",
     aiTitle: "AI rewrite",
     aiTarget: (unit) => `The AI will rewrite ${unit} highlighted in the document and verify the result.`,
     proposerManual: "your edit",
@@ -552,14 +556,18 @@ export const COPY_EN: UiCopy = {
     statWords: "words",
     statTrigger: "trigger",
     statTriggerNote: "Lucid parameter",
+    statTriggerNoteProvisional: "provisional",
     standardSaysLabel: "The standard asks for",
-    standardSays:
+    standardSays: (standard) =>
       "concise sentences, one idea per sentence and varied length across the document — without stating a " +
-      "number (ABNT NBR ISO 24495-1, 5.3.4).",
+      `number (${standard}, 5.3.4).`,
     parameterSaysLabel: "Lucid inspects",
     parameterSays: (threshold) =>
       `sentences above ${threshold} words. That number is this product's choice, adjustable in the editorial ` +
       "profile, and crossing it does not mean the sentence is inadequate.",
+    parameterSaysProvisional: (threshold) =>
+      `sentences above ${threshold} words. That number is provisional for this analysis language — not ` +
+      "validated — and crossing it does not mean the sentence is inadequate.",
     coOccurringLabel: "Other signals in this sentence",
     coOccurringNote: "Each carries its own criterion and its own justification. None of this adds up to a score.",
     coOccurringNone:
@@ -1006,6 +1014,10 @@ export const COPY_EN: UiCopy = {
     deviationValue: (what, value, fallback) => `${what} ${value} (default: ${fallback})`,
     decrease: (label) => `Decrease ${label}`,
     increase: (label) => `Increase ${label}`,
+    provisionalTag: "provisional",
+    provisionalNote:
+      "Thresholds marked provisional have not been validated for this analysis language. Hover the mark to see " +
+      "where each number came from.",
     knobSentenceWarn: "Inspect sentences above",
     knobParagraph: "Long paragraph — above (sentences)",
     knobHeading: "Long heading — above (words)",
@@ -1097,9 +1109,9 @@ export const COPY_EN: UiCopy = {
       usable: "Usable",
     },
     coverage: { curated: "curated", productive: "productive" },
-    editorialExtension: "PT-BR editorial extension",
-    editorialExtensionTag: "PT-BR",
-    editorialExtensionTitle: "PT-BR editorial extension — outside the ISO standard",
+    editorialExtension: (locale) => `${locale} editorial extension`,
+    editorialExtensionTag: (locale) => locale,
+    editorialExtensionTitle: (locale) => `${locale} editorial extension — outside the ISO standard`,
     organizational: "The organisation's vocabulary",
     organizationalTag: "declared",
     organizationalTitle:
@@ -1113,10 +1125,46 @@ export const COPY_EN: UiCopy = {
     manual: "Author's edit",
     ai: "AI rewrite",
     glossary: "Direct swap from the glossary",
+    attested: "Swap attested by a source",
     typing: "Passage rewritten by hand",
   },
 
+  analysisLocale: {
+    label: "Analysis language",
+    lead:
+      "The language of the audited document. It is independent from the interface language: you can read " +
+      "Lucid in Portuguese and audit an English text, or the other way round.",
+    current: "Auditing as",
+    onlyOne: "Only one analysis engine exists today. When another one lands, it shows up here.",
+    switchWarning:
+      "Switching the language re-analyses the document with another engine. If there is work done with the " +
+      "current engine, Lucid asks first and says what would be discarded.",
+    name: { "pt-BR": "Portuguese (Brazil)", "en-US": "English (US)" },
+    experimentalTag: "experimental",
+    experimentalNote:
+      "Experimental catalogue. No criterion has been validated on an independent corpus: where there is a golden " +
+      "suite, it is only a regression net, written together with the detector. This language has no readability, " +
+      "cohesion or AI rewriting, and the analysis exists only in the Studio — the CLI analyses pt-BR only.",
+    switchDialog: {
+      title: (target) => `Switch the analysis language to ${target}?`,
+      lead: "The following belongs to the current engine and will be discarded:",
+      changes: (n) => `${n} recorded ${n === 1 ? "change" : "changes"}`,
+      reviewed: (n) => `${n} reviewed or dismissed ${n === 1 ? "point" : "points"}`,
+      baseline: "the attached baseline",
+      vocabulary: (n) => `${n} organization vocabulary ${n === 1 ? "term" : "terms"}`,
+      profile: (name) => `the editorial profile “${name}”`,
+      adjustments: (n) => `${n} threshold ${n === 1 ? "adjustment" : "adjustments"}`,
+      kept: "The document and the reader briefing stay. The text is re-analysed by the new engine.",
+      cancel: "Cancel",
+      confirm: "Switch language and re-analyse",
+    },
+  },
+
   readability: {
+    unavailable: "unavailable for this language",
+    unavailableWhy:
+      "This locale declares no readability metric. That is not an absence of problems and not a " +
+      "measurement failure: it is a measure the tool cannot yet sustain, so it publishes none.",
     noMeasure: "no measurement",
     noWords: "There are no words to measure — no value was computed (this is not zero).",
     noSentences: "There is no delimited sentence to measure — no value was computed (this is not zero).",

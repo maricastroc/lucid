@@ -1,6 +1,7 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import type { JargonEntry, CompiledEntry, JargonDomain } from "../datasets/types";
 import { getPrepared } from "../datasets/registry";
+import type { PtConfig } from "../config";
 
 export { compileJargonEntries } from "../datasets/prepare";
 export type { JargonEntry, CompiledEntry } from "../datasets/types";
@@ -105,7 +106,7 @@ function buildJustification(entry: JargonEntry, hasSuggestion: boolean): string 
   return `${base} A ferramenta não tem, no glossário, um equivalente simples e seguro para sugerir aqui.`;
 }
 
-export const jargonPass: Pass = {
+export const jargonPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["jargao.pt"],

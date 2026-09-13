@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../locale/context";
 import { forwardRef, useMemo, useRef } from "react";
 import type { Block, Diagnostic, Finding, ListItemBlock, Span } from "@/lucid";
 import { buildLines, segmentRange, type LineSegment } from "../lib/editor-model";
@@ -81,6 +82,7 @@ function LabelledList({
   diagnostic: Diagnostic;
   occurrences: readonly Span[];
 }) {
+  const locale = useAnalysisLocale();
   const base = items.reduce((n, item) => Math.min(n, item.level), Number.POSITIVE_INFINITY);
 
   return (
@@ -95,6 +97,7 @@ function LabelledList({
                   segments={segmentRange(
                     diagnostic.text,
                     diagnostic.findings,
+                    locale.id,
                     paragraph.start,
                     paragraph.end,
                     occurrences,
@@ -121,6 +124,7 @@ function ListLevel({
   diagnostic: Diagnostic;
   occurrences: readonly Span[];
 }) {
+  const locale = useAnalysisLocale();
   if (nodes.length === 0) return null;
   const ordered = nodes[0].item.ordered;
   const labelled = nodes.every((node) => node.item.marker !== undefined);
@@ -139,6 +143,7 @@ function ListLevel({
                   segments={segmentRange(
                     diagnostic.text,
                     diagnostic.findings,
+                    locale.id,
                     paragraph.start,
                     paragraph.end,
                     occurrences,
@@ -157,6 +162,7 @@ function ListLevel({
 
 function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: SegmentContext }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const { selectedId, flashId, hiddenHighlights, rewriteTarget, activeOccurrence, onSelectFinding } = ctx;
   return (
     <>
@@ -181,7 +187,7 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
         const target = inline ?? passage!;
         const id = findingId(target);
         const selected = selectedId === id;
-        const meta = metaFor(target.criterion, lang);
+        const meta = metaFor(locale.id, target.criterion, lang);
         const classes = ["seg"];
         if (inTarget) classes.push("rewrite-target");
         if (inline) classes.push("mark", meta.markStyleClass);
@@ -266,6 +272,7 @@ function BlockView({
   isFocused: boolean;
 }) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const markersIn = (start: number, end: number): Finding[] =>
     diagnostic.findings.filter(
       (f) =>
@@ -295,7 +302,14 @@ function BlockView({
                 style={{ fontSize: headingSize(block.level) }}
               >
                 <Segments
-                  segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
+                  segments={segmentRange(
+                    diagnostic.text,
+                    diagnostic.findings,
+                    locale.id,
+                    block.start,
+                    block.end,
+                    occurrences,
+                  )}
                   ctx={ctx}
                 />
               </Tag>
@@ -356,6 +370,7 @@ function BlockView({
                                     segments={segmentRange(
                                       diagnostic.text,
                                       diagnostic.findings,
+                                      locale.id,
                                       paragraph.start,
                                       paragraph.end,
                                       occurrences,
@@ -380,7 +395,14 @@ function BlockView({
           <p key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
             {tick}
             <Segments
-              segments={segmentRange(diagnostic.text, diagnostic.findings, block.start, block.end, occurrences)}
+              segments={segmentRange(
+                diagnostic.text,
+                diagnostic.findings,
+                locale.id,
+                block.start,
+                block.end,
+                occurrences,
+              )}
               ctx={ctx}
             />
           </p>
@@ -413,8 +435,12 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   scrollRef,
 ) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const drop = useFileDrop(onOpenDocument);
-  const lines = useMemo(() => buildLines(diagnostic.text, diagnostic.findings, occurrences), [diagnostic, occurrences]);
+  const lines = useMemo(
+    () => buildLines(diagnostic.text, diagnostic.findings, locale.id, occurrences),
+    [diagnostic, locale, occurrences],
+  );
   const paragraphs = useMemo(() => lines.filter((l) => l.text.trim().length > 0), [lines]);
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;

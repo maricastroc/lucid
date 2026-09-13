@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import type { Diagnostic, Finding } from "@/lucid";
 import { metaFor, provenanceTag, severityInkVar } from "../../lib/criteria";
 import { distinctTexts, type FindingGroup } from "../../lib/finding-query";
@@ -44,7 +45,8 @@ export function CriterionGroup({
   onMarkMany: (findings: readonly Finding[], mark: ReviewMarkKind | null) => void;
 }) {
   const { c, lang } = useCopy();
-  const meta = metaFor(group.criterion, lang);
+  const locale = useAnalysisLocale();
+  const meta = metaFor(locale.id, group.criterion, lang);
   const counts = tally(marks, group.items);
 
   const repeated = new Set(group.items.map(excerptOf).filter((text, index, all) => all.indexOf(text) !== index));
@@ -191,7 +193,7 @@ function GroupProgress({ pending, total }: { pending: number; total: number }) {
 
 function tagFor(diagnostic: Diagnostic, criterion: string, lang: UiLang) {
   const f = diagnostic.findings.find((x) => x.criterion === criterion);
-  return f ? provenanceTag(f, lang) : null;
+  return f ? provenanceTag(f, lang, diagnostic.meta.localeId) : null;
 }
 
 function ProvenanceTag({ tag }: { tag: { text: string; title: string } | null }) {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, checkBriefing, EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { checkBriefing, EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { REPORT_RECORD_FIELDS, REVIEW_FLOW_FIELDS } from "../src/app/lib/briefing-surfaces";
 import { readerQuestions } from "../src/app/components/report-record-dialog";
 import { COPY } from "../src/app/i18n/copy";

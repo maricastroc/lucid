@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { analyze, buildDocument, type Finding, type Span } from "@/lucid";
+import { type Finding, type Span } from "@/lucid";
+import { analyze, buildDocument } from "@/locales/pt-BR";
 import { rewriteTargetAt } from "../../../src/app/lib/paragraphs";
+import { analysisLocale } from "../../../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 export const CORPUS_DIR = path.join(process.cwd(), "corpus/v1/text");
 
@@ -30,7 +34,7 @@ function targetsIn(document: string, text: string): EvalTarget[] {
   const seen = new Set<string>();
 
   for (const finding of diagnostic.findings) {
-    const { span, unit } = rewriteTargetAt(text, finding.span.start);
+    const { span, unit } = rewriteTargetAt(text, finding.span.start, PT);
     const key = `${span.start}:${span.end}`;
     if (seen.has(key)) continue;
     seen.add(key);

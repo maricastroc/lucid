@@ -9,7 +9,7 @@ import {
 } from "@/lucid";
 import { describeDeviation, disabledCriteria } from "./profile";
 import {
-  CRITERION_ORDER,
+  criterionOrder,
   coverageLabel,
   coverageOf,
   isSafe,
@@ -25,6 +25,8 @@ import { renderLedgerMarkdown, type LedgerEntry } from "./ledger";
 import { keptPoints, type ReviewMarks } from "./review-marks";
 import type { BaselineComparison, StampField } from "./baseline";
 import { readabilityOf } from "./readability";
+import { requireAnalysisLocale, type AnalysisLocale } from "../locale/active";
+import { vocabularyTerms } from "../locale/vocabulary";
 
 export interface AuditReportMeta {
   generatedAt: string;
@@ -104,16 +106,18 @@ const PRESET_LIMIT_PT: Record<ProfileId, string> = {
   digital: "Aplicado a texto sem títulos nem listas, quatro critérios ficam sem objeto e o placar cala sobre eles.",
 };
 
-function renderProfileMarkdown(config: Config | null, profileId: ProfileId | null): string {
+function renderProfileMarkdown(config: Config | null, profileId: ProfileId | null, locale: AnalysisLocale): string {
   if (config === null) return "";
   const preset = profileId ?? "base";
-  const adjustments = adjustmentsOver(config, preset);
-  const deviations = configDeviations(config);
+  const adjustments = adjustmentsOver(config, preset, locale);
+  const deviations = configDeviations(config, locale.defaultConfig);
   if (adjustments.length === 0 && preset === "base") return "";
 
-  const off = disabledCriteria(config);
+  const off = disabledCriteria(config, "pt-BR", locale);
   const out: string[] = ["## Perfil editorial", ""];
-  out.push(`**Finalidade declarada:** ${PRESET_PT[preset]} · versão ${PROFILE_VERSION} · \`${profileHash(preset)}\``);
+  out.push(
+    `**Finalidade declarada:** ${PRESET_PT[preset]} · versão ${PROFILE_VERSION} · \`${profileHash(preset, locale)}\``,
+  );
   out.push("");
   out.push(PRESET_LIMIT_PT[preset]);
   out.push("");
@@ -127,7 +131,7 @@ function renderProfileMarkdown(config: Config | null, profileId: ProfileId | nul
       `${deviations.length === 1 ? "ajuste foi declarado" : "ajustes foram declarados"} por quem auditou:`,
   );
   out.push("");
-  for (const deviation of deviations) out.push(`- ${describeDeviation(deviation)}`);
+  for (const deviation of deviations) out.push(`- ${describeDeviation(deviation, "pt-BR", locale)}`);
   out.push("");
   if (off.length > 0) {
     out.push(
@@ -151,7 +155,11 @@ const DIRECTION_PT: Record<string, string> = {
   unchanged: "sem mudança",
 };
 
-function renderBalanceMarkdown(before: readonly Finding[] | null, after: readonly Finding[]): string {
+function renderBalanceMarkdown(
+  before: readonly Finding[] | null,
+  after: readonly Finding[],
+  locale: AnalysisLocale,
+): string {
   if (before === null) return "";
   const summary = revisionBalance(before, after);
   const moved = summary.byCriterion.filter((row) => row.direction !== "unchanged");
@@ -172,7 +180,7 @@ function renderBalanceMarkdown(before: readonly Finding[] | null, after: readonl
   out.push("|---|--:|--:|---|---|");
   for (const row of moved) {
     out.push(
-      `| ${metaFor(row.criterion).label} | ${row.before} | ${row.after} | ` +
+      `| ${metaFor(locale.id, row.criterion).label} | ${row.before} | ${row.after} | ` +
         `${fmtNum(row.weightBefore)} → ${fmtNum(row.weightAfter)} | ${DIRECTION_PT[row.direction]} |`,
     );
   }
@@ -233,7 +241,7 @@ const DECISION_PT: Record<"seen" | "dismissed", string> = {
   dismissed: "já ignorado",
 };
 
-function renderBaselineMarkdown(comparison: BaselineComparison | null): string {
+function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: AnalysisLocale): string {
   if (comparison === null) return "";
 
   const out: string[] = ["## Comparação com o ponto de partida", ""];
@@ -270,7 +278,9 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null): string {
     out.push("| Critério | Ponto de partida | Agora | |");
     out.push("|---|--:|--:|---|");
     for (const row of moved) {
-      out.push(`| ${metaFor(row.criterion).label} | ${row.before} | ${row.after} | ${DIRECTION_PT[row.direction]} |`);
+      out.push(
+        `| ${metaFor(locale.id, row.criterion).label} | ${row.before} | ${row.after} | ${DIRECTION_PT[row.direction]} |`,
+      );
     }
     out.push("");
   }
@@ -287,7 +297,7 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null): string {
   } else {
     for (const point of comparison.stillThere) {
       const times = point.count > 1 ? ` · ${point.count}×` : "";
-      out.push(`- **${metaFor(point.criterion).label}**${times} — “${collapse(point.excerpt)}”`);
+      out.push(`- **${metaFor(locale.id, point.criterion).label}**${times} — “${collapse(point.excerpt)}”`);
       if (point.decision !== null) {
         const reason = point.decision.note === null ? "sem motivo registrado" : collapse(point.decision.note);
         out.push(`  _${DECISION_PT[point.decision.kind]}: ${reason}_`);
@@ -305,7 +315,7 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null): string {
 
 const KIND_PT: Record<"seen" | "dismissed", string> = { seen: "revisado", dismissed: "ignorado" };
 
-function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[]): string {
+function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[], locale: AnalysisLocale): string {
   if (findings.length === 0) return "";
   const kept = keptPoints(marks, findings);
   const unexamined = findings.length - kept.length;
@@ -334,7 +344,7 @@ function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[
   out.push("");
 
   for (const point of [...kept].sort((a, b) => bySeverityThenPosition(a.finding, b.finding))) {
-    out.push(`**${metaFor(point.finding.criterion).label}** — ${KIND_PT[point.kind]}`);
+    out.push(`**${metaFor(locale.id, point.finding.criterion).label}** — ${KIND_PT[point.kind]}`);
     out.push("");
     out.push(`> ${collapse(point.finding.span.text)}`);
     out.push("");
@@ -344,13 +354,13 @@ function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[
   return out.join("\n");
 }
 
-function renderVocabularyMarkdown(config: Config | null, findings: readonly Finding[]): string {
-  const terms = config?.vocabulario.terms ?? [];
+function renderVocabularyMarkdown(config: Config | null, findings: readonly Finding[], locale: AnalysisLocale): string {
+  const terms = config === null ? [] : vocabularyTerms(config, locale);
   if (terms.length === 0) return "";
 
   const hits = new Map<string, number>();
   for (const f of findings) {
-    if (f.criterion !== "vocabulario_da_organizacao") continue;
+    if (locale.canonical(f.criterion) !== "organization_vocabulary") continue;
     const declared = typeof f.meta?.term === "string" ? f.meta.term : f.span.text;
     hits.set(declared, (hits.get(declared) ?? 0) + 1);
   }
@@ -409,6 +419,7 @@ export function buildAuditReport(
 ): string {
   const m = diagnostic.metrics;
   const engine = diagnostic.meta;
+  const locale = requireAnalysisLocale(engine.localeId);
   const total = findings.length;
   const sev: Record<Severity, number> = { info: 0, warning: 0, error: 0 };
   for (const f of findings) sev[f.severity]++;
@@ -416,7 +427,7 @@ export function buildAuditReport(
   const human = total - safe;
 
   const out: string[] = [];
-  out.push("# Auditoria de Linguagem Simples");
+  out.push("# Auditoria textual");
   out.push("");
   out.push(`Análise determinística · ${engine.standardVersion} · Lucid`);
   out.push(`Gerado em ${meta.generatedAt}${meta.documentTitle ? ` · ${meta.documentTitle}` : ""}`);
@@ -453,11 +464,13 @@ export function buildAuditReport(
   out.push(
     `- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`,
   );
-  const readability = readabilityOf(m);
+  const readability = readabilityOf(m, "pt-BR", locale.readability);
+  const readabilityLabel =
+    locale.readability === undefined ? "Legibilidade" : `Legibilidade (${locale.readability.name})`;
   out.push(
     readability.measured
-      ? `- Legibilidade (Flesch-PT): ${readability.value} — ${readability.qualifier}`
-      : `- Legibilidade (Flesch-PT): ${readability.qualifier}`,
+      ? `- ${readabilityLabel}: ${readability.value} — ${readability.qualifier}`
+      : `- ${readabilityLabel}: ${readability.qualifier}`,
   );
   for (const note of readability.notes) {
     out.push(`  - ${note}`);
@@ -470,21 +483,28 @@ export function buildAuditReport(
       "repetição; baixa pode ser variação). Não entram no placar._",
   );
   const co = m.cohesion;
-  out.push(
-    `- Coesão referencial (sobreposição entre frases vizinhas): ${fmtNum(co.referentialOverlap)} · ` +
-      `pares sem continuidade: ${fmtNum(co.adjacentGapRatio)}`,
-  );
-  out.push(
-    `- Conectivos por 100 palavras: ${fmtNum(co.connectivesPer100Words)} ` +
-      `(aditivos ${co.connectivesByClass.additive}, adversativos ${co.connectivesByClass.adversative}, ` +
-      `causais ${co.connectivesByClass.causal}, temporais ${co.connectivesByClass.temporal}, ` +
-      `conclusivos ${co.connectivesByClass.conclusive})`,
-  );
+  if (co === null) {
+    out.push(
+      "- Indisponível neste idioma de análise: o locale não declara uma bateria de coesão. " +
+        "Não é zero nem ausência de problema.",
+    );
+  } else {
+    out.push(
+      `- Coesão referencial (sobreposição entre frases vizinhas): ${fmtNum(co.referentialOverlap)} · ` +
+        `pares sem continuidade: ${fmtNum(co.adjacentGapRatio)}`,
+    );
+    out.push(
+      `- Conectivos por 100 palavras: ${fmtNum(co.connectivesPer100Words)} ` +
+        `(aditivos ${co.connectivesByClass.additive}, adversativos ${co.connectivesByClass.adversative}, ` +
+        `causais ${co.connectivesByClass.causal}, temporais ${co.connectivesByClass.temporal}, ` +
+        `conclusivos ${co.connectivesByClass.conclusive})`,
+    );
+  }
   out.push("");
 
   const counts = new Map<string, number>();
   for (const f of findings) counts.set(f.criterion, (counts.get(f.criterion) ?? 0) + 1);
-  const activeRows = CRITERION_ORDER.filter((c) => (counts.get(c) ?? 0) > 0);
+  const activeRows = criterionOrder(locale.id).filter((c) => (counts.get(c) ?? 0) > 0);
   if (activeRows.length > 0) {
     out.push("## Anotações por critério");
     out.push("");
@@ -493,7 +513,7 @@ export function buildAuditReport(
     for (const c of activeRows) {
       const first = findings.find((f) => f.criterion === c)!;
       out.push(
-        `| ${metaFor(c).label} | ${principleGroupLabel(first.principleGroup)} | ${provenanceLabel(first)} | ${coverageLabel(coverageOf(c))} | ${counts.get(c)} |`,
+        `| ${metaFor(locale.id, c).label} | ${principleGroupLabel(first.principleGroup)} | ${provenanceLabel(first, "pt-BR", locale.id)} | ${coverageLabel(coverageOf(locale.id, c))} | ${counts.get(c)} |`,
       );
     }
     out.push("");
@@ -511,7 +531,7 @@ export function buildAuditReport(
     out.push("");
     [...findings].sort(bySeverityThenPosition).forEach((f, i) => {
       out.push(
-        `### ${i + 1}. ${metaFor(f.criterion).label} — ${SEVERITY_LABEL[f.severity]} · ${principleGroupLabel(f.principleGroup)} · ${provenanceLabel(f)}`,
+        `### ${i + 1}. ${metaFor(locale.id, f.criterion).label} — ${SEVERITY_LABEL[f.severity]} · ${principleGroupLabel(f.principleGroup)} · ${provenanceLabel(f, "pt-BR", locale.id)}`,
       );
       out.push("");
       out.push(`> ${collapse(f.span.text)}`);
@@ -535,12 +555,12 @@ export function buildAuditReport(
     });
   }
 
-  const profileSection = renderProfileMarkdown(config, profileId);
+  const profileSection = renderProfileMarkdown(config, profileId, locale);
   if (profileSection) {
     out.push(profileSection);
   }
 
-  const vocabularySection = renderVocabularyMarkdown(config, findings);
+  const vocabularySection = renderVocabularyMarkdown(config, findings, locale);
   if (vocabularySection) {
     out.push(vocabularySection);
   }
@@ -550,22 +570,22 @@ export function buildAuditReport(
     out.push(briefingSection);
   }
 
-  const comparisonSection = renderBaselineMarkdown(comparison);
+  const comparisonSection = renderBaselineMarkdown(comparison, locale);
   if (comparisonSection) {
     out.push(comparisonSection);
   }
 
-  const balance = comparison === null ? renderBalanceMarkdown(originalFindings, findings) : "";
+  const balance = comparison === null ? renderBalanceMarkdown(originalFindings, findings, locale) : "";
   if (balance) {
     out.push(balance);
   }
 
-  const decisions = renderDecisionsMarkdown(marks, findings);
+  const decisions = renderDecisionsMarkdown(marks, findings, locale);
   if (decisions) {
     out.push(decisions);
   }
 
-  const trail = renderLedgerMarkdown(ledger);
+  const trail = renderLedgerMarkdown(ledger, locale.id);
   if (trail) {
     out.push(trail);
   }

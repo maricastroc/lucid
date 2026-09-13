@@ -1,4 +1,5 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "prose_enumeration";
 
@@ -34,7 +35,7 @@ function markerRankAt(tokens: readonly Token[], index: number): number | null {
   return null;
 }
 
-export const proseEnumerationPass: Pass = {
+export const proseEnumerationPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "structural",
 

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { countPii } from "../src/lucid";
+import { countPii } from "../src/locales/pt-BR";
 import { copyFor } from "../src/app/i18n/copy";
 
 function filesUnder(dir: string): string[] {

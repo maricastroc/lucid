@@ -12,7 +12,7 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 
 const only = process.env.ONLY?.split(",").map((s) => s.trim());
 const metaKey = process.env.META;

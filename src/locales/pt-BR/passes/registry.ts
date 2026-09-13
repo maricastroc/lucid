@@ -23,8 +23,9 @@ import { longHeadingPass } from "./long-heading";
 import { singleItemListPass } from "./single-item-list";
 import { vocabularioOrganizacaoPass } from "./vocabulario-organizacao";
 import { headingBodyMismatchPass } from "./heading-body-mismatch";
+import type { PtConfig } from "../config";
 
-export const PASSES: readonly Pass[] = [
+export const PASSES: readonly Pass<PtConfig>[] = [
   sentenceLengthPass,
   passiveVoicePass,
   passivaSinteticaPass,

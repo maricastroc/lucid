@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, checkBriefing, EMPTY_BRIEFING, type Finding } from "../src/lucid";
+import { checkBriefing, EMPTY_BRIEFING, type Finding } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { queryFindings, type FindingQuery } from "../src/app/lib/finding-query";
 import { buildAuditReport } from "../src/app/lib/audit-report";
 import { EMPTY_MARKS } from "../src/app/lib/review-marks";

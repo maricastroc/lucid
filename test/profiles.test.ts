@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { analyzeDocument, buildDocument, buildStructuredDocument, DEFAULT_CONFIG, ptDocumentServices } from "@/lucid";
+import { buildStructuredDocument } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
+import { analyzeDocument, buildDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { htmlToRawBlocks } from "@/importers/html-blocks";
 import { buildAuditReport } from "@/app/lib/audit-report";
 import {
@@ -13,17 +15,21 @@ import {
   profileOf,
 } from "@/app/lib/profiles";
 import { GDOCS_HTML } from "./fixtures/gdocs-clipboard";
+import { analysisLocale } from "@/app/locale/active";
+import type { PtConfig } from "@/locales/pt-BR";
+
+const PT = analysisLocale("pt-BR");
 
 const EDITAL = buildStructuredDocument(htmlToRawBlocks(GDOCS_HTML), ptDocumentServices);
 const LEI = buildDocument(readFileSync("corpus/v1/text/planalto-leis__1989-1994-l8000.txt", "utf8"));
 const count = (doc: typeof LEI, id: (typeof PROFILE_IDS)[number], criterion?: string) => {
-  const findings = analyzeDocument(doc, profileConfig(id)).findings;
+  const findings = analyzeDocument(doc, profileConfig(id, PT)).findings;
   return criterion === undefined ? findings.length : findings.filter((f) => f.criterion === criterion).length;
 };
 
 describe("a purpose is a different measure, not a different label", () => {
   it("gives every profile its own configHash", () => {
-    const hashes = PROFILE_IDS.map(profileHash);
+    const hashes = PROFILE_IDS.map((id) => profileHash(id, PT));
     expect(new Set(hashes).size).toBe(PROFILE_IDS.length);
   });
 
@@ -50,32 +56,32 @@ describe("a purpose is a different measure, not a different label", () => {
   });
 
   it("declares each difference against the default, field by field", () => {
-    expect(profileDifferences("base")).toEqual([]);
+    expect(profileDifferences("base", PT)).toEqual([]);
     for (const id of PROFILE_IDS.filter((x) => x !== "base")) {
-      const differences = profileDifferences(id);
+      const differences = profileDifferences(id, PT);
       expect(differences.length).toBeGreaterThan(0);
       for (const d of differences) expect(d.base).not.toBe(d.value);
     }
   });
 
   it("recognises the config it produced, and refuses an unknown name", () => {
-    for (const id of PROFILE_IDS) expect(profileOf(profileConfig(id))).toBe(id);
-    expect(profileOf({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 7 } })).toBeNull();
+    for (const id of PROFILE_IDS) expect(profileOf(profileConfig(id, PT), PT)).toBe(id);
+    expect(profileOf({ ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 7 } } as PtConfig, PT)).toBeNull();
     expect(isProfileId("cartilha")).toBe(false);
     expect(isProfileId("publico")).toBe(true);
   });
 });
 
 describe("the report carries the profile it was produced under", () => {
-  const findings = analyzeDocument(LEI, profileConfig("normativo")).findings;
+  const findings = analyzeDocument(LEI, profileConfig("normativo", PT)).findings;
   const report = (id: (typeof PROFILE_IDS)[number]) =>
     buildAuditReport(
-      analyzeDocument(LEI, profileConfig(id)),
+      analyzeDocument(LEI, profileConfig(id, PT)),
       findings,
       { generatedAt: "x" },
       [],
       null,
-      profileConfig(id),
+      profileConfig(id, PT),
       null,
       null,
       id,
@@ -85,7 +91,7 @@ describe("the report carries the profile it was produced under", () => {
     const md = report("normativo");
     expect(md).toContain("**Finalidade declarada:** Normativo ou contratual");
     expect(md).toContain(`versão ${PROFILE_VERSION}`);
-    expect(md).toContain(profileHash("normativo"));
+    expect(md).toContain(profileHash("normativo", PT));
   });
 
   it("states the limits of comparing that score with another", () => {

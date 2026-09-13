@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
-import { analyze } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { EMPTY_MARKS, withMark } from "@/app/lib/review-marks";
 import { blocksToDocx } from "../../src/exporters/docx";
 import { mountStudio } from "./support/mount-studio";

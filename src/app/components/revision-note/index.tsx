@@ -18,6 +18,8 @@ import { CuratedEquivalent } from "./curated-equivalent";
 import { HumanDecision } from "./human-decision";
 import { ManualEditForm } from "./manual-edit-form";
 import { Disclosure } from "./note-disclosure";
+import { useAnalysisLocale } from "../../locale/context";
+import { speaksSameLanguage } from "../../locale/language";
 
 export interface RevisionNoteProps {
   finding: Finding;
@@ -25,7 +27,7 @@ export interface RevisionNoteProps {
   allFindings: readonly Finding[];
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
   onManualEdit: (target: Span, replacement: string) => void;
-  onApplyCuratedSwap: (target: Span, replacement: string) => void;
+  onApplyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
 }
 
 export function RevisionNote({
@@ -37,7 +39,8 @@ export function RevisionNote({
   onApplyCuratedSwap,
 }: RevisionNoteProps) {
   const { c, lang } = useCopy();
-  const meta = metaFor(finding.criterion, lang);
+  const locale = useAnalysisLocale();
+  const meta = metaFor(locale.id, finding.criterion, lang);
   const ink = severityInkVar(finding.severity);
   const safe = isSafe(finding);
   const group = principleGroupLabel(finding.principleGroup, lang);
@@ -55,12 +58,14 @@ export function RevisionNote({
         </span>
       </div>
 
-      <h3 className="mt-2 font-serif text-[23px] leading-[1.2] text-ink-0">{detectionHeadline(finding, lang)}</h3>
+      <h3 className="mt-2 font-serif text-[23px] leading-[1.2] text-ink-0">
+        {detectionHeadline(finding, locale.id, lang)}
+      </h3>
 
       <p className="mt-2 text-[12.5px] text-ink-2">
         <span className="text-ink-1">{group}</span> · {meta.principleName}
         <span className="ml-2 rounded-[5px] border border-rule-1 bg-surface-2 px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3">
-          {provenanceLabel(finding, lang)}
+          {provenanceLabel(finding, lang, locale.id)}
         </span>
       </p>
 
@@ -73,14 +78,20 @@ export function RevisionNote({
       </Block>
 
       <Block label={c.note.whatWeFound}>
-        <Prose>{detectedProse(finding, lang)}</Prose>
+        <Prose>{detectedProse(finding, locale.id, lang)}</Prose>
       </Block>
 
       <div className="mt-7">
         {safe ? (
           <CuratedEquivalent
             finding={finding}
-            onApply={() => onApplyCuratedSwap(finding.span, matchLeadingCase(finding.span.text, finding.suggestion!))}
+            onApply={() =>
+              onApplyCuratedSwap(
+                finding.span,
+                matchLeadingCase(finding.span.text, finding.suggestion!),
+                attestedSourceOf(finding),
+              )
+            }
           />
         ) : (
           <HumanDecision
@@ -135,13 +146,14 @@ function Excerpt({ finding, ink, channelClass }: { finding: Finding; ink: string
 
 function EngineJustification({ finding }: { finding: Finding }) {
   const { c, lang } = useCopy();
-  if (lang === "pt-BR") return <Prose className="mt-2 text-ink-2">{finding.justification}</Prose>;
+  const locale = useAnalysisLocale();
+  if (speaksSameLanguage(lang, locale.id)) return <Prose className="mt-2 text-ink-2">{finding.justification}</Prose>;
   return (
     <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2/50 px-3 py-2.5">
       <p className="u-sublabel text-ink-3" title={c.note.engineOutputHint}>
-        {c.note.engineOutput}
+        {c.note.engineOutput(locale.id)}
       </p>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-2" lang="pt-BR">
+      <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-2" lang={locale.id}>
         {finding.justification}
       </p>
     </div>
@@ -159,4 +171,9 @@ function Block({ label, children }: { label: string; children: React.ReactNode }
 
 function Prose({ children, className }: { children: React.ReactNode; className?: string }) {
   return <p className={`text-[13.5px] leading-relaxed text-ink-1 ${className ?? ""}`}>{children}</p>;
+}
+
+function attestedSourceOf(finding: Finding): string | undefined {
+  const source = finding.meta?.attestedIn;
+  return typeof source === "string" ? source : undefined;
 }

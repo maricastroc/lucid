@@ -20,7 +20,7 @@ export interface DocumentEditsOptions {
 }
 
 export interface DocumentEdits {
-  readonly applyCuratedSwap: (target: Span, replacement: string) => void;
+  readonly applyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
   readonly applyManualEdit: (target: Span, replacement: string) => void;
   readonly applyRewrite: (target: Span, proposal: RewriteProposal) => void;
   readonly undoChange: () => void;
@@ -67,11 +67,13 @@ export function useDocumentEdits({
   );
 
   const applyCuratedSwap = useCallback(
-    (target: Span, replacement: string) => {
+    (target: Span, replacement: string, attestedIn?: string) => {
       const nextText = spliceSpan(diagnostic.text, target, replacement);
       moveMarks(target, nextText);
       applyChange(
-        { source: "glossary", label: sourceLabel("glossary"), before: target.text, after: replacement },
+        attestedIn === undefined
+          ? { source: "glossary", label: sourceLabel("glossary"), before: target.text, after: replacement }
+          : { source: "attested", label: sourceLabel("attested"), attestedIn, before: target.text, after: replacement },
         nextText,
       );
     },

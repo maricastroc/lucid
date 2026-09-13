@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../locale/context";
 import type { Finding, Severity } from "@/lucid";
 import { isSafe, metaFor, requiresHumanThroughout, severityInkVar } from "../lib/criteria";
 import { useCopy } from "../i18n/use-copy";
@@ -45,7 +46,8 @@ export function SeverityDot({ severity, className = "" }: { severity: Severity; 
 
 export function CriterionMark({ criterion, className = "" }: { criterion: string; className?: string }) {
   const { lang } = useCopy();
-  const meta = metaFor(criterion, lang);
+  const locale = useAnalysisLocale();
+  const meta = metaFor(locale.id, criterion, lang);
   if (meta.channel === "passage") {
     return (
       <span

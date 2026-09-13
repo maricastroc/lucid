@@ -1,4 +1,6 @@
-import { DEFAULT_CONFIG, hashConfig, type Config } from "@/lucid";
+import { hashConfig, type Config } from "@/lucid";
+import { DEFAULT_CONFIG as PT_DEFAULT, type PtConfig } from "@/locales/pt-BR";
+import type { AnalysisLocale, AnalysisLocaleId } from "../locale/active";
 
 export const PROFILE_IDS = ["base", "normativo", "publico", "digital"] as const;
 
@@ -11,47 +13,68 @@ export interface ProfileDefinition {
   readonly config: Config;
 }
 
-const withOverrides = (overrides: Partial<Config>): Config => ({ ...DEFAULT_CONFIG, ...overrides });
+const ptWith = (overrides: Partial<PtConfig>): PtConfig => ({ ...PT_DEFAULT, ...overrides });
 
-const CONFIGS: Record<ProfileId, Config> = {
-  base: DEFAULT_CONFIG,
+const PT_PROFILES: Record<ProfileId, PtConfig> = {
+  base: PT_DEFAULT,
 
-  normativo: withOverrides({
+  normativo: ptWith({
     sentenceLength: { warnAbove: 25 },
-    paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 6 },
-    subordinacao: { ...DEFAULT_CONFIG.subordinacao, minPorFrase: 4 },
+    paragraphLength: { ...PT_DEFAULT.paragraphLength, maxSentences: 6 },
+    subordinacao: { ...PT_DEFAULT.subordinacao, minPorFrase: 4 },
   }),
 
-  publico: withOverrides({
+  publico: ptWith({
     sentenceLength: { warnAbove: 15 },
-    paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 3 },
-    subordinacao: { ...DEFAULT_CONFIG.subordinacao, minPorFrase: 2 },
-    nominalizacaoEncadeada: { ...DEFAULT_CONFIG.nominalizacaoEncadeada, minPorFrase: 2 },
+    paragraphLength: { ...PT_DEFAULT.paragraphLength, maxSentences: 3 },
+    subordinacao: { ...PT_DEFAULT.subordinacao, minPorFrase: 2 },
+    nominalizacaoEncadeada: { ...PT_DEFAULT.nominalizacaoEncadeada, minPorFrase: 2 },
   }),
 
-  digital: withOverrides({
+  digital: ptWith({
     sentenceLength: { warnAbove: 15 },
-    paragraphLength: { ...DEFAULT_CONFIG.paragraphLength, maxSentences: 2 },
-    longHeading: { ...DEFAULT_CONFIG.longHeading, maxWords: 8 },
-    proseEnumeration: { ...DEFAULT_CONFIG.proseEnumeration, minMarkers: 2 },
+    paragraphLength: { ...PT_DEFAULT.paragraphLength, maxSentences: 2 },
+    longHeading: { ...PT_DEFAULT.longHeading, maxWords: 8 },
+    proseEnumeration: { ...PT_DEFAULT.proseEnumeration, minMarkers: 2 },
   }),
 };
 
-export function profileConfig(id: ProfileId): Config {
-  return CONFIGS[id];
+const PURPOSE_PROFILES: Partial<Record<AnalysisLocaleId, Partial<Record<ProfileId, Config>>>> = {
+  "pt-BR": PT_PROFILES,
+};
+
+function profilesOf(locale: AnalysisLocale): Partial<Record<ProfileId, Config>> {
+  return { base: locale.defaultConfig, ...PURPOSE_PROFILES[locale.id] };
 }
 
-export function profileHash(id: ProfileId): string {
-  return hashConfig(CONFIGS[id]);
+export function availableProfiles(locale: AnalysisLocale): readonly ProfileId[] {
+  const profiles = profilesOf(locale);
+  return PROFILE_IDS.filter((id) => profiles[id] !== undefined);
+}
+
+export function isProfileAvailable(id: ProfileId, locale: AnalysisLocale): boolean {
+  return profilesOf(locale)[id] !== undefined;
+}
+
+export function profileConfig(id: ProfileId, locale: AnalysisLocale): Config {
+  const config = profilesOf(locale)[id];
+  if (config === undefined) {
+    throw new Error(`o perfil "${id}" não existe para o locale "${locale.id}".`);
+  }
+  return config;
+}
+
+export function profileHash(id: ProfileId, locale: AnalysisLocale): string {
+  return hashConfig(profileConfig(id, locale), locale.configSections);
 }
 
 export function isProfileId(value: unknown): value is ProfileId {
   return typeof value === "string" && (PROFILE_IDS as readonly string[]).includes(value);
 }
 
-export function profileOf(config: Config): ProfileId | null {
-  const hash = hashConfig(config);
-  for (const id of PROFILE_IDS) if (hashConfig(CONFIGS[id]) === hash) return id;
+export function profileOf(config: Config, locale: AnalysisLocale): ProfileId | null {
+  const hash = hashConfig(config, locale.configSections);
+  for (const id of availableProfiles(locale)) if (profileHash(id, locale) === hash) return id;
   return null;
 }
 
@@ -62,12 +85,12 @@ export interface ProfileDifference {
   readonly value: number | boolean;
 }
 
-export function profileDifferences(id: ProfileId): ProfileDifference[] {
-  return differencesBetween(DEFAULT_CONFIG, CONFIGS[id]);
+export function profileDifferences(id: ProfileId, locale: AnalysisLocale): ProfileDifference[] {
+  return differencesBetween(locale.defaultConfig, profileConfig(id, locale));
 }
 
-export function adjustmentsOver(config: Config, id: ProfileId): ProfileDifference[] {
-  return differencesBetween(CONFIGS[id], config);
+export function adjustmentsOver(config: Config, id: ProfileId, locale: AnalysisLocale): ProfileDifference[] {
+  return differencesBetween(profileConfig(id, locale), config);
 }
 
 function differencesBetween(from: Config, to: Config): ProfileDifference[] {

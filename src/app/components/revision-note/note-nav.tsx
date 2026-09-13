@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import type { ReviewMarkKind, ReviewState } from "../../lib/review-marks";
 import { metaFor } from "../../lib/criteria";
 import { useCopy } from "../../i18n/use-copy";
@@ -34,7 +35,8 @@ export function NoteNav({
   onBackToOverview: () => void;
 }) {
   const { c, lang } = useCopy();
-  const label = metaFor(criterion, lang).label;
+  const locale = useAnalysisLocale();
+  const label = metaFor(locale.id, criterion, lang).label;
   const g = c.guided;
 
   if (guided !== null) {

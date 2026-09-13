@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildDocument, toRawBlocks, type RawBlock } from "@/lucid";
+import { toRawBlocks, type RawBlock } from "@/lucid";
+import { buildDocument } from "@/locales/pt-BR";
 import { documentToHtml, documentToMarkdown } from "@/app/lib/export-document";
 
 const BLOCKS: RawBlock[] = [

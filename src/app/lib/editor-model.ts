@@ -1,4 +1,5 @@
 import type { Finding, Span } from "@/lucid";
+import type { AnalysisLocaleId } from "../locale/active";
 import { metaFor, severityRank } from "./criteria";
 
 export interface LineSegment {
@@ -27,12 +28,13 @@ function pickHighest(candidates: Finding[]): Finding | undefined {
 export function segmentRange(
   text: string,
   findings: readonly Finding[],
+  localeId: AnalysisLocaleId,
   start: number,
   end: number,
   marks: readonly Span[] = [],
 ): LineSegment[] {
-  const inlineF = findings.filter((f) => metaFor(f.criterion).channel !== "passage");
-  const passageF = findings.filter((f) => metaFor(f.criterion).channel === "passage");
+  const inlineF = findings.filter((f) => metaFor(localeId, f.criterion).channel !== "passage");
+  const passageF = findings.filter((f) => metaFor(localeId, f.criterion).channel === "passage");
 
   const bset = new Set<number>([start, end]);
   for (const f of findings) {
@@ -58,7 +60,12 @@ export function segmentRange(
   return segments;
 }
 
-export function buildLines(text: string, findings: readonly Finding[], marks: readonly Span[] = []): DocLine[] {
+export function buildLines(
+  text: string,
+  findings: readonly Finding[],
+  localeId: AnalysisLocaleId,
+  marks: readonly Span[] = [],
+): DocLine[] {
   const lines: DocLine[] = [];
   const rawLines = text.split("\n");
   let offset = 0;
@@ -75,7 +82,7 @@ export function buildLines(text: string, findings: readonly Finding[], marks: re
       start,
       end,
       text: lineText,
-      segments: segmentRange(text, findings, start, end, marks),
+      segments: segmentRange(text, findings, localeId, start, end, marks),
       markers,
     });
   });

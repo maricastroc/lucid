@@ -1,10 +1,15 @@
 import type { Config } from "../config";
-import type { CohesionMetrics, Document, Metrics, TableBlock, TableMetrics } from "../types";
+import type { ReadabilityMetric } from "../contracts/locale";
+import type { CohesionMetrics, Document, Metrics, ReadabilityReading, TableBlock, TableMetrics } from "../types";
 
 export interface MetricServices {
-  countSyllables: (word: string) => number;
-  readability: (input: { wordsPerSentence: number; syllablesPerWord: number }) => number;
-  cohesion: (doc: Document) => CohesionMetrics;
+  countSyllables?: (word: string) => number;
+  readability?: (input: { wordsPerSentence: number; syllablesPerWord: number }) => number;
+  cohesion?: (doc: Document) => CohesionMetrics;
+}
+
+export function readabilityReadingOf(metric: ReadabilityMetric | undefined, metrics: Metrics): ReadabilityReading {
+  return metric === undefined ? { kind: "unavailable" } : metric.interpret(metrics);
 }
 
 function round(value: number, decimalPlaces: number): number {
@@ -24,16 +29,16 @@ function roundCohesion(c: CohesionMetrics, decimalPlaces: number): CohesionMetri
 function zeroMetrics(
   sentenceCount: number,
   wordCount: number,
-  syllableCount: number,
-  cohesion: CohesionMetrics,
+  syllableCount: number | null,
+  cohesion: CohesionMetrics | null,
 ): Metrics {
   return {
-    fleschPt: null,
+    readability: null,
     words: wordCount,
     sentences: sentenceCount,
     syllables: syllableCount,
     wordsPerSentence: 0,
-    syllablesPerWord: 0,
+    syllablesPerWord: syllableCount === null ? null : 0,
     cohesion,
   };
 }
@@ -78,9 +83,11 @@ export function runMetrics(doc: Document, config: Config, services: MetricServic
   const sentenceCount = prose.doc.sentences.length;
   const wordTokens = prose.doc.tokens.filter((t) => t.isWord);
   const wordCount = wordTokens.length;
-  const syllableCount = wordTokens.reduce((sum, t) => sum + services.countSyllables(t.text), 0);
+  const countSyllables = services.countSyllables;
+  const syllableCount =
+    countSyllables === undefined ? null : wordTokens.reduce((sum, t) => sum + countSyllables(t.text), 0);
   const decimalPlaces = config.metrics.decimalPlaces;
-  const cohesion = roundCohesion(services.cohesion(prose.doc), decimalPlaces);
+  const cohesion = services.cohesion === undefined ? null : roundCohesion(services.cohesion(prose.doc), decimalPlaces);
 
   if (sentenceCount === 0 || wordCount === 0) {
     const empty = zeroMetrics(sentenceCount, wordCount, syllableCount, cohesion);
@@ -88,19 +95,22 @@ export function runMetrics(doc: Document, config: Config, services: MetricServic
   }
 
   const rawWordsPerSentence = wordCount / sentenceCount;
-  const rawSyllablesPerWord = syllableCount / wordCount;
-  const rawFleschPt = services.readability({
-    wordsPerSentence: rawWordsPerSentence,
-    syllablesPerWord: rawSyllablesPerWord,
-  });
+  const rawSyllablesPerWord = syllableCount === null ? null : syllableCount / wordCount;
+  const rawReadability =
+    services.readability === undefined || rawSyllablesPerWord === null
+      ? null
+      : services.readability({
+          wordsPerSentence: rawWordsPerSentence,
+          syllablesPerWord: rawSyllablesPerWord,
+        });
 
   const measured: Metrics = {
-    fleschPt: round(rawFleschPt, decimalPlaces),
+    readability: rawReadability === null ? null : round(rawReadability, decimalPlaces),
     words: wordCount,
     sentences: sentenceCount,
     syllables: syllableCount,
     wordsPerSentence: round(rawWordsPerSentence, decimalPlaces),
-    syllablesPerWord: round(rawSyllablesPerWord, decimalPlaces),
+    syllablesPerWord: rawSyllablesPerWord === null ? null : round(rawSyllablesPerWord, decimalPlaces),
     cohesion,
   };
   return tables === undefined ? measured : { ...measured, tables };

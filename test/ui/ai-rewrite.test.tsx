@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { analyze } from "@/lucid";
+import { analyze } from "@/locales/pt-BR";
 import { proposeAndVerify, StubRewriteProposer, type VerifiedRewrite } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { rewriteTargetAt } from "@/app/lib/paragraphs";
@@ -7,10 +7,13 @@ import { mountStudio } from "./support/mount-studio";
 import { auditPanel, documentRegion, openChanges } from "./support/panels";
 import { auditReady, openPoint } from "./support/points";
 import { PASSIVE_AND_JARGON, PLAIN_FIRST_SENTENCE, REWRITE_LOSING_THE_NUMBER } from "./support/documents";
+import { analysisLocale } from "../../src/app/locale/active";
+
+const PT = analysisLocale("pt-BR");
 
 async function answerWith(proposed: string): Promise<VerifiedRewrite> {
   const finding = analyze(PASSIVE_AND_JARGON).findings[0];
-  const target = rewriteTargetAt(PASSIVE_AND_JARGON, finding.span.start).span;
+  const target = rewriteTargetAt(PASSIVE_AND_JARGON, finding.span.start, PT).span;
   return proposeAndVerify(
     PASSIVE_AND_JARGON,
     target,

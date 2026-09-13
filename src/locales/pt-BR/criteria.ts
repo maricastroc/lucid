@@ -30,3 +30,11 @@ export type CriterionId = (typeof CRITERION_IDS)[number];
 export function isCriterionId(value: string): value is CriterionId {
   return (CRITERION_IDS as readonly string[]).includes(value);
 }
+
+export const PT_CANONICAL: Readonly<Record<string, string>> = {
+  nominalization: "hidden_verb",
+  sigla_sem_expansao: "undefined_acronym",
+  leitor_terceira_pessoa: "reader_in_third_person",
+  salto_de_nivel_titulo: "heading_level_skip",
+  vocabulario_da_organizacao: "organization_vocabulary",
+};

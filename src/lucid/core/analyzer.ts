@@ -8,7 +8,7 @@ import type { CriterionTaxonomy, Diagnostic, Document, Finding, PassContext, Pas
 
 const LUCID_VERSION = "0.1.0";
 
-function mergeConfig(base: Config, overrides?: Partial<Config>): Config {
+function mergeConfig<C extends Config>(base: C, overrides?: Partial<C>): C {
   return { ...base, ...overrides };
 }
 
@@ -37,21 +37,27 @@ export function sortFindings(findings: readonly Finding[]): Finding[] {
   });
 }
 
-export function analyzeDocumentWithLocale(
+export function analyzeDocumentWithLocale<C extends Config>(
   doc: Document,
-  locale: LocaleBundle,
-  configOverrides?: Partial<Config>,
+  locale: LocaleBundle<C>,
+  configOverrides?: Partial<C>,
 ): Diagnostic {
   const config = mergeConfig(locale.config, configOverrides);
 
+  const readability = locale.metrics.readability;
+  const cohesion = locale.metrics.cohesion;
   const metrics = runMetrics(doc, config, {
     countSyllables: locale.metrics.countSyllables,
-    readability: (input) => locale.metrics.readability.calculate(input),
-    cohesion: (d) => locale.metrics.cohesion(d),
+    readability: readability === undefined ? undefined : (input) => readability.calculate(input),
+    cohesion: cohesion === undefined ? undefined : (d) => cohesion(d),
   });
 
   const rawFindings = locale.passes.flatMap((pass) => {
-    const context: PassContext = Object.freeze({ doc, config, data: locale.data.createDataView(pass.dataDeps ?? []) });
+    const context: PassContext<C> = Object.freeze({
+      doc,
+      config,
+      data: locale.data.createDataView(pass.dataDeps ?? []),
+    });
     const passFindings = pass.run(context);
     for (const finding of passFindings) {
       if (finding.criterion !== pass.criterion) {
@@ -82,14 +88,18 @@ export function analyzeDocumentWithLocale(
     meta: {
       lucidVersion: LUCID_VERSION,
       localeId: locale.id,
-      configHash: hashConfig(config),
+      configHash: hashConfig(config, Object.keys(locale.configSchema)),
       dataHash: locale.data.dataHashFor(dataIds),
       standardVersion: locale.standardVersion,
     },
   };
 }
 
-export function analyzeWithLocale(text: string, locale: LocaleBundle, configOverrides?: Partial<Config>): Diagnostic {
+export function analyzeWithLocale<C extends Config>(
+  text: string,
+  locale: LocaleBundle<C>,
+  configOverrides?: Partial<C>,
+): Diagnostic {
   const doc = buildDocument(text, {
     segmentSentences: locale.services.segmentSentences,
     abbreviations: locale.data.abbreviations,
@@ -97,9 +107,11 @@ export function analyzeWithLocale(text: string, locale: LocaleBundle, configOver
   return analyzeDocumentWithLocale(doc, locale, configOverrides);
 }
 
-export function createAnalyzer(opts: { locale: LocaleBundle }): {
+export function createAnalyzer<C extends Config>(opts: {
+  locale: LocaleBundle<C>;
+}): {
   readonly localeId: string;
-  analyze(text: string, configOverrides?: Partial<Config>): Diagnostic;
+  analyze(text: string, configOverrides?: Partial<C>): Diagnostic;
 } {
   return {
     localeId: opts.locale.id,

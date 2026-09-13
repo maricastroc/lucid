@@ -1,0 +1,1907 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`en-US — full Diagnostic snapshots > abbreviations 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 3,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 17,
+    "wordsPerSentence": 5.7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "Mr. Smith met Rep. Jones on Jan. 5 about form No. 12. The meeting ran 30 min. Then it ended.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > ambiguous_shall 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "reader_in_third_person",
+      "justification": "The reader is named in the third person (“lessee”) and given an obligation or a permission (“shall”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "meta": {
+        "deontic": "shall",
+        "readerNoun": "lessee",
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "info",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 16,
+        "start": 0,
+        "text": "The lessee shall",
+      },
+    },
+    {
+      "category": "lexical",
+      "criterion": "ambiguous_shall",
+      "justification": "“shall” can state an obligation, a discretion, a recommendation or a prediction, and the sentence does not say which. The Federal Plain Language Guidelines (2011, p. 25) recommend “must” for an obligation, “may” for a discretionary action and “should” for a recommendation; “will” for a prediction is Lucid's note. Lucid does not pick the reading and does not replace the word: only the author knows what is meant.",
+      "meta": {
+        "negated": false,
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "editorial",
+      "span": {
+        "end": 16,
+        "start": 11,
+        "text": "shall",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "reader_in_third_person",
+      "justification": "The reader is named in the third person (“applicant”) and given an obligation or a permission (“shall”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "meta": {
+        "deontic": "shall",
+        "readerNoun": "applicant",
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "info",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 57,
+        "start": 38,
+        "text": "The applicant shall",
+      },
+    },
+    {
+      "category": "lexical",
+      "criterion": "ambiguous_shall",
+      "justification": "“shall not” can state a prohibition or a prediction, and the sentence does not say which. The Federal Plain Language Guidelines (2011, p. 25) recommend “must not” for a prohibition; “will not” for a prediction is Lucid's note. Lucid does not pick the reading and does not replace the words: only the author knows what is meant.",
+      "meta": {
+        "negated": true,
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "editorial",
+      "span": {
+        "end": 61,
+        "start": 52,
+        "text": "shall not",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 2,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 12,
+    "wordsPerSentence": 6,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 2,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 16.7,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 2,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 16.7,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 4,
+  },
+  "text": "The lessee shall file an application. The applicant shall not remove timber.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > empty 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 0,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 0,
+    "wordsPerSentence": 0,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > hidden_verb 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "hidden_verb",
+      "justification": "Verb hidden in a noun: “make the payment of” uses a noun where the verb “pay” says the action directly (ISO 24495-1, 5.3.3). The equivalence is attested in the Federal Plain Language Guidelines (2011), p. 23; whether to use it is the author's decision.",
+      "meta": {
+        "attestedIn": "Federal Plain Language Guidelines (2011), p. 23",
+        "curated": true,
+        "lightForm": "make",
+        "lightVerb": "make",
+        "nominal": "payment",
+        "productive": true,
+        "suffix": "ment",
+        "swap": true,
+        "verb": "pay",
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": false,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 33,
+        "start": 14,
+        "text": "make the payment of",
+      },
+      "suggestion": "pay",
+    },
+    {
+      "category": "syntactic",
+      "criterion": "hidden_verb",
+      "justification": "Verb hidden in a noun: “make an application” uses a noun where the verb “apply” says the action directly (ISO 24495-1, 5.3.3). The equivalence is attested in the Federal Plain Language Guidelines (2011), p. 23; whether to use it is the author's decision.",
+      "meta": {
+        "attestedIn": "Federal Plain Language Guidelines (2011), p. 23",
+        "curated": true,
+        "lightForm": "make",
+        "lightVerb": "make",
+        "nominal": "application",
+        "productive": true,
+        "suffix": "tion",
+        "swap": true,
+        "verb": "apply",
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": false,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 76,
+        "start": 57,
+        "text": "make an application",
+      },
+      "suggestion": "apply",
+    },
+    {
+      "category": "syntactic",
+      "criterion": "hidden_verb",
+      "justification": "Verb possibly hidden in a noun: the light verb “made” is followed by a noun ending in “-sion”, a suffix that usually turns a verb into a noun (ISO 24495-1, 5.3.3). No one-to-one equivalence is attested for this phrase, so Lucid does not name a verb. Check whether a single verb says it more directly.",
+      "meta": {
+        "curated": false,
+        "lightForm": "made",
+        "lightVerb": "make",
+        "nominal": "decision",
+        "productive": true,
+        "suffix": "sion",
+        "swap": false,
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 107,
+        "start": 92,
+        "text": "made a decision",
+      },
+      "suggestion": undefined,
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 3,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 26,
+    "wordsPerSentence": 8.7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 3,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 11.5,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 3,
+  },
+  "text": "If you cannot make the payment of the $100 fee, you must make an application in writing. We made a decision. Take the first position in line.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > long_sentence 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "long_sentence",
+      "justification": "Sentence of 34 words. Lucid inspects sentences above 25 words. That trigger is an interim reference borrowed from GOV.UK, the United Kingdom government's guidance; it is not a US federal recommendation and has not been validated for American documents, so it stays provisional and configurable. ISO 24495-1 asks for concise sentences and varied length without fixing a number. Check whether the sentence carries more than one idea; if it carries one, it may be fine as it is.",
+      "meta": {
+        "threshold": 25,
+        "thresholdStatus": "provisional",
+        "words": 34,
+      },
+      "normativeReference": {
+        "section": "5.3.4",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 179,
+        "start": 0,
+        "text": "You can apply if you live in the state and your household income is below the limit set by the agency for the current year, which the agency publishes each January on its website.",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 1,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 34,
+    "wordsPerSentence": 34,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 2.9,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "You can apply if you live in the state and your household income is below the limit set by the agency for the current year, which the agency publishes each January on its website.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > passive 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Passive voice with the agent after the verb, introduced by “by”. The sentence says who acts, but only after the action; making that agent the subject shows who does what (ISO 24495-1, 5.3.3). Whether to change it is the author's decision.",
+      "meta": {
+        "agentEnd": 45,
+        "agentMarkerEnd": 32,
+        "agentMarkerStart": 30,
+        "agentTruncated": false,
+        "form": "past",
+        "hasAgent": true,
+        "participleEnd": 29,
+        "participleStart": 21,
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": false,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 45,
+        "start": 17,
+        "text": "was approved by the director",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). Lucid does not supply the missing agent — only the author knows who acts.",
+      "meta": {
+        "form": "modal",
+        "hasAgent": false,
+        "participleEnd": 81,
+        "participleStart": 73,
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 81,
+        "start": 61,
+        "text": "will not be accepted",
+      },
+    },
+    {
+      "category": "syntactic",
+      "criterion": "passive_voice",
+      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). Lucid does not supply the missing agent — only the author knows who acts.",
+      "meta": {
+        "form": "perfect",
+        "hasAgent": false,
+        "participleEnd": 113,
+        "participleStart": 105,
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 113,
+        "start": 96,
+        "text": "has been extended",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 4,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 26,
+    "wordsPerSentence": 6.5,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 3,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 11.5,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 3,
+  },
+  "text": "Your application was approved by the director. Late payments will not be accepted. The deadline has been extended by March 31. She is interested in the program.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > plain_sentence 1`] = `
+{
+  "findings": [],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 1,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 7,
+    "wordsPerSentence": 7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 0,
+  },
+  "text": "Send the form to us by March 31.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > prose_enumeration 1`] = `
+{
+  "findings": [
+    {
+      "category": "structural",
+      "criterion": "prose_enumeration",
+      "justification": "A series of 3 items is marked with “(1)… (2)… (3)…” inside running text. The Federal Plain Language Guidelines (2011, pp. 71-72) recommend a vertical list, with a lead-in sentence, for a series of requirements, steps or conditions (ISO 24495-1, 5.2.3). Turning it into a list changes the structure of the text; Lucid does not convert it.",
+      "meta": {
+        "items": 3,
+        "notation": "markers",
+        "threshold": 3,
+        "thresholdStatus": "provisional",
+      },
+      "normativeReference": {
+        "section": "5.2.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "findable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 116,
+        "start": 79,
+        "text": "1) register, (2) pay, and (3) attend.",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 2,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 18,
+    "wordsPerSentence": 9,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 5.6,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "Bring these documents: a photo ID, proof of address, and your lease. You must (1) register, (2) pay, and (3) attend.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > reader_in_third_person 1`] = `
+{
+  "findings": [
+    {
+      "category": "syntactic",
+      "criterion": "reader_in_third_person",
+      "justification": "The reader is named in the third person (“Applicants”) and given an obligation or a permission (“must”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "meta": {
+        "deontic": "must",
+        "readerNoun": "Applicants",
+      },
+      "normativeReference": {
+        "section": "5.3.3",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "info",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 15,
+        "start": 0,
+        "text": "Applicants must",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 2,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 16,
+    "wordsPerSentence": 8,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 1,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 6.3,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "Applicants must submit Form 12 by May 1. If you are the lessee, you must monitor the operator.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > structure 1`] = `
+{
+  "findings": [
+    {
+      "category": "structural",
+      "criterion": "heading_level_skip",
+      "justification": "This heading jumps from level 1 to 4 without passing through 2. Skipped levels break reading by structure (table of contents, scanning, screen readers). Adjust this heading's level or add an intermediate one; the tool does not reorganize the hierarchy for you.",
+      "meta": {
+        "level": 4,
+        "prevLevel": 1,
+      },
+      "normativeReference": {
+        "section": "5.2.4",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "findable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 28,
+        "start": 17,
+        "text": "Eligibility",
+      },
+    },
+    {
+      "category": "structural",
+      "criterion": "single_item_list",
+      "justification": "List with a single item. A list exists to separate and compare several items; with one, it helps no one find anything and suggests either that an item is missing or that the content belongs in running text. This is structural hygiene (a weak signal, with no direct guideline in the standard): completing the list or folding it into the prose is the author's decision.",
+      "meta": {
+        "ordered": false,
+      },
+      "principleGroup": "findable",
+      "requiresHuman": true,
+      "severity": "info",
+      "source": "structural-heuristic",
+      "span": {
+        "end": 48,
+        "start": 32,
+        "text": "Proof of address",
+      },
+    },
+    {
+      "category": "structural",
+      "criterion": "long_heading",
+      "justification": "Heading ends with a period, like a sentence — headings are labels and do not close as a clause. Reworking the form is the author's call; the tool does not rewrite headings.",
+      "meta": {
+        "reason": "sentence",
+        "sentences": 1,
+        "words": 3,
+      },
+      "normativeReference": {
+        "section": "5.2.4",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "findable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 66,
+        "start": 53,
+        "text": "How to apply.",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 6,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 16,
+    "wordsPerSentence": 2.7,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 6.3,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 6.3,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 1,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 6.3,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 3,
+  },
+  "text": "# Benefits
+
+#### Eligibility
+
+- Proof of address
+
+## How to apply.
+
+Send the form. We answer within ten days.",
+}
+`;
+
+exports[`en-US — full Diagnostic snapshots > undefined_acronym 1`] = `
+{
+  "findings": [
+    {
+      "category": "lexical",
+      "criterion": "undefined_acronym",
+      "justification": "“FAA” is used before it is spelled out. The Federal Plain Language Guidelines (2011, p. 34) ask to define an abbreviation the first time it is used — or to replace it with a short name that says what it is (ISO 24495-1, 5.3.2). Lucid does not know what the acronym stands for; writing it out is the author's.",
+      "meta": {
+        "acronym": "FAA",
+      },
+      "normativeReference": {
+        "section": "5.3.2",
+        "standard": "ISO 24495-1",
+      },
+      "principleGroup": "understandable",
+      "requiresHuman": true,
+      "severity": "warning",
+      "source": "iso-24495-1",
+      "span": {
+        "end": 7,
+        "start": 4,
+        "text": "FAA",
+      },
+    },
+  ],
+  "meta": {
+    "configHash": "e1a12c6b",
+    "dataHash": "01dfeeaf",
+    "localeId": "en-US",
+    "lucidVersion": "0.1.0",
+    "standardVersion": "ISO 24495-1:2023",
+  },
+  "metrics": {
+    "cohesion": null,
+    "readability": null,
+    "sentences": 3,
+    "syllables": null,
+    "syllablesPerWord": null,
+    "words": 19,
+    "wordsPerSentence": 6.3,
+  },
+  "score": {
+    "byCriterion": [
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "passive_voice",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "hidden_verb",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "reader_in_third_person",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "ambiguous_shall",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 1,
+        },
+        "criterion": "undefined_acronym",
+        "densityPer100Words": 5.3,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "prose_enumeration",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_sentence",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "paragraph_length",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "long_heading",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "heading_level_skip",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "single_item_list",
+        "densityPer100Words": 0,
+      },
+      {
+        "count": {
+          "error": 0,
+          "info": 0,
+          "warning": 0,
+        },
+        "criterion": "organization_vocabulary",
+        "densityPer100Words": 0,
+      },
+    ],
+    "totalFindings": 1,
+  },
+  "text": "The FAA denied the request. The Social Security Administration (SSA) and the SSA office agree. Your ATM card works.",
+}
+`;

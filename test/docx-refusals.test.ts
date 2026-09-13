@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ptDocumentServices } from "../src/lucid";
+import { ptDocumentServices } from "../src/locales/pt-BR";
 import { importDocx, type DocxResult } from "../src/importers/docx";
 import { buildDocx, documentXml, outlineStyle, para, styled, stylesXml } from "./support/docx";
 

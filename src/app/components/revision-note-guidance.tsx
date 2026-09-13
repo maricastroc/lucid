@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { isCriterionId, passiveScaffold, type Finding, type SplitPoint } from "@/lucid";
+import { type Finding } from "@/lucid";
+import { isCriterionId } from "@/locales/pt-BR/criteria";
+import { isEnCriterionId } from "@/locales/en-US/criteria";
+import { EN_GUIDANCE } from "../presentation/en-US/guidance";
+import { thresholdNoteFor } from "../presentation/registry";
+import { useAnalysisLocale } from "../locale/context";
+import { passiveScaffold, type SplitPoint } from "@/locales/pt-BR";
 import { findingsInsideSpan } from "../lib/finding-query";
+import { knobsFor, sectionCriterion } from "../lib/profile";
 import { metaFor } from "../lib/criteria";
 import type { AgentDeclaration } from "@/report/rewrite";
 import { Checkbox } from "./ui/checkbox";
@@ -19,6 +26,30 @@ export interface GuidanceProps {
 }
 
 export function Guidance({ finding, source, allFindings, declaration, onDeclare }: GuidanceProps) {
+  const locale = useAnalysisLocale();
+  if (locale.id === "en-US") return <EnGuidance finding={finding} source={source} allFindings={allFindings} />;
+  return (
+    <PtGuidance
+      finding={finding}
+      source={source}
+      allFindings={allFindings}
+      declaration={declaration}
+      onDeclare={onDeclare}
+    />
+  );
+}
+
+function EnGuidance({ finding, source, allFindings }: GuidanceProps) {
+  const { c, lang } = useCopy();
+  const criterion = finding.criterion;
+  if (!isEnCriterionId(criterion)) return <GuideText>{c.guidance.generic}</GuideText>;
+  if (criterion === "long_sentence") {
+    return <LongSentenceGuide finding={finding} source={source} allFindings={allFindings} />;
+  }
+  return <GuideText>{EN_GUIDANCE[lang][criterion]}</GuideText>;
+}
+
+function PtGuidance({ finding, source, allFindings, declaration, onDeclare }: GuidanceProps) {
   const { c } = useCopy();
   const g = c.guidance;
   const criterion = finding.criterion;
@@ -136,8 +167,15 @@ function LongSentenceGuide({
   allFindings: readonly Finding[];
 }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const t = c.guidance;
-  const guide = longSentenceGuidance(finding, source);
+  const guide = longSentenceGuidance(finding, source, locale);
+  const provisional = finding.meta?.thresholdStatus === "provisional";
+  const thresholdNote =
+    knobsFor(locale)
+      .filter((knob) => sectionCriterion(locale, knob.section) === finding.criterion)
+      .map((knob) => thresholdNoteFor(locale.id, knob.section, knob.field, lang))
+      .find((note) => note !== null) ?? null;
   const hasCuts = guide.candidates.length > 0;
   const inside = findingsInsideSpan(finding, allFindings);
   const criteria = [...new Set(inside.map((f) => f.criterion))];
@@ -162,20 +200,27 @@ function LongSentenceGuide({
         <Stat
           label={t.statTrigger}
           value={guide.threshold != null ? String(guide.threshold) : "—"}
-          note={t.statTriggerNote}
+          note={provisional ? t.statTriggerNoteProvisional : t.statTriggerNote}
         />
       </div>
 
       <dl className="mt-4 flex flex-col gap-2 rounded-lg border border-rule-1 bg-surface-2 px-3 py-2.5">
         <div>
           <dt className="u-sublabel text-ink-3">{t.standardSaysLabel}</dt>
-          <dd className="text-[12px] leading-relaxed text-ink-1">{t.standardSays}</dd>
+          <dd className="text-[12px] leading-relaxed text-ink-1">
+            {t.standardSays(finding.normativeReference?.standard ?? "ISO 24495-1")}
+          </dd>
         </div>
         <div>
           <dt className="u-sublabel text-ink-3">{t.parameterSaysLabel}</dt>
           <dd className="text-[12px] leading-relaxed text-ink-1">
-            {guide.threshold != null ? t.parameterSays(guide.threshold) : "—"}
+            {guide.threshold == null
+              ? "—"
+              : provisional
+                ? t.parameterSaysProvisional(guide.threshold)
+                : t.parameterSays(guide.threshold)}
           </dd>
+          {thresholdNote !== null && <dd className="mt-1 text-[11.5px] leading-relaxed text-ink-3">{thresholdNote}</dd>}
         </div>
       </dl>
 
@@ -189,7 +234,7 @@ function LongSentenceGuide({
                   key={criterion}
                   className="rounded-[5px] border border-rule-1 bg-sheet px-2 py-0.5 text-[11.5px] text-ink-1"
                 >
-                  {metaFor(criterion, lang).label}
+                  {metaFor(locale.id, criterion, lang).label}
                 </li>
               ))}
             </ul>

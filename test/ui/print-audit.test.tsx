@@ -43,7 +43,7 @@ describe("printing the audit", () => {
     await openPrint();
     const sheet = printed()!;
     expect(sheet).toBeInTheDocument();
-    expect(sheet.querySelector("h1")).toHaveTextContent(/auditoria de linguagem simples/i);
+    expect(sheet.querySelector("h1")).toHaveTextContent(/auditoria textual/i);
     expect(sheet.textContent).toContain("Placar");
     expect(sheet.textContent).toMatch(/Motor Lucid .+ · perfil .+ · dados /);
   });

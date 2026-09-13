@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const spans = (text: string): string[] =>
   analyze(text)
@@ -22,7 +22,7 @@ describe("adverbios_vagos — presence (ADR-058)", () => {
     expect(f.severity).toBe("info");
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.source).toBe("editorial-pt-br");
+    expect(f.source).toBe("editorial");
     expect(f.principleGroup).toBe("understandable");
     expect(f.normativeReference).toBeUndefined();
   });

@@ -8,6 +8,7 @@ import type { Config } from "@/lucid";
 import { useCopy } from "../../i18n/use-copy";
 import { CloseIcon, HistoryIcon } from "../icons";
 import { Button } from "../ui/button";
+import { useAnalysisLocale } from "../../locale/context";
 
 export interface BaselineSurface {
   attached: Baseline | null;
@@ -21,6 +22,7 @@ export interface BaselineSurface {
 
 export function BaselinePanel({ surface, config }: { surface: BaselineSurface; config: Config }) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const b = c.baseline;
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -119,7 +121,7 @@ export function BaselinePanel({ surface, config }: { surface: BaselineSurface; c
           <p className="mt-1 text-[11.5px] leading-relaxed text-ink-2">
             {comparison.divergence.map((field) => b.divergenceFields[field]).join(" · ")}
           </p>
-          {configDiffers(comparison) && !profileMatches(attached, config) && (
+          {configDiffers(comparison) && !profileMatches(attached, config, locale) && (
             <>
               <Button variant="outline" size="sm" onClick={surface.onAdoptProfile} className="mt-2">
                 {b.adoptProfile}
@@ -138,6 +140,7 @@ export function BaselinePanel({ surface, config }: { surface: BaselineSurface; c
 
 export function StillTherePanel({ comparison }: { comparison: BaselineComparison }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const b = c.baseline;
 
   return (
@@ -168,7 +171,7 @@ export function StillTherePanel({ comparison }: { comparison: BaselineComparison
                   aria-hidden
                 />
                 <span className="min-w-0 flex-1 truncate text-[11.5px] text-ink-2">
-                  {metaFor(point.criterion, lang).label}
+                  {metaFor(locale.id, point.criterion, lang).label}
                 </span>
                 {point.count > 1 && (
                   <span className="shrink-0 text-[11px] tabular-nums text-ink-3">{b.occurrences(point.count)}</span>

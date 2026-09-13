@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { analyze, checkBriefing, DEFAULT_CONFIG } from "@/lucid";
+import { checkBriefing } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
+import { analyze } from "@/locales/pt-BR";
 import { buildAuditReport } from "@/app/lib/audit-report";
 import { escapeHtml, renderInline, renderReportHtml } from "@/app/lib/report-html";
+import type { PtConfig } from "@/locales/pt-BR";
 
 const DOCUMENT =
   "Foi realizada a análise do documento pela comissão em sede de procedimento administrativo " +
@@ -27,7 +30,7 @@ function fullReport(originalText = ENTRY): string {
       },
     ],
     { briefing, check: checkBriefing(d.text, briefing) },
-    { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 25 }, mesoclise: { enabled: false } },
+    { ...DEFAULT_CONFIG, sentenceLength: { warnAbove: 25 }, mesoclise: { enabled: false } } as PtConfig,
     originalText,
   );
 }
@@ -112,7 +115,7 @@ describe("renderReportHtml — a whole report reaches the page as prose", () => 
   it("renders every section the report can carry", () => {
     const html = renderReportHtml(fullReport());
     for (const section of [
-      "Auditoria de Linguagem Simples",
+      "Auditoria textual",
       "Placar",
       "Anotações por critério",
       "Perfil editorial",

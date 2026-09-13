@@ -1,8 +1,10 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { useState } from "react";
 import type { Finding } from "@/lucid";
 import { buildConfidence } from "../../lib/narrative";
+import { swapCopyFor } from "../../presentation/registry";
 import { matchLeadingCase } from "../../lib/text-edit";
 import { useCopy } from "../../i18n/use-copy";
 import { ArrowDownIcon, CheckIcon } from "../icons";
@@ -10,12 +12,14 @@ import { Button } from "../ui/button";
 
 export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onApply: () => void }) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const [copied, setCopied] = useState(false);
   const before = finding.span.text.replace(/\s+/g, " ").trim();
 
   const after = matchLeadingCase(before, finding.suggestion!);
-  const rationale = buildConfidence(finding, lang).rationale;
+  const rationale = buildConfidence(finding, locale.id, lang).rationale;
   const declared = finding.source === "organizational";
+  const swap = swapCopyFor(locale.id, finding.criterion, lang);
 
   const copy = async () => {
     try {
@@ -40,7 +44,7 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
           <div className="flex items-center gap-2 border-t border-rule-1 px-3.5 py-1">
             <ArrowDownIcon className="size-3.5 text-safe" />
             <span className="u-sublabel text-ink-3">
-              {declared ? c.note.declaredEquivalent : c.note.safeEquivalent}
+              {declared ? c.note.declaredEquivalent : (swap?.source ?? c.note.safeEquivalent)}
             </span>
           </div>
           <DiffRow label={c.note.safePlain} tone="safe">
@@ -58,7 +62,7 @@ export function CuratedEquivalent({ finding, onApply }: { finding: Finding; onAp
         </div>
 
         <p className="mt-3 text-[12px] leading-relaxed text-ink-2">
-          {declared ? c.note.declaredApplyNote : c.note.safeApplyNote}
+          {declared ? c.note.declaredApplyNote : (swap?.applyNote ?? c.note.safeApplyNote)}
         </p>
         <p className="mt-2 text-[12px] leading-relaxed text-ink-2">{rationale}</p>
         <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{c.note.safeNote}</p>

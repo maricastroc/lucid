@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { htmlToRawBlocks } from "@/importers/html-blocks";
 import { ptDocumentServices } from "../src/locales/pt-BR";
-import { buildDocument, buildStructuredDocument, normalizeListItem, toRawBlocks, type RawBlock } from "@/lucid";
+import { buildStructuredDocument, normalizeListItem, toRawBlocks, type RawBlock } from "@/lucid";
+import { buildDocument } from "@/locales/pt-BR";
 
 const itemsOf = (blocks: readonly RawBlock[]) =>
   blocks

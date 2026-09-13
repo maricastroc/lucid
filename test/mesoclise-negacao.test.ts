@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const spans = (text: string, criterion: string): string[] =>
   analyze(text)
@@ -20,7 +20,7 @@ describe("mesoclise — pronoun in the middle of the verb", () => {
     const f = analyze("O prazo contar-se-á em dias.").findings.find((x) => x.criterion === "mesoclise")!;
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
-    expect(f.source).toBe("editorial-pt-br");
+    expect(f.source).toBe("editorial");
   });
 
   it("ordinary enclisis is NOT mesoclisis", () => {

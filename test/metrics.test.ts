@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildDocument } from "./support/pt";
 import { runMetrics } from "./support/pt";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 describe("runMetrics — empty document", () => {
   it("empty text: counts go to zero, but Flesch-PT is null (not measured) — no NaN/Infinity", () => {
@@ -9,7 +9,7 @@ describe("runMetrics — empty document", () => {
     const metrics = runMetrics(doc);
 
     expect(metrics).toEqual({
-      fleschPt: null,
+      readability: null,
       words: 0,
       sentences: 0,
       syllables: 0,
@@ -29,7 +29,7 @@ describe("runMetrics — empty document", () => {
     const metrics = runMetrics(doc);
     expect(metrics.sentences).toBe(0);
     expect(metrics.words).toBe(0);
-    expect(metrics.fleschPt).toBeNull();
+    expect(metrics.readability).toBeNull();
   });
 
   it("text with only punctuation (no word at all) does not get a 0 — it gets null", () => {
@@ -37,8 +37,8 @@ describe("runMetrics — empty document", () => {
     const metrics = runMetrics(doc);
     expect(metrics.words).toBe(0);
     expect(metrics.syllables).toBe(0);
-    expect(metrics.fleschPt).toBeNull();
-    expect(metrics.fleschPt).not.toBeNaN();
+    expect(metrics.readability).toBeNull();
+    expect(metrics.readability).not.toBeNaN();
   });
 });
 
@@ -50,10 +50,11 @@ describe("runMetrics — single-sentence text", () => {
     expect(metrics.sentences).toBe(1);
     expect(metrics.words).toBe(5);
     expect(metrics.wordsPerSentence).toBe(5);
-    expect(metrics.syllablesPerWord).toBe(metrics.syllables / metrics.words);
+    expect(metrics.syllablesPerWord).toBe(metrics.syllables! / metrics.words);
 
-    const expected = 248.835 - 1.015 * (metrics.words / metrics.sentences) - 84.6 * (metrics.syllables / metrics.words);
-    expect(metrics.fleschPt).toBeCloseTo(expected, 1);
+    const expected =
+      248.835 - 1.015 * (metrics.words / metrics.sentences) - 84.6 * (metrics.syllables! / metrics.words);
+    expect(metrics.readability).toBeCloseTo(expected, 1);
   });
 });
 
@@ -76,9 +77,9 @@ describe("runMetrics — multi-sentence text", () => {
           "O cão correu atrás dele por muito tempo sem nunca conseguir alcançá-lo.",
       ),
     );
-    expect(long.fleschPt).not.toBeNull();
-    expect(short.fleschPt).not.toBeNull();
-    expect(long.fleschPt!).toBeLessThan(short.fleschPt!);
+    expect(long.readability).not.toBeNull();
+    expect(short.readability).not.toBeNull();
+    expect(long.readability!).toBeLessThan(short.readability!);
   });
 });
 
@@ -96,7 +97,7 @@ describe("runMetrics — rounding at the output boundary", () => {
       expect(m.syllables).toBe(oneDecimal.syllables);
     }
 
-    expect(Number.isInteger(zeroDecimals.fleschPt)).toBe(true);
+    expect(Number.isInteger(zeroDecimals.readability)).toBe(true);
     expect(Number.isInteger(zeroDecimals.wordsPerSentence)).toBe(true);
     expect(Number.isInteger(zeroDecimals.syllablesPerWord)).toBe(true);
   });
@@ -105,7 +106,7 @@ describe("runMetrics — rounding at the output boundary", () => {
     const doc = buildDocument("O gato subiu rapidamente pelo telhado da casa vizinha durante a tarde de domingo.");
     const metrics = runMetrics(doc, { ...DEFAULT_CONFIG, metrics: { decimalPlaces: 2 } });
 
-    for (const field of ["fleschPt", "wordsPerSentence", "syllablesPerWord"] as const) {
+    for (const field of ["readability", "wordsPerSentence", "syllablesPerWord"] as const) {
       const text = String(metrics[field]);
       const decimals = text.includes(".") ? text.split(".")[1].length : 0;
       expect(decimals).toBeLessThanOrEqual(2);

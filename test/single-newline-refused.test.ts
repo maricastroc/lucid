@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildDocument } from "@/lucid";
+import { buildDocument } from "@/locales/pt-BR";
 
 const CORPUS = path.join(process.cwd(), "corpus/v1/text");
 

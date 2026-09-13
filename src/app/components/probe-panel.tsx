@@ -7,6 +7,7 @@ import { excerptState, PROBE_MAX_EXCERPT } from "../lib/probe-excerpt";
 import { SendNotice } from "./send-notice";
 import type { UiCopy } from "../i18n/copy";
 import { Button } from "./ui/button";
+import { engineOutputSuffix } from "../locale/language";
 
 interface ProbeResponse {
   signal: ProbeSignal;
@@ -162,7 +163,7 @@ function ExcerptBox({ excerpt, onClear }: { excerpt: ReturnType<typeof excerptSt
 }
 
 function ProbeResultView({ data }: { data: ProbeResponse }) {
-  const { c } = useCopy();
+  const { c, lang } = useCopy();
   const t = c.probe;
   const { signal, result } = data;
   const operacoes = signal.operacoes;
@@ -178,7 +179,7 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
       >
         <p className="text-[12.5px] font-medium" style={{ color: "var(--sev-warn)" }}>
           {t.stuck}
-          <span className="u-sublabel ml-1.5 font-normal text-ink-3">{c.common.engineOutputSuffix}</span>
+          <span className="u-sublabel ml-1.5 font-normal text-ink-3">{engineOutputSuffix(lang, "pt-BR")}</span>
         </p>
         <p className="mt-1 text-[12px] text-ink-2" lang="pt-BR">
           {signal.motivo}.
@@ -210,7 +211,7 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
     <div className="mt-3 rounded-lg border border-rule-1 bg-surface-2 px-3 py-3">
       <p className="text-[12.5px] text-ink-2">
         {t.noFloorViolation}
-        <span className="u-sublabel ml-1.5 text-ink-3">{c.common.engineOutputSuffix}</span>
+        <span className="u-sublabel ml-1.5 text-ink-3">{engineOutputSuffix(lang, "pt-BR")}</span>
       </p>
       <p className="mt-1 text-[12px] text-ink-3" lang="pt-BR">
         {signal.nota}

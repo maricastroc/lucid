@@ -1,4 +1,5 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "sigla_sem_expansao";
 
@@ -59,7 +60,7 @@ function isWeldedToDigits(tokens: readonly Token[], index: number): boolean {
   return false;
 }
 
-export const siglaSemExpansaoPass: Pass = {
+export const siglaSemExpansaoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["siglas-conhecidas.pt"],

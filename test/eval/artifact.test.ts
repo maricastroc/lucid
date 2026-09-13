@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CRITERION_IDS } from "../../src/lucid";
+import { CRITERION_IDS } from "../../src/locales/pt-BR";
 import { dataHashFor, REGISTRY } from "../../src/locales/pt-BR/datasets/registry";
 import type { DatasetId } from "../../src/locales/pt-BR/datasets/registry";
 import {

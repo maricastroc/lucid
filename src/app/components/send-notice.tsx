@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { countPii } from "@/lucid";
+import { countPii } from "@/locales/pt-BR";
 import { useCopy } from "../i18n/use-copy";
 import { ShieldAlertIcon } from "./icons";
 

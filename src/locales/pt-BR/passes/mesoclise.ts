@@ -1,11 +1,12 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "mesoclise";
 
 const RE_MESOCLISE =
   /^\p{L}+-(?:me|te|se|o|a|os|as|lhe|lhes|nos|vos|lo|la|los|las)-(?:á|ás|ão|ei|emos|eis|ia|ias|íamos|íeis|iam)$/u;
 
-export const mesoclisePass: Pass = {
+export const mesoclisePass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
 

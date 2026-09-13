@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze, checkBriefing, EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { checkBriefing, EMPTY_BRIEFING, type ReaderBriefing } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { segmentRange } from "../src/app/lib/editor-model";
 import { occurrenceKey, resolveCursor, stepCursor } from "../src/app/lib/occurrence-cursor";
 
@@ -63,7 +64,7 @@ describe("occurrence marks in the document — the scroll targets the panel need
   it("every occurrence becomes its own segment, carrying the span that identifies it", () => {
     const { findings } = analyze(TEXT);
     const spans = checkOf(["prazo"]).coverage[0].occurrences;
-    const segments = segmentRange(TEXT, findings, 0, TEXT.length, spans);
+    const segments = segmentRange(TEXT, findings, "pt-BR", 0, TEXT.length, spans);
 
     const marked = segments.filter((s) => s.mark !== undefined);
     expect(marked).toHaveLength(spans.length);
@@ -76,7 +77,7 @@ describe("occurrence marks in the document — the scroll targets the panel need
     expect(passive).toBeDefined();
 
     const spans = checkOf(["prazo"]).coverage[0].occurrences;
-    const withMarks = segmentRange(TEXT, findings, 0, TEXT.length, spans);
+    const withMarks = segmentRange(TEXT, findings, "pt-BR", 0, TEXT.length, spans);
     const covering = withMarks.filter(
       (s) => s.start >= passive!.span.start && s.end <= passive!.span.end && s.inline !== undefined,
     );
@@ -85,6 +86,8 @@ describe("occurrence marks in the document — the scroll targets the panel need
 
   it("with no expression selected the segmentation is exactly what it was before", () => {
     const { findings } = analyze(TEXT);
-    expect(segmentRange(TEXT, findings, 0, TEXT.length, [])).toEqual(segmentRange(TEXT, findings, 0, TEXT.length));
+    expect(segmentRange(TEXT, findings, "pt-BR", 0, TEXT.length, [])).toEqual(
+      segmentRange(TEXT, findings, "pt-BR", 0, TEXT.length),
+    );
   });
 });

@@ -12,7 +12,6 @@ export const COPY_PT: UiCopy = {
     copy: "Copiar",
     copied: "Copiado",
     words: "palavras",
-    engineOutputSuffix: "",
   },
 
   language: {
@@ -23,7 +22,7 @@ export const COPY_PT: UiCopy = {
 
   masthead: {
     home: "Voltar ao início",
-    tagline: "Auditor de linguagem simples",
+    tagline: "Auditor textual determinístico",
     openDocument: "Abrir documento",
     opening: "Abrindo…",
     evaluation: "Avaliação",
@@ -36,24 +35,24 @@ export const COPY_PT: UiCopy = {
 
   welcome: {
     regionLabel: "Apresentação do Lucid",
-    kicker: "Auditor de Linguagem Simples",
-    titleLead: "Lucid audita a clareza do seu texto.",
-    titleTrail: "Não reescreve por você.",
+    kicker: "Mesmo texto, mesmo diagnóstico",
+    titleLead: "Lucid audita o seu texto, critério a critério.",
+    titleTrail: "Não decide por você.",
     lead:
-      "Ele confronta cada trecho com os princípios de Linguagem Simples da norma ABNT: mostra o que trava o leitor, " +
-      "cita o critério que disparou e explica o porquê.",
-    leadStrong: "A palavra final é sempre sua.",
+      "Cada apontamento traz o critério que disparou, a fonte que o fundamenta — como a norma ABNT NBR ISO 24495-1 — " +
+      "e o trecho exato: mostra o que trava o leitor e explica o porquê.",
+    leadStrong: "Uma proposta da IA só entra no documento se você aplicar.",
     doesLabel: "O que ele faz",
     verbs: ["Analisa", "Detecta", "Explica", "Pergunta", "Verifica"],
     doesNotBefore: "O que ele ",
     doesNotStrong: "não",
-    doesNotAfter: " faz: escrever o texto no seu lugar.",
+    doesNotAfter: " faz: aprovar o seu texto.",
     write: "Escrever ou colar texto",
     loadExample: "Carregar exemplo",
     anatomyLabel: "Cada trecho vira uma anotação assim",
     cardCriterion: {
       title: "O critério que disparou",
-      body: "Voz passiva, jargão, frase longa, nominalização — cada um ligado a um princípio da norma.",
+      body: "Voz passiva, jargão, frase longa, nominalização — cada um com a fonte que o fundamenta.",
     },
     cardWhy: {
       title: "Por que trava o leitor",
@@ -162,6 +161,9 @@ export const COPY_PT: UiCopy = {
     movedLabel: "O que já mudou",
     seeChanges: "Ver as alterações",
     limitsLabel: "Limites desta análise",
+    experimentalLimit: (name) =>
+      `Análise em ${name}, experimental: sem validação em corpus independente, sem leiturabilidade, coesão ` +
+      "nem reescrita por IA.",
     annotations: (n) => plural(n, "ponto para revisar", "pontos para revisar"),
     adjustedProfileBefore: "Esta auditoria usa um ",
     adjustedProfileStrong: "perfil personalizado",
@@ -383,7 +385,7 @@ export const COPY_PT: UiCopy = {
     understandCriterion: "Entenda este critério",
     excerptMore: "Ver o trecho completo",
     excerptLess: "Recolher o trecho",
-    engineOutput: "Saída da engine · pt-BR",
+    engineOutput: (locale) => `Saída da engine · ${locale}`,
     engineOutputHint:
       "A justificativa vem do motor de análise, que audita português — ela não é traduzida junto com a interface.",
     navPrev: "Anterior (k)",
@@ -415,11 +417,6 @@ export const COPY_PT: UiCopy = {
     humanLead:
       "Este ponto exige uma análise do contexto. Revise o trecho e escolha a alteração que melhor preserve o " +
       "sentido original.",
-    humanLeadByCriterion: {
-      long_sentence:
-        "Leia a frase e decida se ela carrega mais de uma ideia. Se carrega, você escolhe onde separar e como " +
-        "recompor; se carrega uma só, marque como vista — a extensão sozinha não obriga a nada.",
-    },
     howToProceed: "Como seguir",
 
     manualOpen: "Editar ou colar minha versão",
@@ -433,6 +430,13 @@ export const COPY_PT: UiCopy = {
       "Escreva ou cole sua versão. Ao aplicar, ela será salva como rascunho e analisada pelos mesmos critérios " +
       "usados na reescrita por IA.",
 
+    aiUnavailableForLocale:
+      "A reescrita por IA ainda não existe para este idioma de análise: o verificador que julga a proposta foi " +
+      "escrito para o português. Edite o trecho à mão; o motor mede o documento de novo.",
+    manualApplyUnverified: "Aplicar edição",
+    manualUnverifiedNote:
+      "Neste idioma de análise não há verificador de reescrita: a edição é aplicada sem as provas de preservação " +
+      "(números, datas, agente declarado), e o motor mede o documento de novo.",
     aiTitle: "Reescrita por IA",
     aiTarget: (unit) => `A IA vai reescrever ${unit} em destaque no documento e verificar o resultado.`,
     proposerManual: "sua edição",
@@ -552,14 +556,18 @@ export const COPY_PT: UiCopy = {
     statWords: "palavras",
     statTrigger: "gatilho",
     statTriggerNote: "parâmetro do Lucid",
+    statTriggerNoteProvisional: "provisório",
     standardSaysLabel: "A norma pede",
-    standardSays:
+    standardSays: (standard) =>
       "frases concisas, uma ideia por frase e variação de tamanho ao longo do texto — sem fixar número " +
-      "(ABNT NBR ISO 24495-1, 5.3.4).",
+      `(${standard}, 5.3.4).`,
     parameterSaysLabel: "O Lucid inspeciona",
     parameterSays: (threshold) =>
       `frases acima de ${threshold} palavras. O número é escolha do produto, ajustável no perfil editorial, ` +
       "e passar dele não significa que a frase esteja inadequada.",
+    parameterSaysProvisional: (threshold) =>
+      `frases acima de ${threshold} palavras. O número é provisório para este idioma de análise — não foi ` +
+      "validado — e passar dele não significa que a frase esteja inadequada.",
     coOccurringLabel: "Outros sinais nesta frase",
     coOccurringNote: "Cada um tem seu próprio critério e sua própria justificativa. Nada aqui vira nota somada.",
     coOccurringNone:
@@ -1000,6 +1008,10 @@ export const COPY_PT: UiCopy = {
     deviationValue: (what, value, fallback) => `${what} ${value} (padrão: ${fallback})`,
     decrease: (label) => `Diminuir ${label}`,
     increase: (label) => `Aumentar ${label}`,
+    provisionalTag: "provisório",
+    provisionalNote:
+      "Os limiares marcados como provisórios não foram validados para este idioma de análise. Passe o cursor " +
+      "sobre a marca para ver de onde cada número veio.",
     knobSentenceWarn: "Inspecionar frases acima de",
     knobParagraph: "Parágrafo longo — acima de (frases)",
     knobHeading: "Título longo — acima de (palavras)",
@@ -1091,9 +1103,9 @@ export const COPY_PT: UiCopy = {
       usable: "Usável",
     },
     coverage: { curated: "curada", productive: "produtiva" },
-    editorialExtension: "Extensão editorial PT-BR",
-    editorialExtensionTag: "PT-BR",
-    editorialExtensionTitle: "Extensão editorial PT-BR — fora da norma ISO",
+    editorialExtension: (locale) => `Extensão editorial ${locale}`,
+    editorialExtensionTag: (locale) => locale,
+    editorialExtensionTitle: (locale) => `Extensão editorial ${locale} — fora da norma ISO`,
     organizational: "Vocabulário da organização",
     organizationalTag: "declarado",
     organizationalTitle:
@@ -1107,10 +1119,46 @@ export const COPY_PT: UiCopy = {
     manual: "Edição do autor",
     ai: "Reescrita por IA",
     glossary: "Troca direta do glossário",
+    attested: "Troca atestada por fonte",
     typing: "Trecho reescrito à mão",
   },
 
+  analysisLocale: {
+    label: "Idioma da análise",
+    lead:
+      "O idioma do documento auditado. É independente do idioma da interface: dá para ler o Lucid em " +
+      "português e auditar um texto em inglês, ou o contrário.",
+    current: "Auditando como",
+    onlyOne: "Hoje só existe um motor de análise. Quando houver outro, ele aparece aqui.",
+    switchWarning:
+      "Trocar o idioma reanalisa o documento com outro motor. Se houver trabalho feito com o motor atual, " +
+      "o Lucid pergunta antes e diz o que seria descartado.",
+    name: { "pt-BR": "Português (Brasil)", "en-US": "Inglês (EUA)" },
+    experimentalTag: "experimental",
+    experimentalNote:
+      "Catálogo experimental. Nenhum critério foi validado em corpus independente: onde há suíte golden, ela é " +
+      "só rede de regressão, escrita junto com o detector. Neste idioma não há leiturabilidade, coesão nem " +
+      "reescrita por IA, e a análise existe só no Studio — a CLI analisa apenas pt-BR.",
+    switchDialog: {
+      title: (target) => `Trocar o idioma da análise para ${target}?`,
+      lead: "O que segue pertence ao motor atual e será descartado:",
+      changes: (n) => `${n} ${plural(n, "alteração registrada", "alterações registradas")}`,
+      reviewed: (n) => `${n} ${plural(n, "ponto revisado ou ignorado", "pontos revisados ou ignorados")}`,
+      baseline: "a linha de base anexada",
+      vocabulary: (n) => `${n} ${plural(n, "termo", "termos")} do vocabulário da organização`,
+      profile: (name) => `o perfil editorial “${name}”`,
+      adjustments: (n) => `${n} ${plural(n, "ajuste de limite", "ajustes de limite")}`,
+      kept: "O documento e o briefing do leitor permanecem. O texto é reanalisado pelo novo motor.",
+      cancel: "Cancelar",
+      confirm: "Trocar idioma e reanalisar",
+    },
+  },
+
   readability: {
+    unavailable: "indisponível neste idioma",
+    unavailableWhy:
+      "Este locale não declara métrica de leiturabilidade. Não é ausência de problema nem falha de " +
+      "medição: é medida que a ferramenta ainda não pode sustentar, e por isso não publica.",
     noMeasure: "sem medida",
     noWords: "Não há palavras para medir — nenhum valor foi calculado (não é zero).",
     noSentences: "Não há frase delimitada para medir — nenhum valor foi calculado (não é zero).",

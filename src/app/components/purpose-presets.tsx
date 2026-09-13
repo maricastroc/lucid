@@ -1,9 +1,9 @@
 "use client";
 
 import type { Config } from "@/lucid";
-import { criterionLabelFor, knobLabel, KNOBS } from "../lib/profile";
+import { criterionLabelFor, knobLabel, knobsFor } from "../lib/profile";
 import {
-  PROFILE_IDS,
+  availableProfiles,
   PROFILE_VERSION,
   profileConfig,
   profileDifferences,
@@ -14,6 +14,8 @@ import {
 import { useCopy } from "../i18n/use-copy";
 import type { UiLang } from "../i18n/types";
 import { Button } from "./ui/button";
+import type { AnalysisLocale } from "../locale/active";
+import { useAnalysisLocale } from "../locale/context";
 
 interface Props {
   config: Config;
@@ -23,10 +25,11 @@ interface Props {
 
 export function PurposePresets({ config, selected, onSelect }: Props) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const p = c.presets;
-  const deviations = adjustmentsOver(config, selected).length;
+  const deviations = adjustmentsOver(config, selected, locale).length;
   const matches = deviations === 0;
-  const differences = profileDifferences(selected);
+  const differences = profileDifferences(selected, locale);
 
   return (
     <div className="border-t border-rule-1 px-4 py-5">
@@ -34,7 +37,7 @@ export function PurposePresets({ config, selected, onSelect }: Props) {
       <p className="mt-2 text-[12.5px] leading-relaxed text-ink-3">{p.lead}</p>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {PROFILE_IDS.map((id) => (
+        {availableProfiles(locale).map((id) => (
           <Button
             key={id}
             variant={id === selected ? "primary" : "outline"}
@@ -54,7 +57,7 @@ export function PurposePresets({ config, selected, onSelect }: Props) {
         {matches ? p.current(p.names[selected]) : p.adjustedOn(p.names[selected], deviations)}
         {" · "}
         <span className="tabular-nums text-ink-3">
-          {p.stamp(p.names[selected], PROFILE_VERSION, profileHash(selected))}
+          {p.stamp(p.names[selected], PROFILE_VERSION, profileHash(selected, locale))}
         </span>
       </p>
 
@@ -66,7 +69,7 @@ export function PurposePresets({ config, selected, onSelect }: Props) {
           <ul className="mt-1.5 flex flex-col gap-0.5">
             {differences.map((d) => (
               <li key={`${d.section}.${d.field}`} className="flex items-baseline justify-between gap-3 text-[11.5px]">
-                <span className="min-w-0 truncate text-ink-2">{labelFor(d.section, d.field, lang)}</span>
+                <span className="min-w-0 truncate text-ink-2">{labelFor(d.section, d.field, lang, locale)}</span>
                 <span className="shrink-0 tabular-nums text-ink-3">
                   {String(d.base)} → {String(d.value)}
                 </span>
@@ -82,9 +85,9 @@ export function PurposePresets({ config, selected, onSelect }: Props) {
   );
 }
 
-function labelFor(section: string, field: string, lang: UiLang): string {
-  const knob = KNOBS.find((k) => k.section === section && k.field === field);
-  return knob === undefined ? criterionLabelFor(section, lang) : knobLabel(knob, lang);
+function labelFor(section: string, field: string, lang: UiLang, locale: AnalysisLocale): string {
+  const knob = knobsFor(locale).find((k) => k.section === section && k.field === field);
+  return knob === undefined ? criterionLabelFor(section, lang, locale) : knobLabel(knob, lang);
 }
 
 export const presetConfigFor = profileConfig;

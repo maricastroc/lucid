@@ -6,6 +6,7 @@ const OVERVIEW =
 
 export const CLAUSE_TREE: ClauseTree = {
   standard: "ABNT NBR ISO 24495-1:2024",
+  referenceName: "ABNT NBR ISO 24495-1",
   transcription:
     "Seção 5 (Diretrizes) transcrita por inteiro — os quatro princípios e as 23 subcláusulas de 5.1 a " +
     "5.4 — com os títulos conferidos contra o texto normativo. As seções 1 a 4 (Escopo, Referências " +

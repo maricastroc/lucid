@@ -21,6 +21,7 @@ export interface ClauseNode {
 
 export interface ClauseTree {
   readonly standard: string;
+  readonly referenceName: string;
   readonly transcription: string;
   readonly exhaustive: boolean;
   readonly nodes: readonly ClauseNode[];

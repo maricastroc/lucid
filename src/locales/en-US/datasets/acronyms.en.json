@@ -1,0 +1,22 @@
+{
+  "_comment": "Acronyms that en-US does not ask to be spelled out. Detection of undefined acronyms is productive (shape: two to six capital letters, optionally a plural -s), so this list only excuses; it never finds. The seed is the example list of the Federal Plain Language Guidelines (2011, p. 33) for abbreviations 'that have entered common usage': IBM, ATM, BMW, CIA (PhD is not all capitals and is never matched). The rest are Lucid additions of the same kind and are marked so. A longer list would raise precision and hide acronyms a given reader does not know; that trade is the author's, not the tool's.",
+  "fromGuidelines": ["IBM", "ATM", "BMW", "CIA"],
+  "lucidAdditions": [
+    "US",
+    "USA",
+    "UK",
+    "EU",
+    "UN",
+    "TV",
+    "PDF",
+    "URL",
+    "AM",
+    "PM",
+    "OK",
+    "ID",
+    "FAQ",
+    "DNA",
+    "GPS",
+    "CEO"
+  ]
+}

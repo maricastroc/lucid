@@ -1,10 +1,11 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
-import { matchPhrasesInSentence } from "./phrase-match";
+import { matchPhrasesInSentence } from "../../_shared";
+import type { PtConfig } from "../config";
 
 const CRITERION = "perifrase_inflada";
 
-export const perifraseInfladaPass: Pass = {
+export const perifraseInfladaPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["perifrases.pt"],

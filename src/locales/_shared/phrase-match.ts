@@ -1,5 +1,16 @@
 import type { Sentence, Token } from "@/lucid/core/types";
-import type { PhraseEntry, PhrasePrepared } from "../datasets/types";
+
+export interface PhraseEntry {
+  phrase: string;
+  plain: string | null;
+}
+
+export interface CompiledPhrase {
+  words: readonly string[];
+  entry: PhraseEntry;
+}
+
+export type PhrasePrepared = ReadonlyMap<string, readonly CompiledPhrase[]>;
 
 export interface PhraseHit {
   start: number;

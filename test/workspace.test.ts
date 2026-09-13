@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { buildStructuredDocument, DEFAULT_CONFIG, EMPTY_BRIEFING, toRawBlocks, type RawBlock } from "@/lucid";
+import { buildStructuredDocument, EMPTY_BRIEFING, toRawBlocks, type RawBlock } from "@/lucid";
+import { DEFAULT_CONFIG } from "@/locales/pt-BR";
 import { clearWorkspace, getSaveFailed, readWorkspace, writeWorkspace } from "../src/app/lib/workspace";
-import { ptDocumentServices } from "@/lucid";
+import { ptDocumentServices } from "@/locales/pt-BR";
+import type { PtConfig } from "@/locales/pt-BR";
 
 const STORAGE_KEY = "lucid-workspace";
 
@@ -38,6 +40,7 @@ describe("workspace — round trip through storage", () => {
 
   it("restores a plain-text document with no structure", () => {
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "O prazo venceu ontem.",
@@ -50,6 +53,7 @@ describe("workspace — round trip through storage", () => {
       guidedStep: null,
     });
     expect(readWorkspace()).toEqual({
+      localeId: "pt-BR",
       baseline: null,
       importNotes: null,
       profileId: "base",
@@ -78,6 +82,7 @@ describe("workspace — round trip through storage", () => {
       { source: "ai" as const, label: "Reescrita por IA · directed@4", burdenBefore: 12.4, burdenAfter: 9.1 },
     ];
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Texto revisado.",
@@ -97,6 +102,7 @@ describe("workspace — round trip through storage", () => {
   it("rebuilds the imported .docx structure byte-identically", () => {
     const imported = buildStructuredDocument(BLOCKS, ptDocumentServices);
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: imported.source,
@@ -131,6 +137,7 @@ describe("workspace — the reader briefing (ADR-079)", () => {
       mustFind: ["prazo de recurso", "valor da taxa"],
     };
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Texto.",
@@ -192,6 +199,7 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       mesoclise: { enabled: false },
     };
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Texto.",
@@ -204,8 +212,8 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       guidedStep: null,
     });
     const restored = readWorkspace();
-    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25 });
-    expect(restored?.config.mesoclise.enabled).toBe(false);
+    expect((restored?.config as PtConfig | undefined)?.sentenceLength).toEqual({ warnAbove: 25 });
+    expect((restored?.config as PtConfig | undefined)?.mesoclise.enabled).toBe(false);
   });
 
   it("fills unknown or missing sections from the default instead of failing", () => {
@@ -221,8 +229,8 @@ describe("workspace — the editorial profile (ADR-081)", () => {
       }),
     );
     const restored = readWorkspace();
-    expect(restored?.config.sentenceLength).toEqual({ warnAbove: 25 });
-    expect(restored?.config.mesoclise).toEqual(DEFAULT_CONFIG.mesoclise);
+    expect((restored?.config as PtConfig | undefined)?.sentenceLength).toEqual({ warnAbove: 25 });
+    expect((restored?.config as PtConfig | undefined)?.mesoclise).toEqual(DEFAULT_CONFIG.mesoclise);
   });
 
   it("reads a version 2 payload and assumes the default profile", () => {
@@ -329,6 +337,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
       },
     });
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Documento grande.",
@@ -346,6 +355,7 @@ describe("workspace — a storage that refuses to write is reported, not hidden"
   it("clears the flag once a write succeeds again", () => {
     installStorage();
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Documento pequeno.",
@@ -382,6 +392,7 @@ describe("workspace — the author's review marks", () => {
       "passive_voice:40:53": { kind: "dismissed" as const, note: "voz passiva exigida pelo modelo do órgão" },
     };
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Texto.",
@@ -460,6 +471,7 @@ describe("workspace — the entry text", () => {
   });
 
   const base = {
+    localeId: "pt-BR" as const,
     profileId: "base" as const,
     text: "O prazo foi prorrogado.",
     blocks: null,
@@ -515,6 +527,7 @@ describe("workspace — the entry text", () => {
 
   it("keeps the import caveat, because the flattening it explains also survives the reload", () => {
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "Categoria Qtd Motivo",
@@ -550,6 +563,7 @@ describe("workspace — the entry text", () => {
 
   it("refuses a malformed caveat instead of restoring half of it", () => {
     writeWorkspace({
+      localeId: "pt-BR",
       originalText: null,
       profileId: "base",
       text: "texto",
@@ -564,5 +578,74 @@ describe("workspace — the entry text", () => {
     });
 
     expect(readWorkspace()?.importNotes).toBeNull();
+  });
+});
+
+describe("workspace — the locale that produced the work travels with it", () => {
+  const stored = (extra: Record<string, unknown>) =>
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        text: "O prazo foi prorrogado.",
+        blocks: null,
+        ledger: [],
+        mode: "audit",
+        ...extra,
+      }),
+    );
+
+  it("a snapshot saved before the locale existed is migrated to pt-BR", () => {
+    stored({ version: 10 });
+    expect(readWorkspace()?.localeId).toBe("pt-BR");
+  });
+
+  it("every readable version before 11 is migrated the same way", () => {
+    for (const version of [1, 4, 8, 9, 10]) {
+      stored({ version });
+      expect(readWorkspace()?.localeId).toBe("pt-BR");
+    }
+  });
+
+  it("a version-11 snapshot WITHOUT a locale is refused, not defaulted", () => {
+    stored({ version: 11 });
+    expect(readWorkspace()).toBeNull();
+  });
+
+  it("a version-11 snapshot with an unknown locale is refused", () => {
+    stored({ version: 11, localeId: "fr-FR" });
+    expect(readWorkspace()).toBeNull();
+
+    stored({ version: 11, localeId: "" });
+    expect(readWorkspace()).toBeNull();
+
+    stored({ version: 11, localeId: 7 });
+    expect(readWorkspace()).toBeNull();
+  });
+
+  it("a version-11 snapshot with a declared locale keeps it", () => {
+    stored({ version: 11, localeId: "pt-BR" });
+    expect(readWorkspace()?.localeId).toBe("pt-BR");
+
+    stored({ version: 11, localeId: "en-US" });
+    expect(readWorkspace()?.localeId).toBe("en-US");
+  });
+
+  it("what is written back carries the locale and the current schema version", () => {
+    writeWorkspace({
+      localeId: "pt-BR",
+      profileId: "base",
+      text: "O prazo foi prorrogado.",
+      originalText: null,
+      blocks: null,
+      ledger: [],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+      guidedStep: null,
+    });
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) as string);
+    expect(raw.version).toBe(11);
+    expect(raw.localeId).toBe("pt-BR");
   });
 });

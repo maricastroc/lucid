@@ -1,336 +1,15 @@
-import type { CriterionId, Finding, PrincipleGroup, Severity } from "@/lucid";
-import { isCriterionId } from "@/lucid";
+import type { Finding, PrincipleGroup, Severity } from "@/lucid";
 import type { CriterionCoverage } from "@/report/eval/contract";
 import { copyFor } from "../i18n/copy";
-import { CRITERION_TEXT_EN } from "../i18n/criteria-meta.en";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
+import type { UiCriterionId } from "../locale/criteria";
+import { CRITERION_ORDER } from "../presentation/order";
 
-export type Criterion = CriterionId;
-export type Channel = "inline" | "passage";
-
-export interface CriterionMeta {
-  label: string;
-  ruleId: Criterion;
-  kind: string;
-  principleName: string;
-  channel: Channel;
-  markStyleClass: string;
-  signal: string;
-  why: string;
-}
-
-export type CriterionText = Pick<CriterionMeta, "label" | "kind" | "principleName" | "signal" | "why">;
-
-export const CRITERION_ORDER: readonly Criterion[] = [
-  "passive_voice",
-  "passiva_sintetica",
-  "nominalization",
-  "nominalizacao_encadeada",
-  "mais_que_perfeito_sintetico",
-  "gerundismo",
-  "jargon",
-  "vocabulario_da_organizacao",
-  "sigla_sem_expansao",
-  "adverbios_vagos",
-  "adverbio_mente_denso",
-  "redundancia",
-  "perifrase_inflada",
-  "mesoclise",
-  "dupla_negacao",
-  "leitor_terceira_pessoa",
-  "subordinacao_densa",
-  "long_sentence",
-  "paragraph_length",
-  "prose_enumeration",
-  "salto_de_nivel_titulo",
-  "long_heading",
-  "single_item_list",
-  "heading_body_mismatch",
-];
-
-export const CRITERION_META: Record<Criterion, CriterionMeta> = {
-  passive_voice: {
-    label: "Voz passiva",
-    ruleId: "passive_voice",
-    kind: "Construção sintática",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dotted",
-    signal: "âncora numa forma de “ser” seguida de particípio, em janela local de palavras",
-    why: "Quem pratica a ação some ou vai para o fim da frase. No presente e sem agente, porém, a construção também pode indicar estado ou característica; nesses casos, só o contexto permite decidir.",
-  },
-  passiva_sintetica: {
-    label: "Voz passiva sintética",
-    ruleId: "passiva_sintetica",
-    kind: "Construção sintática",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dotted",
-    signal:
-      "“se” enclítico em verbo (aplica-se, publicam-se); exclui verbos inerentemente pronominais (trata-se, refere-se…)",
-    why: "O “se” esconde quem pratica a ação — e o leitor precisa saber quem faz o quê.",
-  },
-  nominalization: {
-    label: "Nominalização",
-    ruleId: "nominalization",
-    kind: "Escolha lexical",
-    principleName: "Frases claras e concisas",
-    channel: "inline",
-    markStyleClass: "mark-dashed",
-    signal: "verbo-suporte + determinante + substantivo derivado de verbo, em adjacência estrita",
-    why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
-  },
-  nominalizacao_encadeada: {
-    label: "Nominalização encadeada",
-    ruleId: "nominalizacao_encadeada",
-    kind: "Escolha lexical",
-    principleName: "Frases claras e concisas",
-    channel: "inline",
-    markStyleClass: "mark-dashed",
-    signal:
-      "substantivo de ação de um léxico curado encadeado por “de” a outro substantivo abstrato, ou concentrado na mesma frase",
-    why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
-  },
-  jargon: {
-    label: "Jargão",
-    ruleId: "jargon",
-    kind: "Escolha lexical",
-    principleName: "Palavras familiares",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal: "correspondência exata num glossário curado (maior correspondência primeiro)",
-    why: "Termo pouco familiar fora do domínio afasta o leitor não especialista.",
-  },
-  vocabulario_da_organizacao: {
-    label: "Vocabulário da organização",
-    ruleId: "vocabulario_da_organizacao",
-    kind: "Escolha lexical",
-    principleName: "Palavras familiares",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal: "correspondência exata com um termo declarado pela organização (maior correspondência primeiro)",
-    why: "A organização declarou que este termo não é familiar ao leitor dela. A norma não conhece o vocabulário de uma casa; ela conhece.",
-  },
-  sigla_sem_expansao: {
-    label: "Sigla sem expansão",
-    ruleId: "sigla_sem_expansao",
-    kind: "Escolha lexical",
-    principleName: "Palavras familiares",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal:
-      "sigla (2–6 letras maiúsculas) usada antes de ser apresentada por extenso; exclui UFs, unidades e siglas universais",
-    why: "Sigla não apresentada exige que o leitor já a conheça — quem não conhece trava logo no começo.",
-  },
-  long_sentence: {
-    label: "Comprimento de frase",
-    ruleId: "long_sentence",
-    kind: "Extensão da frase",
-    principleName: "Frases concisas",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "contagem de palavras da frase acima do gatilho de inspeção configurado",
-    why:
-      "Extensão é um gatilho de inspeção, não um defeito: a norma pede uma ideia por frase e variação de " +
-      "tamanho, sem fixar número. Frases longas tendem a acumular ideias, mas uma frase longa com uma " +
-      "ideia só pode estar adequada, e uma frase curta pode ser difícil por outros motivos.",
-  },
-  mais_que_perfeito_sintetico: {
-    label: "Mais-que-perfeito sintético",
-    ruleId: "mais_que_perfeito_sintetico",
-    kind: "Tempo verbal",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dotted",
-    signal: "forma num léxico de mais-que-perfeito sintético (derivado do PortiLexicon-UD), já sem formas ambíguas",
-    why: "Forma verbal pouco usada na fala (“fizera” = “tinha feito”) — de leitura mais difícil.",
-  },
-  gerundismo: {
-    label: "Gerundismo",
-    ruleId: "gerundismo",
-    kind: "Construção sintática",
-    principleName: "Frases concisas",
-    channel: "inline",
-    markStyleClass: "mark-dashed",
-    signal: "padrão “ir + estar + gerúndio” (ex.: “vai estar enviando”)",
-    why: "Alonga a frase sem necessidade — a forma simples (“vai enviar”) é mais direta.",
-  },
-  adverbios_vagos: {
-    label: "Advérbios vagos",
-    ruleId: "adverbios_vagos",
-    kind: "Escolha lexical",
-    principleName: "Frases concisas",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal: "advérbio de reforço/atenuação de um léxico curado (basicamente, efetivamente, realmente…)",
-    why: "Advérbio que reforça sem acrescentar: costuma sair sem mudar o que a frase afirma.",
-  },
-  adverbio_mente_denso: {
-    label: "Advérbios em -mente (descontinuado)",
-    ruleId: "adverbio_mente_denso",
-    kind: "Escolha lexical",
-    principleName: "Frases concisas",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal: "concentração de advérbios em -mente na mesma frase (allowlist do PortiLexicon-UD)",
-    why: "Critério descontinuado (ADR-058), substituído por “Advérbios vagos”; desligado por padrão.",
-  },
-  redundancia: {
-    label: "Redundância",
-    ruleId: "redundancia",
-    kind: "Escolha lexical",
-    principleName: "Frases concisas",
-    channel: "inline",
-    markStyleClass: "mark-solid",
-    signal: "correspondência num léxico curado de pleonasmos e duplas redundantes",
-    why: "Um termo repete o sentido do outro sem acrescentar informação.",
-  },
-  perifrase_inflada: {
-    label: "Perífrase inflada",
-    ruleId: "perifrase_inflada",
-    kind: "Escolha lexical",
-    principleName: "Frases concisas",
-    channel: "inline",
-    markStyleClass: "mark-dashed",
-    signal: "locução cadastrada que ocupa o lugar de uma preposição/conjunção simples",
-    why: "Alonga a frase no lugar de uma palavra simples.",
-  },
-  paragraph_length: {
-    label: "Parágrafo longo",
-    ruleId: "paragraph_length",
-    kind: "Estrutura do documento",
-    principleName: "Fácil de localizar",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "contagem de frases do parágrafo acima do limite configurado",
-    why: "Um paredão de frases dificulta varrer o texto e achar a informação.",
-  },
-  prose_enumeration: {
-    label: "Enumeração em prosa",
-    ruleId: "prose_enumeration",
-    kind: "Estrutura do documento",
-    principleName: "Fácil de localizar",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "≥3 ordinais distintos (a partir de “primeiro”) no mesmo parágrafo",
-    why: "Itens embutidos no texto corrido são mais difíceis de localizar que uma lista.",
-  },
-  mesoclise: {
-    label: "Mesóclise",
-    ruleId: "mesoclise",
-    kind: "Forma verbal",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dotted",
-    signal: "pronome encaixado no meio do verbo + terminação de futuro/condicional",
-    why: "Forma arcaica (“far-se-á”) de leitura difícil — a forma comum é mais direta.",
-  },
-  dupla_negacao: {
-    label: "Dupla negação",
-    ruleId: "dupla_negacao",
-    kind: "Construção sintática",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dashed",
-    signal: "expressão cadastrada que afirma negando o negativo (litotes)",
-    why: "O leitor precisa desfazer a negação para chegar ao sentido afirmativo.",
-  },
-  subordinacao_densa: {
-    label: "Subordinação densa",
-    ruleId: "subordinacao_densa",
-    kind: "Construção sintática",
-    principleName: "Frases concisas",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "concentração de conectivos subordinativos na mesma frase (léxico curado, sem os polissêmicos)",
-    why: "Muitas orações subordinadas encadeadas prendem ideias demais numa frase só e pesam a leitura.",
-  },
-  leitor_terceira_pessoa: {
-    label: "Fala indireta ao leitor",
-    ruleId: "leitor_terceira_pessoa",
-    kind: "Construção sintática",
-    principleName: "Frases claras",
-    channel: "inline",
-    markStyleClass: "mark-dotted",
-    signal: "substantivo que nomeia o leitor em posição de sujeito + verbo deôntico numa janela local",
-    why: "Falar do leitor em terceira pessoa distancia; dizer “você” aproxima e deixa claro quem deve agir.",
-  },
-  salto_de_nivel_titulo: {
-    label: "Salto de nível de título",
-    ruleId: "salto_de_nivel_titulo",
-    kind: "Estrutura do documento",
-    principleName: "Fácil de localizar",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "título cujo nível pula mais de um degrau abaixo do título anterior (só em documento estruturado)",
-    why: "Saltos na hierarquia de títulos quebram a leitura por estrutura — sumário, varredura, leitor de tela.",
-  },
-  long_heading: {
-    label: "Título longo",
-    ruleId: "long_heading",
-    kind: "Estrutura do documento",
-    principleName: "Fácil de localizar",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "título acima do limite de palavras, ou pontuado/formado como frase (só em documento estruturado)",
-    why: "Um título é um rótulo para varrer e localizar; longo ou em forma de frase, deixa de cumprir esse papel.",
-  },
-  single_item_list: {
-    label: "Lista de um item",
-    ruleId: "single_item_list",
-    kind: "Estrutura do documento",
-    principleName: "Fácil de localizar",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "bloco de lista com exatamente um item (só em documento estruturado)",
-    why: "Uma lista existe para comparar vários itens; com um só, não ajuda a localizar e sugere item faltando.",
-  },
-  heading_body_mismatch: {
-    label: "Título sem eco no corpo",
-    ruleId: "heading_body_mismatch",
-    kind: "Estrutura do documento",
-    principleName: "Relevância para o leitor",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "nenhuma palavra de conteúdo do título aparece no corpo da seção (comparação exata, sem lemas)",
-    why: "Um título que não antecipa o conteúdo da seção deixa de ajudar o leitor a saber se vale a pena ler.",
-  },
-};
-
-const META_BY_LANG: Record<UiLang, Record<Criterion, CriterionMeta>> = {
-  "pt-BR": CRITERION_META,
-  en: Object.fromEntries(
-    (Object.keys(CRITERION_META) as Criterion[]).map((c) => [c, { ...CRITERION_META[c], ...CRITERION_TEXT_EN[c] }]),
-  ) as Record<Criterion, CriterionMeta>,
-};
-
-export function isCriterion(value: string): value is Criterion {
-  return isCriterionId(value);
-}
-export function metaFor(criterion: string, lang: UiLang = DEFAULT_UI_LANG): CriterionMeta {
-  const meta = META_BY_LANG[lang];
-  return isCriterion(criterion) ? meta[criterion] : meta.jargon;
-}
-
+export type Criterion = UiCriterionId;
+export type { Channel, CriterionMeta, CriterionText } from "../presentation/types";
+export { coverageOf, criterionOrder, hasPresentation, metaFor } from "../presentation/registry";
+export { CRITERION_ORDER };
 export type { CriterionCoverage };
-
-const CURATED_COVERAGE: ReadonlySet<Criterion> = new Set<Criterion>([
-  "jargon",
-  "nominalization",
-  "nominalizacao_encadeada",
-  "redundancia",
-  "perifrase_inflada",
-  "dupla_negacao",
-  "adverbios_vagos",
-  "adverbio_mente_denso",
-  "mais_que_perfeito_sintetico",
-  "subordinacao_densa",
-  "leitor_terceira_pessoa",
-]);
-
-export function coverageOf(criterion: string): CriterionCoverage {
-  return isCriterion(criterion) && CURATED_COVERAGE.has(criterion) ? "curated" : "productive";
-}
 
 export function coverageLabel(coverage: CriterionCoverage, lang: UiLang = DEFAULT_UI_LANG): string {
   return copyFor(lang).taxonomy.coverage[coverage];
@@ -379,17 +58,31 @@ export function principleGroupLabel(group: PrincipleGroup, lang: UiLang = DEFAUL
   return copyFor(lang).taxonomy.principleGroup[group];
 }
 
-export function provenanceLabel(f: Finding, lang: UiLang = DEFAULT_UI_LANG): string {
+export const DEFAULT_ANALYSIS_LOCALE = "pt-BR";
+
+export function localeTag(localeId: string): string {
+  return localeId.toUpperCase();
+}
+
+export function provenanceLabel(
+  f: Finding,
+  lang: UiLang = DEFAULT_UI_LANG,
+  localeId: string = DEFAULT_ANALYSIS_LOCALE,
+): string {
   const t = copyFor(lang).taxonomy;
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return `${f.normativeReference.standard} · ${f.normativeReference.section}`;
   }
-  if (f.source === "editorial-pt-br") return t.editorialExtension;
+  if (f.source === "editorial") return t.editorialExtension(localeTag(localeId));
   if (f.source === "organizational") return t.organizational;
   return t.structuralHeuristic;
 }
 
-export function provenanceTag(f: Finding, lang: UiLang = DEFAULT_UI_LANG): { text: string; title: string } {
+export function provenanceTag(
+  f: Finding,
+  lang: UiLang = DEFAULT_UI_LANG,
+  localeId: string = DEFAULT_ANALYSIS_LOCALE,
+): { text: string; title: string } {
   const t = copyFor(lang).taxonomy;
   if (f.source === "iso-24495-1" && f.normativeReference) {
     return {
@@ -397,8 +90,9 @@ export function provenanceTag(f: Finding, lang: UiLang = DEFAULT_UI_LANG): { tex
       title: `${f.normativeReference.standard} · ${f.normativeReference.section}`,
     };
   }
-  if (f.source === "editorial-pt-br") {
-    return { text: t.editorialExtensionTag, title: t.editorialExtensionTitle };
+  if (f.source === "editorial") {
+    const tag = localeTag(localeId);
+    return { text: t.editorialExtensionTag(tag), title: t.editorialExtensionTitle(tag) };
   }
   if (f.source === "organizational") {
     return { text: t.organizationalTag, title: t.organizationalTitle };

@@ -1,6 +1,7 @@
 import type { PassFinding, Pass, Sentence } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
-import { matchPhrasesInSentence, type PhraseHit } from "./phrase-match";
+import { matchPhrasesInSentence, type PhraseHit } from "../../_shared";
+import type { PtConfig } from "../config";
 
 const CRITERION = "subordinacao_densa";
 
@@ -47,7 +48,7 @@ function countsAsSubordinator(hit: PhraseHit, sentence: Sentence): boolean {
   return true;
 }
 
-export const subordinacaoPass: Pass = {
+export const subordinacaoPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["subordinadores.pt"],

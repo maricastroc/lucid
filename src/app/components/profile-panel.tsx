@@ -1,32 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { configDeviations, DEFAULT_CONFIG, type Config } from "@/lucid";
+import { configDeviations, type Config } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 import {
   criterionLabelFor,
   describeDeviation,
   knobLabel,
-  KNOBS,
+  hasProvisionalThresholds,
+  knobsFor,
   readEnabled,
   readNumber,
-  TOGGLEABLE_SECTIONS,
+  toggleableSectionsFor,
   withEnabled,
   withNumber,
 } from "../lib/profile";
 import { useCopy } from "../i18n/use-copy";
+import { thresholdNoteFor } from "../presentation/registry";
 import { ChevronDownIcon } from "./icons";
 import { Checkbox } from "./ui/checkbox";
 import { Stepper } from "./ui/stepper";
 
 interface Props {
   config: Config;
+  locale: AnalysisLocale;
   onChange: (config: Config) => void;
 }
 
-export function ProfilePanel({ config, onChange }: Props) {
+export function ProfilePanel({ config, locale, onChange }: Props) {
   const { c, lang } = useCopy();
   const p = c.profile;
-  const deviations = configDeviations(config);
+  const deviations = configDeviations(config, locale.defaultConfig);
+  const knobs = knobsFor(locale);
+  const sections = toggleableSectionsFor(locale);
   const [open, setOpen] = useState(false);
 
   return (
@@ -46,7 +52,7 @@ export function ProfilePanel({ config, onChange }: Props) {
         <ul className="mt-3 flex flex-col gap-1">
           {deviations.map((deviation) => (
             <li key={`${deviation.section}.${deviation.field}`} className="text-[12.5px] text-ink-1">
-              <span className="text-ink-3">·</span> {describeDeviation(deviation, lang)}
+              <span className="text-ink-3">·</span> {describeDeviation(deviation, lang, locale)}
             </li>
           ))}
         </ul>
@@ -67,7 +73,7 @@ export function ProfilePanel({ config, onChange }: Props) {
         {deviations.length > 0 && (
           <button
             type="button"
-            onClick={() => onChange(DEFAULT_CONFIG)}
+            onClick={() => onChange(locale.defaultConfig)}
             className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-[12.5px] font-medium text-ink-2 transition-colors duration-150 hover:bg-surface-2 hover:text-ink-0"
           >
             {p.resetDefaults}
@@ -78,31 +84,50 @@ export function ProfilePanel({ config, onChange }: Props) {
       {open && (
         <div className="mt-4">
           <span className="u-label text-ink-3">{p.thresholdsLabel}</span>
+          {hasProvisionalThresholds(locale) && (
+            <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">{p.provisionalNote}</p>
+          )}
           <div className="mt-2 flex flex-col gap-2">
-            {KNOBS.map((knob) => (
-              <div key={`${knob.section}.${knob.field}`} className="flex items-center justify-between gap-3">
-                <span className="min-w-0 text-[12.5px] text-ink-1">{knobLabel(knob, lang)}</span>
-                <Stepper
-                  label={knobLabel(knob, lang)}
-                  min={knob.min}
-                  max={knob.max}
-                  value={readNumber(config, knob.section, knob.field)}
-                  onChange={(next) => onChange(withNumber(config, knob.section, knob.field, next))}
-                />
-              </div>
-            ))}
+            {knobs.map((knob) => {
+              const note = thresholdNoteFor(locale.id, knob.section, knob.field, lang);
+              return (
+                <div key={`${knob.section}.${knob.field}`}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 text-[12.5px] text-ink-1">
+                      {knobLabel(knob, lang)}
+                      {knob.basis?.status === "provisional" && (
+                        <span
+                          title={knob.basis.basis}
+                          className="ml-1.5 rounded-[3px] bg-surface-2 px-1 py-px text-[10px] tracking-wide text-ink-3"
+                        >
+                          {p.provisionalTag}
+                        </span>
+                      )}
+                    </span>
+                    <Stepper
+                      label={knobLabel(knob, lang)}
+                      min={knob.min}
+                      max={knob.max}
+                      value={readNumber(config, knob.section, knob.field)}
+                      onChange={(next) => onChange(withNumber(config, knob.section, knob.field, next))}
+                    />
+                  </div>
+                  {note !== null && <p className="mt-1 text-[11px] leading-relaxed text-ink-3">{note}</p>}
+                </div>
+              );
+            })}
           </div>
 
           <span className="u-label mt-5 block text-ink-3">{p.policyLabel}</span>
           <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-3">{p.policyNote}</p>
           <div className="mt-2 flex flex-col divide-y divide-rule-1">
-            {TOGGLEABLE_SECTIONS.map((section) => (
+            {sections.map((section) => (
               <label
                 key={section}
                 htmlFor={`criterio-${section}`}
                 className="flex cursor-pointer items-center justify-between gap-3 py-2"
               >
-                <span className="min-w-0 text-[12.5px] text-ink-1">{criterionLabelFor(section, lang)}</span>
+                <span className="min-w-0 text-[12.5px] text-ink-1">{criterionLabelFor(section, lang, locale)}</span>
                 <Checkbox
                   id={`criterio-${section}`}
                   checked={readEnabled(config, section)}

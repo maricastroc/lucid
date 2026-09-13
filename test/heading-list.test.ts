@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { analyze, analyzeDocument, buildStructuredDocument, type Finding, type RawBlock } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { buildStructuredDocument, type Finding, type RawBlock } from "../src/lucid";
+import { analyze, analyzeDocument } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 import { ptDocumentServices } from "../src/locales/pt-BR";
 
 const H = (text: string, level = 1): RawBlock => ({ kind: "heading", level, text });

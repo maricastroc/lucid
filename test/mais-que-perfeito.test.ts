@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
+import { analyze } from "../src/locales/pt-BR";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
 
 const spans = (text: string): string[] =>
   analyze(text)
@@ -21,7 +21,7 @@ describe("mais_que_perfeito_sintetico — detection", () => {
     expect(f.requiresHuman).toBe(true);
     expect(f.suggestion).toBeUndefined();
     expect(f.severity).toBe("warning");
-    expect(f.source).toBe("editorial-pt-br");
+    expect(f.source).toBe("editorial");
   });
 });
 

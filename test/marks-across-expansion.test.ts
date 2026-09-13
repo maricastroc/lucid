@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  analyzeDocument,
   buildStructuredDocument,
-  ptDocumentServices,
   spliceStructuredDocument,
   type Document,
   type Finding,
   type RawBlock,
   type Span,
 } from "@/lucid";
+import { analyzeDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { findingId } from "../src/app/lib/criteria";
 import { pruneMarks, reanchorMarks, type ReviewMarks } from "../src/app/lib/review-marks";
 

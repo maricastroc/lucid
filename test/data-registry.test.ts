@@ -6,7 +6,7 @@ import {
   dataHashFor,
   type DatasetId,
 } from "../src/locales/pt-BR/datasets/registry";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
 import { localePtBR } from "../src/locales/pt-BR";
 

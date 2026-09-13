@@ -1,0 +1,16 @@
+{
+  "_comment": "Lexicon for the en-US ambiguous_shall detector. Every 'shall' is flagged, because the form itself does not say which reading is meant: the Federal Plain Language Guidelines (2011, p. 25) state that 'shall' can indicate either an obligation or a prediction, and recommend 'must' for an obligation, 'must not' for a prohibition, 'may' for a discretionary action and 'should' for a recommendation. Lucid never substitutes: choosing the reading is the author's decision. 'will' for a prediction is Lucid's note, not the guidelines' prescription, and is labelled as such.",
+  "forms": ["shall", "shan't"],
+  "negators": ["not", "never"],
+  "readings": [
+    { "reading": "obligation", "plain": "must", "source": "Federal Plain Language Guidelines (2011), p. 25" },
+    { "reading": "prohibition", "plain": "must not", "source": "Federal Plain Language Guidelines (2011), p. 25" },
+    { "reading": "discretion", "plain": "may", "source": "Federal Plain Language Guidelines (2011), p. 25" },
+    { "reading": "recommendation", "plain": "should", "source": "Federal Plain Language Guidelines (2011), p. 25" },
+    {
+      "reading": "prediction",
+      "plain": "will",
+      "source": "Lucid note: the guidelines name prediction as a reading of 'shall' without prescribing a replacement"
+    }
+  ]
+}

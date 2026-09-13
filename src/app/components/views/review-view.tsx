@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import type { Diagnostic, Finding } from "@/lucid";
 import { metaFor } from "../../lib/criteria";
 import type { Bucket, FindingGroup, FindingQuery, SortOrder, StateFilter } from "../../lib/finding-query";
@@ -45,6 +46,7 @@ interface Props {
 
 export function ReviewView(props: Props) {
   const { c, lang } = useCopy();
+  const locale = useAnalysisLocale();
   const { route, mode } = props;
   const open = route.open;
 
@@ -99,7 +101,7 @@ export function ReviewView(props: Props) {
                 className="focus-inset inline-flex shrink-0 items-center gap-1 rounded-md text-[11.5px] font-medium text-accent transition-colors duration-150 hover:underline"
               >
                 <ChevronLeftIcon className="size-3.5" />
-                {c.route.browseReturn(open.index + 1, metaFor(open.step.criterion, lang).label)}
+                {c.route.browseReturn(open.index + 1, metaFor(locale.id, open.step.criterion, lang).label)}
               </button>
             </div>
           )}

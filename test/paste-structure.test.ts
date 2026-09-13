@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildDocument, buildStructuredDocument, ptDocumentServices } from "@/lucid";
+import { buildStructuredDocument } from "@/lucid";
+import { buildDocument, ptDocumentServices } from "@/locales/pt-BR";
 import { htmlToRawBlocks } from "@/importers/html-blocks";
 import { gdocsExcerpt, GDOCS_HTML, GDOCS_PLAIN } from "./fixtures/gdocs-clipboard";
 

@@ -1,11 +1,8 @@
 import {
-  analyze,
-  analyzeDocument,
   buildStructuredDocument,
   type Config,
   type Diagnostic,
   type DiagnosticMeta,
-  ptDocumentServices,
   type Finding,
   hashConfig,
   isRawBlock,
@@ -14,6 +11,7 @@ import {
   type Severity,
   stableHash,
 } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 import { balance, type CriterionBalance } from "./attribution";
 import { findingId } from "./criteria";
 import { isProfileId, type ProfileId } from "./profiles";
@@ -149,14 +147,19 @@ export function divergenceOf(historical: DiagnosticMeta, current: DiagnosticMeta
   return STAMP_FIELDS.filter((field) => historical[field] !== current[field]);
 }
 
-export function rebaseline(baseline: Baseline, config: Config): readonly Finding[] {
+export function rebaseline(baseline: Baseline, config: Config, locale: AnalysisLocale): readonly Finding[] {
   const blocks = baseline.source.blocks;
-  if (blocks === null) return analyze(baseline.source.text, config).findings;
-  return analyzeDocument(buildStructuredDocument(blocks, ptDocumentServices), config).findings;
+  if (blocks === null) return locale.analyze(baseline.source.text, config).findings;
+  return locale.analyzeDocument(buildStructuredDocument(blocks, locale.documentServices), config).findings;
 }
 
-export function compareToBaseline(baseline: Baseline, current: Diagnostic, config: Config): BaselineComparison {
-  const rebased = rebaseline(baseline, config);
+export function compareToBaseline(
+  baseline: Baseline,
+  current: Diagnostic,
+  config: Config,
+  locale: AnalysisLocale,
+): BaselineComparison {
+  const rebased = rebaseline(baseline, config, locale);
 
   const before = countsByExcerpt(rebased.map((f) => ({ criterion: f.criterion, excerpt: f.span.text })));
   const after = countsByExcerpt(current.findings.map((f) => ({ criterion: f.criterion, excerpt: f.span.text })));
@@ -198,8 +201,8 @@ export function compareToBaseline(baseline: Baseline, current: Diagnostic, confi
 
 export const configDiffers = (comparison: BaselineComparison): boolean => comparison.divergence.includes("configHash");
 
-export const profileMatches = (baseline: Baseline, config: Config): boolean =>
-  hashConfig(baseline.historical.config) === hashConfig(config);
+export const profileMatches = (baseline: Baseline, config: Config, locale: AnalysisLocale): boolean =>
+  hashConfig(baseline.historical.config, locale.configSections) === hashConfig(config, locale.configSections);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);

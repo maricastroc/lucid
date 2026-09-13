@@ -1,5 +1,6 @@
 "use client";
 
+import { useAnalysisLocale } from "../../locale/context";
 import { metaFor } from "../../lib/criteria";
 import { routeStarted, type ReviewRoute, type RouteStep } from "../../lib/review-route";
 import { useCopy } from "../../i18n/use-copy";
@@ -26,8 +27,9 @@ function StepRow({
   onOpen: () => void;
 }) {
   const { c } = useCopy();
+  const locale = useAnalysisLocale();
   const r = c.route;
-  const label = metaFor(step.criterion, lang).label;
+  const label = metaFor(locale.id, step.criterion, lang).label;
   const partial = tone !== "done" && step.count > step.pending;
 
   const frame =

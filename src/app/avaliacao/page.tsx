@@ -173,7 +173,7 @@ export default function AvaliacaoPage() {
                             title={c}
                             className="inline-flex items-baseline rounded-full border border-rule-2 bg-surface px-2.5 py-1 text-[12px] text-ink-0"
                           >
-                            {metaFor(c).label}
+                            {metaFor("pt-BR", c).label}
                           </li>
                         ))}
                       </ul>
@@ -184,7 +184,7 @@ export default function AvaliacaoPage() {
                         <ul className="mt-2 flex flex-col gap-1">
                           {l.criteria.map((c) => (
                             <li key={c} className="flex flex-wrap items-baseline gap-x-2 text-ink-1">
-                              <span className="text-ink-0">{metaFor(c).label}</span>
+                              <span className="text-ink-0">{metaFor("pt-BR", c).label}</span>
                               <MonoTag>{c}</MonoTag>
                             </li>
                           ))}
@@ -241,7 +241,7 @@ export default function AvaliacaoPage() {
               {detectors.map((d) => (
                 <section key={d.criterion} id={`lim-${d.criterion}`} className="scroll-mt-20">
                   <h3 className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 border-b border-rule-2 pb-2.5">
-                    <span className="text-[14px] text-ink-0">{metaFor(d.criterion).label}</span>
+                    <span className="text-[14px] text-ink-0">{metaFor("pt-BR", d.criterion).label}</span>
                     <MonoTag>{d.criterion}</MonoTag>
                     <span className="ml-auto text-[12px] tabular-nums text-ink-1">
                       {d.knownLimitations.length}{" "}
@@ -460,7 +460,7 @@ function CriterionCard({ d, noteNumber }: { d: DetectorReport; noteNumber: (id: 
     <article className="flex flex-col rounded-lg border border-rule-1 bg-sheet px-5 py-5 shadow-(--shadow-card)">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="text-[14.5px] leading-tight text-ink-0">{metaFor(d.criterion).label}</h3>
+          <h3 className="text-[14.5px] leading-tight text-ink-0">{metaFor("pt-BR", d.criterion).label}</h3>
           <MonoTag className="mt-2">{d.criterion}</MonoTag>
         </div>
         <span className="shrink-0 rounded-full border border-rule-2 bg-surface-2 px-2 py-0.5 text-[10.5px] font-medium text-ink-1">
@@ -703,7 +703,7 @@ function AssistedCard({ m }: { m: AssistedMeasurement }) {
       className={`rounded-lg border px-5 py-4 ${m.promoted ? "border-rule-2 bg-surface" : "border-human-line bg-human-weak"}`}
     >
       <header className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1.5">
-        <h3 className="text-[14px] text-ink-0">{metaFor(m.criterion).label}</h3>
+        <h3 className="text-[14px] text-ink-0">{metaFor("pt-BR", m.criterion).label}</h3>
         <MonoTag>{m.criterion}</MonoTag>
         <span
           className={`ml-auto rounded-full px-2.5 py-0.5 text-[11px] ${

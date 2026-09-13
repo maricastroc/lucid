@@ -1,5 +1,6 @@
 import type { PassFinding, Pass, Token } from "@/lucid/core/types";
 import { getPrepared } from "../datasets/registry";
+import type { PtConfig } from "../config";
 
 const CRITERION = "leitor_terceira_pessoa";
 
@@ -93,7 +94,7 @@ function findDeonticAfter(tokens: readonly Token[], startIndex: number): { start
   return null;
 }
 
-export const leitorTerceiraPessoaPass: Pass = {
+export const leitorTerceiraPessoaPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "syntactic",
   dataDeps: ["substantivos-leitor.pt"],

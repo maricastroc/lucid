@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildCoverageReport, coverageReport, CRITERION_IDS, localePtBR } from "../src/lucid";
+import { buildCoverageReport } from "../src/lucid";
+import { coverageReport, CRITERION_IDS, localePtBR } from "../src/locales/pt-BR";
 import type { ClauseTree, CriterionTaxonomy } from "../src/lucid";
 import { CLAUSE_TREE } from "../src/locales/pt-BR/clauses";
 
@@ -14,7 +15,7 @@ function iso(section: string): CriterionTaxonomy[string] {
 }
 
 function tree(nodes: ClauseTree["nodes"], exhaustive = false): ClauseTree {
-  return { standard: "TEST-STD", transcription: "synthetic", exhaustive, nodes };
+  return { standard: "TEST-STD", referenceName: ABNT, transcription: "synthetic", exhaustive, nodes };
 }
 
 const leaf = (section: string, extra: Partial<ClauseTree["nodes"][number]> = {}) => ({
@@ -60,6 +61,27 @@ describe("clause coverage — authority cannot be invented", () => {
 
   it("a parent pointing at a clause that does not exist is a build error", () => {
     expect(() => buildCoverageReport(tree([leaf("5.3.2", { parent: "5.3" })]), {})).toThrow(/não existe/);
+  });
+
+  it("a criterion citing a standard the locale's tree does not declare is a build error", () => {
+    const foreign: CriterionTaxonomy = {
+      borrowed: {
+        source: "iso-24495-1",
+        principleGroup: "understandable",
+        normativeReference: { standard: "ISO 24495-1", section: "5.1" },
+      },
+    };
+    const nodes = [leaf("5.1", { limit: { kind: "unbuilt", reason: "..." } })];
+    expect(() => buildCoverageReport(tree(nodes), foreign)).toThrow(/ISO 24495-1/);
+    expect(() => buildCoverageReport(tree(nodes), foreign)).toThrow(/a árvore/);
+  });
+
+  it("the pt-BR tree declares the reference name its own criteria cite", () => {
+    expect(CLAUSE_TREE.referenceName).toBe(ABNT);
+    for (const entry of Object.values(localePtBR.taxonomy)) {
+      if (entry.source !== "iso-24495-1") continue;
+      expect(entry.normativeReference.standard).toBe(CLAUSE_TREE.referenceName);
+    }
   });
 });
 

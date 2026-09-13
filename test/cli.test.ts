@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseArgs } from "../src/cli/args";
+import { HELP, parseArgs } from "../src/cli/args";
 import { auditText, crossesThreshold, positionAt } from "../src/cli/audit";
 import { missingPhrase, renderCoverage, renderJson, renderText } from "../src/cli/render";
-import { coverageReport } from "../src/lucid";
+import { coverageReport } from "../src/locales/pt-BR";
 
 const JURIDIQUES =
   "Foi realizada a análise do documento pela comissão competente em sede de procedimento administrativo.";
@@ -48,6 +48,13 @@ describe("parseArgs — options", () => {
     expect(parseArgs(["--criterion", "inventado"])).toMatchObject({ ok: false });
     expect(parseArgs(["--fail-on", "critico"])).toMatchObject({ ok: false });
     expect(parseArgs(["--nao-existe"])).toMatchObject({ ok: false });
+  });
+
+  it("has no language option: the CLI analyses pt-BR only, and its help says so", () => {
+    expect(parseArgs(["--locale", "en-US", "a.txt"])).toEqual({ ok: false, error: "opção desconhecida: --locale" });
+    expect(parseArgs(["--lang", "en", "a.txt"])).toMatchObject({ ok: false });
+    expect(HELP).toMatch(/Analisa em pt-BR/);
+    expect(HELP).not.toMatch(/--locale|--lang/);
   });
 
   it("rejects a flag whose value is missing", () => {

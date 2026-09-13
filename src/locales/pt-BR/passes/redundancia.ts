@@ -1,10 +1,11 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
 import type { PhrasePrepared } from "../datasets/types";
-import { matchPhrasesInSentence } from "./phrase-match";
+import { matchPhrasesInSentence } from "../../_shared";
+import type { PtConfig } from "../config";
 
 const CRITERION = "redundancia";
 
-export const redundanciaPass: Pass = {
+export const redundanciaPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["redundancias.pt"],

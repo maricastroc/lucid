@@ -1,0 +1,233 @@
+{
+  "_comment": "Lexicon for the en-US hidden_verb detector, in two halves. PRODUCTIVE: a light verb followed by a noun ending in a deverbal suffix is flagged from its form, without naming any verb; the in-sample regression suite counts this half only. The suffixes and the light verbs marked 'listed' come from the Federal Plain Language Guidelines (2011, p. 23), which list -ment, -tion, -sion and -ance and the verbs achieve, effect, give, have, make, reach and take; -ence is added by Lucid as the sibling of -ance. 'carry out', 'undertake' and 'gain' appear in that page's examples; 'conduct' and 'perform' are Lucid additions. 'nonDeverbal' removes nouns that carry the suffix without naming an action (station, appointment, difference); it trades nothing for recall of real hidden verbs and exists for precision. CURATED: 'attested' holds the only phrase-to-verb pairs Lucid will name, each copied from the source cited in the entry. A verb is offered as a direct swap only for these pairs, only with the light verb in its base form and no modifier, because Lucid does not inflect or compose.",
+  "lightVerbs": [
+    {
+      "lemma": "make",
+      "base": "make",
+      "forms": ["make", "makes", "made", "making"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "take",
+      "base": "take",
+      "forms": ["take", "takes", "took", "taken", "taking"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "give",
+      "base": "give",
+      "forms": ["give", "gives", "gave", "given", "giving"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "have",
+      "base": "have",
+      "forms": ["have", "has", "had", "having"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "reach",
+      "base": "reach",
+      "forms": ["reach", "reaches", "reached", "reaching"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "achieve",
+      "base": "achieve",
+      "forms": ["achieve", "achieves", "achieved", "achieving"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "effect",
+      "base": "effect",
+      "forms": ["effect", "effected", "effecting"],
+      "particle": null,
+      "origin": "listed"
+    },
+    {
+      "lemma": "carry out",
+      "base": "carry",
+      "forms": ["carry", "carries", "carried", "carrying"],
+      "particle": "out",
+      "origin": "example"
+    },
+    {
+      "lemma": "undertake",
+      "base": "undertake",
+      "forms": ["undertake", "undertakes", "undertook", "undertaken", "undertaking"],
+      "particle": null,
+      "origin": "example"
+    },
+    {
+      "lemma": "gain",
+      "base": "gain",
+      "forms": ["gain", "gains", "gained", "gaining"],
+      "particle": null,
+      "origin": "example"
+    },
+    {
+      "lemma": "conduct",
+      "base": "conduct",
+      "forms": ["conduct", "conducts", "conducted", "conducting"],
+      "particle": null,
+      "origin": "lucid"
+    },
+    {
+      "lemma": "perform",
+      "base": "perform",
+      "forms": ["perform", "performs", "performed", "performing"],
+      "particle": null,
+      "origin": "lucid"
+    }
+  ],
+  "determiners": [
+    "a",
+    "an",
+    "the",
+    "any",
+    "some",
+    "this",
+    "that",
+    "these",
+    "those",
+    "its",
+    "their",
+    "our",
+    "your",
+    "his",
+    "her",
+    "no"
+  ],
+  "swapDeterminers": ["a", "an", "the"],
+  "suffixes": ["tion", "sion", "ment", "ance", "ence"],
+  "havePrepositions": ["of", "for", "to", "about", "with", "on"],
+  "nonDeverbal": [
+    "absence",
+    "advance",
+    "ambulance",
+    "apartment",
+    "appointment",
+    "audience",
+    "caution",
+    "chance",
+    "circumstance",
+    "commission",
+    "compartment",
+    "condition",
+    "confidence",
+    "conscience",
+    "consequence",
+    "contraction",
+    "conversation",
+    "department",
+    "destination",
+    "difference",
+    "dimension",
+    "direction",
+    "distance",
+    "division",
+    "document",
+    "documentation",
+    "element",
+    "environment",
+    "equipment",
+    "essence",
+    "evidence",
+    "fence",
+    "fiction",
+    "finance",
+    "fraction",
+    "function",
+    "garment",
+    "government",
+    "identification",
+    "impression",
+    "information",
+    "instance",
+    "instrument",
+    "intelligence",
+    "location",
+    "lotion",
+    "mansion",
+    "medication",
+    "mission",
+    "moment",
+    "motion",
+    "nation",
+    "occasion",
+    "option",
+    "ornament",
+    "parliament",
+    "passion",
+    "patience",
+    "pension",
+    "population",
+    "portion",
+    "position",
+    "potion",
+    "profession",
+    "question",
+    "ration",
+    "regulation",
+    "science",
+    "section",
+    "segment",
+    "sentence",
+    "sentiment",
+    "sequence",
+    "session",
+    "silence",
+    "station",
+    "substance",
+    "television",
+    "tension",
+    "transition",
+    "vacation",
+    "version",
+    "violence",
+    "vision"
+  ],
+  "attested": [
+    {
+      "light": "make",
+      "nominal": "application",
+      "verb": "apply",
+      "consumes": null,
+      "source": "Federal Plain Language Guidelines (2011), p. 23"
+    },
+    {
+      "light": "make",
+      "nominal": "payment",
+      "verb": "pay",
+      "consumes": "of",
+      "source": "Federal Plain Language Guidelines (2011), p. 23"
+    },
+    {
+      "light": "carry out",
+      "nominal": "review",
+      "verb": "review",
+      "consumes": "of",
+      "source": "Federal Plain Language Guidelines (2011), p. 23"
+    },
+    {
+      "light": "gain",
+      "nominal": "understanding",
+      "verb": "understand",
+      "consumes": "of",
+      "source": "Federal Plain Language Guidelines (2011), p. 23"
+    },
+    {
+      "light": "undertake",
+      "nominal": "calculation",
+      "verb": "calculate",
+      "consumes": "of",
+      "source": "Federal Plain Language Guidelines (2011), p. 23"
+    }
+  ]
+}

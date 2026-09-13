@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { analyze } from "../src/lucid";
+import { analyze } from "../src/locales/pt-BR";
 import { buildScore } from "../src/lucid/core/score";
 import { PASSES } from "../src/locales/pt-BR/passes/registry";
-import { DEFAULT_CONFIG } from "../src/lucid/core/config";
-import type { Config } from "../src/lucid/core/config";
+import { DEFAULT_CONFIG } from "../src/locales/pt-BR";
+import type { PtConfig as Config } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
 
 const TEXT_4 =

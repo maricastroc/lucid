@@ -1,8 +1,9 @@
 import type { PassFinding, Pass } from "@/lucid/core/types";
+import type { PtConfig } from "../config";
 
 const CRITERION = "adverbios_vagos";
 
-export const adverbiosVagosPass: Pass = {
+export const adverbiosVagosPass: Pass<PtConfig> = {
   criterion: CRITERION,
   category: "lexical",
   dataDeps: ["adverbios-vagos.pt"],

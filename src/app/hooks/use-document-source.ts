@@ -2,13 +2,8 @@
 
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import {
-  analyzeDocument,
-  missingBlockKindsIn,
-  buildDocument,
   buildStructuredDocument,
   rawUnitTexts,
-  ptDocumentServices,
-  silentCriteriaIn,
   spliceStructuredDocument,
   toRawBlocks,
   type Block,
@@ -18,10 +13,11 @@ import {
   type Document,
   type RawBlock,
 } from "@/lucid";
+import type { AnalysisLocale } from "../locale/active";
 import type { DocxNotes, DocxRefusalKind } from "@/importers/docx";
 import { htmlToRawBlocks } from "@/importers/html-blocks";
 import type { PdfNotes, PdfRefusalKind } from "@/importers/pdf";
-import { SAMPLE_TEXT } from "../lib/sample";
+import { SAMPLES } from "../lib/sample";
 import { type WorkspaceSnapshot } from "../lib/workspace";
 
 export type ImportError = DocxRefusalKind | PdfRefusalKind;
@@ -79,8 +75,8 @@ function refinesPastedLines(units: readonly string[], plain: string): boolean {
   return at === lines.length && joined === "";
 }
 
-function documentFrom(blocks: readonly RawBlock[] | null): Document | null {
-  return blocks === null ? null : buildStructuredDocument(blocks, ptDocumentServices);
+function documentFrom(blocks: readonly RawBlock[] | null, locale: AnalysisLocale): Document | null {
+  return blocks === null ? null : buildStructuredDocument(blocks, locale.documentServices);
 }
 
 interface DocumentSourceState {
@@ -88,10 +84,14 @@ interface DocumentSourceState {
   readonly doc: Document | null;
 }
 
-export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Config): DocumentSource {
+export function useDocumentSource(
+  initial: WorkspaceSnapshot | null,
+  config: Config,
+  locale: AnalysisLocale,
+): DocumentSource {
   const [source, setSource] = useState<DocumentSourceState>(() => ({
     text: initial?.text ?? "",
-    doc: documentFrom(initial?.blocks ?? null),
+    doc: documentFrom(initial?.blocks ?? null, locale),
   }));
   const importedRef = useRef<Document | null>(source.doc);
   const refusedRef = useRef<{ reason: SpliceRefusal; text: string } | null>(null);
@@ -125,7 +125,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         return;
       }
 
-      const result = spliceStructuredDocument(current, value, ptDocumentServices);
+      const result = spliceStructuredDocument(current, value, locale.documentServices);
       if (!result.ok) {
         refusedRef.current = { reason: result.reason, text: value };
         setRefusedEdit(refusedRef.current);
@@ -134,15 +134,18 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
       adopt(result.document, result.document.source);
     },
-    [adopt],
+    [adopt, locale],
   );
 
-  const previewText = useCallback((value: string): string | null => {
-    const current = importedRef.current;
-    if (current === null) return value;
-    const result = spliceStructuredDocument(current, value, ptDocumentServices);
-    return result.ok ? result.document.source : null;
-  }, []);
+  const previewText = useCallback(
+    (value: string): string | null => {
+      const current = importedRef.current;
+      if (current === null) return value;
+      const result = spliceStructuredDocument(current, value, locale.documentServices);
+      return result.ok ? result.document.source : null;
+    },
+    [locale],
+  );
 
   const acceptAsPlainText = useCallback(() => {
     const pending = refusedRef.current;
@@ -161,17 +164,20 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
   const deferred = useDeferredValue(source);
   const structured = deferred.doc !== null && deferred.text === deferred.doc.source;
 
-  const doc = useMemo(() => (structured ? deferred.doc! : buildDocument(deferred.text)), [structured, deferred]);
-
-  const diagnostic = useMemo(() => analyzeDocument(doc, config), [doc, config]);
-
-  const silentCriteria = useMemo(() => silentCriteriaIn(doc.blocks), [doc]);
-  const missingBlockKinds = useMemo(
-    () => (silentCriteria.length === 0 ? [] : missingBlockKindsIn(doc.blocks)),
-    [doc, silentCriteria],
+  const doc = useMemo(
+    () => (structured ? deferred.doc! : locale.buildDocument(deferred.text)),
+    [structured, deferred, locale],
   );
 
-  const loadExample = useCallback(() => enter(null, SAMPLE_TEXT), [enter]);
+  const diagnostic = useMemo(() => locale.analyzeDocument(doc, config), [doc, config, locale]);
+
+  const silentCriteria = useMemo(() => locale.silentCriteriaIn(doc.blocks), [doc, locale]);
+  const missingBlockKinds = useMemo(
+    () => (silentCriteria.length === 0 ? [] : locale.missingBlockKindsIn(doc.blocks)),
+    [doc, silentCriteria, locale],
+  );
+
+  const loadExample = useCallback(() => enter(null, SAMPLES[locale.id]), [enter, locale]);
 
   const clear = useCallback(() => enter(null, ""), [enter]);
 
@@ -188,10 +194,10 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         enter(null, value);
         return;
       }
-      const doc = buildStructuredDocument(blocks, ptDocumentServices);
+      const doc = buildStructuredDocument(blocks, locale.documentServices);
       enter(doc, doc.source);
     },
-    [enter],
+    [enter, locale],
   );
 
   const openDocument = useCallback(
@@ -204,7 +210,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
 
         if (isPdf) {
           const { importPdf } = await import("@/importers/pdf");
-          const result = await importPdf(bytes, ptDocumentServices);
+          const result = await importPdf(bytes, locale.documentServices);
           if (!result.ok) {
             setImportError(result.refusal);
             return false;
@@ -215,7 +221,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         }
 
         const { importDocx } = await import("@/importers/docx");
-        const result = await importDocx(bytes, ptDocumentServices);
+        const result = await importDocx(bytes, locale.documentServices);
         if (!result.ok) {
           setImportError(result.refusal);
           return false;
@@ -230,7 +236,7 @@ export function useDocumentSource(initial: WorkspaceSnapshot | null, config: Con
         setImporting(false);
       }
     },
-    [enter],
+    [enter, locale],
   );
 
   const rawBlocks = useMemo(() => (source.doc === null ? null : toRawBlocks(source.doc.blocks)), [source.doc]);
