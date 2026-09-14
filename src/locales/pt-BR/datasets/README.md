@@ -439,11 +439,12 @@ mais comum (mesma cautela dos léxicos `participios-*`).
 
 ## `stopwords.pt.json` — filtro de palavras funcionais (ADR-044)
 
-**Usado por:** `passes/heading-body-mismatch.ts` (`heading_body_mismatch`, **5.1** — o PRIMEIRO
-critério a citar o Princípio 1/Relevante; todos os anteriores citam 5.2/5.3).
+**Usado por:** `metrics/cohesion.ts` (coesão referencial) e `passes/passiva-sintetica.ts`. Nasceu
+para `heading_body_mismatch`, removido no ADR-105; o `_comentario` do JSON ainda cita esse critério e
+fica assim de propósito, para a remoção não alterar o `dataHash`.
 
-**Propósito:** membership para separar palavra de CONTEÚDO de palavra FUNCIONAL, na comparação
-heurística título↔corpo. Nunca dispara finding sozinho — só filtra o que entra na comparação.
+**Propósito:** membership para separar palavra de CONTEÚDO de palavra FUNCIONAL. Nunca dispara
+finding sozinho — só filtra o que entra numa comparação.
 
 **Critério de curadoria:** classes fechadas de função do português (artigos, contrações
 preposição+artigo, preposições, conjunções coordenativas/subordinativas, pronomes pessoais/

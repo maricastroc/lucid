@@ -18,12 +18,7 @@ const BLOCKS: readonly RawBlock[] = [
   { kind: "list", ordered: false, items: ["Servidor efetivo"] },
 ];
 
-const REQUIRES_DECLARED_STRUCTURE = [
-  "heading_body_mismatch",
-  "long_heading",
-  "salto_de_nivel_titulo",
-  "single_item_list",
-] as const;
+const REQUIRES_DECLARED_STRUCTURE = ["long_heading", "salto_de_nivel_titulo", "single_item_list"] as const;
 
 function asMarkdown(blocks: readonly RawBlock[]): string {
   return blocks
@@ -82,8 +77,8 @@ describe("experiment 001 — coverage follows declared structure, not the contai
     expect(hasStructuralMarkers(asProse(BLOCKS))).toBe(false);
   });
 
-  it("the size of the loss, as published in the experiment", () => {
-    expect(structured()).toHaveLength(6);
+  it("the size of the loss: 6 findings when 001 was measured, 5 since ADR-105 removed heading_body_mismatch", () => {
+    expect(structured()).toHaveLength(5);
     expect(prose()).toHaveLength(2);
   });
 

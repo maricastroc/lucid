@@ -99,8 +99,6 @@ function PtGuidance({ finding, source, allFindings, declaration, onDeclare }: Gu
       return <GuideText>{g.longHeading}</GuideText>;
     case "single_item_list":
       return <GuideText>{g.singleItemList}</GuideText>;
-    case "heading_body_mismatch":
-      return <GuideText>{g.headingBodyMismatch}</GuideText>;
     case "vocabulario_da_organizacao":
       return <GuideText>{g.vocabularioDaOrganizacao}</GuideText>;
     default:

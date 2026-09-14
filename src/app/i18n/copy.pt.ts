@@ -522,9 +522,6 @@ export const COPY_PT: UiCopy = {
     singleItemList:
       "Uma lista de um item só não separa nada: acrescente os itens que faltam, ou traga o conteúdo de volta para o " +
       "texto corrido. A escolha depende do conteúdo — sua.",
-    headingBodyMismatch:
-      "Releia o título e a seção juntos: ele antecipa o que o leitor vai encontrar aqui? Se não, ajuste o título ou " +
-      "confirme que a palavra em comum só mudou de forma (plural/singular) — a ferramenta não decide por você.",
     jargon:
       "Há um equivalente mais simples no glossário, mas a troca depende do que vem a seguir. Confirme que o contexto é um " +
       "sintagma nominal (não uma oração) antes de substituir.",

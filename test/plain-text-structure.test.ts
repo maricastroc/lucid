@@ -24,11 +24,6 @@ describe("structure in pasted text/Markdown (F4) — ATX headings", () => {
     expect(structuralSpans(text, "salto_de_nivel_titulo")).toEqual(["Subsecao"]);
   });
 
-  it("a heading with no echo in the body triggers heading_body_mismatch", () => {
-    const text = "## Documentacao\n\nO interessado tem trinta dias para responder ao pedido enviado.";
-    expect(structuralSpans(text, "heading_body_mismatch")).toEqual(["Documentacao"]);
-  });
-
   it("# levels become the block level (##### = 5)", () => {
     const doc = buildDocument("##### Titulo bem fundo aqui\n\nCorpo.");
     const heading = doc.blocks.find((b) => b.kind === "heading");
@@ -80,7 +75,7 @@ describe("structure in pasted text (F4) — unmarked prose stays intact", () => 
   it("prose text (no # and no markers) yields only paragraphs and no structural finding", () => {
     const text = "Foi realizada a analise do pedido. O prazo e valido e o documento tramita.\n\nOutro paragrafo aqui.";
     expect(blockKinds(text)).toEqual(["paragraph", "paragraph"]);
-    for (const c of ["long_heading", "salto_de_nivel_titulo", "heading_body_mismatch", "single_item_list"]) {
+    for (const c of ["long_heading", "salto_de_nivel_titulo", "single_item_list"]) {
       expect(structuralSpans(text, c)).toEqual([]);
     }
   });

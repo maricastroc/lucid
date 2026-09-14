@@ -100,3 +100,7 @@ Deliberadamente **não** implementado: inferir título ou lista de texto em pros
 
 - **Frequência em documento real.** Sabe-se que a perda é de 4 critérios; não se sabe em que fração dos documentos que chegam a estrutura vem declarada. `.docx` de origem institucional quase sempre declara; texto colado quase nunca. A proporção não foi medida e não dá para inferir do corpus atual, que é 0/20.
 - **Efeito sobre `paragraph_length` e `prose_enumeration`.** Ambos disparam em prosa e ambos são creditados ao 5.2. Não foi medido se a segmentação em prosa os torna mais ou menos sensíveis que sobre blocos declarados.
+
+## Nota posterior — ADR-105
+
+`heading_body_mismatch` saiu do catálogo depois desta medição: não achar no corpo uma palavra do título não é evidência de que o título esteja inadequado. Os números acima são os da data em que o experimento foi medido e ficam como estão. Rodado hoje, o mesmo `.docx` estruturado dá **5 achados**, e a perda em prosa é de **3 critérios** (`long_heading`, `salto_de_nivel_titulo`, `single_item_list`). `test/structural-coverage.test.ts` acompanha a medição atual.

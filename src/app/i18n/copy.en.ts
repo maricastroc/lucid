@@ -521,10 +521,6 @@ export const COPY_EN: UiCopy = {
     singleItemList:
       "A one-item list separates nothing: add the missing items, or fold the content back into running text. The " +
       "choice depends on the content — it is yours.",
-    headingBodyMismatch:
-      "Read the heading and the section together: does it anticipate what the reader will find here? If not, adjust " +
-      "the heading, or confirm that the shared word only changed form (plural/singular) — the tool does not decide for " +
-      "you.",
     jargon:
       "There is a simpler equivalent in the glossary, but the swap depends on what follows. Confirm the context is a " +
       "noun phrase (not a clause) before substituting.",

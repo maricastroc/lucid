@@ -30,5 +30,4 @@ export const CRITERION_ORDER: readonly UiCriterionId[] = [
   "heading_level_skip",
   "long_heading",
   "single_item_list",
-  "heading_body_mismatch",
 ];

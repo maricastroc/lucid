@@ -287,22 +287,6 @@ const BASE: PtNarrativeSet = {
         `The tool recognizes the one-item list, but deciding between completing the list and dissolving it into running text depends on the content — an author's decision.`,
       ),
   },
-  heading_body_mismatch: {
-    headline: () => "Heading with no echo in the body",
-    prose: (f) => {
-      const hw = metaNum(f, "headingContentWords");
-      const bw = metaNum(f, "bodyContentWords");
-      return (
-        `No content word from this heading reappears in the ${bw ?? "several"} content words of the section ` +
-        `(the heading has ${hw ?? "few"}). The comparison normalizes plural/singular (documentos ≈ documento), but ` +
-        "it does not relate derivations or synonyms; it is a weak proxy for findability, not proof that the heading is wrong."
-      );
-    },
-    confidence: () =>
-      assistida(
-        `This is the weakest signal in the tool: a deterministic proxy (word overlap), not a reading of meaning. Deciding whether the heading needs to change — and to what — is the author's work; the tool does not rewrite headings.`,
-      ),
-  },
 };
 
 export const NARRATIVE_UI_EN = BASE;

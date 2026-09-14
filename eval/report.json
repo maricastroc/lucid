@@ -4,9 +4,9 @@
     "lucidVersion": "0.1.0",
     "localeId": "pt-BR",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
-    "configHash": "44521072",
+    "configHash": "4c2da7fd",
     "dataHash": "06b3def4",
-    "goldenHash": "a75462f8"
+    "goldenHash": "6f242f1a"
   },
   "method": {
     "scoring": "count-per-passage",
@@ -198,8 +198,7 @@
       "leitor_terceira_pessoa",
       "salto_de_nivel_titulo",
       "long_heading",
-      "single_item_list",
-      "heading_body_mismatch"
+      "single_item_list"
     ],
     "unitTestsOnly": [
       "mais_que_perfeito_sintetico",
@@ -214,7 +213,7 @@
       "dupla_negacao",
       "vocabulario_da_organizacao"
     ],
-    "total": 24
+    "total": 23
   },
   "assistedCorpus": {
     "corpusVersion": "v1",

@@ -21,7 +21,6 @@ export type IntegratedCriterion =
   | "salto_de_nivel_titulo"
   | "long_heading"
   | "single_item_list"
-  | "heading_body_mismatch"
   | "vocabulario_da_organizacao";
 
 export interface ExpectedFinding {
@@ -582,27 +581,11 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     expected: {
       findings: [
         {
-          criterion: "heading_body_mismatch",
-          severity: "info",
-          start: 2,
-          end: 97,
-          spanText: "Da concessão do auxílio e das obrigações do requerente perante a administração pública estadual",
-          requiresHuman: true,
-        },
-        {
           criterion: "long_heading",
           severity: "warning",
           start: 2,
           end: 97,
           spanText: "Da concessão do auxílio e das obrigações do requerente perante a administração pública estadual",
-          requiresHuman: true,
-        },
-        {
-          criterion: "heading_body_mismatch",
-          severity: "info",
-          start: 103,
-          end: 118,
-          spanText: "Quem pode pedir",
           requiresHuman: true,
         },
         {
@@ -642,6 +625,6 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 26, sentences: 4 },
     },
     notes:
-      "único caso do corpus que declara estrutura (experimento 001 / ADR-084): sem ele os quatro critérios estruturais nunca eram exercitados sobre texto. Exercita também jargon e passive_voice, para provar que a estrutura não desloca os critérios de texto.",
+      "único caso do corpus que declara estrutura (experimento 001 / ADR-084): sem ele os critérios estruturais nunca eram exercitados sobre texto (eram quatro; três desde o ADR-105). Exercita também jargon e passive_voice, para provar que a estrutura não desloca os critérios de texto.",
   },
 ];

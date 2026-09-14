@@ -103,7 +103,7 @@ Two layers, and a fence between them that the build enforces:
 ┌─────────────────────────────────────────────────────────────┐
 │  LAYER 1 — the deterministic engine          THE PRODUCT    │
 │  zero LLM · zero network · same input → byte-identical out  │
-│  24 detectors, each declaring the authority behind it       │
+│  23 detectors, each declaring the authority behind it       │
 │  It can judge. It cannot write.                             │
 └─────────────────────────────────────────────────────────────┘
                     ▲                        ▲
@@ -168,7 +168,7 @@ The refusals are the design, not missing features.
 | `jargon`             |     0.963 |  0.929 | curated lexicon |
 | `sigla_sem_expansao` |     0.867 |  1.000 | productive rule |
 
-- **Only 4 of 24 detectors are listed.** The others have no defensible precision/recall number, so none is invented.
+- **Only 4 of 23 detectors are listed.** The others have no defensible precision/recall number, so none is invented.
 - **Known limitations count against the score.** `passive_voice` publishes 0.830 recall, not the 0.943 it once showed: where no deterministic signal separates a passive from a predicative adjective, the detector now stays silent, and the cost is in the number.
 - **Circular numbers are flagged inside the JSON.** Recall of a curated-lexicon detector, measured on a corpus built from that lexicon, says "the code reads its own list" — and the artifact says so.
 
@@ -178,7 +178,7 @@ To break that circularity: **149 passages from 16 real federal laws**, labelled 
 
 ## 🔬 Inside the engine
 
-- **A pure pipeline.** Normalize (NFC) → segment → tokenize → 24 detectors → per-criterion score. No `Date`, no `Math.random`, no `localeCompare`, no network in the core; an ESLint rule fails the build if one appears. Byte-identical golden snapshots lock the output.
+- **A pure pipeline.** Normalize (NFC) → segment → tokenize → 23 detectors → per-criterion score. No `Date`, no `Math.random`, no `localeCompare`, no network in the core; an ESLint rule fails the build if one appears. Byte-identical golden snapshots lock the output.
 - **Provenance is a type.** Every criterion declares where its authority comes from:
 
   | `source`               | Meaning                                            | Gets an ISO clause?                     |
@@ -220,7 +220,7 @@ The ISO criteria come from `ABNT NBR ISO 24495-1:2024`, the Brazilian adoption �
 | 3   | **Understandable** | 5.3    | Deterministic detectors                                                                                                                      |
 | 4   | **Usable**         | 5.4    | Needs real readers. A synthetic comprehension probe exists in the code but is off: it failed its own recall floor against the current model. |
 
-23 detectors cover principles 2 and 3; a 24th checks [your organisation's own vocabulary](docs/how-it-works.md#the-organisations-vocabulary) and never cites the standard.
+22 detectors cover principles 2 and 3; a 23rd checks [your organisation's own vocabulary](docs/how-it-works.md#the-organisations-vocabulary) and never cites the standard.
 
 <br/>
 

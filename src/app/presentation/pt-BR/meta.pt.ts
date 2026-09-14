@@ -238,14 +238,4 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     signal: "bloco de lista com exatamente um item (só em documento estruturado)",
     why: "Uma lista existe para comparar vários itens; com um só, não ajuda a localizar e sugere item faltando.",
   },
-  heading_body_mismatch: {
-    label: "Título sem eco no corpo",
-    ruleId: "heading_body_mismatch",
-    kind: "Estrutura do documento",
-    principleName: "Relevância para o leitor",
-    channel: "passage",
-    markStyleClass: "",
-    signal: "nenhuma palavra de conteúdo do título aparece no corpo da seção (comparação exata, sem lemas)",
-    why: "Um título que não antecipa o conteúdo da seção deixa de ajudar o leitor a saber se vale a pena ler.",
-  },
 };

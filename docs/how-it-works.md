@@ -42,7 +42,7 @@ That last row is the point of the whole mechanism. Deleting a heading changes th
 
 A benefit ruling and an app screen do not fail at the same sentence length. Four named profiles carry the purpose — `base`, `normativo`, `publico`, `digital` — and each is a different set of thresholds, not a different set of rules: no criterion is switched off, no clause is reinterpreted.
 
-Each profile hashes differently (`44521072`, `0cc01df9`, `d73a7e54`, `126cfd71`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
+Each profile hashes differently (`4c2da7fd`, `149bb584`, `df1615df`, `864ac886`), and the report stamps the name, the version and the hash. **A looser threshold cannot hide** — it travels with the result, in the same `configHash` the reproducibility guarantee already rests on. Choosing a profile is stating who you are writing for, on the record.
 
 ---
 
@@ -69,7 +69,7 @@ And because a zero now means two different things depending on the detector, the
 
 `npm run eval` produces a stamped artifact ([`eval/report.json`](../eval/report.json)) rendered at [`/avaliacao`](https://lucid.marianacastro.dev/avaliacao). The README shows the four measured detectors. Three things about that table are unusual, and deliberate:
 
-1. **Only 4 of 24 detectors are there.** The rest have no honest precision/recall number, so none is invented. The artifact says which is which.
+1. **Only 4 of 23 detectors are there.** The rest have no honest precision/recall number, so none is invented. The artifact says which is which.
 2. **Known limitations count _against_ the score.** A false positive we chose not to fix is left in the corpus, so `jargon` publishes 0.963 instead of a prettier 1.000. The same rule is why `passive_voice` publishes 0.830 recall rather than the 0.943 it once showed: `ser` in the present with no agent and a subject before the verb (“o benefício é concedido”) is structurally identical to a predicative adjective (“o servidor é qualificado”), no deterministic signal separates them, and the detector now stays silent there. The recall those silences cost is in the number, not in a footnote.
 3. **The artifact flags its own circular numbers.** Recall for a curated-lexicon detector is measured against a corpus built from that same lexicon — so it reports "the code reads its own list," not "the instrument finds the phenomenon." That caveat ships _inside_ the JSON.
 

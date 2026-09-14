@@ -138,7 +138,7 @@ const SPECS: Record<DatasetId, RawSpec> = {
   "stopwords.pt": {
     raw: stopwordsData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para heading_body_mismatch (curadoria própria, ADR-044)",
+    provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para as métricas de coesão e para passiva_sintetica (curadoria própria, ADR-044)",
   },
   "siglas-conhecidas.pt": {
     raw: siglasConhecidasData,

@@ -201,8 +201,8 @@ const BASE: PtNarrativeSet = {
     headline: (f) => (metaStr(f, "kind") === "chain" ? "Nominalizações em cadeia" : "Nominalizações concentradas"),
     prose: (f) =>
       metaStr(f, "kind") === "chain"
-  ? `Em «${flat(f.span.text)}», uma ação aparece como substantivo. Isso torna o trecho mais abstrato e deixa menos claro quem realiza a ação.`
-  : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação. Cada um transforma uma ação em substantivo, e o acúmulo torna a leitura mais abstrata.`,
+        ? `Em «${flat(f.span.text)}», uma ação aparece como substantivo. Isso torna o trecho mais abstrato e deixa menos claro quem realiza a ação.`
+        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação. Cada um transforma uma ação em substantivo, e o acúmulo torna a leitura mais abstrata.`,
     confidence: () =>
       assistida(
         `A detecção é por léxico curado e adjacência — sem interpretação. Mas desfazer a nominalização é devolver a ação ao verbo e dizer quem a pratica, o que muda a estrutura da frase; a ferramenta não reescreve nem inventa o agente.`,
@@ -282,22 +282,6 @@ const BASE: PtNarrativeSet = {
     confidence: () =>
       assistida(
         `A ferramenta reconhece a lista de um item só, mas decidir entre completar a lista ou dissolvê-la no texto corrido depende do conteúdo — decisão de autor.`,
-      ),
-  },
-  heading_body_mismatch: {
-    headline: () => "Título sem eco no corpo",
-    prose: (f) => {
-      const hw = metaNum(f, "headingContentWords");
-      const bw = metaNum(f, "bodyContentWords");
-      return (
-        `Nenhuma palavra de conteúdo deste título reaparece nas ${bw ?? "várias"} palavras de conteúdo da seção ` +
-        `(o título tem ${hw ?? "poucas"}). A comparação normaliza plural/singular (documentos ≈ documento), mas ` +
-        "não relaciona derivações nem sinônimos; é um proxy fraco de localização, não prova de que o título está errado."
-      );
-    },
-    confidence: () =>
-      assistida(
-        `Este é o sinal mais fraco da ferramenta: um proxy determinístico (sobreposição de palavras), não uma leitura de sentido. Decidir se o título precisa mudar — e para quê — é trabalho de autor; a ferramenta não reescreve títulos.`,
       ),
   },
 };

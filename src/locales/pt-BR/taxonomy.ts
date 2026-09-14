@@ -32,5 +32,4 @@ export const CRITERION_TAXONOMY: Record<CriterionId, CriterionTaxonomyEntry> = {
   vocabulario_da_organizacao: { source: "organizational", principleGroup: "understandable" },
 
   single_item_list: { source: "structural-heuristic", principleGroup: "findable" },
-  heading_body_mismatch: { source: "structural-heuristic", principleGroup: "findable" },
 };

@@ -74,10 +74,6 @@ export interface PtConfig extends Config {
   singleItemList: {
     enabled: boolean;
   };
-  headingBodyMismatch: {
-    enabled: boolean;
-    minBodyContentWords: number;
-  };
   vocabulario: {
     enabled: boolean;
     terms: readonly OrgTerm[];
@@ -161,10 +157,6 @@ export const DEFAULT_CONFIG: PtConfig = {
   singleItemList: {
     enabled: true,
   },
-  headingBodyMismatch: {
-    enabled: true,
-    minBodyContentWords: 6,
-  },
   vocabulario: {
     enabled: true,
     terms: [],
@@ -212,10 +204,6 @@ export const PT_CONFIG_SCHEMA: ConfigSchema = {
   hierarquiaTitulos: { criterion: "salto_de_nivel_titulo" },
   longHeading: { criterion: "long_heading", thresholds: { maxWords: PRODUCT_PARAMETER } },
   singleItemList: { criterion: "single_item_list" },
-  headingBodyMismatch: {
-    criterion: "heading_body_mismatch",
-    thresholds: { minBodyContentWords: PRODUCT_PARAMETER },
-  },
   vocabulario: { criterion: "vocabulario_da_organizacao", role: "organization-vocabulary" },
   metrics: { criterion: null },
 };

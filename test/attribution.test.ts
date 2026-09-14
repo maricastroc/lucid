@@ -56,11 +56,12 @@ describe("attribute — what one edit did, in the region it touched", () => {
 describe("attribute — what the edit did somewhere else", () => {
   it("labels as indirect a finding that changed outside the region the author touched", () => {
     const antes =
-      "# Título geral\n\n## Seção primeira\n\nUm parágrafo qualquer aqui.\n\n#### Subitem profundo\n\nOutro parágrafo.";
-    const depois = "# Título geral\n\nUm parágrafo qualquer aqui.\n\n#### Subitem profundo\n\nOutro parágrafo.";
+      "# Título geral\n\n## Seção primeira\n\nUm parágrafo qualquer aqui.\n\n### Subitem profundo\n\nOutro parágrafo.";
+    const depois = "# Título geral\n\nUm parágrafo qualquer aqui.\n\n### Subitem profundo\n\nOutro parágrafo.";
     const indiretos = change(antes, depois).changes.filter((c) => c.scope === "indirect");
     expect(indiretos.length).toBeGreaterThan(0);
     for (const c of indiretos) expect(c.kind).toBe("indirect");
+    expect(indiretos.map((c) => c.criterion)).toEqual(["salto_de_nivel_titulo"]);
   });
 
   it("says nothing about criteria the edit left alone", () => {

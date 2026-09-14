@@ -199,7 +199,6 @@ describe("silence — the audit says what it could not look at", () => {
 
   it("names the criteria that had no object in a prose document", () => {
     expect(auditText("prosa.txt", PROSE, []).silent).toEqual([
-      "heading_body_mismatch",
       "long_heading",
       "salto_de_nivel_titulo",
       "single_item_list",
@@ -227,7 +226,7 @@ describe("silence — the audit says what it could not look at", () => {
 
   it("carries the same fact into the json output", () => {
     const payload = JSON.parse(renderJson([auditText("prosa.txt", PROSE, [])]));
-    expect(payload.files[0].criteriaWithoutObject).toHaveLength(4);
+    expect(payload.files[0].criteriaWithoutObject).toHaveLength(3);
   });
 });
 

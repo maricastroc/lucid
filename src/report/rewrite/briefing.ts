@@ -24,7 +24,6 @@ const LABEL: Record<string, string> = {
   salto_de_nivel_titulo: "Salto de nível de título",
   long_heading: "Título longo",
   single_item_list: "Lista de um item",
-  heading_body_mismatch: "Título sem eco no corpo",
 };
 
 const HINT: Record<string, string> = {

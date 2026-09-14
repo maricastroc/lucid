@@ -367,7 +367,6 @@ export interface UiCopy {
     readonly longHeading: string;
     readonly singleItemList: string;
     readonly vocabularioDaOrganizacao: string;
-    readonly headingBodyMismatch: string;
     readonly jargon: string;
 
     readonly nominalizationBaseVerb: (verb: string) => string;

@@ -27,7 +27,6 @@ const CRITERIA: readonly IntegratedCriterion[] = [
   "salto_de_nivel_titulo",
   "long_heading",
   "single_item_list",
-  "heading_body_mismatch",
   "vocabulario_da_organizacao",
 ];
 
@@ -137,7 +136,6 @@ describe("integrated golden — integrated summary (global and per-criterion met
     salto_de_nivel_titulo: zero(),
     long_heading: zero(),
     single_item_list: zero(),
-    heading_body_mismatch: zero(),
     vocabulario_da_organizacao: zero(),
   };
   let findingsOnUnforeseenTerms = 0;

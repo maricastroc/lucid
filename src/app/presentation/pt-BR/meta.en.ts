@@ -171,11 +171,4 @@ export const TEXT_UI_EN: Record<CriterionId, CriterionText> = {
     signal: "a list block with exactly one item (structured documents only)",
     why: "A list exists to compare several items; with only one it does not help locate anything and suggests a missing item.",
   },
-  heading_body_mismatch: {
-    label: "Heading with no echo in the body",
-    kind: "Document structure",
-    principleName: "Relevance to the reader",
-    signal: "no content word from the heading appears in the section body (exact comparison, no lemmas)",
-    why: "A heading that does not anticipate the section's content stops helping the reader decide whether to read on.",
-  },
 };

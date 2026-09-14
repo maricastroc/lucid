@@ -153,8 +153,8 @@ export const CLAUSE_TREE: ClauseTree = {
         kind: "partial",
         reason:
           "Tamanho do título e salto de nível são medidos. Se o título antecipa o que vem depois é " +
-          "julgamento de conteúdo: `heading_body_mismatch` tenta uma aproximação por eco de termos, mas " +
-          "é heurística estrutural do Lucid e não cita a norma.",
+          "julgamento de conteúdo e fica com o autor: repetir ou não as palavras do corpo não mostra se o " +
+          "título cumpre essa função (ADR-105).",
       },
     },
     {
