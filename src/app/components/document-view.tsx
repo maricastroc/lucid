@@ -186,14 +186,15 @@ function Segments({ segments, ctx }: { segments: readonly LineSegment[]; ctx: Se
 
         const target = inline ?? passage!;
         const id = findingId(target);
-        const selected = selectedId === id;
+        const ids = [inline, passage].filter((f) => f !== undefined).map(findingId);
+        const selected = selectedId !== null && ids.includes(selectedId);
         const meta = metaFor(locale.id, target.criterion, lang);
         const classes = ["seg"];
         if (inTarget) classes.push("rewrite-target");
         if (inline) classes.push("mark", meta.markStyleClass);
         if (passage) classes.push("passage");
         if (selected) classes.push("seg-selected", "is-lit");
-        if (flashId === id) classes.push("seg-flash");
+        if (flashId !== null && ids.includes(flashId)) classes.push("seg-flash");
         if (occ) classes.push(occ.className, "is-lit");
         const ink = inline ? severityInkVar(inline.severity) : undefined;
 
