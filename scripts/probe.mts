@@ -1,15 +1,3 @@
-/**
- * Sonda de investigação do motor: roda a Camada 1 sobre frases soltas, sobre um arquivo de casos ou
- * sobre texto real, e imprime cada apontamento com o contexto em que caiu. Não faz parte do produto
- * — existe para interrogar o motor antes de mexer numa regra, e para medir o efeito depois.
- *
- *   npx tsx scripts/probe.mts "O servidor é qualificado."      # frases no argumento
- *   npx tsx scripts/probe.mts --file casos.txt                 # um caso por linha, # é comentário
- *   npx tsx scripts/probe.mts --dir corpus/v1/text             # texto real, agregado no fim
- *
- *   ONLY=passive_voice           limita a saída a um critério
- *   META=eventiveness            agrupa a contagem por um campo de meta
- */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { analyze } from "../src/locales/pt-BR";
