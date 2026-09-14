@@ -20,7 +20,7 @@ interface Props {
   importing: boolean;
   text: string;
   diagnostic: Diagnostic;
-  blocks: readonly Block[] | null;
+  blocks: readonly Block[];
   selectedId: string | null;
   flashId: string | null;
   hiddenHighlights: ReadonlySet<string>;
@@ -393,7 +393,11 @@ function BlockView({
         }
 
         return (
-          <p key={bi} data-start={block.start} className={`relative ${bi === 0 ? "" : "mt-[1.55em]"}`}>
+          <p
+            key={bi}
+            data-start={block.start}
+            className={`relative whitespace-pre-line ${bi === 0 ? "" : "mt-[1.55em]"}`}
+          >
             {tick}
             <Segments
               segments={segmentRange(
@@ -446,7 +450,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
   const words = diagnostic.metrics.words;
   const isFocused = mode === "audit" && selectedId !== null;
 
-  const structured = blocks !== null && blocks.some((b) => b.kind !== "paragraph");
+  const structured = blocks.some((b) => b.kind !== "paragraph");
   const ctx: SegmentContext = {
     selectedId,
     flashId,
@@ -527,7 +531,7 @@ export const DocumentView = forwardRef<HTMLDivElement, Props>(function DocumentV
               <article className={`prose-doc px-6 py-8 sm:px-14 sm:py-12 ${isFocused ? "is-focused" : ""}`}>
                 {structured ? (
                   <BlockView
-                    blocks={blocks!}
+                    blocks={blocks}
                     diagnostic={diagnostic}
                     hiddenHighlights={hiddenHighlights}
                     occurrences={occurrences}
@@ -579,9 +583,12 @@ function DocumentToolbar({
         {words} {c.common.words}
       </span>
       {mode === "edit" ? (
-        <span className="u-sublabel hidden min-w-0 truncate rounded-full border border-accent-line bg-accent-weak px-2 py-0.5 text-accent sm:block">
-          {c.documentView.draft}
-        </span>
+        <>
+          <span className="u-sublabel hidden min-w-0 truncate rounded-full border border-accent-line bg-accent-weak px-2 py-0.5 text-accent sm:block">
+            {c.documentView.draft}
+          </span>
+          <span className="hidden min-w-0 truncate text-[12px] text-ink-3 xl:block">{c.documentView.markdownHint}</span>
+        </>
       ) : (
         structured && (
           <span className="u-sublabel hidden min-w-0 truncate rounded-full border border-rule-2 px-2 py-0.5 text-ink-3 sm:block">

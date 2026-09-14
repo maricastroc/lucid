@@ -734,6 +734,7 @@ export interface UiCopy {
     readonly dropHere: string;
     readonly dropHint: string;
     readonly draft: string;
+    readonly markdownHint: string;
     readonly structured: string;
     readonly underReview: string;
     readonly textareaLabel: string;

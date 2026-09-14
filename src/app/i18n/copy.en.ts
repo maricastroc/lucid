@@ -1079,6 +1079,7 @@ export const COPY_EN: UiCopy = {
     dropHere: "Drop to open",
     dropHint: "Takes .docx and .pdf",
     draft: "Draft",
+    markdownHint: "Headings with #, lists with - or 1.",
     structured: "Structured document",
     underReview: "Document under review",
     textareaLabel: "Document text",

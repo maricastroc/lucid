@@ -33,6 +33,8 @@ export interface DocumentSource {
   missingBlockKinds: readonly string[];
   importNotes: ImportNotes | null;
   blocks: readonly Block[] | null;
+  /** The blocks the analysis ran on: the imported structure, or the headings and lists the text itself declares. */
+  analyzedBlocks: readonly Block[];
   rawBlocks: readonly RawBlock[] | null;
   isEmpty: boolean;
   isSettled: boolean;
@@ -250,6 +252,7 @@ export function useDocumentSource(
     missingBlockKinds,
     importNotes: structured ? importNotes : null,
     blocks: structured ? deferred.doc!.blocks : null,
+    analyzedBlocks: doc.blocks,
     rawBlocks,
     isEmpty: source.text.trim() === "" && (source.doc === null || source.doc.blocks.length === 0),
     isSettled: deferred === source,

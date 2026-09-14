@@ -1073,6 +1073,7 @@ export const COPY_PT: UiCopy = {
     dropHere: "Solte para abrir",
     dropHint: "Aceita .docx e .pdf",
     draft: "Rascunho",
+    markdownHint: "Títulos com #, listas com - ou 1.",
     structured: "Documento estruturado",
     underReview: "Documento em revisão",
     textareaLabel: "Texto do documento",

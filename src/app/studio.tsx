@@ -98,6 +98,7 @@ export function Studio() {
     setText,
     diagnostic,
     blocks,
+    analyzedBlocks,
     silentCriteria,
     missingBlockKinds,
     importNotes,
@@ -665,7 +666,7 @@ export function Studio() {
                 importing={importing}
                 text={text}
                 diagnostic={diagnostic}
-                blocks={blocks}
+                blocks={analyzedBlocks}
                 selectedId={selectedId}
                 flashId={flashId}
                 hiddenHighlights={hiddenHighlights}

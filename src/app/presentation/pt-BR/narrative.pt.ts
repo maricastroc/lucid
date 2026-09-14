@@ -201,8 +201,8 @@ const BASE: PtNarrativeSet = {
     headline: (f) => (metaStr(f, "kind") === "chain" ? "Nominalizações em cadeia" : "Nominalizações concentradas"),
     prose: (f) =>
       metaStr(f, "kind") === "chain"
-  ? `Em «${flat(f.span.text)}», uma ação aparece como substantivo. Isso torna o trecho mais abstrato e deixa menos claro quem realiza a ação.`
-  : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação. Cada um transforma uma ação em substantivo, e o acúmulo torna a leitura mais abstrata.`,
+        ? `Em «${flat(f.span.text)}», uma ação aparece como substantivo. Isso torna o trecho mais abstrato e deixa menos claro quem realiza a ação.`
+        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação. Cada um transforma uma ação em substantivo, e o acúmulo torna a leitura mais abstrata.`,
     confidence: () =>
       assistida(
         `A detecção é por léxico curado e adjacência — sem interpretação. Mas desfazer a nominalização é devolver a ação ao verbo e dizer quem a pratica, o que muda a estrutura da frase; a ferramenta não reescreve nem inventa o agente.`,
