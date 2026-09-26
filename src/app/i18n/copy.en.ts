@@ -450,6 +450,22 @@ export const COPY_EN: UiCopy = {
     aiRunning: "Generating and verifying…",
     aiFailed: (message) => `Could not generate: ${message}`,
     aiFailedGeneric: "failed to generate the rewrite",
+    aiErrorKind: {
+      authentication:
+        "The server could not authenticate with the model provider, so there is no proposal. The deterministic " +
+        "audit is still complete.",
+      quota:
+        "The model provider's quota ran out, so there is no proposal now. The deterministic audit is still complete.",
+      rate_limit: "The model provider asked to wait before another attempt. Try again in a moment.",
+      model_unavailable: "The configured model is not available at the provider, so there is no proposal.",
+      invalid_request: "The provider refused the configuration sent to the model, so there is no proposal.",
+      incomplete: "The model stopped before finishing its answer, so there is no usable proposal. Nothing was applied.",
+      empty: "The model answered with no content, so there is no proposal. Nothing was applied.",
+      unusable:
+        "The model did not return a usable proposal. Nothing was applied; try again or edit the passage yourself.",
+      network: "Could not reach the model provider. Check the connection and try again.",
+      server: "The model provider failed to answer. Try again in a moment.",
+    },
     aiNoProposal:
       "The model returned nothing different from the passage, so there is no proposal. Lucid does not create " +
       "one; the decision stays with you.",

@@ -53,7 +53,6 @@ export interface RewriteProposal {
   original: string;
   proposed: string;
   localeId?: string;
-  parseOutcome?: "ok" | "unparseable";
   provenance?: RewriteProvenance;
 }
 

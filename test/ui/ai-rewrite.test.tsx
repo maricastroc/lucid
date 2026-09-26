@@ -128,6 +128,28 @@ describe("flow 5 · a proposal the engine blocks", () => {
   });
 });
 
+describe("flow 5 · a model answer that cannot be used", () => {
+  it("says the model returned no usable proposal and offers nothing to apply", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () =>
+        ({
+          ok: false,
+          status: 502,
+          json: async () => ({ error: "o modelo não devolveu uma proposta utilizável", kind: "unusable" }),
+        }) as unknown as Response,
+    );
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
+
+    await runRewrite(user);
+
+    expect(await auditPanel().findByText(/o modelo não devolveu uma proposta utilizável/i)).toBeInTheDocument();
+    expect(auditPanel().queryByRole("button", { name: /rascunho/i })).not.toBeInTheDocument();
+  });
+});
+
 describe("flow 5 · a passive left for the author does not block the proposal", () => {
   const TWO_AGENTLESS = "O pedido foi indeferido ontem e a decisão foi comunicada ao interessado.";
 

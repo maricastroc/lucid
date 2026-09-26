@@ -3,12 +3,13 @@
 import { useCallback, useRef, useState } from "react";
 import type { Span } from "@/lucid";
 import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
-import { generateRewrite, type RewriteModel } from "../../lib/rewrite";
+import type { ChatProviderErrorKind } from "@/llm";
+import { generateRewrite, RewriteFailure, type RewriteModel } from "../../lib/rewrite";
 
 export type RewriteDraft =
   | { readonly status: "idle" }
   | { readonly status: "running" }
-  | { readonly status: "failed"; readonly message: string }
+  | { readonly status: "failed"; readonly message: string; readonly kind: ChatProviderErrorKind | null }
   | { readonly status: "proposed"; readonly result: VerifiedRewrite };
 
 export interface RewriteDraftOptions {
@@ -66,7 +67,12 @@ export function useRewriteDraft({
     } catch (error) {
       if (runIdRef.current !== runId) return;
       if (controller.signal.aborted) setDraft({ status: "idle" });
-      else setDraft({ status: "failed", message: error instanceof Error ? error.message : failureMessage });
+      else
+        setDraft({
+          status: "failed",
+          message: error instanceof Error ? error.message : failureMessage,
+          kind: error instanceof RewriteFailure ? error.kind : null,
+        });
     } finally {
       if (runIdRef.current === runId) abortRef.current = null;
     }

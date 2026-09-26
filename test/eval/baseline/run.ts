@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { GeminiProvider } from "@/llm";
-import { LlmRewriteProposer } from "@/report/rewrite";
+import { LlmRewriteProposer, parseRewrite } from "@/report/rewrite";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ProbeResult } from "@/lucid/probe/types";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
@@ -79,6 +79,10 @@ export function latestByKey(rows: readonly CallRow[]): Map<string, CallRow> {
   return out;
 }
 
+export function rewriteRawParses(raw: string): boolean {
+  return parseRewrite(raw) !== null;
+}
+
 export function probeRawParses(raw: string): boolean {
   const attempt = (candidate: string): boolean => {
     try {
@@ -144,7 +148,6 @@ async function execute(
   value: {
     proposed?: string;
     original?: string;
-    parseOutcome?: "ok" | "unparseable";
     probe?: ProbeResult;
     stampedId: string;
   } | null;
@@ -173,7 +176,6 @@ async function execute(
     return {
       proposed: proposal.proposed,
       original: proposal.original,
-      parseOutcome: proposal.parseOutcome,
       stampedId: proposal.proposerId,
     };
   });
@@ -274,7 +276,11 @@ export async function runBaseline(
         outcome: errorMessage === null ? "ok" : "error",
         error: errorMessage === null ? null : { message: errorMessage, status },
         parseOutcome: isRewrite
-          ? (value?.parseOutcome ?? null)
+          ? final?.firstPartText
+            ? rewriteRawParses(final.firstPartText)
+              ? "ok"
+              : "unparseable"
+            : null
           : final?.firstPartText
             ? probeRawParses(final.firstPartText)
               ? "ok"

@@ -89,31 +89,27 @@ describe("LlmRewriteProposer", () => {
     expect(withConfig.provenance?.generation).toEqual({ temperature: 0, maxOutputTokens: 2048 });
   });
 
-  it("an unreadable response → proposal = original (honest, fabricates nothing)", async () => {
-    const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
-    const target = span("Trecho original intacto.");
-    const proposal = await proposer.propose({ text: target.text, target });
-    expect(proposal.proposed).toBe(target.text);
-  });
-
-  it("an unreadable response → parseOutcome reports 'unparseable' (LUCID-012: it does not slip by)", async () => {
+  it("an unreadable response is a typed failure, never a proposal equal to the original (LUCID-012)", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const proposer = new LlmRewriteProposer(new MockChatProvider("não sei responder"), "m1");
     const target = span("Trecho original intacto.");
-    const proposal = await proposer.propose({ text: target.text, target, criterion: "long_sentence" });
-    expect(proposal.parseOutcome).toBe("unparseable");
+
+    const failure = await proposer.propose({ text: target.text, target, criterion: "long_sentence" }).catch((e) => e);
+
+    expect(failure).toBeInstanceOf(ChatProviderError);
+    expect(failure).toMatchObject({ kind: "unusable", message: "o modelo não devolveu uma proposta utilizável" });
     expect(warnSpy).toHaveBeenCalledTimes(1);
     expect(warnSpy.mock.calls[0][0]).toContain("long_sentence");
     warnSpy.mockRestore();
   });
 
-  it("a parseable response → parseOutcome = 'ok', with no warning", async () => {
+  it("a parseable response becomes the proposal, with no warning", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
     const proposer = new LlmRewriteProposer(provider, "m1");
     const target = span("Um trecho longo e enrolado que precisa de ajuda.");
     const proposal = await proposer.propose({ text: target.text, target });
-    expect(proposal.parseOutcome).toBe("ok");
+    expect(proposal.proposed).toBe("Versão curta e clara.");
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });

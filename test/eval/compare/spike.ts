@@ -7,7 +7,7 @@ import type { ProbeResult } from "@/lucid/probe/types";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { buildPlan, type ProbeJob, type RewriteJob } from "../baseline/plan";
 import { installRecorder, recording, sha256, type AttemptRecord } from "../baseline/recorder";
-import { probeRawParses } from "../baseline/run";
+import { probeRawParses, rewriteRawParses } from "../baseline/run";
 
 export const SPIKE_MODEL = "gemini-3.8-flash";
 
@@ -329,7 +329,11 @@ export async function runSpike(
         error: errorMessage === null ? null : { message: errorMessage, status },
         parseOutcome:
           s.kind === "rewrite" || s.kind === "directed"
-            ? (proposal?.parseOutcome ?? null)
+            ? final?.firstPartText
+              ? rewriteRawParses(final.firstPartText)
+                ? "ok"
+                : "unparseable"
+              : null
             : final?.firstPartText
               ? probeRawParses(final.firstPartText)
                 ? "ok"

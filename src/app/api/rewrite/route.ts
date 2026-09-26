@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Finding, Span } from "@/lucid";
-import { ChatProviderError, GeminiProvider, GEMINI_MODELS } from "@/llm";
+import { ChatProviderError, GeminiProvider, GEMINI_MODELS, redactSecrets } from "@/llm";
 import {
   LlmRewriteProposer,
   proposeAndVerify,
@@ -133,7 +133,10 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(result);
   } catch (cause) {
     if (cause instanceof ChatProviderError) {
-      return NextResponse.json({ error: cause.message }, { status: 502 });
+      return NextResponse.json(
+        { error: redactSecrets(cause.message, [process.env.GEMINI_API_KEY ?? ""]), kind: cause.kind },
+        { status: cause.kind === "quota" || cause.kind === "rate_limit" ? 429 : 502 },
+      );
     }
     return NextResponse.json({ error: "erro interno do servidor" }, { status: 500 });
   }

@@ -459,6 +459,23 @@ export const COPY_PT: UiCopy = {
     aiRunning: "Gerando e verificando…",
     aiFailed: (message) => `Não foi possível gerar a reescrita: ${message}.`,
     aiFailedGeneric: "erro inesperado",
+    aiErrorKind: {
+      authentication:
+        "O servidor não conseguiu se autenticar no provedor do modelo, então não há proposta. A auditoria " +
+        "determinística continua completa.",
+      quota:
+        "A cota do provedor do modelo acabou, então não há proposta agora. A auditoria determinística continua completa.",
+      rate_limit:
+        "O provedor do modelo pediu para esperar antes de uma nova tentativa. Tente de novo em alguns instantes.",
+      model_unavailable: "O modelo configurado não está disponível no provedor, então não há proposta.",
+      invalid_request: "O provedor recusou a configuração enviada ao modelo, então não há proposta.",
+      incomplete: "O modelo interrompeu a resposta antes do fim, então não há proposta utilizável. Nada foi aplicado.",
+      empty: "O modelo respondeu sem conteúdo, então não há proposta. Nada foi aplicado.",
+      unusable:
+        "O modelo não devolveu uma proposta utilizável. Nada foi aplicado; tente de novo ou edite o trecho você mesmo.",
+      network: "Não foi possível falar com o provedor do modelo. Verifique a conexão e tente de novo.",
+      server: "O provedor do modelo falhou ao responder. Tente de novo em alguns instantes.",
+    },
     aiNoProposal:
       "A IA devolveu o trecho sem mudanças, então não há proposta para verificar. Tente de novo ou edite o " +
       "trecho você mesmo.",

@@ -1,5 +1,5 @@
 import { buildRewritePrompt, STRATEGY_VERSION, type RewriteStrategy } from "./prompt";
-import type { ChatCompletionOptions, ChatProvider } from "@/llm";
+import { ChatProviderError, type ChatCompletionOptions, type ChatProvider } from "@/llm";
 import { stableHash } from "@/lucid";
 import type { RewriteProposal, RewriteProposer, RewriteRequest } from "./types";
 
@@ -55,16 +55,16 @@ export class LlmRewriteProposer implements RewriteProposer {
     const parsed = parseRewrite(raw);
     if (parsed === null) {
       console.warn(
-        `[rewrite] parseRewrite() não extraiu reescrita válida — mantendo original. ` +
+        `[rewrite] parseRewrite() não extraiu reescrita válida. ` +
           `proposerId=${proposerId} criterion=${request.criterion ?? "-"} raw=${JSON.stringify(raw.slice(0, 200))}`,
       );
+      throw new ChatProviderError("o modelo não devolveu uma proposta utilizável", this.provider.id, "unusable");
     }
     return {
       proposerId,
       original,
-      proposed: parsed ?? original,
+      proposed: parsed,
       localeId: request.localeId,
-      parseOutcome: parsed === null ? "unparseable" : "ok",
       provenance: {
         providerId: this.provider.id,
         model: this.model,

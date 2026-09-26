@@ -46,7 +46,7 @@ export function AiRewritePanel({
   });
 
   const loading = draft.status === "running";
-  const error = draft.status === "failed" ? draft.message : null;
+  const error = draft.status === "failed" ? draft : null;
   const result = draft.status === "proposed" ? draft.result : null;
   const hasProposal = result !== null && result.proposal.proposed !== result.proposal.original;
 
@@ -100,7 +100,7 @@ export function AiRewritePanel({
 
           {error !== null && (
             <p className="mt-3 rounded-lg border border-human-line bg-human-weak px-3 py-2.5 text-[12px] leading-relaxed text-ink-1">
-              {c.note.aiFailed(error)}
+              {error.kind === null ? c.note.aiFailed(error.message) : c.note.aiErrorKind[error.kind]}
             </p>
           )}
 

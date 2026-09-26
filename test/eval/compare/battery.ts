@@ -7,7 +7,7 @@ import type { ProbeResult } from "@/lucid/probe/types";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { buildPlan, MAX_OUTPUT_TOKENS, MODEL as BASE_MODEL, type Job } from "../baseline/plan";
 import { installRecorder, recording, sha256, type AttemptRecord } from "../baseline/recorder";
-import { latestByKey, loadCalls, probeRawParses, type CallRow } from "../baseline/run";
+import { latestByKey, loadCalls, probeRawParses, rewriteRawParses, type CallRow } from "../baseline/run";
 import { spikeCost } from "./spike";
 
 export const CANDIDATE_MODEL = "gemini-3.8-flash";
@@ -90,7 +90,6 @@ async function execute(
     return {
       proposed: proposal.proposed,
       original: proposal.original,
-      parseOutcome: proposal.parseOutcome,
       stampedId: proposal.proposerId,
     };
   });
@@ -204,7 +203,11 @@ export async function runBattery(
         outcome: errorMessage === null ? "ok" : "error",
         error: errorMessage === null ? null : { message: errorMessage, status },
         parseOutcome: isRewrite
-          ? (value?.parseOutcome ?? null)
+          ? final?.firstPartText
+            ? rewriteRawParses(final.firstPartText)
+              ? "ok"
+              : "unparseable"
+            : null
           : final?.firstPartText
             ? probeRawParses(final.firstPartText)
               ? "ok"
