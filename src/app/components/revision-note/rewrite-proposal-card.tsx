@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { VerifiedRewrite } from "@/report/rewrite";
 import { useCopy } from "../../i18n/use-copy";
 import { Button } from "../ui/button";
@@ -25,6 +26,11 @@ export function RewriteProposalCard({
   const dFlesch = readabilityBefore === null || readabilityAfter === null ? null : readabilityAfter - readabilityBefore;
   const dWords = verification.metrics.wordsAfter - verification.metrics.wordsBefore;
   const passed = verification.proofs.filter((p) => p.passed).length;
+  const failed = verification.proofs.filter((p) => !p.passed);
+  const flagged = verification.signals.filter((s) => s.flagged);
+  const proofIssues = failed.length > 0 || verification.notices.length > 0;
+  const suffix = engineOutputSuffix(lang, locale.id);
+  const [showChecks, setShowChecks] = useState(false);
 
   return (
     <div className="-mx-3 mt-3.5 border-t border-rule-1">
@@ -59,36 +65,29 @@ export function RewriteProposalCard({
         </div>
       </div>
 
-      <div className="px-3 py-3">
-        <p className="u-sublabel mb-2 text-ink-3">
-          {c.note.proofLabel}
-          {engineOutputSuffix(lang, locale.id)}
-        </p>
-        <ul className="flex flex-col gap-1.5">
-          {verification.proofs.map((p) => (
-            <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
-          ))}
-          {verification.notices.map((n) => (
-            <CheckLine key={n.check} ok={false} kind="notice" detail={n.detail} />
-          ))}
-        </ul>
-      </div>
-
-      {verification.signals.length > 0 && (
-        <div className="border-t border-rule-1 px-3 py-3">
-          <p className="u-sublabel mb-2 text-ink-3">
-            {c.note.signalLabel}
-            {engineOutputSuffix(lang, locale.id)}
-          </p>
-          <ul className="flex flex-col gap-1.5">
-            {verification.signals.map((s) => (
-              <CheckLine key={s.check} ok={!s.flagged} kind="signal" detail={s.detail} />
-            ))}
-          </ul>
+      {(proofIssues || flagged.length > 0) && (
+        <div className="flex flex-col gap-3 border-b border-rule-1 px-3 py-3">
+          {proofIssues && (
+            <CheckGroup label={`${c.note.proofLabel}${suffix}`}>
+              {failed.map((p) => (
+                <CheckLine key={p.check} ok={false} kind="proof" detail={p.detail} />
+              ))}
+              {verification.notices.map((n) => (
+                <CheckLine key={n.check} ok={false} kind="notice" detail={n.detail} />
+              ))}
+            </CheckGroup>
+          )}
+          {flagged.length > 0 && (
+            <CheckGroup label={`${c.note.signalLabel}${suffix}`}>
+              {flagged.map((s) => (
+                <CheckLine key={s.check} ok={false} kind="signal" detail={s.detail} />
+              ))}
+            </CheckGroup>
+          )}
         </div>
       )}
 
-      <div className="border-t border-rule-1 px-3 py-3">
+      <div className="px-3 py-3">
         <div className="mb-1.5 flex items-baseline justify-between gap-2">
           <p className="u-sublabel text-ink-3">{c.note.evaluatedExcerpt}</p>
           <span className="font-mono text-[10px] text-ink-3" title={c.note.proposerTitle}>
@@ -106,6 +105,33 @@ export function RewriteProposalCard({
           </p>
         </div>
       </div>
+
+      <div className="border-t border-rule-1 px-3 py-2.5">
+        <button
+          type="button"
+          aria-expanded={showChecks}
+          onClick={() => setShowChecks(!showChecks)}
+          className="rounded-md text-[11.5px] text-accent transition-colors duration-150 hover:underline"
+        >
+          {showChecks ? c.note.checksHide : c.note.checksShow(verification.proofs.length, verification.signals.length)}
+        </button>
+        {showChecks && (
+          <div className="mt-3 flex flex-col gap-3 pb-0.5">
+            <CheckGroup label={`${c.note.proofLabel}${suffix}`}>
+              {verification.proofs.map((p) => (
+                <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
+              ))}
+            </CheckGroup>
+            {verification.signals.length > 0 && (
+              <CheckGroup label={`${c.note.signalLabel}${suffix}`}>
+                {verification.signals.map((s) => (
+                  <CheckLine key={s.check} ok={!s.flagged} kind="signal" detail={s.detail} />
+                ))}
+              </CheckGroup>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -113,6 +139,15 @@ export function RewriteProposalCard({
 function fmtDelta(n: number, digits: number): string {
   const s = digits > 0 ? n.toFixed(digits) : String(Math.round(n));
   return n >= 0 ? `+${s}` : s;
+}
+
+function CheckGroup({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="u-sublabel mb-2 text-ink-3">{label}</p>
+      <ul className="flex flex-col gap-1.5">{children}</ul>
+    </div>
+  );
 }
 
 function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal" | "notice"; detail: string }) {

@@ -193,12 +193,9 @@ export async function verifyRewrite(
     }
 
     const label = labelsOf([criterion]);
+    const quoted = awaitingLeft.map((f) => `«${f.span.text.replace(/\s+/gu, " ").trim()}»`).join(", ");
     const exceptions: string[] = [];
-    if (awaitingLeft.length > 0) {
-      exceptions.push(
-        awaitingLeft.length === 1 ? "no ponto indicado abaixo" : `nos ${awaitingLeft.length} pontos indicados abaixo`,
-      );
-    }
+    if (awaitingLeft.length > 0) exceptions.push(`em ${quoted}`);
     if (impersonalLeft > 0) exceptions.push("onde você pediu para manter a forma impessoal");
     proofs.push({
       check: "target_resolved",
@@ -212,7 +209,6 @@ export async function verifyRewrite(
     });
 
     if (awaitingLeft.length > 0) {
-      const quoted = awaitingLeft.map((f) => `«${f.span.text.replace(/\s+/gu, " ").trim()}»`).join(", ");
       notices.push({
         check: "awaiting_author",
         detail:

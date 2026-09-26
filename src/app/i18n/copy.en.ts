@@ -463,6 +463,10 @@ export const COPY_EN: UiCopy = {
     proofLabel: "Proof · deterministic",
     signalLabel: "Signal · heuristic (not a proof)",
     evaluatedExcerpt: "Passage evaluated",
+    checksShow: (proofs, signals) =>
+      `Show ${plural(proofs, "the proof", `all ${proofs} proofs`)}` +
+      (signals > 0 ? ` and ${plural(signals, "the signal", `${signals} signals`)}` : ""),
+    checksHide: "Hide proofs and signals",
     proposerTitle: "model + prompt version",
     applyStale: "Passage changed since this check",
     applyBlocked: "Use as a draft anyway",
