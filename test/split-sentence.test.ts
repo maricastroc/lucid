@@ -87,7 +87,7 @@ describe("clauseSplitPoints — edge guards", () => {
   });
 });
 
-describe("clauseSplitPoints — information only, never an action (ADR-054)", () => {
+describe("clauseSplitPoints — information only, never an action", () => {
   it("the module exports no text transform — splitting is the author's job", async () => {
     const mod = await import("../src/locales/pt-BR/actions/split-sentence");
     expect(Object.keys(mod).sort()).toEqual(["clauseSplitPoints"]);

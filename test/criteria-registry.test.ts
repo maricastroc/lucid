@@ -20,7 +20,7 @@ function sorted(values: readonly string[]): string[] {
 
 const UI_CRITERIA = sorted([...new Set<string>([...CRITERION_IDS, ...EN_CRITERION_IDS])]);
 
-describe("criterion registry (ADR-029)", () => {
+describe("criterion registry", () => {
   it("CRITERION_IDS has no duplicates", () => {
     expect(sorted(CRITERION_IDS)).toEqual(sorted([...new Set(CRITERION_IDS)]));
   });
@@ -58,7 +58,7 @@ describe("criterion registry (ADR-029)", () => {
   });
 });
 
-describe("provenance taxonomy (ADR-056)", () => {
+describe("provenance taxonomy", () => {
   it("CRITERION_TAXONOMY covers exactly the CRITERION_IDS", () => {
     expect(sorted(Object.keys(CRITERION_TAXONOMY))).toEqual(sorted(CRITERION_IDS));
   });

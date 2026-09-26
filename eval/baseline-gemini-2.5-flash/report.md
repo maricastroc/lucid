@@ -151,7 +151,7 @@ Atenção: a verificação do A/B passa `findings` e não passa `focus`, então 
 | rewrite@6 · r2 · gemini-2.5-flash | 157 | 2% | 1 | 0 | 1.0 → 0.6 | 1.2 | 0.1 | 0 | 3 |
 | rewrite@6 · r3 · gemini-2.5-flash | 157 | 2% | 1 | 0 | 1.0 → 0.6 | 1.2 | 0.1 | 0 | 4 |
 
-### 7. Estrutura resultante e aplicação no documento estruturado (ADR-088)
+### 7. Estrutura resultante e aplicação no documento estruturado
 
 | Sistema | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive |
 |---|--:|--:|--:|--:|---|---|

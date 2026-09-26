@@ -56,7 +56,7 @@ Nenhum deles conta como regressão do candidato. Só conta uma piora **no mesmo 
 
 - `directed@4` vetado em todos os itens. Perde o rótulo `Art./§/inciso` (37 de 38 na rodada 1) e
   reescreve a passiva que o autor mandou manter (intacta em 9 de 44).
-- Conflito `rewrite@6` × `target_resolved`: o prompt (ADR-094) permite manter frase longa de uma ideia, e a
+- Conflito `rewrite@6` × `target_resolved`: o prompt permite manter frase longa de uma ideia, e a
   prova bloqueia. 85 de 154 alvos de `long_sentence` reprovam na rodada 1.
 - Dividir frase cria achado de voz passiva (38 de 157 na rodada 1), o que derruba `no_new_findings` e
   `region_improved`.

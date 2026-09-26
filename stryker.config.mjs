@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * Mutation testing do motor determinístico (ADR-075).
+ * Mutation testing do motor determinístico.
  *
  * @type {import('@stryker-mutator/api/core').PartialStrykerOptions}
  */

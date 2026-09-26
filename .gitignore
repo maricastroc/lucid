@@ -48,7 +48,7 @@ docs/ARQUITETURA.md
 AGENTS.md
 .claude
 
-# corpus de avaliação (ADR-087): os BYTES ORIGINAIS ficam em cache local.
+# corpus de avaliação: os BYTES ORIGINAIS ficam em cache local.
 # O repositório versiona trecho + procedência + hash, não o acervo — e se a
 # fonte mudar o documento, o hash denuncia em vez de a medição derivar calada.
 #

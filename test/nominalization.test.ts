@@ -25,14 +25,14 @@ describe("nominalizationPass — each curated light verb", () => {
     "É preciso efetuar a solicitação de acesso.",
     "É preciso promover a avaliação de riscos.",
     "É preciso proceder à verificação dos dados.",
-  ])("detects the construction in '%s' — without composing a swap (ADR-054)", (text) => {
+  ])("detects the construction in '%s' — without composing a swap", (text) => {
     const findings = nomFindings(text);
     expect(findings).toHaveLength(1);
     expect(findings[0].suggestion).toBeUndefined();
   });
 });
 
-describe("nominalizationPass — the engine never composes the swap (ADR-054)", () => {
+describe("nominalizationPass — the engine never composes the swap", () => {
   it.each([
     "É preciso fazer a análise de documentos.",
     "O comitê fez a análise de documentos.",

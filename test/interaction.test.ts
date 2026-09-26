@@ -28,7 +28,7 @@ describe("interaction — four criteria in the same sentence", () => {
     expect(d.findings.length).toBe(5);
   });
 
-  it("each finding reconstructs its own span; only jargon carries a curated equivalent (ADR-054)", () => {
+  it("each finding reconstructs its own span; only jargon carries a curated equivalent", () => {
     for (const f of d.findings) {
       expect(d.text.slice(f.span.start, f.span.end)).toBe(f.span.text);
       if (f.suggestion !== undefined) {

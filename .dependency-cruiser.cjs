@@ -4,7 +4,7 @@ module.exports = {
       name: "verificacao-sem-modelo",
       severity: "error",
       comment:
-        "ADR-108: a verificação da reescrita é determinística. O verificador e o registro de verificações não " +
+        "A verificação da reescrita é determinística. O verificador e o registro de verificações não " +
         "importam a sonda nem a infraestrutura de LLM; análise por modelo, se existir, fica fora do veredito.",
       from: { path: "^src/report/rewrite/(verify|checks)\\.ts$" },
       to: { path: "^src/(lucid/probe|llm)(/|$)" },
@@ -50,7 +50,7 @@ module.exports = {
       name: "lucid-nao-importa-locale",
       severity: "error",
       comment:
-        "Fronteira de locale (ADR-031, endurecida no ADR-102): src/lucid inteiro — core, probe E o " +
+        "Fronteira de locale: src/lucid inteiro — core, probe E o " +
         "barrel público — é NEUTRO de idioma e nunca importa uma implementação de locale. A dependência " +
         "é sempre locale -> lucid. Quem quer o pt-BR importa @/locales/pt-BR, explicitamente.",
       from: { path: "^src/lucid" },
@@ -69,7 +69,7 @@ module.exports = {
       name: "core-e-locale-nao-importam-importer",
       severity: "error",
       comment:
-        "Fronteira de formato (ADR-039): importadores (src/importers) usam biblioteca (mammoth/pdfjs) " +
+        "Fronteira de formato: importadores (src/importers) usam biblioteca (mammoth/pdfjs) " +
         "e são o único lugar ciente do formato. A dependência é sempre importer/app -> lucid, nunca o " +
         "contrário — a Camada 1 continua zero-dep de parsing.",
       from: { path: "^src/(lucid/core|locales)" },
@@ -79,7 +79,7 @@ module.exports = {
       name: "core-e-locale-nao-importam-exporter",
       severity: "error",
       comment:
-        "Fronteira de formato (ADR-077), espelho da regra dos importadores: exportadores (src/exporters) " +
+        "Fronteira de formato, espelho da regra dos importadores: exportadores (src/exporters) " +
         "são o único lugar que escreve OOXML/ZIP. A dependência é sempre exporter/app -> lucid.",
       from: { path: "^src/(lucid/core|locales)" },
       to: { path: "^src/exporters" },
@@ -112,7 +112,7 @@ module.exports = {
       name: "rotulagem-nao-ve-o-detector",
       severity: "error",
       comment:
-        "Cerca da avaliação assistida (ADR-087 §4.1). O mundo da rotulagem — coleta, segmentação, " +
+        "Cerca da avaliação assistida. O mundo da rotulagem — coleta, segmentação, " +
         "rotulador, conciliação — não pode importar o detector nem o léxico que ele consulta. Se o " +
         "rotulador visse a saída do detector, só saberia contestar o que ele achou e nunca apontar o " +
         "que ele perdeu: o recall viraria inmensurável por construção. O detector só encontra o corpus " +

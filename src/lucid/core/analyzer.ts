@@ -17,7 +17,7 @@ function stampTaxonomy(finding: PassFinding, taxonomy: CriterionTaxonomy): Findi
   if (!entry) {
     throw new Error(
       `critério "${finding.criterion}" não tem entrada em locale.taxonomy — ` +
-        "todo critério precisa declarar source/principleGroup (ADR-056).",
+        "todo critério precisa declarar source/principleGroup.",
     );
   }
   return {

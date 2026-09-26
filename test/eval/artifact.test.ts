@@ -115,7 +115,7 @@ describe("eval artifact — publication invariants", () => {
     }
   });
 
-  it("with no denominator the value is null, NEVER 1 — 100% is not fabricated (consistent with ADR-066)", () => {
+  it("with no denominator the value is null, NEVER 1 — 100% is not fabricated", () => {
     const empty = summarize([]);
     expect(empty.precision).toBeNull();
     expect(empty.recall).toBeNull();

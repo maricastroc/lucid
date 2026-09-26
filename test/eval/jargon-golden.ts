@@ -176,7 +176,7 @@ export const GOLDEN_JARGAO: readonly EntradaGolden[] = [
       "determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava " +
       "este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo " +
       "termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade " +
-      "(ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na " +
+      ", que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na " +
       "precisão do eval em vez de ser mascarado.",
   },
 
@@ -198,8 +198,8 @@ export const GOLDEN_JARGAO: readonly EntradaGolden[] = [
     motivo:
       "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. " +
       "Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), " +
-      "mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o " +
-      "glossário curado como autoridade única de runtime)",
+      "mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (o glossário curado " +
+      "continua a autoridade única de runtime)",
   },
   {
     texto: "Isso ocorreu em sede, de recurso interposto.",

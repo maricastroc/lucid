@@ -61,7 +61,7 @@ async function main(): Promise<void> {
   if (args.split === "test" && !sealedEvalEnabled()) {
     throw new Error(
       "o split `test` está selado: rotular nele exige LUCID_SEALED_EVAL=1 e a execução fica " +
-        "registrada. Itere no `dev` (ADR-087 §4.4).",
+        "registrada. Itere no `dev`.",
     );
   }
 

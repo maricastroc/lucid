@@ -5,8 +5,8 @@
     "localeId": "pt-BR",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
     "configHash": "4c2da7fd",
-    "dataHash": "8f1ba41e",
-    "goldenHash": "42d3439a"
+    "dataHash": "10729b2f",
+    "goldenHash": "0039a531"
   },
   "method": {
     "scoring": "count-per-passage",
@@ -115,7 +115,7 @@
         },
         {
           "texto": "O setor deve fazer uma nova avaliação da proposta.",
-          "motivo": "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2 (ADR-007), então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar"
+          "motivo": "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2, então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger a janela aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar"
         },
         {
           "texto": "Promovemos a divulgação do edital.",
@@ -140,7 +140,7 @@
       "knownLimitations": [
         {
           "texto": "Ele contou que, Outrossim, era o apelido do avô.",
-          "motivo": "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade (ADR-008), que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na precisão do eval em vez de ser mascarado."
+          "motivo": "FALSO POSITIVO assumido (A-12b). Aqui 'Outrossim' é nome próprio (apelido), mas a estrutura é IDÊNTICA à do uso conectivo legítimo ('Ele disse que, Outrossim, viria') — mesma caixa alta, mesmas vírgulas: só a semântica do resto da frase distingue os dois, e isso está fora do alcance determinístico. A guarda antiga (suprimir todo unigrama capitalizado em meio de frase) evitava este caso ao custo de um falso NEGATIVO sistemático no uso conectivo, além de tratar o mesmo termo de forma diferente conforme a posição na frase. Escolha: o glossário curado é a autoridade , que já omite de propósito unigramas ambíguos; este resíduo fica visível como FP na precisão do eval em vez de ser mascarado."
         },
         {
           "texto": "O benefício será concedido a quem fizer jus a ele.",
@@ -148,7 +148,7 @@
         },
         {
           "texto": "O pedido será analisado na hipotese de indeferimento.",
-          "motivo": "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (ADR-008 mantém o glossário curado como autoridade única de runtime)"
+          "motivo": "A12a — o casamento no glossário é por forma EXATA (token.lower), então 'hipotese' sem acento não casa 'na hipótese de'. Corrigir exigiria chave normalizada sem diacrítico: seguro para os 6 termos acentuados do glossário (todos multipalavra), mas aproxima o linter de um corretor ortográfico — decisão de produto pendente, com eval própria (o glossário curado continua a autoridade única de runtime)"
         }
       ],
       "regressions": []

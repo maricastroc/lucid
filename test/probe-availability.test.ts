@@ -6,7 +6,7 @@ import { GOLDEN_SONDA } from "./eval/probe-golden";
 
 const c = COPY["pt-BR"];
 
-describe("comprehension probe — hidden from production until the meta-eval clears (ADR-090)", () => {
+describe("comprehension probe — hidden from production until the meta-eval clears", () => {
   it("stays disabled: flipping this on is a decision that owes a passing live meta-eval", () => {
     expect(PROBE_SECTION_ENABLED).toBe(false);
   });

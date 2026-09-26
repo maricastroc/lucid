@@ -7,7 +7,7 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "adverbios_vagos")
     .map((f) => f.span.text);
 
-describe("adverbios_vagos — presence (ADR-058)", () => {
+describe("adverbios_vagos — presence", () => {
   it("marks every vague adverb, even in isolation (density plays no part)", () => {
     expect(spans("Basicamente, o pedido foi negado.")).toEqual(["Basicamente"]);
     expect(spans("O sistema está efetivamente fora do ar.")).toEqual(["efetivamente"]);

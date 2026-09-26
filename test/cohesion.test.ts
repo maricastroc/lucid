@@ -7,7 +7,7 @@ const cohesionOf = (text: string) => {
   return cohesion;
 };
 
-describe("lexical referential cohesion (ADR-061)", () => {
+describe("lexical referential cohesion", () => {
   it("sentences repeating content words have high overlap and zero gap", () => {
     const c = cohesionOf("O prazo do documento é curto. O documento tem prazo definido.");
     expect(c.referentialOverlap).toBeGreaterThan(0);
@@ -32,7 +32,7 @@ describe("lexical referential cohesion (ADR-061)", () => {
   });
 });
 
-describe("connectives by class (ADR-061)", () => {
+describe("connectives by class", () => {
   it("classifies connectives and counts them per class", () => {
     const c = cohesionOf("O pedido foi negado. Portanto, o prazo encerra. No entanto, cabe recurso porque há prazo.");
     expect(c.connectivesByClass.conclusive).toBeGreaterThanOrEqual(1);

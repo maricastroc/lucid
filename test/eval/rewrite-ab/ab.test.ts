@@ -156,7 +156,7 @@ describe.runIf(process.env.AB_REPORT === "1")("relatório (offline, zero chamada
       "",
       "Este relatório compara PROMPTS com o modelo fixo. Ele **não** mostra que um prompt é o",
       "melhor em geral — mostra qual é o melhor para este modelo. O segundo braço",
-      "O Lucid fala com um provedor só (ADR-097), então esta é a única leitura disponível —",
+      "O Lucid fala com um provedor só, então esta é a única leitura disponível —",
       "e ela continua sendo sobre ESTE modelo, não sobre prompts em geral.",
       "",
 

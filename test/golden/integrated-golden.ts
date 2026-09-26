@@ -129,7 +129,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 29, sentences: 1 },
     },
     notes:
-      "Não dispara nominalização com verbo-suporte ('avaliação' vem de 'pela', não de verbo leve) nem passiva ('apresentadas' é relativa reduzida sem 'ser') — precisão sobre recall, correto por design. A nominalização SEM verbo-suporte (ADR-051) dispara: densidade (3 substantivos de ação na frase) marca 'avaliação' e 'deliberação'; 'entrega dos documentos' é cadeia fraca (elo só por sufixo) — tudo info, requiresHuman.",
+      "Não dispara nominalização com verbo-suporte ('avaliação' vem de 'pela', não de verbo leve) nem passiva ('apresentadas' é relativa reduzida sem 'ser') — precisão sobre recall, correto por design. A nominalização SEM verbo-suporte dispara: densidade (3 substantivos de ação na frase) marca 'avaliação' e 'deliberação'; 'entrega dos documentos' é cadeia fraca (elo só por sufixo) — tudo info, requiresHuman.",
   },
   {
     id: "voz_passiva_com_e_sem_agente",
@@ -156,11 +156,11 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       ],
       metrics: { words: 10, sentences: 2 },
     },
-    notes: "Passiva nunca gera sugestão (reconjugar para ativa não é mecanicamente seguro — ADR-006).",
+    notes: "Passiva nunca gera sugestão (reconjugar para ativa não é mecanicamente seguro).",
   },
   {
     id: "nominalizacao_mapeamento_unico",
-    description: "duas nominalizações verbo-leve com mapeamento único (requiresHuman false, sem sugestão — ADR-054)",
+    description: "duas nominalizações verbo-leve com mapeamento único (requiresHuman false, sem sugestão)",
     text: "É preciso fazer a análise de documentos. Também convém realizar o pagamento da taxa.",
     expected: {
       findings: [
@@ -192,7 +192,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 14, sentences: 2 },
     },
     notes:
-      "Desde o ADR-054 a engine não compõe troca: o span cobre só o núcleo verbo-leve+determinante+nominalização, e o verbo-base ('analisar', 'pagar') vai em meta/justification como informação. Sobreposição deliberada com a cadeia fraca do ADR-051 ('análise de documentos'), que só marca. 'pagamento da taxa' não encadeia ('taxa' sem sufixo deverbal).",
+      "A engine não compõe troca: o span cobre só o núcleo verbo-leve+determinante+nominalização, e o verbo-base ('analisar', 'pagar') vai em meta/justification como informação. Sobreposição deliberada com a cadeia fraca ('análise de documentos'), que só marca. 'pagamento da taxa' não encadeia ('taxa' sem sufixo deverbal).",
   },
   {
     id: "quatro_criterios_span_sobreposto",
@@ -254,7 +254,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 29, sentences: 1 },
     },
     notes:
-      "'fazer a verificação' tem mapeamento único (verificar) → requiresHuman false; sem sugestão composta (ADR-054). long_sentence é 'warning' (29 palavras, entre 20 e 30).",
+      "'fazer a verificação' tem mapeamento único (verificar) → requiresHuman false; sem sugestão composta. long_sentence é 'warning' (29 palavras, entre 20 e 30).",
   },
   {
     id: "multiplas_ocorrencias_jargao",
@@ -354,7 +354,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 19, sentences: 1 },
     },
     notes:
-      "19 palavras — abaixo do limiar de 20, então NÃO é frase longa, apesar de densa. 'fazer a análise' → mapeamento único (analisar), requiresHuman false; sem sugestão composta (ADR-054).",
+      "19 palavras — abaixo do limiar de 20, então NÃO é frase longa, apesar de densa. 'fazer a análise' → mapeamento único (analisar), requiresHuman false; sem sugestão composta.",
   },
   {
     id: "termos_protegidos_por_guardas",
@@ -377,15 +377,14 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
     notes:
       "'supracitado' entre aspas → suprimido (aspas marcam MENÇÃO, não uso). 'Outrossim' capitalizado em " +
       "meio de frase → APONTADO desde o A-12b: a caixa alta sozinha não veta um termo cadastrado, e o " +
-      "glossário curado é a autoridade (ADR-008). Antes era suprimido, o que criava falso negativo e " +
+      "glossário curado é a autoridade. Antes era suprimido, o que criava falso negativo e " +
       "tratava o mesmo termo de modo diferente conforme a posição na frase. 'sede' isolada não está no " +
       "glossário. O resíduo dessa escolha (nome próprio homógrafo de termo cadastrado) está documentado " +
       "como limitação em jargon-golden.ts.",
   },
   {
     id: "passiva_sintetica_e_jargao",
-    description:
-      "passiva sintética ('Vendem-se') detectada (ADR-060); 'consoante' fora do glossário; jargão em escopo detectado",
+    description: "passiva sintética ('Vendem-se') detectada; 'consoante' fora do glossário; jargão em escopo detectado",
     text: "Consoante o disposto, o prazo corre. Vendem-se casas na hipótese de interesse.",
     expected: {
       findings: [
@@ -409,7 +408,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 12, sentences: 2 },
     },
     notes:
-      "'Consoante' foi deliberadamente omitido do glossário (polissêmico, ADR-008); 'Vendem-se' é passiva sintética, agora EM escopo (ADR-060), requiresHuman pela ambiguidade do 'se'. 'na hipótese de' é detectado mas sem sugestão (context_dependent).",
+      "'Consoante' foi deliberadamente omitido do glossário (polissêmico); 'Vendem-se' é passiva sintética, agora EM escopo, requiresHuman pela ambiguidade do 'se'. 'na hipótese de' é detectado mas sem sugestão (context_dependent).",
   },
   {
     id: "unicode_aspas_travessao",
@@ -463,7 +462,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
   },
   {
     id: "titulo_sem_marcador_com_linha_em_branco",
-    description: "título não-marcado sobre o corpo — a linha em branco fecha a frase (ADR-073)",
+    description: "título não-marcado sobre o corpo — a linha em branco fecha a frase",
     text:
       "Prazos e documentos necessarios\n\n" +
       "O interessado deve entregar na secretaria os documentos exigidos pelo edital antes do fim do prazo legal.",
@@ -482,7 +481,7 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 21, sentences: 2 },
     },
     notes:
-      "REGRESSÃO ANCORADA: antes do ADR-073 a linha em branco não fechava frase sem pontuação, então título e corpo viravam UMA frase de 21 palavras — acima do limiar 20 — e o documento recebia um long_sentence falso com o título dentro do span. Aqui as duas frases têm 4 e 17 palavras e nenhuma cruza o limiar. O texto não tem marcador algum: é o caminho de prosa, o mais comum ao colar.",
+      "REGRESSÃO ANCORADA: antes da correção, a linha em branco não fechava frase sem pontuação, então título e corpo viravam UMA frase de 21 palavras — acima do limiar 20 — e o documento recebia um long_sentence falso com o título dentro do span. Aqui as duas frases têm 4 e 17 palavras e nenhuma cruza o limiar. O texto não tem marcador algum: é o caminho de prosa, o mais comum ao colar.",
   },
   {
     id: "emoji_antes_do_finding",
@@ -621,6 +620,6 @@ export const GOLDEN_INTEGRADO: readonly GoldenCase[] = [
       metrics: { words: 26, sentences: 4 },
     },
     notes:
-      "único caso do corpus que declara estrutura (experimento 001 / ADR-084): sem ele os critérios estruturais nunca eram exercitados sobre texto (eram quatro; três desde o ADR-105). Exercita também jargon e passive_voice, para provar que a estrutura não desloca os critérios de texto.",
+      "único caso do corpus que declara estrutura (experimento 001): sem ele os critérios estruturais nunca eram exercitados sobre texto (eram quatro; hoje são três). Exercita também jargon e passive_voice, para provar que a estrutura não desloca os critérios de texto.",
   },
 ];

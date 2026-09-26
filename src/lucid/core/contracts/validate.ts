@@ -53,7 +53,7 @@ export function assertLocaleBundle<C extends Config>(locale: LocaleBundle<C>): v
   for (const id of criteria) {
     if (!passes.has(id)) throw new Error(`${where}: o critério "${id}" está no catálogo e não tem pass.`);
     if (!(id in locale.taxonomy)) {
-      throw new Error(`${where}: o critério "${id}" não tem entrada na taxonomia (ADR-056).`);
+      throw new Error(`${where}: o critério "${id}" não tem entrada na taxonomia.`);
     }
   }
   for (const id of passes) {

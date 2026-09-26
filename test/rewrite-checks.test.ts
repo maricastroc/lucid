@@ -195,11 +195,10 @@ describe("check registry — what each verification is allowed to claim", () => 
     expect(effectOnly).toBeGreaterThan(0);
   });
 
-  it("every verification declares what it proves, its limit and its ADR", () => {
+  it("every verification declares what it proves and its limit", () => {
     for (const [id, spec] of [...Object.entries(PROOF_CHECKS), ...Object.entries(SIGNAL_CHECKS)]) {
       expect(spec.proves.length, id).toBeGreaterThan(20);
       expect(spec.limit.length, id).toBeGreaterThan(10);
-      expect(spec.adr, id).toMatch(/^ADR-\d{3}$/u);
     }
   });
 

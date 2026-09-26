@@ -35,7 +35,7 @@ describe("nominalizationPass evaluation — golden set", () => {
     expect(summary.negatives).toBeGreaterThan(0);
   });
 
-  it("the engine never emits a composed suggestion — hard invariant of ADR-054", () => {
+  it("the engine never emits a composed suggestion — hard invariant: the engine never writes", () => {
     expect(emittedSuggestions, `suggestions emitted: ${JSON.stringify(emittedSuggestions)}`).toEqual([]);
   });
 

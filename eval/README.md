@@ -35,7 +35,7 @@ contract both sides depend on: the tooling that produces the artifact and the
 
 - **`precision` / `recall` / `exactRate`** — `null` when there is no denominator (the detector had
   no opportunity to be right or wrong). **Never `1`**: fabricating 100% would be the same mistake as
-  the `fleschPt: 0` corrected in ADR-066, and at the best point of the scale. `tp`/`fp`/`fn` are
+  the `fleschPt: 0` that was corrected earlier, and at the best point of the scale. `tp`/`fp`/`fn` are
   always present so the number can be recomputed.
 
 - **`detectors[]`** — precision/recall per criterion, in the **canonical order** of `CRITERION_IDS`

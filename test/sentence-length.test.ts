@@ -187,7 +187,7 @@ describe("sentenceLengthPass — regression: sentences merged by the conservativ
   });
 });
 
-describe("long_sentence — the finding as the product presents it (ADR-094)", () => {
+describe("long_sentence — the finding as the product presents it", () => {
   const LONG =
     "A equipe da secretaria revisou todos os documentos que chegaram durante a semana passada para " +
     "garantir que o relatório final ficasse completo e correto.";
@@ -232,7 +232,7 @@ describe("long_sentence — the finding as the product presents it (ADR-094)", (
   });
 });
 
-describe("long_sentence — other signals in the same sentence (ADR-094)", () => {
+describe("long_sentence — other signals in the same sentence", () => {
   it("collects the other criteria inside the span without adding them up", () => {
     const text =
       "O relatório supramencionado foi assinado pelo gestor responsável, e a realização da análise dos " +

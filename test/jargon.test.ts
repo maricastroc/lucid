@@ -50,7 +50,7 @@ describe("jargonPass — multi-word expression", () => {
   });
 });
 
-describe("jargonPass — batch 2 (ADR-010): new safe entries", () => {
+describe("jargonPass — batch 2: new safe entries", () => {
   it.each([
     ["Destarte, o pedido foi indeferido.", "Destarte", "assim"],
     ["Conquanto tardio, o recurso foi conhecido.", "Conquanto", "embora"],

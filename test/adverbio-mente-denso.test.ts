@@ -9,7 +9,7 @@ const spans = (text: string): string[] =>
     .findings.filter((f) => f.criterion === "adverbio_mente_denso")
     .map((f) => f.span.text);
 
-describe("adverbio_mente_denso — DISCONTINUED (ADR-058)", () => {
+describe("adverbio_mente_denso — DISCONTINUED", () => {
   it("off by default: DEFAULT_CONFIG produces no findings", () => {
     const findings = analyze(
       "O processo foi conduzido rigorosamente, cuidadosamente e sistematicamente.",
