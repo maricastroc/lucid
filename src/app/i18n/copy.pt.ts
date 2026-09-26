@@ -52,7 +52,7 @@ export const COPY_PT: UiCopy = {
     anatomyLabel: "Cada trecho vira uma anotação assim",
     cardCriterion: {
       title: "O critério que disparou",
-      body: "Voz passiva, jargão, frase longa, nominalização: cada um com a fonte que o fundamenta.",
+      body: "Voz passiva, jargão, frase longa, ações escritas como substantivos: cada um com a fonte que o fundamenta.",
     },
     cardWhy: {
       title: "Por que trava o leitor",
@@ -516,8 +516,9 @@ export const COPY_PT: UiCopy = {
       "Quem age é uma informação que precisa vir de você. Se o “se” for reflexivo, ou se a forma impessoal for " +
       "intencional, ignore este ponto.",
     nominalizacaoEncadeada:
-      "Devolva a ação ao verbo (“a verificação das informações” → “verificar as informações”) e, se o texto não " +
-      "disser, informe quem pratica a ação. Você decide quais nominalizações vale desfazer.",
+      "Para escrever a ação como verbo, use o verbo correspondente: “a verificação das informações” → “verificar as " +
+      "informações”. Às vezes o verbo pede alguém que pratique a ação; se o texto não disser quem é, essa " +
+      "informação precisa vir de você. Não é preciso mudar todas. Veja quais podem ser escritas de forma mais direta.",
     siglaSemExpansao:
       "Na primeira vez que a sigla aparece, escreva o nome por extenso seguido da sigla entre parênteses: “Nome " +
       "por Extenso (SIGLA)”. Depois, use só a sigla. O Lucid não sabe o que a sigla significa: o nome por " +
@@ -1020,7 +1021,7 @@ export const COPY_PT: UiCopy = {
     purposes: {
       base: "Sem finalidade declarada. Os limiares de referência do Lucid, iguais para qualquer texto.",
       normativo:
-        "Lei, decreto, edital, contrato. Aceita frases e parágrafos mais longos, porque a estrutura jurídica os impõe, e continua apontando jargão, passiva e nominalização.",
+        "Lei, decreto, edital, contrato. Aceita frases e parágrafos mais longos, porque a estrutura jurídica os impõe, e continua apontando jargão, passiva e ações escritas como substantivos.",
       publico:
         "Texto escrito para quem não é da área. Frase curta, parágrafo curto e pouca subordinação; é o perfil mais exigente do conjunto.",
       digital:
@@ -1069,7 +1070,7 @@ export const COPY_PT: UiCopy = {
     knobParagraph: "Parágrafo longo, em frases: acima de",
     knobHeading: "Título longo, em palavras: acima de",
     knobSubordination: "Subordinação densa, em orações: a partir de",
-    knobChainedNominalization: "Nominalização encadeada, por frase: a partir de",
+    knobChainedNominalization: "Ações escritas como substantivos, na mesma frase: a partir de",
     knobProseEnumeration: "Enumeração em prosa, em itens: a partir de",
   },
 

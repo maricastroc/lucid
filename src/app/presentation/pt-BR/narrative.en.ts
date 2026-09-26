@@ -1,4 +1,13 @@
-import { assistida, flat, metaBool, metaNum, metaStr, type PtNarrativeSet } from "../../lib/narrative-types";
+import {
+  assistida,
+  flat,
+  metaBool,
+  metaNum,
+  metaStr,
+  metaWords,
+  quotedList,
+  type PtNarrativeSet,
+} from "../../lib/narrative-types";
 
 const DOMAIN_EN: Record<string, string> = {
   administrative: "administrative",
@@ -78,7 +87,7 @@ const BASE: PtNarrativeSet = {
   nominalization: {
     headline: (f) => {
       const base = metaStr(f, "baseVerb");
-      return base ? `Nominalization of “${base}”` : "Nominalization";
+      return base ? `Generic verb instead of “${base}”` : "Action with a generic verb";
     },
     prose: (f) => {
       const base = metaStr(f, "baseVerb");
@@ -208,14 +217,44 @@ const BASE: PtNarrativeSet = {
       ),
   },
   nominalizacao_encadeada: {
-    headline: (f) => (metaStr(f, "kind") === "chain" ? "Chained nominalizations" : "Concentrated nominalizations"),
-    prose: (f) =>
-      metaStr(f, "kind") === "chain"
-        ? `In «${flat(f.span.text)}», the action appears as a noun linked by “de” to another abstract noun. The passage becomes more abstract and makes it less clear who performs the action.`
-        : `The sentence concentrates ${metaNum(f, "count") ?? "several"} nouns that name actions. Together they make the reading more abstract and hide who does what.`,
+    headline: (f) => {
+      if (metaStr(f, "kind") === "chain") {
+        return metaBool(f, "strongLink")
+          ? `One linked to another: “${flat(f.span.text)}”`
+          : `Linked to another noun: “${flat(f.span.text)}”`;
+      }
+      const words = metaWords(f, "words");
+      const count = metaNum(f, "count");
+      return words.length > 0
+        ? `${count ?? words.length} in this sentence: ${quotedList(words, "and")}`
+        : "Several in this sentence";
+    },
+    prose: (f) => {
+      if (metaStr(f, "kind") === "chain") {
+        const actions = metaWords(f, "actions");
+        const connectors = [...new Set(metaWords(f, "connectors"))];
+        const tails = metaWords(f, "words").slice(1);
+        if (metaBool(f, "strongLink") && actions.length >= 2) {
+          return `${quotedList(actions, "and")} are actions written as nouns, and here one is linked to the other by ${quotedList(connectors, "and")}. In sequence, they can make the reading more abstract.`;
+        }
+        if (actions.length === 1 && tails.length > 0) {
+          return `In “${flat(f.span.text)}”, the action “${actions[0]}” is written as a noun and is linked by ${quotedList(connectors, "and")} to ${tails.length === 1 ? "another noun" : "other nouns"}, ${quotedList(tails, "and")}.`;
+        }
+        return `In “${flat(f.span.text)}”, an action is written as a noun and is linked by “de” to another noun.`;
+      }
+      const words = metaWords(f, "words");
+      const count = metaNum(f, "count") ?? words.length;
+      const marked = flat(f.span.text);
+      const others = [...words];
+      const at = others.indexOf(marked);
+      if (at >= 0) others.splice(at, 1);
+      if (others.length === 0)
+        return `This sentence has ${count} actions written as nouns. This point marks “${marked}”.`;
+      return `This sentence has ${count} actions written as nouns. This point marks “${marked}”; ${quotedList(others, "and")} ${others.length === 1 ? "appears" : "appear"} in other points of this sentence.`;
+    },
     confidence: () =>
       assistida(
-        "Lucid locates the nouns reliably, from a curated list. Not every action noun needs to go, and giving the action back to a verb requires knowing who performs it: check whether the text says who acts.",
+        "Lucid recognizes these words from a curated list of action nouns. Whether the sentence reads better with the verb is your call.",
       ),
   },
   mais_que_perfeito_sintetico: {

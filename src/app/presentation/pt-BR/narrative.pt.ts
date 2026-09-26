@@ -1,4 +1,13 @@
-import { assistida, flat, metaBool, metaNum, metaStr, type PtNarrativeSet } from "../../lib/narrative-types";
+import {
+  assistida,
+  flat,
+  metaBool,
+  metaNum,
+  metaStr,
+  metaWords,
+  quotedList,
+  type PtNarrativeSet,
+} from "../../lib/narrative-types";
 
 const DOMAIN_PT: Record<string, string> = {
   administrative: "administrativo",
@@ -78,7 +87,7 @@ const BASE: PtNarrativeSet = {
   nominalization: {
     headline: (f) => {
       const base = metaStr(f, "baseVerb");
-      return base ? `Nominalização de “${base}”` : "Nominalização";
+      return base ? `Verbo genérico no lugar de “${base}”` : "Ação com verbo genérico";
     },
     prose: (f) => {
       const base = metaStr(f, "baseVerb");
@@ -208,14 +217,42 @@ const BASE: PtNarrativeSet = {
       ),
   },
   nominalizacao_encadeada: {
-    headline: (f) => (metaStr(f, "kind") === "chain" ? "Nominalizações em cadeia" : "Nominalizações concentradas"),
-    prose: (f) =>
-      metaStr(f, "kind") === "chain"
-        ? `Em «${flat(f.span.text)}», a ação aparece como substantivo e se liga por “de” a outro substantivo abstrato. O trecho fica mais abstrato e deixa menos claro quem realiza a ação.`
-        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos que nomeiam ações. Juntos, eles deixam a leitura mais abstrata e escondem quem faz o quê.`,
+    headline: (f) => {
+      if (metaStr(f, "kind") === "chain") {
+        return metaBool(f, "strongLink")
+          ? `Uma ligada à outra: “${flat(f.span.text)}”`
+          : `Ligada a outro substantivo: “${flat(f.span.text)}”`;
+      }
+      const words = metaWords(f, "words");
+      const count = metaNum(f, "count");
+      return words.length > 0 ? `${count ?? words.length} nesta frase: ${quotedList(words)}` : "Várias nesta frase";
+    },
+    prose: (f) => {
+      if (metaStr(f, "kind") === "chain") {
+        const actions = metaWords(f, "actions");
+        const connectors = [...new Set(metaWords(f, "connectors"))];
+        const tails = metaWords(f, "words").slice(1);
+        if (metaBool(f, "strongLink") && actions.length >= 2) {
+          return `${quotedList(actions)} são ações escritas como substantivo, e aqui uma vem ligada à outra por ${quotedList(connectors)}. Em sequência, elas podem tornar a leitura mais abstrata.`;
+        }
+        if (actions.length === 1 && tails.length > 0) {
+          return `Em “${flat(f.span.text)}”, a ação “${actions[0]}” está escrita como substantivo e vem ligada por ${quotedList(connectors)} a ${tails.length === 1 ? "outro substantivo" : "outros substantivos"}, ${quotedList(tails)}.`;
+        }
+        return `Em “${flat(f.span.text)}”, uma ação está escrita como substantivo e vem ligada por “de” a outro substantivo.`;
+      }
+      const words = metaWords(f, "words");
+      const count = metaNum(f, "count") ?? words.length;
+      const marked = flat(f.span.text);
+      const others = [...words];
+      const at = others.indexOf(marked);
+      if (at >= 0) others.splice(at, 1);
+      if (others.length === 0)
+        return `Esta frase tem ${count} ações escritas como substantivo. Este ponto marca “${marked}”.`;
+      return `Esta frase tem ${count} ações escritas como substantivo. Este ponto marca “${marked}”; ${quotedList(others)} ${others.length === 1 ? "aparece" : "aparecem"} em outros pontos desta frase.`;
+    },
     confidence: () =>
       assistida(
-        "Os substantivos são localizados com segurança, a partir de uma lista curada. Nem todo substantivo de ação precisa sair, e devolver a ação ao verbo exige saber quem a pratica: confira se o texto diz quem age.",
+        "O Lucid reconhece essas palavras por uma lista curada de substantivos de ação. Se a frase fica melhor com o verbo é uma avaliação sua.",
       ),
   },
   mais_que_perfeito_sintetico: {

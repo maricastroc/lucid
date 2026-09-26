@@ -24,7 +24,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     why: "O “se” esconde quem pratica a ação, e o leitor precisa saber quem faz o quê.",
   },
   nominalization: {
-    label: "Nominalização",
+    label: "Ação com verbo genérico",
     ruleId: "nominalization",
     kind: "Escolha lexical",
     principleName: "Frases claras e concisas",
@@ -35,15 +35,18 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
   },
   nominalizacao_encadeada: {
-    label: "Nominalização encadeada",
+    label: "Ações escritas como substantivos",
     ruleId: "nominalizacao_encadeada",
     kind: "Escolha lexical",
     principleName: "Frases claras e concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal:
-      "substantivo de ação, de uma lista curada, ligado por “de” a outro substantivo abstrato, ou vários deles na mesma frase",
-    why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
+      "substantivo que nomeia uma ação, de uma lista curada, ligado por “de” a outro substantivo, ou vários deles na mesma frase",
+    why:
+      "Quando uma ação aparece como substantivo (“a análise”) em vez de verbo (“analisar”), pode ficar menos direto " +
+      "perceber quem faz o quê. Várias dessas construções na mesma frase, ou uma ligada à outra por “de” (“a análise " +
+      "da concessão”), podem tornar a leitura mais abstrata.",
   },
   jargon: {
     label: "Jargão",

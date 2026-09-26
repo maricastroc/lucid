@@ -274,10 +274,11 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
+      "justification": "“avaliação” é uma das 3 ações escritas como substantivo nesta frase: “avaliação”, “deliberação” e “entrega”. A partir de 3 na mesma frase, o Lucid marca cada uma para revisão.",
       "meta": {
         "count": 3,
         "kind": "density",
+        "words": "avaliação deliberação entrega",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -296,10 +297,11 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
+      "justification": "“deliberação” é uma das 3 ações escritas como substantivo nesta frase: “avaliação”, “deliberação” e “entrega”. A partir de 3 na mesma frase, o Lucid marca cada uma para revisão.",
       "meta": {
         "count": 3,
         "kind": "density",
+        "words": "avaliação deliberação entrega",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -318,11 +320,14 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“entrega” é uma ação escrita como substantivo, ligada por “dos” a “documentos”.",
       "meta": {
+        "actions": "entrega",
+        "connectors": "dos",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "entrega documentos",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -930,11 +935,14 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“análise” é uma ação escrita como substantivo, ligada por “de” a “documentos”.",
       "meta": {
+        "actions": "análise",
+        "connectors": "de",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "análise documentos",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -1297,11 +1305,14 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“verificação” é uma ação escrita como substantivo, ligada por “dos” a “documentos”.",
       "meta": {
+        "actions": "verificação",
+        "connectors": "dos",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "verificação documentos",
       },
       "normativeReference": {
         "section": "5.3.3",

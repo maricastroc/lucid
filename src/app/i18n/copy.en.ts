@@ -52,7 +52,7 @@ export const COPY_EN: UiCopy = {
     anatomyLabel: "Each flagged passage gets an annotation like this",
     cardCriterion: {
       title: "The criterion that fired",
-      body: "Passive voice, jargon, long sentence, nominalization: each one comes with its source.",
+      body: "Passive voice, jargon, long sentence, actions written as nouns: each one comes with its source.",
     },
     cardWhy: {
       title: "Why it may stop the reader",
@@ -507,8 +507,10 @@ export const COPY_EN: UiCopy = {
       "aplicada pelo órgão” or “o órgão aplica a multa”). If the “se” is reflexive, ignore this point: only you " +
       "can tell which case it is.",
     nominalizacaoEncadeada:
-      "Find the verb hidden inside the noun and turn it back into a verb (“a verificação das informações” → " +
-      "“verificar as informações”). You decide who performs the action and which nominalizations are worth undoing.",
+      "To write the action as a verb, use the matching verb: “a verificação das informações” → “verificar as " +
+      "informações”. Sometimes the verb needs someone to perform the action; if the text does not say who, that " +
+      "information has to come from you. You do not need to change all of them. See which ones can be written more " +
+      "directly.",
     siglaSemExpansao:
       "The first time the acronym appears, write the full name followed by the acronym in parentheses: “Nome Por " +
       "Extenso (SIGLA)”. After that, use the acronym alone. Lucid does not know what the acronym stands for, so " +
@@ -1009,7 +1011,7 @@ export const COPY_EN: UiCopy = {
     purposes: {
       base: "No declared purpose. Lucid's reference limits, the same for any text.",
       normativo:
-        "Laws, decrees, tenders and contracts. Accepts longer sentences and paragraphs, because legal structure requires them, and still flags jargon, passive voice and nominalization.",
+        "Laws, decrees, tenders and contracts. Accepts longer sentences and paragraphs, because legal structure requires them, and still flags jargon, passive voice and actions written as nouns.",
       publico:
         "Written for people outside the field. Short sentences, short paragraphs, little subordination: the strictest profile of the set.",
       digital:
@@ -1058,7 +1060,7 @@ export const COPY_EN: UiCopy = {
     knobParagraph: "Long paragraph: sentences above",
     knobHeading: "Long heading: words above",
     knobSubordination: "Dense subordination: minimum clauses",
-    knobChainedNominalization: "Chained nominalization: minimum per sentence",
+    knobChainedNominalization: "Actions written as nouns: minimum per sentence",
     knobProseEnumeration: "Enumeration in prose: minimum items",
   },
 
