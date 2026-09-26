@@ -26,8 +26,8 @@ const say = (message: string): void => {
 
 const git = (args: string): string => execSync(`git ${args}`, { encoding: "utf8" }).trim();
 
-describe.runIf(process.env.SPIKE_PLAN === "1")("spike 3.8 — plano e custo (offline, zero chamadas)", () => {
-  it("lista as chamadas e o pior caso de cada uma", () => {
+describe.runIf(process.env.SPIKE_PLAN === "1")("3.8 spike — plan and cost (offline, zero calls)", () => {
+  it("lists the calls and the worst case of each", () => {
     const jobs = buildSpike();
     let expected = 0;
     let worst = 0;
@@ -47,9 +47,9 @@ describe.runIf(process.env.SPIKE_PLAN === "1")("spike 3.8 — plano e custo (off
   });
 });
 
-describe.runIf(process.env.SPIKE_RUN === "1")("spike 3.8 — execução (rede, paga)", () => {
+describe.runIf(process.env.SPIKE_RUN === "1")("3.8 spike — paid run (network)", () => {
   it(
-    "roda o teste de contrato com a trava",
+    "runs the contract spike under the guard",
     async () => {
       const apiKey = loadKey("GEMINI_API_KEY");
       if (!apiKey) throw new Error("GEMINI_API_KEY ausente");
@@ -84,8 +84,8 @@ describe.runIf(process.env.SPIKE_RUN === "1")("spike 3.8 — execução (rede, p
 const mean = (xs: readonly number[]): number => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const max = (xs: readonly number[]): number => (xs.length ? Math.max(...xs) : 0);
 
-describe.runIf(process.env.SPIKE_REPORT === "1")("spike 3.8 — relatório (offline, zero chamadas)", () => {
-  it("resume o contrato e projeta a bateria completa", () => {
+describe.runIf(process.env.SPIKE_REPORT === "1")("3.8 spike — report (offline, zero calls)", () => {
+  it("summarises the contract and projects the full battery", () => {
     const rows = fs
       .readFileSync(CALLS, "utf8")
       .split("\n")

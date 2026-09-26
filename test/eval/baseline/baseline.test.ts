@@ -144,8 +144,8 @@ function buildStamp(plan: ReturnType<typeof buildPlan>): Record<string, unknown>
   };
 }
 
-describe("baseline 2.5 — o que é medido é o que a produção envia (offline)", () => {
-  it("cada prompt planejado é, byte a byte, o que LlmRewriteProposer e LlmComprehensionProbe enviam", async () => {
+describe("baseline 2.5 — what is measured is what production sends (offline)", () => {
+  it("every planned prompt is, byte for byte, what LlmRewriteProposer and LlmComprehensionProbe send", async () => {
     const plan = buildPlan();
     const firstRun = plan.jobs.filter((j) => j.run === RUNS[0]);
     expect(firstRun.length).toBe(plan.targets.length + plan.directedTargets.length + GOLDEN_SONDA.length);
@@ -179,7 +179,7 @@ describe("baseline 2.5 — o que é medido é o que a produção envia (offline)
     }
   });
 
-  it("o gravador guarda o generationConfig enviado e nunca a chave", async () => {
+  it("the recorder keeps the generationConfig it sent and never the key", async () => {
     const realFetch = globalThis.fetch;
     globalThis.fetch = async () =>
       new Response(
@@ -251,8 +251,8 @@ function estimate(jobs: readonly Job[]) {
   return rows;
 }
 
-describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plano e custo (offline, zero chamadas)", () => {
-  it("conta as chamadas e estima tokens e custo antes de qualquer chamada paga", () => {
+describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plan and cost (offline, zero calls)", () => {
+  it("counts the calls and estimates tokens and cost before any paid call", () => {
     const plan = buildPlan();
     const rows = estimate(plan.jobs);
     say(`\n=== PLANO DA BASELINE · ${MODEL} · rodadas ${RUNS.join(", ")} ===`);
@@ -279,9 +279,9 @@ describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plano e cust
   });
 });
 
-describe.runIf(process.env.BASELINE_RUN === "1")("baseline 2.5 — execução (rede, paga)", () => {
+describe.runIf(process.env.BASELINE_RUN === "1")("baseline 2.5 — paid run (network)", () => {
   it(
-    "roda as duas rodadas das três suítes com a trava de custo",
+    "runs every round of the three suites under the cost guard",
     async () => {
       const apiKey = loadKey("GEMINI_API_KEY");
       if (!apiKey) throw new Error("GEMINI_API_KEY ausente");
@@ -342,9 +342,9 @@ describe.runIf(process.env.BASELINE_RUN === "1")("baseline 2.5 — execução (r
   );
 });
 
-describe.runIf(process.env.BASELINE_REPORT === "1")("baseline 2.5 — relatório (offline, zero chamadas)", () => {
+describe.runIf(process.env.BASELINE_REPORT === "1")("baseline 2.5 — report (offline, zero calls)", () => {
   it(
-    "pontua as respostas gravadas e escreve report.md e summary.json",
+    "scores the recorded answers and writes report.md and summary.json",
     async () => {
       const plan = buildPlan();
       await writeReport(OUT_DIR, CALLS, STAMP, plan, say);

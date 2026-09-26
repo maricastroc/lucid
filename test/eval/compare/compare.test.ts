@@ -24,8 +24,8 @@ const arm = (label: string, runs: number[], items: Record<string, boolean[]>, ch
   ),
 });
 
-describe("comparação pareada — classificação por maioria (offline)", () => {
-  it("classifica pela maioria 2/3 e separa item instável na base", () => {
+describe("paired comparison — classification by majority (offline)", () => {
+  it("classifies by 2/3 majority and sets apart an item unstable in the base", () => {
     expect(classify({ runs: 3, passes: 3 }, { runs: 3, passes: 1 })).toBe("regressao");
     expect(classify({ runs: 3, passes: 2 }, { runs: 3, passes: 0 })).toBe("regressao_fraca");
     expect(classify({ runs: 3, passes: 0 }, { runs: 3, passes: 2 })).toBe("melhora");
@@ -35,7 +35,7 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
     expect(classify(null, { runs: 3, passes: 3 })).toBe("incompleto");
   });
 
-  it("problema que já falhava na base nunca vira regressão do candidato", () => {
+  it("a problem that already failed in the base never becomes a candidate regression", () => {
     const base = arm("base", [1, 2, 3], { a: [false, false, false], b: [false, true, false] });
     const candidate = arm("cand", [1, 2, 3], { a: [false, false, false], b: [false, false, false] });
     const row = compareArms(base, candidate).checks.find((c) => c.check === "c")!;
@@ -43,7 +43,7 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
     expect(row.regressions).toEqual([]);
   });
 
-  it("preserva o resultado de cada rodada ao lado da maioria", () => {
+  it("keeps each round's result next to the majority", () => {
     const base = arm("base", [1, 2, 3], { a: [true, true, true], b: [true, false, true] });
     const candidate = arm("cand", [1, 2, 3], { a: [false, true, false], b: [true, true, true] });
     const row = compareArms(base, candidate).checks.find((c) => c.check === "c")!;
@@ -52,7 +52,7 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
     expect(row.regressions).toEqual(["a"]);
   });
 
-  it("mede viradas como itens sem unanimidade entre as rodadas", () => {
+  it("measures flips as items without unanimity across rounds", () => {
     const a = arm(
       "a",
       [1, 2, 3],
@@ -62,13 +62,13 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
     expect(flipRate(a, "rewrite")).toMatchObject({ items: 3, unstable: 1, unstableItems: ["y"] });
   });
 
-  it("restringe um braço a um subconjunto de rodadas", () => {
+  it("restricts an arm to a subset of rounds", () => {
     const a = arm("a", [1, 2, 3], { x: [true, false, true] });
     const only2 = restrict(a, [2], "a·r2");
     expect(compareArms(restrict(a, [1], "a·r1"), only2).checks[0].regressions).toEqual(["x"]);
   });
 
-  it("compara o rótulo do dispositivo sem depender de quebra de linha ou espaço", () => {
+  it("compares the device label regardless of line breaks or spaces", () => {
     expect(labelKept("Art.\n19 O prazo será de dez dias.", "Art. 19 O prazo é de dez dias.")).toBe(true);
     expect(labelKept("§ 2º Na atualização...", "§  2º Na atualização...")).toBe(true);
     expect(labelKept("Art. 19 O prazo será de dez dias.", "O prazo é de dez dias.")).toBe(false);
@@ -80,8 +80,8 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
 const BASELINE_CALLS = path.join(process.cwd(), "eval/baseline-gemini-2.5-flash/calls.jsonl");
 const OUT_DIR = path.join(process.cwd(), "eval/comparacao-gemini-3.8");
 
-describe.runIf(process.env.COMPARE_AA === "1")("teste A/A — 2.5 contra 2.5 (offline, zero chamadas)", () => {
-  it("roda a máquina de comparação rodada contra rodada e publica o ruído", async () => {
+describe.runIf(process.env.COMPARE_AA === "1")("A/A test — 2.5 against 2.5 (offline, zero calls)", () => {
+  it("runs the comparison machine round against round and publishes the noise", async () => {
     const base = await scoreArm("gemini-2.5-flash", BASELINE_CALLS, [1, 2, 3]);
     const pairs: [number, number][] = [
       [1, 2],

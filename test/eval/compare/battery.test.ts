@@ -40,8 +40,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("bateria 3.8 — o que o protocolo fixou (offline)", () => {
-  it("usa os mesmos jobs da baseline, com chaves únicas e o modelo trocado só na chave", () => {
+describe("3.8 battery — what the protocol fixed (offline)", () => {
+  it("uses the baseline jobs, with unique keys and the model changed only in the key", () => {
     const jobs = candidateJobs();
     expect(jobs).toHaveLength(684);
     expect(new Set(jobs.map((j) => j.key)).size).toBe(684);
@@ -51,7 +51,7 @@ describe("bateria 3.8 — o que o protocolo fixou (offline)", () => {
     }
   });
 
-  it("envia exatamente o generationConfig do protocolo em cada suíte", async () => {
+  it("sends exactly the protocol's generationConfig in every suite", async () => {
     for (const suite of ["rewrite", "directed", "probe"] as const) {
       const fetchMock = vi.fn(
         async () =>
@@ -73,8 +73,8 @@ describe("bateria 3.8 — o que o protocolo fixou (offline)", () => {
   });
 });
 
-describe.runIf(process.env.BATTERY_PLAN === "1")("bateria 3.8 — plano e custo (offline, zero chamadas)", () => {
-  it("estima pelo que o teste de contrato mediu", () => {
+describe.runIf(process.env.BATTERY_PLAN === "1")("3.8 battery — plan and cost (offline, zero calls)", () => {
+  it("estimates from what the contract spike measured", () => {
     const jobs = candidateJobs();
     const tokensPerChar = 0.2843;
     const outputBySuite = { rewrite: 131, directed: 53, probe: 61 } as const;
@@ -93,9 +93,9 @@ describe.runIf(process.env.BATTERY_PLAN === "1")("bateria 3.8 — plano e custo 
   });
 });
 
-describe.runIf(process.env.BATTERY_RUN === "1")("bateria 3.8 — execução (rede, paga)", () => {
+describe.runIf(process.env.BATTERY_RUN === "1")("3.8 battery — paid run (network)", () => {
   it(
-    "roda as 3 rodadas das 3 suítes com a trava de custo",
+    "runs the 3 rounds of the 3 suites under the cost guard",
     async () => {
       const apiKey = loadKey("GEMINI_API_KEY");
       if (!apiKey) throw new Error("GEMINI_API_KEY ausente");
@@ -195,9 +195,9 @@ describe.runIf(process.env.BATTERY_RUN === "1")("bateria 3.8 — execução (red
   );
 });
 
-describe.runIf(process.env.FINAL_REPORT === "1")("comparação final (offline, zero chamadas)", () => {
+describe.runIf(process.env.FINAL_REPORT === "1")("final comparison (offline, zero calls)", () => {
   it(
-    "pontua os dois braços e escreve o relatório final",
+    "scores both arms and writes the final report",
     async () => {
       const outDir = process.env.FINAL_OUT ?? COMPARE_DIR;
       const candidateCalls = process.env.FINAL_CANDIDATE_CALLS ?? CALLS;
