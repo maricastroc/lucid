@@ -2,6 +2,7 @@ import type { Diagnostic } from "@/lucid/core/types";
 import { analyzeWithLocale } from "@/lucid/core/analyzer";
 import { localePtBR } from "./index";
 import { getPrepared } from "./datasets/registry";
+import { deviceLabel, legalReferences, valuesWithUnit, writtenDates } from "./fidelity";
 
 const FIRST_PERSON_PRONOUNS = [
   "eu",
@@ -177,4 +178,8 @@ export const rewriteLocalePtBR = {
   deonticInSource: RE_DEONTIC_SOURCE_PT,
   deonticIntroduced: RE_DEONTIC_INTRODUCED_PT,
   legalCategories: RE_LEGAL_CATEGORY_PT,
+  references: legalReferences,
+  deviceLabel,
+  valuesWithUnit,
+  writtenDates,
 };

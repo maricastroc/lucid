@@ -20,6 +20,9 @@ const FIRST_PERSON_DOC = "Nós recebemos o pedido. O pedido foi analisado pela e
 
 const FOCUS_DOC = "O pedido foi indeferido ontem. A decisão foi comunicada ao interessado.";
 
+const LAW =
+  "Art. 7º O prazo de 30 dias previsto no caput do art. 5º da Lei nº 8.112, de 11 de dezembro de 1990, gera multa de 2%.";
+
 interface Scenario {
   readonly text: string;
   readonly proposed: string;
@@ -93,6 +96,18 @@ const SCENARIOS: readonly Scenario[] = [
     options: (text) => ({
       declarations: [{ span: analyze(text).findings.find((f) => f.criterion === "passive_voice")!.span, agent: "nós" }],
     }),
+  },
+  {
+    text: LAW,
+    proposed:
+      "Art. 7º A multa de 2% vale para o prazo de 30 dias previsto no caput do artigo 5º da Lei nº 8.112, de 11 de dezembro de 1990.",
+    options: () => ({}),
+  },
+  {
+    text: LAW,
+    proposed:
+      "Art. 8º O prazo de 30 meses previsto no § 1º do art. 5º da Lei nº 8.112 gera multa de **2%**, desde 12 de dezembro de 1990.",
+    options: () => ({}),
   },
   {
     text: FOCUS_DOC,

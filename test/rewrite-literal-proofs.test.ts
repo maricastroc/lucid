@@ -174,7 +174,7 @@ describe("dates_kept and dates_added — mutation battery", () => {
     });
   });
 
-  it("does not apply to a date written out, which is left to the numbers and to what is not verified", async () => {
+  it("does not apply to a date written out, which the written-date proof covers instead", async () => {
     const original = "O prazo conta a partir de 10 de maio de 2024.";
     const v = await verify(original, "O prazo conta a partir de 10 de junho de 2024.");
     expect(proof(v, "dates_kept")).toMatchObject({
@@ -182,6 +182,9 @@ describe("dates_kept and dates_added — mutation battery", () => {
       detail: "O trecho original não tem data escrita só com algarismos, como 10/05/2024.",
     });
     expect(proof(v, "numbers_kept").outcome).toBe("confirmed");
-    expect(v.hasBlockingFailure).toBe(false);
+    expect(proof(v, "written_dates_kept")).toMatchObject({
+      outcome: "not_confirmed",
+      detail: "A data «10 de maio de 2024» do trecho original não foi encontrada por extenso na proposta.",
+    });
   });
 });

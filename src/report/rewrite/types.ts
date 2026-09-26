@@ -1,6 +1,11 @@
 import type { Diagnostic, Finding, Span } from "../../lucid/core/types";
 import type { RewriteStrategy } from "./prompt";
 
+export interface LiteralMention {
+  readonly key: string;
+  readonly text: string;
+}
+
 export interface RewriteLocale {
   readonly id: string;
   analyze(text: string): Diagnostic;
@@ -11,6 +16,10 @@ export interface RewriteLocale {
   readonly deonticInSource: RegExp;
   readonly deonticIntroduced: RegExp;
   readonly legalCategories: RegExp;
+  references(text: string): readonly LiteralMention[];
+  deviceLabel(text: string): LiteralMention | null;
+  valuesWithUnit(text: string): readonly LiteralMention[];
+  writtenDates(text: string): readonly LiteralMention[];
 }
 
 export interface AgentDeclaration {
@@ -61,6 +70,14 @@ export interface Proof {
     | "numbers_added"
     | "dates_kept"
     | "dates_added"
+    | "references_kept"
+    | "references_added"
+    | "label_kept"
+    | "values_kept"
+    | "values_added"
+    | "written_dates_kept"
+    | "written_dates_added"
+    | "markup_added"
     | "no_new_jargon"
     | "no_invented_first_person";
   outcome: ProofOutcome;

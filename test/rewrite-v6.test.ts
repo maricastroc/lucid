@@ -117,13 +117,21 @@ describe("rewrite@6 — o que a troca preservou", () => {
     expect(verification.proofs.map((p) => p.check).sort()).toEqual([
       "dates_added",
       "dates_kept",
+      "label_kept",
+      "markup_added",
       "no_invented_first_person",
       "no_new_findings",
       "no_new_jargon",
       "numbers_added",
       "numbers_kept",
+      "references_added",
+      "references_kept",
       "region_improved",
       "target_resolved",
+      "values_added",
+      "values_kept",
+      "written_dates_added",
+      "written_dates_kept",
     ]);
     expect(verification.proofs.find((p) => p.check === "numbers_kept")?.outcome).toBe("not_confirmed");
     expect(verification.hasBlockingFailure).toBe(true);

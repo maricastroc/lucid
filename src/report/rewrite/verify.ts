@@ -3,6 +3,7 @@ import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
 import { criterionLabel } from "./briefing";
 import type {
   AgentDeclaration,
+  LiteralMention,
   MetricsDelta,
   Proof,
   ProofOutcome,
@@ -197,6 +198,158 @@ function extractEntities(text: string): string[] {
     if (!sentenceInitial) out.push(token);
   }
   return out.sort();
+}
+
+interface MentionTerms {
+  readonly originalHasNone: string;
+  readonly proposalHasNone: string;
+  readonly kept: (texts: readonly string[]) => string;
+  readonly lost: (texts: readonly string[]) => string;
+  readonly added: (texts: readonly string[]) => string;
+  readonly nothingAdded: string;
+}
+
+const REFERENCE_TERMS: MentionTerms = {
+  originalHasNone: "O trecho original não cita artigo, parágrafo, inciso, alínea, caput nem norma numerada.",
+  proposalHasNone: "A proposta não cita artigo, parágrafo, inciso, alínea, caput nem norma numerada.",
+  kept: (texts) =>
+    texts.length === 1
+      ? `A referência ${quoted(texts)} do trecho original aparece na proposta.`
+      : `As referências ${quoted(texts)} do trecho original aparecem na proposta.`,
+  lost: (texts) =>
+    texts.length === 1
+      ? `A referência ${quoted(texts)} do trecho original não foi encontrada na proposta.`
+      : `As referências ${quoted(texts)} do trecho original não foram encontradas na proposta.`,
+  added: (texts) =>
+    texts.length === 1
+      ? `A proposta contém a referência ${quoted(texts)}, que não aparece explicitamente no trecho original.`
+      : `A proposta contém as referências ${quoted(texts)}, que não aparecem explicitamente no trecho original.`,
+  nothingAdded: "Toda referência da proposta aparece no trecho original.",
+};
+
+const VALUE_TERMS: MentionTerms = {
+  originalHasNone: "O trecho original não tem valor em reais, percentual nem prazo em algarismos.",
+  proposalHasNone: "A proposta não tem valor em reais, percentual nem prazo em algarismos.",
+  kept: (texts) =>
+    texts.length === 1
+      ? `O valor ${quoted(texts)} do trecho original aparece na proposta, com a mesma unidade.`
+      : `Os valores ${quoted(texts)} do trecho original aparecem na proposta, com a mesma unidade.`,
+  lost: (texts) =>
+    texts.length === 1
+      ? `O valor ${quoted(texts)} do trecho original não foi encontrado na proposta com a mesma unidade.`
+      : `Os valores ${quoted(texts)} do trecho original não foram encontrados na proposta com a mesma unidade.`,
+  added: (texts) =>
+    texts.length === 1
+      ? `A proposta contém o valor ${quoted(texts)}, que não aparece com essa unidade no trecho original.`
+      : `A proposta contém os valores ${quoted(texts)}, que não aparecem com essa unidade no trecho original.`,
+  nothingAdded: "Todo valor em reais, percentual ou prazo da proposta aparece no trecho original, com a mesma unidade.",
+};
+
+const WRITTEN_DATE_TERMS: MentionTerms = {
+  originalHasNone: "O trecho original não tem data por extenso com dia, mês e ano.",
+  proposalHasNone: "A proposta não tem data por extenso com dia, mês e ano.",
+  kept: (texts) =>
+    texts.length === 1
+      ? `A data ${quoted(texts)} do trecho original aparece na proposta.`
+      : `As datas ${quoted(texts)} do trecho original aparecem na proposta.`,
+  lost: (texts) =>
+    texts.length === 1
+      ? `A data ${quoted(texts)} do trecho original não foi encontrada por extenso na proposta.`
+      : `As datas ${quoted(texts)} do trecho original não foram encontradas por extenso na proposta.`,
+  added: (texts) =>
+    texts.length === 1
+      ? `A proposta contém a data ${quoted(texts)}, que não aparece por extenso no trecho original.`
+      : `A proposta contém as datas ${quoted(texts)}, que não aparecem por extenso no trecho original.`,
+  nothingAdded: "Toda data por extenso da proposta aparece no trecho original.",
+};
+
+function distinct(mentions: readonly LiteralMention[]): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const m of mentions) if (!out.has(m.key)) out.set(m.key, m.text);
+  return out;
+}
+
+function mentionProofs(
+  kept: Proof["check"],
+  added: Proof["check"],
+  extract: (text: string) => readonly LiteralMention[],
+  proposal: RewriteProposal,
+  terms: MentionTerms,
+): [Proof, Proof] {
+  const before = distinct(extract(proposal.original));
+  const after = distinct(extract(proposal.proposed));
+  const lost = [...before].filter(([k]) => !after.has(k)).map(([, text]) => text);
+  const unseen = [...after].filter(([k]) => !before.has(k)).map(([, text]) => text);
+  const keptOutcome: ProofOutcome =
+    before.size === 0 ? "not_applicable" : lost.length === 0 ? "confirmed" : "not_confirmed";
+  const addedOutcome: ProofOutcome =
+    after.size === 0 ? "not_applicable" : unseen.length === 0 ? "confirmed" : "addition";
+  return [
+    {
+      check: kept,
+      outcome: keptOutcome,
+      passed: keptOutcome !== "not_confirmed",
+      detail:
+        keptOutcome === "not_applicable"
+          ? terms.originalHasNone
+          : keptOutcome === "confirmed"
+            ? terms.kept([...before.values()])
+            : terms.lost(lost),
+    },
+    {
+      check: added,
+      outcome: addedOutcome,
+      passed: addedOutcome !== "addition",
+      detail:
+        addedOutcome === "not_applicable"
+          ? terms.proposalHasNone
+          : addedOutcome === "confirmed"
+            ? terms.nothingAdded
+            : terms.added(unseen),
+    },
+  ];
+}
+
+function labelProof(proposal: RewriteProposal, locale: RewriteLocale): Proof {
+  const original = locale.deviceLabel(proposal.original);
+  if (original === null) {
+    return {
+      check: "label_kept",
+      outcome: "not_applicable",
+      passed: true,
+      detail: "O trecho original não começa por rótulo de artigo, parágrafo, inciso ou alínea.",
+    };
+  }
+  const proposed = locale.deviceLabel(proposal.proposed);
+  const kept = proposed?.key === original.key;
+  return {
+    check: "label_kept",
+    outcome: kept ? "confirmed" : "not_confirmed",
+    passed: kept,
+    detail: kept
+      ? `A proposta começa pelo mesmo rótulo do trecho original: ${quoted([original.text])}.`
+      : proposed === null
+        ? `A proposta não começa pelo rótulo ${quoted([original.text])} do trecho original.`
+        : `A proposta começa por ${quoted([proposed.text])}, e o trecho original, por ${quoted([original.text])}.`,
+  };
+}
+
+const RE_MARKUP = /\*\*|__|`|\[|\]|^[ \t]{0,3}#{1,6}[ \t]|^[ \t]*>/gmu;
+
+function markupProof(proposal: RewriteProposal): Proof {
+  const before = new Set(proposal.original.match(RE_MARKUP) ?? []);
+  const added = [...new Set((proposal.proposed.match(RE_MARKUP) ?? []).map((m) => m.trim()))].filter(
+    (m) => ![...before].some((b) => b.trim() === m),
+  );
+  return {
+    check: "markup_added",
+    outcome: added.length === 0 ? "confirmed" : "addition",
+    passed: added.length === 0,
+    detail:
+      added.length === 0
+        ? "A proposta não contém marcação (**, __, `, colchetes, # ou > no início de linha) que não esteja no trecho original."
+        : `A proposta contém marcação que não aparece no trecho original: ${quoted(added)}.`,
+  };
 }
 
 function labelsOf(criteria: readonly string[]): string {
@@ -424,6 +577,21 @@ export async function verifyRewrite(
 
   const numbers = literalProofs("numbers_kept", "numbers_added", RE_NUMBER, proposal, NUMBER_TERMS);
   const dates = literalProofs("dates_kept", "dates_added", RE_DATE, proposal, DATE_TERMS);
+  const references = mentionProofs(
+    "references_kept",
+    "references_added",
+    (t) => locale.references(t),
+    proposal,
+    REFERENCE_TERMS,
+  );
+  const values = mentionProofs("values_kept", "values_added", (t) => locale.valuesWithUnit(t), proposal, VALUE_TERMS);
+  const writtenDates = mentionProofs(
+    "written_dates_kept",
+    "written_dates_added",
+    (t) => locale.writtenDates(t),
+    proposal,
+    WRITTEN_DATE_TERMS,
+  );
 
   const beforeSpanJargon = jargonTextsOverlapping(
     before.findings,
@@ -468,7 +636,18 @@ export async function verifyRewrite(
             : "A proposta não usa nenhuma forma de 1ª pessoa da lista do Lucid.",
   };
 
-  proofs.push(noNewFindings, ...numbers, ...dates, noNewJargon, noInventedFirstPerson);
+  proofs.push(
+    noNewFindings,
+    ...numbers,
+    ...dates,
+    ...references,
+    labelProof(proposal, locale),
+    ...values,
+    ...writtenDates,
+    markupProof(proposal),
+    noNewJargon,
+    noInventedFirstPerson,
+  );
 
   const signals: VerificationSignal[] = [];
 

@@ -38,6 +38,7 @@ export type { CheckKind, CheckSpec, NotVerifiedDimension, ProofCheckSpec } from 
 export type { VerifyOptions } from "./verify";
 export type {
   AgentDeclaration,
+  LiteralMention,
   MetricsDelta,
   Proof,
   ProofOutcome,

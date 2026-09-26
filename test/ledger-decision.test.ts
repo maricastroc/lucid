@@ -33,6 +33,10 @@ describe("decisionRecord — what the trail keeps when the author uses a verifie
         check: "numbers_kept",
         detail: "O número «7» do trecho original não foi encontrado na proposta com a mesma grafia.",
       },
+      {
+        check: "references_kept",
+        detail: "A referência «art. 7º» do trecho original não foi encontrada na proposta.",
+      },
     ]);
     expect(record.verification.additions).toEqual([]);
     expect(record.verification.notVerified).toEqual(NOT_VERIFIED.map((d) => d.id));
@@ -58,7 +62,7 @@ describe("decisionRecord — what the trail keeps when the author uses a verifie
 
     expect(record.decision).toBe("used_anyway");
     expect(record.verification.notConfirmed).toEqual([]);
-    expect(record.verification.additions.map((c) => c.check)).toEqual(["numbers_added"]);
+    expect(record.verification.additions.map((c) => c.check)).toEqual(["numbers_added", "references_added"]);
   });
 
   it("copies the provenance of an AI proposal", async () => {
@@ -102,8 +106,9 @@ describe("renderLedgerMarkdown — the report says what was used anyway", () => 
 
     const at = lines.indexOf("_Usado mesmo assim:_");
     expect(at).toBeGreaterThan(0);
-    expect(lines.slice(at + 1, at + 4)).toEqual([
+    expect(lines.slice(at + 1, at + 5)).toEqual([
       "- Não confirmado: O número «7» do trecho original não foi encontrado na proposta com a mesma grafia.",
+      "- Não confirmado: A referência «art. 7º» do trecho original não foi encontrada na proposta.",
       '_proposta:_ mock · m1 · directed@4 · prompt 1a2b3c4d (1234 caracteres) · configuração {"maxOutputTokens":2048,"temperature":0}',
       `_decidido em:_ ${AT}`,
     ]);

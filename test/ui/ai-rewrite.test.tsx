@@ -222,7 +222,7 @@ describe("flow 5 · the card says what was confirmed and what was not verified",
   it("the fixtures reach every state the card distinguishes", async () => {
     expect(failing(await answerWith(PLAIN_FIRST_SENTENCE))).toEqual([]);
     expect(failing(await answerWith(REWRITE_LOSING_THE_NUMBER))).toEqual(["guarantee:not_confirmed"]);
-    expect(failing(await answerWith(ADDS_A_REFERENCE))).toEqual(["guarantee:addition"]);
+    expect(failing(await answerWith(ADDS_A_REFERENCE))).toEqual(["guarantee:addition", "guarantee:addition"]);
     expect(failing(await answerWith(KEEPS_THE_PASSIVE))).toEqual(["effect:not_confirmed"]);
   });
 
@@ -246,9 +246,13 @@ describe("flow 5 · the card says what was confirmed and what was not verified",
   it("shows an addition with its exact text, under its own heading", async () => {
     await showCard(ADDS_A_REFERENCE);
 
-    expect(
-      within(auditPanel().getByRole("group", { name: "Acréscimo para conferir" })).getByRole("listitem"),
-    ).toHaveTextContent("A proposta contém o número «1», que não aparece em algarismos no trecho original.");
+    const items = within(auditPanel().getByRole("group", { name: "Acréscimo para conferir" }))
+      .getAllByRole("listitem")
+      .map((li) => li.textContent?.replace(/^\+/u, ""));
+    expect(items).toEqual([
+      "A proposta contém o número «1», que não aparece em algarismos no trecho original.",
+      "A proposta contém a referência «§ 1º», que não aparece explicitamente no trecho original.",
+    ]);
     expect(auditPanel().queryByRole("group", { name: "Não confirmado" })).not.toBeInTheDocument();
   });
 
