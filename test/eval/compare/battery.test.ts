@@ -19,13 +19,14 @@ import {
   worstCaseCandidateUsd,
 } from "./battery";
 import { writeFinalReport } from "./final";
-import { SPIKE_PRICING, spikeCost } from "./spike";
+import { SPIKE_PRICING, spikeCost, type SpikeRow } from "./spike";
 
 const COMPARE_DIR = path.join(process.cwd(), "eval/comparacao-gemini-3.8");
 const ARM_DIR = path.join(COMPARE_DIR, "candidato-gemini-3.8-flash-low");
 const CALLS = path.join(ARM_DIR, "calls.jsonl");
 const STAMP = path.join(ARM_DIR, "stamp.json");
 const BASE_CALLS = path.join(process.cwd(), "eval/baseline-gemini-2.5-flash/calls.jsonl");
+const SPIKE_CALLS = path.join(COMPARE_DIR, "spike/calls.jsonl");
 
 const CAP_USD = 3.5;
 const STOP_AT_USD = 3.45;
@@ -153,6 +154,17 @@ describe.runIf(process.env.BATTERY_RUN === "1")("bateria 3.8 — execução (red
         fs.writeFileSync(STAMP, `${JSON.stringify(stamp, null, 2)}\n`);
       }
 
+      const prior = new Map<"rewrite" | "directed" | "probe", { usd: number; chars: number }>();
+      for (const row of fs
+        .readFileSync(SPIKE_CALLS, "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => JSON.parse(l) as SpikeRow)) {
+        if (row.outcome !== "ok" || row.level !== CANDIDATE_LEVEL || row.kind === "contract") continue;
+        const p = prior.get(row.kind) ?? { usd: 0, chars: 0 };
+        prior.set(row.kind, { usd: p.usd + row.costUsd, chars: p.chars + row.promptChars });
+      }
+
       const startedAt = new Date().toISOString();
       const outcome = await runBattery(
         CALLS,
@@ -160,10 +172,21 @@ describe.runIf(process.env.BATTERY_RUN === "1")("bateria 3.8 — execução (red
         apiKey,
         { stopAtUsd: STOP_AT_USD, maxNewCalls: jobs.length + 40 },
         say,
+        prior,
       );
       fs.writeFileSync(
         path.join(ARM_DIR, `execucao-${Date.now()}.json`),
-        `${JSON.stringify({ startedAt, finishedAt: new Date().toISOString(), commit: stamp.commit, outcome }, null, 2)}\n`,
+        `${JSON.stringify(
+          {
+            startedAt,
+            finishedAt: new Date().toISOString(),
+            commit: git("rev-parse HEAD"),
+            projectionPrior: Object.fromEntries(prior),
+            outcome,
+          },
+          null,
+          2,
+        )}\n`,
       );
       say(JSON.stringify(outcome, null, 2));
       expect(loadCalls(CALLS).reduce((n, r) => n + r.costUsd, 0)).toBeLessThanOrEqual(CAP_USD);

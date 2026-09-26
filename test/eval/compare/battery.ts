@@ -116,6 +116,7 @@ export async function runBattery(
   apiKey: string,
   guard: { readonly stopAtUsd: number; readonly maxNewCalls: number },
   log: (message: string) => void,
+  prior: ReadonlyMap<Job["suite"], { readonly usd: number; readonly chars: number }> = new Map(),
 ): Promise<BatteryOutcome> {
   const previous = loadCalls(file);
   const done = new Set([...latestByKey(previous).values()].filter((r) => r.outcome === "ok").map((r) => r.key));
@@ -123,7 +124,7 @@ export async function runBattery(
   const alreadyDone = jobs.filter((c) => done.has(c.key)).length;
   const pending = jobs.filter((c) => !done.has(c.key));
 
-  const observed = new Map<Job["suite"], { usd: number; chars: number }>();
+  const observed = new Map<Job["suite"], { usd: number; chars: number }>(prior);
   for (const row of previous) {
     if (row.outcome !== "ok") continue;
     const o = observed.get(row.suite) ?? { usd: 0, chars: 0 };
