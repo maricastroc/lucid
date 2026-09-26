@@ -1,0 +1,84 @@
+{
+  "purpose": "Braço candidato da comparação pré-registrada em eval/comparacao-gemini-3.8/protocolo.md.",
+  "createdAt": "2026-09-26T17:02:06.510Z",
+  "commit": "0cb6b223ed8de4f97d3d616c221453c9845b8d64",
+  "srcTree": "4cb38c316ae448af7d4c70c4d16fd9cfb5fd058a",
+  "protocolSha256": "8983daf6cbde0b402e65b36591c2bd658ef5258db242bc0299386f04bb4edc0b",
+  "ruler": {
+    "lucidVersion": "0.1.0",
+    "dataHash": "a7ae67e2",
+    "configHash": "4c2da7fd"
+  },
+  "model": "gemini-3.8-flash",
+  "thinkingLevel": "low",
+  "promptVersions": {
+    "rewrite": "rewrite@6",
+    "directed": "directed@4",
+    "probe": "probe@1"
+  },
+  "generationConfig": {
+    "rewrite": {
+      "maxOutputTokens": 2048,
+      "responseMimeType": "application/json",
+      "thinkingConfig": {
+        "thinkingLevel": "low"
+      }
+    },
+    "directed": {
+      "maxOutputTokens": 2048,
+      "responseMimeType": "application/json",
+      "thinkingConfig": {
+        "thinkingLevel": "low"
+      }
+    },
+    "probe": {
+      "maxOutputTokens": 512,
+      "responseMimeType": "application/json",
+      "thinkingConfig": {
+        "thinkingLevel": "low"
+      }
+    }
+  },
+  "pricing": {
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "retrievedAt": "2026-09-26",
+    "tier": "Paid Tier · Standard · preço introdutório até 31/12/2026",
+    "inputUsdPerMillion": 0.75,
+    "outputUsdPerMillion": 3.75,
+    "from2027": {
+      "inputUsdPerMillion": 1.5,
+      "outputUsdPerMillion": 7.5
+    }
+  },
+  "baseline": {
+    "calls": "eval/baseline-gemini-2.5-flash/calls.jsonl",
+    "sha256": "39a13742d2b6c4da36bcefa4ae8c9f143331522ff7f5373a8ad403c25e7a4b9c"
+  },
+  "harness": [
+    {
+      "file": "test/eval/compare/battery.ts",
+      "sha256": "03cef4ccdb4f80a76d7a9d11abe24a01838ce9456f2f0d4ef170ec6b5c675b44"
+    },
+    {
+      "file": "test/eval/compare/battery.test.ts",
+      "sha256": "ea95a98536334f0ff359626421567e239ac88e3074502812ae9d39faf97b01c5"
+    },
+    {
+      "file": "test/eval/compare/compare.ts",
+      "sha256": "9efb3067c46e3f7419f520705ff93dc1b9c078a691bbacee8eb42484cd6a1634"
+    },
+    {
+      "file": "test/eval/compare/final.ts",
+      "sha256": "86a3e7ed69efab171ba4b43b40661c7f73d753a74476272d994aeee97db3f598"
+    },
+    {
+      "file": "test/eval/compare/spike.ts",
+      "sha256": "bf299c64c8fc157ee275bc7900baed4ad10b708947c7215ea1adf89eaa91e2a7"
+    }
+  ],
+  "credential": "GEMINI_API_KEY ativa no .env (chave paga original). Nenhum valor derivado da chave é gravado.",
+  "guard": {
+    "capUsd": 3.5,
+    "stopAtUsd": 3.45
+  }
+}

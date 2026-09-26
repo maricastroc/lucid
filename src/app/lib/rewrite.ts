@@ -1,6 +1,6 @@
 import { type Finding, type Span } from "@/lucid";
 import { analyze } from "@/locales/pt-BR";
-import { GEMINI_MODELS } from "@/llm";
+import { CHAT_PROVIDER_ERROR_KINDS, GEMINI_MODELS, type ChatProviderErrorKind } from "@/llm";
 import {
   proposeAndVerify,
   StubRewriteProposer,
@@ -89,12 +89,27 @@ export async function generateRewrite(
     signal,
   });
 
-  const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;
+  const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string; kind?: string } | null;
   if (!response.ok || data === null || !("verification" in data)) {
     const message = (data && "error" in data && data.error) || `HTTP ${response.status}`;
-    throw new Error(message);
+    const kind = data && "kind" in data ? data.kind : undefined;
+    throw new RewriteFailure(message, isErrorKind(kind) ? kind : null);
   }
   return data;
+}
+
+export class RewriteFailure extends Error {
+  constructor(
+    message: string,
+    readonly kind: ChatProviderErrorKind | null,
+  ) {
+    super(message);
+    this.name = "RewriteFailure";
+  }
+}
+
+function isErrorKind(value: unknown): value is ChatProviderErrorKind {
+  return typeof value === "string" && (CHAT_PROVIDER_ERROR_KINDS as readonly string[]).includes(value);
 }
 
 export async function verifyManualEdit(

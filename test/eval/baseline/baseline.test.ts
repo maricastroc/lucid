@@ -144,8 +144,8 @@ function buildStamp(plan: ReturnType<typeof buildPlan>): Record<string, unknown>
   };
 }
 
-describe("baseline 2.5 — o que é medido é o que a produção envia (offline)", () => {
-  it("cada prompt planejado é, byte a byte, o que LlmRewriteProposer e LlmComprehensionProbe enviam", async () => {
+describe("baseline 2.5 — what is measured is what production sends (offline)", () => {
+  it("every planned prompt is, byte for byte, what LlmRewriteProposer and LlmComprehensionProbe send", async () => {
     const plan = buildPlan();
     const firstRun = plan.jobs.filter((j) => j.run === RUNS[0]);
     expect(firstRun.length).toBe(plan.targets.length + plan.directedTargets.length + GOLDEN_SONDA.length);
@@ -179,7 +179,7 @@ describe("baseline 2.5 — o que é medido é o que a produção envia (offline)
     }
   });
 
-  it("o gravador guarda o generationConfig enviado e nunca a chave", async () => {
+  it("the recorder keeps the generationConfig it sent and never the key", async () => {
     const realFetch = globalThis.fetch;
     globalThis.fetch = async () =>
       new Response(
@@ -251,8 +251,8 @@ function estimate(jobs: readonly Job[]) {
   return rows;
 }
 
-describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plano e custo (offline, zero chamadas)", () => {
-  it("conta as chamadas e estima tokens e custo antes de qualquer chamada paga", () => {
+describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plan and cost (offline, zero calls)", () => {
+  it("counts the calls and estimates tokens and cost before any paid call", () => {
     const plan = buildPlan();
     const rows = estimate(plan.jobs);
     say(`\n=== PLANO DA BASELINE · ${MODEL} · rodadas ${RUNS.join(", ")} ===`);
@@ -279,47 +279,72 @@ describe.runIf(process.env.BASELINE_PLAN === "1")("baseline 2.5 — plano e cust
   });
 });
 
-describe.runIf(process.env.BASELINE_RUN === "1")("baseline 2.5 — execução (rede, paga)", () => {
+describe.runIf(process.env.BASELINE_RUN === "1")("baseline 2.5 — paid run (network)", () => {
   it(
-    "roda as duas rodadas das três suítes com a trava de custo",
+    "runs every round of the three suites under the cost guard",
     async () => {
       const apiKey = loadKey("GEMINI_API_KEY");
       if (!apiKey) throw new Error("GEMINI_API_KEY ausente");
       const plan = buildPlan();
       const stamp = buildStamp(plan);
+      const stopAtUsd = Number(process.env.BASELINE_STOP_AT_USD ?? STOP_AT_USD);
+      if (!Number.isFinite(stopAtUsd) || stopAtUsd > CAP_USD) throw new Error(`trava inválida: ${stopAtUsd}`);
+      if (git("status --porcelain -- src") !== "")
+        throw new Error("src/ com mudanças pendentes: a medição não seria fiel");
       fs.mkdirSync(OUT_DIR, { recursive: true });
+      let stampCommit = stamp.commit as string;
       if (fs.existsSync(STAMP)) {
         const recorded = JSON.parse(fs.readFileSync(STAMP, "utf8")) as Record<string, unknown>;
-        for (const field of ["commit", "ruler", "model", "promptVersions"] as const) {
+        stampCommit = recorded.commit as string;
+        if (git(`rev-parse ${stampCommit}:src`) !== git("rev-parse HEAD:src")) {
+          throw new Error(
+            `src/ difere do commit do carimbo (${stampCommit}): não misturo rodadas de estados diferentes`,
+          );
+        }
+        for (const field of ["ruler", "model", "promptVersions", "corpus"] as const) {
           if (JSON.stringify(recorded[field]) !== JSON.stringify(stamp[field])) {
             throw new Error(`o carimbo gravado diverge em '${field}': não misturo rodadas de estados diferentes`);
           }
         }
       } else {
+        if (stamp.trackedTreeClean !== true)
+          throw new Error("árvore com mudanças rastreadas: a fotografia não teria commit fiel");
         fs.writeFileSync(STAMP, `${JSON.stringify(stamp, null, 2)}\n`);
       }
-      if (stamp.trackedTreeClean !== true)
-        throw new Error("árvore com mudanças rastreadas: a fotografia não teria commit fiel");
 
-      say(`\n=== BASELINE · ${plan.jobs.length} chamadas planejadas · trava US$ ${STOP_AT_USD} ===`);
+      const startedAt = new Date().toISOString();
+      say(`\n=== BASELINE · ${plan.jobs.length} chamadas no plano · trava US$ ${stopAtUsd} ===`);
       const outcome = await runBaseline(
         CALLS,
         plan.jobs,
         apiKey,
-        { stopAtUsd: STOP_AT_USD, maxNewCalls: plan.jobs.length + 40 },
+        { stopAtUsd, maxNewCalls: plan.jobs.length + 40 },
         say,
       );
       say(`\n${JSON.stringify(outcome, null, 2)}`);
-      fs.writeFileSync(path.join(OUT_DIR, `outcome-${Date.now()}.json`), `${JSON.stringify(outcome, null, 2)}\n`);
+      const execution = {
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        commit: git("rev-parse HEAD"),
+        srcTree: git("rev-parse HEAD:src"),
+        srcTreeOfStampCommit: git(`rev-parse ${stampCommit}:src`),
+        stampCommit,
+        harness: stamp.harness,
+        credential: stamp.credential,
+        runs: RUNS,
+        stopAtUsd,
+        outcome,
+      };
+      fs.writeFileSync(path.join(OUT_DIR, `execucao-${Date.now()}.json`), `${JSON.stringify(execution, null, 2)}\n`);
       expect(outcome.spentUsd).toBeLessThanOrEqual(CAP_USD);
     },
     4 * 60 * 60 * 1000,
   );
 });
 
-describe.runIf(process.env.BASELINE_REPORT === "1")("baseline 2.5 — relatório (offline, zero chamadas)", () => {
+describe.runIf(process.env.BASELINE_REPORT === "1")("baseline 2.5 — report (offline, zero calls)", () => {
   it(
-    "pontua as respostas gravadas e escreve report.md e summary.json",
+    "scores the recorded answers and writes report.md and summary.json",
     async () => {
       const plan = buildPlan();
       await writeReport(OUT_DIR, CALLS, STAMP, plan, say);

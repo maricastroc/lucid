@@ -8,8 +8,8 @@ import { parseStoredMarks, type ReviewMarks } from "./review-marks";
 import { analysisLocale, isAnalysisLocaleId, type AnalysisLocaleId } from "../locale/active";
 
 const STORAGE_KEY = "lucid-workspace";
-const SCHEMA_VERSION = 11;
-const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+const SCHEMA_VERSION = 12;
+const READABLE_VERSIONS: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 const LOCALE_STAMPED_FROM = 11;
 
@@ -56,6 +56,36 @@ function isAttribution(value: unknown): boolean {
 
 const LEDGER_SOURCES: readonly string[] = ["manual", "ai", "glossary", "attested", "typing"];
 
+const isString = (value: unknown): value is string => typeof value === "string";
+
+function isLedgerCheckList(value: unknown): boolean {
+  return Array.isArray(value) && value.every((item) => isRecord(item) && isString(item.check) && isString(item.detail));
+}
+
+function isLedgerVerification(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isLedgerCheckList(value.notConfirmed) &&
+    isLedgerCheckList(value.additions) &&
+    isLedgerCheckList(value.effects) &&
+    isLedgerCheckList(value.signals) &&
+    Array.isArray(value.notVerified) &&
+    value.notVerified.every(isString)
+  );
+}
+
+function isLedgerProvenance(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return (
+    isString(value.providerId) &&
+    isString(value.model) &&
+    isString(value.strategy) &&
+    (value.generation === null || isRecord(value.generation)) &&
+    isString(value.promptHash) &&
+    typeof value.promptChars === "number"
+  );
+}
+
 function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (!isRecord(value)) return false;
   if (typeof value.source !== "string" || !LEDGER_SOURCES.includes(value.source)) return false;
@@ -67,6 +97,11 @@ function isLedgerEntry(value: unknown): value is LedgerEntry {
   if (typeof value.burdenBefore !== "number" || typeof value.burdenAfter !== "number") return false;
   if (value.before !== undefined && typeof value.before !== "string") return false;
   if (value.after !== undefined && typeof value.after !== "string") return false;
+  if (value.decision !== undefined && value.decision !== "used" && value.decision !== "used_anyway") return false;
+  if (value.verification !== undefined && !isLedgerVerification(value.verification)) return false;
+  if ((value.decision === undefined) !== (value.verification === undefined)) return false;
+  if (value.provenance !== undefined && !isLedgerProvenance(value.provenance)) return false;
+  if (value.decidedAt !== undefined && !isString(value.decidedAt)) return false;
   return true;
 }
 

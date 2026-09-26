@@ -9,8 +9,18 @@ export type VetoClass =
 const MARGIN = 5;
 
 const FIDELITY_PROOFS = new Set([
-  "numbers_preserved",
-  "dates_preserved",
+  "numbers_kept",
+  "numbers_added",
+  "dates_kept",
+  "dates_added",
+  "references_kept",
+  "references_added",
+  "label_kept",
+  "values_kept",
+  "values_added",
+  "written_dates_kept",
+  "written_dates_added",
+  "markup_added",
   "no_new_jargon",
   "no_invented_first_person",
   "declared_agent_present",
@@ -99,7 +109,7 @@ export function renderVetoAnatomy(details: readonly VetoDetail[]): string {
 
   out.push("## O que o veto% mede");
   out.push("");
-  out.push("`veto = hasBlockingFailure = pelo menos uma das 7 provas reprovou`. É um E lógico:");
+  out.push("`veto = pelo menos uma das provas reprovou`. É um E lógico:");
   out.push("basta uma prova falhar para a proposta não ser aprovada. O número não distingue uma");
   out.push("frase de 21 palavras contra um limiar de 20 de uma reescrita que inventou agente — a");
   out.push("tabela abaixo distingue. **Nenhum veto vira não-veto aqui**: a engine continua se");

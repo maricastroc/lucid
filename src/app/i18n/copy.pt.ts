@@ -459,23 +459,44 @@ export const COPY_PT: UiCopy = {
     aiRunning: "Gerando e verificando…",
     aiFailed: (message) => `Não foi possível gerar a reescrita: ${message}.`,
     aiFailedGeneric: "erro inesperado",
+    aiErrorKind: {
+      authentication:
+        "O servidor não conseguiu se autenticar no provedor do modelo, então não há proposta. A auditoria " +
+        "determinística continua completa.",
+      quota:
+        "A cota do provedor do modelo acabou, então não há proposta agora. A auditoria determinística continua completa.",
+      rate_limit:
+        "O provedor do modelo pediu para esperar antes de uma nova tentativa. Tente de novo em alguns instantes.",
+      model_unavailable: "O modelo configurado não está disponível no provedor, então não há proposta.",
+      invalid_request: "O provedor recusou a configuração enviada ao modelo, então não há proposta.",
+      incomplete: "O modelo interrompeu a resposta antes do fim, então não há proposta utilizável. Nada foi aplicado.",
+      empty: "O modelo respondeu sem conteúdo, então não há proposta. Nada foi aplicado.",
+      unusable:
+        "O modelo não devolveu uma proposta utilizável. Nada foi aplicado; tente de novo ou edite o trecho você mesmo.",
+      network: "Não foi possível falar com o provedor do modelo. Verifique a conexão e tente de novo.",
+      server: "O provedor do modelo falhou ao responder. Tente de novo em alguns instantes.",
+    },
     aiNoProposal:
       "A IA devolveu o trecho sem mudanças, então não há proposta para verificar. Tente de novo ou edite o " +
       "trecho você mesmo.",
 
     verdictLabel: "O Lucid verificou",
-    verdictProofs: (passed, total) => `${passed}/${total} provas`,
-    verdictBlocked: "Uma prova falhou: o Lucid não atesta esta versão.",
-    verdictClear: "Nenhuma falha encontrada neste trecho.",
+    verdictDivergent: "Há divergência entre o trecho original e a proposta. Confira antes de usar.",
+    verdictEffect: "O Lucid ainda aponta problemas no trecho reescrito.",
+    verdictNoDivergence: "O Lucid não encontrou divergência no que verifica.",
     verdictWords: "palavras",
     verdictMeasureNotApproval: "medição, não aprovação",
-    proofLabel: "Prova · determinística",
-    signalLabel: "Sinal · heurístico (não é prova)",
+    groupNotConfirmed: "Não confirmado",
+    groupAddition: "Acréscimo para conferir",
+    groupEffect: "Efeito no texto",
+    groupSignals: "Sinais (não são provas)",
+    groupConfirmed: "Confirmado",
+    groupNotApplicable: "Não se aplica",
+    groupNotVerified: "Não verificado",
+    notVerifiedLead: "O Lucid não verifica",
     evaluatedExcerpt: "Trecho avaliado",
-    checksShow: (proofs, signals) =>
-      `Ver ${plural(proofs, "a prova", `as ${proofs} provas`)}` +
-      (signals > 0 ? ` e ${plural(signals, "o sinal", `os ${signals} sinais`)}` : ""),
-    checksHide: "Ocultar provas e sinais",
+    checksShow: (count) => `Ver ${plural(count, "a outra verificação", `as outras ${count} verificações`)}`,
+    checksHide: "Ocultar as outras verificações",
     proposerTitle: "modelo + versão do prompt",
     applyStale: "O trecho mudou: gere de novo",
     applyBlocked: "Usar mesmo assim como rascunho",
@@ -849,6 +870,7 @@ export const COPY_PT: UiCopy = {
       "aqui com o antes, o depois e o efeito nos critérios.",
     listLabel: "Alterações aplicadas",
     effectLabel: "Efeito nos critérios",
+    usedAnyway: "Usado mesmo assim, com estas divergências",
     detailsShow: "Ver detalhes da alteração",
     detailsHide: "Ocultar detalhes da alteração",
     undoLast: "Desfazer esta alteração",

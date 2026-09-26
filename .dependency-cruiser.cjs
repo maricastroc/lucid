@@ -1,6 +1,15 @@
 module.exports = {
   forbidden: [
     {
+      name: "verificacao-sem-modelo",
+      severity: "error",
+      comment:
+        "ADR-108: a verificação da reescrita é determinística. O verificador e o registro de verificações não " +
+        "importam a sonda nem a infraestrutura de LLM; análise por modelo, se existir, fica fora do veredito.",
+      from: { path: "^src/report/rewrite/(verify|checks)\\.ts$" },
+      to: { path: "^src/(lucid/probe|llm)(/|$)" },
+    },
+    {
       name: "core-nao-importa-probe",
       severity: "error",
       comment: "Camada 1 (core) não pode importar da Camada 2 (probe). Ver CLAUDE.md — cerca dura entre as camadas.",

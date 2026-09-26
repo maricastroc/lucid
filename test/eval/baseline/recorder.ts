@@ -14,6 +14,7 @@ export interface AttemptRecord {
   readonly modelVersion: string | null;
   readonly responseId: string | null;
   readonly partsCount: number | null;
+  readonly partShapes: readonly (readonly string[])[] | null;
   readonly firstPartText: string | null;
   readonly apiError: { readonly code: number | null; readonly status: string | null; readonly message: string } | null;
   readonly networkError: string | null;
@@ -25,7 +26,11 @@ interface GeminiBody {
 }
 
 interface GeminiReply {
-  candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string; finishMessage?: string }[];
+  candidates?: {
+    content?: { parts?: Record<string, unknown>[] };
+    finishReason?: string;
+    finishMessage?: string;
+  }[];
   usageMetadata?: unknown;
   modelVersion?: string;
   responseId?: string;
@@ -77,6 +82,7 @@ export function installRecorder(secrets: readonly string[]): () => void {
         modelVersion: data?.modelVersion ?? null,
         responseId: data?.responseId ?? null,
         partsCount: Array.isArray(parts) ? parts.length : null,
+        partShapes: Array.isArray(parts) ? parts.map((part) => Object.keys(part).sort()) : null,
         firstPartText: typeof parts?.[0]?.text === "string" ? parts[0].text : null,
         apiError: data?.error
           ? {
@@ -99,6 +105,7 @@ export function installRecorder(secrets: readonly string[]): () => void {
         modelVersion: null,
         responseId: null,
         partsCount: null,
+        partShapes: null,
         firstPartText: null,
         apiError: null,
         networkError: redact(cause instanceof Error ? `${cause.name}: ${cause.message}` : String(cause)),

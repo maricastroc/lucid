@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Finding, Span } from "@/lucid";
-import { ChatProviderError, GeminiProvider, GEMINI_MODELS } from "@/llm";
+import { ChatProviderError, GeminiProvider, GEMINI_MODELS, redactSecrets } from "@/llm";
 import {
   LlmRewriteProposer,
   proposeAndVerify,
@@ -9,14 +9,10 @@ import {
   type RewriteStrategy,
 } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
-import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
-import type { ComprehensionProbe } from "@/lucid/probe/types";
 
 export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 200_000;
-
-const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
 
 interface RewriteRequestBody {
   text?: unknown;
@@ -79,13 +75,6 @@ function buildProposer(providerId: string, model: string): RewriteProposer | { e
   return { error: `provedor desconhecido: ${providerId}`, status: 400 };
 }
 
-function buildProbe(): ComprehensionProbe | null {
-  if (process.env.GEMINI_API_KEY) {
-    return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
-  }
-  return null;
-}
-
 export async function POST(request: Request): Promise<Response> {
   let body: RewriteRequestBody;
   try {
@@ -127,8 +116,6 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: proposer.error }, { status: proposer.status });
   }
 
-  const probe = buildProbe();
-
   try {
     const result = await proposeAndVerify(text, target, proposer, {
       locale,
@@ -141,14 +128,15 @@ export async function POST(request: Request): Promise<Response> {
       declarations: Array.isArray(declarations)
         ? declarations.filter((d): d is AgentDeclaration => isDeclarationLike(d, text.length))
         : undefined,
-      probe: probe ?? undefined,
-      question: probe ? FLOOR_QUESTION : undefined,
       signal: request.signal,
     });
     return NextResponse.json(result);
   } catch (cause) {
     if (cause instanceof ChatProviderError) {
-      return NextResponse.json({ error: cause.message }, { status: 502 });
+      return NextResponse.json(
+        { error: redactSecrets(cause.message, [process.env.GEMINI_API_KEY ?? ""]), kind: cause.kind },
+        { status: cause.kind === "quota" || cause.kind === "rate_limit" ? 429 : 502 },
+      );
     }
     return NextResponse.json({ error: "erro interno do servidor" }, { status: 500 });
   }

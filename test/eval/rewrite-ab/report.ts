@@ -19,6 +19,8 @@ export interface Aggregate {
   readonly proofsTotalMean: number;
   readonly vetoPct: number;
   readonly failedProofCounts: Record<string, number>;
+  readonly numbersOkPct: number;
+  readonly datesOkPct: number;
   readonly regionBurdenBefore: number;
   readonly regionBurdenAfter: number;
   readonly regionWorsePct: number;
@@ -86,6 +88,8 @@ export function aggregate(rows: readonly ScoredRow[]): Aggregate[] {
         proofsTotalMean: mean(group.map((r) => r.proofsTotal)),
         vetoPct: pct(group.map((r) => r.vetoed)),
         failedProofCounts: tally(group.flatMap((r) => r.failedProofs)),
+        numbersOkPct: pct(group.map((r) => !r.failedProofs.some((c) => c === "numbers_kept" || c === "numbers_added"))),
+        datesOkPct: pct(group.map((r) => !r.failedProofs.some((c) => c === "dates_kept" || c === "dates_added"))),
         regionBurdenBefore: mean(group.map((r) => r.regionBurdenBefore)),
         regionBurdenAfter: mean(group.map((r) => r.regionBurdenAfter)),
         regionWorsePct: pct(group.map((r) => r.regionBurdenAfter > r.regionBurdenBefore)),
@@ -158,10 +162,8 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   );
   out.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|");
   for (const a of aggregates) {
-    const numbersOk = 100 - (a.failedProofCounts.numbers_preserved ?? 0) * (100 / a.n);
-    const datesOk = 100 - (a.failedProofCounts.dates_preserved ?? 0) * (100 / a.n);
     out.push(
-      `| ${label(a)} | ${a.n} | ${n0(numbersOk)} | ${n0(datesOk)} | ${n0(a.valuesLostPct)} | ${n0(a.refsLostPct)} | ${n0(
+      `| ${label(a)} | ${a.n} | ${n0(a.numbersOkPct)} | ${n0(a.datesOkPct)} | ${n0(a.valuesLostPct)} | ${n0(a.refsLostPct)} | ${n0(
         a.relationsLostPct,
       )} | ${n0(a.markerFamilyLostPct)} | ${n0(a.entitiesFlaggedPct)} |`,
     );

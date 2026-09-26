@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ChatProviderError, GeminiProvider, GEMINI_MODELS } from "../src/llm";
+import { ChatProviderError, GEMINI_CANDIDATE_MODELS, GeminiProvider, GEMINI_MODELS } from "../src/llm";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -28,6 +28,81 @@ describe("GeminiProvider — allow-list (no network)", () => {
   it("exposes the model allow-list", () => {
     expect(GEMINI_MODELS).toContain("gemini-2.5-flash");
     expect(new GeminiProvider("x").models).toEqual(GEMINI_MODELS);
+  });
+});
+
+describe("GeminiProvider — the gemini-2.5-flash request stays byte-identical to the recorded baseline", () => {
+  it("sends exactly the body the baseline recorded", async () => {
+    const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
+    vi.stubGlobal("fetch", fetchMock);
+    await new GeminiProvider("fake-key").complete("prompt", {
+      model: "gemini-2.5-flash",
+      temperature: 0,
+      maxTokens: 512,
+    });
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent");
+    expect(init.body).toBe(
+      '{"contents":[{"role":"user","parts":[{"text":"prompt"}]}],"generationConfig":{"temperature":0,' +
+        '"maxOutputTokens":512,"responseMimeType":"application/json","thinkingConfig":{"thinkingBudget":0}}}',
+    );
+  });
+
+  it("reports as its request configuration exactly the generationConfig it sends", async () => {
+    const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
+    vi.stubGlobal("fetch", fetchMock);
+    const provider = new GeminiProvider("fake-key");
+    const options = { model: "gemini-2.5-flash", temperature: 0, maxTokens: 2048 };
+    await provider.complete("prompt", options);
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+
+    expect(provider.requestConfig(options)).toEqual(JSON.parse(init.body as string).generationConfig);
+    expect(provider.requestConfig({ ...options, model: "nonexistent-model" })).toBeNull();
+  });
+
+  it("keeps the same body when a thinking level is configured", async () => {
+    const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
+    vi.stubGlobal("fetch", fetchMock);
+    await new GeminiProvider("fake-key", { thinkingLevel: "low" }).complete("prompt", {
+      model: "gemini-2.5-flash",
+      temperature: 0,
+    });
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(init.body as string).generationConfig).toEqual({
+      temperature: 0,
+      maxOutputTokens: 2048,
+      responseMimeType: "application/json",
+      thinkingConfig: { thinkingBudget: 0 },
+    });
+  });
+});
+
+describe("GeminiProvider — gemini-3.8-flash is reachable only for evaluation", () => {
+  it("rejects gemini-3.8-flash without an explicit thinking level, which is how production builds the provider", async () => {
+    const fetchMock = vi.fn(async () => okResponse("{}"));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      new GeminiProvider("fake-key").complete("p", { model: GEMINI_CANDIDATE_MODELS[0], temperature: 0 }),
+    ).rejects.toBeInstanceOf(ChatProviderError);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(GEMINI_MODELS as readonly string[]).not.toContain(GEMINI_CANDIDATE_MODELS[0]);
+  });
+
+  it("sends thinkingLevel and neither temperature nor thinkingBudget", async () => {
+    const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
+    vi.stubGlobal("fetch", fetchMock);
+    await new GeminiProvider("fake-key", { thinkingLevel: "medium" }).complete("p", {
+      model: "gemini-3.8-flash",
+      temperature: 0,
+      maxTokens: 512,
+    });
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent");
+    expect(JSON.parse(init.body as string).generationConfig).toEqual({
+      maxOutputTokens: 512,
+      responseMimeType: "application/json",
+      thinkingConfig: { thinkingLevel: "medium" },
+    });
   });
 });
 

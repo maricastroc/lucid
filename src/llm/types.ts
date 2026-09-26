@@ -15,14 +15,50 @@ export interface ChatProvider {
   readonly id: string;
   readonly models: readonly string[];
   complete(prompt: string, options: ChatCompletionOptions): Promise<string>;
+  requestConfig?(options: ChatCompletionOptions): Readonly<Record<string, unknown>> | null;
+}
+
+export type ChatProviderErrorKind =
+  | "authentication"
+  | "quota"
+  | "rate_limit"
+  | "model_unavailable"
+  | "invalid_request"
+  | "incomplete"
+  | "empty"
+  | "unusable"
+  | "network"
+  | "server";
+
+export const CHAT_PROVIDER_ERROR_KINDS: readonly ChatProviderErrorKind[] = [
+  "authentication",
+  "quota",
+  "rate_limit",
+  "model_unavailable",
+  "invalid_request",
+  "incomplete",
+  "empty",
+  "unusable",
+  "network",
+  "server",
+];
+
+const RE_GOOGLE_KEY = /AIza[0-9A-Za-z_-]{35}/gu;
+const REDACTED = "[chave omitida]";
+
+export function redactSecrets(text: string, secrets: readonly string[] = []): string {
+  let out = text.replace(RE_GOOGLE_KEY, REDACTED);
+  for (const secret of secrets) if (secret.length >= 8) out = out.split(secret).join(REDACTED);
+  return out;
 }
 
 export class ChatProviderError extends Error {
   constructor(
     message: string,
     readonly providerId: string,
+    readonly kind: ChatProviderErrorKind,
   ) {
-    super(message);
+    super(redactSecrets(message));
     this.name = "ChatProviderError";
   }
 }

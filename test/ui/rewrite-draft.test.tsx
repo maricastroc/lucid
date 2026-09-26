@@ -94,10 +94,10 @@ describe("the AI proposal draft", () => {
     );
 
     await act(async () => result.current.run());
-    expect(result.current.draft).toEqual({ status: "failed", message: "sem resposta" });
+    expect(result.current.draft).toEqual({ status: "failed", message: "sem resposta", kind: null });
 
     rerender({ declaration });
 
-    expect(result.current.draft).toEqual({ status: "failed", message: "sem resposta" });
+    expect(result.current.draft).toEqual({ status: "failed", message: "sem resposta", kind: null });
   });
 });

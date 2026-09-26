@@ -130,7 +130,7 @@ export async function scoreRow(row: RunRow, target: EvalTarget): Promise<ScoredR
     verification,
     proofsPassed: verification.proofs.filter((p) => p.passed).length,
     proofsTotal: verification.proofs.length,
-    vetoed: verification.hasBlockingFailure,
+    vetoed: verification.proofs.some((p) => !p.passed),
     failedProofs,
     flaggedSignals: verification.signals.filter((s) => s.flagged).map((s) => s.check),
     regionBurdenBefore: burdenIn(before.findings, target.span.start, target.span.end),

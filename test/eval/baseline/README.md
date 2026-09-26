@@ -29,13 +29,13 @@ Ordem: rodada 1 inteira (rewrite → directed → probe), depois a rodada 2.
 ## Como rodar
 
 ```bash
-BASELINE_PLAN=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "plano"
+BASELINE_PLAN=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "plan and cost"
 ```
 
 Plano e custo estimado. **Zero chamadas.**
 
 ```bash
-caffeinate -i env BASELINE_RUN=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "execução"
+caffeinate -i env BASELINE_RUN=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "paid run"
 ```
 
 Execução paga. Antes de cada chamada, o runner confere se o gasto acumulado mais o pior caso da chamada
@@ -44,7 +44,7 @@ Execução paga. Antes de cada chamada, o runner confere se o gasto acumulado ma
 Retomável: chave com resposta válida não é chamada de novo; chave com erro é.
 
 ```bash
-BASELINE_REPORT=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "relatório"
+BASELINE_REPORT=1 npx vitest run --project engine test/eval/baseline/baseline.test.ts -t "report"
 ```
 
 Relatório. **Offline, zero chamadas.** Reexecutar não custa nada.

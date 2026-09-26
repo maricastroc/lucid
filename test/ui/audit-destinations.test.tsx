@@ -17,7 +17,7 @@ async function applyRegisteredEdit(user: User): Promise<void> {
   await user.clear(editor);
   await user.type(editor, PLAIN_FIRST_SENTENCE);
   await user.click(auditPanel().getByRole("button", { name: /verificar minha versão/i }));
-  await auditPanel().findByText(/nenhuma falha encontrada/i);
+  await auditPanel().findByText(/não encontrou divergência no que verifica/i);
   await user.click(auditPanel().getByRole("button", { name: /^usar como rascunho/i }));
 }
 

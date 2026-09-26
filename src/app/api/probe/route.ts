@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PROBE_MAX_EXCERPT as MAX_TEXT_LENGTH } from "../../lib/probe-excerpt";
-import { ChatProviderError, GeminiProvider } from "@/llm";
+import { ChatProviderError, GeminiProvider, redactSecrets } from "@/llm";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import { interpret } from "@/lucid/probe/interpret";
 import type { ComprehensionProbe } from "@/lucid/probe/types";
@@ -58,7 +58,10 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ signal, result, probeId: probe.id });
   } catch (cause) {
     if (cause instanceof ChatProviderError) {
-      return NextResponse.json({ error: cause.message }, { status: 502 });
+      return NextResponse.json(
+        { error: redactSecrets(cause.message, [process.env.GEMINI_API_KEY ?? ""]), kind: cause.kind },
+        { status: cause.kind === "quota" || cause.kind === "rate_limit" ? 429 : 502 },
+      );
     }
     return NextResponse.json({ error: "erro interno do servidor" }, { status: 500 });
   }

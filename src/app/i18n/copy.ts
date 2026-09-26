@@ -1,4 +1,5 @@
 import type { PrincipleGroup, Severity, SpliceRefusal } from "@/lucid";
+import type { ChatProviderErrorKind } from "@/llm";
 import type { AuditViewId } from "../lib/audit-views";
 import type { MetricRowKey } from "../lib/metric-rows";
 import type { CriterionCoverage } from "@/report/eval/contract";
@@ -328,18 +329,25 @@ export interface UiCopy {
     readonly aiRunning: string;
     readonly aiFailed: (message: string) => string;
     readonly aiFailedGeneric: string;
+    readonly aiErrorKind: Readonly<Record<ChatProviderErrorKind, string>>;
     readonly aiNoProposal: string;
 
     readonly verdictLabel: string;
-    readonly verdictProofs: (passed: number, total: number) => string;
-    readonly verdictBlocked: string;
-    readonly verdictClear: string;
+    readonly verdictDivergent: string;
+    readonly verdictEffect: string;
+    readonly verdictNoDivergence: string;
     readonly verdictWords: string;
     readonly verdictMeasureNotApproval: string;
-    readonly proofLabel: string;
-    readonly signalLabel: string;
+    readonly groupNotConfirmed: string;
+    readonly groupAddition: string;
+    readonly groupEffect: string;
+    readonly groupSignals: string;
+    readonly groupConfirmed: string;
+    readonly groupNotApplicable: string;
+    readonly groupNotVerified: string;
+    readonly notVerifiedLead: string;
     readonly evaluatedExcerpt: string;
-    readonly checksShow: (proofs: number, signals: number) => string;
+    readonly checksShow: (count: number) => string;
     readonly checksHide: string;
     readonly proposerTitle: string;
     readonly applyStale: string;
@@ -589,6 +597,7 @@ export interface UiCopy {
     readonly emptyBody: string;
     readonly listLabel: string;
     readonly effectLabel: string;
+    readonly usedAnyway: string;
     readonly detailsShow: string;
     readonly detailsHide: string;
     readonly undoLast: string;

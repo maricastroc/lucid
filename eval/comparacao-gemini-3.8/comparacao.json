@@ -1,0 +1,3137 @@
+{
+  "comparison": {
+    "base": "gemini-2.5-flash",
+    "candidate": "gemini-3.8-flash·low",
+    "checks": [
+      {
+        "suite": "rewrite",
+        "check": "contract.ok",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "contract.parse",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "contract.stop",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.condicao",
+        "hard": false,
+        "counts": {
+          "regressao": 5,
+          "regressao_fraca": 1,
+          "melhora": 6,
+          "melhora_fraca": 2,
+          "preexistente": 26,
+          "igual": 117,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7999.txt#18995-19234",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8000.txt#396-624",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l8022.txt#2635-2861"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l8014.txt#707-1117"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7994.txt#1017-1174",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l7999.txt#14805-15178",
+          "planalto-leis__1989-1994-l7999.txt#6877-7100",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692"
+        ],
+        "basePerRun": [
+          123,
+          123,
+          125
+        ],
+        "candidatePerRun": [
+          125,
+          125,
+          127
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.excecao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 3,
+          "igual": 153,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8002.txt#600-772"
+        ],
+        "basePerRun": [
+          153,
+          152,
+          153
+        ],
+        "candidatePerRun": [
+          154,
+          155,
+          154
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.negacao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          155,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.obrigacao",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 154,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8002.txt#1007-1258",
+          "planalto-leis__1989-1994-l8022.txt#2118-2346"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8013.txt#1223-1552"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          155,
+          155,
+          155
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.permissao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          156,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.proibicao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 2,
+          "igual": 154,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7999.txt#18995-19234"
+        ],
+        "basePerRun": [
+          154,
+          154,
+          154
+        ],
+        "candidatePerRun": [
+          155,
+          155,
+          155
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.refs",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 156,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8013.txt#2608-2949"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.relations",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 156,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8007.txt#529-1098"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.values",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "label.kept",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 139,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          139,
+          139,
+          139
+        ],
+        "candidatePerRun": [
+          139,
+          139,
+          139
+        ],
+        "items": 139
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.dates_preserved",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_invented_first_person",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_new_findings",
+        "hard": false,
+        "counts": {
+          "regressao": 9,
+          "regressao_fraca": 1,
+          "melhora": 18,
+          "melhora_fraca": 2,
+          "preexistente": 7,
+          "igual": 120,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l7999.txt#7268-7453",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#16688-17089"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#6934-7435",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8000.txt#4777-5164",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8016.txt#677-1149",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l7999.txt#11330-11776",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l7994.txt#1955-2115",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8013.txt#657-842",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#3531-3782",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759"
+        ],
+        "basePerRun": [
+          130,
+          129,
+          131
+        ],
+        "candidatePerRun": [
+          136,
+          141,
+          139
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_new_jargon",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.numbers_preserved",
+        "hard": true,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 154,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7999.txt#2825-3097",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8013.txt#2608-2949"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          155,
+          155,
+          155
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.region_improved",
+        "hard": false,
+        "counts": {
+          "regressao": 9,
+          "regressao_fraca": 1,
+          "melhora": 18,
+          "melhora_fraca": 2,
+          "preexistente": 7,
+          "igual": 120,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l7999.txt#7268-7453",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#16688-17089"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#6934-7435",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8000.txt#4777-5164",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8016.txt#677-1149",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l7999.txt#11330-11776",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l7994.txt#1955-2115",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8013.txt#657-842",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#3531-3782",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759"
+        ],
+        "basePerRun": [
+          130,
+          129,
+          131
+        ],
+        "candidatePerRun": [
+          136,
+          141,
+          139
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved",
+        "hard": false,
+        "counts": {
+          "regressao": 47,
+          "regressao_fraca": 3,
+          "melhora": 6,
+          "melhora_fraca": 0,
+          "preexistente": 79,
+          "igual": 22,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8006.txt#879-1050",
+          "planalto-leis__1989-1994-l8014.txt#325-604",
+          "planalto-leis__1989-1994-l8017.txt#237-517",
+          "planalto-leis__1989-1994-l7993.txt#114-275",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8006.txt#296-575",
+          "planalto-leis__1989-1994-l8007.txt#248-527",
+          "planalto-leis__1989-1994-l8017.txt#519-834",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l7992.txt#653-809",
+          "planalto-leis__1989-1994-l7999.txt#2825-3097",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l8018.txt#965-1302",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8002.txt#774-1005",
+          "planalto-leis__1989-1994-l8006.txt#1052-1311",
+          "planalto-leis__1989-1994-l7994.txt#1750-1953",
+          "planalto-leis__1989-1994-l8000.txt#779-1094",
+          "planalto-leis__1989-1994-l8010.txt#269-548",
+          "planalto-leis__1989-1994-l8016.txt#395-675",
+          "planalto-leis__1989-1994-l8018.txt#236-516",
+          "planalto-leis__1989-1994-l8022.txt#2863-3158",
+          "planalto-leis__1989-1994-l8013.txt#160-373",
+          "planalto-leis__1989-1994-l8022.txt#3548-3728",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#4501-4775",
+          "planalto-leis__1989-1994-l8013.txt#375-655",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8022.txt#1896-2116",
+          "planalto-leis__1989-1994-l7999.txt#8436-8586",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l7999.txt#11878-12132",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#18169-18432",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390",
+          "planalto-leis__1989-1994-l8000.txt#3626-3804",
+          "planalto-leis__1989-1994-l8000.txt#3806-4056",
+          "planalto-leis__1989-1994-l7999.txt#673-879",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#6877-7100",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#19534-19833"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8018.txt#2570-2812",
+          "planalto-leis__1989-1994-l8010.txt#3295-3458",
+          "planalto-leis__1989-1994-l8010.txt#3509-3673",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8010.txt#4433-4653"
+        ],
+        "basePerRun": [
+          71,
+          72,
+          71
+        ],
+        "candidatePerRun": [
+          33,
+          28,
+          27
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved[long_sentence]",
+        "hard": false,
+        "counts": {
+          "regressao": 47,
+          "regressao_fraca": 3,
+          "melhora": 6,
+          "melhora_fraca": 0,
+          "preexistente": 78,
+          "igual": 20,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8006.txt#879-1050",
+          "planalto-leis__1989-1994-l8014.txt#325-604",
+          "planalto-leis__1989-1994-l8017.txt#237-517",
+          "planalto-leis__1989-1994-l7993.txt#114-275",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8006.txt#296-575",
+          "planalto-leis__1989-1994-l8007.txt#248-527",
+          "planalto-leis__1989-1994-l8017.txt#519-834",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l7992.txt#653-809",
+          "planalto-leis__1989-1994-l7999.txt#2825-3097",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l8018.txt#965-1302",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8002.txt#774-1005",
+          "planalto-leis__1989-1994-l8006.txt#1052-1311",
+          "planalto-leis__1989-1994-l7994.txt#1750-1953",
+          "planalto-leis__1989-1994-l8000.txt#779-1094",
+          "planalto-leis__1989-1994-l8010.txt#269-548",
+          "planalto-leis__1989-1994-l8016.txt#395-675",
+          "planalto-leis__1989-1994-l8018.txt#236-516",
+          "planalto-leis__1989-1994-l8022.txt#2863-3158",
+          "planalto-leis__1989-1994-l8013.txt#160-373",
+          "planalto-leis__1989-1994-l8022.txt#3548-3728",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#4501-4775",
+          "planalto-leis__1989-1994-l8013.txt#375-655",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8022.txt#1896-2116",
+          "planalto-leis__1989-1994-l7999.txt#8436-8586",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l7999.txt#11878-12132",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#18169-18432",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390",
+          "planalto-leis__1989-1994-l8000.txt#3626-3804",
+          "planalto-leis__1989-1994-l8000.txt#3806-4056",
+          "planalto-leis__1989-1994-l7999.txt#673-879",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#6877-7100",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#19534-19833"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8018.txt#2570-2812",
+          "planalto-leis__1989-1994-l8010.txt#3295-3458",
+          "planalto-leis__1989-1994-l8010.txt#3509-3673",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8010.txt#4433-4653"
+        ],
+        "basePerRun": [
+          69,
+          70,
+          69
+        ],
+        "candidatePerRun": [
+          31,
+          26,
+          25
+        ],
+        "items": 154
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved[outros]",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 2,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          2,
+          2,
+          2
+        ],
+        "candidatePerRun": [
+          2,
+          2,
+          2
+        ],
+        "items": 3
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_criteria",
+        "hard": false,
+        "counts": {
+          "regressao": 6,
+          "regressao_fraca": 1,
+          "melhora": 32,
+          "melhora_fraca": 2,
+          "preexistente": 9,
+          "igual": 107,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l7999.txt#7268-7453",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l7999.txt#12397-12589",
+          "planalto-leis__1989-1994-l7999.txt#16688-17089"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l7999.txt#1352-1632"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8002.txt#436-598",
+          "planalto-leis__1989-1994-l8010.txt#1119-1451",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8010.txt#1453-1855",
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l7992.txt#653-809",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8006.txt#1052-1311",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8013.txt#2168-2477",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l7999.txt#11330-11776",
+          "planalto-leis__1989-1994-l8000.txt#779-1094",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8013.txt#160-373",
+          "planalto-leis__1989-1994-l8022.txt#3548-3728",
+          "planalto-leis__1989-1994-l7994.txt#1955-2115",
+          "planalto-leis__1989-1994-l8000.txt#5275-5618",
+          "planalto-leis__1989-1994-l8013.txt#657-842",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#3531-3782",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759",
+          "planalto-leis__1989-1994-l7999.txt#19534-19833"
+        ],
+        "basePerRun": [
+          115,
+          113,
+          114
+        ],
+        "candidatePerRun": [
+          138,
+          142,
+          139
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_passive",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 29,
+          "melhora_fraca": 1,
+          "preexistente": 8,
+          "igual": 117,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7999.txt#7268-7453",
+          "planalto-leis__1989-1994-l7999.txt#16688-17089"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8002.txt#436-598",
+          "planalto-leis__1989-1994-l8010.txt#1119-1451",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8010.txt#1453-1855",
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l7992.txt#653-809",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8006.txt#1052-1311",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l7999.txt#11330-11776",
+          "planalto-leis__1989-1994-l8000.txt#779-1094",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8013.txt#160-373",
+          "planalto-leis__1989-1994-l8022.txt#3548-3728",
+          "planalto-leis__1989-1994-l7994.txt#1955-2115",
+          "planalto-leis__1989-1994-l8000.txt#5275-5618",
+          "planalto-leis__1989-1994-l8013.txt#657-842",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#3531-3782",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#19534-19833"
+        ],
+        "basePerRun": [
+          119,
+          118,
+          119
+        ],
+        "candidatePerRun": [
+          145,
+          144,
+          144
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.entities_preserved",
+        "hard": false,
+        "counts": {
+          "regressao": 10,
+          "regressao_fraca": 0,
+          "melhora": 11,
+          "melhora_fraca": 1,
+          "preexistente": 17,
+          "igual": 118,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7992.txt#322-529",
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8016.txt#1680-2057",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l7994.txt#694-858",
+          "planalto-leis__1989-1994-l8016.txt#395-675"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8002.txt#436-598",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8017.txt#237-517",
+          "planalto-leis__1989-1994-l8002.txt#1007-1258",
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l8022.txt#1313-1618",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8000.txt#396-624",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l7994.txt#114-342",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759"
+        ],
+        "basePerRun": [
+          129,
+          128,
+          128
+        ],
+        "candidatePerRun": [
+          127,
+          127,
+          129
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.possible_category_narrowed",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 156,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#2353-2656"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.possible_invented_agent",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          156,
+          157,
+          156
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.possible_invented_obligation",
+        "hard": false,
+        "counts": {
+          "regressao": 4,
+          "regressao_fraca": 0,
+          "melhora": 18,
+          "melhora_fraca": 0,
+          "preexistente": 3,
+          "igual": 132,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8013.txt#1223-1552",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8000.txt#1654-1824",
+          "planalto-leis__1989-1994-l7999.txt#12397-12589"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8010.txt#1119-1451",
+          "planalto-leis__1989-1994-l8010.txt#1453-1855",
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l8000.txt#4058-4499",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l8000.txt#5801-5984",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#13487-13759"
+        ],
+        "basePerRun": [
+          136,
+          135,
+          136
+        ],
+        "candidatePerRun": [
+          149,
+          149,
+          150
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "struct.docx",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "struct.not_refused",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.list_rule",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 4,
+          "melhora_fraca": 2,
+          "preexistente": 0,
+          "igual": 151,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8010.txt#917-1117",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l8022.txt#3965-4254"
+        ],
+        "basePerRun": [
+          151,
+          153,
+          150
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.markup",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.not_inflated",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 156,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8013.txt#1554-1818"
+        ],
+        "basePerRun": [
+          156,
+          156,
+          156
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.paragraphs",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 157,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          157,
+          157,
+          157
+        ],
+        "candidatePerRun": [
+          157,
+          157,
+          157
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto",
+        "hard": false,
+        "counts": {
+          "regressao": 45,
+          "regressao_fraca": 3,
+          "melhora": 6,
+          "melhora_fraca": 0,
+          "preexistente": 81,
+          "igual": 22,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8006.txt#879-1050",
+          "planalto-leis__1989-1994-l8014.txt#325-604",
+          "planalto-leis__1989-1994-l8017.txt#237-517",
+          "planalto-leis__1989-1994-l7993.txt#114-275",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8006.txt#296-575",
+          "planalto-leis__1989-1994-l8007.txt#248-527",
+          "planalto-leis__1989-1994-l8017.txt#519-834",
+          "planalto-leis__1989-1994-l7992.txt#653-809",
+          "planalto-leis__1989-1994-l7999.txt#2825-3097",
+          "planalto-leis__1989-1994-l8000.txt#1826-2128",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l8018.txt#965-1302",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8002.txt#774-1005",
+          "planalto-leis__1989-1994-l8006.txt#1052-1311",
+          "planalto-leis__1989-1994-l7994.txt#1750-1953",
+          "planalto-leis__1989-1994-l8000.txt#779-1094",
+          "planalto-leis__1989-1994-l8010.txt#269-548",
+          "planalto-leis__1989-1994-l8016.txt#395-675",
+          "planalto-leis__1989-1994-l8018.txt#236-516",
+          "planalto-leis__1989-1994-l8022.txt#2863-3158",
+          "planalto-leis__1989-1994-l8013.txt#160-373",
+          "planalto-leis__1989-1994-l8022.txt#3548-3728",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#4501-4775",
+          "planalto-leis__1989-1994-l8013.txt#375-655",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l8022.txt#1896-2116",
+          "planalto-leis__1989-1994-l7999.txt#8436-8586",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l7999.txt#11878-12132",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#18169-18432",
+          "planalto-leis__1989-1994-l8000.txt#2658-2821",
+          "planalto-leis__1989-1994-l8000.txt#3206-3384",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390",
+          "planalto-leis__1989-1994-l8000.txt#3626-3804",
+          "planalto-leis__1989-1994-l8000.txt#3806-4056",
+          "planalto-leis__1989-1994-l7999.txt#673-879",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#6877-7100",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#19534-19833"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8018.txt#2570-2812",
+          "planalto-leis__1989-1994-l8010.txt#3295-3458",
+          "planalto-leis__1989-1994-l8010.txt#3509-3673",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8010.txt#4433-4653"
+        ],
+        "basePerRun": [
+          69,
+          70,
+          69
+        ],
+        "candidatePerRun": [
+          32,
+          27,
+          27
+        ],
+        "items": 157
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto_exceto_comprimento",
+        "hard": false,
+        "counts": {
+          "regressao": 11,
+          "regressao_fraca": 1,
+          "melhora": 18,
+          "melhora_fraca": 2,
+          "preexistente": 8,
+          "igual": 117,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7999.txt#2825-3097",
+          "planalto-leis__1989-1994-l8006.txt#577-877",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l7999.txt#12897-13485",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l7999.txt#7268-7453",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415",
+          "planalto-leis__1989-1994-l7999.txt#1352-1632",
+          "planalto-leis__1989-1994-l7999.txt#14417-14692",
+          "planalto-leis__1989-1994-l7999.txt#16688-17089"
+        ],
+        "weakRegressions": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110"
+        ],
+        "improvements": [
+          "planalto-leis__1989-1994-l8000.txt#6934-7435",
+          "planalto-leis__1989-1994-l8013.txt#844-1221",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l8010.txt#1857-2307",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8000.txt#4777-5164",
+          "planalto-leis__1989-1994-l8010.txt#2309-2805",
+          "planalto-leis__1989-1994-l8016.txt#677-1149",
+          "planalto-leis__1989-1994-l8010.txt#2807-3249",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l7999.txt#11330-11776",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l7994.txt#1955-2115",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8013.txt#657-842",
+          "planalto-leis__1989-1994-l8013.txt#1554-1818",
+          "planalto-leis__1989-1994-l8000.txt#8292-8555",
+          "planalto-leis__1989-1994-l7999.txt#3531-3782",
+          "planalto-leis__1989-1994-l7999.txt#12591-12759"
+        ],
+        "basePerRun": [
+          129,
+          128,
+          130
+        ],
+        "candidatePerRun": [
+          133,
+          138,
+          136
+        ],
+        "items": 157
+      },
+      {
+        "suite": "directed",
+        "check": "contract.ok",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "contract.parse",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "contract.stop",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "directed.kept_passive_verbatim",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 21,
+          "melhora_fraca": 0,
+          "preexistente": 13,
+          "igual": 10,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8016.txt#2059-2437",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8013.txt#2168-2477",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l8000.txt#4058-4499",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503"
+        ],
+        "basePerRun": [
+          9,
+          10,
+          10
+        ],
+        "candidatePerRun": [
+          31,
+          33,
+          32
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.condicao",
+        "hard": false,
+        "counts": {
+          "regressao": 1,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 10,
+          "igual": 33,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8016.txt#2059-2437"
+        ],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          34,
+          34,
+          35
+        ],
+        "candidatePerRun": [
+          33,
+          35,
+          33
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.excecao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 43,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          43,
+          43,
+          43
+        ],
+        "candidatePerRun": [
+          43,
+          43,
+          43
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.negacao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.obrigacao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 43,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8018.txt#2084-2382"
+        ],
+        "basePerRun": [
+          43,
+          43,
+          43
+        ],
+        "candidatePerRun": [
+          44,
+          43,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.permissao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.proibicao",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 42,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7999.txt#18995-19234"
+        ],
+        "basePerRun": [
+          42,
+          42,
+          42
+        ],
+        "candidatePerRun": [
+          43,
+          43,
+          43
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.refs",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 23,
+          "melhora_fraca": 0,
+          "preexistente": 7,
+          "igual": 14,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          13,
+          14,
+          14
+        ],
+        "candidatePerRun": [
+          37,
+          36,
+          35
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.relations",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 43,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          43,
+          43,
+          43
+        ],
+        "candidatePerRun": [
+          43,
+          43,
+          43
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "fid.values",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 43,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8018.txt#1399-1591"
+        ],
+        "basePerRun": [
+          43,
+          43,
+          43
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "label.kept",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 32,
+          "melhora_fraca": 0,
+          "preexistente": 9,
+          "igual": 1,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8013.txt#1223-1552",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8000.txt#4777-5164",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8016.txt#2439-2757",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#14805-15178",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          1,
+          1,
+          1
+        ],
+        "candidatePerRun": [
+          33,
+          32,
+          32
+        ],
+        "items": 42
+      },
+      {
+        "suite": "directed",
+        "check": "proof.dates_preserved",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.directed_findings_resolved",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 1,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          1,
+          1,
+          1
+        ],
+        "candidatePerRun": [
+          1,
+          1,
+          1
+        ],
+        "items": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_invented_first_person",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_new_findings",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 7,
+          "melhora_fraca": 2,
+          "preexistente": 9,
+          "igual": 24,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8018.txt#965-1302",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8016.txt#2059-2437",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831"
+        ],
+        "basePerRun": [
+          28,
+          26,
+          25
+        ],
+        "candidatePerRun": [
+          33,
+          33,
+          32
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_new_jargon",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.numbers_preserved",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 25,
+          "melhora_fraca": 0,
+          "preexistente": 7,
+          "igual": 12,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l7999.txt#14805-15178",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          11,
+          12,
+          12
+        ],
+        "candidatePerRun": [
+          37,
+          36,
+          36
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.region_improved",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 7,
+          "melhora_fraca": 2,
+          "preexistente": 9,
+          "igual": 24,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8018.txt#965-1302",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8016.txt#2059-2437",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831"
+        ],
+        "basePerRun": [
+          28,
+          26,
+          25
+        ],
+        "candidatePerRun": [
+          33,
+          33,
+          32
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 12,
+          "melhora_fraca": 1,
+          "preexistente": 23,
+          "igual": 6,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8013.txt#2168-2477",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#18434-18614"
+        ],
+        "basePerRun": [
+          8,
+          9,
+          8
+        ],
+        "candidatePerRun": [
+          18,
+          21,
+          19
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved[outros]",
+        "hard": false,
+        "counts": {
+          "regressao": 2,
+          "regressao_fraca": 0,
+          "melhora": 12,
+          "melhora_fraca": 1,
+          "preexistente": 23,
+          "igual": 6,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8013.txt#2168-2477",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#18434-18614"
+        ],
+        "basePerRun": [
+          8,
+          9,
+          8
+        ],
+        "candidatePerRun": [
+          18,
+          21,
+          19
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "region.no_new_criteria",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 4,
+          "melhora_fraca": 1,
+          "preexistente": 1,
+          "igual": 38,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8016.txt#1151-1678",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382"
+        ],
+        "basePerRun": [
+          39,
+          37,
+          38
+        ],
+        "candidatePerRun": [
+          43,
+          42,
+          43
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "region.no_new_passive",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "signal.entities_preserved",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 20,
+          "melhora_fraca": 0,
+          "preexistente": 13,
+          "igual": 11,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l8013.txt#2608-2949",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#18434-18614",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          11,
+          11,
+          11
+        ],
+        "candidatePerRun": [
+          31,
+          31,
+          29
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "signal.possible_category_narrowed",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 2,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 42,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8013.txt#1820-2166",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591"
+        ],
+        "basePerRun": [
+          42,
+          42,
+          42
+        ],
+        "candidatePerRun": [
+          44,
+          43,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "signal.possible_invented_agent",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "signal.possible_invented_obligation",
+        "hard": false,
+        "counts": {
+          "regressao": 6,
+          "regressao_fraca": 0,
+          "melhora": 1,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 36,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l8026.txt#821-1182",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
+          "planalto-leis__1989-1994-l8013.txt#1223-1552",
+          "planalto-leis__1989-1994-l8016.txt#677-1149",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831"
+        ],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l8007.txt#529-1098"
+        ],
+        "basePerRun": [
+          42,
+          42,
+          42
+        ],
+        "candidatePerRun": [
+          37,
+          36,
+          39
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "struct.docx",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "struct.not_refused",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "style.list_rule",
+        "hard": false,
+        "counts": {
+          "regressao": 1,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 43,
+          "incompleto": 0
+        },
+        "regressions": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110"
+        ],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          43,
+          43,
+          43
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "style.markup",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "style.not_inflated",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "style.paragraphs",
+        "hard": true,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 44,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          44,
+          44,
+          44
+        ],
+        "candidatePerRun": [
+          44,
+          44,
+          44
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "verdict.sem_veto",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 16,
+          "melhora_fraca": 0,
+          "preexistente": 28,
+          "igual": 0,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#18434-18614",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          0,
+          0,
+          0
+        ],
+        "candidatePerRun": [
+          15,
+          14,
+          16
+        ],
+        "items": 44
+      },
+      {
+        "suite": "directed",
+        "check": "verdict.sem_veto_exceto_comprimento",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 16,
+          "melhora_fraca": 0,
+          "preexistente": 28,
+          "igual": 0,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8007.txt#529-1098",
+          "planalto-leis__1989-1994-l8018.txt#794-963",
+          "planalto-leis__1989-1994-l8022.txt#348-685",
+          "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#3160-3546",
+          "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l8018.txt#1593-1804",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17833-18167",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#18434-18614",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ],
+        "basePerRun": [
+          0,
+          0,
+          0
+        ],
+        "candidatePerRun": [
+          15,
+          14,
+          16
+        ],
+        "items": 44
+      },
+      {
+        "suite": "probe",
+        "check": "contract.ok",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 27,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          27,
+          27,
+          27
+        ],
+        "candidatePerRun": [
+          27,
+          27,
+          27
+        ],
+        "items": 27
+      },
+      {
+        "suite": "probe",
+        "check": "contract.parse",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 27,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          27,
+          27,
+          27
+        ],
+        "candidatePerRun": [
+          27,
+          27,
+          27
+        ],
+        "items": 27
+      },
+      {
+        "suite": "probe",
+        "check": "contract.stop",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 27,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          27,
+          27,
+          27
+        ],
+        "candidatePerRun": [
+          27,
+          27,
+          27
+        ],
+        "items": 27
+      },
+      {
+        "suite": "probe",
+        "check": "probe.agrees",
+        "hard": false,
+        "counts": {
+          "regressao": 1,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 1,
+          "igual": 25,
+          "incompleto": 0
+        },
+        "regressions": [
+          "carga-integracao"
+        ],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          26,
+          26,
+          26
+        ],
+        "candidatePerRun": [
+          25,
+          25,
+          26
+        ],
+        "items": 27
+      },
+      {
+        "suite": "probe",
+        "check": "probe.no_contradiction",
+        "hard": false,
+        "counts": {
+          "regressao": 0,
+          "regressao_fraca": 0,
+          "melhora": 0,
+          "melhora_fraca": 0,
+          "preexistente": 0,
+          "igual": 27,
+          "incompleto": 0
+        },
+        "regressions": [],
+        "weakRegressions": [],
+        "improvements": [],
+        "basePerRun": [
+          27,
+          27,
+          27
+        ],
+        "candidatePerRun": [
+          27,
+          27,
+          27
+        ],
+        "items": 27
+      }
+    ],
+    "flips": {
+      "base": {
+        "items": 157,
+        "unstable": 4,
+        "rate": 0.025477707006369428,
+        "unstableItems": [
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415"
+        ]
+      },
+      "candidate": {
+        "items": 157,
+        "unstable": 20,
+        "rate": 0.12738853503184713,
+        "unstableItems": [
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l8017.txt#519-834",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l7994.txt#1750-1953",
+          "planalto-leis__1989-1994-l8006.txt#1491-1726",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8016.txt#190-393",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8010.txt#3509-3673",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l7999.txt#11878-12132",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l8000.txt#1654-1824",
+          "planalto-leis__1989-1994-l7999.txt#486-671",
+          "planalto-leis__1989-1994-l8000.txt#3806-4056",
+          "planalto-leis__1989-1994-l7999.txt#12397-12589"
+        ]
+      }
+    }
+  },
+  "probe": {
+    "base": {
+      "perRun": [
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 0,
+          "tn": 21,
+          "recall": 0.8333333333333334,
+          "precision": 1,
+          "accuracy": 0.9629629629629629,
+          "contradictions": 0,
+          "misses": [
+            "casos-nao-enumerados"
+          ]
+        },
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 0,
+          "tn": 21,
+          "recall": 0.8333333333333334,
+          "precision": 1,
+          "accuracy": 0.9629629629629629,
+          "contradictions": 0,
+          "misses": [
+            "casos-nao-enumerados"
+          ]
+        },
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 0,
+          "tn": 21,
+          "recall": 0.8333333333333334,
+          "precision": 1,
+          "accuracy": 0.9629629629629629,
+          "contradictions": 0,
+          "misses": [
+            "casos-nao-enumerados"
+          ]
+        }
+      ],
+      "majority": {
+        "n": 27,
+        "tp": 5,
+        "fn": 1,
+        "fp": 0,
+        "tn": 21,
+        "recall": 0.8333333333333334,
+        "precision": 1,
+        "accuracy": 0.9629629629629629,
+        "contradictions": 0,
+        "misses": [
+          "casos-nao-enumerados"
+        ]
+      },
+      "sameSignal": 27,
+      "cases": 27
+    },
+    "candidate": {
+      "perRun": [
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 1,
+          "tn": 20,
+          "recall": 0.8333333333333334,
+          "precision": 0.8333333333333334,
+          "accuracy": 0.9259259259259259,
+          "contradictions": 0,
+          "misses": [
+            "carga-integracao",
+            "casos-nao-enumerados"
+          ]
+        },
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 1,
+          "tn": 20,
+          "recall": 0.8333333333333334,
+          "precision": 0.8333333333333334,
+          "accuracy": 0.9259259259259259,
+          "contradictions": 0,
+          "misses": [
+            "carga-integracao",
+            "casos-nao-enumerados"
+          ]
+        },
+        {
+          "n": 27,
+          "tp": 5,
+          "fn": 1,
+          "fp": 0,
+          "tn": 21,
+          "recall": 0.8333333333333334,
+          "precision": 1,
+          "accuracy": 0.9629629629629629,
+          "contradictions": 0,
+          "misses": [
+            "casos-nao-enumerados"
+          ]
+        }
+      ],
+      "majority": {
+        "n": 27,
+        "tp": 5,
+        "fn": 1,
+        "fp": 1,
+        "tn": 20,
+        "recall": 0.8333333333333334,
+        "precision": 0.8333333333333334,
+        "accuracy": 0.9259259259259259,
+        "contradictions": 0,
+        "misses": [
+          "carga-integracao",
+          "casos-nao-enumerados"
+        ]
+      },
+      "sameSignal": 26,
+      "cases": 27
+    }
+  },
+  "flips": {
+    "base": {
+      "rewrite": {
+        "items": 157,
+        "unstable": 4,
+        "rate": 0.025477707006369428,
+        "unstableItems": [
+          "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l8010.txt#550-915",
+          "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "planalto-leis__1989-1994-l7999.txt#13979-14415"
+        ]
+      },
+      "directed": {
+        "items": 44,
+        "unstable": 0,
+        "rate": 0,
+        "unstableItems": []
+      },
+      "probe": {
+        "items": 27,
+        "unstable": 0,
+        "rate": 0,
+        "unstableItems": []
+      }
+    },
+    "candidate": {
+      "rewrite": {
+        "items": 157,
+        "unstable": 20,
+        "rate": 0.12738853503184713,
+        "unstableItems": [
+          "planalto-leis__1989-1994-l8014.txt#707-1117",
+          "planalto-leis__1989-1994-l8017.txt#519-834",
+          "planalto-leis__1989-1994-l8018.txt#2384-2568",
+          "planalto-leis__1989-1994-l8018.txt#1399-1591",
+          "planalto-leis__1989-1994-l7994.txt#1750-1953",
+          "planalto-leis__1989-1994-l8006.txt#1491-1726",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8016.txt#190-393",
+          "planalto-leis__1989-1994-l8000.txt#2823-3088",
+          "planalto-leis__1989-1994-l8010.txt#3509-3673",
+          "planalto-leis__1989-1994-l8000.txt#6177-6503",
+          "planalto-leis__1989-1994-l8010.txt#4249-4431",
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l8000.txt#7974-8185",
+          "planalto-leis__1989-1994-l7999.txt#11878-12132",
+          "planalto-leis__1989-1994-l8000.txt#8557-8781",
+          "planalto-leis__1989-1994-l8000.txt#1654-1824",
+          "planalto-leis__1989-1994-l7999.txt#486-671",
+          "planalto-leis__1989-1994-l8000.txt#3806-4056",
+          "planalto-leis__1989-1994-l7999.txt#12397-12589"
+        ]
+      },
+      "directed": {
+        "items": 44,
+        "unstable": 7,
+        "rate": 0.1590909090909091,
+        "unstableItems": [
+          "planalto-leis__1989-1994-l7993.txt#635-1110",
+          "planalto-leis__1989-1994-l8000.txt#1399-1652",
+          "planalto-leis__1989-1994-l8022.txt#2118-2346",
+          "planalto-leis__1989-1994-l8013.txt#2951-3143",
+          "planalto-leis__1989-1994-l8018.txt#2084-2382",
+          "planalto-leis__1989-1994-l8000.txt#6505-6724",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
+        ]
+      },
+      "probe": {
+        "items": 27,
+        "unstable": 1,
+        "rate": 0.037037037037037035,
+        "unstableItems": [
+          "carga-integracao"
+        ]
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import {
   buildRewritePrompt,
   buildRewritePromptV4,
   criterionLabel,
+  needsAuthorDecision,
   PROMPT_V4_PARTS,
   renderBriefing,
   REWRITE_PROMPT_VERSION,
@@ -106,7 +107,7 @@ describe("rewrite@6 — o que a troca preservou", () => {
     expect(previous).not.toContain("O QUE O MOTOR VAI VERIFICAR");
   });
 
-  it("as sete provas determinísticas continuam as mesmas, e uma falha ainda veta", async () => {
+  it("the deterministic proofs are the registered ones, and a failure still vetoes", async () => {
     const verification = await verifyRewrite(
       TEXT,
       target,
@@ -115,16 +116,26 @@ describe("rewrite@6 — o que a troca preservou", () => {
     );
 
     expect(verification.proofs.map((p) => p.check).sort()).toEqual([
-      "dates_preserved",
+      "dates_added",
+      "dates_kept",
+      "label_kept",
+      "markup_added",
       "no_invented_first_person",
       "no_new_findings",
       "no_new_jargon",
-      "numbers_preserved",
+      "numbers_added",
+      "numbers_kept",
+      "references_added",
+      "references_kept",
       "region_improved",
       "target_resolved",
+      "values_added",
+      "values_kept",
+      "written_dates_added",
+      "written_dates_kept",
     ]);
-    expect(verification.proofs.find((p) => p.check === "numbers_preserved")?.passed).toBe(false);
-    expect(verification.hasBlockingFailure).toBe(true);
+    expect(verification.proofs.find((p) => p.check === "numbers_kept")?.outcome).toBe("not_confirmed");
+    expect(needsAuthorDecision(verification)).toBe(true);
   });
 
   it("o briefing é insumo do prompt e NUNCA entra na verificação", async () => {

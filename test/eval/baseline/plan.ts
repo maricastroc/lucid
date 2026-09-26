@@ -6,7 +6,7 @@ import { GOLDEN_SONDA, type ProbeGoldenCase } from "../probe-golden";
 import { loadEvalTargets, type EvalTarget } from "../rewrite-ab/targets";
 
 export const MODEL = "gemini-2.5-flash";
-export const RUNS = [1, 2] as const;
+export const RUNS = [1, 2, 3] as const;
 
 export const PRICING = {
   source: "https://ai.google.dev/gemini-api/docs/pricing",

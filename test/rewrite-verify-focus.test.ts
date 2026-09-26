@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/locales/pt-BR";
 import type { Finding, Span } from "../src/lucid/core/types";
-import { verifyRewrite, type AgentDeclaration, type VerifyOptions } from "../src/report/rewrite";
+import { type AgentDeclaration, needsAuthorDecision, type VerifyOptions, verifyRewrite } from "../src/report/rewrite";
 
 const TEXT = "O pedido foi indeferido ontem. A decisão foi comunicada ao interessado.";
 const PARAGRAPH: Span = { start: 0, end: TEXT.length, text: TEXT };
@@ -45,7 +45,7 @@ describe("target_resolved — only what the rewrite had the information to resol
     expect(targetProof(v).detail).toMatch(/exceto em «foi comunicada»/);
     expect(v.notices).toHaveLength(1);
     expect(v.notices[0].detail).toContain("«foi comunicada»");
-    expect(v.hasBlockingFailure).toBe(false);
+    expect(needsAuthorDecision(v)).toBe(false);
   });
 
   it("fails when the open point itself is still a passive", async () => {
@@ -53,7 +53,7 @@ describe("target_resolved — only what the rewrite had the information to resol
     const v = await verifyParagraph(TEXT, { focus: focus.span });
 
     expect(targetProof(v).passed).toBe(false);
-    expect(targetProof(v).detail).toMatch(/ainda aparece no trecho reescrito \(1 vez\)/);
+    expect(targetProof(v).detail).toBe("O Lucid ainda aponta «Voz passiva» no trecho reescrito (1 vez).");
     expect(v.notices).toHaveLength(1);
   });
 
@@ -76,6 +76,43 @@ describe("target_resolved — only what the rewrite had the information to resol
     expect(targetProof(v).passed).toBe(true);
     expect(targetProof(v).detail).toMatch(/manter a forma impessoal/);
     expect(v.notices).toEqual([]);
+  });
+
+  it("the passive kept impersonal is still recognized when the rewrite changes its tense", async () => {
+    const focus = passive("indeferido");
+    const kept = passive("comunicada");
+    const declarations: AgentDeclaration[] = [
+      { span: focus.span, agent: "a comissão" },
+      { span: kept.span, agent: null },
+    ];
+    const v = await verifyParagraph("A comissão indeferiu o pedido ontem. A decisão será comunicada ao interessado.", {
+      focus: focus.span,
+      declarations,
+    });
+
+    expect(targetProof(v).passed).toBe(true);
+    expect(targetProof(v).detail).toBe(
+      "O Lucid não aponta mais «Voz passiva» no trecho reescrito, exceto onde você pediu para manter a forma impessoal.",
+    );
+  });
+
+  it("a required passive rewritten as another passive of the same verb still counts", async () => {
+    const focus = passive("indeferido");
+    const kept = passive("comunicada");
+    const declarations: AgentDeclaration[] = [
+      { span: focus.span, agent: "a comissão" },
+      { span: kept.span, agent: null },
+    ];
+    const v = await verifyParagraph(
+      "O pedido será indeferido pela comissão. A decisão foi comunicada ao interessado.",
+      {
+        focus: focus.span,
+        declarations,
+      },
+    );
+
+    expect(targetProof(v).passed).toBe(false);
+    expect(targetProof(v).detail).toBe("O Lucid ainda aponta «Voz passiva» no trecho reescrito (1 vez).");
   });
 
   it("a passive whose agent the author gave is required like the open point", async () => {

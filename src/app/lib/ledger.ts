@@ -2,11 +2,36 @@ import type { Finding } from "@/lucid";
 import type { Attribution } from "./attribution";
 import type { AnalysisLocaleId } from "../locale/active";
 import { metaFor } from "./criteria";
-import { totalBurden } from "@/report/rewrite";
+import { needsAuthorDecision, NOT_VERIFIED, PROOF_CHECKS, totalBurden, type VerifiedRewrite } from "@/report/rewrite";
+import { stableStringify } from "@/lucid";
 import { copyFor } from "../i18n/copy";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
 export type LedgerSource = "manual" | "ai" | "glossary" | "attested" | "typing";
+
+export type LedgerDecision = "used" | "used_anyway";
+
+export interface LedgerCheck {
+  readonly check: string;
+  readonly detail: string;
+}
+
+export interface LedgerVerification {
+  readonly notConfirmed: readonly LedgerCheck[];
+  readonly additions: readonly LedgerCheck[];
+  readonly effects: readonly LedgerCheck[];
+  readonly signals: readonly LedgerCheck[];
+  readonly notVerified: readonly string[];
+}
+
+export interface LedgerProvenance {
+  readonly providerId: string;
+  readonly model: string;
+  readonly strategy: string;
+  readonly generation: Readonly<Record<string, unknown>> | null;
+  readonly promptHash: string;
+  readonly promptChars: number;
+}
 
 export interface LedgerEntry {
   source: LedgerSource;
@@ -18,6 +43,32 @@ export interface LedgerEntry {
   burdenBefore: number;
   burdenAfter: number;
   attribution?: Attribution;
+  decision?: LedgerDecision;
+  verification?: LedgerVerification;
+  provenance?: LedgerProvenance;
+  decidedAt?: string;
+}
+
+export type LedgerDecisionRecord = Required<Pick<LedgerEntry, "decision" | "verification" | "decidedAt">> &
+  Pick<LedgerEntry, "provenance">;
+
+export function decisionRecord(result: VerifiedRewrite, decidedAt: string): LedgerDecisionRecord {
+  const { proofs, signals } = result.verification;
+  const guarantee = (check: keyof typeof PROOF_CHECKS) => PROOF_CHECKS[check].kind === "guarantee";
+  const pick = ({ check, detail }: { check: string; detail: string }): LedgerCheck => ({ check, detail });
+  const provenance = result.proposal.provenance;
+  return {
+    decision: needsAuthorDecision(result.verification) ? "used_anyway" : "used",
+    verification: {
+      notConfirmed: proofs.filter((p) => guarantee(p.check) && p.outcome === "not_confirmed").map(pick),
+      additions: proofs.filter((p) => guarantee(p.check) && p.outcome === "addition").map(pick),
+      effects: proofs.filter((p) => !guarantee(p.check) && !p.passed).map(pick),
+      signals: signals.filter((s) => s.flagged).map(pick),
+      notVerified: NOT_VERIFIED.map((d) => d.id),
+    },
+    ...(provenance === undefined ? {} : { provenance: { ...provenance } }),
+    decidedAt,
+  };
 }
 
 export function sourceLabel(source: LedgerSource, lang: UiLang = DEFAULT_UI_LANG): string {
@@ -55,6 +106,29 @@ const collapse = (t: string): string => t.replace(/\s+/g, " ").trim();
 const truncate = (t: string, max = 90): string => (t.length > max ? `${t.slice(0, max - 1)}…` : t);
 const fmt = (v: number): string => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 
+function decisionLines(e: LedgerEntry): string[] {
+  if (e.decision === undefined || e.verification === undefined) return [];
+  const v = e.verification;
+  const out: string[] = [e.decision === "used_anyway" ? "_Usado mesmo assim:_" : "_Usado como rascunho._"];
+  for (const c of v.notConfirmed) out.push(`- Não confirmado: ${c.detail}`);
+  for (const c of v.additions) out.push(`- Acréscimo para conferir: ${c.detail}`);
+  for (const c of v.effects) out.push(`- Efeito no texto: ${c.detail}`);
+  for (const c of v.signals) out.push(`- Sinal ativo (não é prova): ${c.detail}`);
+  const current = NOT_VERIFIED.map((d) => d.id);
+  if (v.notVerified.join(",") !== current.join(",")) {
+    out.push(`- Não verificado nesta versão: ${v.notVerified.join(", ")}`);
+  }
+  if (e.provenance !== undefined) {
+    const p = e.provenance;
+    out.push(
+      `_proposta:_ ${p.providerId} · ${p.model} · ${p.strategy} · prompt ${p.promptHash} (${p.promptChars} caracteres)` +
+        (p.generation === null ? "" : ` · configuração ${stableStringify(p.generation)}`),
+    );
+  }
+  if (e.decidedAt !== undefined) out.push(`_decidido em:_ ${e.decidedAt}`);
+  return out;
+}
+
 export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: AnalysisLocaleId): string {
   if (entries.length === 0) return "";
   const out: string[] = [];
@@ -85,6 +159,7 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: 
     if (e.before !== undefined && e.after !== undefined && e.before !== "") {
       out.push(`_de:_ "${truncate(collapse(e.before))}" · _para:_ "${truncate(collapse(e.after))}"`);
     }
+    out.push(...decisionLines(e));
     for (const change of e.attribution?.changes ?? []) {
       const label = metaFor(localeId, change.criterion).label;
       const verdict =
@@ -98,6 +173,14 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: 
     out.push("");
   });
 
+  if (entries.some((e) => e.verification !== undefined)) {
+    out.push(
+      "_Em cada versão verificada, o Lucid não verifica: " +
+        `${NOT_VERIFIED.map((d) => d.what).join("; ")}. A decisão de usar é do autor, e "usado mesmo assim" não é ` +
+        "aprovação nem reprovação do Lucid._",
+    );
+    out.push("");
+  }
   if (entries.some((e) => e.source === "typing")) {
     out.push(
       "_Trecho reescrito à mão: a comparação vale para a região inteira. Dentro dela, não é possível dizer qual " +

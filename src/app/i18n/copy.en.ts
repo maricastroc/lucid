@@ -450,23 +450,43 @@ export const COPY_EN: UiCopy = {
     aiRunning: "Generating and verifying…",
     aiFailed: (message) => `Could not generate: ${message}`,
     aiFailedGeneric: "failed to generate the rewrite",
+    aiErrorKind: {
+      authentication:
+        "The server could not authenticate with the model provider, so there is no proposal. The deterministic " +
+        "audit is still complete.",
+      quota:
+        "The model provider's quota ran out, so there is no proposal now. The deterministic audit is still complete.",
+      rate_limit: "The model provider asked to wait before another attempt. Try again in a moment.",
+      model_unavailable: "The configured model is not available at the provider, so there is no proposal.",
+      invalid_request: "The provider refused the configuration sent to the model, so there is no proposal.",
+      incomplete: "The model stopped before finishing its answer, so there is no usable proposal. Nothing was applied.",
+      empty: "The model answered with no content, so there is no proposal. Nothing was applied.",
+      unusable:
+        "The model did not return a usable proposal. Nothing was applied; try again or edit the passage yourself.",
+      network: "Could not reach the model provider. Check the connection and try again.",
+      server: "The model provider failed to answer. Try again in a moment.",
+    },
     aiNoProposal:
       "The model returned nothing different from the passage, so there is no proposal. Lucid does not create " +
       "one; the decision stays with you.",
 
     verdictLabel: "Lucid's verification",
-    verdictProofs: (passed, total) => `${passed}/${total} proofs`,
-    verdictBlocked: "A proof failed, so Lucid cannot vouch for this version.",
-    verdictClear: "No failure found in this passage.",
+    verdictDivergent: "The original passage and the proposal diverge. Check before using it.",
+    verdictEffect: "Lucid still flags problems in the rewritten passage.",
+    verdictNoDivergence: "Lucid found no divergence in what it checks.",
     verdictWords: "words",
     verdictMeasureNotApproval: "measurement, not approval",
-    proofLabel: "Proof · deterministic",
-    signalLabel: "Signal · heuristic (not a proof)",
+    groupNotConfirmed: "Not confirmed",
+    groupAddition: "Addition to check",
+    groupEffect: "Effect on the text",
+    groupSignals: "Signals (not proofs)",
+    groupConfirmed: "Confirmed",
+    groupNotApplicable: "Does not apply",
+    groupNotVerified: "Not verified",
+    notVerifiedLead: "Lucid does not check",
     evaluatedExcerpt: "Passage evaluated",
-    checksShow: (proofs, signals) =>
-      `Show ${plural(proofs, "the proof", `all ${proofs} proofs`)}` +
-      (signals > 0 ? ` and ${plural(signals, "the signal", `${signals} signals`)}` : ""),
-    checksHide: "Hide proofs and signals",
+    checksShow: (count) => `Show ${plural(count, "the other check", `the other ${count} checks`)}`,
+    checksHide: "Hide the other checks",
     proposerTitle: "model + prompt version",
     applyStale: "Passage changed since this check",
     applyBlocked: "Use as a draft anyway",
@@ -839,6 +859,7 @@ export const COPY_EN: UiCopy = {
       "the after and its effect on the criteria.",
     listLabel: "Applied changes",
     effectLabel: "Effect on criteria",
+    usedAnyway: "Used anyway, with these divergences",
     detailsShow: "See the details of this change",
     detailsHide: "Hide the details of this change",
     undoLast: "Undo this change",
