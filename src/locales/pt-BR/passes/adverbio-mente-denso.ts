@@ -27,8 +27,8 @@ export const adverbioMenteDensoPass: Pass<PtConfig> = {
           severity: "info",
           requiresHuman: true,
           justification:
-            `Concentração de advérbios em -mente (${hits.length} nesta frase) — o excesso pesa a ` +
-            "leitura. Considere cortar ou substituir alguns; a ferramenta não decide quais.",
+            `Frase com ${hits.length} advérbios em -mente: o acúmulo pesa a leitura. ` +
+            "Escolha quais cortar ou substituir.",
         });
       }
     }

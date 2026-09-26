@@ -23,8 +23,8 @@ export const mesoclisePass: Pass<PtConfig> = {
         severity: "warning",
         requiresHuman: true,
         justification:
-          `Mesóclise (“${token.text}”) — o pronome encaixado no meio do verbo é uma forma arcaica e ` +
-          "de leitura difícil. Prefira a forma comum (ex.: “vai fazer-se” em vez de “far-se-á”); a ferramenta não reescreve automaticamente.",
+          `Mesóclise: em “${token.text}”, o pronome fica no meio do verbo, uma forma antiga e de leitura ` +
+          "difícil. Prefira a forma comum, como “vai fazer-se” no lugar de “far-se-á”.",
       });
     }
     return findings;

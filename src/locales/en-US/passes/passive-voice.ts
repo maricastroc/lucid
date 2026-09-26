@@ -102,26 +102,27 @@ function agentAfter(tokens: readonly Token[], participle: number, lex: PassiveLe
 function justification(form: PassiveForm, agent: Agent | null): string {
   if (agent !== null && !agent.truncated) {
     return (
-      "Passive voice with the agent after the verb, introduced by “by”. The sentence says who acts, but only " +
-      "after the action; making that agent the subject shows who does what (ISO 24495-1, 5.3.3). Whether to " +
-      "change it is the author's decision."
+      "Passive voice with the agent after the verb, introduced by “by”. The sentence names who acts only after " +
+      "the action; opening it with that agent shows who does what (ISO 24495-1, 5.3.3). Whether to change it is " +
+      "the author's decision."
     );
   }
   if (agent !== null) {
     return (
-      "Passive voice with an agent introduced by “by”, but the agent runs past the window Lucid reads, so it " +
-      "may be incomplete. Check who acts before deciding anything."
+      `Passive voice with an agent introduced by “by”. The agent runs past the ${AGENT_WINDOW} words Lucid reads ` +
+      "after “by”, so it may be cut short here. Check who acts in the full sentence before you change anything."
     );
   }
-  const present =
+  const state =
     form === "present"
-      ? " In the present tense without an agent, the construction can also describe a state (“the office is " +
-        "closed”) rather than an action; only the context decides."
+      ? " In the present tense, the construction can also describe a state (“the office is closed”) rather " +
+        "than an action; only the context decides."
       : "";
   return (
-    "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). " +
-    "Lucid does not supply the missing agent — only the author knows who acts." +
-    present
+    "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3)." +
+    state +
+    " If the reader needs to know who acts, name them. Lucid does not supply the missing agent: only the " +
+    "author knows who it is."
   );
 }
 

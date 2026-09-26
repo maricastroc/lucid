@@ -19,9 +19,9 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Lucid — auditor textual determinístico",
+  title: "Lucid · auditor textual determinístico",
   description:
-    "Auditoria textual determinística: cada apontamento rastreável ao critério e à fonte que o fundamenta — cláusulas da ABNT NBR ISO 24495-1:2024, convenções editoriais e heurísticas estruturais declaradas. Mede, não aprova.",
+    "Auditoria textual determinística: cada apontamento é rastreável ao critério e à fonte que o fundamenta, seja uma cláusula da ABNT NBR ISO 24495-1:2024, uma convenção editorial ou uma heurística estrutural declarada. Mede, não aprova.",
 };
 
 export default function RootLayout({

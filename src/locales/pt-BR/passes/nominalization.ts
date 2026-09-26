@@ -18,16 +18,16 @@ function connectorSetFor(pattern: "direct" | "a"): ReadonlySet<string> {
 function buildJustification(safeMapping: boolean, baseVerb: string): string {
   if (safeMapping) {
     return (
-      `Nominalização com verbo-suporte — o verbo "${baseVerb}" substitui a construção ` +
-      "diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva " +
-      "a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado."
+      "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde " +
+      `a ele é um só: “${baseVerb}”. Reescreva com esse verbo, conjugado, e ajuste o complemento. ` +
+      "O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA."
     );
   }
 
   return (
-    `Nominalização com verbo-suporte — o verbo "${baseVerb}" poderia substituir a ` +
-    "construção diretamente, mas o mapeamento desta palavra para um único verbo não é " +
-    "seguro o bastante; a escolha do verbo é decisão sua."
+    "Nominalização com verbo-suporte: a ação está escondida num substantivo. Esta palavra pode " +
+    `corresponder a mais de um verbo (o registrado é “${baseVerb}”), e só o contexto decide qual. ` +
+    "Escolha o verbo que diz a ação nesta frase e reescreva com ele."
   );
 }
 

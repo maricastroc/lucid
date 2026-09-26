@@ -406,7 +406,7 @@ function RoleRow({
         {value ? (
           <span className="font-serif text-[14px] text-ink-0">{value}</span>
         ) : (
-          <span className="text-[12.5px] italic text-ink-3">— {placeholder}</span>
+          <span className="text-[12.5px] italic text-ink-3">{placeholder}</span>
         )}
         {note && value && <span className="ml-1.5 font-sans text-[11.5px] text-ink-2">{note}</span>}
       </span>

@@ -168,7 +168,7 @@ export const DEFAULT_CONFIG: PtConfig = {
 
 const PRODUCT_PARAMETER: ThresholdBasis = {
   status: "product-parameter",
-  basis: "Parâmetro de produto do Lucid; a ABNT NBR ISO 24495-1 não fixa número para este limite.",
+  basis: "Parâmetro do Lucid: a ABNT NBR ISO 24495-1 não fixa número para este limite.",
 };
 
 export const PT_CONFIG_SCHEMA: ConfigSchema = {
@@ -178,8 +178,8 @@ export const PT_CONFIG_SCHEMA: ConfigSchema = {
       warnAbove: {
         status: "product-parameter",
         basis:
-          "Gatilho de inspeção, não regra (ADR-094). A norma pede frases concisas e variação de tamanho sem " +
-          "fixar número.",
+          "Gatilho de inspeção do Lucid, não regra: a ABNT NBR ISO 24495-1 pede frases concisas e com " +
+          "variação de tamanho, sem fixar número.",
       },
     },
   },

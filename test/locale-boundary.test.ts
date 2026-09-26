@@ -241,7 +241,7 @@ describe("switching the analysis locale discards what belonged to the old one", 
     expect(items).toEqual([
       "2 alterações registradas",
       "1 ponto revisado ou ignorado",
-      "a linha de base anexada",
+      "o ponto de partida anexado",
       "1 termo do vocabulário da organização",
       "o perfil editorial “Normativo ou contratual”",
       "2 ajustes de limite",

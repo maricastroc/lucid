@@ -51,7 +51,10 @@ describe("parseArgs — options", () => {
   });
 
   it("has no language option: the CLI analyses pt-BR only, and its help says so", () => {
-    expect(parseArgs(["--locale", "en-US", "a.txt"])).toEqual({ ok: false, error: "opção desconhecida: --locale" });
+    expect(parseArgs(["--locale", "en-US", "a.txt"])).toEqual({
+      ok: false,
+      error: "opção desconhecida: --locale (veja lucid --help)",
+    });
     expect(parseArgs(["--lang", "en", "a.txt"])).toMatchObject({ ok: false });
     expect(HELP).toMatch(/Analisa em pt-BR/);
     expect(HELP).not.toMatch(/--locale|--lang/);

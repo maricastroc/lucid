@@ -49,15 +49,15 @@ function matchChain(tokens: readonly Token[], headIndex: number, heads: Readonly
 function chainJustification(strongLink: boolean): string {
   if (strongLink) {
     return (
-      "Nominalizações encadeadas por “de” — ações escondidas em substantivos, uma governando " +
-      "a outra. Devolver as ações aos verbos deixaria a frase mais direta, mas exige decidir " +
-      "quem faz o quê; a ferramenta marca e não reescreve."
+      "Nominalizações encadeadas por “de”: duas ou mais ações escondidas em substantivos, uma presa à " +
+      "outra, e o leitor precisa desmontar a cadeia para saber quem faz o quê. Reescreva com verbos, " +
+      "decidindo quem pratica cada ação."
     );
   }
   return (
-    "Nominalização com complemento abstrato encadeado por “de” — a ação principal está " +
-    "escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a " +
-    "estrutura da frase; a ferramenta marca e não reescreve."
+    "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida " +
+    "num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; " +
+    "avalie se a versão com o verbo fica mais clara."
   );
 }
 
@@ -116,9 +116,8 @@ export const nominalizacaoEncadeadaPass: Pass<PtConfig> = {
           severity: "info",
           requiresHuman: true,
           justification:
-            `Concentração de nominalizações (${hitIndexes.length} nesta frase) — substantivos de ` +
-            "ação empilhados pesam a leitura. Considere devolver algumas ações ao verbo; a " +
-            "ferramenta não decide quais.",
+            `Frase com ${hitIndexes.length} substantivos de ação (nominalizações): o acúmulo pesa a ` +
+            "leitura. Escolha quais ações voltam a ser verbos.",
           meta: { kind: "density", count: hitIndexes.length },
         });
       }

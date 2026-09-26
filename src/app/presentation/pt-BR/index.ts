@@ -17,13 +17,13 @@ export const PT_PRESENTATION: LocalePresentation<CriterionId> = {
   humanLead: {
     "pt-BR": {
       long_sentence:
-        "Leia a frase e decida se ela carrega mais de uma ideia. Se carrega, você escolhe onde separar e como " +
-        "recompor; se carrega uma só, marque como vista — a extensão sozinha não obriga a nada.",
+        "Leia a frase. Se ela carrega mais de uma ideia, escolha onde separar e como reescrever; se carrega " +
+        "uma só, marque como revisado.",
     },
     en: {
       long_sentence:
-        "Read the sentence and decide whether it carries more than one idea. If it does, you choose where to " +
-        "separate and how to recompose; if it carries one, mark it as seen — length alone compels nothing.",
+        "Read the sentence. If it carries more than one idea, choose where to split it and how to rewrite it; " +
+        "if it carries only one, mark it as reviewed.",
     },
   },
   curated: new Set<CriterionId>([

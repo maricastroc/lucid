@@ -305,32 +305,26 @@ function buildJustification(eventiveness: Eventiveness, agentTruncated: boolean)
   if (eventiveness === "agent") {
     if (!agentTruncated) {
       return (
-        "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a " +
-        "ação. Considere reescrever na voz ativa para tornar a frase mais direta; a " +
-        "ferramenta não reescreve automaticamente."
+        "Voz passiva com agente explícito: a frase diz quem praticou a ação, mas só depois do verbo. " +
+        "Considere a voz ativa, com esse agente como sujeito, para o leitor saber logo quem faz o quê."
       );
     }
     return (
-      "Frase na voz passiva com agente explícito, mas o agente é longo demais para a " +
-      "ferramenta delimitar com segurança — reconhece só os primeiros " +
-      `${MAX_AGENT_PHRASE_TOKENS} termos após o marcador. Indique o agente manualmente ou ` +
-      "reescreva na voz ativa; converter automaticamente arriscaria cortar o agente no meio " +
-      "e colar o resto da frase ao objeto, corrompendo o sentido."
+      "Voz passiva com agente explícito, mas longo: o Lucid delimita só os " +
+      `${MAX_AGENT_PHRASE_TOKENS} primeiros termos depois do marcador (“por”, “pelo”…), e o agente ` +
+      "marcado pode estar incompleto. Confira onde ele termina antes de passar a frase para a voz ativa."
     );
   }
   if (eventiveness === "postposed_subject") {
     return (
-      "Frase na voz passiva: a oração começa no verbo e o sujeito vem depois do particípio " +
-      "(“É vedada a cobrança” = “a cobrança é vedada”). Falta dizer quem pratica a ação. Indique o " +
-      "agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente."
+      "Voz passiva: a oração começa pelo verbo e o sujeito vem depois do particípio (“É vedada a " +
+      "cobrança” equivale a “a cobrança é vedada”). O Lucid não encontrou na frase quem pratica a ação. Se ela não " +
+      "diz, informe quem a pratica para que a versão final possa nomear esse agente."
     );
   }
   return (
-    "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece " +
-    '"pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ' +
-    '("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") ' +
-    "fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a " +
-    "ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu."
+    "Voz passiva sem agente: o Lucid não encontrou na frase quem praticou a ação. Se ela não diz, " +
+    "informe quem a praticou para que a versão final possa nomear esse agente."
   );
 }
 

@@ -2,6 +2,7 @@ import type { Finding, Severity, Span } from "../../lucid";
 import type { ComprehensionProbe } from "../../lucid/probe/types";
 import { interpret } from "../../lucid/probe/interpret";
 import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
+import { criterionLabel } from "./briefing";
 import type {
   AgentDeclaration,
   MetricsDelta,
@@ -74,6 +75,10 @@ function extractEntities(text: string): string[] {
     if (!sentenceInitial) out.push(token);
   }
   return out.sort();
+}
+
+function labelsOf(criteria: readonly string[]): string {
+  return criteria.map((c) => `«${criterionLabel(c)}»`).join(", ");
 }
 
 function sameMultiset(a: string[], b: string[]): boolean {
@@ -152,8 +157,10 @@ export async function verifyRewrite(
       passed: targetRemaining === 0,
       detail:
         targetRemaining === 0
-          ? `a violação de '${criterion}' não reaparece no trecho reescrito`
-          : `'${criterion}' ainda é detectado ${targetRemaining}× no trecho reescrito`,
+          ? `${labelsOf([criterion])} não aparece mais no trecho reescrito`
+          : `${labelsOf([criterion])} ainda aparece no trecho reescrito (${targetRemaining} ${
+              targetRemaining === 1 ? "vez" : "vezes"
+            })`,
     });
   }
 
@@ -188,10 +195,13 @@ export async function verifyRewrite(
         passed: stillPresent.length === 0,
         detail:
           stillPresent.length === 0
-            ? `todos os ${directedCriteria.length} critérios pedíveis do briefing dirigido foram resolvidos`
+            ? directedCriteria.length === 1
+              ? `A nova versão resolveu o critério pedido à IA: ${labelsOf(directedCriteria)}`
+              : `A nova versão resolveu os ${directedCriteria.length} critérios pedidos à IA: ${labelsOf(directedCriteria)}`
             : degraded.length > 0
-              ? `briefing dirigido não resolveu: ${stillPresent.join(", ")} (${degraded.join(", ")} degradou para requiresHuman — informação que permitia resolver foi apagada, não corrigida)`
-              : `briefing dirigido não resolveu: ${stillPresent.join(", ")}`,
+              ? `A nova versão não resolveu: ${labelsOf(stillPresent)}. Em ${labelsOf(degraded)}, ela apagou a ` +
+                "informação que permitia corrigir, em vez de corrigir"
+              : `A nova versão não resolveu: ${labelsOf(stillPresent)}`,
       });
     }
   }
@@ -204,8 +214,8 @@ export async function verifyRewrite(
       passed: missing.length === 0,
       detail:
         missing.length === 0
-          ? `a reescrita nomeia o agente declarado pelo autor: ${declaredAgents.map((a) => `«${a}»`).join(", ")}`
-          : `o autor declarou o agente, mas a reescrita não o nomeia: ${missing.map((a) => `«${a}»`).join(", ")}`,
+          ? `A nova versão nomeia o agente que você informou: ${declaredAgents.map((a) => `«${a}»`).join(", ")}`
+          : `A nova versão não nomeia o agente que você informou: ${missing.map((a) => `«${a}»`).join(", ")}`,
     });
   }
 
@@ -214,7 +224,7 @@ export async function verifyRewrite(
   proofs.push({
     check: "region_improved",
     passed: burdenAfter <= burdenBefore + BURDEN_EPSILON,
-    detail: `peso (severidade) dos findings no trecho: ${burdenBefore.toFixed(1)} → ${burdenAfter.toFixed(1)}`,
+    detail: `Peso dos achados no trecho, pela gravidade: ${burdenBefore.toFixed(1)} → ${burdenAfter.toFixed(1)}`,
   });
 
   const totalBefore = totalBurden(before.findings);
@@ -222,7 +232,7 @@ export async function verifyRewrite(
   const noNewFindings: Proof = {
     check: "no_new_findings",
     passed: totalAfter <= totalBefore + BURDEN_EPSILON,
-    detail: `peso (severidade) total: ${totalBefore.toFixed(1)} → ${totalAfter.toFixed(1)}`,
+    detail: `Peso dos achados no texto todo, pela gravidade: ${totalBefore.toFixed(1)} → ${totalAfter.toFixed(1)}`,
   };
 
   const numsBefore = extractSorted(proposal.original, RE_NUMBER);
@@ -231,8 +241,8 @@ export async function verifyRewrite(
     check: "numbers_preserved",
     passed: sameMultiset(numsBefore, numsAfter),
     detail: sameMultiset(numsBefore, numsAfter)
-      ? "todos os números do trecho foram preservados"
-      : `números diferem: [${numsBefore.join(", ")}] → [${numsAfter.join(", ")}]`,
+      ? "Os números do trecho foram mantidos"
+      : `Os números mudaram: [${numsBefore.join(", ")}] → [${numsAfter.join(", ")}]`,
   };
 
   const datesBefore = extractSorted(proposal.original, RE_DATE);
@@ -241,8 +251,8 @@ export async function verifyRewrite(
     check: "dates_preserved",
     passed: sameMultiset(datesBefore, datesAfter),
     detail: sameMultiset(datesBefore, datesAfter)
-      ? "todas as datas do trecho foram preservadas"
-      : `datas diferem: [${datesBefore.join(", ")}] → [${datesAfter.join(", ")}]`,
+      ? "As datas do trecho foram mantidas"
+      : `As datas mudaram: [${datesBefore.join(", ")}] → [${datesAfter.join(", ")}]`,
   };
 
   const beforeSpanJargon = jargonTextsOverlapping(
@@ -258,8 +268,8 @@ export async function verifyRewrite(
     passed: introducedJargon.length === 0,
     detail:
       introducedJargon.length === 0
-        ? "a proposta não introduziu jargão novo"
-        : `jargão novo introduzido: ${introducedJargon.join(", ")}`,
+        ? "A nova versão não traz jargão novo"
+        : `A nova versão traz jargão novo: ${introducedJargon.join(", ")}`,
   };
 
   const sourceFirstPerson = firstPersonMarkers(`${text} ${declaredAgentsText}`, locale.firstPersonMarkers);
@@ -270,8 +280,8 @@ export async function verifyRewrite(
     passed: inventedFirstPerson.length === 0,
     detail:
       inventedFirstPerson.length === 0
-        ? "a proposta não fabricou agente em 1ª pessoa"
-        : `1ª pessoa inventada (texto original é impessoal): ${inventedFirstPerson.join(", ")}`,
+        ? "A nova versão não inventa agente em primeira pessoa"
+        : `O texto original é impessoal, e a nova versão fala em primeira pessoa: ${inventedFirstPerson.join(", ")}`,
   };
 
   proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon, noInventedFirstPerson);
@@ -286,8 +296,8 @@ export async function verifyRewrite(
     flagged: missingEntities.length > 0,
     detail:
       missingEntities.length > 0
-        ? `nome(s) possivelmente ausentes na proposta — confira: ${[...new Set(missingEntities)].join(", ")}`
-        : "sem sinal de nome próprio perdido (heurística, não prova)",
+        ? `Confira se estes nomes do original continuam na nova versão: ${[...new Set(missingEntities)].join(", ")}`
+        : "Nenhum nome próprio parece ter saído (heurística, não prova)",
   });
 
   const sourceAgentNouns = agentNounsAnywhere(`${text} ${declaredAgentsText}`, locale.thirdPersonAgentNouns);
@@ -298,8 +308,9 @@ export async function verifyRewrite(
     flagged: inventedAgents.length > 0,
     detail:
       inventedAgents.length > 0
-        ? `a proposta introduz possível agente ausente no original: ${inventedAgents.join(", ")}`
-        : "sem sinal de agente em 3ª pessoa fabricado (heurística, não prova)",
+        ? `A nova versão nomeia um possível agente que não está no original: ${inventedAgents.join(", ")}. ` +
+          "Confira se ele não foi inventado"
+        : "Nenhum agente novo em terceira pessoa encontrado (heurística, não prova)",
   });
 
   const sourceIsDeontic = new RegExp(locale.deonticInSource.source, "iu").test(proposal.original);
@@ -309,8 +320,9 @@ export async function verifyRewrite(
     flagged: introduced !== null,
     detail:
       introduced !== null
-        ? `o original não impõe dever e a proposta escreve «${introduced[0]}» — confira se descrever virou obrigar`
-        : "sem sinal de dever introduzido (heurística, não prova)",
+        ? `O original não impõe dever, e a nova versão escreve «${introduced[0]}». Confira se o que era ` +
+          "descrição virou obrigação"
+        : "Nenhum dever novo encontrado (heurística, não prova)",
   });
 
   const strip = (value: string): string =>
@@ -331,8 +343,9 @@ export async function verifyRewrite(
     flagged: categoriesDropped.length > 0,
     detail:
       categoriesDropped.length > 0
-        ? `a proposta não repete a categoria do original — confira se ela não passou a valer para mais gente: ${categoriesDropped.join(", ")}`
-        : "sem sinal de categoria jurídica encolhida (heurística, não prova)",
+        ? `A nova versão deixou de citar ${categoriesDropped.length === 1 ? "esta categoria" : "estas categorias"} ` +
+          `do original: ${categoriesDropped.join(", ")}. Confira se a regra não passou a valer para mais gente`
+        : "Nenhuma categoria jurídica do original saiu (heurística, não prova)",
   });
 
   if (options.probe && options.question) {
@@ -350,10 +363,10 @@ export async function verifyRewrite(
         check: "meaning_preserved",
         flagged: lost,
         detail: lost
-          ? "o leitor de piso extraía o fato do original mas trava na proposta — possível perda de informação"
+          ? "O leitor de piso encontrava a resposta no original, mas trava na nova versão: possível perda de informação"
           : proposedSignal.tipo === "flag"
-            ? "a proposta trava o leitor de piso, mas o original também travava — sem conclusão de perda"
-            : "sem sinal de perda de sentido pelo piso (não é garantia de compreensão)",
+            ? "A nova versão trava o leitor de piso, mas o original também travava: não dá para concluir que houve perda"
+            : "Nenhuma perda de sentido detectada pelo leitor de piso (não é garantia de compreensão)",
       });
     } catch (error) {
       console.warn(

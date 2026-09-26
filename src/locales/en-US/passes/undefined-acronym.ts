@@ -75,9 +75,10 @@ export const undefinedAcronymPass: Pass<EnConfig> = {
         severity: "warning",
         requiresHuman: true,
         justification:
-          `“${key}” is used before it is spelled out. The Federal Plain Language Guidelines (2011, p. 34) ask to ` +
-          "define an abbreviation the first time it is used — or to replace it with a short name that says what it " +
-          "is (ISO 24495-1, 5.3.2). Lucid does not know what the acronym stands for; writing it out is the author's.",
+          `“${key}” is used before it is spelled out. Write out the full name the first time, or replace the ` +
+          "acronym with a short name that says what it is; the Federal Plain Language Guidelines (2011, p. 34) " +
+          `recommend either (ISO 24495-1, 5.3.2). Lucid does not know what “${key}” stands for: the full name has ` +
+          "to come from the author.",
         meta: { acronym: key },
       });
     }

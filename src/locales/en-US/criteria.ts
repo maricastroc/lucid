@@ -47,7 +47,7 @@ export const EN_NOT_PORTED: readonly NotPorted[] = [
     criterion: "gerundismo",
     reason:
       "The construction is standard English ('will be sending'); Portuguese gerundismo is a calque of it. " +
-      "Porting the rule would flag correct English as a defect — the canonical case of why translating a " +
-      "rule does not port a phenomenon.",
+      "Porting the rule would flag correct English as a defect: the clearest case of why translating a rule " +
+      "does not port a phenomenon.",
   },
 ];

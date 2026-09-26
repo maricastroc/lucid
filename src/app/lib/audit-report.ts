@@ -50,19 +50,19 @@ function bySeverityThenPosition(a: Finding, b: Finding): number {
 function renderBriefingMarkdown(briefing: BriefingReport | null): string {
   if (briefing === null || !briefing.check.declared) {
     return [
-      "## Princípio 1 — Relevante (5.1)",
+      "## Princípio 1: Relevante (5.1)",
       "",
-      "**Não declarado.** A norma pede que o autor modele o leitor antes de escrever: quem lê, o que precisa fazer, " +
-        "o que entra e o que sai. Nenhuma regra automática decide o que é relevante para um leitor específico — por " +
-        "isso este princípio **não tem critério no placar** e **não é dado por cumprido**. A ausência aqui é ausência " +
-        "de declaração, não conformidade.",
+      "**Não declarado.** A norma pede que o autor pense no leitor antes de escrever: quem lê, o que precisa fazer, " +
+        "o que entra no texto e o que fica de fora. Só o autor pode responder a isso. Por isso, este princípio " +
+        "**não tem critério no placar** e **não aparece como cumprido**. Aqui, a ausência quer dizer que nada foi " +
+        "declarado, não que o texto esteja conforme.",
       "",
     ].join("\n");
   }
 
   const { briefing: declared, check } = briefing;
-  const out: string[] = ["## Princípio 1 — Relevante (5.1)", ""];
-  out.push("_Briefing declarado pelo autor. É registro de decisão humana, não medição da ferramenta._");
+  const out: string[] = ["## Princípio 1: Relevante (5.1)", ""];
+  out.push("_Respostas do autor sobre o leitor. São registro de decisão humana: o Lucid não as mede nem as verifica._");
   out.push("");
   if (declared.audience.trim() !== "") out.push(`- **Quem é o leitor:** ${collapse(declared.audience)}`);
   if (declared.purpose.trim() !== "")
@@ -75,14 +75,16 @@ function renderBriefingMarkdown(briefing: BriefingReport | null): string {
     out.push("");
     for (const item of check.coverage) {
       const found = item.occurrences.length > 0;
+      const times = item.occurrences.length;
       out.push(
-        `- ${found ? "✓" : "✗"} “${item.expression}” — ${found ? `aparece ${item.occurrences.length}×` : "não aparece com essas palavras"}`,
+        `- ${found ? "✓" : "✗"} “${item.expression}”: ${found ? `aparece ${times} ${plural(times, "vez", "vezes")}` : "não aparece com essas palavras"}`,
       );
     }
     out.push("");
     out.push(
-      "_Busca literal, sensível a acento. Encontrar não prova que o leitor vai entender; não encontrar não prova que o " +
-        "assunto está ausente — pode estar dito com outras palavras. Esta lista é do autor e não entra no placar._",
+      "_Busca literal: ignora maiúsculas e minúsculas, mas considera os acentos. Encontrar não prova que o leitor " +
+        "vai entender; não encontrar pode significar só que o texto diz o mesmo com outras palavras. Esta lista é do " +
+        "autor e não entra no placar._",
     );
     out.push("");
   }
@@ -100,10 +102,11 @@ const PRESET_PT: Record<ProfileId, string> = {
 const PRESET_LIMIT_PT: Record<ProfileId, string> = {
   base: "Comparável a qualquer outro placar padrão.",
   normativo:
-    "Um placar deste perfil não é comparável a um padrão nem aos demais: o mesmo texto tem menos frases longas aqui porque o limite é outro.",
+    "Um placar deste perfil não é comparável a um padrão nem ao de outro perfil: o mesmo texto tem menos frases longas aqui porque o limite é outro.",
   publico:
-    "Aplicado a texto jurídico, este perfil aponta quase toda frase — é o perfil errado para aquele documento, não um defeito do texto.",
-  digital: "Aplicado a texto sem títulos nem listas, quatro critérios ficam sem objeto e o placar cala sobre eles.",
+    "Aplicado a texto jurídico, este perfil aponta quase todas as frases: é o perfil errado para aquele documento, não um defeito do texto.",
+  digital:
+    "Em texto sem títulos nem listas, os critérios de título e de lista ficam sem objeto, e o placar não diz nada sobre eles.",
 };
 
 function renderProfileMarkdown(config: Config | null, profileId: ProfileId | null, locale: AnalysisLocale): string {
@@ -136,13 +139,14 @@ function renderProfileMarkdown(config: Config | null, profileId: ProfileId | nul
   if (off.length > 0) {
     out.push(
       `> **${off.length} ${off.length === 1 ? "critério foi desligado" : "critérios foram desligados"}** ` +
-        `(${off.join(", ")}). Onde eles calam, o silêncio significa **"não procurei"**, não "não encontrei". ` +
+        `(${off.join(", ")}). ${plural(off.length, "Para ele", "Para eles")}, a falta de anotações quer dizer ` +
+        `**"não procurei"**, não "não encontrei". ` +
         "Um placar produzido com critérios desligados não é comparável a um placar padrão.",
     );
     out.push("");
   }
   out.push(
-    "_A norma não fixa números; o limiar é escolha editorial. O perfil carimbado no cabeçalho identifica " +
+    "_A norma não fixa números: os limiares são escolha editorial. O perfil carimbado no cabeçalho identifica " +
       "exatamente estes ajustes._",
   );
   out.push("");
@@ -167,8 +171,8 @@ function renderBalanceMarkdown(
 
   const out: string[] = ["## Antes e depois", ""];
   out.push(
-    "Comparação entre o texto de entrada e o texto atual, critério a critério. Diz o que os critérios " +
-      "encontram nos dois momentos — não diz se o leitor entendeu, e peso menor não é aprovação.",
+    "Comparação entre o texto de entrada e o texto atual, critério a critério. Mostra o que os critérios " +
+      "encontram em cada momento. Não diz se o leitor entendeu, e peso menor não é aprovação.",
   );
   out.push("");
   out.push(
@@ -189,14 +193,14 @@ function renderBalanceMarkdown(
 }
 
 function renderEntryTextMarkdown(originalText: string | null, hasChanges: boolean): string {
-  const out: string[] = ["## Anexo — Texto de entrada", ""];
+  const out: string[] = ["## Anexo: texto de entrada", ""];
 
   if (originalText === null || originalText === "") {
     if (!hasChanges) return "";
     out.push(
       originalText === null
-        ? "**Não registrado.** Esta sessão foi salva antes de o Lucid guardar uma cópia do texto de entrada, " +
-            "portanto o peso inicial informado acima não pode ser conferido contra o texto de partida."
+        ? "**Não registrado.** Esta sessão foi salva antes de o Lucid passar a guardar uma cópia do texto de " +
+            "entrada. Por isso, o peso inicial informado acima não pode ser conferido contra o texto de partida."
         : "O documento foi escrito dentro do Lucid: não houve texto de entrada, e o peso inicial informado acima " +
             "corresponde ao primeiro estado analisado.",
     );
@@ -206,12 +210,11 @@ function renderEntryTextMarkdown(originalText: string | null, hasChanges: boolea
 
   out.push(
     hasChanges
-      ? "Cópia do documento como ele entrou nesta sessão, para que a variação de peso informada acima possa ser " +
-          "conferida contra o ponto de partida. É registro, não proposta: o Lucid não restaura nem aplica nada a " +
-          "partir deste anexo."
-      : "Cópia do documento como ele entrou nesta sessão. Nenhuma alteração foi registrada, o que não quer dizer " +
-          "que o texto atual seja igual a este: edição feita à mão não gera registro. É registro, não proposta — " +
-          "o Lucid não restaura nem aplica nada a partir deste anexo.",
+      ? "Cópia do documento como ele entrou nesta sessão, para conferir a variação de peso informada acima. " +
+          "É só registro: o Lucid não restaura nem aplica nada a partir deste anexo."
+      : "Cópia do documento como ele entrou nesta sessão. Nenhuma alteração foi registrada, mas o texto atual " +
+          "pode ser diferente deste: uma edição ainda aberta no modo Escrever só é registrada quando o autor sai " +
+          "desse modo. É só registro: o Lucid não restaura nem aplica nada a partir deste anexo.",
   );
   out.push("");
   const fence = "`".repeat(Math.max(3, longestBacktickRun(originalText) + 1));
@@ -248,9 +251,9 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: A
   out.push(`**${comparison.title}** · ${comparison.savedAt}`);
   out.push("");
   out.push(
-    "**A régua é a mesma nos dois lados.** O texto do ponto de partida foi reanalisado com o motor, o perfil e os " +
-      "dados carimbados no cabeçalho deste relatório. Nenhum número abaixo compara medições feitas com réguas " +
-      "diferentes.",
+    "**A régua é a mesma nos dois lados.** O texto do ponto de partida foi reanalisado com a versão do Lucid, o " +
+      "perfil e os dados carimbados no cabeçalho deste relatório. Nenhum número abaixo compara medições feitas com " +
+      "réguas diferentes.",
   );
   out.push("");
 
@@ -258,7 +261,7 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: A
   out.push(
     `A auditoria emitida à época registrou ${comparison.historicalCount} ` +
       `${plural(comparison.historicalCount, "anotação", "anotações")}. Reanalisado agora, o mesmo texto dá ` +
-      `${comparison.rebasedCount}.`,
+      `${comparison.rebasedCount} ${plural(comparison.rebasedCount, "anotação", "anotações")}.`,
   );
   if (drift !== 0) {
     out.push("");
@@ -269,7 +272,7 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: A
   }
   if (comparison.divergence.length > 0) {
     out.push("");
-    out.push(`Mudou na régua desde então: ${comparison.divergence.map((field) => STAMP_PT[field]).join(", ")}.`);
+    out.push(`O que mudou na régua desde então: ${comparison.divergence.map((field) => STAMP_PT[field]).join(", ")}.`);
   }
   out.push("");
 
@@ -296,8 +299,8 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: A
     out.push("_Nenhum dos trechos apontados antes aparece de novo com as mesmas palavras._");
   } else {
     for (const point of comparison.stillThere) {
-      const times = point.count > 1 ? ` · ${point.count}×` : "";
-      out.push(`- **${metaFor(locale.id, point.criterion).label}**${times} — “${collapse(point.excerpt)}”`);
+      const times = point.count > 1 ? ` · ${point.count} ocorrências` : "";
+      out.push(`- **${metaFor(locale.id, point.criterion).label}**${times}: “${collapse(point.excerpt)}”`);
       if (point.decision !== null) {
         const reason = point.decision.note === null ? "sem motivo registrado" : collapse(point.decision.note);
         out.push(`  _${DECISION_PT[point.decision.kind]}: ${reason}_`);
@@ -306,8 +309,8 @@ function renderBaselineMarkdown(comparison: BaselineComparison | null, locale: A
   }
   out.push("");
   out.push(
-    "_Esta lista não afirma que algo foi resolvido: ela diz o que sobreviveu. Entre duas versões editadas fora do " +
-      "Lucid não é possível dizer qual edição produziu qual mudança, e peso menor não é aprovação._",
+    "_Esta lista não afirma que algo foi resolvido: mostra só o que continua no texto. Entre duas versões editadas " +
+      "fora do Lucid, não é possível dizer qual edição produziu qual mudança. Peso menor não é aprovação._",
   );
   out.push("");
   return out.join("\n");
@@ -329,8 +332,8 @@ function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[
   out.push("");
   out.push(
     kept.length === 0
-      ? "**Nenhum ponto foi examinado nesta sessão.** Isto não é atestado sobre o texto nem defeito dele — " +
-          "é o estado da revisão, dito em voz alta para que a ausência de registro não passe por revisão feita."
+      ? "**Nenhum ponto foi examinado nesta sessão.** Isso descreve o estado da revisão, não o texto. A " +
+          "seção existe para que a falta de registro não pareça revisão feita."
       : `**${kept.length} ${plural(kept.length, "ponto examinado", "pontos examinados")}** e mantidos no texto · ` +
           `${withReason} com motivo registrado.`,
   );
@@ -338,13 +341,14 @@ function renderDecisionsMarkdown(marks: ReviewMarks, findings: readonly Finding[
     out.push("");
     out.push(
       `${unexamined} ${plural(unexamined, "ponto ainda não foi examinado", "pontos ainda não foram examinados")}. ` +
-        "Os itens não examinados não são listados aqui: eles já estão em “Anotações”, com a mesma severidade.",
+        `${plural(unexamined, "Ele não é listado aqui: já aparece", "Eles não são listados aqui: já aparecem")} em ` +
+        "“Anotações”, com a mesma severidade.",
     );
   }
   out.push("");
 
   for (const point of [...kept].sort((a, b) => bySeverityThenPosition(a.finding, b.finding))) {
-    out.push(`**${metaFor(locale.id, point.finding.criterion).label}** — ${KIND_PT[point.kind]}`);
+    out.push(`**${metaFor(locale.id, point.finding.criterion).label}**: ${KIND_PT[point.kind]}`);
     out.push("");
     out.push(`> ${collapse(point.finding.span.text)}`);
     out.push("");
@@ -368,9 +372,9 @@ function renderVocabularyMarkdown(config: Config | null, findings: readonly Find
   const withPlain = terms.filter((t) => t.plain !== null && t.plain.trim() !== "").length;
   const out: string[] = ["## Vocabulário da organização", ""];
   out.push(
-    "Estes termos **não vêm da norma**. Quem declarou que eles não são familiares ao leitor deste " +
-      "documento foi a organização. O relatório os mantém separados do glossário curado porque a " +
-      "autoridade sobre cada lista é de uma parte diferente, e uma não empresta peso à outra.",
+    "Estes termos **não vêm da norma**: foi a organização que declarou que eles não são familiares ao leitor " +
+      "deste documento. Eles ficam separados do glossário curado porque cada lista tem uma autoridade diferente, " +
+      "e uma não empresta peso à outra.",
   );
   out.push("");
   out.push(
@@ -394,8 +398,8 @@ function renderVocabularyMarkdown(config: Config | null, findings: readonly Find
   }
   out.push("");
   out.push(
-    "_Termo sem equivalente registrado é sinalização, não proposta: sem uma troca atestada, sugerir " +
-      "uma substituição seria a ferramenta inventar o que a organização não disse._",
+    "_Termo sem equivalente registrado é só sinalizado. Sem um equivalente declarado pela organização, o Lucid " +
+      "não sugere substituição: seria inventar o que ela não disse._",
   );
   out.push("");
 
@@ -437,18 +441,6 @@ export function buildAuditReport(
   );
   out.push("");
   out.push("> **Este relatório mede, não aprova.** A ausência de anotações não é atestado de clareza.");
-  out.push(
-    "> Dois relatórios só são comparáveis se o motor, o perfil e os dados carimbados acima forem os mesmos: " +
-      "limiar diferente ou léxico diferente produzem placar diferente a partir do mesmo texto.",
-  );
-  out.push(
-    "> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação. O valor não é truncado: " +
-      "o número é o calculado, e a faixa de referência é leitura ao lado dele.",
-  );
-  out.push(
-    "> Critérios de léxico (jargão, nominalização, redundância, perífrase, dupla negação, advérbios vagos) checam " +
-      "**listas curadas** (precisão > recall): contagem baixa ou zero não prova ausência do fenômeno.",
-  );
   out.push("");
 
   out.push("## Placar");
@@ -458,9 +450,12 @@ export function buildAuditReport(
       `${sev.error} ${plural(sev.error, "prioritária", "prioritárias")}, ` +
       `${sev.warning} de atenção, ${sev.info} ${plural(sev.info, "leve", "leves")}`,
   );
-  out.push(
-    `- **${safe}** de troca direta (equivalente indicado; a aplicação é do autor) · **${human}** de decisão do autor`,
-  );
+  if (total > 0) {
+    out.push(
+      `- Das anotações, **${safe}** ${plural(safe, "tem", "têm")} troca direta (o equivalente é indicado; quem ` +
+        `troca é o autor) e **${human}** ${plural(human, "depende", "dependem")} de decisão do autor`,
+    );
+  }
   out.push(
     `- Palavras: ${fmtNum(m.words)} · Frases: ${fmtNum(m.sentences)} · Palavras por frase: ${fmtNum(m.wordsPerSentence)}`,
   );
@@ -469,12 +464,26 @@ export function buildAuditReport(
     locale.readability === undefined ? "Legibilidade" : `Legibilidade (${locale.readability.name})`;
   out.push(
     readability.measured
-      ? `- ${readabilityLabel}: ${readability.value} — ${readability.qualifier}`
+      ? `- ${readabilityLabel}: ${readability.value} · ${readability.qualifier}`
       : `- ${readabilityLabel}: ${readability.qualifier}`,
   );
   for (const note of readability.notes) {
     out.push(`  - ${note}`);
   }
+  out.push("");
+  out.push(
+    "> Legibilidade é sinal de apoio (Princípio 4 da norma), nunca aprovação. O valor não é truncado: " +
+      "o número mostrado é o calculado, e a faixa de referência só ajuda a interpretá-lo.",
+  );
+  out.push(
+    "> Critérios de léxico (jargão, nominalização, redundância, perífrase, dupla negação, advérbios vagos) " +
+      "comparam o texto com **listas curadas**, feitas para evitar apontamento errado. Contagem baixa ou zero não " +
+      "prova que o fenômeno esteja ausente.",
+  );
+  out.push(
+    "> Dois relatórios só são comparáveis se o motor, o perfil e os dados carimbados acima forem os mesmos: " +
+      "limiar diferente ou léxico diferente produzem placar diferente a partir do mesmo texto.",
+  );
   out.push("");
   out.push("### Coesão (descritores)");
   out.push("");
@@ -485,7 +494,7 @@ export function buildAuditReport(
   const co = m.cohesion;
   if (co === null) {
     out.push(
-      "- Indisponível neste idioma de análise: o locale não declara uma bateria de coesão. " +
+      "- Indisponível neste idioma de análise: o Lucid não mede coesão para este idioma. " +
         "Não é zero nem ausência de problema.",
     );
   } else {
@@ -518,8 +527,8 @@ export function buildAuditReport(
     }
     out.push("");
     out.push(
-      "_Cobertura **curada**: o critério compara contra uma lista curada — a contagem é um piso, não um teto. " +
-        "Cobertura **produtiva**: regra que casa qualquer ocorrência do padrão._",
+      "_Cobertura **curada**: o critério compara o texto com uma lista curada, então a contagem é um piso, não um " +
+        "teto. Cobertura **produtiva**: uma regra que encontra qualquer ocorrência do padrão._",
     );
     out.push("");
   }
@@ -531,25 +540,28 @@ export function buildAuditReport(
     out.push("");
     [...findings].sort(bySeverityThenPosition).forEach((f, i) => {
       out.push(
-        `### ${i + 1}. ${metaFor(locale.id, f.criterion).label} — ${SEVERITY_LABEL[f.severity]} · ${principleGroupLabel(f.principleGroup)} · ${provenanceLabel(f, "pt-BR", locale.id)}`,
+        `### ${i + 1}. ${metaFor(locale.id, f.criterion).label}: ${SEVERITY_LABEL[f.severity]} · ${principleGroupLabel(f.principleGroup)} · ${provenanceLabel(f, "pt-BR", locale.id)}`,
       );
       out.push("");
       out.push(`> ${collapse(f.span.text)}`);
       out.push("");
       out.push(f.justification);
       if (isSafe(f) && f.suggestion !== undefined) {
+        const origin =
+          f.source === "organizational" ? "Equivalente declarado pela organização" : "Equivalente direto (curado)";
         out.push("");
         out.push(
-          `**Equivalente direto (curado):** ${f.suggestion} — indicado pela ferramenta; a troca no texto é do autor.`,
+          `**${origin}:** “${f.suggestion}”. O Lucid indica; quem confere o sentido e faz a troca no texto é o autor.`,
         );
       } else if (!f.requiresHuman) {
         out.push("");
         out.push(
-          "_Sem troca 1:1 pronta, mas resolvível: a IA pode reescrever e a engine verifica — aplicar é decisão sua._",
+          "_Sem troca 1:1 pronta, mas resolvível: o autor reescreve o trecho, ou pede uma proposta à IA, e o Lucid " +
+            "verifica o resultado. Aplicar é decisão do autor._",
         );
       } else {
         out.push("");
-        out.push("_Exige decisão humana — a ferramenta aponta, não reescreve por você._");
+        out.push("_Exige decisão humana: só quem conhece o contexto pode resolver este ponto._");
       }
       out.push("");
     });
@@ -596,7 +608,7 @@ export function buildAuditReport(
   }
 
   out.push("---");
-  out.push("Gerado pelo Lucid — auditoria determinística (Camada 1, sem IA). Mede, não aprova.");
+  out.push("Gerado pelo Lucid: auditoria determinística, feita sem IA. Mede, não aprova.");
   out.push("");
   return out.join("\n");
 }

@@ -47,11 +47,11 @@ describe("ledger — provenance trail", () => {
     const md = renderLedgerMarkdown(ENTRIES, "pt-BR");
     expect(md).toContain("## Alterações registradas");
     expect(md).toContain("Peso da auditoria na sessão:** 6 → 2");
-    expect(md).toContain("**1. Edição do autor · Jargão** — peso 6 → 5 ↓");
-    expect(md).toContain("**2. Reescrita por IA · gemini:2.5-flash** — peso 5 → 2 ↓");
+    expect(md).toContain("**1. Edição do autor · Jargão**: peso 6 → 5 ↓");
+    expect(md).toContain("**2. Reescrita por IA · gemini:2.5-flash**: peso 5 → 2 ↓");
     expect(md).toContain('_de:_ "em sede de" · _para:_ "durante"');
     expect(md).toContain("não um atestado de qualidade");
-    expect(md).toContain("não é o histórico completo de edição");
+    expect(md).toContain("Uma edição ainda aberta no modo Escrever não aparece aqui.");
   });
 
   it("deterministic: same entries → byte-identical markdown", () => {

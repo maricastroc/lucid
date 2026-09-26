@@ -11,7 +11,7 @@ function buildFloorProbe(): ComprehensionProbe | { error: string } {
   if (process.env.GEMINI_API_KEY) {
     return new LlmComprehensionProbe(new GeminiProvider(process.env.GEMINI_API_KEY), "gemini-2.5-flash");
   }
-  return { error: "nenhum provedor de LLM configurado no servidor (GEMINI_API_KEY)" };
+  return { error: "nenhum provedor de IA configurado no servidor (GEMINI_API_KEY)" };
 }
 
 interface ProbeRequestBody {
@@ -24,7 +24,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     body = (await request.json()) as ProbeRequestBody;
   } catch {
-    return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
+    return NextResponse.json({ error: "requisição inválida: o corpo precisa ser JSON" }, { status: 400 });
   }
 
   const { text, pergunta } = body;
@@ -36,9 +36,9 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(
       {
         error:
-          `a sonda lê um trecho, não o documento inteiro: recebeu ${text.length.toLocaleString("pt-BR")} ` +
-          `caracteres e o limite é ${MAX_TEXT_LENGTH.toLocaleString("pt-BR")}. A auditoria determinística ` +
-          "não depende da sonda.",
+          `o teste de compreensão lê um trecho, não o documento inteiro: recebeu ` +
+          `${text.length.toLocaleString("pt-BR")} caracteres, e o limite é ${MAX_TEXT_LENGTH.toLocaleString("pt-BR")}. ` +
+          "A auditoria determinística não depende dele.",
       },
       { status: 413 },
     );
@@ -60,6 +60,6 @@ export async function POST(request: Request): Promise<Response> {
     if (cause instanceof ChatProviderError) {
       return NextResponse.json({ error: cause.message }, { status: 502 });
     }
-    return NextResponse.json({ error: "falha ao rodar a sonda" }, { status: 500 });
+    return NextResponse.json({ error: "erro interno do servidor" }, { status: 500 });
   }
 }

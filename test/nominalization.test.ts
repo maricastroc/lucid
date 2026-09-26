@@ -45,7 +45,7 @@ describe("nominalizationPass — the engine never composes the swap (ADR-054)", 
   it("the curated base verb is reported via meta and justification — information, not ready-made text", () => {
     const [f] = nomFindings("É preciso fazer a análise de documentos.");
     expect(f.meta).toMatchObject({ lightVerb: "fazer", nominalization: "análise", baseVerb: "analisar" });
-    expect(f.justification).toContain('"analisar"');
+    expect(f.justification).toContain("“analisar”");
     expect(f.justification).toContain("não reescreve");
   });
 });

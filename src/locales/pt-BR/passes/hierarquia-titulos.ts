@@ -7,7 +7,7 @@ export const hierarquiaTitulosPass = createHeadingLevelSkipPass<PtConfig>({
   text: {
     justification: (level, previousLevel) =>
       `Este título pula do nível ${previousLevel} para o ${level}, sem passar pelo ${previousLevel + 1}. ` +
-      "Saltos na hierarquia quebram a leitura por estrutura (sumário, varredura, leitor de tela). Ajuste o " +
-      "nível deste título ou insira um intermediário; a ferramenta não reorganiza a hierarquia por você.",
+      "O salto confunde quem navega pela estrutura do documento (sumário, leitor de tela). Ajuste o nível " +
+      `deste título ou inclua antes dele um título de nível ${previousLevel + 1}.`,
   },
 });

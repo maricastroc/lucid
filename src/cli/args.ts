@@ -71,7 +71,8 @@ export function parseArgs(argv: readonly string[]): ParseResult {
       if (!criteria.includes(value)) criteria.push(value);
       continue;
     }
-    if (arg.startsWith("-") && arg !== "-") return { ok: false, error: `opção desconhecida: ${arg}` };
+    if (arg.startsWith("-") && arg !== "-")
+      return { ok: false, error: `opção desconhecida: ${arg} (veja lucid --help)` };
 
     paths.push(arg);
   }
@@ -79,43 +80,45 @@ export function parseArgs(argv: readonly string[]): ParseResult {
   return { ok: true, options: { paths, format, failOn, criteria, quiet, coverage, help, version } };
 }
 
-export const HELP = `Lucid — auditor textual determinístico
+export const HELP = `Lucid · auditor textual determinístico
   Cada apontamento cita o critério e a fonte que o fundamenta (ex.: ABNT NBR ISO 24495-1).
 
 USO
   lucid <arquivo...> [opções]
   cat documento.txt | lucid -
 
-  Aceita .txt, .md, .docx e .pdf. Um PDF não declara título nem lista: tudo
-  entra como parágrafo, e os critérios de estrutura ficam sem objeto.
+  Aceita .txt, .md, .docx e .pdf. Um PDF não declara títulos nem listas: eles
+  são inferidos pela numeração e pelo desenho da página. Confira o resultado
+  antes de confiar nos critérios de estrutura.
 
   Analisa em pt-BR. O catálogo en-US é experimental e existe só no Studio;
   esta CLI não tem opção de idioma.
 
 OPÇÕES
   --format text|json     formato da saída (padrão: text)
-  --fail-on <gravidade>  never|info|warning|error — sai com código 2 se houver
-                         achado nessa gravidade ou acima (padrão: never)
+  --fail-on <gravidade>  never|info|warning|error. Sai com código 2 se houver
+                         achado dessa gravidade ou mais grave (padrão: never)
   --criterion <id>       audita só este critério; pode repetir
-  -q, --quiet            só o resumo por arquivo
-  --coverage             mapa de cobertura por cláusula da norma e sai;
-                         não audita arquivo nenhum
-  -v, --version          versão da engine e dos dados
-  -h, --help             esta ajuda
+  -q, --quiet            mostra só o resumo por arquivo
+  --coverage             mostra o mapa de cobertura por cláusula da norma e
+                         sai, sem auditar arquivos
+  -v, --version          versão do Lucid, do perfil e dos dados
+  -h, --help             mostra esta ajuda
 
 CÓDIGOS DE SAÍDA
-  0  a auditoria rodou
-  1  nada foi auditado (opção inválida, arquivo ilegível, ou recusa — .docx com
-     alterações rastreadas não resolvidas; PDF digitalizado, em colunas, com
-     texto grudado ou que perdeu um número na leitura; ou sem conteúdo legível)
-  2  o limite declarado em --fail-on foi cruzado
+  0  a auditoria terminou
+  1  nada foi auditado: opção inválida, arquivo ilegível ou arquivo recusado
+     (.docx com alterações rastreadas pendentes; PDF digitalizado, em colunas,
+     com palavras grudadas ou que perdeu um número na leitura; arquivo sem
+     conteúdo legível)
+  2  houve achado na gravidade declarada em --fail-on ou acima
 
-  Sair com 0 significa que a medição terminou — NÃO que o texto foi aprovado.
-  A ferramenta mede; ela não atesta clareza. Só há código 2 quando você declara
-  um limite: o corte é seu, nunca dela.
+  Sair com 0 significa que a medição terminou, NÃO que o texto foi aprovado.
+  O Lucid mede; não atesta clareza. O código 2 só existe quando você declara
+  um limite: o corte é seu, nunca do Lucid.
 
 FORMATOS ACEITOS
-  .txt  .md  .docx  e entrada padrão (-)
+  .txt  .md  .docx  .pdf  e entrada padrão (-)
 
-A auditoria é 100% determinística e offline: nenhuma rede, nenhum LLM.
-Mesma entrada produz saída byte-idêntica.`;
+A auditoria é determinística e offline: não usa rede nem IA.
+A mesma entrada produz sempre a mesma saída, byte a byte.`;

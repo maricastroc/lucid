@@ -142,7 +142,7 @@ describe("the record of a document · what the trail shows and what it admits", 
     await applyManualEdit(user);
     await openChanges(user);
 
-    expect(auditPanel().getByText(/não aparecem aqui nem no relatório exportado/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/o relatório exportado traz a mesma lista/i)).toBeInTheDocument();
   });
 });
 

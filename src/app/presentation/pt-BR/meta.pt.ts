@@ -9,8 +9,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dotted",
-    signal: "âncora numa forma de “ser” seguida de particípio, em janela local de palavras",
-    why: "Quem pratica a ação some ou vai para o fim da frase. No presente e sem agente, porém, a construção também pode indicar estado ou característica; nesses casos, só o contexto permite decidir.",
+    signal: "forma do verbo “ser” seguida de particípio, em palavras próximas",
+    why: "Quem pratica a ação some ou vai para o fim da frase. Quando a construção descreve um estado, e não uma ação, não há agente a nomear: só o contexto decide.",
   },
   passiva_sintetica: {
     label: "Voz passiva sintética",
@@ -20,8 +20,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-dotted",
     signal:
-      "“se” enclítico em verbo (aplica-se, publicam-se); exclui verbos inerentemente pronominais (trata-se, refere-se…)",
-    why: "O “se” esconde quem pratica a ação — e o leitor precisa saber quem faz o quê.",
+      "“se” depois do verbo (aplica-se, publicam-se) ou antes dele, logo após palavras como “não” e “que” (não se aplica); ficam de fora verbos que sempre levam “se” (trata-se, refere-se…)",
+    why: "O “se” esconde quem pratica a ação, e o leitor precisa saber quem faz o quê.",
   },
   nominalization: {
     label: "Nominalização",
@@ -30,7 +30,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras e concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
-    signal: "verbo-suporte + determinante + substantivo derivado de verbo, em adjacência estrita",
+    signal:
+      "verbo de apoio (fazer, realizar, efetuar, proceder, promover) seguido de artigo ou preposição e de um substantivo que vem de um verbo, em palavras seguidas (“fazer a análise”)",
     why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
   },
   nominalizacao_encadeada: {
@@ -41,7 +42,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal:
-      "substantivo de ação de um léxico curado encadeado por “de” a outro substantivo abstrato, ou concentrado na mesma frase",
+      "substantivo de ação, de uma lista curada, ligado por “de” a outro substantivo abstrato, ou vários deles na mesma frase",
     why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
   },
   jargon: {
@@ -51,8 +52,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Palavras familiares",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "correspondência exata num glossário curado (maior correspondência primeiro)",
-    why: "Termo pouco familiar fora do domínio afasta o leitor não especialista.",
+    signal: "termo escrito exatamente como está no glossário do Lucid (a expressão mais longa tem prioridade)",
+    why: "Um termo pouco conhecido fora da área afasta o leitor que não é especialista.",
   },
   vocabulario_da_organizacao: {
     label: "Vocabulário da organização",
@@ -61,8 +62,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Palavras familiares",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "correspondência exata com um termo declarado pela organização (maior correspondência primeiro)",
-    why: "A organização declarou que este termo não é familiar ao leitor dela. A norma não conhece o vocabulário de uma casa; ela conhece.",
+    signal: "termo escrito exatamente como a organização o declarou (a expressão mais longa tem prioridade)",
+    why: "Um termo que o leitor não conhece trava a leitura. Quem sabe o que o leitor conhece é a organização, que declarou este termo; a norma não tem como saber.",
   },
   sigla_sem_expansao: {
     label: "Sigla sem expansão",
@@ -72,8 +73,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-solid",
     signal:
-      "sigla (2–6 letras maiúsculas) usada antes de ser apresentada por extenso; exclui UFs, unidades e siglas universais",
-    why: "Sigla não apresentada exige que o leitor já a conheça — quem não conhece trava logo no começo.",
+      "sigla (de 2 a 6 letras maiúsculas) usada antes de ser escrita por extenso; ficam de fora siglas de estado, unidades de medida e siglas muito conhecidas",
+    why: "Sigla não apresentada exige que o leitor já a conheça. Quem não conhece trava logo no começo.",
   },
   long_sentence: {
     label: "Comprimento de frase",
@@ -82,11 +83,11 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "passage",
     markStyleClass: "",
-    signal: "contagem de palavras da frase acima do gatilho de inspeção configurado",
+    signal: "frase com mais palavras do que o número definido no perfil editorial (parâmetro do Lucid)",
     why:
-      "Extensão é um gatilho de inspeção, não um defeito: a norma pede uma ideia por frase e variação de " +
-      "tamanho, sem fixar número. Frases longas tendem a acumular ideias, mas uma frase longa com uma " +
-      "ideia só pode estar adequada, e uma frase curta pode ser difícil por outros motivos.",
+      "Frases longas tendem a acumular ideias. A norma pede uma ideia por frase e variação de tamanho, sem " +
+      "fixar número. O comprimento é um motivo para reler a frase, não um defeito: uma frase longa com uma " +
+      "ideia só pode estar adequada, e uma curta pode ser difícil por outros motivos.",
   },
   mais_que_perfeito_sintetico: {
     label: "Mais-que-perfeito sintético",
@@ -95,8 +96,9 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dotted",
-    signal: "forma num léxico de mais-que-perfeito sintético (derivado do PortiLexicon-UD), já sem formas ambíguas",
-    why: "Forma verbal pouco usada na fala (“fizera” = “tinha feito”) — de leitura mais difícil.",
+    signal:
+      "forma verbal de uma lista de mais-que-perfeito (“fizera”, “dissera”), tirada do PortiLexicon-UD e sem as formas ambíguas",
+    why: "Forma verbal pouco usada na fala (“fizera” em vez de “tinha feito”) e, por isso, mais difícil de ler.",
   },
   gerundismo: {
     label: "Gerundismo",
@@ -106,7 +108,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal: "padrão “ir + estar + gerúndio” (ex.: “vai estar enviando”)",
-    why: "Alonga a frase sem necessidade — a forma simples (“vai enviar”) é mais direta.",
+    why: "Alonga a frase sem necessidade: a forma simples (“vai enviar”) é mais direta.",
   },
   adverbios_vagos: {
     label: "Advérbios vagos",
@@ -115,7 +117,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "advérbio de reforço/atenuação de um léxico curado (basicamente, efetivamente, realmente…)",
+    signal: "advérbio de reforço ou de atenuação de uma lista curada (basicamente, efetivamente, realmente…)",
     why: "Advérbio que reforça sem acrescentar: costuma sair sem mudar o que a frase afirma.",
   },
   adverbio_mente_denso: {
@@ -125,8 +127,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "concentração de advérbios em -mente na mesma frase (allowlist do PortiLexicon-UD)",
-    why: "Critério descontinuado (ADR-058), substituído por “Advérbios vagos”; desligado por padrão.",
+    signal: "vários advérbios em -mente na mesma frase (lista tirada do PortiLexicon-UD)",
+    why: "Muitos advérbios em -mente na mesma frase pesam a leitura. Critério descontinuado e desligado por padrão: “Advérbios vagos” o substitui.",
   },
   redundancia: {
     label: "Redundância",
@@ -135,7 +137,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "inline",
     markStyleClass: "mark-solid",
-    signal: "correspondência num léxico curado de pleonasmos e duplas redundantes",
+    signal: "expressão de uma lista curada de pleonasmos e pares redundantes (“elo de ligação”)",
     why: "Um termo repete o sentido do outro sem acrescentar informação.",
   },
   perifrase_inflada: {
@@ -145,8 +147,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
-    signal: "locução cadastrada que ocupa o lugar de uma preposição/conjunção simples",
-    why: "Alonga a frase no lugar de uma palavra simples.",
+    signal: "locução de uma lista curada que ocupa o lugar de uma preposição ou conjunção simples (“no sentido de”)",
+    why: "Usa várias palavras onde uma simples bastaria.",
   },
   paragraph_length: {
     label: "Parágrafo longo",
@@ -155,8 +157,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Fácil de localizar",
     channel: "passage",
     markStyleClass: "",
-    signal: "contagem de frases do parágrafo acima do limite configurado",
-    why: "Um paredão de frases dificulta varrer o texto e achar a informação.",
+    signal: "parágrafo com mais frases do que o número definido no perfil editorial (parâmetro do Lucid)",
+    why: "Um bloco com muitas frases dificulta percorrer o texto e achar a informação.",
   },
   prose_enumeration: {
     label: "Enumeração em prosa",
@@ -165,8 +167,9 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Fácil de localizar",
     channel: "passage",
     markStyleClass: "",
-    signal: "≥3 ordinais distintos (a partir de “primeiro”) no mesmo parágrafo",
-    why: "Itens embutidos no texto corrido são mais difíceis de localizar que uma lista.",
+    signal:
+      "marcadores de sequência diferentes no mesmo parágrafo, a partir do primeiro (“primeiro… segundo…”, “(1)… (2)…”), na quantidade mínima definida no perfil editorial",
+    why: "Itens embutidos no texto corrido são mais difíceis de localizar do que numa lista.",
   },
   mesoclise: {
     label: "Mesóclise",
@@ -175,8 +178,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dotted",
-    signal: "pronome encaixado no meio do verbo + terminação de futuro/condicional",
-    why: "Forma arcaica (“far-se-á”) de leitura difícil — a forma comum é mais direta.",
+    signal: "pronome no meio do verbo, antes da terminação de futuro ou de condicional (“far-se-á”)",
+    why: "Forma arcaica (“far-se-á”) e difícil de ler: a forma comum é mais direta.",
   },
   dupla_negacao: {
     label: "Dupla negação",
@@ -185,7 +188,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dashed",
-    signal: "expressão cadastrada que afirma negando o negativo (litotes)",
+    signal: "expressão de uma lista curada que afirma negando o contrário (“não é incomum”)",
     why: "O leitor precisa desfazer a negação para chegar ao sentido afirmativo.",
   },
   subordinacao_densa: {
@@ -195,7 +198,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases concisas",
     channel: "passage",
     markStyleClass: "",
-    signal: "concentração de conectivos subordinativos na mesma frase (léxico curado, sem os polissêmicos)",
+    signal:
+      "vários conectivos subordinativos na mesma frase (“que”, “porque”, “embora”, “para que”…), de uma lista curada",
     why: "Muitas orações subordinadas encadeadas prendem ideias demais numa frase só e pesam a leitura.",
   },
   leitor_terceira_pessoa: {
@@ -205,8 +209,9 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Frases claras",
     channel: "inline",
     markStyleClass: "mark-dotted",
-    signal: "substantivo que nomeia o leitor em posição de sujeito + verbo deôntico numa janela local",
-    why: "Falar do leitor em terceira pessoa distancia; dizer “você” aproxima e deixa claro quem deve agir.",
+    signal:
+      "palavra que nomeia o leitor (“o interessado”, “o cidadão”) como sujeito de um verbo de obrigação (“deve”, “deverá”), em palavras próximas",
+    why: "Falar do leitor em terceira pessoa distancia. Dizer “você” aproxima e deixa claro quem deve agir.",
   },
   salto_de_nivel_titulo: {
     label: "Salto de nível de título",
@@ -215,8 +220,8 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Fácil de localizar",
     channel: "passage",
     markStyleClass: "",
-    signal: "título cujo nível pula mais de um degrau abaixo do título anterior (só em documento estruturado)",
-    why: "Saltos na hierarquia de títulos quebram a leitura por estrutura — sumário, varredura, leitor de tela.",
+    signal: "título que desce mais de um nível em relação ao título anterior (só quando o documento marca títulos)",
+    why: "Saltos na hierarquia de títulos atrapalham quem lê pela estrutura: o sumário, a leitura rápida e o leitor de tela.",
   },
   long_heading: {
     label: "Título longo",
@@ -225,8 +230,9 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Fácil de localizar",
     channel: "passage",
     markStyleClass: "",
-    signal: "título acima do limite de palavras, ou pontuado/formado como frase (só em documento estruturado)",
-    why: "Um título é um rótulo para varrer e localizar; longo ou em forma de frase, deixa de cumprir esse papel.",
+    signal:
+      "título com mais palavras do que o limite do perfil editorial, com mais de uma frase ou terminado em ponto final (só quando o documento marca títulos)",
+    why: "Um título serve de rótulo para localizar a seção. Longo ou em forma de frase, ele deixa de cumprir esse papel.",
   },
   single_item_list: {
     label: "Lista de um item",
@@ -235,7 +241,7 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     principleName: "Fácil de localizar",
     channel: "passage",
     markStyleClass: "",
-    signal: "bloco de lista com exatamente um item (só em documento estruturado)",
-    why: "Uma lista existe para comparar vários itens; com um só, não ajuda a localizar e sugere item faltando.",
+    signal: "lista com exatamente um item (só quando o documento marca listas)",
+    why: "Uma lista serve para separar vários itens. Com um só, não ajuda a localizar nada e sugere que falta um item.",
   },
 };

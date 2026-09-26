@@ -119,9 +119,9 @@ describe("renderReportHtml — a whole report reaches the page as prose", () => 
       "Placar",
       "Anotações por critério",
       "Perfil editorial",
-      "Princípio 1 — Relevante",
+      "Princípio 1: Relevante",
       "Alterações registradas",
-      "Anexo — Texto de entrada",
+      "Anexo: texto de entrada",
     ]) {
       expect(stripTags(html)).toContain(section);
     }

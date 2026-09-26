@@ -15,29 +15,25 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      if (w == null || th == null) return "This sentence is above the inspection trigger for length.";
+      if (w == null || th == null) return "This sentence has more words than Lucid's inspection parameter.";
       const standard = f.normativeReference?.standard ?? "ISO 24495-1";
       const parameter =
         metaStr(f, "thresholdStatus") === "provisional"
-          ? "that number is provisional for this analysis language, not validated, and not a limit set by the standard"
-          : "that number is a methodological parameter of this product, not a limit set by the standard";
+          ? "That number is provisional for this analysis language, not yet validated, and not a limit set by the standard"
+          : "That number is a Lucid parameter, not a limit set by the standard";
       return (
-        `This sentence has ${w} words. Lucid inspects sentences above ${th} words — ${parameter}: ` +
-        `${standard} asks for concise sentences and varied length without stating a count. The main check is ` +
-        "a different one: see whether the sentence carries more than one idea. A long sentence carrying a " +
-        "single idea can be fine, and does not necessarily need to be split."
+        `This sentence has ${w} words, and Lucid inspects sentences above ${th}. ${parameter}: ` +
+        `${standard} asks for concise sentences and varied length without stating a count. What matters is ` +
+        "whether the sentence carries more than one idea: with only one, it can be fine and does not need to be split."
       );
     },
     confidence: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       return assistida(
-        `The tool measures length exactly${
-          w != null && th != null ? ` (${w} words against a trigger of ${th})` : ""
-        }, but length alone does not decide whether the sentence is clear: it cannot tell one long idea from ` +
-          "several stacked ones, and it does not see institution names, legal references or spelled-out " +
-          "amounts, which lengthen a sentence without multiplying what it asks of the reader. Reading the " +
-          "sentence and counting the ideas is yours to do.",
+        `The word count is exact${w != null && th != null ? ` (${w}, above ${th})` : ""}. Length alone, ` +
+          "though, does not show whether the sentence holds one long idea or several stacked ones: institution " +
+          "names, legal references and spelled-out amounts lengthen a sentence without adding ideas.",
       );
     },
   },
@@ -51,32 +47,32 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const passage = `«${flat(f.span.text)}» combines a form of the verb “ser” with a participle.`;
       if (metaStr(f, "eventiveness") === "postposed_subject") {
-        return `${passage} The clause opens on the verb and the subject follows the participle — an order only the passive allows. The text does not say who performs the action.`;
+        return `${passage} The clause opens on the verb and the subject follows the participle, an order only the passive allows. Lucid did not find who performs the action in the sentence.`;
       }
       return `${passage} ${
         metaBool(f, "hasAgent")
-          ? "The agent appears in the passage itself."
-          : "The text does not say who performed the action."
+          ? "The agent, whoever performs the action, appears in the passage itself."
+          : "Lucid did not find who performed the action in the sentence."
       }`;
     },
     confidence: (f) =>
       assistida(
         metaStr(f, "eventiveness") === "postposed_subject"
-          ? `The verb-subject order confirms the passive, but the agent is not in the text: turning it active would mean saying who performs the action, and the tool refuses to invent that.`
+          ? "The verb-subject order confirms the passive. Lucid does not invent an agent that is not in the text."
           : metaBool(f, "hasAgent")
-            ? `The agent is in the text, so the information exists — but turning it active means reordering subject and object and reconjugating the verb. That is outside any mechanical guarantee: the tool builds the scaffolding, the final sentence is yours.`
-            : `Beyond reordering and reconjugating, the agent is not in the text here: rewriting in the active voice would mean inventing who performed the action. The tool refuses to fabricate and hands the decision back to you.`,
+            ? "Lucid recognized both the passive and the agent in the text. Check that the agent is complete and that the active version keeps the same meaning."
+            : "This is a form of “ser” followed by a participle. Lucid does not invent an agent that is not in the text.",
       ),
   },
   passiva_sintetica: {
     headline: () => "Synthetic passive (“se”)",
     prose: (f) =>
       metaStr(f, "position") === "proclitic"
-        ? `«${flat(f.span.text)}» puts the “se” before the verb: the action exists, but the text does not say who performs it (“não se aplica a multa” — who applies it?). The detector only marks proclisis after a word that forces it (“${metaStr(f, "attractor") ?? "não"}”, here), a position where the “se” cannot be the conditional; and it excludes inherently pronominal verbs (trata-se, refere-se…).`
-        : `«${flat(f.span.text)}» uses the enclitic “se”: the action exists, but the text does not say who performs it (“aplica-se a multa” — who applies it?). The detector marks the enclitic “verb-se” form and excludes inherently pronominal verbs (trata-se, refere-se…).`,
+        ? `In «${flat(f.span.text)}», the “se” comes before the verb and the text does not say who performs the action (in “não se aplica a multa”, who applies it?). Lucid only flags this “se” after a word that forces that position (here, “${metaStr(f, "attractor") ?? "não"}”), where it cannot be the conditional “se”.`
+        : `In «${flat(f.span.text)}», the “se” comes after the verb and the text does not say who performs the action (in “aplica-se a multa”, who applies it?).`,
     confidence: () =>
       assistida(
-        `The “se” is ambiguous — it can be a passive, an indeterminate subject, or a reflexive. The tool does not resolve that ambiguity and does not invent the agent: it flags the construction and hands the decision back to you.`,
+        "Lucid located the construction reliably, but the role of the “se” depends on the sentence: it can be a passive, an indeterminate subject or a reflexive. Read the sentence and decide which case it is.",
       ),
   },
   nominalization: {
@@ -86,33 +82,36 @@ const BASE: PtNarrativeSet = {
     },
     prose: (f) => {
       const base = metaStr(f, "baseVerb");
-      return `The action${base ? ` of the verb “${base}”` : ""} appears disguised as a noun, attached to a light verb — which lengthens the sentence and pulls the verb away from its meaning.`;
+      const light = metaStr(f, "lightVerb");
+      return `The action${base ? ` of “${base}”` : ""} appears as a noun, carried by ${
+        light ? `the verb “${light}”` : "a verb such as “fazer” or “realizar”"
+      }. That lengthens the sentence and hides the action.`;
     },
     confidence: (f) => {
       const base = metaStr(f, "baseVerb");
       if (!f.requiresHuman)
         return assistida(
-          `The mapping to the verb${base ? ` “${base}”` : ""} is unique and comes from a curated lexicon — but reconjugating and adjusting the complement is writing, and the engine does not write. Give the action back to the verb in your own edit, or ask the AI for the rewrite; the engine verifies the result.`,
+          `According to Lucid's curated list, this noun corresponds to a single verb${base ? `, “${base}”` : ""}. The new sentence can be yours or an AI proposal; either way, Lucid verifies the result.`,
         );
       return assistida(
-        `The construction was detected, but mapping this word to a single verb is not safe (more than one sense is possible). Choosing the verb${base ? ` — perhaps “${base}” —` : ""} is your decision; the tool does not choose for you.`,
+        `Lucid recognized the construction reliably, but this noun can map to more than one verb. Check which verb expresses the action in this sentence${base ? ` (perhaps “${base}”)` : ""}.`,
       );
     },
   },
   jargon: {
     headline: (f) => `${DOMAIN_EN[metaStr(f, "domain") ?? ""] ?? "Technical"} jargon`,
     prose: (f) =>
-      `«${flat(f.span.text)}» is listed in the curated glossary as ${
+      `«${flat(f.span.text)}» is in Lucid's glossary as ${
         DOMAIN_EN[metaStr(f, "domain") ?? ""] ?? "technical"
-      } vocabulary, unfamiliar to readers outside that domain.`,
+      } vocabulary, unfamiliar to readers outside that field.`,
     confidence: (f) => {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `“${flat(f.span.text)}” is in the curated glossary with a single, context-independent equivalent; swapping it for “${f.suggestion}” preserves government and requires no reconjugation. It is a 1:1 substitution — the tool vouches for the equivalence; making the swap in the text is yours.`,
+          rationale: `Lucid's glossary records “${f.suggestion}” as an equivalent of “${flat(f.span.text)}”, with no other known sense and no change in government. Whether it fits this sentence is yours to check, before you click.`,
         };
       return assistida(
-        `There is a simpler equivalent, but the swap depends on what follows in the sentence: applying it blindly could break agreement. The tool detects it and points the way, but leaves the swap to you.`,
+        "Lucid recognized the term reliably, but the glossary records no swap that works in every sentence: the sense here and what follows decide. Check the context before swapping.",
       );
     },
   },
@@ -120,15 +119,15 @@ const BASE: PtNarrativeSet = {
     headline: () => "Organisation's vocabulary",
     prose: (f) =>
       `«${flat(f.span.text)}» is in the vocabulary your organisation declared unfamiliar to its own reader. ` +
-      `This does not come from the standard — it comes from whoever knows this document's audience.`,
+      "This finding comes from the organisation, not from the standard.",
     confidence: (f) => {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `The organisation recorded “${f.suggestion}” as this term's equivalent. It signs the equivalence — not the tool, not the standard; the change in the text is still yours.`,
+          rationale: `The term appears exactly as the organisation declared it, and the organisation recorded “${f.suggestion}” as its equivalent. Whether it fits this sentence is yours to check, before you click.`,
         };
       return assistida(
-        "The organisation declared the term but recorded no equivalent. Without an attested swap, all that fits here is a signal: proposing a replacement would mean inventing what nobody stated.",
+        "The term appears exactly as the organisation declared it, but no equivalent was recorded. Decide whether it stays, gets an explanation or is replaced; Lucid does not propose a substitute.",
       );
     },
   },
@@ -139,11 +138,11 @@ const BASE: PtNarrativeSet = {
     },
     prose: (f) => {
       const a = metaStr(f, "acronym");
-      return `The acronym${a ? ` “${a}”` : ""} appears without having been spelled out before this occurrence. The detector marks only the FIRST undefined use, and ignores state codes, units and universal acronyms (CPF, CEP…).`;
+      return `The acronym${a ? ` “${a}”` : ""} appears here without having been spelled out before. Only this first occurrence is flagged.`;
     },
     confidence: () =>
       assistida(
-        `The tool locates the first undefined occurrence exactly, but writing the name out — “Nome Por Extenso (SIGLA)” — is your writing; it does not know what the acronym stands for and will not invent the expansion.`,
+        "Lucid reliably locates the first occurrence that was never introduced, but it does not know what the acronym stands for. Supply the full name at this first occurrence.",
       ),
   },
   subordinacao_densa: {
@@ -155,15 +154,15 @@ const BASE: PtNarrativeSet = {
       const c = metaNum(f, "clauses");
       const th = metaNum(f, "threshold");
       return `This sentence chains ${c ?? "several"} subordinate clauses${
-        th != null ? ` (threshold: ${th})` : ""
-      }. The detector counts unambiguous subordinating connectives — it does not interpret content, and deliberately ignores the ambiguous ones (“que”, “se”, “caso”…).`;
+        th != null ? `, and Lucid flags sentences from ${th} on` : ""
+      }. The count comes from connectives on a curated list, without interpreting the content.`;
     },
     confidence: (f) => {
       const c = metaNum(f, "clauses");
       return assistida(
-        `The tool counts subordinating connectives exactly${
+        `The connective count is exact${
           c != null ? ` (${c} in this sentence)` : ""
-        }, but separating the clauses means deciding what becomes its own sentence and reconjugating — the author's work (Principle 1). It points at the density; the rewrite is yours.`,
+        }, but it does not measure whether the sentence became hard: some subordinate clauses are short and clear. Read the sentence and check whether it traps too many ideas.`,
       );
     },
   },
@@ -175,14 +174,18 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const noun = metaStr(f, "readerNoun");
       const verb = metaStr(f, "deonticVerb");
-      return `The text names the reader in the third person${noun ? ` (“${noun}”)` : ""}${
+      return `The text refers to the reader in the third person${noun ? ` (“${noun}”)` : ""}${
         verb ? ` and assigns them an obligation (“${verb}”)` : ""
-      } — it speaks ABOUT the reader instead of WITH them. The detector requires a subject plus a deontic verb, so “tem direitos” (no obligation) does not fire.`;
+      }: it talks about the reader instead of to them.`;
     },
-    confidence: () =>
-      assistida(
-        `The tool recognizes the reader-noun in subject position with a verb of obligation — but switching to “você” or the imperative changes the person and the register of the text, a stylistic decision for the author. It is a weak signal (info): it points, it does not correct.`,
-      ),
+    confidence: (f) => {
+      const noun = metaStr(f, "readerNoun");
+      return assistida(
+        `Lucid reliably recognizes a word that usually names the reader, as the subject of an obligation. Check whether ${
+          noun ? `“${noun}”` : "that person"
+        } really is whoever reads the document, and whether addressing them directly suits the tone of the text.`,
+      );
+    },
   },
   salto_de_nivel_titulo: {
     headline: (f) => {
@@ -193,82 +196,86 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const l = metaNum(f, "level");
       const p = metaNum(f, "prevLevel");
-      return `The heading hierarchy jumps from level ${p ?? "the previous"} to ${l ?? "the next"}, without the intermediate step. The detector reads the heading LEVELS — it only exists because the document is structured (a .docx carries that markup; plain text has no real headings).`;
+      const jump =
+        l != null && p != null
+          ? `The heading hierarchy jumps from level ${p} to level ${l}, without the level in between.`
+          : "The heading hierarchy skips a level, without the level in between.";
+      return `${jump} The level comes from the document's heading markup, not from the font size.`;
     },
     confidence: () =>
       assistida(
-        `The tool reads heading levels exactly, but deciding whether this heading should move up a level or whether an intermediate heading is missing depends on how the content is organized — the author's work.`,
+        "The levels are read exactly from the document's markup. Check whether this heading should move up a level or whether an intermediate heading is missing: that depends on how the content is organized.",
       ),
   },
   nominalizacao_encadeada: {
     headline: (f) => (metaStr(f, "kind") === "chain" ? "Chained nominalizations" : "Concentrated nominalizations"),
     prose: (f) =>
       metaStr(f, "kind") === "chain"
-        ? `«${flat(f.span.text)}» hides the action in a noun that governs another abstract noun through “de” — the sentence stacks abstractions instead of saying who does what.`
-        : `The sentence concentrates ${metaNum(f, "count") ?? "several"} action nouns — each one hides a verb, and the pile-up weighs the reading down.`,
+        ? `In «${flat(f.span.text)}», the action appears as a noun linked by “de” to another abstract noun. The passage becomes more abstract and makes it less clear who performs the action.`
+        : `The sentence concentrates ${metaNum(f, "count") ?? "several"} nouns that name actions. Together they make the reading more abstract and hide who does what.`,
     confidence: () =>
       assistida(
-        `Detection is by curated lexicon and adjacency — no interpretation. But undoing a nominalization means giving the action back to the verb and saying who performs it, which changes the structure of the sentence; the tool neither rewrites nor invents the agent.`,
+        "Lucid locates the nouns reliably, from a curated list. Not every action noun needs to go, and giving the action back to a verb requires knowing who performs it: check whether the text says who acts.",
       ),
   },
   mais_que_perfeito_sintetico: {
     confidence: () =>
       assistida(
-        `The form is correct, but the synthetic pluperfect (“fizera”) sounds archaic and stalls the reader. The compound form (“tinha feito”) is clearer — swapping requires reconjugating with the auxiliary, which the tool does not do on its own.`,
+        "Lucid recognized the form reliably, and it is grammatically correct; what weighs is that it is rare in speech. When rewriting, check that the auxiliary and the person of the verb agree with the rest of the sentence.",
       ),
   },
   gerundismo: {
     confidence: () =>
       assistida(
-        `The chained gerund (“vamos estar enviando”) lengthens without informing. The simple future or the present (“enviaremos”, “enviamos”) says the same in fewer words — but rewriting changes the verb form, and that is your decision.`,
+        "Lucid recognized the pattern “ir + estar + gerund” reliably. When swapping it for the future or the present, check that the sentence still says when the action happens.",
       ),
   },
   adverbio_mente_denso: {
     confidence: () =>
       assistida(
-        `Discontinued criterion (ADR-058): it counts -mente adverbs by density. Replaced by “Vague adverbs”, which targets the smoke-screen adverb itself. Off by default.`,
+        "Discontinued criterion, off by default: it counts how many -mente adverbs a sentence has, without assessing each one. “Vague adverbs” replaces it. Check which adverbs add meaning before cutting.",
       ),
   },
   adverbios_vagos: {
     confidence: () =>
       assistida(
-        `The tool recognizes the vague adverb from a curated lexicon, but deciding whether cutting it weakens or cleans the sentence depends on the emphasis you want — which is why it is a weak signal (info) that points rather than corrects.`,
+        "Lucid recognized the adverb reliably, from a curated list. Whether it only reinforces or also changes what the sentence asserts depends on the emphasis you want.",
       ),
   },
   redundancia: {
     confidence: () =>
       assistida(
-        `The tool recognizes the redundant pair, but choosing which term to cut is your decision — which is why it names the leaner form in the justification instead of applying it.`,
+        "Lucid recognized the expression reliably, from a curated list. Which term to cut depends on the sentence: check that what remains says the same thing.",
       ),
   },
   perifrase_inflada: {
     confidence: () =>
       assistida(
-        `The periphrasis has an equivalent lean form, but swapping it can change the government of what follows — the tool points at the direct form and leaves the swap to you.`,
+        "Lucid recognized the phrase reliably, from a curated list. A shorter form can change the government or the meaning of what follows: check the whole sentence before swapping.",
       ),
   },
   paragraph_length: {
     confidence: () =>
       assistida(
-        `The tool counts the paragraph's sentences exactly, but where to break it into smaller blocks depends on how the ideas are organized — an author's decision.`,
+        "The sentence count is exact, and the limit is a Lucid parameter, not one set by the standard. Check whether the paragraph covers more than one idea; where to split depends on how those ideas are organized.",
       ),
   },
   prose_enumeration: {
     confidence: () =>
       assistida(
-        `The tool recognizes the enumeration embedded in the prose, but turning it into a list is a formatting decision that changes the structure of the text — yours.`,
+        "Lucid recognized the sequence markers reliably. Check whether the items make sense on their own, in a list, or depend on the text that links them.",
       ),
   },
   mesoclise: {
     confidence: () =>
       assistida(
-        `Mesoclisis (“far-se-á”) is correct, but rare, and it stalls the reading. Rewriting without it (“será feito”, “vai fazer”) changes the construction — the author's work, not a mechanical swap.`,
+        "Lucid recognized the mesoclisis reliably, and it is grammatically correct; what weighs is that it is rare. Rewriting without it changes the construction of the sentence; check that the new version says who does what.",
       ),
   },
   dupla_negacao: {
     confidence: () =>
       assistida(
-        `The tool recognizes the litotes (“não é incomum”), but asserting it directly (“é comum”) may change the nuance you intended — which is why it points at the direct form and leaves the decision to you.`,
+        "Lucid recognized the double negative reliably, from a curated list. Saying it directly (“é comum” instead of “não é incomum”) may lose the nuance you intended: check whether it matters here.",
       ),
   },
   long_heading: {
@@ -278,13 +285,13 @@ const BASE: PtNarrativeSet = {
     },
     confidence: () =>
       assistida(
-        `The tool measures the heading (words, number of sentences, final punctuation) exactly, but shortening or reshaping it into a label depends on what is essential for the reader — the author's work.`,
+        "The heading measurement (words, sentences and final full stop) is exact, and the word limit is a Lucid parameter. Check what the reader needs to locate the section; the rest can move into the text.",
       ),
   },
   single_item_list: {
     confidence: () =>
       assistida(
-        `The tool recognizes the one-item list, but deciding between completing the list and dissolving it into running text depends on the content — an author's decision.`,
+        "The count is exact: the list has only one item. Check whether an item is missing or whether the content fits better in running text.",
       ),
   },
 };

@@ -117,7 +117,7 @@ describe("provenance — the source names a tradition, not a language baked into
     expect(provenanceLabel(editorial)).toBe("Extensão editorial PT-BR");
     expect(provenanceTag(editorial)).toEqual({
       text: "PT-BR",
-      title: "Extensão editorial PT-BR — fora da norma ISO",
+      title: "Extensão editorial PT-BR: não vem da norma ISO",
     });
     expect(provenanceLabel(editorial, "en")).toBe("PT-BR editorial extension");
   });

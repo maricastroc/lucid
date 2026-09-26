@@ -90,7 +90,7 @@ describe("measurement anomalies — each one named, with magnitude and threshold
 
     const anomaly = r.anomalies.find((a) => a.cause === "sentence_boundary_missing");
     expect(anomaly).toMatchObject({ cause: "sentence_boundary_missing", wordsPerSentence: 300, threshold: 100 });
-    expect(describeReadability(r).notes.join(" ")).toContain("fronteira de frase");
+    expect(describeReadability(r).notes.join(" ")).toContain("onde as frases terminam");
   });
 
   it("`small_sample`: below 20 words the average is dominated by a single token", () => {

@@ -48,7 +48,7 @@ describe("what the organisation attested, and what it did not", () => {
 
     expect(found.suggestion).toBeUndefined();
     expect(found.requiresHuman).toBe(true);
-    expect(found.justification).toContain("sinalização");
+    expect(found.justification).toContain("só sinaliza");
   });
 
   it("treats an empty equivalent as no equivalent, not as a swap for nothing", () => {

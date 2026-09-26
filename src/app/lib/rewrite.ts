@@ -88,7 +88,7 @@ export async function generateRewrite(
 
   const data = (await response.json().catch(() => null)) as VerifiedRewrite | { error?: string } | null;
   if (!response.ok || data === null || !("verification" in data)) {
-    const message = (data && "error" in data && data.error) || `falha ao gerar (HTTP ${response.status})`;
+    const message = (data && "error" in data && data.error) || `HTTP ${response.status}`;
     throw new Error(message);
   }
   return data;

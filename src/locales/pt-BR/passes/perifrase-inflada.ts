@@ -18,16 +18,17 @@ export const perifraseInfladaPass: Pass<PtConfig> = {
 
     for (const sentence of ctx.doc.sentences) {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
-        const enxuta = hit.entry.plain ? ` Muitas vezes cabe só “${hit.entry.plain}”.` : "";
+        const next = hit.entry.plain
+          ? ` Forma enxuta registrada: “${hit.entry.plain}”. Confira se ela se encaixa nesta frase, inclusive ` +
+            "com o que vem depois."
+          : " Escolha a palavra simples que diga o mesmo nesta frase.";
         findings.push({
           criterion: CRITERION,
           category: "lexical",
           span: { start: hit.start, end: hit.end, text: hit.text },
           severity: "warning",
           requiresHuman: true,
-          justification:
-            `Perífrase inflada — “${hit.text}” alonga a frase no lugar de uma palavra simples.${enxuta} ` +
-            "A ferramenta não troca sozinha porque o encaixe depende do contexto.",
+          justification: `Perífrase inflada: “${hit.text}” ocupa o lugar de uma palavra simples e alonga a frase.${next}`,
         });
       }
     }

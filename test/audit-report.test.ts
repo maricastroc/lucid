@@ -84,7 +84,7 @@ describe("buildAuditReport — the audit as a deliverable", () => {
     const d = analyze(SAMPLE);
     const md = buildAuditReport(d, d.findings, META);
     const line = md.split("\n").find((l) => l.startsWith("- **Legibilidade") || l.includes("Legibilidade (Flesch-PT)"));
-    expect(line).toMatch(/Legibilidade \(Flesch-PT\): -?\d+(\.\d+)? — (faixa|abaixo|acima)/);
+    expect(line).toMatch(/Legibilidade \(Flesch-PT\): -?\d+(\.\d+)? · (faixa|abaixo|acima)/);
     expect(md).toContain("O valor não é truncado");
   });
 
@@ -139,13 +139,13 @@ describe("buildAuditReport — the entry text, so the reported delta can be chec
 
   it("carries the whole entry text, not a summary of it", () => {
     const md = report("Foi realizada a análise do documento pela comissão competente.");
-    expect(md).toContain("## Anexo — Texto de entrada");
+    expect(md).toContain("## Anexo: texto de entrada");
     expect(md).toContain("Foi realizada a análise do documento pela comissão competente.");
   });
 
   it("says the delta cannot be checked when the entry text was never recorded", () => {
     const md = report(null);
-    expect(md).toContain("## Anexo — Texto de entrada");
+    expect(md).toContain("## Anexo: texto de entrada");
     expect(md).toContain("**Não registrado.**");
     expect(md).toContain("não pode ser conferido");
   });
@@ -155,8 +155,8 @@ describe("buildAuditReport — the entry text, so the reported delta can be chec
   });
 
   it("stays silent when there is neither an entry text nor a change to explain", () => {
-    expect(report(null, [])).not.toContain("Anexo — Texto de entrada");
-    expect(report("", [])).not.toContain("Anexo — Texto de entrada");
+    expect(report(null, [])).not.toContain("Anexo: texto de entrada");
+    expect(report("", [])).not.toContain("Anexo: texto de entrada");
   });
 
   it("shows the entry text even with no changes registered, since free editing leaves no trail", () => {
@@ -184,7 +184,7 @@ describe("buildAuditReport — the entry text does not overclaim", () => {
   it("does not point at a weight that is not there when nothing was registered", () => {
     const md = buildAuditReport(d, d.findings, META, [], null, null, "O texto de partida.");
     expect(md).not.toContain("variação de peso informada acima");
-    expect(md).toContain("edição feita à mão não gera registro");
+    expect(md).toContain("o texto atual pode ser diferente deste");
   });
 });
 

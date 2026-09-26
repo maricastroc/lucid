@@ -64,8 +64,8 @@ export const gerundismoPass: Pass<PtConfig> = {
           severity: "warning",
           requiresHuman: true,
           justification:
-            "Gerundismo ('vou estar enviando') — perífrase que alonga a frase sem necessidade. " +
-            "Prefira a forma simples ('vou enviar' / 'enviarei'); a ferramenta não reescreve automaticamente.",
+            "Gerundismo: a construção “ir + estar + gerúndio” (como “vou estar enviando”) alonga a frase sem " +
+            "acrescentar sentido. Prefira a forma simples, como “vou enviar” ou “enviarei”.",
         });
       }
     }

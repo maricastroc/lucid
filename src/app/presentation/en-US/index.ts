@@ -12,31 +12,31 @@ export const EN_PRESENTATION: LocalePresentation<EnCriterionId> = {
   humanLead: {
     "pt-BR": {
       long_sentence:
-        "Leia a frase e decida se ela carrega mais de uma ideia. Se carrega, você escolhe onde separar e como " +
-        "recompor; se carrega uma só, marque como vista — o gatilho é provisório e a extensão sozinha não obriga a nada.",
+        "Leia a frase e veja se ela carrega mais de uma ideia. Se carregar, escolha onde separar e reescreva as " +
+        "partes. Se carregar uma só, marque como revisado: o gatilho é provisório, e o tamanho sozinho não pede mudança.",
     },
     en: {
       long_sentence:
-        "Read the sentence and decide whether it carries more than one idea. If it does, you choose where to " +
-        "separate and how to recompose; if it carries one, mark it as seen — the trigger is provisional and " +
-        "length alone compels nothing.",
+        "Read the sentence and see whether it carries more than one idea. If it does, choose where to split it and " +
+        "rewrite the parts. If it carries only one, mark it as reviewed: the trigger is provisional, and length " +
+        "alone does not call for a change.",
     },
   },
   swap: {
     "pt-BR": {
       hidden_verb: {
-        source: "equivalência 1:1 atestada (FPLG 2011, p. 23)",
+        source: "equivalente atestado nas FPLG 2011, p. 23",
         applyNote:
-          "A troca é sua: a ferramenta só garante que o par está atestado na fonte e que o verbo leve está na " +
-          "forma base. Aplicada uma ocorrência por vez, e a engine reaudita o texto depois.",
+          "O Lucid só mostra o verbo quando o par está atestado na fonte e o verbo leve está na forma base. Ele " +
+          "não verifica se o sentido se mantém nesta frase.",
       },
     },
     en: {
       hidden_verb: {
-        source: "1:1 equivalence attested (FPLG 2011, p. 23)",
+        source: "equivalent attested in the FPLG 2011, p. 23",
         applyNote:
-          "The swap is yours: the tool only vouches that the pair is attested in the source and that the light " +
-          "verb is in its base form. Applied one at a time, and the engine re-audits the text afterwards.",
+          "Lucid shows the verb only when the source attests the pair and the light verb is in its base form. It " +
+          "does not check whether the meaning holds in this sentence.",
       },
     },
   },
@@ -44,29 +44,31 @@ export const EN_PRESENTATION: LocalePresentation<EnCriterionId> = {
   thresholdNotes: {
     "pt-BR": {
       "sentenceLength.warnAbove":
-        "Referência interina emprestada do GOV.UK (Reino Unido): dividir frases com mais de 25 palavras. Não é " +
-        "recomendação federal americana e não foi validada para documentos americanos. Provisória e configurável.",
+        "Referência provisória emprestada do GOV.UK (Reino Unido), que recomenda dividir frases com mais de 25 " +
+        "palavras. Não é recomendação federal americana e não foi validada para documentos americanos. Configurável.",
       "paragraphLength.maxSentences":
-        "Teto de “três a oito frases” das Federal Plain Language Guidelines (2011, p. 72), atribuído a " +
-        "especialistas não nomeados. Provisório; não validado.",
+        "Limite superior de “três a oito frases”, das Federal Plain Language Guidelines (2011, p. 72), que o " +
+        "atribuem a especialistas não nomeados. Provisório e não validado.",
       "longHeading.maxWords":
-        "Nenhuma fonte americana nem a ISO fixa tamanho de título: parâmetro provisório do produto, não validado.",
+        "Nem a ISO nem as fontes americanas fixam tamanho de título. É um parâmetro provisório do Lucid, não validado.",
       "proseEnumeration.minItems":
-        "Nenhuma fonte americana nem a ISO fixa quantos itens pedem lista; as diretrizes federais (2011, pp. 71-72) " +
-        "recomendam lista para séries de requisitos, etapas e condições. Três é parâmetro provisório do produto, não validado.",
+        "Nem a ISO nem as fontes americanas fixam quantos itens pedem lista. As diretrizes federais (2011, pp. 71-72) " +
+        "recomendam lista para séries de requisitos, etapas ou condições. O padrão, três, é um parâmetro provisório " +
+        "do Lucid, não validado.",
     },
     en: {
       "sentenceLength.warnAbove":
-        "Interim reference borrowed from GOV.UK (United Kingdom): split sentences over 25 words. Not a US federal " +
-        "recommendation and not validated for American documents. Provisional and configurable.",
+        "Interim reference borrowed from GOV.UK (United Kingdom), which recommends splitting sentences over 25 " +
+        "words. Not a US federal recommendation and not validated for American documents. Provisional and configurable.",
       "paragraphLength.maxSentences":
-        "Upper end of “three to eight sentences” in the Federal Plain Language Guidelines (2011, p. 72), " +
-        "attributed to unnamed writing experts. Provisional; not validated.",
+        "Upper end of “three to eight sentences” in the Federal Plain Language Guidelines (2011, p. 72), which " +
+        "attribute it to unnamed writing experts. Provisional and not validated.",
       "longHeading.maxWords":
-        "No US source nor ISO sets a heading length: a provisional product parameter, not validated.",
+        "Neither ISO nor any US source sets a heading length. This is a provisional Lucid parameter, not validated.",
       "proseEnumeration.minItems":
-        "No US source nor ISO sets how many items call for a list; the federal guidelines (2011, pp. 71-72) " +
-        "recommend a list for series of requirements, steps and conditions. Three is a provisional product parameter, not validated.",
+        "Neither ISO nor any US source sets how many items call for a list. The federal guidelines (2011, pp. 71-72) " +
+        "recommend a list for a series of requirements, steps or conditions. The default, three, is a provisional " +
+        "Lucid parameter, not validated.",
     },
   },
 };

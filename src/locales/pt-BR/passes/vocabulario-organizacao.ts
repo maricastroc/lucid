@@ -9,13 +9,12 @@ export const vocabularioOrganizacaoPass = createOrganizationVocabularyPass<PtCon
   read: (config) => config.vocabulario,
   text: {
     withEquivalent: (plain, reason) =>
-      `Termo do vocabulário da organização: ela declarou que este termo não é familiar ao leitor ` +
-      `dela e registrou "${plain}" como equivalente. A troca é decisão sua — a ferramenta não ` +
-      `reescreve.${declaredReason(reason)}`,
+      `A organização declarou que este termo não é familiar ao leitor dela e registrou “${plain}” como ` +
+      "equivalente. O Lucid não verificou esse sentido: confira se o equivalente serve nesta frase antes " +
+      `de usá-lo.${declaredReason(reason)}`,
     withoutEquivalent: (reason) =>
-      `Termo do vocabulário da organização: ela declarou que este termo não é familiar ao leitor ` +
-      `dela, e NÃO registrou um equivalente simples. Aqui isto é sinalização, não proposta: sem um ` +
-      `equivalente atestado, sugerir uma troca seria a ferramenta inventando o que a organização não ` +
-      `disse.${declaredReason(reason)}`,
+      "A organização declarou que este termo não é familiar ao leitor dela, mas não registrou equivalente. " +
+      "O Lucid só sinaliza e não sugere troca. Use uma palavra que o leitor conheça ou explique o termo na " +
+      `primeira vez que ele aparecer.${declaredReason(reason)}`,
   },
 });

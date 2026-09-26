@@ -202,10 +202,10 @@ describe("long_sentence — the finding as the product presents it (ADR-094)", (
   it("the prose separates the standard's guideline from Lucid's own parameter", () => {
     const finding = analyze(LONG).findings.find((f) => f.criterion === "long_sentence")!;
     const prose = detectedProse(finding, "pt-BR");
-    expect(prose).toContain("parâmetro metodológico do produto");
+    expect(prose).toContain("parâmetro do Lucid, não um limite da norma");
     expect(prose).toContain("sem estabelecer contagem");
     expect(prose).toContain("mais de uma ideia");
-    expect(prose).toContain("não precisa necessariamente ser dividida");
+    expect(prose).toContain("não precisa ser dividida");
     expect(prose).not.toContain("recomendamos");
   });
 

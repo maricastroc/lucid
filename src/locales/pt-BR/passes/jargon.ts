@@ -82,28 +82,39 @@ function domainLabel(domain: JargonDomain): string {
 }
 
 function buildJustification(entry: JargonEntry, hasSuggestion: boolean): string {
-  const base = `Este termo pode não ser familiar para leitores fora do domínio ${domainLabel(entry.domain)}.`;
+  const base = `Termo ${domainLabel(entry.domain)} que pode não ser familiar a leitores de fora dessa área.`;
 
   if (hasSuggestion) {
     return (
-      `${base} Poderia ser substituído por "${entry.plain}"; a ferramenta não reescreve ` +
-      "automaticamente — veja a sugestão."
+      `${base} O glossário do Lucid registra “${entry.plain}” como equivalente; confira se ele mantém ` +
+      "o sentido nesta frase antes de usá-lo."
+    );
+  }
+
+  if (entry.reason === "polysemous") {
+    return (
+      `${base} Esta palavra tem mais de um sentido, e só o contexto diz qual vale aqui; por isso o Lucid ` +
+      "não indica equivalente. Confirme o sentido e escolha uma palavra comum que o expresse."
     );
   }
 
   if (entry.plain) {
-    const motivo =
-      entry.reason === "context_dependent"
-        ? "a troca depende do que vem depois na frase, e substituir sem ajustar o resto " +
-          "poderia gerar um erro gramatical"
-        : entry.reason === "polysemous"
-          ? "esta palavra tem mais de um sentido possível, e trocar sem confirmar o " + "sentido aqui seria arriscado"
-          : "a ferramenta não tem, aqui, uma troca segura o bastante para sugerir automaticamente";
-
-    return `${base} Um equivalente possível é "${entry.plain}", mas ${motivo}; a decisão de trocar é do autor.`;
+    if (entry.reason === "context_dependent") {
+      return (
+        `${base} A forma mais simples registrada é “${entry.plain}”, mas ela exige ajustar o que vem ` +
+        "depois na frase. Se usá-la, reescreva o trecho seguinte para manter a concordância e a regência."
+      );
+    }
+    return (
+      `${base} O glossário registra “${entry.plain}” como forma mais simples; confira se ela mantém o ` +
+      "sentido nesta frase antes de usá-la."
+    );
   }
 
-  return `${base} A ferramenta não tem, no glossário, um equivalente simples e seguro para sugerir aqui.`;
+  return (
+    `${base} O glossário do Lucid não registra equivalente para ele. Troque por uma palavra comum que ` +
+    "diga o mesmo ou explique o termo na primeira vez que ele aparecer."
+  );
 }
 
 export const jargonPass: Pass<PtConfig> = {
