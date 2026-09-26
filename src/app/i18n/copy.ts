@@ -595,6 +595,7 @@ export interface UiCopy {
     readonly emptyBody: string;
     readonly listLabel: string;
     readonly effectLabel: string;
+    readonly usedAnyway: string;
     readonly detailsShow: string;
     readonly detailsHide: string;
     readonly undoLast: string;

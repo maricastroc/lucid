@@ -15,6 +15,7 @@ export interface ChatProvider {
   readonly id: string;
   readonly models: readonly string[];
   complete(prompt: string, options: ChatCompletionOptions): Promise<string>;
+  requestConfig?(options: ChatCompletionOptions): Readonly<Record<string, unknown>> | null;
 }
 
 export class ChatProviderError extends Error {

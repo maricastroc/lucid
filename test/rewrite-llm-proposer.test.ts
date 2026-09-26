@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION } from "../src/report/rewrite";
+import { LlmRewriteProposer, parseRewrite, REWRITE_PROMPT_VERSION, STRATEGY_VERSION } from "../src/report/rewrite";
+import { stableHash } from "../src/lucid";
 import { ChatProviderError, GEMINI_MODELS, GeminiProvider, type ChatProvider } from "../src/llm";
 import type { Span } from "../src/lucid/core/types";
 
@@ -50,6 +51,42 @@ describe("LlmRewriteProposer", () => {
     expect(proposal.proposed).toBe("Versão curta e clara.");
     expect(proposal.proposerId).toBe(`mock:m1+${REWRITE_PROMPT_VERSION}`);
     expect(provider.lastPrompt).toContain(target.text);
+  });
+
+  it("the proposerId follows the strategy that was executed, not the one the proposer was built with", async () => {
+    const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
+    const proposer = new LlmRewriteProposer(provider, "m1");
+    const target = span("Um trecho longo e enrolado que precisa de ajuda.");
+
+    const proposal = await proposer.propose({ text: target.text, target, strategy: "directed" });
+
+    expect(proposer.id).toBe(`mock:m1+${STRATEGY_VERSION.rewrite}`);
+    expect(proposal.proposerId).toBe(`mock:m1+${STRATEGY_VERSION.directed}`);
+    expect(proposal.provenance?.strategy).toBe(STRATEGY_VERSION.directed);
+  });
+
+  it("records the provenance of the call: provider, model, the prompt sent and the configuration", async () => {
+    const provider = new MockChatProvider('{"reescrita": "Versão curta e clara."}');
+    const target = span("Um trecho longo e enrolado que precisa de ajuda.");
+
+    const bare = await new LlmRewriteProposer(provider, "m1").propose({ text: target.text, target });
+    expect(bare.provenance).toEqual({
+      providerId: "mock",
+      model: "m1",
+      strategy: REWRITE_PROMPT_VERSION,
+      generation: null,
+      promptHash: stableHash(provider.lastPrompt),
+      promptChars: provider.lastPrompt.length,
+    });
+
+    const configured: ChatProvider = {
+      id: "mock",
+      models: ["m1"],
+      complete: provider.complete.bind(provider),
+      requestConfig: (options) => ({ temperature: options.temperature, maxOutputTokens: options.maxTokens }),
+    };
+    const withConfig = await new LlmRewriteProposer(configured, "m1").propose({ text: target.text, target });
+    expect(withConfig.provenance?.generation).toEqual({ temperature: 0, maxOutputTokens: 2048 });
   });
 
   it("an unreadable response → proposal = original (honest, fabricates nothing)", async () => {

@@ -2,8 +2,8 @@
 
 import { useCallback } from "react";
 import type { Diagnostic, Span } from "@/lucid";
-import type { RewriteProposal } from "@/report/rewrite";
-import { sourceLabel, type LedgerEntry } from "../lib/ledger";
+import type { VerifiedRewrite } from "@/report/rewrite";
+import { decisionRecord, sourceLabel, type LedgerEntry } from "../lib/ledger";
 import { spliceSpan } from "../lib/text-edit";
 import type { ReviewMarks } from "../lib/review-marks";
 
@@ -21,8 +21,8 @@ export interface DocumentEditsOptions {
 
 export interface DocumentEdits {
   readonly applyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
-  readonly applyManualEdit: (target: Span, replacement: string) => void;
-  readonly applyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  readonly applyManualEdit: (target: Span, replacement: string, verified?: VerifiedRewrite) => void;
+  readonly applyRewrite: (target: Span, result: VerifiedRewrite) => void;
   readonly undoChange: () => void;
 }
 
@@ -55,11 +55,17 @@ export function useDocumentEdits({
   );
 
   const applyManualEdit = useCallback(
-    (target: Span, replacement: string) => {
+    (target: Span, replacement: string, verified?: VerifiedRewrite) => {
       const nextText = spliceSpan(diagnostic.text, target, replacement);
       moveMarks(target, nextText);
       applyChange(
-        { source: "manual", label: sourceLabel("manual"), before: target.text, after: replacement },
+        {
+          source: "manual",
+          label: sourceLabel("manual"),
+          before: target.text,
+          after: replacement,
+          ...(verified === undefined ? {} : decisionRecord(verified, new Date().toISOString())),
+        },
         nextText,
       );
     },
@@ -81,7 +87,8 @@ export function useDocumentEdits({
   );
 
   const applyRewrite = useCallback(
-    (target: Span, proposal: RewriteProposal) => {
+    (target: Span, result: VerifiedRewrite) => {
+      const { proposal } = result;
       const nextText = spliceSpan(diagnostic.text, target, proposal.proposed);
       moveMarks(target, nextText);
       applyChange(
@@ -91,6 +98,7 @@ export function useDocumentEdits({
           proposerId: proposal.proposerId,
           before: target.text,
           after: proposal.proposed,
+          ...decisionRecord(result, new Date().toISOString()),
         },
         nextText,
       );

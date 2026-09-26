@@ -226,6 +226,24 @@ function ChangeEntry({
           </span>
         </div>
 
+        {entry.decision === "used_anyway" && entry.verification !== undefined && (
+          <div className="mt-1.5">
+            <p className="u-sublabel text-human">{c.changes.usedAnyway}</p>
+            <ul className="mt-1 flex flex-col gap-0.5">
+              {[
+                ...entry.verification.notConfirmed.map((item) => [c.note.groupNotConfirmed, item.detail]),
+                ...entry.verification.additions.map((item) => [c.note.groupAddition, item.detail]),
+                ...entry.verification.effects.map((item) => [c.note.groupEffect, item.detail]),
+              ].map(([group, detail], i) => (
+                <li key={i} className="text-[11.5px] leading-relaxed text-ink-2">
+                  <span className="text-ink-3">{group}: </span>
+                  <span lang="pt-BR">{detail}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {hasPassage && (
           <div className="mt-1.5 overflow-hidden rounded-lg border border-rule-1">
             <p className="flex items-baseline gap-2 bg-surface-2 px-2.5 py-1.5 text-[11.5px] leading-relaxed">

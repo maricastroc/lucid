@@ -37,7 +37,7 @@ export class GeminiProvider implements ChatProvider {
     this.thinkingLevel = options.thinkingLevel ?? null;
   }
 
-  private generationConfig(options: ChatCompletionOptions): Record<string, unknown> | null {
+  requestConfig(options: ChatCompletionOptions): Record<string, unknown> | null {
     if (this.models.includes(options.model as (typeof GEMINI_MODELS)[number])) {
       return {
         temperature: options.temperature,
@@ -60,7 +60,7 @@ export class GeminiProvider implements ChatProvider {
   }
 
   async complete(prompt: string, options: ChatCompletionOptions): Promise<string> {
-    const generationConfig = this.generationConfig(options);
+    const generationConfig = this.requestConfig(options);
     if (generationConfig === null) {
       throw new ChatProviderError(`modelo não permitido: ${options.model}`, this.id);
     }

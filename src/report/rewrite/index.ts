@@ -44,6 +44,7 @@ export type {
   RewriteLocale,
   RewriteProposal,
   RewriteProposer,
+  RewriteProvenance,
   RewriteRequest,
   RewriteVerification,
   VerificationNotice,

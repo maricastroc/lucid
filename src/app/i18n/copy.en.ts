@@ -843,6 +843,7 @@ export const COPY_EN: UiCopy = {
       "the after and its effect on the criteria.",
     listLabel: "Applied changes",
     effectLabel: "Effect on criteria",
+    usedAnyway: "Used anyway, with these divergences",
     detailsShow: "See the details of this change",
     detailsHide: "Hide the details of this change",
     undoLast: "Undo this change",

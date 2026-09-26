@@ -1,7 +1,7 @@
 "use client";
 
 import { type Finding, type Span } from "@/lucid";
-import type { AgentDeclaration, RewriteProposal } from "@/report/rewrite";
+import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
 import { buildConfidence } from "../../lib/narrative";
 import { humanLeadFor } from "../../presentation/registry";
 import { useCopy } from "../../i18n/use-copy";
@@ -24,7 +24,7 @@ export function HumanDecision({
   allFindings: readonly Finding[];
   declaration: AgentDeclaration | null;
   onDeclare: (d: AgentDeclaration | null) => void;
-  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onApplyRewrite: (target: Span, result: VerifiedRewrite) => void;
 }) {
   const { c, lang } = useCopy();
   const locale = useAnalysisLocale();

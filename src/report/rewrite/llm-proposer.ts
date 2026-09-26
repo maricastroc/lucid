@@ -1,5 +1,6 @@
 import { buildRewritePrompt, STRATEGY_VERSION, type RewriteStrategy } from "./prompt";
-import type { ChatProvider } from "@/llm";
+import type { ChatCompletionOptions, ChatProvider } from "@/llm";
+import { stableHash } from "@/lucid";
 import type { RewriteProposal, RewriteProposer, RewriteRequest } from "./types";
 
 export function parseRewrite(raw: string): string | null {
@@ -37,31 +38,41 @@ export class LlmRewriteProposer implements RewriteProposer {
   async propose(request: RewriteRequest): Promise<RewriteProposal> {
     const original = request.target.text;
     const strategy = request.strategy ?? this.strategy;
+    const proposerId = `${this.provider.id}:${this.model}+${STRATEGY_VERSION[strategy]}`;
     const prompt = buildRewritePrompt(request.text, request.target, {
       strategy,
       criterion: request.criterion,
       findings: request.briefing ?? request.findings,
       declarations: request.declarations,
     });
-    const raw = await this.provider.complete(prompt, {
+    const options: ChatCompletionOptions = {
       model: this.model,
       temperature: 0,
       maxTokens: 2048,
       signal: request.signal,
-    });
+    };
+    const raw = await this.provider.complete(prompt, options);
     const parsed = parseRewrite(raw);
     if (parsed === null) {
       console.warn(
         `[rewrite] parseRewrite() não extraiu reescrita válida — mantendo original. ` +
-          `proposerId=${this.id} criterion=${request.criterion ?? "-"} raw=${JSON.stringify(raw.slice(0, 200))}`,
+          `proposerId=${proposerId} criterion=${request.criterion ?? "-"} raw=${JSON.stringify(raw.slice(0, 200))}`,
       );
     }
     return {
-      proposerId: this.id,
+      proposerId,
       original,
       proposed: parsed ?? original,
       localeId: request.localeId,
       parseOutcome: parsed === null ? "unparseable" : "ok",
+      provenance: {
+        providerId: this.provider.id,
+        model: this.model,
+        strategy: STRATEGY_VERSION[strategy],
+        generation: this.provider.requestConfig?.(options) ?? null,
+        promptHash: stableHash(prompt),
+        promptChars: prompt.length,
+      },
     };
   }
 }

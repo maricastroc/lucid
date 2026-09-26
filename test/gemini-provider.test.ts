@@ -48,6 +48,18 @@ describe("GeminiProvider — the gemini-2.5-flash request stays byte-identical t
     );
   });
 
+  it("reports as its request configuration exactly the generationConfig it sends", async () => {
+    const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
+    vi.stubGlobal("fetch", fetchMock);
+    const provider = new GeminiProvider("fake-key");
+    const options = { model: "gemini-2.5-flash", temperature: 0, maxTokens: 2048 };
+    await provider.complete("prompt", options);
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+
+    expect(provider.requestConfig(options)).toEqual(JSON.parse(init.body as string).generationConfig);
+    expect(provider.requestConfig({ ...options, model: "nonexistent-model" })).toBeNull();
+  });
+
   it("keeps the same body when a thinking level is configured", async () => {
     const fetchMock = vi.fn(async () => okResponse('{"reescrita":"clara"}'));
     vi.stubGlobal("fetch", fetchMock);

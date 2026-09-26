@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Finding, Span } from "@/lucid";
-import type { AgentDeclaration, RewriteProposal } from "@/report/rewrite";
+import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
 import { rewriteTargetAt } from "../../lib/paragraphs";
 import { REWRITE_MODELS } from "../../lib/rewrite";
 import { useCopy } from "../../i18n/use-copy";
@@ -25,7 +25,7 @@ export function AiRewritePanel({
   source: string;
   declaration: AgentDeclaration | null;
   onDeclare: (d: AgentDeclaration | null) => void;
-  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
+  onApplyRewrite: (target: Span, result: VerifiedRewrite) => void;
 }) {
   const { c } = useCopy();
   const locale = useAnalysisLocale();
@@ -109,7 +109,7 @@ export function AiRewritePanel({
               <RewriteProposalCard
                 result={result}
                 currentOriginal={target.text}
-                onApplyRewrite={() => onApplyRewrite(target, result.proposal)}
+                onApplyRewrite={() => onApplyRewrite(target, result)}
               />
             ) : (
               <p className="mt-3 rounded-lg border border-rule-1 bg-surface px-3 py-2.5 text-[12px] leading-relaxed text-ink-2">

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Finding, Span } from "@/lucid";
-import type { AgentDeclaration, RewriteProposal } from "@/report/rewrite";
+import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
 import {
   isSafe,
   metaFor,
@@ -25,8 +25,8 @@ export interface RevisionNoteProps {
   finding: Finding;
   source: string;
   allFindings: readonly Finding[];
-  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onManualEdit: (target: Span, replacement: string) => void;
+  onApplyRewrite: (target: Span, result: VerifiedRewrite) => void;
+  onManualEdit: (target: Span, replacement: string, verified?: VerifiedRewrite) => void;
   onApplyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
 }
 

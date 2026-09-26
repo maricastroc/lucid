@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { within } from "@testing-library/react";
+import { waitFor, within } from "@testing-library/react";
 import { analyze } from "@/locales/pt-BR";
 import {
   PROOF_CHECKS,
@@ -100,6 +100,31 @@ describe("flow 5 · a proposal the engine blocks", () => {
     await user.click(override);
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
+  });
+
+  it("records in the trail that the version was used anyway, and with which divergence", async () => {
+    stubRewriteEndpoint(await answerWith(REWRITE_LOSING_THE_NUMBER));
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
+
+    await runRewrite(user);
+    await user.click(await auditPanel().findByRole("button", { name: /usar mesmo assim como rascunho/i }));
+    await openChanges(user);
+
+    expect(auditPanel().getByText(/usado mesmo assim, com estas divergências/i)).toBeInTheDocument();
+    expect(
+      auditPanel().getByText("O número «3» do trecho original não foi encontrado na proposta com a mesma grafia."),
+    ).toBeInTheDocument();
+    await waitFor(() => {
+      const stored = JSON.parse(localStorage.getItem("lucid-workspace") ?? "{}");
+      expect(stored.version).toBe(12);
+      expect(stored.ledger.at(-1)).toMatchObject({
+        source: "ai",
+        decision: "used_anyway",
+        verification: { notConfirmed: [{ check: "numbers_kept" }], additions: [] },
+      });
+    });
   });
 });
 

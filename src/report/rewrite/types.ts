@@ -30,12 +30,22 @@ export interface RewriteRequest {
   signal?: AbortSignal;
 }
 
+export interface RewriteProvenance {
+  readonly providerId: string;
+  readonly model: string;
+  readonly strategy: string;
+  readonly generation: Readonly<Record<string, unknown>> | null;
+  readonly promptHash: string;
+  readonly promptChars: number;
+}
+
 export interface RewriteProposal {
   proposerId: string;
   original: string;
   proposed: string;
   localeId?: string;
   parseOutcome?: "ok" | "unparseable";
+  provenance?: RewriteProvenance;
 }
 
 export type ProofOutcome = "confirmed" | "not_confirmed" | "addition" | "not_applicable";

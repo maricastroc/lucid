@@ -645,7 +645,95 @@ describe("workspace — the locale that produced the work travels with it", () =
       guidedStep: null,
     });
     const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) as string);
-    expect(raw.version).toBe(11);
+    expect(raw.version).toBe(12);
     expect(raw.localeId).toBe("pt-BR");
   });
+});
+
+describe("workspace — the author's decision on a verified version (ADR-111)", () => {
+  beforeEach(() => {
+    installStorage();
+    clearWorkspace();
+  });
+
+  const DECIDED = {
+    source: "ai" as const,
+    label: "Reescrita por IA · gemini:gemini-2.5-flash+directed@4",
+    proposerId: "gemini:gemini-2.5-flash+directed@4",
+    before: "conforme o art. 7º",
+    after: "conforme a regra",
+    burdenBefore: 4,
+    burdenAfter: 2,
+    decision: "used_anyway" as const,
+    verification: {
+      notConfirmed: [
+        {
+          check: "numbers_kept",
+          detail: "O número «7» do trecho original não foi encontrado na proposta com a mesma grafia.",
+        },
+      ],
+      additions: [],
+      effects: [],
+      signals: [],
+      notVerified: ["deontic_force", "conditions"],
+    },
+    provenance: {
+      providerId: "gemini",
+      model: "gemini-2.5-flash",
+      strategy: "directed@4",
+      generation: { temperature: 0, maxOutputTokens: 2048 },
+      promptHash: "1a2b3c4d",
+      promptChars: 1234,
+    },
+    decidedAt: "2026-09-26T18:40:00.000Z",
+  };
+
+  function stored(entry: unknown, version = 12): void {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version, localeId: "pt-BR", text: "a", blocks: null, ledger: [entry], mode: "audit" }),
+    );
+  }
+
+  it("keeps the decision, what diverged, what was not verified and where the version came from", () => {
+    writeWorkspace({
+      localeId: "pt-BR",
+      originalText: null,
+      profileId: "base",
+      text: "Texto revisado.",
+      blocks: null,
+      ledger: [DECIDED],
+      mode: "audit",
+      briefing: EMPTY_BRIEFING,
+      config: DEFAULT_CONFIG,
+      reviewMarks: {},
+      guidedStep: null,
+    });
+    expect(readWorkspace()?.ledger).toEqual([DECIDED]);
+  });
+
+  it("reads a version-11 trail, whose entries carry no decision", () => {
+    stored({ source: "ai", label: "Reescrita por IA · rewrite@6", burdenBefore: 3, burdenAfter: 1 }, 11);
+    expect(readWorkspace()?.ledger).toEqual([
+      { source: "ai", label: "Reescrita por IA · rewrite@6", burdenBefore: 3, burdenAfter: 1 },
+    ]);
+  });
+
+  const REJECTED: Record<string, unknown> = {
+    "a decision with no verification": { ...DECIDED, verification: undefined },
+    "a verification with no decision": { ...DECIDED, decision: undefined },
+    "an unknown decision": { ...DECIDED, decision: "approved" },
+    "a divergence with no detail": {
+      ...DECIDED,
+      verification: { ...DECIDED.verification, additions: [{ check: "numbers_added" }] },
+    },
+    "a provenance with no prompt": { ...DECIDED, provenance: { ...DECIDED.provenance, promptHash: undefined } },
+  };
+
+  for (const [name, entry] of Object.entries(REJECTED)) {
+    it(`rejects ${name}`, () => {
+      stored(JSON.parse(JSON.stringify(entry)));
+      expect(readWorkspace()).toBeNull();
+    });
+  }
 });

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import type { ImportNotes } from "../hooks/use-document-source";
 import type { Block, BriefingCheck, Config, Diagnostic, Finding, RawBlock, ReaderBriefing, Span } from "@/lucid";
-import type { RewriteProposal } from "@/report/rewrite";
+import type { VerifiedRewrite } from "@/report/rewrite";
 import type { LedgerEntry } from "../lib/ledger";
 import type { ProfileId } from "../lib/profiles";
 import { buildAuditViews, viewPanelId, viewTabId, type AuditViewId } from "../lib/audit-views";
@@ -55,8 +55,8 @@ export interface HighlightVisibility {
 }
 
 export interface DocumentEditActions {
-  onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
-  onManualEdit: (target: Span, replacement: string) => void;
+  onApplyRewrite: (target: Span, result: VerifiedRewrite) => void;
+  onManualEdit: (target: Span, replacement: string, verified?: VerifiedRewrite) => void;
   onApplyCuratedSwap: (target: Span, replacement: string, attestedIn?: string) => void;
 }
 

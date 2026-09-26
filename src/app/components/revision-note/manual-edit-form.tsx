@@ -1,7 +1,7 @@
 "use client";
 
 import type { Finding, Span } from "@/lucid";
-import type { AgentDeclaration } from "@/report/rewrite";
+import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
 import { rewriteTargetAt } from "../../lib/paragraphs";
 import { manualEditReplacement } from "../../lib/text-edit";
 import { useCopy } from "../../i18n/use-copy";
@@ -20,7 +20,7 @@ export function ManualEditForm({
   finding: Finding;
   source: string;
   declaration: AgentDeclaration | null;
-  onManualEdit: (target: Span, replacement: string) => void;
+  onManualEdit: (target: Span, replacement: string, verified?: VerifiedRewrite) => void;
 }) {
   const { c, lang } = useCopy();
   const locale = useAnalysisLocale();
@@ -91,7 +91,7 @@ export function ManualEditForm({
           <RewriteProposalCard
             result={result}
             currentOriginal={target.text}
-            onApplyRewrite={() => onManualEdit(target, manualEditReplacement(draft))}
+            onApplyRewrite={() => onManualEdit(target, manualEditReplacement(draft), result)}
           />
         )}
 
