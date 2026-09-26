@@ -1,0 +1,152 @@
+{
+  "planalto-leis__1989-1994-l7999.txt#2825-3097": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: proof.numbers_preserved"
+  },
+  "planalto-leis__1989-1994-l7999.txt#7709-8169": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: proof.numbers_preserved"
+  },
+  "planalto-leis__1989-1994-l7999.txt#18995-19234": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8010.txt#1857-2307": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8000.txt#396-624": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8010.txt#2807-3249": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8022.txt#2635-2861": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8014.txt#707-1117": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: fid.marker.condicao"
+  },
+  "planalto-leis__1989-1994-l8002.txt#1007-1258": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: fid.marker.obrigacao"
+  },
+  "planalto-leis__1989-1994-l8022.txt#2118-2346": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: fid.marker.obrigacao"
+  },
+  "planalto-leis__1989-1994-l7992.txt#322-529": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l7993.txt#635-1110": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8007.txt#529-1098": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8022.txt#3160-3546": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8013.txt#1820-2166": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8016.txt#1680-2057": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8022.txt#1620-1894": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8013.txt#2608-2949": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l7994.txt#694-858": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8016.txt#395-675": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.entities_preserved"
+  },
+  "planalto-leis__1989-1994-l8013.txt#1223-1552": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.possible_invented_obligation"
+  },
+  "planalto-leis__1989-1994-l8010.txt#4249-4431": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.possible_invented_obligation"
+  },
+  "planalto-leis__1989-1994-l8000.txt#1654-1824": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.possible_invented_obligation"
+  },
+  "planalto-leis__1989-1994-l7999.txt#12397-12589": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: signal.possible_invented_obligation"
+  },
+  "planalto-leis__1989-1994-l8006.txt#879-1050": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: veredito"
+  },
+  "planalto-leis__1989-1994-l8014.txt#325-604": {
+    "X": "gemini-2.5-flash r1",
+    "Y": "gemini-3.8-flash r1",
+    "estrato": "regressão: veredito"
+  },
+  "planalto-leis__1989-1994-l8017.txt#237-517": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: veredito"
+  },
+  "planalto-leis__1989-1994-l7993.txt#114-275": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: veredito"
+  },
+  "planalto-leis__1989-1994-l8000.txt#1399-1652": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: veredito"
+  },
+  "planalto-leis__1989-1994-l8006.txt#296-575": {
+    "X": "gemini-3.8-flash r1",
+    "Y": "gemini-2.5-flash r1",
+    "estrato": "regressão: veredito"
+  }
+}

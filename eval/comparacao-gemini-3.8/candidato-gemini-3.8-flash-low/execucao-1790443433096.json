@@ -1,0 +1,28 @@
+{
+  "startedAt": "2026-09-26T17:03:39.402Z",
+  "finishedAt": "2026-09-26T17:23:53.096Z",
+  "commit": "0a9bebbd8d4de84cf90dc5419d8dba61d4c5d3c9",
+  "projectionPrior": {
+    "rewrite": {
+      "usd": 0.010407,
+      "chars": 45014
+    },
+    "directed": {
+      "usd": 0.00081,
+      "chars": 2811
+    },
+    "probe": {
+      "usd": 0.001029,
+      "chars": 2431
+    }
+  },
+  "outcome": {
+    "planned": 684,
+    "alreadyDone": 10,
+    "called": 674,
+    "errors": 0,
+    "spentUsd": 2.854461750000001,
+    "stoppedBy": "done",
+    "stopDetail": null
+  }
+}

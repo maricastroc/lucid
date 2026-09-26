@@ -14,6 +14,10 @@ eval/report.json
 eval/baseline-gemini-2.5-flash/
 eval/comparacao-gemini-3.8/aa-2.5.*
 eval/comparacao-gemini-3.8/spike/
+eval/comparacao-gemini-3.8/candidato-gemini-3.8-flash-low/
+eval/comparacao-gemini-3.8/comparacao.json
+eval/comparacao-gemini-3.8/leitura-cega.*
+eval/comparacao-gemini-3.8/relatorio-final.md
 
 # Dados curados: a formatação atual é revisada à mão, uma entrada por linha
 src/locales/pt-BR/datasets/
