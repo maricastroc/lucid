@@ -36,6 +36,7 @@ export function AiRewritePanel({
     source,
     target,
     criterion: finding.criterion,
+    focus: finding.span,
     choice,
     declaration,
     failureMessage: c.note.aiFailedGeneric,

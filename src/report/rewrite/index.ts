@@ -43,6 +43,7 @@ export type {
   RewriteProposer,
   RewriteRequest,
   RewriteVerification,
+  VerificationNotice,
   VerificationSignal,
   VerifiedRewrite,
 } from "./types";

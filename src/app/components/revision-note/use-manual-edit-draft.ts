@@ -26,6 +26,7 @@ export interface ManualEditDraftOptions {
   readonly source: string;
   readonly target: Span;
   readonly criterion: string;
+  readonly focus?: Span;
   readonly declaration: AgentDeclaration | null;
   readonly lang: UiLang;
 }
@@ -45,6 +46,7 @@ export function useManualEditDraft({
   source,
   target,
   criterion,
+  focus,
   declaration,
   lang,
 }: ManualEditDraftOptions): ManualEditDraftControls {
@@ -75,6 +77,7 @@ export function useManualEditDraft({
         criterion,
         declaration ? [declaration] : undefined,
         lang,
+        focus,
       );
       if (checkIdRef.current === checkId) {
         setState({ status: "editing", text, verification: { result, forDeclaration: declaration } });
@@ -86,7 +89,7 @@ export function useManualEditDraft({
         );
       }
     }
-  }, [state, source, target, criterion, declaration, lang]);
+  }, [state, source, target, criterion, focus, declaration, lang]);
 
   const draft: ManualEditDraft =
     state.status === "closed" ? { status: "closed" } : { status: state.status, text: state.text };

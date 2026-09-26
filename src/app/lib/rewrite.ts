@@ -39,6 +39,7 @@ function overlapsTarget(f: Finding, target: Span): boolean {
 
 export interface GenerateRewriteOptions {
   criterion?: string;
+  focus?: Span;
   directed?: boolean;
   declarations?: readonly AgentDeclaration[];
   signal?: AbortSignal;
@@ -50,7 +51,7 @@ export async function generateRewrite(
   choice: RewriteModel,
   options: GenerateRewriteOptions = {},
 ): Promise<VerifiedRewrite> {
-  const { criterion, directed, declarations, signal } = options;
+  const { criterion, focus, directed, declarations, signal } = options;
   const strategy: RewriteStrategy | undefined = directed ? "directed" : undefined;
   const crossing = analyze(text).findings.filter((f) => overlapsTarget(f, target));
   const briefing = crossing;
@@ -59,6 +60,7 @@ export async function generateRewrite(
   if (choice.providerId === "stub") {
     return proposeAndVerify(text, target, stubProposer, {
       criterion,
+      focus,
       strategy,
       briefing,
       findings,
@@ -75,6 +77,7 @@ export async function generateRewrite(
       text,
       target,
       criterion,
+      focus,
       strategy,
       briefing,
       findings,
@@ -101,6 +104,7 @@ export async function verifyManualEdit(
   criterion?: string,
   declarations?: readonly AgentDeclaration[],
   lang: UiLang = DEFAULT_UI_LANG,
+  focus?: Span,
 ): Promise<VerifiedRewrite> {
   const proposal = {
     proposerId: copyFor(lang).note.proposerManual,
@@ -111,6 +115,7 @@ export async function verifyManualEdit(
   const verification = await verifyRewrite(text, target, proposal, {
     locale: rewriteLocalePtBR,
     criterion,
+    focus,
     declarations,
   });
   return { proposal, verification };

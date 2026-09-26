@@ -64,6 +64,11 @@ export interface VerificationSignal {
   detail: string;
 }
 
+export interface VerificationNotice {
+  check: "awaiting_author";
+  detail: string;
+}
+
 export interface MetricsDelta {
   readabilityBefore: number | null;
   readabilityAfter: number | null;
@@ -73,6 +78,7 @@ export interface MetricsDelta {
 
 export interface RewriteVerification {
   proofs: Proof[];
+  notices: VerificationNotice[];
   signals: VerificationSignal[];
   metrics: MetricsDelta;
   hasBlockingFailure: boolean;

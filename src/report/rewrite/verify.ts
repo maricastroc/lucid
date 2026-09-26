@@ -10,6 +10,7 @@ import type {
   RewriteLocale,
   RewriteProposal,
   RewriteVerification,
+  VerificationNotice,
   VerificationSignal,
 } from "./types";
 
@@ -20,9 +21,14 @@ export interface VerifyOptions {
   probe?: ComprehensionProbe;
   question?: string;
   criterion?: string;
+  focus?: Span;
   findings?: readonly Finding[];
   declarations?: readonly AgentDeclaration[];
   signal?: AbortSignal;
+}
+
+function sameSpan(a: Span, b: Span): boolean {
+  return a.start === b.start && a.end === b.end;
 }
 
 function normalizeForMatch(s: string): string {
@@ -146,22 +152,77 @@ export async function verifyRewrite(
   const declaredAgentsText = declaredAgents.join(" ");
 
   const proofs: Proof[] = [];
+  const notices: VerificationNotice[] = [];
 
   if (options.criterion) {
     const criterion = options.criterion;
-    const targetRemaining = after.findings.filter(
-      (f) => f.criterion === criterion && overlaps(f, newStart, newEnd),
-    ).length;
+    const focus = options.focus;
+    const declarationFor = (f: Finding) => declarations.find((d) => sameSpan(d.span, f.span));
+    const keptImpersonal = (f: Finding) => declarationFor(f)?.agent === null;
+    const awaitsAuthor = (f: Finding) =>
+      focus !== undefined &&
+      !sameSpan(f.span, focus) &&
+      f.criterion === "passive_voice" &&
+      f.requiresHuman &&
+      f.meta?.hasAgent !== true &&
+      declarationFor(f) === undefined;
+
+    const regionBefore = before.findings.filter(
+      (f) => f.criterion === criterion && overlaps(f, originalStart, originalEnd),
+    );
+    const required = regionBefore.filter((f) => !keptImpersonal(f) && !awaitsAuthor(f));
+    const impersonal = regionBefore.filter(keptImpersonal);
+    const awaiting = regionBefore.filter((f) => !keptImpersonal(f) && awaitsAuthor(f));
+    const take = (pool: Finding[], f: Finding): boolean => {
+      const key = normalizeForMatch(f.span.text);
+      const index = pool.findIndex((b) => normalizeForMatch(b.span.text) === key);
+      if (index < 0) return false;
+      pool.splice(index, 1);
+      return true;
+    };
+
+    let stillRequired = 0;
+    let impersonalLeft = 0;
+    const awaitingLeft: Finding[] = [];
+    for (const f of after.findings) {
+      if (f.criterion !== criterion || !overlaps(f, newStart, newEnd)) continue;
+      if (take(required, f)) stillRequired++;
+      else if (take(impersonal, f)) impersonalLeft++;
+      else if (take(awaiting, f)) awaitingLeft.push(f);
+      else stillRequired++;
+    }
+
+    const label = labelsOf([criterion]);
+    const exceptions: string[] = [];
+    if (awaitingLeft.length > 0) {
+      exceptions.push(
+        awaitingLeft.length === 1 ? "no ponto indicado abaixo" : `nos ${awaitingLeft.length} pontos indicados abaixo`,
+      );
+    }
+    if (impersonalLeft > 0) exceptions.push("onde você pediu para manter a forma impessoal");
     proofs.push({
       check: "target_resolved",
-      passed: targetRemaining === 0,
+      passed: stillRequired === 0,
       detail:
-        targetRemaining === 0
-          ? `${labelsOf([criterion])} não aparece mais no trecho reescrito`
-          : `${labelsOf([criterion])} ainda aparece no trecho reescrito (${targetRemaining} ${
-              targetRemaining === 1 ? "vez" : "vezes"
-            })`,
+        stillRequired > 0
+          ? `${label} ainda aparece no trecho reescrito (${stillRequired} ${stillRequired === 1 ? "vez" : "vezes"})`
+          : exceptions.length === 0
+            ? `${label} não aparece mais no trecho reescrito`
+            : `${label} não aparece mais no trecho reescrito, exceto ${exceptions.join(" e ")}`,
     });
+
+    if (awaitingLeft.length > 0) {
+      const quoted = awaitingLeft.map((f) => `«${f.span.text.replace(/\s+/gu, " ").trim()}»`).join(", ");
+      notices.push({
+        check: "awaiting_author",
+        detail:
+          awaitingLeft.length === 1
+            ? `${label} continua em ${quoted}, onde o Lucid não encontrou quem pratica a ação. Abra esse ponto e ` +
+              "informe o agente para a IA poder resolvê-lo."
+            : `${label} continua em ${quoted}, onde o Lucid não encontrou quem pratica a ação. Abra cada um ` +
+              "desses pontos e informe o agente para a IA poder resolvê-los.",
+      });
+    }
   }
 
   const explicitNoAgentDeclared = declarations.some((d) => d.agent === null);
@@ -385,6 +446,7 @@ export async function verifyRewrite(
 
   return {
     proofs,
+    notices,
     signals,
     metrics,
     hasBlockingFailure: proofs.some((p) => !p.passed),
