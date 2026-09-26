@@ -109,7 +109,6 @@ export interface RewriteVerification {
   notices: VerificationNotice[];
   signals: VerificationSignal[];
   metrics: MetricsDelta;
-  hasBlockingFailure: boolean;
 }
 
 export interface VerifiedRewrite {

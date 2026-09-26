@@ -119,7 +119,7 @@ async function rewriteChecks(row: CallRow, job: RewriteJob): Promise<Checks> {
     out[`proof.target_resolved[${bucket}]`] = targetProof.passed;
   }
   for (const signal of verification.signals) out[`signal.${signal.check}`] = !signal.flagged;
-  out["verdict.sem_veto"] = !verification.hasBlockingFailure;
+  out["verdict.sem_veto"] = verification.proofs.every((p) => p.passed);
   out["verdict.sem_veto_exceto_comprimento"] = !verification.proofs.some(
     (p) => !p.passed && !(p.check === "target_resolved" && job.criterion === "long_sentence"),
   );

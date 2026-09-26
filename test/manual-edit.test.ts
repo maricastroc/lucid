@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { needsAuthorDecision } from "../src/report/rewrite";
 import { analyze } from "../src/locales/pt-BR";
 import { rewriteTargetAt } from "../src/app/lib/paragraphs";
 import { verifyManualEdit } from "../src/app/lib/rewrite";
@@ -96,13 +97,13 @@ describe("verifyManualEdit — the author's version is judged by the SAME verifi
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const { verification } = await verifyManualEdit(source, span, "Nós aprovamos as contas na nossa reunião.");
 
-    expect(verification.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(verification)).toBe(true);
     const firstPerson = verification.proofs.find((p) => p.check === "no_invented_first_person");
     expect(firstPerson?.passed).toBe(false);
     expect(firstPerson?.outcome).toBe("addition");
   });
 
-  it("an edit that only papers over the passive (without resolving the criterion) fails when the criterion is passed — regression", async () => {
+  it("an edit that only papers over the passive fails target_resolved when the criterion is passed, as an effect — regression", async () => {
     const { source, span } = manualEditTargetFor(text, "passive_voice");
     const { verification } = await verifyManualEdit(
       source,
@@ -113,7 +114,7 @@ describe("verifyManualEdit — the author's version is judged by the SAME verifi
 
     const targetResolved = verification.proofs.find((p) => p.check === "target_resolved");
     expect(targetResolved?.passed).toBe(false);
-    expect(verification.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(verification)).toBe(false);
   });
 });
 
@@ -153,7 +154,7 @@ describe("verifyManualEdit — the agent declaration applies to the author too (
 
     const proof = verification.proofs.find((p) => p.check === "declared_agent_present");
     expect(proof?.passed).toBe(false);
-    expect(verification.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(verification)).toBe(true);
   });
 
   it("with no declaration, the proof does not exist (previous behavior intact)", async () => {

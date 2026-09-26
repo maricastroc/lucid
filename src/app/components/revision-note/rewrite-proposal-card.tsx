@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NOT_VERIFIED, PROOF_CHECKS, type Proof, type VerifiedRewrite } from "@/report/rewrite";
+import { needsAuthorDecision, NOT_VERIFIED, PROOF_CHECKS, type Proof, type VerifiedRewrite } from "@/report/rewrite";
 import { useCopy } from "../../i18n/use-copy";
 import { Button } from "../ui/button";
 import { useAnalysisLocale } from "../../locale/context";
@@ -19,7 +19,6 @@ export function RewriteProposalCard({
   const { c, lang } = useCopy();
   const locale = useAnalysisLocale();
   const { proposal, verification } = result;
-  const blocked = verification.hasBlockingFailure;
 
   const stale = proposal.original !== currentOriginal;
   const { readabilityBefore, readabilityAfter } = verification.metrics;
@@ -36,7 +35,7 @@ export function RewriteProposalCard({
   const effectReached = proofs.filter((p) => !guarantee(p) && p.passed);
   const flagged = verification.signals.filter((s) => s.flagged);
   const quiet = verification.signals.filter((s) => !s.flagged);
-  const divergent = notConfirmed.length + additions.length > 0;
+  const divergent = needsAuthorDecision(verification);
   const effectIssues = effectMissed.length + verification.notices.length > 0;
   const hiddenCount = notApplicable.length + effectReached.length + quiet.length;
   const suffix = engineOutputSuffix(lang, locale.id);
@@ -48,14 +47,18 @@ export function RewriteProposalCard({
         className="px-3 py-3.5"
         style={{
           borderBottom: "1px solid var(--rule-1)",
-          background: blocked ? "var(--human-weak)" : undefined,
+          background: divergent ? "var(--human-weak)" : undefined,
         }}
       >
-        <span className="u-sublabel" style={{ color: blocked ? "var(--human)" : "var(--ink-3)" }}>
+        <span className="u-sublabel" style={{ color: divergent ? "var(--human)" : "var(--ink-3)" }}>
           {c.note.verdictLabel}
         </span>
         <p className="mt-1.5 font-serif text-[19px] leading-tight text-ink-0">
-          {divergent ? c.note.verdictDivergent : blocked ? c.note.verdictEffect : c.note.verdictNoDivergence}
+          {divergent
+            ? c.note.verdictDivergent
+            : effectMissed.length > 0
+              ? c.note.verdictEffect
+              : c.note.verdictNoDivergence}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-ink-2">
           <span>
@@ -89,7 +92,7 @@ export function RewriteProposalCard({
           {effectIssues && (
             <CheckGroup label={`${c.note.groupEffect}${suffix}`}>
               {effectMissed.map((p) => (
-                <CheckLine key={p.check} mark="✗" tone="text-human" detail={p.detail} />
+                <CheckLine key={p.check} mark="•" tone="text-ink-3" detail={p.detail} />
               ))}
               {verification.notices.map((n) => (
                 <CheckLine key={n.check} mark="⚠" tone="text-human" detail={n.detail} />
@@ -132,11 +135,11 @@ export function RewriteProposalCard({
         </div>
 
         <div className="mt-3">
-          <Button variant={blocked ? "tonal-human" : "primary"} size="lg" disabled={stale} onClick={onApplyRewrite}>
-            {stale ? c.note.applyStale : blocked ? c.note.applyBlocked : c.note.apply}
+          <Button variant={divergent ? "tonal-human" : "primary"} size="lg" disabled={stale} onClick={onApplyRewrite}>
+            {stale ? c.note.applyStale : divergent ? c.note.applyBlocked : c.note.apply}
           </Button>
           <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-            {stale ? c.note.applyStaleNote : blocked ? c.note.applyBlockedNote : c.note.applyNote}
+            {stale ? c.note.applyStaleNote : divergent ? c.note.applyBlockedNote : c.note.applyNote}
           </p>
         </div>
       </div>

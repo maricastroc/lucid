@@ -307,7 +307,7 @@ export async function runSpike(
           declarations: job.declarations,
         });
         verification = {
-          vetoed: v.hasBlockingFailure,
+          vetoed: v.proofs.some((p) => !p.passed),
           failedProofs: v.proofs.filter((p) => !p.passed).map((p) => p.check),
           flaggedSignals: v.signals.filter((x) => x.flagged).map((x) => x.check),
         };

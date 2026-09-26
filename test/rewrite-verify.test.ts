@@ -3,12 +3,13 @@ import { analyze } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
 import {
   applyProposal,
+  needsAuthorDecision,
   proposeAndVerify,
+  type RewriteProposal,
   SIGNAL_CHECKS,
   StubRewriteProposer,
-  verifyRewrite,
-  type RewriteProposal,
   type VerifyOptions,
+  verifyRewrite,
 } from "../src/report/rewrite";
 
 function spanFinding(text: string, sub: string, criterion = "long_sentence"): Finding {
@@ -60,7 +61,7 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
 
     expect(proofPassed(v, "target_resolved")).toBe(true);
     expect(proofPassed(v, "no_new_findings")).toBe(true);
-    expect(v.hasBlockingFailure).toBe(false);
+    expect(needsAuthorDecision(v)).toBe(false);
     expect(v.metrics.wordsAfter).toBeLessThan(v.metrics.wordsBefore);
   });
 
@@ -80,11 +81,11 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
     const v = await verifyRewrite(text, finding.span, { proposerId: "test", original: finding.span.text, proposed });
 
     expect(proofPassed(v, "region_improved")).toBe(true);
-    expect(v.hasBlockingFailure).toBe(false);
+    expect(needsAuthorDecision(v)).toBe(false);
     expect(v.proofs.find((p) => p.check === "region_improved")!.detail).toMatch(/Peso/);
   });
 
-  it("a proposal that does NOT resolve the target fails target_resolved (mechanical veto)", async () => {
+  it("a proposal that does NOT resolve the target fails target_resolved, as an effect that does not ask for a decision", async () => {
     const text =
       "O documento apresentado foi analisado com muito cuidado pela comissão competente responsável, " +
       "e o resultado final desse exame minucioso foi comunicado ao interessado dentro do prazo regular.";
@@ -98,7 +99,10 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
     const v = await verify(text, finding, p);
 
     expect(proofPassed(v, "target_resolved")).toBe(false);
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(v.proofs.find((pr) => pr.check === "target_resolved")!.detail).toBe(
+      "O Lucid ainda aponta «Comprimento de frase» no trecho reescrito (1 vez; frase de 27 palavras).",
+    );
+    expect(needsAuthorDecision(v)).toBe(false);
   });
 });
 
@@ -355,7 +359,7 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
 
     expect(proofPassed(v, "declared_agent_present")).toBe(false);
     expect(v.proofs.find((p) => p.check === "declared_agent_present")!.detail).toContain("«a comissão»");
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it("the rewrite keeps the passive without naming the declared agent → FAILS", async () => {
@@ -497,7 +501,7 @@ describe("verifyRewrite — PROOF: mechanical preservation", () => {
       detail: "O número «30» do trecho original não foi encontrado na proposta com a mesma grafia.",
     });
     expect(v.proofs.find((pr) => pr.check === "numbers_added")!.outcome).toBe("confirmed");
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it("kept numbers are confirmed, listed as they are written", async () => {
@@ -556,7 +560,7 @@ describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
       passed: false,
       detail: "A proposta usa formas de 1ª pessoa que não aparecem no documento: «analisamos», «nossa», «nós».",
     });
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it("a proposal with no 1st person passes", async () => {
@@ -590,7 +594,7 @@ describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
     const v = await verify(text, finding, p);
     expect(proofPassed(v, "no_invented_first_person")).toBe(false);
     expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")!.detail).toMatch(/verificamos|vamos/i);
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it("an impersonal reformulation (inventing no agent) still passes", async () => {
@@ -645,7 +649,7 @@ describe("verifyRewrite — SIGNAL: possibly fabricated 3rd-person agent (LUCID-
     const detail = v.signals.find((s) => s.check === "possible_invented_agent")!.detail;
     expect(detail).toContain("comissão");
     expect(v.proofs.map((pr) => pr.check as string)).not.toContain("possible_invented_agent");
-    expect(v.hasBlockingFailure).toBe(false);
+    expect(needsAuthorDecision(v)).toBe(false);
   });
 
   it("a new human agent (a role), absent from the original, raises a flag", async () => {
@@ -702,7 +706,7 @@ describe("verifyRewrite — SIGNAL: possibly fabricated 3rd-person agent (LUCID-
 
     const v = await verify(text, finding, p);
     expect(proofPassed(v, "no_invented_first_person")).toBe(false);
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
     expect(signalFlagged(v, "possible_invented_agent")).toBe(false);
   });
 
@@ -747,7 +751,7 @@ describe("honesty (I5): no green seal", () => {
     expect(keys).not.toContain("approved");
     expect(keys).not.toContain("ok");
     expect(keys).not.toContain("passed");
-    expect(keys.sort()).toEqual(["hasBlockingFailure", "metrics", "notices", "proofs", "signals"]);
+    expect(keys.sort()).toEqual(["metrics", "notices", "proofs", "signals"]);
   });
 
   it("determinism: same input → same JSON", async () => {
@@ -775,7 +779,7 @@ describe("proposeAndVerify — orchestrator with a stub proposer", () => {
     const result = await propose(text, finding, proposer);
 
     expect(result.proposal.proposerId).toBe("stub@1+fixtures@1");
-    expect(result.verification.hasBlockingFailure).toBe(false);
+    expect(needsAuthorDecision(result.verification)).toBe(false);
     expect(analyze(text).text).toBe(text);
   });
 

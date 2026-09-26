@@ -42,6 +42,8 @@ interface VerifiedCall {
   readonly ab: ScoredRow;
 }
 
+const vetoed = (v: RewriteVerification): boolean => v.proofs.some((p) => !p.passed);
+
 function spanOf(target: EvalTarget, range: { start: number; end: number }): Span {
   return { start: range.start, end: range.end, text: target.text.slice(range.start, range.end) };
 }
@@ -142,10 +144,10 @@ function productionTable(label: string, calls: readonly VerifiedCall[]): string[
   const n = calls.length;
   const proofsPassed = calls.map((c) => c.production.proofs.filter((p) => p.passed).length);
   const proofsTotal = calls.map((c) => c.production.proofs.length);
-  const vetoed = calls.filter((c) => c.production.hasBlockingFailure).length;
+  const vetoCount = calls.filter((c) => vetoed(c.production)).length;
   const changed = calls.filter((c) => c.row.proposed !== c.row.original).length;
   return [
-    `| ${label} | ${n} | ${f0(pct(changed, n))} | ${f1(mean(proofsPassed))}/${f1(mean(proofsTotal))} | ${f0(pct(vetoed, n))} | ${fmtTally(
+    `| ${label} | ${n} | ${f0(pct(changed, n))} | ${f1(mean(proofsPassed))}/${f1(mean(proofsTotal))} | ${f0(pct(vetoCount, n))} | ${fmtTally(
       tally(calls.flatMap((c) => c.production.proofs.filter((p) => !p.passed).map((p) => p.check))),
     )} | ${fmtTally(tally(calls.flatMap((c) => c.production.signals.filter((s) => s.flagged).map((s) => s.check))))} | ${
       calls.filter((c) => c.production.notices.length > 0).length
@@ -190,7 +192,7 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
     byItem.set(c.row.itemId, m);
   }
   const verdict = (c: VerifiedCall): string =>
-    c.production.hasBlockingFailure
+    vetoed(c.production)
       ? `veto(${c.production.proofs
           .filter((p) => !p.passed)
           .map((p) => p.check)
@@ -213,7 +215,7 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
         b,
         pairs: both.length,
         identicalText: both.filter(([x, y]) => x.row.proposed === y.row.proposed).length,
-        sameVeto: both.filter(([x, y]) => x.production.hasBlockingFailure === y.production.hasBlockingFailure).length,
+        sameVeto: both.filter(([x, y]) => vetoed(x.production) === vetoed(y.production)).length,
         sameFailedProofs: both.filter(([x, y]) => failedSet(x) === failedSet(y)).length,
         jaccardMean: mean(both.map(([x, y]) => jaccard(x.row.proposed ?? "", y.row.proposed ?? ""))),
       });
@@ -223,7 +225,7 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
   const complete = [...byItem.entries()].filter(([, m]) => RUNS.every((run) => m.has(run)));
   const runsOf = (m: Map<number, VerifiedCall>): VerifiedCall[] => RUNS.map((run) => m.get(run)!);
   const flips = complete
-    .filter(([, m]) => new Set(runsOf(m).map((c) => c.production.hasBlockingFailure)).size > 1)
+    .filter(([, m]) => new Set(runsOf(m).map((c) => vetoed(c.production))).size > 1)
     .map(([itemId, m]) => ({ itemId, verdicts: runsOf(m).map(verdict) }));
   return {
     pairwise,
@@ -231,9 +233,8 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
     allIdentical: complete.filter(([, m]) => new Set(runsOf(m).map((c) => c.row.proposed)).size === 1).length,
     unanimousVeto: complete.length - flips.length,
     unanimousFailedProofs: complete.filter(([, m]) => new Set(runsOf(m).map(failedSet)).size === 1).length,
-    majorityVetoed: complete.filter(
-      ([, m]) => runsOf(m).filter((c) => c.production.hasBlockingFailure).length * 2 > RUNS.length,
-    ).length,
+    majorityVetoed: complete.filter(([, m]) => runsOf(m).filter((c) => vetoed(c.production)).length * 2 > RUNS.length)
+      .length,
     flips,
   };
 }
@@ -514,7 +515,7 @@ export async function writeReport(
             `${suite}·r${run}`,
             {
               n: calls.length,
-              vetoPct: pct(calls.filter((c) => c.production.hasBlockingFailure).length, calls.length),
+              vetoPct: pct(calls.filter((c) => vetoed(c.production)).length, calls.length),
               failedProofs: tally(
                 calls.flatMap((c) => c.production.proofs.filter((p) => !p.passed).map((p) => p.check)),
               ),

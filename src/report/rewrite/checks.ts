@@ -1,4 +1,4 @@
-import type { Proof, ProofOutcome, VerificationSignal } from "./types";
+import type { Proof, ProofOutcome, RewriteVerification, VerificationSignal } from "./types";
 
 export type CheckKind = "guarantee" | "effect" | "signal" | "probabilistic";
 
@@ -228,4 +228,14 @@ export function checkKind(check: Proof["check"] | VerificationSignal["check"]): 
   return check in PROOF_CHECKS
     ? PROOF_CHECKS[check as Proof["check"]].kind
     : SIGNAL_CHECKS[check as VerificationSignal["check"]].kind;
+}
+
+export function divergences(verification: Pick<RewriteVerification, "proofs">): Proof[] {
+  return verification.proofs.filter(
+    (p) => PROOF_CHECKS[p.check].kind === "guarantee" && (p.outcome === "not_confirmed" || p.outcome === "addition"),
+  );
+}
+
+export function needsAuthorDecision(verification: Pick<RewriteVerification, "proofs">): boolean {
+  return divergences(verification).length > 0;
 }

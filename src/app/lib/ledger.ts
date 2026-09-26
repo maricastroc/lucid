@@ -2,7 +2,7 @@ import type { Finding } from "@/lucid";
 import type { Attribution } from "./attribution";
 import type { AnalysisLocaleId } from "../locale/active";
 import { metaFor } from "./criteria";
-import { NOT_VERIFIED, PROOF_CHECKS, totalBurden, type VerifiedRewrite } from "@/report/rewrite";
+import { needsAuthorDecision, NOT_VERIFIED, PROOF_CHECKS, totalBurden, type VerifiedRewrite } from "@/report/rewrite";
 import { stableStringify } from "@/lucid";
 import { copyFor } from "../i18n/copy";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
@@ -53,12 +53,12 @@ export type LedgerDecisionRecord = Required<Pick<LedgerEntry, "decision" | "veri
   Pick<LedgerEntry, "provenance">;
 
 export function decisionRecord(result: VerifiedRewrite, decidedAt: string): LedgerDecisionRecord {
-  const { proofs, signals, hasBlockingFailure } = result.verification;
+  const { proofs, signals } = result.verification;
   const guarantee = (check: keyof typeof PROOF_CHECKS) => PROOF_CHECKS[check].kind === "guarantee";
   const pick = ({ check, detail }: { check: string; detail: string }): LedgerCheck => ({ check, detail });
   const provenance = result.proposal.provenance;
   return {
-    decision: hasBlockingFailure ? "used_anyway" : "used",
+    decision: needsAuthorDecision(result.verification) ? "used_anyway" : "used",
     verification: {
       notConfirmed: proofs.filter((p) => guarantee(p.check) && p.outcome === "not_confirmed").map(pick),
       additions: proofs.filter((p) => guarantee(p.check) && p.outcome === "addition").map(pick),

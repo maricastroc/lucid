@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { verifyRewrite, type Proof, type RewriteVerification } from "../src/report/rewrite";
+import { needsAuthorDecision, type Proof, type RewriteVerification, verifyRewrite } from "../src/report/rewrite";
 
 const ORIGINAL =
   "O prazo de 30 dias conta a partir de 10/05/2024, conforme o art. 7º, e uma multa de R$ 1.500,00 incide sobre cada dia de atraso.";
@@ -61,13 +61,13 @@ describe("numbers_kept and numbers_added — mutation battery", () => {
   it.each(NUMBER_LOST)("%s → not confirmed", async (_, proposed) => {
     const v = await verify(ORIGINAL, proposed);
     expect(proof(v, "numbers_kept").outcome).toBe("not_confirmed");
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it.each(NUMBER_ADDED)("%s → addition", async (_, proposed) => {
     const v = await verify(ORIGINAL, proposed);
     expect(proof(v, "numbers_added").outcome).toBe("addition");
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 
   it.each(NUMBERS_KEPT)("%s → both confirmed", async (_, proposed) => {

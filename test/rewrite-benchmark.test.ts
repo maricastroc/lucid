@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest";
 import { type Span } from "../src/lucid";
 import { analyze } from "../src/locales/pt-BR";
 import { GeminiProvider, GEMINI_MODELS, type ChatProvider } from "../src/llm";
-import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
+import {
+  applyProposal,
+  LlmRewriteProposer,
+  needsAuthorDecision,
+  type RewriteStrategy,
+  verifyRewrite,
+} from "../src/report/rewrite";
 
 const RUN = process.env.BENCHMARK === "1";
 
@@ -67,7 +73,7 @@ interface Sample {
   dWords: number;
   findingsAfter: number;
   proofsPreserved: boolean;
-  blocked: boolean;
+  divergent: boolean;
   entitiesFlagged: boolean;
   latencyMs: number;
   tokens: number;
@@ -114,7 +120,7 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
       proofsPreserved: ["numbers_kept", "numbers_added", "dates_kept", "dates_added", "no_new_jargon"].every(
         proofPassed,
       ),
-      blocked: verification.hasBlockingFailure,
+      divergent: needsAuthorDecision(verification),
       entitiesFlagged: signalFlagged("entities_preserved"),
       latencyMs,
       tokens,
@@ -143,7 +149,7 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
 
     const rows: string[] = [];
     rows.push(
-      "| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | s/nome-perdido% | sem veto% | latência ms | tokens |",
+      "| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | s/nome-perdido% | sem divergência% | latência ms | tokens |",
     );
     rows.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
 
@@ -156,9 +162,9 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
             s.map((x) => x.dWords),
           ).toFixed(0)} | ${mean(s.map((x) => x.findingsAfter)).toFixed(1)} | ${pct(
             s.map((x) => x.proofsPreserved),
-          ).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(s.map((x) => !x.blocked)).toFixed(
-            0,
-          )} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
+          ).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(
+            s.map((x) => !x.divergent),
+          ).toFixed(0)} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
         );
       }
     }

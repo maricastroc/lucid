@@ -33,7 +33,15 @@ export { buildRewritePromptV4, composePromptV4, PROMPT_V4_PARTS } from "./prompt
 export { criterionLabel, renderBriefing } from "./briefing";
 export type { RewriteStrategy } from "./prompt";
 export { applyProposal, totalBurden, verifyRewrite } from "./verify";
-export { checkKind, NOT_VERIFIED, OVERCLAIM_VOCABULARY, PROOF_CHECKS, SIGNAL_CHECKS } from "./checks";
+export {
+  checkKind,
+  divergences,
+  needsAuthorDecision,
+  NOT_VERIFIED,
+  OVERCLAIM_VOCABULARY,
+  PROOF_CHECKS,
+  SIGNAL_CHECKS,
+} from "./checks";
 export type { CheckKind, CheckSpec, NotVerifiedDimension, ProofCheckSpec } from "./checks";
 export type { VerifyOptions } from "./verify";
 export type {

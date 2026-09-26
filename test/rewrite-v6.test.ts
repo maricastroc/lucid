@@ -5,6 +5,7 @@ import {
   buildRewritePrompt,
   buildRewritePromptV4,
   criterionLabel,
+  needsAuthorDecision,
   PROMPT_V4_PARTS,
   renderBriefing,
   REWRITE_PROMPT_VERSION,
@@ -134,7 +135,7 @@ describe("rewrite@6 — o que a troca preservou", () => {
       "written_dates_kept",
     ]);
     expect(verification.proofs.find((p) => p.check === "numbers_kept")?.outcome).toBe("not_confirmed");
-    expect(verification.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(verification)).toBe(true);
   });
 
   it("o briefing é insumo do prompt e NUNCA entra na verificação", async () => {

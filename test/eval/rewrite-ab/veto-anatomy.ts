@@ -109,7 +109,7 @@ export function renderVetoAnatomy(details: readonly VetoDetail[]): string {
 
   out.push("## O que o veto% mede");
   out.push("");
-  out.push("`veto = hasBlockingFailure = pelo menos uma das 7 provas reprovou`. É um E lógico:");
+  out.push("`veto = pelo menos uma das provas reprovou`. É um E lógico:");
   out.push("basta uma prova falhar para a proposta não ser aprovada. O número não distingue uma");
   out.push("frase de 21 palavras contra um limiar de 20 de uma reescrita que inventou agente — a");
   out.push("tabela abaixo distingue. **Nenhum veto vira não-veto aqui**: a engine continua se");

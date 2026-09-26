@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { analyze } from "../src/locales/pt-BR";
 import {
+  needsAuthorDecision,
   NOT_VERIFIED,
   OVERCLAIM_VOCABULARY,
   PROOF_CHECKS,
-  SIGNAL_CHECKS,
-  verifyRewrite,
   type RewriteVerification,
+  SIGNAL_CHECKS,
   type VerifyOptions,
+  verifyRewrite,
 } from "../src/report/rewrite";
 
 const TEXT =
@@ -173,15 +174,25 @@ describe("check registry — what each verification is allowed to claim", () => 
     }
   });
 
-  it("a proof passes exactly when it is confirmed or does not apply, and any other outcome blocks", async () => {
+  it("a proof passes exactly when it is confirmed or does not apply", async () => {
     for (const v of await runAll()) {
       for (const p of v.proofs) {
         expect(p.passed, p.check).toBe(p.outcome === "confirmed" || p.outcome === "not_applicable");
       }
-      expect(v.hasBlockingFailure).toBe(
-        v.proofs.some((p) => p.outcome === "not_confirmed" || p.outcome === "addition"),
-      );
     }
+  });
+
+  it("only a guarantee that is not confirmed or an addition asks the author to decide; an unmet effect never does", async () => {
+    let effectOnly = 0;
+    for (const v of await runAll()) {
+      const guaranteeDivergence = v.proofs.some(
+        (p) =>
+          PROOF_CHECKS[p.check].kind === "guarantee" && (p.outcome === "not_confirmed" || p.outcome === "addition"),
+      );
+      expect(needsAuthorDecision(v)).toBe(guaranteeDivergence);
+      if (!guaranteeDivergence && v.proofs.some((p) => !p.passed)) effectOnly++;
+    }
+    expect(effectOnly).toBeGreaterThan(0);
   });
 
   it("every verification declares what it proves, its limit and its ADR", () => {

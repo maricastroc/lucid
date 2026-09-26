@@ -24,6 +24,18 @@ export interface VerifyOptions {
   declarations?: readonly AgentDeclaration[];
 }
 
+function findingIdentity(f: Finding, source: string): string {
+  const start = f.meta?.participleStart;
+  const end = f.meta?.participleEnd;
+  if (f.criterion === "passive_voice" && typeof start === "number" && typeof end === "number") {
+    return `participle:${source
+      .slice(start, end)
+      .toLowerCase()
+      .replace(/[ao]s?$/u, "")}`;
+  }
+  return `text:${normalizeForMatch(f.span.text)}`;
+}
+
 function sameSpan(a: Span, b: Span): boolean {
   return a.start === b.start && a.end === b.end;
 }
@@ -438,23 +450,34 @@ export async function verifyRewrite(
     const impersonal = regionBefore.filter(keptImpersonal);
     const awaiting = regionBefore.filter((f) => !keptImpersonal(f) && awaitsAuthor(f));
     const take = (pool: Finding[], f: Finding): boolean => {
-      const key = normalizeForMatch(f.span.text);
-      const index = pool.findIndex((b) => normalizeForMatch(b.span.text) === key);
+      const key = findingIdentity(f, rewritten);
+      const index = pool.findIndex((b) => findingIdentity(b, text) === key);
       if (index < 0) return false;
       pool.splice(index, 1);
       return true;
     };
 
-    let stillRequired = 0;
+    const remaining: Finding[] = [];
     let impersonalLeft = 0;
     const awaitingLeft: Finding[] = [];
     for (const f of after.findings) {
       if (f.criterion !== criterion || !overlaps(f, newStart, newEnd)) continue;
-      if (take(required, f)) stillRequired++;
+      if (take(required, f)) remaining.push(f);
       else if (take(impersonal, f)) impersonalLeft++;
       else if (take(awaiting, f)) awaitingLeft.push(f);
-      else stillRequired++;
+      else remaining.push(f);
     }
+    const stillRequired = remaining.length;
+    const words = remaining
+      .map((f) => f.meta?.words)
+      .filter((n): n is number => typeof n === "number")
+      .sort((a, b) => a - b);
+    const wordsNote =
+      words.length === 0
+        ? ""
+        : words.length === 1
+          ? `; frase de ${words[0]} palavras`
+          : `; frases de ${words.slice(0, -1).join(", ")} e ${words[words.length - 1]} palavras`;
 
     const label = labelsOf([criterion]);
     const quoted = awaitingLeft.map((f) => `«${f.span.text.replace(/\s+/gu, " ").trim()}»`).join(", ");
@@ -467,7 +490,7 @@ export async function verifyRewrite(
       passed: stillRequired === 0,
       detail:
         stillRequired > 0
-          ? `O Lucid ainda aponta ${label} no trecho reescrito (${times(stillRequired)}).`
+          ? `O Lucid ainda aponta ${label} no trecho reescrito (${times(stillRequired)}${wordsNote}).`
           : exceptions.length === 0
             ? `O Lucid não aponta mais ${label} no trecho reescrito.`
             : `O Lucid não aponta mais ${label} no trecho reescrito, exceto ${exceptions.join(" e ")}.`,
@@ -732,6 +755,5 @@ export async function verifyRewrite(
     notices,
     signals,
     metrics,
-    hasBlockingFailure: proofs.some((p) => !p.passed),
   };
 }

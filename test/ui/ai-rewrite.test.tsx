@@ -230,7 +230,7 @@ describe("flow 5 · the card says what was confirmed and what was not verified",
     [PLAIN_FIRST_SENTENCE, /^usar como rascunho/i, /não encontrou divergência no que verifica/i],
     [REWRITE_LOSING_THE_NUMBER, /usar mesmo assim como rascunho/i, /há divergência/i],
     [ADDS_A_REFERENCE, /usar mesmo assim como rascunho/i, /há divergência/i],
-    [KEEPS_THE_PASSIVE, /usar mesmo assim como rascunho/i, /ainda aponta problemas no trecho reescrito/i],
+    [KEEPS_THE_PASSIVE, /^usar como rascunho/i, /ainda aponta problemas no trecho reescrito/i],
   ])("for «%s» the headline and the button follow the state", async (proposed, button, headline) => {
     await showCard(proposed);
 
@@ -269,8 +269,10 @@ describe("flow 5 · the card says what was confirmed and what was not verified",
     for (const s of verified.verification.signals) expect(listed).not.toContain(s.detail);
   });
 
-  it("puts an effect the rewrite did not reach under Efeito no texto, not under the guarantees", async () => {
+  it("puts an effect the rewrite did not reach under Efeito no texto, without asking to use it anyway", async () => {
     await showCard(KEEPS_THE_PASSIVE);
+
+    expect(auditPanel().queryByRole("button", { name: /usar mesmo assim/i })).not.toBeInTheDocument();
 
     expect(
       within(auditPanel().getByRole("group", { name: "Efeito no texto" })).getByRole("listitem"),

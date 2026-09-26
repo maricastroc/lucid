@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { verifyRewrite, type Proof, type RewriteVerification } from "../src/report/rewrite";
+import { needsAuthorDecision, type Proof, type RewriteVerification, verifyRewrite } from "../src/report/rewrite";
 import { legalReferences } from "../src/locales/pt-BR/fidelity";
 
 const LAW =
@@ -113,7 +113,7 @@ describe("references, label, values, written dates and markup — mutation batte
   it.each(VIOLATING)("%s → %s is %s", async (_, proposed, check, expected) => {
     const v = await verify(LAW, proposed);
     expect(outcome(v, check), detail(v, check)).toBe(expected);
-    expect(v.hasBlockingFailure).toBe(true);
+    expect(needsAuthorDecision(v)).toBe(true);
   });
 });
 

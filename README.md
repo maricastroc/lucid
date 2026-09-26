@@ -136,7 +136,7 @@ Because the referee is deterministic, "which model should rewrite this?" becomes
 | gemini-2.5-flash · `correct` |       100 |     +16.6 |          67 |        67 |       1440 |
 | gemini-2.5-flash · `rewrite` |       100 | **+71.5** |          67 |        33 |       1263 |
 
-Gemini produced the biggest readability gain in the table — and the deterministic gate still caught it altering a value or introducing jargon on the numbers-and-dates text. **Better prose never buys a pass.** _(Single run, `temperature 0`, 3 texts: a floor signal, not a leaderboard.)_
+Gemini produced the biggest readability gain in the table — and the deterministic checks still flagged it altering a value or introducing jargon on the numbers-and-dates text. **Better prose never buys a pass.** _(Single run, `temperature 0`, 3 texts: a floor signal, not a leaderboard.)_
 
 <br/>
 
