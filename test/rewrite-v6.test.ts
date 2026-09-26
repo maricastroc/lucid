@@ -158,8 +158,8 @@ describe("rewrite@6 — o que a troca preservou", () => {
   });
 });
 
-describe("rewrite@6 — o briefing fala a língua da interface", () => {
-  it("chama cada critério pelo mesmo nome que a interface", () => {
+describe("rewrite@6 — the verifier speaks the interface's language", () => {
+  it("names each criterion in its messages as the interface does", () => {
     for (const criterion of PT_CRITERION_IDS) {
       expect(criterionLabel(criterion), criterion).toBe(metaFor("pt-BR", criterion).label);
     }

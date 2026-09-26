@@ -211,7 +211,7 @@ describe("baseline 2.5 — what is measured is what production sends (offline)",
   });
 
   it.runIf(fs.existsSync(CALLS) && fs.existsSync(STAMP))(
-    "cada prompt gravado ainda é reconstruído igual, enquanto a régua for a mesma",
+    "every recorded prompt is still rebuilt identically while the ruler stays the same",
     () => {
       const stamp = JSON.parse(fs.readFileSync(STAMP, "utf8")) as { ruler: ReturnType<typeof ruler> };
       const current = ruler();

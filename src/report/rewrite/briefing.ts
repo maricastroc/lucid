@@ -3,8 +3,8 @@ import type { Finding } from "../../lucid/core/types";
 const LABEL: Record<string, string> = {
   passive_voice: "Voz passiva",
   passiva_sintetica: "Voz passiva sintética",
-  nominalization: "Nominalização",
-  nominalizacao_encadeada: "Nominalização encadeada",
+  nominalization: "Ação com verbo genérico",
+  nominalizacao_encadeada: "Ações escritas como substantivos",
   mais_que_perfeito_sintetico: "Mais-que-perfeito sintético",
   gerundismo: "Gerundismo",
   jargon: "Jargão",
@@ -51,7 +51,15 @@ const HINT: Record<string, string> = {
   paragraph_length: "O parágrafo acumula frases demais.",
 };
 
+const PROMPT_LABEL: Record<string, string> = {
+  ...LABEL,
+  nominalization: "Nominalização",
+  nominalizacao_encadeada: "Nominalização encadeada",
+};
+
 export const criterionLabel = (criterion: string): string => LABEL[criterion] ?? criterion;
+
+export const promptLabel = (criterion: string): string => PROMPT_LABEL[criterion] ?? criterion;
 
 const FALLBACK_HINT = "Resolva o problema de clareza apontado neste ponto.";
 
@@ -83,7 +91,7 @@ export function renderBriefing(findings: readonly Finding[]): string {
     .map((criterion) => {
       const group = byCriterion.get(criterion)!;
       const human = group.every((f) => f.requiresHuman) ? HUMAN_TAIL : "";
-      return `- ${criterionLabel(criterion)} · ${group.length}× — ${HINT[criterion] ?? FALLBACK_HINT}${shortExamples(
+      return `- ${promptLabel(criterion)} · ${group.length}× — ${HINT[criterion] ?? FALLBACK_HINT}${shortExamples(
         group,
       )}${human}`;
     })

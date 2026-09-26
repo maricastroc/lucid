@@ -274,10 +274,11 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
+      "justification": "“avaliação” é uma das 3 ações escritas como substantivo nesta frase: “avaliação”, “deliberação” e “entrega”. A partir de 3 na mesma frase, o Lucid marca cada uma para revisão.",
       "meta": {
         "count": 3,
         "kind": "density",
+        "words": "avaliação deliberação entrega",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -296,10 +297,11 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
+      "justification": "“deliberação” é uma das 3 ações escritas como substantivo nesta frase: “avaliação”, “deliberação” e “entrega”. A partir de 3 na mesma frase, o Lucid marca cada uma para revisão.",
       "meta": {
         "count": 3,
         "kind": "density",
+        "words": "avaliação deliberação entrega",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -318,11 +320,14 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“entrega” é uma ação escrita como substantivo, ligada por “dos” a “documentos”.",
       "meta": {
+        "actions": "entrega",
+        "connectors": "dos",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "entrega documentos",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -907,7 +912,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “analisar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“fazer a análise” usa o verbo genérico “fazer” com a ação escrita como substantivo, “análise”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “analisar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "analisar",
         "lightVerb": "fazer",
@@ -930,11 +935,14 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“análise” é uma ação escrita como substantivo, ligada por “de” a “documentos”.",
       "meta": {
+        "actions": "análise",
+        "connectors": "de",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "análise documentos",
       },
       "normativeReference": {
         "section": "5.3.3",
@@ -953,7 +961,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “pagar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“realizar o pagamento” usa o verbo genérico “realizar” com a ação escrita como substantivo, “pagamento”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “pagar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "pagar",
         "lightVerb": "realizar",
@@ -1274,7 +1282,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “verificar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“fazer a verificação” usa o verbo genérico “fazer” com a ação escrita como substantivo, “verificação”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “verificar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "verificar",
         "lightVerb": "fazer",
@@ -1297,11 +1305,14 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
+      "justification": "“verificação” é uma ação escrita como substantivo, ligada por “dos” a “documentos”.",
       "meta": {
+        "actions": "verificação",
+        "connectors": "dos",
         "kind": "chain",
         "links": 1,
         "strongLink": false,
+        "words": "verificação documentos",
       },
       "normativeReference": {
         "section": "5.3.3",

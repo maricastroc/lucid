@@ -24,26 +24,31 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     why: "O “se” esconde quem pratica a ação, e o leitor precisa saber quem faz o quê.",
   },
   nominalization: {
-    label: "Nominalização",
+    label: "Ação com verbo genérico",
     ruleId: "nominalization",
     kind: "Escolha lexical",
     principleName: "Frases claras e concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal:
-      "verbo de apoio (fazer, realizar, efetuar, proceder, promover) seguido de artigo ou preposição e de um substantivo que vem de um verbo, em palavras seguidas (“fazer a análise”)",
-    why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
+      "verbo genérico de uma lista (fazer, realizar, efetuar, proceder, promover) seguido de artigo, ou de “à” e “ao”, e de um substantivo de ação de uma lista curada, em palavras seguidas (“fazer a análise”)",
+    why:
+      "Quando uma ação aparece como substantivo acompanhado de um verbo genérico (“fazer a análise”) em vez do " +
+      "verbo que a diz (“analisar”), a frase pode ficar menos direta.",
   },
   nominalizacao_encadeada: {
-    label: "Nominalização encadeada",
+    label: "Ações escritas como substantivos",
     ruleId: "nominalizacao_encadeada",
     kind: "Escolha lexical",
     principleName: "Frases claras e concisas",
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal:
-      "substantivo de ação, de uma lista curada, ligado por “de” a outro substantivo abstrato, ou vários deles na mesma frase",
-    why: "Ações empilhadas como substantivos escondem quem faz o quê e pesam a frase.",
+      "substantivo que nomeia uma ação, de uma lista curada, ligado por “de” a outro substantivo, ou vários deles na mesma frase",
+    why:
+      "Quando uma ação aparece como substantivo (“a análise”) em vez de verbo (“analisar”), pode ficar menos direto " +
+      "perceber quem faz o quê. Várias dessas construções na mesma frase, ou uma ligada à outra por “de” (“a análise " +
+      "da concessão”), podem tornar a leitura mais abstrata.",
   },
   jargon: {
     label: "Jargão",

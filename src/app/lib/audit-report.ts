@@ -476,7 +476,7 @@ export function buildAuditReport(
       "o número mostrado é o calculado, e a faixa de referência só ajuda a interpretá-lo.",
   );
   out.push(
-    "> Critérios de léxico (jargão, nominalização, redundância, perífrase, dupla negação, advérbios vagos) " +
+    "> Critérios de léxico (jargão, ação com verbo genérico, redundância, perífrase, dupla negação, advérbios vagos) " +
       "comparam o texto com **listas curadas**, feitas para evitar apontamento errado. Contagem baixa ou zero não " +
       "prova que o fenômeno esteja ausente.",
   );

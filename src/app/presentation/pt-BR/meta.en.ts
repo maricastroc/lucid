@@ -18,20 +18,25 @@ export const TEXT_UI_EN: Record<CriterionId, CriterionText> = {
     why: "The “se” hides who performs the action, and the reader needs to know who does what.",
   },
   nominalization: {
-    label: "Nominalization",
+    label: "Action with a generic verb",
     kind: "Lexical choice",
     principleName: "Clear and concise sentences",
     signal:
-      "a light verb (fazer, realizar, efetuar, proceder, promover) followed by an article or preposition and a noun derived from a verb, as consecutive words (“fazer a análise”)",
-    why: "It hides the action inside a noun and lengthens the sentence for no gain.",
+      "a generic verb from a list (fazer, realizar, efetuar, proceder, promover) followed by an article, or by “à” and “ao”, and an action noun from a curated list, as consecutive words (“fazer a análise”)",
+    why:
+      "When an action appears as a noun alongside a generic verb (“fazer a análise”) instead of the verb that " +
+      "says it (“analisar”), the sentence can be less direct.",
   },
   nominalizacao_encadeada: {
-    label: "Chained nominalization",
+    label: "Actions written as nouns",
     kind: "Lexical choice",
     principleName: "Clear and concise sentences",
     signal:
-      "an action noun from a curated list linked by “de” to another abstract noun, or several of them in the same sentence",
-    why: "Actions stacked as nouns hide who does what and weigh the sentence down.",
+      "a noun that names an action, from a curated list, linked by “de” to another noun, or several of them in the same sentence",
+    why:
+      "When an action appears as a noun (“a análise”) instead of a verb (“analisar”), it can be less direct to see " +
+      "who does what. Several of these constructions in the same sentence, or one linked to another by “de” (“a " +
+      "análise da concessão”), can make the reading more abstract.",
   },
   jargon: {
     label: "Jargon",

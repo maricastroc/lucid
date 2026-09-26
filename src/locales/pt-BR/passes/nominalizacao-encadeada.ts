@@ -16,12 +16,16 @@ interface Chain {
   endIndex: number;
   strongLink: boolean;
   links: number;
+  connectorIndexes: number[];
+  tailIndexes: number[];
 }
 
 function matchChain(tokens: readonly Token[], headIndex: number, heads: ReadonlySet<string>): Chain | null {
   let endIndex = headIndex;
   let links = 0;
   let strongLink = false;
+  const connectorIndexes: number[] = [];
+  const tailIndexes: number[] = [];
 
   for (;;) {
     const deToken = tokens[endIndex + 1];
@@ -40,25 +44,33 @@ function matchChain(tokens: readonly Token[], headIndex: number, heads: Readonly
 
     if (tailIsHead) strongLink = true;
     links += 1;
+    connectorIndexes.push(endIndex + 1);
+    tailIndexes.push(tailIndex);
     endIndex = tailIndex;
   }
 
-  return links > 0 ? { headIndex, endIndex, strongLink, links } : null;
+  return links > 0 ? { headIndex, endIndex, strongLink, links, connectorIndexes, tailIndexes } : null;
 }
 
-function chainJustification(strongLink: boolean): string {
-  if (strongLink) {
-    return (
-      "Nominalizações encadeadas por “de”: duas ou mais ações escondidas em substantivos, uma presa à " +
-      "outra, e o leitor precisa desmontar a cadeia para saber quem faz o quê. Reescreva com verbos, " +
-      "decidindo quem pratica cada ação."
-    );
+const quoted = (word: string): string => `“${word}”`;
+
+function listed(words: readonly string[]): string {
+  const q = words.map(quoted);
+  return q.length <= 1 ? q.join("") : `${q.slice(0, -1).join(", ")} e ${q[q.length - 1]}`;
+}
+
+const unique = (words: readonly string[]): string[] => [...new Set(words)];
+
+function chainJustification(
+  actions: readonly string[],
+  connectors: readonly string[],
+  tails: readonly string[],
+  span: string,
+): string {
+  if (actions.length >= 2) {
+    return `${listed(actions)} são ações escritas como substantivo, ligadas por ${listed(unique(connectors))} em ${quoted(span)}.`;
   }
-  return (
-    "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida " +
-    "num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; " +
-    "avalie se a versão com o verbo fica mais clara."
-  );
+  return `${quoted(actions[0])} é uma ação escrita como substantivo, ligada por ${listed(unique(connectors))} a ${listed(tails)}.`;
 }
 
 export const nominalizacaoEncadeadaPass: Pass<PtConfig> = {
@@ -94,18 +106,33 @@ export const nominalizacaoEncadeadaPass: Pass<PtConfig> = {
       for (const chain of chains) {
         const start = tokens[chain.headIndex].start;
         const end = tokens[chain.endIndex].end;
+        const text = ctx.doc.source.slice(start, end);
+        const words = [chain.headIndex, ...chain.tailIndexes].map((k) => tokens[k].text);
+        const actions = [chain.headIndex, ...chain.tailIndexes]
+          .filter((k) => heads.has(tokens[k].lower))
+          .map((k) => tokens[k].text);
+        const connectors = chain.connectorIndexes.map((k) => tokens[k].text);
+        const tails = chain.tailIndexes.map((k) => tokens[k].text);
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
-          span: { start, end, text: ctx.doc.source.slice(start, end) },
+          span: { start, end, text },
           severity: chain.strongLink ? "warning" : "info",
           requiresHuman: true,
-          justification: chainJustification(chain.strongLink),
-          meta: { kind: "chain", links: chain.links, strongLink: chain.strongLink },
+          justification: chainJustification(actions, connectors, tails, text.replace(/\s+/gu, " ")),
+          meta: {
+            kind: "chain",
+            links: chain.links,
+            strongLink: chain.strongLink,
+            words: words.join(" "),
+            actions: actions.join(" "),
+            connectors: connectors.join(" "),
+          },
         });
       }
 
       if (hitIndexes.length < minPorFrase) continue;
+      const counted = hitIndexes.map((k) => tokens[k].text);
       for (const hitIndex of hitIndexes) {
         if (covered.has(hitIndex)) continue;
         const token = tokens[hitIndex];
@@ -116,9 +143,9 @@ export const nominalizacaoEncadeadaPass: Pass<PtConfig> = {
           severity: "info",
           requiresHuman: true,
           justification:
-            `Frase com ${hitIndexes.length} substantivos de ação (nominalizações): o acúmulo pesa a ` +
-            "leitura. Escolha quais ações voltam a ser verbos.",
-          meta: { kind: "density", count: hitIndexes.length },
+            `${quoted(token.text)} é uma das ${hitIndexes.length} ações escritas como substantivo nesta frase: ` +
+            `${listed(counted)}. A partir de ${minPorFrase} na mesma frase, o Lucid marca cada uma para revisão.`,
+          meta: { kind: "density", count: hitIndexes.length, words: counted.join(" ") },
         });
       }
     }

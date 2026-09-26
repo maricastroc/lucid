@@ -19,11 +19,17 @@ export const PT_PRESENTATION: LocalePresentation<CriterionId> = {
       long_sentence:
         "Leia a frase. Se ela carrega mais de uma ideia, escolha onde separar e como reescrever; se carrega " +
         "uma só, marque como revisado.",
+      nominalizacao_encadeada:
+        "Veja se essas construções dificultam a leitura. Se dificultarem, considere reescrever algumas com o verbo " +
+        "correspondente. Se a frase já estiver clara, marque o ponto como revisado.",
     },
     en: {
       long_sentence:
         "Read the sentence. If it carries more than one idea, choose where to split it and how to rewrite it; " +
         "if it carries only one, mark it as reviewed.",
+      nominalizacao_encadeada:
+        "See whether these constructions make the sentence harder to read. If they do, consider rewriting some " +
+        "with the matching verb. If the sentence is already clear, mark the point as reviewed.",
     },
   },
   curated: new Set<CriterionId>([
