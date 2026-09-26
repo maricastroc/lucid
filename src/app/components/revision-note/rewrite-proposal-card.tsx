@@ -68,6 +68,9 @@ export function RewriteProposalCard({
           {verification.proofs.map((p) => (
             <CheckLine key={p.check} ok={p.passed} kind="proof" detail={p.detail} />
           ))}
+          {verification.notices.map((n) => (
+            <CheckLine key={n.check} ok={false} kind="notice" detail={n.detail} />
+          ))}
         </ul>
       </div>
 
@@ -112,7 +115,7 @@ function fmtDelta(n: number, digits: number): string {
   return n >= 0 ? `+${s}` : s;
 }
 
-function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal"; detail: string }) {
+function CheckLine({ ok, kind, detail }: { ok: boolean; kind: "proof" | "signal" | "notice"; detail: string }) {
   const mark = ok ? (kind === "proof" ? "✓" : "○") : kind === "proof" ? "✗" : "⚠";
   const tone = ok
     ? kind === "proof"

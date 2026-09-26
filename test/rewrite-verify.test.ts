@@ -855,7 +855,7 @@ describe("honesty (I5): no green seal", () => {
     expect(keys).not.toContain("approved");
     expect(keys).not.toContain("ok");
     expect(keys).not.toContain("passed");
-    expect(keys.sort()).toEqual(["hasBlockingFailure", "metrics", "proofs", "signals"]);
+    expect(keys.sort()).toEqual(["hasBlockingFailure", "metrics", "notices", "proofs", "signals"]);
   });
 
   it("determinism: same input → same JSON", async () => {

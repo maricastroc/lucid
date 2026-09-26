@@ -22,6 +22,7 @@ interface RewriteRequestBody {
   text?: unknown;
   target?: unknown;
   criterion?: unknown;
+  focus?: unknown;
   strategy?: unknown;
   briefing?: unknown;
   findings?: unknown;
@@ -93,7 +94,8 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "requisição inválida: o corpo precisa ser JSON" }, { status: 400 });
   }
 
-  const { text, target, criterion, strategy, briefing, findings, declarations, providerId, model, localeId } = body;
+  const { text, target, criterion, focus, strategy, briefing, findings, declarations, providerId, model, localeId } =
+    body;
   if (typeof text !== "string" || text.length === 0) {
     return NextResponse.json({ error: "texto ausente" }, { status: 400 });
   }
@@ -131,6 +133,7 @@ export async function POST(request: Request): Promise<Response> {
     const result = await proposeAndVerify(text, target, proposer, {
       locale,
       criterion: typeof criterion === "string" ? criterion : undefined,
+      focus: isValidSpan(focus, text.length) ? focus : undefined,
       strategy:
         typeof strategy === "string" && VALID_STRATEGIES.has(strategy) ? (strategy as RewriteStrategy) : undefined,
       briefing: Array.isArray(briefing) ? briefing.filter(isFindingLike) : undefined,

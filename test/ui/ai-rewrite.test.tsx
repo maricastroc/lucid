@@ -92,3 +92,36 @@ describe("flow 5 · a proposal the engine blocks", () => {
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
   });
 });
+
+describe("flow 5 · a passive left for the author does not block the proposal", () => {
+  const TWO_AGENTLESS = "O pedido foi indeferido ontem e a decisão foi comunicada ao interessado.";
+
+  it("resolves the open point, keeps the other passive as a notice and does not veto the version", async () => {
+    const focus = analyze(TWO_AGENTLESS).findings.find((f) => f.span.text.includes("indeferido"))!;
+    const target = rewriteTargetAt(TWO_AGENTLESS, focus.span.start, PT).span;
+    const verified = await proposeAndVerify(
+      TWO_AGENTLESS,
+      target,
+      new StubRewriteProposer(
+        { [target.text]: "A comissão indeferiu o pedido ontem e a decisão foi comunicada ao interessado." },
+        "stub-test@1",
+      ),
+      {
+        criterion: focus.criterion,
+        focus: focus.span,
+        declarations: [{ span: focus.span, agent: "a comissão" }],
+        locale: rewriteLocalePtBR,
+      },
+    );
+    stubRewriteEndpoint(verified);
+    const { user } = mountStudio({ text: TWO_AGENTLESS });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido");
+
+    await runRewrite(user);
+
+    expect(await auditPanel().findByText(/nenhuma falha encontrada/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/continua em «foi comunicada»/i)).toBeInTheDocument();
+    expect(auditPanel().getByRole("button", { name: /^usar como rascunho/i })).toBeEnabled();
+  });
+});

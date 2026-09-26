@@ -27,7 +27,14 @@ export function ManualEditForm({
   const { span: target, unit } = rewriteTargetAt(source, finding.span.start, locale);
   const unitLabel = unit === "sentence" ? c.note.manualUnitSentence : c.note.manualUnitParagraph;
   const original = target.text;
-  const edit = useManualEditDraft({ source, target, criterion: finding.criterion, declaration, lang });
+  const edit = useManualEditDraft({
+    source,
+    target,
+    criterion: finding.criterion,
+    focus: finding.span,
+    declaration,
+    lang,
+  });
   const { draft: editorDraft, verification: result, dirty } = edit;
   const draft = editorDraft.status === "closed" ? original : editorDraft.text;
   const checking = editorDraft.status === "checking";

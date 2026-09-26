@@ -15,6 +15,7 @@ export interface RewriteDraftOptions {
   readonly source: string;
   readonly target: Span;
   readonly criterion: string;
+  readonly focus?: Span;
   readonly choice: RewriteModel;
   readonly declaration: AgentDeclaration | null;
   readonly failureMessage: string;
@@ -30,6 +31,7 @@ export function useRewriteDraft({
   source,
   target,
   criterion,
+  focus,
   choice,
   declaration,
   failureMessage,
@@ -55,6 +57,7 @@ export function useRewriteDraft({
     try {
       const result = await generateRewrite(source, target, choice, {
         criterion,
+        focus,
         directed,
         declarations: declaration ? [declaration] : undefined,
         signal: controller.signal,
@@ -67,7 +70,7 @@ export function useRewriteDraft({
     } finally {
       if (runIdRef.current === runId) abortRef.current = null;
     }
-  }, [source, target, choice, criterion, directed, declaration, failureMessage]);
+  }, [source, target, choice, criterion, focus, directed, declaration, failureMessage]);
 
   const cancel = useCallback(() => abortRef.current?.abort(), []);
 
