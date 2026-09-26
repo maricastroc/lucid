@@ -1,0 +1,195 @@
+{
+  "purpose": "Fotografia do gemini-2.5-flash no estado atual do Lucid, antes da perda de acesso ao modelo. Referência pareada para avaliar sucessores (gemini-3.8-flash, gemini-3.5-flash-lite).",
+  "createdAt": "2026-09-26T16:14:53.492Z",
+  "commit": "78ce2e515c801589355f30382b3fc52580dd4524",
+  "branch": "feat/rewrite-card-order",
+  "trackedTreeClean": true,
+  "harness": [
+    {
+      "file": "test/eval/baseline/baseline.test.ts",
+      "sha256": "52e946673ee6f028ff2680edf02429a9ae7d9938b845108e158e73e8f51173e0"
+    },
+    {
+      "file": "test/eval/baseline/plan.ts",
+      "sha256": "6ad7e1561378d02a5cb81a4891397180b900358bd7a081d621118fb7c933b0c9"
+    },
+    {
+      "file": "test/eval/baseline/recorder.ts",
+      "sha256": "8f82dfc75be26b9cd63371ec246d5dabc3956f4880c0ff7da2126801cd9fd1ed"
+    },
+    {
+      "file": "test/eval/baseline/run.ts",
+      "sha256": "72507f48a269c77c99ebae0dfd8435d151f15a1f1e448d982822a9f1e8bd7b6c"
+    },
+    {
+      "file": "test/eval/baseline/report.ts",
+      "sha256": "da1b790b1c540761d3d0cf1b94044f061b60c82cb1855f4c179c047d4d99208b"
+    }
+  ],
+  "credential": "GEMINI_API_KEY ativa no .env às 13:15 de 26/09/2026, depois da correção da usuária, que a identificou como a chave paga original do projeto com histórico no gemini-2.5-flash. Nenhum valor derivado da chave é gravado.",
+  "node": "v22.22.3",
+  "ruler": {
+    "lucidVersion": "0.1.0",
+    "dataHash": "a7ae67e2",
+    "configHash": "4c2da7fd"
+  },
+  "model": "gemini-2.5-flash",
+  "pricing": {
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "retrievedAt": "2026-09-26",
+    "tier": "Paid Tier · Standard",
+    "inputUsdPerMillion": 0.3,
+    "outputUsdPerMillion": 2.5,
+    "note": "saída inclui tokens de raciocínio"
+  },
+  "promptVersions": {
+    "rewrite": "rewrite@6",
+    "rewriteAbAlias": "lucid@v5",
+    "directed": "directed@4",
+    "probe": "probe@1"
+  },
+  "parametersInCode": {
+    "rewrite": {
+      "temperature": 0,
+      "maxOutputTokens": 2048,
+      "responseMimeType": "application/json",
+      "thinkingBudget": 0
+    },
+    "directed": {
+      "temperature": 0,
+      "maxOutputTokens": 2048,
+      "responseMimeType": "application/json",
+      "thinkingBudget": 0
+    },
+    "probe": {
+      "temperature": 0,
+      "maxOutputTokens": 512,
+      "responseMimeType": "application/json",
+      "thinkingBudget": 0
+    },
+    "note": "O generationConfig realmente enviado está gravado verbatim em cada linha de calls.jsonl.",
+    "retry": "GeminiProvider de produção: até 4 novas tentativas em HTTP 429; timeout de 45 s por tentativa."
+  },
+  "corpus": {
+    "version": "v1",
+    "dir": "corpus/v1/text",
+    "manifestSha256": "56f326fbef425bfaf1425cf185b9694ab0e1f820936aab3ea9666c25c3486918",
+    "files": [
+      {
+        "name": "planalto-leis__1989-1994-l7992.txt",
+        "chars": 1455,
+        "sha256": "b79aa6cebeb1c91c01ac788cf14ac85820ca262b76756329fb076b2816bc9018"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l7993.txt",
+        "chars": 1393,
+        "sha256": "aacc4f97700aa9a92538c31825052ff3c2c80e018b52431fa957db7ae89f339e"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l7994.txt",
+        "chars": 2394,
+        "sha256": "2b82edee5757ead13f1202c1a1bd1aa2f11cf9e37346b4072e0a65a6f18e233c"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l7999.txt",
+        "chars": 20548,
+        "sha256": "d805f0590623f1f15d50febf389a2d0fd9bb5df154ebf1edbf27eb45db630642"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8000.txt",
+        "chars": 9351,
+        "sha256": "7c0f5d1501f4b94d6717e704bffe32e4789a85c2e6445e62c24a82c146338bbf"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8002.txt",
+        "chars": 1820,
+        "sha256": "235c26b80d0f0d9ada3794525d95256c5c2f12cd9a3f0e4576cbdbfb545e59da"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8006.txt",
+        "chars": 2017,
+        "sha256": "8b29ac803c340b93162494b75f8f9efb1e6dd833ab0eafa412458151e53694c6"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8007.txt",
+        "chars": 1369,
+        "sha256": "c2e150414045b753f17ad7878d21a052fe7a0ed6586459b2aabd9ed016513255"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8010.txt",
+        "chars": 5199,
+        "sha256": "ae790e88d8cde5e988f0a0560a41a6dfd20948cef4082033e88da09e1d27a0ee"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8013.txt",
+        "chars": 3558,
+        "sha256": "c22a4f019e629f3ab0e65f64cb092fb43654e43ff05515528934de8a4242ff9f"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8014.txt",
+        "chars": 1480,
+        "sha256": "eb3d177e653947d525422dae7dab3d0ffad3b9184928166c3a59db68b99ae094"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8016.txt",
+        "chars": 3023,
+        "sha256": "cace84d86a89acf1f1b408a7da68ba0fa9d33c7fb66db81270a6f46f70a40fc1"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8017.txt",
+        "chars": 1522,
+        "sha256": "e50c8901591c007e337e31979e3cb8af1185ed6b7e1a1fd5980418b603365a92"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8018.txt",
+        "chars": 3082,
+        "sha256": "e6cb75ea77ad77f782caf13216b8fbb249b3dfc03bb22f06651ea85c546a27bd"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8022.txt",
+        "chars": 4543,
+        "sha256": "ca41b45161bc00427659497bc2e784c91936dac221f0b746e7def855ee2fba1b"
+      },
+      {
+        "name": "planalto-leis__1989-1994-l8026.txt",
+        "chars": 1474,
+        "sha256": "b3a9cbb0ea366d89db001277055c3df709cccdd810618292b9af876397ff808f"
+      }
+    ]
+  },
+  "selection": {
+    "rewrite": {
+      "rule": "loadEvalTargets(500) do A/B: parágrafo, 150–700 caracteres, com ao menos um achado",
+      "targets": 157,
+      "focus": "primeiro achado do parágrafo (o mesmo primaryCriterion do A/B)",
+      "briefing": "todos os achados que cruzam o parágrafo, como generateRewrite faz"
+    },
+    "directed": {
+      "rule": "alvos do rewrite com um achado em que asksForAgent() é verdadeiro (a UI faz a pergunta do agente)",
+      "targets": 44,
+      "declaration": "{ agent: null } no ponto em foco: a resposta 'manter impessoal', a única que não exige inventar agente"
+    },
+    "probe": {
+      "golden": "test/eval/probe-golden.ts",
+      "cases": 27,
+      "goldenSha256": "b9beeb38d0fbd36ff2e60b6f9f5389fdf2e89342a22719c5f0677f64ed821ca5"
+    }
+  },
+  "runs": [
+    1,
+    2
+  ],
+  "order": "rodada 1: rewrite → directed → probe; rodada 2: rewrite → directed → probe",
+  "guard": {
+    "capUsd": 2,
+    "stopAtUsd": 1.9,
+    "rule": "antes de cada chamada: gasto + pior caso da chamada (entrada a 2,5 caracteres/token, saída no teto) ≤ stopAtUsd; a cada 10 chamadas, projeção pelo uso observado ≤ stopAtUsd"
+  },
+  "declaredExclusions": [
+    "A sonda não roda dentro das suítes de reescrita (meaning_preserved), como no A/B (test/eval/rewrite-ab/README.md). Ela é medida à parte, na meta-eval.",
+    "declared_agent_present não é exercitado: nenhum agente declarado por pessoa existe para estes alvos, e o avaliador não inventa um."
+  ],
+  "productionObservations": [
+    "Na produção, a rota cria LlmRewriteProposer sem estratégia (src/app/api/rewrite/route.ts:77) e o id é fixado no construtor (src/report/rewrite/llm-proposer.ts:34): proposta feita com o prompt directed@4 sai carimbada rewrite@6. Aqui stampedId guarda o carimbo de produção e promptVersion guarda o prompt realmente usado."
+  ]
+}

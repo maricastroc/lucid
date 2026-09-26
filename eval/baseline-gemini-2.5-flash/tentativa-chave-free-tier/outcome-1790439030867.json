@@ -1,0 +1,9 @@
+{
+  "planned": 456,
+  "alreadyDone": 0,
+  "called": 1,
+  "errors": 1,
+  "spentUsd": 0,
+  "stoppedBy": "fatal",
+  "stopDetail": "404: Gemini recusou a requisição: This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.8-flash for the latest features and improvements. We recommend you to use the Interactions API (https://ai.google.dev/gemini-api/docs/get-started)."
+}
