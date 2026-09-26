@@ -8,7 +8,6 @@ import {
   verifyRewrite,
   type RewriteVerification,
 } from "../src/report/rewrite";
-import { StubComprehensionProbe } from "../src/lucid/probe/stub-probe";
 
 const TEXT =
   "Em 10/05/2024, o pedido supracitado de reajuste de 30 dias foi encaminhado para análise e o resultado final desse exame " +
@@ -28,8 +27,6 @@ async function everyCheck(proposed: string): Promise<RewriteVerification> {
       criterion: "long_sentence",
       findings,
       declarations: [{ span: passive.span, agent: "a secretaria" }],
-      probe: new StubComprehensionProbe({}),
-      question: "Qual é o fato principal?",
     },
   );
 }

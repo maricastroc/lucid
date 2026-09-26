@@ -69,7 +69,7 @@ export const PROOF_CHECKS: { readonly [C in Proof["check"]]: CheckSpec<"guarante
   },
 };
 
-export const SIGNAL_CHECKS: { readonly [C in VerificationSignal["check"]]: CheckSpec<"signal" | "probabilistic"> } = {
+export const SIGNAL_CHECKS: { readonly [C in VerificationSignal["check"]]: CheckSpec<"signal"> } = {
   entities_preserved: {
     kind: "signal",
     proves:
@@ -95,12 +95,6 @@ export const SIGNAL_CHECKS: { readonly [C in VerificationSignal["check"]]: Check
     proves: "Lista categorias jurídicas da lista do Lucid que estão no original e não estão na proposta.",
     limit: "Depende de uma lista fixa de categorias.",
     adr: "ADR-105",
-  },
-  meaning_preserved: {
-    kind: "probabilistic",
-    proves: "Compara a leitura de uma sonda LLM sobre o original e sobre a proposta.",
-    limit: "Depende de um modelo e nunca foi validada para detectar perda de sentido em reescritas.",
-    adr: "ADR-090",
   },
 };
 

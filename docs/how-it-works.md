@@ -101,7 +101,7 @@ _See [`eval/report.json`](../eval/report.json) → `assistedCorpus`, rendered at
 
 ### The rewrite benchmark
 
-The generator × verifier table in the README comes from [`test/rewrite-benchmark.test.ts`](../test/rewrite-benchmark.test.ts), gated off CI (`BENCHMARK=1`). It separates **PROOF** (deterministic: the target violation is gone, numbers and dates survived, no jargon or first person fabricated) from **SIGNAL** (a non-deterministic read on meaning). Single run, `temperature 0`, 3 texts: a floor signal, not a leaderboard.
+The generator × verifier table in the README comes from [`test/rewrite-benchmark.test.ts`](../test/rewrite-benchmark.test.ts), gated off CI (`BENCHMARK=1`). It separates **PROOF** (deterministic: the target violation is gone, numbers and dates survived, no jargon or first person fabricated) from **SIGNAL** (a deterministic heuristic that raises a suspicion, never a proof). No model takes part in the verification. Single run, `temperature 0`, 3 texts: a floor signal, not a leaderboard.
 
 ---
 

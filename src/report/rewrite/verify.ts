@@ -1,6 +1,4 @@
 import type { Finding, Severity, Span } from "../../lucid";
-import type { ComprehensionProbe } from "../../lucid/probe/types";
-import { interpret } from "../../lucid/probe/interpret";
 import { rewriteLocalePtBR } from "../../locales/pt-BR/tier3";
 import { criterionLabel } from "./briefing";
 import type {
@@ -18,13 +16,10 @@ const DEFAULT_LOCALE: RewriteLocale = rewriteLocalePtBR;
 
 export interface VerifyOptions {
   locale?: RewriteLocale;
-  probe?: ComprehensionProbe;
-  question?: string;
   criterion?: string;
   focus?: Span;
   findings?: readonly Finding[];
   declarations?: readonly AgentDeclaration[];
-  signal?: AbortSignal;
 }
 
 function sameSpan(a: Span, b: Span): boolean {
@@ -404,34 +399,6 @@ export async function verifyRewrite(
           `do original: ${categoriesDropped.join(", ")}. Confira se a regra não passou a valer para mais gente`
         : "Nenhuma categoria jurídica do original saiu (heurística, não prova)",
   });
-
-  if (options.probe && options.question) {
-    try {
-      const [originalResult, proposedResult] = await Promise.all([
-        options.probe.probe({ trecho: proposal.original, pergunta: options.question }, { signal: options.signal }),
-        options.probe.probe({ trecho: proposal.proposed, pergunta: options.question }, { signal: options.signal }),
-      ]);
-
-      const originalReadable = originalResult.podeResponder && !originalResult.precisouInferir;
-      const proposedReadable = proposedResult.podeResponder && !proposedResult.precisouInferir;
-      const lost = originalReadable && !proposedReadable;
-      const proposedSignal = interpret(proposedResult);
-      signals.push({
-        check: "meaning_preserved",
-        flagged: lost,
-        detail: lost
-          ? "O leitor de piso encontrava a resposta no original, mas trava na nova versão: possível perda de informação"
-          : proposedSignal.tipo === "flag"
-            ? "A nova versão trava o leitor de piso, mas o original também travava: não dá para concluir que houve perda"
-            : "Nenhuma perda de sentido detectada pelo leitor de piso (não é garantia de compreensão)",
-      });
-    } catch (error) {
-      console.warn(
-        `[verify] sonda de compreensão falhou — signal 'meaning_preserved' omitido. ` +
-          `criterion=${options.criterion ?? "-"} error=${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
 
   const metrics: MetricsDelta = {
     readabilityBefore: before.metrics.readability,

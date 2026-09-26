@@ -1,16 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { analyze } from "../src/locales/pt-BR";
 import type { Finding } from "../src/lucid/core/types";
 import {
   applyProposal,
   proposeAndVerify,
+  SIGNAL_CHECKS,
   StubRewriteProposer,
   verifyRewrite,
   type RewriteProposal,
   type VerifyOptions,
 } from "../src/report/rewrite";
-import { StubComprehensionProbe } from "../src/lucid/probe/stub-probe";
-import type { ComprehensionProbe, ProbeInput, ProbeResult } from "../src/lucid/probe/types";
 
 function spanFinding(text: string, sub: string, criterion = "long_sentence"): Finding {
   const start = text.indexOf(sub);
@@ -681,161 +680,18 @@ describe("verifyRewrite — SIGNAL: possibly fabricated 3rd-person agent (LUCID-
   });
 });
 
-describe("verifyRewrite — SIGNAL: the probe as a NEGATIVE test", () => {
-  const readable: ProbeResult = {
-    podeResponder: true,
-    respostaExtraida: "o fato",
-    ondeTravou: [],
-    operacoesDeLeitura: [],
-    precisouInferir: false,
-  };
-  const stuck: ProbeResult = {
-    podeResponder: false,
-    respostaExtraida: "o texto não diz",
-    ondeTravou: [{ frase: "trecho", motivo: "ambíguo" }],
-    operacoesDeLeitura: ["integrar_entre_frases"],
-    precisouInferir: false,
-  };
-
-  it("a readable original + a proposal that gets stuck → a meaning-loss flag", async () => {
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-    const probe = new StubComprehensionProbe({ [p.original]: readable, [p.proposed]: stuck });
-
-    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
-    expect(signalFlagged(v, "meaning_preserved")).toBe(true);
-  });
-
-  it("a proposal that gets stuck where the original also got stuck → NO loss conclusion (no flag)", async () => {
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-    const probe = new StubComprehensionProbe({ [p.original]: stuck, [p.proposed]: stuck });
-
-    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
-    expect(signalFlagged(v, "meaning_preserved")).toBe(false);
-  });
-
-  it("with no probe, the meaning signal is omitted (not invented)", async () => {
+describe("verifyRewrite — no model takes part in the verification (ADR-108)", () => {
+  it("every signal it emits is a registered heuristic, never a probabilistic analysis", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
     const p = proposal(finding, "O prazo começa depois");
 
     const v = await verify(text, finding, p);
-    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
-  });
-});
-
-describe("verifyRewrite — LUCID-013: the optional probe degrades gracefully", () => {
-  const readable: ProbeResult = {
-    podeResponder: true,
-    respostaExtraida: "o fato",
-    ondeTravou: [],
-    operacoesDeLeitura: [],
-    precisouInferir: false,
-  };
-
-  class FailingProbe implements ComprehensionProbe {
-    readonly id = "failing-probe@1";
-    constructor(private readonly failOn: string) {}
-    async probe(input: ProbeInput): Promise<ProbeResult> {
-      if (input.trecho === this.failOn) throw new Error("probe unavailable (simulated timeout)");
-      return readable;
-    }
-  }
-
-  it("with a working probe: meaning_preserved is emitted normally (behavior unchanged)", async () => {
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-    const probe = new StubComprehensionProbe({ [p.original]: readable, [p.proposed]: readable });
-
-    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
-    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(true);
+    expect(v.signals.length).toBeGreaterThan(0);
+    for (const s of v.signals) expect(SIGNAL_CHECKS[s.check].kind).toBe("signal");
   });
 
-  it("forwards verifyRewrite's AbortSignal to BOTH probe calls (M6: cancellation has to propagate)", async () => {
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-
-    const receivedSignals: (AbortSignal | undefined)[] = [];
-    class SignalSpyProbe implements ComprehensionProbe {
-      readonly id = "signal-spy@1";
-      async probe(_input: ProbeInput, options?: { signal?: AbortSignal }): Promise<ProbeResult> {
-        receivedSignals.push(options?.signal);
-        return {
-          podeResponder: true,
-          respostaExtraida: "x",
-          ondeTravou: [],
-          operacoesDeLeitura: [],
-          precisouInferir: false,
-        };
-      }
-    }
-
-    const controller = new AbortController();
-    await verify(text, finding, p, {
-      probe: new SignalSpyProbe(),
-      question: "quando o prazo começa?",
-      signal: controller.signal,
-    });
-
-    expect(receivedSignals).toHaveLength(2);
-    expect(receivedSignals[0]).toBe(controller.signal);
-    expect(receivedSignals[1]).toBe(controller.signal);
-  });
-
-  it("the probe fails on the ORIGINAL: verifyRewrite resolves, proofs and metrics stay present, no meaning_preserved, no exception", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-    const probe = new FailingProbe(p.original);
-
-    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
-
-    expect(v.proofs.length).toBeGreaterThan(0);
-    expect(v.metrics).toBeDefined();
-    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
-    expect(v.hasBlockingFailure).toBe(false);
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(warnSpy.mock.calls[0][0]).toContain("sonda");
-    warnSpy.mockRestore();
-  });
-
-  it("the probe fails on the PROPOSAL: the same graceful degradation", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-    const probe = new FailingProbe(p.proposed);
-
-    const v = await verify(text, finding, p, { probe, question: "quando o prazo começa?" });
-
-    expect(v.proofs.length).toBeGreaterThan(0);
-    expect(v.metrics).toBeDefined();
-    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
-    expect(v.hasBlockingFailure).toBe(false);
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    warnSpy.mockRestore();
-  });
-
-  it("with no probe: behavior stays unchanged (no warning, no signal)", async () => {
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
-    const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
-    const p = proposal(finding, "O prazo começa depois");
-
-    const v = await verify(text, finding, p);
-
-    expect(v.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
-    expect(warnSpy).not.toHaveBeenCalled();
-    warnSpy.mockRestore();
-  });
-
-  it("a real deterministic failure (outside the probe) still propagates — the catch does not swallow unrelated errors", async () => {
+  it("a real deterministic failure still propagates", async () => {
     const text = "O documento foi arquivado pelo setor competente.";
     const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
     const p: RewriteProposal = { ...proposal(finding, "O setor arquivou o documento."), localeId: "en-US" };

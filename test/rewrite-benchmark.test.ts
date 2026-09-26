@@ -4,11 +4,8 @@ import { type Span } from "../src/lucid";
 import { analyze } from "../src/locales/pt-BR";
 import { GeminiProvider, GEMINI_MODELS, type ChatProvider } from "../src/llm";
 import { applyProposal, LlmRewriteProposer, verifyRewrite, type RewriteStrategy } from "../src/report/rewrite";
-import { LlmComprehensionProbe } from "../src/lucid/probe/llm-probe";
 
 const RUN = process.env.BENCHMARK === "1";
-const FLOOR_QUESTION = "Qual é o fato principal que este trecho comunica?";
-const PROBE_GEMINI_MODEL = "gemini-2.5-flash";
 
 interface Keys {
   gemini: string | null;
@@ -31,11 +28,6 @@ function providerFor(model: string, keys: Keys): { provider: ChatProvider; token
     return { provider: p, tokens: () => p.lastUsage?.totalTokens ?? 0 };
   }
   throw new Error(`modelo sem provider conhecido: ${model}`);
-}
-
-function buildProbe(keys: Keys): LlmComprehensionProbe {
-  if (keys.gemini) return new LlmComprehensionProbe(new GeminiProvider(keys.gemini), PROBE_GEMINI_MODEL);
-  throw new Error("nenhuma chave disponível para a sonda");
 }
 
 function systemLabel(model: string, strategy: RewriteStrategy): string {
@@ -76,7 +68,6 @@ interface Sample {
   findingsAfter: number;
   proofsPreserved: boolean;
   blocked: boolean;
-  meaningFlagged: boolean;
   entitiesFlagged: boolean;
   latencyMs: number;
   tokens: number;
@@ -89,7 +80,6 @@ function overlapsRegion(start: number, end: number, s: number, e: number): boole
 async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): Promise<Sample[]> {
   const { provider, tokens: readTokens } = providerFor(model, keys);
   const proposer = new LlmRewriteProposer(provider, model, strategy);
-  const probe = buildProbe(keys);
   const samples: Sample[] = [];
 
   for (const item of GOLDEN) {
@@ -101,7 +91,7 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
     const latencyMs = Date.now() - t0;
     const tokens = readTokens();
 
-    const verification = await verifyRewrite(item.text, target, proposal, { probe, question: FLOOR_QUESTION });
+    const verification = await verifyRewrite(item.text, target, proposal);
 
     const rewritten = applyProposal(item.text, target, proposal);
     const after = analyze(rewritten);
@@ -124,7 +114,6 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
       proofsPreserved:
         proofPassed("numbers_preserved") && proofPassed("dates_preserved") && proofPassed("no_new_jargon"),
       blocked: verification.hasBlockingFailure,
-      meaningFlagged: signalFlagged("meaning_preserved"),
       entitiesFlagged: signalFlagged("entities_preserved"),
       latencyMs,
       tokens,
@@ -153,9 +142,9 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
 
     const rows: string[] = [];
     rows.push(
-      "| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | fidelidade(s/deriva)% | s/nome-perdido% | sem veto% | latência ms | tokens |",
+      "| Sistema | reescreveu% | ΔFlesch | Δpalav | findings(depois) | provas OK% | s/nome-perdido% | sem veto% | latência ms | tokens |",
     );
-    rows.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
+    rows.push("|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|");
 
     for (const model of models) {
       for (const strategy of strategies) {
@@ -166,11 +155,9 @@ describe.runIf(RUN)("benchmark de sistemas de reescrita (rede — fora da CI)", 
             s.map((x) => x.dWords),
           ).toFixed(0)} | ${mean(s.map((x) => x.findingsAfter)).toFixed(1)} | ${pct(
             s.map((x) => x.proofsPreserved),
-          ).toFixed(
+          ).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(s.map((x) => !x.blocked)).toFixed(
             0,
-          )} | ${pct(s.map((x) => !x.meaningFlagged)).toFixed(0)} | ${pct(s.map((x) => !x.entitiesFlagged)).toFixed(0)} | ${pct(
-            s.map((x) => !x.blocked),
-          ).toFixed(0)} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
+          )} | ${mean(s.map((x) => x.latencyMs)).toFixed(0)} | ${mean(s.map((x) => x.tokens)).toFixed(0)} |`,
         );
       }
     }

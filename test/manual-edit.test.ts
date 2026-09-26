@@ -90,7 +90,6 @@ describe("verifyManualEdit — the author's version is judged by the SAME verifi
     expect(proposal.original).toBe(span.text);
     expect(verification.proofs.length).toBeGreaterThan(0);
     expect(verification.metrics.wordsBefore).toBeGreaterThan(0);
-    expect(verification.signals.some((s) => s.check === "meaning_preserved")).toBe(false);
   });
 
   it("it does not rubber-stamp the author: inventing a 1st person absent from the original is VETOED (the same veto as the AI's)", async () => {
