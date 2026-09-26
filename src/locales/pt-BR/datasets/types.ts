@@ -29,7 +29,7 @@ export type DatasetId =
 
 export type JargonKind = "word" | "phrase";
 export type JargonDomain = "administrative" | "legal" | "general";
-export type JargonReason = "polysemous" | "context_dependent" | "institutional" | null;
+export type JargonReason = "polysemous" | "context_dependent" | "institutional" | "divergent_sense" | null;
 
 export interface JargonEntry {
   term: string;
@@ -38,6 +38,7 @@ export interface JargonEntry {
   plain: string | null;
   safeForSuggestion: boolean;
   reason: JargonReason;
+  withheldBecause?: string;
 }
 
 export interface CompiledEntry {

@@ -5,8 +5,8 @@
     "localeId": "pt-BR",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
     "configHash": "4c2da7fd",
-    "dataHash": "3daae1f7",
-    "goldenHash": "6f242f1a"
+    "dataHash": "8f1ba41e",
+    "goldenHash": "42d3439a"
   },
   "method": {
     "scoring": "count-per-passage",

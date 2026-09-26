@@ -3,6 +3,7 @@ import type { Sentence, Token } from "@/lucid/core/types";
 export interface PhraseEntry {
   phrase: string;
   plain: string | null;
+  withheldBecause?: string;
 }
 
 export interface CompiledPhrase {

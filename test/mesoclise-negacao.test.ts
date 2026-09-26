@@ -47,11 +47,11 @@ describe("dupla_negacao — litotes", () => {
   });
 
   it("the finding cites the direct form and requires a human decision", () => {
-    const f = analyze("Não é improvável que o pedido seja aceito.").findings.find(
+    const f = analyze("Não é impossível que o pedido seja aceito.").findings.find(
       (x) => x.criterion === "dupla_negacao",
     )!;
     expect(f.requiresHuman).toBe(true);
-    expect(f.justification).toContain("é provável");
+    expect(f.justification).toContain("é possível");
     expect(f.normativeReference?.section).toBe("5.3.3");
   });
 

@@ -20,7 +20,9 @@ export const redundanciaPass: Pass<PtConfig> = {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
         const next = hit.entry.plain
           ? ` Forma enxuta registrada: “${hit.entry.plain}”. Confira se ela mantém o sentido nesta frase.`
-          : " Corte o termo que repete o sentido do outro.";
+          : hit.entry.withheldBecause
+            ? ` O Lucid não registra forma enxuta para ela. ${hit.entry.withheldBecause}`
+            : " Corte o termo que repete o sentido do outro.";
         findings.push({
           criterion: CRITERION,
           category: "lexical",
