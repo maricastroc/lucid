@@ -137,10 +137,14 @@ describe("flow 5 · the proposal comes right after the verdict", () => {
 
     await auditPanel().findByText(/nenhuma falha encontrada/i);
     expect(auditPanel().getByText(PLAIN_FIRST_SENTENCE)).toBeInTheDocument();
-    expect(auditPanel().queryByText(/os números do trecho foram mantidos/i)).not.toBeInTheDocument();
+    expect(
+      auditPanel().queryByText(/o número «3» do trecho original aparece na proposta, com a mesma grafia/i),
+    ).not.toBeInTheDocument();
 
     await user.click(auditPanel().getByRole("button", { name: /^ver as \d+ provas/i }));
-    expect(auditPanel().getByText(/os números do trecho foram mantidos/i)).toBeInTheDocument();
+    expect(
+      auditPanel().getByText(/o número «3» do trecho original aparece na proposta, com a mesma grafia/i),
+    ).toBeInTheDocument();
   });
 
   it("shows a failed proof above the proposal, where the override note says the reason is", async () => {
@@ -151,7 +155,7 @@ describe("flow 5 · the proposal comes right after the verdict", () => {
 
     await runRewrite(user);
 
-    const failure = await auditPanel().findByText(/os números mudaram/i);
+    const failure = await auditPanel().findByText(/o número «3» do trecho original não foi encontrado na proposta/i);
     const proposed = auditPanel().getByText(REWRITE_LOSING_THE_NUMBER);
     expect(failure.compareDocumentPosition(proposed) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(auditPanel().getByText(/se você entendeu o motivo acima/i)).toBeInTheDocument();

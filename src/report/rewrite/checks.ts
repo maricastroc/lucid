@@ -1,4 +1,4 @@
-import type { Proof, VerificationSignal } from "./types";
+import type { Proof, ProofOutcome, VerificationSignal } from "./types";
 
 export type CheckKind = "guarantee" | "effect" | "signal" | "probabilistic";
 
@@ -9,63 +9,96 @@ export interface CheckSpec<K extends CheckKind = CheckKind> {
   readonly adr: string;
 }
 
-export const PROOF_CHECKS: { readonly [C in Proof["check"]]: CheckSpec<"guarantee" | "effect"> } = {
-  numbers_preserved: {
+export interface ProofCheckSpec extends CheckSpec<"guarantee" | "effect"> {
+  readonly outcomes: readonly ProofOutcome[];
+}
+
+export const PROOF_CHECKS: { readonly [C in Proof["check"]]: ProofCheckSpec } = {
+  numbers_kept: {
     kind: "guarantee",
     proves:
-      "Toda sequência de algarismos do trecho original aparece na proposta com a mesma grafia, e nenhuma sequência nova aparece.",
-    limit: "Não confirma a que cada número se refere. Números escritos por extenso ficam de fora.",
-    adr: "ADR-014",
+      "Toda sequência de algarismos do trecho original aparece na proposta com a mesma grafia, pelo menos tantas vezes quanto no original.",
+    limit:
+      "Não confirma a que cada número se refere. Números escritos por extenso ficam de fora. Não se aplica quando o trecho original não tem algarismos.",
+    adr: "ADR-109",
+    outcomes: ["confirmed", "not_confirmed", "not_applicable"],
   },
-  dates_preserved: {
+  numbers_added: {
     kind: "guarantee",
     proves:
-      "Toda data no formato dd/mm/aaaa do trecho original aparece na proposta, e nenhuma data nova nesse formato aparece.",
-    limit: "Datas por extenso ficam de fora; delas, só os algarismos entram na prova de números.",
-    adr: "ADR-014",
+      "Toda sequência de algarismos da proposta aparece no trecho original com a mesma grafia, no máximo tantas vezes quanto no original.",
+    limit:
+      "Um número acrescentado pode estar correto: o Lucid mostra que ele não tem correspondência literal no original, não que está errado. Não se aplica quando a proposta não tem algarismos.",
+    adr: "ADR-109",
+    outcomes: ["confirmed", "addition", "not_applicable"],
+  },
+  dates_kept: {
+    kind: "guarantee",
+    proves:
+      "Toda data escrita só com algarismos (dia, mês e ano separados por barra, hífen ou ponto) do trecho original aparece na proposta com a mesma grafia.",
+    limit:
+      "Datas por extenso ficam de fora; delas, só os algarismos entram na verificação de números, e o mês não é conferido. Não se aplica quando o trecho original não tem data em algarismos.",
+    adr: "ADR-109",
+    outcomes: ["confirmed", "not_confirmed", "not_applicable"],
+  },
+  dates_added: {
+    kind: "guarantee",
+    proves: "Toda data escrita só com algarismos da proposta aparece no trecho original com a mesma grafia.",
+    limit:
+      "Uma data acrescentada pode estar correta: o Lucid mostra que ela não tem correspondência literal no original. Não se aplica quando a proposta não tem data em algarismos.",
+    adr: "ADR-109",
+    outcomes: ["confirmed", "addition", "not_applicable"],
   },
   no_invented_first_person: {
     kind: "guarantee",
     proves:
-      "Nenhuma forma de 1ª pessoa da lista fechada do Lucid (pronomes, possessivos e verbos no plural) aparece na proposta sem aparecer no documento ou no agente declarado.",
-    limit: "Formas de 1ª pessoa fora da lista ficam de fora.",
+      "Quando nem o documento nem o agente declarado usam formas de 1ª pessoa da lista fechada do Lucid (pronomes, possessivos e verbos no plural), a proposta também não usa.",
+    limit:
+      "Formas de 1ª pessoa fora da lista ficam de fora. Não se aplica quando o documento ou o agente declarado já usam alguma forma da lista.",
     adr: "ADR-021",
+    outcomes: ["confirmed", "addition", "not_applicable"],
   },
   declared_agent_present: {
     kind: "guarantee",
     proves: "O texto do agente que o autor declarou aparece na proposta.",
     limit: "Não confirma que o agente é o sujeito da ação a que foi atribuído.",
     adr: "ADR-055",
+    outcomes: ["confirmed", "not_confirmed"],
   },
   target_resolved: {
     kind: "effect",
     proves: "O detector do critério em foco não aponta mais o trecho, fora das exceções pedidas pelo autor.",
     limit: "Mede os detectores do Lucid, não a clareza do texto.",
     adr: "ADR-014",
+    outcomes: ["confirmed", "not_confirmed"],
   },
   directed_findings_resolved: {
     kind: "effect",
     proves: "Os detectores dos critérios pedidos à IA não apontam mais o trecho.",
     limit: "Mede os detectores do Lucid, não a clareza do texto.",
     adr: "ADR-048",
+    outcomes: ["confirmed", "not_confirmed"],
   },
   region_improved: {
     kind: "effect",
     proves: "O peso ponderado dos achados no trecho não aumentou.",
     limit: "Um achado novo pode ser compensado por outro resolvido.",
     adr: "ADR-016",
+    outcomes: ["confirmed", "not_confirmed"],
   },
   no_new_findings: {
     kind: "effect",
     proves: "O peso ponderado dos achados no documento inteiro não aumentou.",
     limit: "Um achado novo pode ser compensado por outro resolvido.",
     adr: "ADR-014",
+    outcomes: ["confirmed", "not_confirmed"],
   },
   no_new_jargon: {
     kind: "effect",
     proves: "Nenhum termo do glossário de jargão aparece no trecho reescrito sem ter aparecido no original.",
     limit: "Só vale para termos do glossário.",
     adr: "ADR-014",
+    outcomes: ["confirmed", "not_confirmed"],
   },
 };
 
@@ -108,8 +141,10 @@ export const NOT_VERIFIED: readonly NotVerifiedDimension[] = [
   { id: "conditions", what: "condições e exceções" },
   { id: "scope", what: "quem é abrangido, incluindo categorias, singular e plural" },
   { id: "agency", what: "quem faz o quê, além do agente declarado pelo autor" },
-  { id: "additions", what: "informações acrescentadas que não sejam números" },
-  { id: "omissions", what: "o que foi omitido fora dos números confirmados" },
+  { id: "additions", what: "informações acrescentadas que não sejam números ou datas em algarismos" },
+  { id: "omissions", what: "o que foi omitido fora dos números e datas em algarismos" },
+  { id: "written_numbers", what: "números escritos por extenso" },
+  { id: "written_dates", what: "datas escritas por extenso, inclusive o mês" },
   { id: "binding", what: "a que cada número se refere" },
   { id: "relations", what: "relações entre normas" },
   { id: "ambiguity", what: "ambiguidade introduzida" },

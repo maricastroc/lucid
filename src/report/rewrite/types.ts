@@ -38,6 +38,8 @@ export interface RewriteProposal {
   parseOutcome?: "ok" | "unparseable";
 }
 
+export type ProofOutcome = "confirmed" | "not_confirmed" | "addition" | "not_applicable";
+
 export interface Proof {
   check:
     | "target_resolved"
@@ -45,10 +47,13 @@ export interface Proof {
     | "declared_agent_present"
     | "region_improved"
     | "no_new_findings"
-    | "numbers_preserved"
-    | "dates_preserved"
+    | "numbers_kept"
+    | "numbers_added"
+    | "dates_kept"
+    | "dates_added"
     | "no_new_jargon"
     | "no_invented_first_person";
+  outcome: ProofOutcome;
   passed: boolean;
   detail: string;
 }

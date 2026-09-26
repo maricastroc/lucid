@@ -53,7 +53,7 @@ describe("target_resolved — only what the rewrite had the information to resol
     const v = await verifyParagraph(TEXT, { focus: focus.span });
 
     expect(targetProof(v).passed).toBe(false);
-    expect(targetProof(v).detail).toMatch(/ainda aparece no trecho reescrito \(1 vez\)/);
+    expect(targetProof(v).detail).toBe("O Lucid ainda aponta «Voz passiva» no trecho reescrito (1 vez).");
     expect(v.notices).toHaveLength(1);
   });
 

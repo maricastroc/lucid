@@ -248,7 +248,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
-    expect(detail).toContain("apagou a informação");
+    expect(detail).toBe("Em «Voz passiva», os pontos que o Lucid marca para decisão humana passaram de 0 para 1.");
   });
 
   it("with an explicit 'no known agent' declaration, the same degradation does NOT fail (the author's decision, not a silent deletion)", async () => {
@@ -421,7 +421,11 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
     );
 
     expect(proofPassed(v, "declared_agent_present")).toBe(true);
-    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+    expect(v.proofs.find((p) => p.check === "no_invented_first_person")).toMatchObject({
+      outcome: "not_applicable",
+      passed: true,
+      detail: "O agente que você informou usa formas de 1ª pessoa da lista do Lucid: «nós».",
+    });
   });
 
   it("WITHOUT the declaration, the same 1st-person proposal stays vetoed (the exemption belongs to the declaration, it is not general)", async () => {
@@ -481,32 +485,53 @@ describe("verifyRewrite — PROOF: agent declared by the author (elicitation, AD
 });
 
 describe("verifyRewrite — PROOF: mechanical preservation", () => {
-  it("lost numbers fail numbers_preserved", async () => {
+  it("a lost number is not confirmed, and it still blocks", async () => {
     const text = "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias após o deferimento do pedido formal.";
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "O pagamento de R$ 1.500,00 deve ocorrer em alguns dias");
 
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "numbers_preserved")).toBe(false);
+    expect(v.proofs.find((pr) => pr.check === "numbers_kept")).toMatchObject({
+      outcome: "not_confirmed",
+      passed: false,
+      detail: "O número «30» do trecho original não foi encontrado na proposta com a mesma grafia.",
+    });
+    expect(v.proofs.find((pr) => pr.check === "numbers_added")!.outcome).toBe("confirmed");
     expect(v.hasBlockingFailure).toBe(true);
   });
 
-  it("preserved numbers pass numbers_preserved", async () => {
+  it("kept numbers are confirmed, listed as they are written", async () => {
     const text = "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias após o deferimento do pedido formal.";
     const finding = spanFinding(text, "O pagamento de R$ 1.500,00 deve ocorrer em 30 dias");
     const p = proposal(finding, "Pague R$ 1.500,00 em 30 dias");
 
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "numbers_preserved")).toBe(true);
+    expect(v.proofs.find((pr) => pr.check === "numbers_kept")).toMatchObject({
+      outcome: "confirmed",
+      passed: true,
+      detail: "Os números «1.500,00», «30» do trecho original aparecem na proposta, com a mesma grafia.",
+    });
+    expect(v.proofs.find((pr) => pr.check === "numbers_added")).toMatchObject({
+      outcome: "confirmed",
+      detail: "Todo número em algarismos da proposta aparece no trecho original, com a mesma grafia.",
+    });
   });
 
-  it("altered dates fail dates_preserved", async () => {
+  it("an altered date is both not confirmed and an addition", async () => {
     const text = "A audiência foi marcada para 17/11/2025 no fórum central da comarca da capital do estado.";
     const finding = spanFinding(text, "A audiência foi marcada para 17/11/2025 no fórum central");
     const p = proposal(finding, "A audiência foi marcada para 18/11/2025 no fórum central");
 
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "dates_preserved")).toBe(false);
+    expect(v.proofs.find((pr) => pr.check === "dates_kept")).toMatchObject({
+      outcome: "not_confirmed",
+      detail: "A data «17/11/2025» do trecho original não foi encontrada na proposta com a mesma grafia.",
+    });
+    expect(v.proofs.find((pr) => pr.check === "dates_added")).toMatchObject({
+      outcome: "addition",
+      passed: false,
+      detail: "A proposta contém a data «18/11/2025», que não aparece com essa grafia no trecho original.",
+    });
   });
 
   it("newly introduced jargon fails no_new_jargon", async () => {
@@ -526,8 +551,11 @@ describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
     const p = proposal(finding, "Nós analisamos o documento com a nossa comissão competente");
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "no_invented_first_person")).toBe(false);
-    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")!.detail).toMatch(/nós|nossa/i);
+    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")).toMatchObject({
+      outcome: "addition",
+      passed: false,
+      detail: "A proposta usa formas de 1ª pessoa que não aparecem no documento: «analisamos», «nossa», «nós».",
+    });
     expect(v.hasBlockingFailure).toBe(true);
   });
 
@@ -536,7 +564,11 @@ describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
     const p = proposal(finding, "A comissão competente analisou o documento");
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")).toMatchObject({
+      outcome: "confirmed",
+      passed: true,
+      detail: "A proposta não usa nenhuma forma de 1ª pessoa da lista do Lucid.",
+    });
   });
 
   it("a 1st person that ALREADY exists in the document is not considered fabricated", async () => {
@@ -544,7 +576,11 @@ describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão");
     const p = proposal(finding, "Nós analisamos o documento na comissão");
     const v = await verify(text, finding, p);
-    expect(proofPassed(v, "no_invented_first_person")).toBe(true);
+    expect(v.proofs.find((pr) => pr.check === "no_invented_first_person")).toMatchObject({
+      outcome: "not_applicable",
+      passed: true,
+      detail: "O documento já usa formas de 1ª pessoa da lista do Lucid: «nós», «recebemos».",
+    });
   });
 
   it("vetoes a pro-drop 'nós' hidden in the verb (without writing the pronoun)", async () => {

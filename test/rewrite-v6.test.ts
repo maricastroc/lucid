@@ -106,7 +106,7 @@ describe("rewrite@6 — o que a troca preservou", () => {
     expect(previous).not.toContain("O QUE O MOTOR VAI VERIFICAR");
   });
 
-  it("as sete provas determinísticas continuam as mesmas, e uma falha ainda veta", async () => {
+  it("the deterministic proofs are the registered ones, and a failure still vetoes", async () => {
     const verification = await verifyRewrite(
       TEXT,
       target,
@@ -115,15 +115,17 @@ describe("rewrite@6 — o que a troca preservou", () => {
     );
 
     expect(verification.proofs.map((p) => p.check).sort()).toEqual([
-      "dates_preserved",
+      "dates_added",
+      "dates_kept",
       "no_invented_first_person",
       "no_new_findings",
       "no_new_jargon",
-      "numbers_preserved",
+      "numbers_added",
+      "numbers_kept",
       "region_improved",
       "target_resolved",
     ]);
-    expect(verification.proofs.find((p) => p.check === "numbers_preserved")?.passed).toBe(false);
+    expect(verification.proofs.find((p) => p.check === "numbers_kept")?.outcome).toBe("not_confirmed");
     expect(verification.hasBlockingFailure).toBe(true);
   });
 

@@ -7,40 +7,118 @@ import {
   SIGNAL_CHECKS,
   verifyRewrite,
   type RewriteVerification,
+  type VerifyOptions,
 } from "../src/report/rewrite";
 
 const TEXT =
   "Em 10/05/2024, o pedido supracitado de reajuste de 30 dias foi encaminhado para análise e o resultado final desse exame " +
   "minucioso foi comunicado ao interessado dentro do prazo regular previsto no edital da secretaria competente.";
 
-const KNOWN_OVERCLAIMS: readonly string[] = ["A nova versão não inventa agente em primeira pessoa"];
+const PLAIN = "O pedido foi analisado pela equipe e o resultado foi comunicado ao interessado.";
 
-async function everyCheck(proposed: string): Promise<RewriteVerification> {
-  const findings = analyze(TEXT).findings;
+const FIRST_PERSON_DOC = "Nós recebemos o pedido. O pedido foi analisado pela equipe.";
+
+const FOCUS_DOC = "O pedido foi indeferido ontem. A decisão foi comunicada ao interessado.";
+
+interface Scenario {
+  readonly text: string;
+  readonly proposed: string;
+  readonly options: (text: string) => VerifyOptions;
+  readonly start?: number;
+}
+
+const whole = (text: string) => ({ start: 0, end: text.length, text });
+
+function fullOptions(text: string): VerifyOptions {
+  const findings = analyze(text).findings;
   const passive = findings.find((f) => f.criterion === "passive_voice" && f.requiresHuman)!;
-  const target = { start: 0, end: TEXT.length, text: TEXT };
+  return {
+    criterion: "long_sentence",
+    findings,
+    declarations: [{ span: passive.span, agent: "a secretaria" }],
+  };
+}
+
+function jargonOnly(text: string): VerifyOptions {
+  return { findings: analyze(text).findings.filter((f) => f.criterion === "jargon") };
+}
+
+function focusOn(text: string): VerifyOptions {
+  const passive = analyze(text).findings.find(
+    (f) => f.criterion === "passive_voice" && f.span.text.includes("indeferido"),
+  )!;
+  return {
+    criterion: "passive_voice",
+    focus: passive.span,
+    declarations: [{ span: passive.span, agent: "a comissão" }],
+  };
+}
+
+const SCENARIOS: readonly Scenario[] = [
+  {
+    text: TEXT,
+    proposed:
+      "Em 10/05/2024, a secretaria encaminhou o pedido de reajuste de 30 dias para análise. O resultado foi comunicado ao interessado no prazo do edital.",
+    options: fullOptions,
+  },
+  {
+    text: TEXT,
+    proposed: "Nós analisamos, em sede de recurso, o pedido de 31 dias. O resultado saiu.",
+    options: fullOptions,
+  },
+  { text: TEXT, proposed: TEXT, options: fullOptions },
+  {
+    text: TEXT,
+    proposed: `${TEXT} Ademais, foi determinado em 11/05/2024 que o pedido supracitado seria reexaminado pela autoridade competente em momento oportuno.`,
+    options: fullOptions,
+  },
+  {
+    text: TEXT,
+    proposed:
+      "Em 10/05/2024, o pedido de reajuste de 30 dias foi encaminhado para análise. O resultado foi comunicado ao interessado.",
+    options: jargonOnly,
+  },
+  { text: TEXT, proposed: TEXT, options: jargonOnly },
+  { text: PLAIN, proposed: "A equipe analisou o pedido e comunicou o resultado ao interessado.", options: () => ({}) },
+  { text: PLAIN, proposed: "A equipe analisou o pedido em 2 dias.", options: () => ({}) },
+  {
+    text: FIRST_PERSON_DOC,
+    proposed: "Nós analisamos o pedido.",
+    options: () => ({}),
+    start: FIRST_PERSON_DOC.indexOf("O pedido"),
+  },
+  {
+    text: PLAIN,
+    proposed: "Nós analisamos o pedido e comunicamos o resultado ao interessado.",
+    options: (text) => ({
+      declarations: [{ span: analyze(text).findings.find((f) => f.criterion === "passive_voice")!.span, agent: "nós" }],
+    }),
+  },
+  {
+    text: FOCUS_DOC,
+    proposed: "A comissão indeferiu o pedido ontem. A decisão foi comunicada ao interessado.",
+    options: focusOn,
+  },
+];
+
+async function run(scenario: Scenario): Promise<RewriteVerification> {
+  const start = scenario.start ?? 0;
+  const target = { start, end: scenario.text.length, text: scenario.text.slice(start) };
   return verifyRewrite(
-    TEXT,
-    target,
-    { proposerId: "test", original: TEXT, proposed },
-    {
-      criterion: "long_sentence",
-      findings,
-      declarations: [{ span: passive.span, agent: "a secretaria" }],
-    },
+    scenario.text,
+    start === 0 ? whole(scenario.text) : target,
+    { proposerId: "test", original: target.text, proposed: scenario.proposed },
+    scenario.options(scenario.text),
   );
 }
 
-const PROPOSALS = [
-  "Em 10/05/2024, a secretaria encaminhou o pedido de reajuste de 30 dias para análise. O resultado foi comunicado ao interessado no prazo do edital.",
-  "Nós analisamos o pedido de 31 dias. O resultado saiu.",
-  TEXT,
-];
+async function runAll(): Promise<RewriteVerification[]> {
+  return Promise.all(SCENARIOS.map(run));
+}
 
-describe("registro de verificações — o que cada verificação é autorizada a afirmar", () => {
-  it("toda verificação emitida está registrada, e o tipo bate com onde ela aparece", async () => {
-    for (const proposed of PROPOSALS) {
-      const v = await everyCheck(proposed);
+describe("check registry — what each verification is allowed to claim", () => {
+  it("every emitted verification is registered, and its kind matches where it appears", async () => {
+    for (const v of await runAll()) {
       for (const p of v.proofs) {
         expect(PROOF_CHECKS[p.check], p.check).toBeDefined();
         expect(["guarantee", "effect"]).toContain(PROOF_CHECKS[p.check].kind);
@@ -52,17 +130,46 @@ describe("registro de verificações — o que cada verificação é autorizada 
     }
   });
 
-  it("o cenário exercita todas as verificações registradas", async () => {
+  it("the scenarios exercise every registered verification", async () => {
     const emitted = new Set<string>();
-    for (const proposed of PROPOSALS) {
-      const v = await everyCheck(proposed);
+    for (const v of await runAll()) {
       v.proofs.forEach((p) => emitted.add(p.check));
       v.signals.forEach((s) => emitted.add(s.check));
     }
     expect([...emitted].sort()).toEqual([...Object.keys(PROOF_CHECKS), ...Object.keys(SIGNAL_CHECKS)].sort());
   });
 
-  it("toda verificação declara o que prova, o limite e a ADR", () => {
+  it("each proof emits only the outcomes it declares, and the scenarios reach every one of them", async () => {
+    const reached = new Map<string, Set<string>>();
+    for (const v of await runAll()) {
+      for (const p of v.proofs) {
+        expect(PROOF_CHECKS[p.check].outcomes, p.check).toContain(p.outcome);
+        reached.set(p.check, (reached.get(p.check) ?? new Set()).add(p.outcome));
+      }
+    }
+    for (const [check, spec] of Object.entries(PROOF_CHECKS)) {
+      expect([...(reached.get(check) ?? [])].sort(), check).toEqual([...spec.outcomes].sort());
+    }
+  });
+
+  it("only guarantees can report an addition or say they do not apply", () => {
+    for (const [check, spec] of Object.entries(PROOF_CHECKS)) {
+      if (spec.kind === "effect") expect(spec.outcomes, check).toEqual(["confirmed", "not_confirmed"]);
+    }
+  });
+
+  it("a proof passes exactly when it is confirmed or does not apply, and any other outcome blocks", async () => {
+    for (const v of await runAll()) {
+      for (const p of v.proofs) {
+        expect(p.passed, p.check).toBe(p.outcome === "confirmed" || p.outcome === "not_applicable");
+      }
+      expect(v.hasBlockingFailure).toBe(
+        v.proofs.some((p) => p.outcome === "not_confirmed" || p.outcome === "addition"),
+      );
+    }
+  });
+
+  it("every verification declares what it proves, its limit and its ADR", () => {
     for (const [id, spec] of [...Object.entries(PROOF_CHECKS), ...Object.entries(SIGNAL_CHECKS)]) {
       expect(spec.proves.length, id).toBeGreaterThan(20);
       expect(spec.limit.length, id).toBeGreaterThan(10);
@@ -70,17 +177,20 @@ describe("registro de verificações — o que cada verificação é autorizada 
     }
   });
 
-  it("as dimensões não verificadas são únicas e nomeadas", () => {
+  it("the unverified dimensions are unique and named, and written numbers and dates are among them", () => {
     expect(new Set(NOT_VERIFIED.map((d) => d.id)).size).toBe(NOT_VERIFIED.length);
     for (const d of NOT_VERIFIED) expect(d.what.length).toBeGreaterThan(5);
+    expect(NOT_VERIFIED.map((d) => d.id)).toEqual(expect.arrayContaining(["written_numbers", "written_dates"]));
   });
 
-  it("nenhum texto de garantia ou efeito afirma mais do que a prova, fora os casos conhecidos que a Etapa 3 corrige", async () => {
-    const offending = new Set<string>();
-    for (const proposed of PROPOSALS) {
-      const v = await everyCheck(proposed);
-      for (const p of v.proofs) if (OVERCLAIM_VOCABULARY.test(p.detail)) offending.add(p.detail);
+  it("no proof, signal or notice message uses the overclaim vocabulary", async () => {
+    const messages = new Set<string>();
+    for (const v of await runAll()) {
+      v.proofs.forEach((p) => messages.add(p.detail));
+      v.signals.forEach((s) => messages.add(s.detail));
+      v.notices.forEach((n) => messages.add(n.detail));
     }
-    expect([...offending].sort()).toEqual([...KNOWN_OVERCLAIMS].sort());
+    expect(messages.size).toBeGreaterThan(30);
+    expect([...messages].filter((m) => OVERCLAIM_VOCABULARY.test(m))).toEqual([]);
   });
 });

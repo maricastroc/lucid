@@ -111,8 +111,9 @@ async function runSystem(model: string, strategy: RewriteStrategy, keys: Keys): 
           : verification.metrics.readabilityAfter - verification.metrics.readabilityBefore,
       dWords: verification.metrics.wordsAfter - verification.metrics.wordsBefore,
       findingsAfter,
-      proofsPreserved:
-        proofPassed("numbers_preserved") && proofPassed("dates_preserved") && proofPassed("no_new_jargon"),
+      proofsPreserved: ["numbers_kept", "numbers_added", "dates_kept", "dates_added", "no_new_jargon"].every(
+        proofPassed,
+      ),
       blocked: verification.hasBlockingFailure,
       entitiesFlagged: signalFlagged("entities_preserved"),
       latencyMs,

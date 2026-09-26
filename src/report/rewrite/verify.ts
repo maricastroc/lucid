@@ -5,6 +5,7 @@ import type {
   AgentDeclaration,
   MetricsDelta,
   Proof,
+  ProofOutcome,
   RewriteLocale,
   RewriteProposal,
   RewriteVerification,
@@ -38,8 +39,128 @@ const RE_ACRONYM = /^\p{Lu}{2,}$/u;
 const RE_SPACE = /\s/u;
 const SENTENCE_TERMINATORS = ".!?…";
 
-function extractSorted(text: string, re: RegExp): string[] {
-  return (text.match(re) ?? []).slice().sort();
+function tally(text: string, re: RegExp): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const value of text.match(re) ?? []) out.set(value, (out.get(value) ?? 0) + 1);
+  return out;
+}
+
+function times(n: number): string {
+  return n === 1 ? "1 vez" : `${n} vezes`;
+}
+
+function quoted(values: readonly string[]): string {
+  return values.map((v) => `«${v}»`).join(", ");
+}
+
+function outcomeOf(passed: boolean): ProofOutcome {
+  return passed ? "confirmed" : "not_confirmed";
+}
+
+interface LiteralTerms {
+  readonly originalHasNone: string;
+  readonly proposalHasNone: string;
+  readonly kept: (values: readonly string[]) => string;
+  readonly lost: (values: readonly string[]) => string;
+  readonly added: (values: readonly string[], original: ReadonlyMap<string, number>) => string;
+  readonly nothingAdded: string;
+}
+
+const digitsOnly = (value: string): string => value.replace(/[.,]/gu, "");
+
+const NUMBER_TERMS: LiteralTerms = {
+  originalHasNone: "O trecho original não tem número em algarismos.",
+  proposalHasNone: "A proposta não tem número em algarismos.",
+  kept: (values) =>
+    values.length === 1
+      ? `O número ${quoted(values)} do trecho original aparece na proposta, com a mesma grafia.`
+      : `Os números ${quoted(values)} do trecho original aparecem na proposta, com a mesma grafia.`,
+  lost: (values) =>
+    values.length === 1
+      ? `O número ${quoted(values)} do trecho original não foi encontrado na proposta com a mesma grafia.`
+      : `Os números ${quoted(values)} do trecho original não foram encontrados na proposta com a mesma grafia.`,
+  added: (values, original) => {
+    const respelled = values.filter((v) => [...original.keys()].some((o) => digitsOnly(o) === digitsOnly(v)));
+    const unseen = values.filter((v) => !respelled.includes(v));
+    const sentences: string[] = [];
+    if (unseen.length === 1) {
+      sentences.push(`A proposta contém o número ${quoted(unseen)}, que não aparece em algarismos no trecho original.`);
+    } else if (unseen.length > 1) {
+      sentences.push(
+        `A proposta contém os números ${quoted(unseen)}, que não aparecem em algarismos no trecho original.`,
+      );
+    }
+    for (const v of respelled) {
+      const spellings = [...original.keys()].filter((o) => digitsOnly(o) === digitsOnly(v));
+      sentences.push(`A proposta escreve ${quoted([v])}, que no trecho original aparece como ${quoted(spellings)}.`);
+    }
+    return sentences.join(" ");
+  },
+  nothingAdded: "Todo número em algarismos da proposta aparece no trecho original, com a mesma grafia.",
+};
+
+const DATE_TERMS: LiteralTerms = {
+  originalHasNone: "O trecho original não tem data escrita só com algarismos, como 10/05/2024.",
+  proposalHasNone: "A proposta não tem data escrita só com algarismos.",
+  kept: (values) =>
+    values.length === 1
+      ? `A data ${quoted(values)} do trecho original aparece na proposta, com a mesma grafia.`
+      : `As datas ${quoted(values)} do trecho original aparecem na proposta, com a mesma grafia.`,
+  lost: (values) =>
+    values.length === 1
+      ? `A data ${quoted(values)} do trecho original não foi encontrada na proposta com a mesma grafia.`
+      : `As datas ${quoted(values)} do trecho original não foram encontradas na proposta com a mesma grafia.`,
+  added: (values) =>
+    values.length === 1
+      ? `A proposta contém a data ${quoted(values)}, que não aparece com essa grafia no trecho original.`
+      : `A proposta contém as datas ${quoted(values)}, que não aparecem com essa grafia no trecho original.`,
+  nothingAdded: "Toda data em algarismos da proposta aparece no trecho original, com a mesma grafia.",
+};
+
+function literalProofs(
+  kept: "numbers_kept" | "dates_kept",
+  added: "numbers_added" | "dates_added",
+  re: RegExp,
+  proposal: RewriteProposal,
+  terms: LiteralTerms,
+): [Proof, Proof] {
+  const before = tally(proposal.original, re);
+  const after = tally(proposal.proposed, re);
+  const lost = [...before.keys()].filter((k) => !after.has(k));
+  const fewer = [...before.keys()].filter((k) => after.has(k) && after.get(k)! < before.get(k)!);
+  const unseen = [...after.keys()].filter((k) => !before.has(k));
+  const more = [...after.keys()].filter((k) => before.has(k) && after.get(k)! > before.get(k)!);
+  const inOriginal = (k: string) => `${times(before.get(k) ?? 0)} no trecho original`;
+  const inProposal = (k: string) => `${times(after.get(k) ?? 0)} na proposta`;
+
+  const keptOutcome: ProofOutcome =
+    before.size === 0 ? "not_applicable" : lost.length + fewer.length === 0 ? "confirmed" : "not_confirmed";
+  const keptDetail =
+    keptOutcome === "not_applicable"
+      ? terms.originalHasNone
+      : keptOutcome === "confirmed"
+        ? terms.kept([...before.keys()])
+        : [
+            ...(lost.length > 0 ? [terms.lost(lost)] : []),
+            ...fewer.map((k) => `${quoted([k])} aparece ${inOriginal(k)} e ${inProposal(k)}.`),
+          ].join(" ");
+
+  const addedOutcome: ProofOutcome =
+    after.size === 0 ? "not_applicable" : unseen.length + more.length === 0 ? "confirmed" : "addition";
+  const addedDetail =
+    addedOutcome === "not_applicable"
+      ? terms.proposalHasNone
+      : addedOutcome === "confirmed"
+        ? terms.nothingAdded
+        : [
+            ...(unseen.length > 0 ? [terms.added(unseen, before)] : []),
+            ...more.map((k) => `${quoted([k])} aparece ${inProposal(k)} e ${inOriginal(k)}.`),
+          ].join(" ");
+
+  return [
+    { check: kept, outcome: keptOutcome, passed: keptOutcome !== "not_confirmed", detail: keptDetail },
+    { check: added, outcome: addedOutcome, passed: addedOutcome !== "addition", detail: addedDetail },
+  ];
 }
 
 function firstPersonMarkers(text: string, re: RegExp): Set<string> {
@@ -80,11 +201,6 @@ function extractEntities(text: string): string[] {
 
 function labelsOf(criteria: readonly string[]): string {
   return criteria.map((c) => `«${criterionLabel(c)}»`).join(", ");
-}
-
-function sameMultiset(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false;
-  return a.every((value, i) => value === b[i]);
 }
 
 function overlaps(f: Finding, start: number, end: number): boolean {
@@ -194,13 +310,14 @@ export async function verifyRewrite(
     if (impersonalLeft > 0) exceptions.push("onde você pediu para manter a forma impessoal");
     proofs.push({
       check: "target_resolved",
+      outcome: outcomeOf(stillRequired === 0),
       passed: stillRequired === 0,
       detail:
         stillRequired > 0
-          ? `${label} ainda aparece no trecho reescrito (${stillRequired} ${stillRequired === 1 ? "vez" : "vezes"})`
+          ? `O Lucid ainda aponta ${label} no trecho reescrito (${times(stillRequired)}).`
           : exceptions.length === 0
-            ? `${label} não aparece mais no trecho reescrito`
-            : `${label} não aparece mais no trecho reescrito, exceto ${exceptions.join(" e ")}`,
+            ? `O Lucid não aponta mais ${label} no trecho reescrito.`
+            : `O Lucid não aponta mais ${label} no trecho reescrito, exceto ${exceptions.join(" e ")}.`,
     });
 
     if (awaitingLeft.length > 0) {
@@ -223,12 +340,16 @@ export async function verifyRewrite(
     const directedCriteria = [...new Set(resolvable.map((f) => f.criterion))].sort();
 
     if (directedCriteria.length > 0) {
+      const remaining: string[] = [];
       const degraded: string[] = [];
-      const stillPresent = directedCriteria.filter((c) => {
+      for (const c of directedCriteria) {
         const resolvableRemaining = after.findings.filter(
           (f) => f.criterion === c && !f.requiresHuman && overlaps(f, newStart, newEnd),
         ).length;
-        if (resolvableRemaining > 0) return true;
+        if (resolvableRemaining > 0) {
+          remaining.push(`${labelsOf([c])} (${times(resolvableRemaining)})`);
+          continue;
+        }
 
         const humanBefore = before.findings.filter(
           (f) => f.criterion === c && f.requiresHuman && overlaps(f, originalStart, originalEnd),
@@ -237,23 +358,30 @@ export async function verifyRewrite(
           (f) => f.criterion === c && f.requiresHuman && overlaps(f, newStart, newEnd),
         ).length;
         if (humanAfter > humanBefore && !explicitNoAgentDeclared) {
-          degraded.push(c);
-          return true;
+          degraded.push(
+            `Em ${labelsOf([c])}, os pontos que o Lucid marca para decisão humana passaram de ${humanBefore} para ` +
+              `${humanAfter}.`,
+          );
         }
-        return false;
-      });
+      }
+      const resolved = remaining.length === 0 && degraded.length === 0;
       proofs.push({
         check: "directed_findings_resolved",
-        passed: stillPresent.length === 0,
-        detail:
-          stillPresent.length === 0
-            ? directedCriteria.length === 1
-              ? `A nova versão resolveu o critério pedido à IA: ${labelsOf(directedCriteria)}`
-              : `A nova versão resolveu os ${directedCriteria.length} critérios pedidos à IA: ${labelsOf(directedCriteria)}`
-            : degraded.length > 0
-              ? `A nova versão não resolveu: ${labelsOf(stillPresent)}. Em ${labelsOf(degraded)}, ela apagou a ` +
-                "informação que permitia corrigir, em vez de corrigir"
-              : `A nova versão não resolveu: ${labelsOf(stillPresent)}`,
+        outcome: outcomeOf(resolved),
+        passed: resolved,
+        detail: resolved
+          ? directedCriteria.length === 1
+            ? `O Lucid não aponta mais no trecho reescrito o critério pedido à IA: ${labelsOf(directedCriteria)}.`
+            : `O Lucid não aponta mais no trecho reescrito os ${directedCriteria.length} critérios pedidos à IA: ` +
+              `${labelsOf(directedCriteria)}.`
+          : [
+              ...(remaining.length > 0
+                ? [
+                    `O Lucid ainda aponta no trecho reescrito, entre os critérios pedidos à IA: ${remaining.join(", ")}.`,
+                  ]
+                : []),
+              ...degraded,
+            ].join(" "),
       });
     }
   }
@@ -263,11 +391,16 @@ export async function verifyRewrite(
     const missing = declaredAgents.filter((a) => !normalizedProposal.includes(normalizeForMatch(a)));
     proofs.push({
       check: "declared_agent_present",
+      outcome: outcomeOf(missing.length === 0),
       passed: missing.length === 0,
       detail:
         missing.length === 0
-          ? `A nova versão nomeia o agente que você informou: ${declaredAgents.map((a) => `«${a}»`).join(", ")}`
-          : `A nova versão não nomeia o agente que você informou: ${missing.map((a) => `«${a}»`).join(", ")}`,
+          ? declaredAgents.length === 1
+            ? `O agente que você informou aparece na proposta: ${quoted(declaredAgents)}.`
+            : `Os agentes que você informou aparecem na proposta: ${quoted(declaredAgents)}.`
+          : missing.length === 1
+            ? `O agente que você informou não foi encontrado na proposta: ${quoted(missing)}.`
+            : `Estes agentes que você informou não foram encontrados na proposta: ${quoted(missing)}.`,
     });
   }
 
@@ -275,6 +408,7 @@ export async function verifyRewrite(
   const burdenAfter = regionBurden(after.findings, newStart, newEnd);
   proofs.push({
     check: "region_improved",
+    outcome: outcomeOf(burdenAfter <= burdenBefore + BURDEN_EPSILON),
     passed: burdenAfter <= burdenBefore + BURDEN_EPSILON,
     detail: `Peso dos achados no trecho, pela gravidade: ${burdenBefore.toFixed(1)} → ${burdenAfter.toFixed(1)}`,
   });
@@ -283,29 +417,13 @@ export async function verifyRewrite(
   const totalAfter = totalBurden(after.findings);
   const noNewFindings: Proof = {
     check: "no_new_findings",
+    outcome: outcomeOf(totalAfter <= totalBefore + BURDEN_EPSILON),
     passed: totalAfter <= totalBefore + BURDEN_EPSILON,
     detail: `Peso dos achados no texto todo, pela gravidade: ${totalBefore.toFixed(1)} → ${totalAfter.toFixed(1)}`,
   };
 
-  const numsBefore = extractSorted(proposal.original, RE_NUMBER);
-  const numsAfter = extractSorted(proposal.proposed, RE_NUMBER);
-  const numbersPreserved: Proof = {
-    check: "numbers_preserved",
-    passed: sameMultiset(numsBefore, numsAfter),
-    detail: sameMultiset(numsBefore, numsAfter)
-      ? "Os números do trecho foram mantidos"
-      : `Os números mudaram: [${numsBefore.join(", ")}] → [${numsAfter.join(", ")}]`,
-  };
-
-  const datesBefore = extractSorted(proposal.original, RE_DATE);
-  const datesAfter = extractSorted(proposal.proposed, RE_DATE);
-  const datesPreserved: Proof = {
-    check: "dates_preserved",
-    passed: sameMultiset(datesBefore, datesAfter),
-    detail: sameMultiset(datesBefore, datesAfter)
-      ? "As datas do trecho foram mantidas"
-      : `As datas mudaram: [${datesBefore.join(", ")}] → [${datesAfter.join(", ")}]`,
-  };
+  const numbers = literalProofs("numbers_kept", "numbers_added", RE_NUMBER, proposal, NUMBER_TERMS);
+  const dates = literalProofs("dates_kept", "dates_added", RE_DATE, proposal, DATE_TERMS);
 
   const beforeSpanJargon = jargonTextsOverlapping(
     before.findings,
@@ -317,26 +435,40 @@ export async function verifyRewrite(
   const introducedJargon = [...afterRegionJargon].filter((t) => !beforeSpanJargon.has(t));
   const noNewJargon: Proof = {
     check: "no_new_jargon",
+    outcome: outcomeOf(introducedJargon.length === 0),
     passed: introducedJargon.length === 0,
     detail:
       introducedJargon.length === 0
-        ? "A nova versão não traz jargão novo"
-        : `A nova versão traz jargão novo: ${introducedJargon.join(", ")}`,
+        ? "O Lucid não aponta jargão novo no trecho reescrito."
+        : `O Lucid aponta jargão novo no trecho reescrito: ${quoted(introducedJargon)}.`,
   };
 
-  const sourceFirstPerson = firstPersonMarkers(`${text} ${declaredAgentsText}`, locale.firstPersonMarkers);
+  const documentFirstPerson = [...firstPersonMarkers(text, locale.firstPersonMarkers)].sort();
+  const agentFirstPerson = [...firstPersonMarkers(declaredAgentsText, locale.firstPersonMarkers)].sort();
   const proposalFirstPerson = [...firstPersonMarkers(proposal.proposed, locale.firstPersonMarkers)].sort();
-  const inventedFirstPerson = sourceFirstPerson.size === 0 ? proposalFirstPerson : [];
+  const firstPersonOutcome: ProofOutcome =
+    documentFirstPerson.length > 0 || agentFirstPerson.length > 0
+      ? "not_applicable"
+      : proposalFirstPerson.length > 0
+        ? "addition"
+        : "confirmed";
   const noInventedFirstPerson: Proof = {
     check: "no_invented_first_person",
-    passed: inventedFirstPerson.length === 0,
+    outcome: firstPersonOutcome,
+    passed: firstPersonOutcome !== "addition",
     detail:
-      inventedFirstPerson.length === 0
-        ? "A nova versão não inventa agente em primeira pessoa"
-        : `O texto original é impessoal, e a nova versão fala em primeira pessoa: ${inventedFirstPerson.join(", ")}`,
+      documentFirstPerson.length > 0
+        ? `O documento já usa formas de 1ª pessoa da lista do Lucid: ${quoted(documentFirstPerson)}.`
+        : agentFirstPerson.length > 0
+          ? `O agente que você informou usa formas de 1ª pessoa da lista do Lucid: ${quoted(agentFirstPerson)}.`
+          : proposalFirstPerson.length > 0
+            ? `A proposta usa formas de 1ª pessoa que não aparecem no documento${
+                declaredAgents.length > 0 ? " nem no agente que você informou" : ""
+              }: ${quoted(proposalFirstPerson)}.`
+            : "A proposta não usa nenhuma forma de 1ª pessoa da lista do Lucid.",
   };
 
-  proofs.push(noNewFindings, numbersPreserved, datesPreserved, noNewJargon, noInventedFirstPerson);
+  proofs.push(noNewFindings, ...numbers, ...dates, noNewJargon, noInventedFirstPerson);
 
   const signals: VerificationSignal[] = [];
 
@@ -348,8 +480,11 @@ export async function verifyRewrite(
     flagged: missingEntities.length > 0,
     detail:
       missingEntities.length > 0
-        ? `Confira se estes nomes do original continuam na nova versão: ${[...new Set(missingEntities)].join(", ")}`
-        : "Nenhum nome próprio parece ter saído (heurística, não prova)",
+        ? `Estas palavras com inicial maiúscula do original não estão na proposta: ${quoted([
+            ...new Set(missingEntities),
+          ])}. Confira se algum nome saiu.`
+        : "Toda sigla e toda palavra com inicial maiúscula do original, fora do início de frase, aparecem na proposta " +
+          "(heurística, não prova).",
   });
 
   const sourceAgentNouns = agentNounsAnywhere(`${text} ${declaredAgentsText}`, locale.thirdPersonAgentNouns);
@@ -360,9 +495,12 @@ export async function verifyRewrite(
     flagged: inventedAgents.length > 0,
     detail:
       inventedAgents.length > 0
-        ? `A nova versão nomeia um possível agente que não está no original: ${inventedAgents.join(", ")}. ` +
-          "Confira se ele não foi inventado"
-        : "Nenhum agente novo em terceira pessoa encontrado (heurística, não prova)",
+        ? inventedAgents.length === 1
+          ? `A proposta tem como possível sujeito ${quoted(inventedAgents)}, palavra que não aparece no documento. ` +
+            "Confira quem pratica a ação no original."
+          : `A proposta tem como possíveis sujeitos ${quoted(inventedAgents)}, palavras que não aparecem no ` +
+            "documento. Confira quem pratica a ação no original."
+        : "Nenhum substantivo de agente da lista do Lucid aparece como sujeito novo na proposta (heurística, não prova).",
   });
 
   const sourceIsDeontic = new RegExp(locale.deonticInSource.source, "iu").test(proposal.original);
@@ -372,9 +510,12 @@ export async function verifyRewrite(
     flagged: introduced !== null,
     detail:
       introduced !== null
-        ? `O original não impõe dever, e a nova versão escreve «${introduced[0]}». Confira se o que era ` +
-          "descrição virou obrigação"
-        : "Nenhum dever novo encontrado (heurística, não prova)",
+        ? `A proposta escreve «${introduced[0]}», e o trecho original não tem nenhum marcador de dever da lista do ` +
+          "Lucid. Confira se uma descrição virou obrigação."
+        : sourceIsDeontic
+          ? "O trecho original já tem marcador de dever, e este sinal só compara trechos sem marcador (heurística, não " +
+            "prova)."
+          : "A proposta não tem marcador de dever da lista do Lucid (heurística, não prova).",
   });
 
   const strip = (value: string): string =>
@@ -395,9 +536,9 @@ export async function verifyRewrite(
     flagged: categoriesDropped.length > 0,
     detail:
       categoriesDropped.length > 0
-        ? `A nova versão deixou de citar ${categoriesDropped.length === 1 ? "esta categoria" : "estas categorias"} ` +
-          `do original: ${categoriesDropped.join(", ")}. Confira se a regra não passou a valer para mais gente`
-        : "Nenhuma categoria jurídica do original saiu (heurística, não prova)",
+        ? `A proposta não cita ${categoriesDropped.length === 1 ? "esta categoria" : "estas categorias"} do ` +
+          `original: ${quoted(categoriesDropped)}. Confira se a regra continua valendo para o mesmo grupo.`
+        : "Toda categoria jurídica da lista do Lucid citada no original aparece na proposta (heurística, não prova).",
   });
 
   const metrics: MetricsDelta = {

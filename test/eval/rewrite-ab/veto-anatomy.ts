@@ -9,8 +9,10 @@ export type VetoClass =
 const MARGIN = 5;
 
 const FIDELITY_PROOFS = new Set([
-  "numbers_preserved",
-  "dates_preserved",
+  "numbers_kept",
+  "numbers_added",
+  "dates_kept",
+  "dates_added",
   "no_new_jargon",
   "no_invented_first_person",
   "declared_agent_present",

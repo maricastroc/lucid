@@ -99,6 +99,7 @@ describe("verifyManualEdit — the author's version is judged by the SAME verifi
     expect(verification.hasBlockingFailure).toBe(true);
     const firstPerson = verification.proofs.find((p) => p.check === "no_invented_first_person");
     expect(firstPerson?.passed).toBe(false);
+    expect(firstPerson?.outcome).toBe("addition");
   });
 
   it("an edit that only papers over the passive (without resolving the criterion) fails when the criterion is passed — regression", async () => {
