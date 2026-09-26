@@ -564,10 +564,10 @@ export const COPY_EN: UiCopy = {
       "it, check that the new word keeps the meaning and fits the rest of the sentence. If the term has to stay, " +
       "explain it the first time it appears.",
 
-    nominalizationBaseVerb: (verb) => `Base verb: “${verb}”.`,
+    nominalizationBaseVerb: (verb) => `Verb registered in Lucid's list: “${verb}”.`,
     nominalizationBody:
-      "Rewrite using the verb directly (e.g. “fazer a análise” → “analisar”). This usually means conjugating the " +
-      "verb or adjusting what follows, so you write the final sentence.",
+      "To write it with the matching verb, conjugate the verb and adjust what follows, as in “fazer a análise” → " +
+      "“analisar”. If the construction is clear as it is, mark the point as reviewed.",
 
     readerNamed: (noun) => `The text refers to “${noun}” in the third person. To close that distance, `,
     readerUnnamed: "The text refers to the reader in the third person. To close that distance, ",

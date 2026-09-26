@@ -22,8 +22,10 @@ export const TEXT_UI_EN: Record<CriterionId, CriterionText> = {
     kind: "Lexical choice",
     principleName: "Clear and concise sentences",
     signal:
-      "a light verb (fazer, realizar, efetuar, proceder, promover) followed by an article or preposition and a noun derived from a verb, as consecutive words (“fazer a análise”)",
-    why: "It hides the action inside a noun and lengthens the sentence for no gain.",
+      "a generic verb from a list (fazer, realizar, efetuar, proceder, promover) followed by an article, or by “à” and “ao”, and an action noun from a curated list, as consecutive words (“fazer a análise”)",
+    why:
+      "When an action appears as a noun alongside a generic verb (“fazer a análise”) instead of the verb that " +
+      "says it (“analisar”), the sentence can be less direct.",
   },
   nominalizacao_encadeada: {
     label: "Actions written as nouns",

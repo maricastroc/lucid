@@ -571,10 +571,10 @@ export const COPY_PT: UiCopy = {
       "equivalente possível, confira se ele cabe nesta frase: o sentido e a construção do que vem depois precisam " +
       "continuar certos.",
 
-    nominalizationBaseVerb: (verb) => `Verbo-base: “${verb}”.`,
+    nominalizationBaseVerb: (verb) => `Verbo registrado na lista do Lucid: “${verb}”.`,
     nominalizationBody:
-      "Reescreva com o verbo direto (“fazer a análise” → “analisar”), reconjugando o verbo e ajustando o " +
-      "complemento.",
+      "Para escrever com o verbo correspondente, conjugue-o e ajuste o complemento, como em “fazer a análise” → " +
+      "“analisar”. Se a construção estiver clara como está, marque o ponto como revisado.",
 
     readerNamed: (noun) => `O texto fala de “${noun}” em terceira pessoa. Para `,
     readerUnnamed: "O texto fala do leitor em terceira pessoa. Para ",

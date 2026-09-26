@@ -85,16 +85,13 @@ const BASE: PtNarrativeSet = {
       ),
   },
   nominalization: {
-    headline: (f) => {
-      const base = metaStr(f, "baseVerb");
-      return base ? `Generic verb instead of “${base}”` : "Action with a generic verb";
-    },
+    headline: (f) => `With a generic verb: “${flat(f.span.text)}”`,
     prose: (f) => {
-      const base = metaStr(f, "baseVerb");
+      const noun = metaStr(f, "nominalization");
       const light = metaStr(f, "lightVerb");
-      return `The action${base ? ` of “${base}”` : ""} appears as a noun, carried by ${
-        light ? `the verb “${light}”` : "a verb such as “fazer” or “realizar”"
-      }. That lengthens the sentence and hides the action.`;
+      return `In “${flat(f.span.text)}”, the action is written as a noun${noun ? ` (“${noun}”)` : ""} alongside a generic verb${
+        light ? ` (“${light}”)` : ""
+      }. With the matching verb, the sentence can be more direct.`;
     },
     confidence: (f) => {
       const base = metaStr(f, "baseVerb");

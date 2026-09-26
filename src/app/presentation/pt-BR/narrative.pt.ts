@@ -85,16 +85,13 @@ const BASE: PtNarrativeSet = {
       ),
   },
   nominalization: {
-    headline: (f) => {
-      const base = metaStr(f, "baseVerb");
-      return base ? `Verbo genérico no lugar de “${base}”` : "Ação com verbo genérico";
-    },
+    headline: (f) => `Com verbo genérico: “${flat(f.span.text)}”`,
     prose: (f) => {
-      const base = metaStr(f, "baseVerb");
+      const noun = metaStr(f, "nominalization");
       const light = metaStr(f, "lightVerb");
-      return `A ação${base ? ` de “${base}”` : ""} aparece como substantivo, apoiada ${
-        light ? `no verbo “${light}”` : "num verbo como “fazer” ou “realizar”"
-      }. Isso alonga a frase e esconde a ação.`;
+      return `Em “${flat(f.span.text)}”, a ação está escrita como substantivo${noun ? ` (“${noun}”)` : ""} e acompanhada de um verbo genérico${
+        light ? ` (“${light}”)` : ""
+      }. Com o verbo correspondente, a frase pode ficar mais direta.`;
     },
     confidence: (f) => {
       const base = metaStr(f, "baseVerb");

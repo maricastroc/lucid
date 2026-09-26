@@ -912,7 +912,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “analisar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“fazer a análise” usa o verbo genérico “fazer” com a ação escrita como substantivo, “análise”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “analisar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "analisar",
         "lightVerb": "fazer",
@@ -961,7 +961,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “pagar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“realizar o pagamento” usa o verbo genérico “realizar” com a ação escrita como substantivo, “pagamento”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “pagar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "pagar",
         "lightVerb": "realizar",
@@ -1282,7 +1282,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “verificar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
+      "justification": "“fazer a verificação” usa o verbo genérico “fazer” com a ação escrita como substantivo, “verificação”. Pela lista curada do Lucid, esse substantivo corresponde a um único verbo: “verificar”. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "verificar",
         "lightVerb": "fazer",

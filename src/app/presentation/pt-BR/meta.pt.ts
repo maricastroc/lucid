@@ -31,8 +31,10 @@ export const META_UI_PT: Record<CriterionId, CriterionMeta> = {
     channel: "inline",
     markStyleClass: "mark-dashed",
     signal:
-      "verbo de apoio (fazer, realizar, efetuar, proceder, promover) seguido de artigo ou preposição e de um substantivo que vem de um verbo, em palavras seguidas (“fazer a análise”)",
-    why: "Esconde a ação dentro de um substantivo e alonga a frase sem necessidade.",
+      "verbo genérico de uma lista (fazer, realizar, efetuar, proceder, promover) seguido de artigo, ou de “à” e “ao”, e de um substantivo de ação de uma lista curada, em palavras seguidas (“fazer a análise”)",
+    why:
+      "Quando uma ação aparece como substantivo acompanhado de um verbo genérico (“fazer a análise”) em vez do " +
+      "verbo que a diz (“analisar”), a frase pode ficar menos direta.",
   },
   nominalizacao_encadeada: {
     label: "Ações escritas como substantivos",
