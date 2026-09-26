@@ -101,7 +101,7 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
     );
   });
 
-  it("ACCEPTS a line break inside a paragraph, keeping it one paragraph (ADR-088)", () => {
+  it("ACCEPTS a line break inside a paragraph, keeping it one paragraph", () => {
     const doc = build();
     const next = splice(doc, "análise", "análise\nnova");
     expect(next).not.toBeNull();
@@ -141,7 +141,7 @@ describe("spliceStructuredDocument — it gives up instead of guessing", () => {
   });
 });
 
-describe("spliceStructuredDocument — the Principle 2 criteria stop going silent (ADR-080)", () => {
+describe("spliceStructuredDocument — the Principle 2 criteria stop going silent", () => {
   it("a heading-level jump is still detected after the body is edited", async () => {
     const { analyzeDocument } = await import("@/locales/pt-BR");
     const jumpy: RawBlock[] = [
@@ -162,7 +162,7 @@ describe("spliceStructuredDocument — the Principle 2 criteria stop going silen
   });
 });
 
-describe("spliceStructuredDocument — deleting is editing, not an error (ADR-080)", () => {
+describe("spliceStructuredDocument — deleting is editing, not an error", () => {
   const texts = (doc: Document): string[] =>
     doc.blocks.flatMap((b) => (b.kind === "list" ? b.items.map((i) => i.text) : [b.text]));
 

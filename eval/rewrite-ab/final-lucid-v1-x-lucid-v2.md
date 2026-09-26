@@ -148,7 +148,7 @@ recusando a aprovar; o que muda é saber o que ela recusou.
 | lucid@v1 · gemini-2.5-flash |  20 |            2% |           0 |                 0 |                          1.0 → 0.8 |                          0.8 |                     0.3 |                  0 |            0 |
 | lucid@v2 · gemini-2.5-flash |  20 |            6% |           0 |                 0 |                          1.0 → 0.3 |                          2.1 |                     0.3 |                  0 |            0 |
 
-### 7. Estrutura resultante e aplicação no documento estruturado (ADR-088)
+### 7. Estrutura resultante e aplicação no documento estruturado
 
 | Sistema                     | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive   |
 | --------------------------- | ----: | -------: | -------: | --------------: | ----------------- | ----------------- |

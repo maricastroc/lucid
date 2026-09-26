@@ -33,14 +33,14 @@ rede e sem I/O assíncrono. Este README documenta proveniência e critério de c
 por arquivo — disciplina do projeto ("`principle` nunca é inventado"; análogo aqui:
 nenhum dado entra sem origem registrada).
 
-## Data registry e `dataHash` (ADR-022)
+## Data registry e `dataHash`
 
 Além do consumo direto, cada dataset é registrado em `core/data/registry.ts` com um
 `fingerprint` estável do conteúdo. O `analyze` estampa um `meta.dataHash` derivado dos
 datasets em jogo (dados de estágio de documento + `dataDeps` dos passes), de modo que a
 reprodutibilidade de um `Diagnostic` seja `(lucidVersion, configHash, dataHash)`. **Mexer
 em qualquer JSON aqui muda o `fingerprint` → muda o `dataHash` → quebra o snapshot de
-propósito** (governança automática, ver ADR-022/ADR-023). Adicionar um
+propósito** (governança automática). Adicionar um
 dataset novo = novo id em `DatasetId` + entrada no registry + este README + golden.
 
 ## `abreviacoes.pt.json`
@@ -85,9 +85,8 @@ vem logo depois de uma destas formas. Lista fechada, não um conjugador.
 
 **Critério de curadoria:** paradigma completo de `ser` (indicativo, subjuntivo,
 infinitivo pessoal/impessoal, gerúndio, particípio, imperativo). Deliberadamente
-**não** inclui formas de `estar`/`ficar` — fora de escopo nesta etapa (ver
-ADR-006/ADR-052). O placeholder `Config.passiveVoice.treatEstarAsPassive`
-foi removido (ADR-052): `estar`/`ficar` + particípio é predominantemente resultativo/adjetival,
+**não** inclui formas de `estar`/`ficar` — fora de escopo nesta etapa. O placeholder `Config.passiveVoice.treatEstarAsPassive`
+foi removido: `estar`/`ficar` + particípio é predominantemente resultativo/adjetival,
 não passiva de ação, e um flag que os tratasse igual a `ser` teria alto risco de falso positivo.
 
 **Fora de escopo deliberado:** `estar`/`ficar` (Fase 2, se algum dia — exige separar
@@ -129,7 +128,7 @@ voz passiva de uma ação praticada por um agente.
 
 **Critério de curadoria:** julgamento linguístico de que a leitura adjetival domina
 esmagadoramente sobre a leitura de ação passiva. Curado e extensível — cada entrada
-nova (ver ADR-006, para o exemplo de `envolvido`) precisa da mesma
+nova (como o exemplo de `envolvido`) precisa da mesma
 justificativa: pertencer à mesma classe semântica das entradas já presentes
 (psicológico/relacional), não ser um ajuste pontual para um único exemplo.
 
@@ -148,7 +147,7 @@ Fase 1).
 
 **Propósito:** ancora o matcher da construção `[verbo leve] + [determinante] +
 [nominalização]`. Cada entrada associa a forma superficial ao lema e ao `pattern`
-de regência (os conectores aceitos). Só detecção: desde o ADR-054 o dataset **não**
+de regência (os conectores aceitos). Só detecção: o dataset **não**
 alimenta composição de sugestão — a engine detecta e informa, nunca monta a troca.
 
 **Critério de curadoria:** os 5 verbos-suporte demonstrados como seguros no pedido de
@@ -158,14 +157,14 @@ presente, pretérito imperfeito, futuro do pretérito, presente do subjuntivo e
 gerúndio — 14 formas por verbo. Deliberadamente **não** cobre 1ª/2ª pessoa,
 imperativo nem pretérito mais-que-perfeito simples.
 
-**Histórico (`feature`/`infinitive`, ADR-011 → ADR-054):** cada forma já carregou o traço
+**Histórico (`feature`/`infinitive`):** cada forma já carregou o traço
 morfológico que casava com a tabela `conjugations` de `nominalizacoes.pt.json` para compor a
-sugestão finita. Os dois campos foram **removidos** com o compositor (ADR-054): a detecção só
+sugestão finita. Os dois campos foram **removidos** com o compositor: a detecção só
 precisa de `form`, `lemma` e `pattern`.
 
 **Fora de escopo deliberado:** `dar`/`ter` como verbos-suporte de nominalização
 ("dar continuidade a") — regência e ambiguidade lexical próprias, não demonstradas
-como seguras nesta etapa (ver ADR-007). Regências alternativas de
+como seguras nesta etapa. Regências alternativas de
 `proceder` (`proceder com`) — só o padrão `à/ao/às/aos` foi implementado.
 
 **Formato:** `{ "forms": [{ "form", "lemma", "pattern" }] }`, comparação em caixa
@@ -180,7 +179,7 @@ invariante.
 **Propósito:** mapeia nominalização → verbo-base, para o pass detectar a construção
 `verbo-leve + determinante + nominalização`, **classificar** o mapeamento
 (`safeForSuggestion` ⇒ `requiresHuman = false`: único e defensável) e **informar** o
-verbo-base curado. Desde o ADR-054 nada aqui alimenta composição de texto — a engine
+verbo-base curado. Nada aqui alimenta composição de texto — a engine
 não sugere a troca, só a classifica e nomeia.
 
 **Critério de curadoria:** só nominalizações com mapeamento verbo único e defensável,
@@ -196,7 +195,7 @@ completamente omitidas, não incluídas com `safeForSuggestion:false`. `revisão
 exceção: cadastrada (aparece nos exemplos de detecção do pedido) mas com
 `safeForSuggestion:false` (mapeamento genuinamente não-único — "revisar" ou "rever").
 
-**Histórico (ADR-011 → ADR-054):** este dataset já carregou uma tabela `conjugations`
+**Histórico:** este dataset já carregou uma tabela `conjugations`
 (verbo-base → traço → forma finita, verificada à mão) para compor sugestões finitas
 ("fez a análise" → "analisou"). A tabela foi **removida** junto com o compositor: compor
 a troca é escrever, e a engine não escreve. Também saíram os campos
@@ -209,13 +208,12 @@ caixa invariante.
 
 ## `jargao.pt.json`
 
-**Usado por:** `src/locales/pt-BR/passes/jargon.ts` (pass de jargão — Fase 1, ver
-ADR-008).
+**Usado por:** `src/locales/pt-BR/passes/jargon.ts` (pass de jargão — Fase 1).
 
 **Propósito:** mapeia termo/expressão de linguagem administrativa e jurídica ao
 equivalente em linguagem simples, quando existe um equivalente único e defensável.
 É a **autoridade exclusiva de runtime** para este critério — nenhuma lista de
-frequência participa da decisão de emitir finding (ver ADR-008).
+frequência participa da decisão de emitir finding.
 
 **Critério de curadoria:** cada entrada passou por 4 perguntas antes de entrar — (1) é
 realmente pouco familiar para o leitor-alvo; (2) tem sentido estável no domínio
@@ -242,9 +240,9 @@ vem depois na frase (sintagma nominal vs. oração com "que", ou regência da pr
 seguinte) — risco de regência quebrada, não de sentido incerto. `plain` continua
 preenchido nesses casos para alimentar a `justification`, nunca a `suggestion`.
 
-**Lote 2 (ADR-010) — expansão curada do equivalente informativo no domínio.** 13
+**Lote 2 — expansão curada do equivalente informativo no domínio.** 13
 entradas novas, todas `safeForSuggestion:true` (equivalente 1:1 invariante, exibido como
-cartão "Copiar" — nunca aplicado pela engine, ADR-054), em três famílias:
+cartão "Copiar" — nunca aplicado pela engine), em três famílias:
 (a) conectores/advérbios formais invariantes e monossêmicos (`destarte`→"assim",
 `conquanto`→"embora", `porquanto`→"porque", `mormente`→"principalmente"); (b) MWEs fixas
 desambiguadas pela própria expressão (`tão logo`→"assim que", `via de regra`→"em geral",
@@ -255,7 +253,7 @@ regência. Candidatos `context_dependent` (`nos termos de`, `à luz de`, `em que
 foram deliberadamente adiados: o equivalente muda regência/estrutura, então entrariam só
 como detecção-sem-equivalente — sem ganho de informação segura para exibir.
 
-**Fora de escopo deliberado (ver ADR-008 para o raciocínio completo):**
+**Fora de escopo deliberado:**
 - `consoante` — substantivo comum (letra do alfabeto) tão frequente quanto o uso
   conjuntivo formal; nenhum contexto sintático barato o bastante para desambiguar sem
   parser. Omitida, não cadastrada com `safeForSuggestion:false`.
@@ -266,7 +264,7 @@ como detecção-sem-equivalente — sem ganho de informação segura para exibir
   deste critério inteiro.
 - "Termo definido localmente" (`"X (doravante 'Y')"`) — generalizar essa detecção com
   segurança exigiria mais do que casamento local de tokens; deixada fora do matcher
-  inicial e registrada como limitação (ADR-008), não improvisada.
+  inicial e registrada como limitação, não improvisada.
 
 **Formato:** `{ "entries": JargonEntry[] }` — `term` (minúsculo, palavras separadas por
 um único espaço para `kind:"phrase"`), `kind` (`"word" | "phrase"`), `domain`
@@ -301,7 +299,7 @@ precede a palavra (`"foi o resultado"`) — esses já são barrados pelo própri
 
 **Usados por:** `passes/mais-que-perfeito.ts` (`mais_que_perfeito_sintetico`, 5.3.3) e
 `passes/adverbio-mente-denso.ts` (`adverbio_mente_denso`, 5.3.4). Primeiros datasets derivados
-de um léxico externo reusado (fatia vertical da Camada 1; ver ADR-024/ADR-034).
+de um léxico externo reusado (fatia vertical da Camada 1).
 
 **Fonte:** **PortiLexicon-UD** (Lopes, Duran, Fernandes, Pardo — ICMC-USP/NILC), TSV por classe
 `forma ⇥ lema ⇥ FEATS` (Universal Dependencies), em
@@ -364,7 +362,7 @@ e claras em PT, **não** entram. Sem colisão com o glossário de jargão.
 
 **Licença:** curadoria própria (fatos de língua).
 
-## `subordinadores.pt.json` — densidade de subordinação (ADR-035)
+## `subordinadores.pt.json` — densidade de subordinação
 
 **Usado por:** `passes/subordinacao.ts` (`subordinacao_densa`, 5.3.4). Matcher de frase compartilhado
 (`phrase-match.ts`, single + multipalavra), longest-match-first.
@@ -387,7 +385,7 @@ Contar `que` cru inflaria a densidade em toda oração relativa. Consequência a
 
 **Licença:** curadoria própria (fatos de língua).
 
-## `substantivos-leitor.pt.json` — fala indireta ao leitor (ADR-036)
+## `substantivos-leitor.pt.json` — fala indireta ao leitor
 
 **Usado por:** `passes/leitor-terceira-pessoa.ts` (`leitor_terceira_pessoa`, 5.3.3). Matcher LOCAL por
 tokens (como `passive-voice`), NÃO o de frase contígua.
@@ -408,28 +406,26 @@ reescreve (`requiresHuman`, sem `suggestion`).
 
 **Licença:** curadoria própria (fatos de língua + alinhamento aos guias gov.br/LAB.mg "fale com o leitor").
 
-## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — REMOVIDOS (ADR-054)
+## `ser-tempos.pt.json` e `conjugacoes-ativas.pt.json` — REMOVIDOS
 
-Existiam exclusivamente para a conversão determinística voz passiva→ativa (ADR-032/033/034),
+Existiam exclusivamente para a conversão determinística voz passiva→ativa,
 removida por completo: a engine não escreve. Sua validação de particípios sobrevive no
 `participios-infinitivo.pt.json` (seção abaixo).
 
 ## `participios-infinitivo.pt.json`
 
-**Usado por:** `src/locales/pt-BR/actions/passive-scaffold.ts` (andaime de voz passiva — Tier 2,
-ADR-013). Registrado como `participios-infinitivo.pt`.
+**Usado por:** `src/locales/pt-BR/actions/passive-scaffold.ts` (andaime de voz passiva — Tier 2). Registrado como `participios-infinitivo.pt`.
 
 **Propósito:** mapa `particípio (masculino singular) → verbo-base no infinitivo`, consumido pelo
 andaime como **SINAL** "estrutura identificada, confira" — nunca como sugestão aplicável (a
-engine não escreve, ADR-054). Fora da tabela, o andaime devolve `baseVerb=null` e mostra só o
+engine não escreve). Fora da tabela, o andaime devolve `baseVerb=null` e mostra só o
 particípio, deixando o verbo com o autor.
 
 **Critério de curadoria:** tabela **fechada e curada** (lista de particípios coberta é decisão
 humana), forte em verbos de alta frequência administrativa/jurídica. Cada par
 particípio→infinitivo é **validado contra PortiLexicon-UD** em curadoria-time por
-`scripts/validate-participios.mjs` (ADR-034/ADR-054) — a autoridade que desambigua o `-ido`
-(`recebido`→`receber` vs. `partido`→`partir`). Zero conjugador produtivo (disciplina do
-ADR-011); o andaime normaliza gênero/número por concordância regular antes de consultar.
+`scripts/validate-participios.mjs` — a autoridade que desambigua o `-ido`
+(`recebido`→`receber` vs. `partido`→`partir`). Zero conjugador produtivo; o andaime normaliza gênero/número por concordância regular antes de consultar.
 Adicionar entrada exige confirmar que o particípio não é um substantivo/adjetivo lexicalizado
 mais comum (mesma cautela dos léxicos `participios-*`).
 
@@ -437,10 +433,10 @@ mais comum (mesma cautela dos léxicos `participios-*`).
 
 **Licença:** fatos de flexão verbal, curadoria própria; pares validados contra PortiLexicon-UD.
 
-## `stopwords.pt.json` — filtro de palavras funcionais (ADR-044)
+## `stopwords.pt.json` — filtro de palavras funcionais
 
 **Usado por:** `metrics/cohesion.ts` (coesão referencial) e `passes/passiva-sintetica.ts`. Nasceu
-para `heading_body_mismatch`, removido no ADR-105; o `_comentario` do JSON ainda cita esse critério e
+para `heading_body_mismatch`, critério já removido; o `_comentario` do JSON ainda cita esse critério e
 fica assim de propósito, para a remoção não alterar o `dataHash`.
 
 **Propósito:** membership para separar palavra de CONTEÚDO de palavra FUNCIONAL. Nunca dispara
@@ -455,7 +451,7 @@ biblioteca de NLP.
 
 **Fora de escopo deliberado:** verbos de conteúdo (mesmo frequentes) e substantivos — mantidos como
 conteúdo de propósito, mesmo quando muito frequentes, porque o objetivo aqui não é "frequência
-lexical" (essa é a `frequência PT-BR` prevista e não construída, ver ADR-008), é filtrar só a
+lexical" (essa é a `frequência PT-BR` prevista e não construída), é filtrar só a
 função gramatical.
 
 **Formato:** `{ "forms": string[] }`, comparação em caixa invariante. Entradas repetidas (ex.: "o"/
@@ -463,7 +459,7 @@ função gramatical.
 
 **Licença:** curadoria própria (fatos de língua), sem dependência de fonte externa.
 
-## `substantivos-acao.pt.json` — nominalização encadeada (ADR-051)
+## `substantivos-acao.pt.json` — nominalização encadeada
 
 **Usado por:** `passes/nominalizacao-encadeada.ts` (`nominalizacao_encadeada`, `5.3.3`).
 
@@ -473,7 +469,7 @@ da cadeia `[cabeça] + de/da/do/das/dos (+ 1 palavra opcional) + [substantivo co
 deverbal]` e de unidade da densidade por frase. É o complemento do par
 `verbos-leves.pt.json`/`nominalizacoes.pt.json`: aquele detecta a nominalização COM
 verbo-suporte (e informa o verbo-base curado); este detecta a nominalização SEM âncora de
-verbo leve (e nem verbo-base tem para informar). Desde o ADR-054 **nenhum** dos dois compõe
+verbo leve (e nem verbo-base tem para informar). **Nenhum** dos dois compõe
 a troca — `requiresHuman` conforme o mapeamento seja único (informa) ou ambíguo (só marca).
 
 **Critério de curadoria (precisão > recall):** só entra palavra (a) transparentemente

@@ -4,7 +4,7 @@
 
 Este relatório compara PROMPTS com o modelo fixo. Ele **não** mostra que um prompt é o
 melhor em geral — mostra qual é o melhor para este modelo. O segundo braço
-O Lucid fala com um provedor só (ADR-097), então esta é a única leitura disponível —
+O Lucid fala com um provedor só, então esta é a única leitura disponível —
 e ela continua sendo sobre ESTE modelo, não sobre prompts em geral.
 
 **Recorte das tabelas:** 14 alvos em que TODOS os candidatos responderam (de 20 com alguma resposta). Comparar candidatos sobre
@@ -50,7 +50,7 @@ sem esse recorte vem no fim, com o n de cada braço.
 | lucid@v4 · gemini-2.5-flash  |  14 |            8% |           0 |                 0 |                          1.0 → 0.4 |                          2.5 |                     0.3 |                  0 |            0 |
 | rewrite@2 · gemini-2.5-flash |  14 |           10% |           7 |                 0 |                          1.0 → 0.2 |                          2.8 |                     0.1 |                  0 |            0 |
 
-### 7. Estrutura resultante e aplicação no documento estruturado (ADR-088)
+### 7. Estrutura resultante e aplicação no documento estruturado
 
 | Sistema                      | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive   |
 | ---------------------------- | ----: | -------: | -------: | --------------: | ----------------- | ----------------- |
@@ -141,7 +141,7 @@ sem esse recorte vem no fim, com o n de cada braço.
 | lucid@v4 · gemini-2.5-flash  |  20 |            6% |           0 |                 0 |                          1.0 → 0.4 |                          2.2 |                     0.3 |                  0 |            0 |
 | rewrite@2 · gemini-2.5-flash |  20 |            6% |           5 |                 0 |                          1.0 → 0.2 |                          2.5 |                     0.1 |                  0 |            0 |
 
-### 7. Estrutura resultante e aplicação no documento estruturado (ADR-088)
+### 7. Estrutura resultante e aplicação no documento estruturado
 
 | Sistema                      | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive   |
 | ---------------------------- | ----: | -------: | -------: | --------------: | ----------------- | ----------------- |

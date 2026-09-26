@@ -80,7 +80,7 @@ describe("structure in pasted text (F4) — unmarked prose stays intact", () => 
     }
   });
 
-  it("a blank line separates paragraphs even with nothing punctuated (ADR-073)", () => {
+  it("a blank line separates paragraphs even with nothing punctuated", () => {
     const doc = buildDocument("Prazos e documentos\n\nO interessado deve entregar os documentos.");
     expect(doc.blocks.map((b) => b.kind)).toEqual(["paragraph", "paragraph"]);
     expect(doc.sentences.map((s) => s.wordCount)).toEqual([3, 6]);
@@ -115,7 +115,7 @@ describe("structure in pasted text (A10) — a marker in one place does not re-r
   });
 });
 
-describe("a list marker only opens a list at a block boundary (ADR-094)", () => {
+describe("a list marker only opens a list at a block boundary", () => {
   const WRAPPED =
     "O orçamento compreende:\n\nI\n- o Orçamento Fiscal referente aos Poderes da União, seus fundos e\n" +
     "entidades da Administração Direta e Indireta;\n\nII\n- o Orçamento da Seguridade Social, abrangendo as\n" +

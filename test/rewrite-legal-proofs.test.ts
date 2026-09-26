@@ -104,7 +104,7 @@ const NEW_GUARANTEES: readonly Proof["check"][] = [
   "markup_added",
 ];
 
-describe("references, label, values, written dates and markup — mutation battery (ADR-112)", () => {
+describe("references, label, values, written dates and markup — mutation battery", () => {
   it.each(PRESERVING)("%s → every new guarantee is confirmed", async (_, proposed) => {
     const v = await verify(LAW, proposed);
     for (const check of NEW_GUARANTEES) expect(outcome(v, check), `${check}: ${detail(v, check)}`).toBe("confirmed");

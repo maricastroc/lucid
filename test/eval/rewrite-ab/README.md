@@ -43,7 +43,7 @@ finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
 
 ## Rede — o que a rodada aprendeu na marra
 
-- **Um provedor só.** O Lucid fala com o Gemini (ADR-097). O runner para na primeira cota diária:
+- **Um provedor só.** O Lucid fala com o Gemini. O runner para na primeira cota diária:
   nenhuma espera dentro da corrida recupera isso.
 - **Rodar sob `caffeinate -i`, em blocos com teto próprio.** A máquina suspende e o
   `AbortSignal.timeout` dorme junto — uma chamada chegou a marcar 33 min com mediana real de
@@ -60,7 +60,7 @@ finalistas, refaz as métricas sobre os pares completos e monta o duelo cego.
 | `briefing.ts`        | os achados da engine renderizados como briefing                                                               |
 | `lucid-v1-frozen.ts` | o texto exato do braço `lucid@v1`, congelado para a medição continuar reproduzível                            |
 | `fidelity.ts`        | métricas offline: referência jurídica, relação entre normas, marcadores deônticos, inchaço e divisão de frase |
-| `score.ts`           | verificação determinística + estrutura ADR-088 + round-trip `.docx`                                           |
+| `score.ts`           | verificação determinística + estrutura do documento + round-trip `.docx`                                      |
 | `veto-anatomy.ts`    | abre o `veto%` por prova, sem transformar veto em não-veto                                                    |
 | `report.ts`          | agregação, recorte balanceado, amostra cega e duelo de duas                                                   |
 | `runner.ts`          | rede: teto, reaproveitamento, parada por cota                                                                 |

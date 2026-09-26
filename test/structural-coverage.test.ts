@@ -77,7 +77,7 @@ describe("experiment 001 — coverage follows declared structure, not the contai
     expect(hasStructuralMarkers(asProse(BLOCKS))).toBe(false);
   });
 
-  it("the size of the loss: 6 findings when 001 was measured, 5 since ADR-105 removed heading_body_mismatch", () => {
+  it("the size of the loss: 6 findings when 001 was measured, 5 since heading_body_mismatch was removed", () => {
     expect(structured()).toHaveLength(5);
     expect(prose()).toHaveLength(2);
   });
@@ -99,7 +99,7 @@ describe("experiment 001 — coverage follows declared structure, not the contai
   });
 });
 
-describe("the coverage map answers for a document, not only for the instrument (ADR-084)", () => {
+describe("the coverage map answers for a document, not only for the instrument", () => {
   const proseDoc = () => buildDocument(asProse(BLOCKS));
   const markedDoc = () => buildDocument(asMarkdown(BLOCKS));
 
@@ -147,7 +147,7 @@ describe("the coverage map answers for a document, not only for the instrument (
   });
 });
 
-describe("the interface says it too, in both languages (ADR-084)", () => {
+describe("the interface says it too, in both languages", () => {
   it("every criterion that can go silent has its own label — metaFor falls back to jargon otherwise", () => {
     for (const lang of ["pt-BR", "en"] as const) {
       for (const criterion of REQUIRES_DECLARED_STRUCTURE) {

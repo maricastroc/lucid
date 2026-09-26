@@ -93,7 +93,7 @@ describe("directed@4 — the engine directs the AI through two briefings (mandat
   });
 });
 
-describe("directed@4 — elicitation inside the briefing (ADR-055): the author's answer becomes a requirement, not a template", () => {
+describe("directed@4 — elicitation inside the briefing: the author's answer becomes a requirement, not a template", () => {
   const TEXT = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function passiveAndTarget(text: string) {

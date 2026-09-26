@@ -91,7 +91,7 @@ describe("provenance — NFC normalization and the offset convention", () => {
     expect(passive.span.text).toBe("foi publicada");
   });
 
-  it("nominalization carries no composed suggestion (ADR-054) — the base verb lives in meta, the span is a quote", () => {
+  it("nominalization carries no composed suggestion — the base verb lives in meta, the span is a quote", () => {
     const d = analyze("É preciso fazer a análise de documentos.");
     const nominal = d.findings.find((f) => f.criterion === "nominalization")!;
     expect(nominal.suggestion).toBeUndefined();

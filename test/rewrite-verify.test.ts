@@ -316,7 +316,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
   });
 });
 
-describe("verifyRewrite — PROOF: agent declared by the author (elicitation, ADR-055)", () => {
+describe("verifyRewrite — PROOF: agent declared by the author (elicitation)", () => {
   const TEXT = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function passiveOf(text: string): Finding {
@@ -549,7 +549,7 @@ describe("verifyRewrite — PROOF: mechanical preservation", () => {
   });
 });
 
-describe("verifyRewrite — PROOF: fabricated 1st person (ADR-019)", () => {
+describe("verifyRewrite — PROOF: fabricated 1st person", () => {
   it("impersonal text rewritten with an invented 'nós' fails (mechanical veto)", async () => {
     const text = "Foi realizada a análise do documento pela comissão competente antes da decisão final do processo.";
     const finding = spanFinding(text, "Foi realizada a análise do documento pela comissão competente");
@@ -720,7 +720,7 @@ describe("verifyRewrite — SIGNAL: possibly fabricated 3rd-person agent (LUCID-
   });
 });
 
-describe("verifyRewrite — no model takes part in the verification (ADR-108)", () => {
+describe("verifyRewrite — no model takes part in the verification", () => {
   it("every signal it emits is a registered heuristic, never a probabilistic analysis", async () => {
     const text = "O prazo começa a contar da data da publicação do ato no diário oficial do estado.";
     const finding = spanFinding(text, "O prazo começa a contar da data da publicação");
@@ -804,7 +804,7 @@ describe("applyProposal — pure replacement of the excerpt", () => {
   });
 });
 
-describe("verifyRewrite — locale identity (anti-mixing, ADR-031)", () => {
+describe("verifyRewrite — locale identity (anti-mixing)", () => {
   const text = "O documento foi arquivado pelo setor competente.";
   const finding = spanFinding(text, "O documento foi arquivado pelo setor competente", "passive_voice");
 

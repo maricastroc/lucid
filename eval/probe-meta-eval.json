@@ -1,6 +1,5 @@
 {
   "gerado": "2026-08-28",
-  "adr": "ADR-090",
   "sonda": {
     "provider": "groq",
     "modelo": "openai/gpt-oss-120b",
@@ -14,11 +13,11 @@
   "pisos": {
     "recall": 0.6,
     "precision": 0.7,
-    "fonte": "test/eval/probe-eval.test.ts (ADR-043 + ADR-046)"
+    "fonte": "test/eval/probe-eval.test.ts"
   },
   "baseline": {
     "modelo": "llama-3.3-70b-versatile",
-    "fonte": "ADR-046",
+    "fonte": "meta-eval anterior, mesmo golden",
     "agreement": 1,
     "recall": 1,
     "precision": 1,

@@ -99,7 +99,7 @@ const SPECS: Record<DatasetId, RawSpec> = {
   "jargao.pt": {
     raw: jargaoData,
     prepare: prepareJargon,
-    provenance: "glossário curado de jargão administrativo-jurídico (ADR-008)",
+    provenance: "glossário curado de jargão administrativo-jurídico",
   },
   "mais-que-perfeito.pt": {
     raw: maisQuePerfeitoData,
@@ -109,12 +109,12 @@ const SPECS: Record<DatasetId, RawSpec> = {
   "adverbios-mente.pt": {
     raw: adverbiosMenteData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0); dataset do critério DESCONTINUADO adverbio_mente_denso (ADR-058)",
+    provenance: "advérbios em -mente — derivado de PortiLexicon-UD (CC-BY 4.0); dataset do critério DESCONTINUADO adverbio_mente_denso",
   },
   "adverbios-vagos.pt": {
     raw: adverbiosVagosData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "advérbios vagos (reforço/hedge) — curadoria própria, precisão>recall (ADR-058)",
+    provenance: "advérbios vagos (reforço/hedge) — curadoria própria, precisão>recall",
   },
   "redundancias.pt": {
     raw: redundanciasData,
@@ -144,22 +144,22 @@ const SPECS: Record<DatasetId, RawSpec> = {
   "stopwords.pt": {
     raw: stopwordsData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para as métricas de coesão e para passiva_sintetica (curadoria própria, ADR-044)",
+    provenance: "palavras funcionais do PT-BR (artigos, preposições, conjunções, pronomes, cópulas) — filtro de palavras de conteúdo para as métricas de coesão e para passiva_sintetica (curadoria própria)",
   },
   "siglas-conhecidas.pt": {
     raw: siglasConhecidasData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "siglas universalmente conhecidas (UFs, cotidiano, unidades) a NÃO sinalizar — allowlist enxuta (curadoria própria, ADR-059)",
+    provenance: "siglas universalmente conhecidas (UFs, cotidiano, unidades) a NÃO sinalizar — allowlist enxuta (curadoria própria)",
   },
   "verbos-pronominais.pt": {
     raw: verbosPronominaisData,
     prepare: (r) => prepareStringSet(r, "forms"),
-    provenance: "formas enclíticas de verbos inerentemente pronominais (trata-se, refere-se…) a NÃO tratar como passiva sintética (curadoria própria, ADR-060)",
+    provenance: "formas enclíticas de verbos inerentemente pronominais (trata-se, refere-se…) a NÃO tratar como passiva sintética (curadoria própria)",
   },
   "conectivos.pt": {
     raw: conectivosData,
     prepare: (r) => compileConnectives((r as { entries: ConnectiveEntry[] }).entries),
-    provenance: "conectivos de discurso com classe, para a métrica de coesão — exclui 'e'/'ou' (curadoria própria, ADR-061)",
+    provenance: "conectivos de discurso com classe, para a métrica de coesão — exclui 'e'/'ou' (curadoria própria)",
   },
 };
 

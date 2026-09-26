@@ -1,5 +1,5 @@
 {
-  "_comentario": "Formas enclíticas 3ª pessoa de verbos INERENTEMENTE PRONOMINAIS (o 'se' é partícula integrante do verbo, NUNCA ocultação de agente) — a suprimir em passiva_sintetica (ADR-060). Inclui os copulares/impessoais idiomáticos de altíssima frequência no burocratês ('trata-se de', 'refere-se a', 'torna-se'). Curadoria própria, precisão>recall: lista de FORMAS exatas, byte-exata, sem lematização. Verbos transitivos com 'se' passivo/impessoal (aplica-se, publicam-se, utiliza-se, considera-se…) NÃO entram aqui — são o alvo do critério.",
+  "_comentario": "Formas enclíticas 3ª pessoa de verbos INERENTEMENTE PRONOMINAIS (o 'se' é partícula integrante do verbo, NUNCA ocultação de agente) — a suprimir em passiva_sintetica. Inclui os copulares/impessoais idiomáticos de altíssima frequência no burocratês ('trata-se de', 'refere-se a', 'torna-se'). Curadoria própria, precisão>recall: lista de FORMAS exatas, byte-exata, sem lematização. Verbos transitivos com 'se' passivo/impessoal (aplica-se, publicam-se, utiliza-se, considera-se…) NÃO entram aqui — são o alvo do critério.",
   "forms": [
     "abstendo-se",
     "abstenha-se",

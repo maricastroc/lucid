@@ -1,5 +1,5 @@
 {
-  "_comentario": "Conectivos de discurso com CLASSE, para a métrica de coesão (ADR-061). Descritor, não finding. Cada conectivo recebe UMA classe primária (curadoria; alguns são polissêmicos — 'logo' temporal/conclusivo → conclusivo; 'pois' causal/conclusivo → causal). Exclui de propósito os coordenadores ultrafrequentes 'e'/'ou' (dominariam a contagem sem informar sobre coesão de discurso). Curadoria própria, precisão>recall.",
+  "_comentario": "Conectivos de discurso com CLASSE, para a métrica de coesão. Descritor, não finding. Cada conectivo recebe UMA classe primária (curadoria; alguns são polissêmicos — 'logo' temporal/conclusivo → conclusivo; 'pois' causal/conclusivo → causal). Exclui de propósito os coordenadores ultrafrequentes 'e'/'ou' (dominariam a contagem sem informar sobre coesão de discurso). Curadoria própria, precisão>recall.",
   "entries": [
     { "phrase": "também", "class": "additive" },
     { "phrase": "além disso", "class": "additive" },

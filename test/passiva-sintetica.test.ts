@@ -52,7 +52,7 @@ describe("passiva_sintetica — exclusions (low false positive rate)", () => {
   });
 });
 
-describe("passiva_sintetica — proclisis after a word that forces it (ADR-072)", () => {
+describe("passiva_sintetica — proclisis after a word that forces it", () => {
   it.each([
     ["Não se aplica a multa ao infrator.", "se aplica"],
     ["A regra que se aplica ao caso é outra.", "se aplica"],

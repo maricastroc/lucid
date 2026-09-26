@@ -116,7 +116,7 @@ concorda que não devia. Sem disparo não há denominador; sem denominador não 
 
 O achado é real e é o seguinte: **zero falso positivo em 16 trechos de lei federal que ninguém escreveu
 pensando neste detector.** É modesto, é verdadeiro, e não vira precisão de 100% — que é exatamente o
-erro que o ADR-069 proíbe.
+erro que o projeto proíbe.
 
 Isso obrigou uma correção na interface, feita no mesmo dia: o selo dizia "métrica publicada" sobre dois
 traços, o que lê como defeito ou como resultado vazio. O selo passou a dizer **"publicado"** — um fato

@@ -204,7 +204,7 @@ export function renderTables(aggregates: readonly Aggregate[]): string {
   }
 
   out.push("");
-  out.push("### 7. Estrutura resultante e aplicação no documento estruturado (ADR-088)");
+  out.push("### 7. Estrutura resultante e aplicação no documento estruturado");
   out.push("");
   out.push("| Sistema | igual | expandiu | recusado | não verificável | motivos da recusa | .docx sobrevive |");
   out.push("|---|--:|--:|--:|--:|---|---|");

@@ -1,5 +1,5 @@
 {
-  "_comentario": "Catálogo de fontes públicas do corpus de avaliação (ADR-087). Recorte da v1: FEDERAL apenas. Base legal única: Lei 9.610/98, art. 8º, IV — leis, decretos, regulamentos e demais atos oficiais NÃO são objeto de proteção como direitos autorais. Não é uso justo nem tolerância: está fora do regime autoral. Toda fonte aqui precisa ser ato oficial publicado. Ato de PESSOAL (nomeação, exoneração, aposentadoria, concessão de benefício) é excluído por 'denyPattern' porque é onde mora CPF, nome e matrícula de pessoa real — ver ADR-087 §3.",
+  "_comentario": "Catálogo de fontes públicas do corpus de avaliação. Recorte da v1: FEDERAL apenas. Base legal única: Lei 9.610/98, art. 8º, IV — leis, decretos, regulamentos e demais atos oficiais NÃO são objeto de proteção como direitos autorais. Não é uso justo nem tolerância: está fora do regime autoral. Toda fonte aqui precisa ser ato oficial publicado. Ato de PESSOAL (nomeação, exoneração, aposentadoria, concessão de benefício) é excluído por 'denyPattern' porque é onde mora CPF, nome e matrícula de pessoa real.",
   "schemaVersion": 1,
   "license": {
     "basis": "lei-9610-art-8-IV",

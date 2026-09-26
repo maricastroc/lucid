@@ -1,7 +1,7 @@
 # Corpus de avaliação assistida
 
 Corpus de ato oficial federal para medir os detectores contra **texto que ninguém
-escreveu para eles**. Racional completo em `docs/decisoes/adr-087`.
+escreveu para eles**.
 
 O `eval/report.json` já declara por que isto existe:
 
@@ -86,7 +86,7 @@ Dados pessoais, em duas linhas e nesta ordem:
 1. **recorte por tipo de ato** — `denyPattern` exclui ato de pessoal (nomeação,
    exoneração, aposentadoria, benefício), que é onde mora CPF, nome e matrícula.
    Este é o controle principal;
-2. **`countPii` como segunda linha**, com o limite que a ADR-086 fixou: _não achar
+2. **`countPii` como segunda linha**, com um limite declarado: _não achar
    nada não prova que não há_. Documento com detecção é **descartado, não mascarado**
    — mascarar mudaria o texto medido.
 

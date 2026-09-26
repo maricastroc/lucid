@@ -53,7 +53,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("provider contract — recorded responses become typed failures (ADR-114)", () => {
+describe("provider contract — recorded responses become typed failures", () => {
   it("the 404 for a model no longer offered to new keys is model_unavailable", async () => {
     const attempt = FREE_TIER[0].attempts[0];
     expect(attempt.status).toBe(404);

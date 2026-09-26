@@ -41,7 +41,7 @@ export function assertNotSealed(manifest: CorpusManifest, stage: string): void {
   if (!manifest.sealed) return;
   throw new Error(
     `corpus ${manifest.corpusVersion} está SELADO: '${stage}' alteraria dados já publicados. ` +
-      "Correção não edita a versão selada — crie uma versão nova com supersedes (ADR-087 §2).",
+      "Correção não edita a versão selada — crie uma versão nova com supersedes.",
   );
 }
 

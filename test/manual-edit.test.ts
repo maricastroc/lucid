@@ -118,7 +118,7 @@ describe("verifyManualEdit — the author's version is judged by the SAME verifi
   });
 });
 
-describe("verifyManualEdit — the agent declaration applies to the author too (ADR-055)", () => {
+describe("verifyManualEdit — the agent declaration applies to the author too", () => {
   const text = "A decisão foi comunicada ao interessado no processo administrativo em curso.";
 
   function agentlessPassive() {

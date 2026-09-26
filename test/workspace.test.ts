@@ -123,7 +123,7 @@ describe("workspace — round trip through storage", () => {
   });
 });
 
-describe("workspace — the reader briefing (ADR-079)", () => {
+describe("workspace — the reader briefing", () => {
   beforeEach(() => {
     installStorage();
     clearWorkspace();
@@ -186,7 +186,7 @@ describe("workspace — the reader briefing (ADR-079)", () => {
   });
 });
 
-describe("workspace — the editorial profile (ADR-081)", () => {
+describe("workspace — the editorial profile", () => {
   beforeEach(() => {
     installStorage();
     clearWorkspace();
@@ -650,7 +650,7 @@ describe("workspace — the locale that produced the work travels with it", () =
   });
 });
 
-describe("workspace — the author's decision on a verified version (ADR-111)", () => {
+describe("workspace — the author's decision on a verified version", () => {
   beforeEach(() => {
     installStorage();
     clearWorkspace();

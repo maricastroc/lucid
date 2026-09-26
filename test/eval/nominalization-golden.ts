@@ -180,9 +180,9 @@ export const GOLDEN_NOMINALIZACAO: readonly EntradaGolden[] = [
     expectedCount: 1,
     estado: "limitacao_conhecida",
     motivo:
-      "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2 (ADR-007), " +
+      "A12d — o pass exige o trio ADJACENTE [verbo leve][determinante][nominalização] em i, i+1, i+2, " +
       "então um adjetivo entre determinante e substantivo derruba a detecção: 'fazer uma nova avaliação' é o mesmo " +
-      "fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger (ADR-001) a janela " +
+      "fenômeno de 'fazer uma avaliação'. Corrigir exigiria janela de 1 token, e sem POS tagger a janela " +
       "aceitaria qualquer token — o ganho de recall precisa de eval própria antes de entrar",
   },
 

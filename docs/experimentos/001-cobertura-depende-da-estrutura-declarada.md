@@ -1,6 +1,6 @@
 # 001 — A cobertura da auditoria depende do recipiente do documento?
 
-> Escrito em 26/08/2026, ao abrir o `docs/experimentos/`. A pergunta nasceu do ADR-083:
+> Escrito em 26/08/2026, ao abrir o `docs/experimentos/`. A pergunta nasceu de uma constatação:
 > o mapa de cobertura por cláusula reporta o instrumento como se ele fosse o mesmo para
 > qualquer entrada. É?
 >
@@ -58,7 +58,7 @@ golden integrado: 20 casos, 0 com marcador estrutural
 
 Nenhum caso do golden integrado declarava estrutura. O corpus que alimenta as asserções semânticas **não exercitava** esses quatro critérios em momento algum — coerente com o `eval/report.json`, que já os classificava honestamente em `unitTestsOnly`.
 
-> **Estado posterior (ADR-084).** Este número foi corrigido no mesmo dia: entrou um caso que declara estrutura, e os quatro critérios migraram de `unitTestsOnly` para `goldenLabelledOnly` no artefato publicado. O `0 de 20` fica registrado como a medição que motivou a correção, não como o estado atual — o teste que sustenta este documento assere o estado de hoje.
+> **Estado posterior.** Este número foi corrigido no mesmo dia: entrou um caso que declara estrutura, e os quatro critérios migraram de `unitTestsOnly` para `goldenLabelledOnly` no artefato publicado. O `0 de 20` fica registrado como a medição que motivou a correção, não como o estado atual — o teste que sustenta este documento assere o estado de hoje.
 
 ## 4. Um resultado que não apareceu, e por que ele importa
 
@@ -77,13 +77,13 @@ O README lista sete recusas. A sexta é:
 
 > _Report what it did **not** look for · Let a silent absence read as an all-clear._
 
-**Sobre texto em prosa, a ferramenta não cumpre essa recusa.** Ela audita com 19 critérios em vez de 23, relata "nenhum achado" para o Princípio 2 e não distingue _não encontrei_ de _não pude olhar_ — que é exatamente a distinção que o ADR-083 acabou de tornar obrigatória no mapa de cláusulas (`unbuilt` × `out_of_reach`) e que aqui reaparece num terceiro eixo, ainda não tratado: **`unreachable-for-this-document`**.
+**Sobre texto em prosa, a ferramenta não cumpre essa recusa.** Ela audita com 19 critérios em vez de 23, relata "nenhum achado" para o Princípio 2 e não distingue _não encontrei_ de _não pude olhar_ — que é exatamente a distinção que o mapa de cláusulas acabou de tornar obrigatória (`unbuilt` × `out_of_reach`) e que aqui reaparece num terceiro eixo, ainda não tratado: **`unreachable-for-this-document`**.
 
 O custo é direto e cai na cláusula: o mapa credita 4 detectores ao 5.2 (Princípio 2 — o leitor encontra o que precisa). Em prosa, **metade deles não pode disparar** — `long_heading` e `salto_de_nivel_titulo` —, e o mapa continua dizendo `parcial` com os mesmos 4. O relatório de cobertura é estático; a cobertura real é função do documento.
 
-Custa também admitir que o mapa entregue no ADR-083 está incompleto no dia em que nasceu. Preferível a descobrir isso depois de alguém publicar um laudo com ele.
+Custa também admitir que o mapa de cobertura recém-entregue está incompleto no dia em que nasceu. Preferível a descobrir isso depois de alguém publicar um laudo com ele.
 
-## 6. Correção aplicada — ADR-084
+## 6. Correção aplicada
 
 Os quatro pontos propostos foram implementados:
 
@@ -101,6 +101,6 @@ Deliberadamente **não** implementado: inferir título ou lista de texto em pros
 - **Frequência em documento real.** Sabe-se que a perda é de 4 critérios; não se sabe em que fração dos documentos que chegam a estrutura vem declarada. `.docx` de origem institucional quase sempre declara; texto colado quase nunca. A proporção não foi medida e não dá para inferir do corpus atual, que é 0/20.
 - **Efeito sobre `paragraph_length` e `prose_enumeration`.** Ambos disparam em prosa e ambos são creditados ao 5.2. Não foi medido se a segmentação em prosa os torna mais ou menos sensíveis que sobre blocos declarados.
 
-## Nota posterior — ADR-105
+## Nota posterior
 
 `heading_body_mismatch` saiu do catálogo depois desta medição: não achar no corpo uma palavra do título não é evidência de que o título esteja inadequado. Os números acima são os da data em que o experimento foi medido e ficam como estão. Rodado hoje, o mesmo `.docx` estruturado dá **5 achados**, e a perda em prosa é de **3 critérios** (`long_heading`, `salto_de_nivel_titulo`, `single_item_list`). `test/structural-coverage.test.ts` acompanha a medição atual.
