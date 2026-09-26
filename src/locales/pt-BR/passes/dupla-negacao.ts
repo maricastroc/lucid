@@ -18,7 +18,9 @@ export const duplaNegacaoPass: Pass<PtConfig> = {
 
     for (const sentence of ctx.doc.sentences) {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
-        const direta = hit.entry.plain ? ` Diga direto: “${hit.entry.plain}”.` : "";
+        const next = hit.entry.plain
+          ? ` Forma direta registrada: “${hit.entry.plain}”. Confira se ela mantém a nuance que você quer dar.`
+          : " Diga de forma direta o que a expressão afirma, na intensidade que você quer dar.";
         findings.push({
           criterion: CRITERION,
           category: "syntactic",
@@ -26,8 +28,8 @@ export const duplaNegacaoPass: Pass<PtConfig> = {
           severity: "warning",
           requiresHuman: true,
           justification:
-            `Dupla negação — “${hit.text}” afirma negando o negativo, e o leitor tem de desfazer a ` +
-            `negação para entender.${direta} A ferramenta não reescreve automaticamente porque o encaixe depende do contexto.`,
+            `Dupla negação: “${hit.text}” afirma negando o contrário, e o leitor precisa desfazer as ` +
+            `negações para entender.${next}`,
         });
       }
     }

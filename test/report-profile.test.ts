@@ -52,7 +52,7 @@ describe("describeDeviation — every deviation reads as prose, in the criterion
   it("uses the knob label for a threshold", () => {
     const config = { ...DEFAULT_CONFIG, paragraphLength: { enabled: true, maxSentences: 9 } };
     expect(configDeviations(config, DEFAULT_CONFIG).map((d) => describeDeviation(d, "pt-BR", PT))).toEqual([
-      "Parágrafo longo — acima de (frases) 9 (padrão: 5)",
+      "Parágrafo longo, em frases: acima de 9 (padrão: 5)",
     ]);
   });
 

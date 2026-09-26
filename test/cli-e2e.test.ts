@@ -119,7 +119,7 @@ describe("lucid CLI — exit codes", () => {
     const broken = path.join(workspace, "quebrado.pdf");
     fs.writeFileSync(broken, "isto não é um PDF");
     expect(lucid([broken]).status).toBe(1);
-    expect(lucid([broken]).stderr).toContain("não foi possível ler o arquivo");
+    expect(lucid([broken]).stderr).toContain("o arquivo não pôde ser lido");
   });
 });
 

@@ -163,9 +163,9 @@ function justification(found: Detected): string {
         ? `A series of ${found.items} steps is announced with ordinal words (“first… second… third…”) inside running text.`
         : `A colon introduces ${found.items} items separated by commas inside one sentence.`;
   return (
-    `${opening} The Federal Plain Language Guidelines (2011, pp. 71-72) recommend a vertical list, with a lead-in ` +
-    "sentence, for a series of requirements, steps or conditions (ISO 24495-1, 5.2.3). Turning it into a list " +
-    "changes the structure of the text; Lucid does not convert it."
+    `${opening} If the items are requirements, steps or conditions, consider a vertical list with a lead-in ` +
+    "sentence, as the Federal Plain Language Guidelines (2011, pp. 71-72) recommend (ISO 24495-1, 5.2.3). " +
+    "Whether a list helps this reader is the author's decision."
   );
 }
 

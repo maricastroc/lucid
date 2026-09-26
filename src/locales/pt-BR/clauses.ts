@@ -1,18 +1,17 @@
 import type { ClauseTree } from "@/lucid/core/coverage/types";
 
 const OVERVIEW =
-  "Cláusula de visão geral: apresenta o princípio e remete às diretrizes seguintes, sem enunciar " +
-  "uma diretriz própria que se possa verificar num texto.";
+  "Visão geral: apresenta o princípio e remete às diretrizes seguintes. Não traz diretriz própria que " +
+  "se possa verificar num texto.";
 
 export const CLAUSE_TREE: ClauseTree = {
   standard: "ABNT NBR ISO 24495-1:2024",
   referenceName: "ABNT NBR ISO 24495-1",
   transcription:
-    "Seção 5 (Diretrizes) transcrita por inteiro — os quatro princípios e as 23 subcláusulas de 5.1 a " +
-    "5.4 — com os títulos conferidos contra o texto normativo. As seções 1 a 4 (Escopo, Referências " +
-    "normativas, Termos e definições, Princípios norteadores) e os Anexos A e B não estão nesta " +
-    "árvore, e a ausência delas aqui não afirma que não existam. Por isso `exhaustive` continua " +
-    "`false` e nenhuma fração de cobertura é publicada.",
+    "Esta árvore transcreve por inteiro a seção 5 (Diretrizes): os quatro princípios e as 23 " +
+    "subcláusulas de 5.1 a 5.4, com os títulos conferidos com o texto da norma. As seções 1 a 4 " +
+    "(Escopo, Referências normativas, Termos e definições, Princípios norteadores) e os Anexos A e B " +
+    "ficaram fora dela, o que não quer dizer que não existam. Por isso a árvore não é declarada completa.",
   exhaustive: false,
   nodes: [
     {
@@ -39,8 +38,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "out_of_reach",
         reason:
-          "Quem é o leitor não é propriedade do texto. Nenhuma regra lê num documento a população que " +
-          "ele pretende alcançar, e um texto pode nomear um público e ser escrito para outro.",
+          "Quem é o leitor não está escrito no texto. Nenhuma regra descobre num documento o público que " +
+          "ele quer alcançar, e um texto pode nomear um público e ter sido escrito para outro.",
       },
     },
     {
@@ -78,8 +77,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "out_of_reach",
         reason:
-          "Se o formato escolhido é o adequado para a necessidade do leitor só se responde comparando " +
-          "com as alternativas que não foram escritas.",
+          "Saber se o formato escolhido atende à necessidade do leitor exige comparar com alternativas " +
+          "que não foram escritas.",
       },
     },
     {
@@ -92,10 +91,10 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "O briefing confere se as expressões que o autor declarou como essenciais aparecem no texto. " +
-          "Isso verifica a declaração do autor, não a necessidade do leitor: se a declaração estiver " +
-          "errada ou incompleta, a conferência passa mesmo assim. Saber o que o leitor precisa exige o " +
-          "leitor, e o briefing não é um detector — não produz finding nem cita cláusula.",
+          "O Lucid confere se as expressões que o autor declarou como essenciais aparecem no texto. Isso " +
+          "verifica a declaração do autor, não a necessidade do leitor: se a declaração estiver errada ou " +
+          "incompleta, a conferência passa mesmo assim. Saber do que o leitor precisa exige ouvir o leitor. " +
+          "A conferência não gera achado nem cita cláusula.",
       },
     },
     {
@@ -123,10 +122,10 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "O fatiamento do parágrafo é medido. A ordenação do documento pela necessidade do leitor não " +
-          "é: exige saber o que o leitor procura primeiro. A cláusula 5.3.5 da norma trata do parágrafo " +
-          "sob o Princípio 3, e se `paragraph_length` pertence lá é questão em aberto, declarada e não " +
-          "decidida.",
+          "O Lucid mede o tamanho dos parágrafos. Não mede se o documento está ordenado pela necessidade " +
+          "do leitor, porque isso exige saber o que ele procura primeiro. A norma também trata de " +
+          "parágrafo na 5.3.5 (Princípio 3); se paragraph_length pertence lá é uma questão em aberto, " +
+          "ainda não decidida.",
       },
     },
     {
@@ -138,9 +137,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "Só a enumeração em prosa onde caberia lista é detectada. Tabela, destaque, espaçamento e " +
-          "hierarquia visual não chegam ao motor: são decisões de apresentação que o texto puro não " +
-          "carrega.",
+          "O Lucid detecta só a enumeração em prosa onde caberia uma lista. Tabela, destaque, espaçamento " +
+          "e hierarquia visual são decisões de apresentação que não chegam à análise do texto.",
       },
     },
     {
@@ -152,9 +150,9 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "Tamanho do título e salto de nível são medidos. Se o título antecipa o que vem depois é " +
+          "O Lucid mede o tamanho do título e o salto de nível. Se o título antecipa o que vem depois é " +
           "julgamento de conteúdo e fica com o autor: repetir ou não as palavras do corpo não mostra se o " +
-          "título cumpre essa função (ADR-105).",
+          "título cumpre essa função.",
       },
     },
     {
@@ -166,8 +164,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "unbuilt",
         reason:
-          "Alcançável por análise de texto: exceção, ressalva e nota encravadas no meio do período têm " +
-          "marca sintática. Nenhum detector foi construído.",
+          "Dá para verificar pelo texto, porque exceção, ressalva e nota no meio do período têm marca " +
+          "sintática, mas nenhum detector foi construído.",
       },
     },
     {
@@ -195,8 +193,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "Jargão e sigla dependem de léxico curado. Um léxico não cobre uma língua: termo fora da " +
-          "lista não é flagrado, e a ausência de achado não é atestado de vocabulário simples.",
+          "Jargão e sigla dependem de listas curadas, e nenhuma lista cobre a língua inteira: termo fora " +
+          "dela não é apontado, e não ter achado não atesta que o vocabulário é familiar.",
       },
     },
     {
@@ -208,11 +206,11 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "A cláusula tem cinco alíneas. Os detectores alcançam parte de a) — estrutura ambígua, via " +
-          "voz passiva e dupla negação — e c), quem faz o quê. Não alcançam a) 1) e 4), que pedem saber " +
-          "o que é familiar ao leitor e o que já foi dito antes, nem d) e e), que remetem à norma " +
-          "linguística. A alínea b), falar diretamente ao leitor, é tocada por " +
-          "`leitor_terceira_pessoa`, que detecta a fala indireta mas não decide se ela é apropriada.",
+          "A cláusula tem cinco alíneas. Os detectores alcançam parte da a), estrutura ambígua, pela voz " +
+          "passiva e pela dupla negação, e a c), quem faz o quê. Não alcançam os itens 1) e 4) da a), que " +
+          "pedem saber o que é familiar ao leitor e o que já foi dito antes, nem a d) e a e), que remetem à " +
+          "norma linguística. A b), falar diretamente ao leitor, é tratada por leitor_terceira_pessoa, que " +
+          "detecta a fala indireta mas não decide se ela é adequada.",
       },
     },
     {
@@ -224,15 +222,14 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "A cláusula tem três alíneas e nenhum número. A alínea b) — palavras redundantes, " +
-          "modificadores vagos, clichês — é a mais alcançada, por `redundancia` e `perifrase_inflada`; " +
-          "`adverbios_vagos` cobre a mesma alínea de fato, mas segue declarado como extensão editorial " +
-          "do PT e por isso não cita esta cláusula. A alínea c) pede frases razoavelmente curtas COM " +
-          "variação de tamanho: o " +
-          "motor mede o comprimento e usa 20 palavras como gatilho de inspeção, número que é parâmetro " +
-          "do Lucid e não da norma, e não mede variação nenhuma. A alínea a), uma ideia por frase, é a " +
-          "diretriz central e não é verificável: contar ideias exige ler. `long_sentence` e " +
-          "`subordinacao_densa` são aproximações estruturais dela, não a medição dela.",
+          "A cláusula tem três alíneas e não fixa número. A b), palavras redundantes, modificadores vagos " +
+          "e clichês, é a mais alcançada, por redundancia e perifrase_inflada; adverbios_vagos cobre a mesma " +
+          "alínea, mas é declarado como extensão editorial do português e por isso não cita esta cláusula. " +
+          "A c) pede frases razoavelmente curtas e com variação de tamanho: o Lucid mede o comprimento e " +
+          "usa 20 palavras como gatilho de inspeção, número do Lucid e não da norma, mas não mede a " +
+          "variação. A a), uma ideia por frase, é a diretriz central e não se verifica automaticamente, " +
+          "porque contar ideias exige ler; long_sentence e subordinacao_densa são aproximações estruturais " +
+          "dela, não a medição dela.",
       },
     },
     {
@@ -244,9 +241,9 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "unbuilt",
         reason:
-          "Um parágrafo = um tópico, com o tópico anunciado no início, é alcançável por análise de " +
-          "texto ao menos em parte. Nenhum detector cita esta cláusula: `paragraph_length` mede número " +
-          "de frases e está declarado em 5.2.2.",
+          "Um tópico por parágrafo, anunciado no início, pode ser verificado pelo texto ao menos em " +
+          "parte, mas nenhum detector cita esta cláusula: paragraph_length conta frases e está declarado " +
+          "na 5.2.2.",
       },
     },
     {
@@ -258,8 +255,8 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "out_of_reach",
         reason:
-          "Se uma imagem ajudaria, e se a que existe apoia o texto, não se decide a partir do texto. O " +
-          "motor audita texto e não vê a imagem.",
+          "Se uma imagem ajudaria, ou se a que existe apoia o texto, não se decide pelo texto. O Lucid " +
+          "audita texto e não vê imagens.",
       },
     },
     {
@@ -271,9 +268,9 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "unbuilt",
         reason:
-          "Parte é lexical — termos que estereotipam ou excluem cabem num léxico curado, como jargão " +
-          "cabe. Nada foi construído. O tom do documento como um todo, esse não é lexical e não seria " +
-          "alcançado por um léxico.",
+          "Parte é lexical: termos que estereotipam ou excluem caberiam numa lista curada, como o jargão, " +
+          "mas nada foi construído. O tom do documento como um todo não é lexical e não seria alcançado " +
+          "por uma lista.",
       },
     },
     {
@@ -286,9 +283,9 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "A bateria de coesão de superfície mede repetição lexical entre frases e conectivos por " +
-          "classe. É descritor neutro: não produz achado, não entra no placar e não usa LSA nem " +
-          "embeddings. Coesão de sentido — se as ideias se encadeiam — fica fora.",
+          "As métricas de coesão medem a repetição de palavras entre frases vizinhas e os conectivos por " +
+          "tipo. São descritivas: não geram achado nem entram no placar. A coesão de sentido (se as ideias " +
+          "se encadeiam) fica fora.",
       },
     },
     {
@@ -328,9 +325,9 @@ export const CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "out_of_reach",
         reason:
-          "Se o leitor consegue usar a informação se mede testando com leitores. Nenhuma propriedade do " +
-          "texto prova uso, e nenhum detector futuro alcança isto: um texto pode passar em todos os " +
-          "critérios e ainda assim não permitir que a pessoa faça o que precisa fazer.",
+          "Só um teste com leitores mostra se eles conseguem usar a informação. Nenhuma propriedade do " +
+          "texto prova uso, e nenhum detector futuro alcança isto: um texto pode não ter nenhum achado e " +
+          "ainda assim não permitir que a pessoa faça o que precisa fazer.",
       },
     },
     {

@@ -8,6 +8,7 @@ export type DatasetId =
   | "participios-ambiguos.pt"
   | "participios-falsos-nominais.pt"
   | "adjuntos-nao-agente.pt"
+  | "substantivos-agente.pt"
   | "participios-infinitivo.pt"
   | "verbos-leves.pt"
   | "nominalizacoes.pt"
@@ -72,6 +73,7 @@ export interface DataTypes {
   "participios-ambiguos.pt": ReadonlySet<string>;
   "participios-falsos-nominais.pt": ReadonlySet<string>;
   "adjuntos-nao-agente.pt": ReadonlySet<string>;
+  "substantivos-agente.pt": ReadonlySet<string>;
   "participios-infinitivo.pt": Readonly<Record<string, string>>;
   "verbos-leves.pt": ReadonlyMap<string, LightVerbForm>;
   "nominalizacoes.pt": ReadonlyMap<string, NominalizationEntry>;

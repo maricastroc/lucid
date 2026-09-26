@@ -131,9 +131,9 @@ export const leitorTerceiraPessoaPass: Pass<PtConfig> = {
           severity: "info",
           requiresHuman: true,
           justification:
-            `O texto se refere ao leitor em terceira pessoa (“${noun.text}”) e lhe atribui uma obrigação. ` +
-            "Falar diretamente com o leitor (“você deve…”) ou usar o imperativo aproxima e deixa claro quem " +
-            "age. A ferramenta não reescreve: mudar a pessoa do texto é decisão de estilo sua.",
+            `O texto fala do leitor em terceira pessoa (“${noun.text}”) ao dizer o que ele deve ou pode fazer. ` +
+            "Se quem lê é essa pessoa, fale com ela diretamente (“você deve…”) ou use o imperativo: fica mais " +
+            "claro quem precisa agir.",
           meta: { readerNoun: noun.text, deonticVerb: deonticText },
         });
       }

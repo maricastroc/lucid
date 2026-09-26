@@ -121,9 +121,9 @@ export const readerThirdPersonPass: Pass<EnConfig> = {
           requiresHuman: true,
           justification:
             `The reader is named in the third person (“${noun.text}”) and given an obligation or a permission ` +
-            `(“${marker}”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as ` +
-            "“you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the " +
-            "document's reader is the person named here.",
+            `(“${marker}”). If the document is written for this person, address them as “you”: the Federal Plain ` +
+            "Language Guidelines (2011, p. 30) recommend it because it shows who must act (ISO 24495-1, 5.3.3). " +
+            "Only the author knows who the document is written for.",
           meta: { readerNoun: noun.text, deontic: marker },
         });
         i = deontic.end;

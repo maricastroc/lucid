@@ -11,17 +11,20 @@ import { Button } from "../ui/button";
 import { SendNotice } from "../send-notice";
 import { RewriteProposalCard } from "./rewrite-proposal-card";
 import { useRewriteDraft } from "./use-rewrite-draft";
+import { AgentQuestion, asksForAgent } from "./agent-question";
 import { useAnalysisLocale } from "../../locale/context";
 
 export function AiRewritePanel({
   finding,
   source,
   declaration,
+  onDeclare,
   onApplyRewrite,
 }: {
   finding: Finding;
   source: string;
   declaration: AgentDeclaration | null;
+  onDeclare: (d: AgentDeclaration | null) => void;
   onApplyRewrite: (target: Span, proposal: RewriteProposal) => void;
 }) {
   const { c } = useCopy();
@@ -65,6 +68,10 @@ export function AiRewritePanel({
           <p className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-1">
             {c.note.aiTarget(unitLabel)}
           </p>
+
+          {asksForAgent(finding, source) && (
+            <AgentQuestion finding={finding} declaration={declaration} onDeclare={onDeclare} />
+          )}
 
           {choice.providerId !== "stub" && <SendNotice text={source} />}
 

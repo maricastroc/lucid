@@ -48,6 +48,6 @@ describe("flow 6 · re-auditing after a change", () => {
 
     const trail = within(auditPanel().getByRole("list", { name: /alterações aplicadas/i }));
     expect(trail.getByText(/edição do autor/i)).toBeInTheDocument();
-    expect(auditPanel().getByText(/não aparecem aqui nem no relatório exportado/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/o relatório exportado traz a mesma lista/i)).toBeInTheDocument();
   });
 });

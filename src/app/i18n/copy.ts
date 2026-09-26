@@ -410,7 +410,6 @@ export interface UiCopy {
     readonly passiveWithAgent: string;
     readonly passiveNoAgentLead: string;
     readonly passiveNoAgentBody: string;
-    readonly passiveNoAgentStrong: string;
     readonly passiveNoAgentRequirement: string;
     readonly scaffoldLead: string;
     readonly scaffoldLeadStrong: string;
@@ -425,6 +424,7 @@ export interface UiCopy {
     readonly scaffoldObjectPlaceholder: string;
     readonly scaffoldNote: string;
     readonly agentQuestion: string;
+    readonly agentQuestionHint: string;
     readonly agentPlaceholder: string;
     readonly agentKeepImpersonal: string;
     readonly agentRecordedKeep: string;

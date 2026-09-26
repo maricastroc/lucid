@@ -15,9 +15,9 @@ import { EvidenceNav } from "./evidence-nav";
 import { CopyRunSignature } from "./run-signature";
 
 export const metadata: Metadata = {
-  title: "Avaliação do motor — Lucid",
+  title: "Avaliação do motor · Lucid",
   description:
-    "O Lucid só publica métricas onde a medição é sustentada. Precisão, recall e cobertura do motor determinístico, com as limitações do método declaradas — lidas do artefato de eval, não recalculadas.",
+    "O Lucid só publica métricas onde a medição se sustenta. Precisão, recall e cobertura do motor determinístico, com as limitações do método declaradas. Os valores são lidos do artefato de avaliação, não recalculados.",
 };
 
 export const SUPPORTED_SCHEMA_VERSION = EVAL_SCHEMA_VERSION;
@@ -39,17 +39,17 @@ const SECTIONS = [
 
 const TIERS = [
   {
-    note: "Precisão e recall contra golden que inclui casos negativos — há oportunidade real de falso positivo.",
+    note: "Precisão e recall contra um golden com casos negativos, em que o detector tem chance real de apontar errado.",
     rule: "border-t-2 border-ink-0",
     numeral: "text-ink-0",
   },
   {
-    note: "Findings exatos fixados no golden integrado: regressão quebra o build, mas não há taxa agregada.",
+    note: "Os apontamentos esperados estão fixados no golden integrado: uma regressão quebra o build, mas não há taxa agregada.",
     rule: "border-t border-ink-dim",
     numeral: "text-ink-1",
   },
   {
-    note: "Confirma o que o autor previu; não mede recall sobre texto que ninguém antecipou.",
+    note: "Confirma o que quem escreveu o teste previu; não mede recall em texto que ninguém antecipou.",
     rule: "border-t border-dashed border-ink-dim",
     numeral: "text-ink-2",
   },
@@ -94,14 +94,16 @@ export default function AvaliacaoPage() {
             </p>
 
             <h1 className="mt-5 max-w-[30ch] font-serif text-[26px] leading-[1.12] tracking-[-0.02em] text-ink-0 sm:text-[35px]">
-              O Lucid só publica métricas onde a medição é sustentada.
-              <span className="mt-1 block text-ink-2">O resto ele declara como não medido.</span>
+              O Lucid só publica métricas onde a medição se sustenta.
+              <span className="mt-1 block text-ink-2">O resto aparece como não medido.</span>
             </h1>
 
             <p className="mt-5 max-w-[62ch] text-[14px] leading-[1.65] text-ink-1">
-              Cada taxa desta página vem de corpus rotulado à mão, com as falhas conhecidas contando contra o número em
-              vez de serem excluídas. Todo valor é lido de <Mono>eval/report.json</Mono> — nada é recalculado aqui, e o
-              que não foi medido aparece como não medido.
+              {assistedCorpus
+                ? "As taxas desta página vêm de corpus rotulado: à mão, nos critérios medidos, e por dois modelos com revisão humana parcial, no corpus assistido."
+                : "As taxas desta página vêm de corpus rotulado à mão."}{" "}
+              As falhas conhecidas contam contra o número em vez de serem excluídas. Todo valor é lido de{" "}
+              <Mono>eval/report.json</Mono>: nada é recalculado aqui, e o que não foi medido aparece como não medido.
             </p>
 
             <p className="mt-4 flex max-w-[62ch] items-start gap-2.5 text-[13px] leading-relaxed text-ink-1">
@@ -112,8 +114,8 @@ export default function AvaliacaoPage() {
                 <CrossGlyph />
               </span>
               <span>
-                Número alto aqui <span className="font-medium text-ink-0">não</span> é aprovação nem atestado de clareza
-                de texto: mede o motor, não o documento de ninguém.
+                Número alto aqui <span className="font-medium text-ink-0">não</span> é aprovação nem atestado de
+                clareza: mede o motor, não o documento de ninguém.
               </span>
             </p>
           </header>
@@ -124,8 +126,8 @@ export default function AvaliacaoPage() {
 
           <Band id="metodo" label="Método" aside="o que os números podem significar">
             <p className="max-w-[64ch] text-[13.5px] leading-relaxed text-ink-1">
-              Limites do método, do próprio artefato. Os cartões de critério remetem a eles pelos índices. Pontuação por{" "}
-              <Mono>{method.scoring}</Mono>.
+              Limites do método, como declarados no próprio artefato. Os números sobrescritos nos cartões de critério
+              remetem a esta lista. Pontuação: <Mono>{method.scoring}</Mono>.
             </p>
             <ol className="mt-5 grid grid-cols-1 gap-x-10 lg:grid-cols-2">
               {method.caveats.map((caveat, i) => (
@@ -149,7 +151,7 @@ export default function AvaliacaoPage() {
             <p className="max-w-[62ch] text-[15px] leading-[1.65] text-ink-1">
               <Tabular>{criteriaCoverage.measured.length}</Tabular> dos <Tabular>{criteriaCoverage.total}</Tabular>{" "}
               critérios do motor têm métrica publicada. Os demais aparecem nas camadas abaixo, com a evidência que de
-              fato existe para cada um — a régua enfraquece junto.
+              fato existe para cada um. De uma camada para a seguinte, a evidência fica mais fraca.
             </p>
 
             <div className="relative mt-9 pl-5 sm:pl-7">
@@ -201,7 +203,7 @@ export default function AvaliacaoPage() {
             <Band id="regressoes" label="Regressões" aside="falha sem motivo declarado">
               <div className="rounded-lg border border-human-line bg-human-weak px-5 py-4">
                 <p className="max-w-[62ch] text-[13px] leading-relaxed text-ink-1">
-                  Casos marcados como corretos no corpus que falharam. Não há motivo declarado — e esta página não
+                  Casos marcados como corretos no corpus que falharam. Não há motivo declarado, e esta página não
                   inventa nenhum.
                 </p>
                 <ul className="mt-4 flex flex-col gap-3">
@@ -229,8 +231,8 @@ export default function AvaliacaoPage() {
             </div>
             <p className="mt-6 max-w-[68ch] text-[12.5px] leading-relaxed text-ink-1">
               <span className="text-ink-1">Casos</span> é o tamanho do corpus do critério e{" "}
-              <span className="text-ink-1">negativos</span> é quantos deles exigem que o detector fique calado — sem
-              eles, precisão seria 100% por construção. Um traço significa ausência de medida, nunca zero.
+              <span className="text-ink-1">negativos</span> é quantos deles exigem que o detector fique calado. Sem
+              negativos, a precisão seria 100% por construção. Um traço significa ausência de medida, nunca zero.
             </p>
           </Band>
 
@@ -246,7 +248,9 @@ export default function AvaliacaoPage() {
                     <span className="ml-auto text-[12px] tabular-nums text-ink-1">
                       {d.knownLimitations.length}{" "}
                       {d.knownLimitations.length === 1 ? "caso declarado" : "casos declarados"}
-                      <span className="ml-1.5 text-ink-1">· conta contra a métrica</span>
+                      <span className="ml-1.5 text-ink-1">
+                        · {d.knownLimitations.length === 1 ? "conta" : "contam"} contra a métrica
+                      </span>
                     </span>
                   </h3>
                   <ol className="mt-5 flex flex-col gap-7">
@@ -280,8 +284,8 @@ export default function AvaliacaoPage() {
           <Band id="procedencia" label="Procedência" aside="assinatura da rodada">
             <div className="rounded-lg border border-rule-2 bg-surface-2 px-5 py-5">
               <p className="max-w-[64ch] text-[13px] leading-relaxed text-ink-1">
-                Estes seis valores identificam a rodada: com eles e o mesmo corpus, qualquer pessoa chega aos mesmos
-                números desta página — e uma divergência aponta qual peça mudou.
+                Estes seis valores identificam a rodada. Com eles e o mesmo corpus, qualquer pessoa chega aos mesmos
+                números desta página; se algum número divergir, a assinatura mostra qual peça mudou.
               </p>
               <dl className="mt-5 grid grid-cols-2 gap-x-8 gap-y-5 border-t border-rule-1 pt-5 sm:grid-cols-3">
                 <Field term="lucidVersion" value={stamp.lucidVersion} />
@@ -296,10 +300,10 @@ export default function AvaliacaoPage() {
               </div>
 
               <p className="mt-4 text-[12px] leading-relaxed text-ink-1">
-                <span className="font-mono text-[11px] text-ink-1">{stamp.standardVersion}</span> · mesma estampa e
-                mesmo corpus devem produzir os mesmos valores. Ela não cobre o código-fonte dos detectores —{" "}
-                <Mono>lucidVersion</Mono> é declarada à mão —, e por isso o guard de atualidade compara byte a byte em
-                vez de confiar nela. Para regenerar: <Mono>npm run eval</Mono>.
+                <span className="font-mono text-[11px] text-ink-1">{stamp.standardVersion}</span> · a mesma estampa e o
+                mesmo corpus devem produzir os mesmos valores. A estampa não cobre o código-fonte dos detectores (
+                <Mono>lucidVersion</Mono> é declarada à mão), por isso a verificação de atualidade compara o artefato
+                byte a byte em vez de confiar nela. Para regenerar: <Mono>npm run eval</Mono>.
               </p>
             </div>
 
@@ -316,7 +320,8 @@ export default function AvaliacaoPage() {
               </div>
               <p className="text-[12px] text-ink-1">
                 <Tabular>{services.syllables.words}</Tabular> palavras ·{" "}
-                <Tabular>{services.syllables.limitations}</Tabular> declaradas
+                <Tabular>{services.syllables.limitations}</Tabular>{" "}
+                {services.syllables.limitations === 1 ? "limitação declarada" : "limitações declaradas"}
               </p>
             </div>
           </Band>
@@ -327,7 +332,7 @@ export default function AvaliacaoPage() {
             <span className="text-ink-dim" aria-hidden>
               ·
             </span>
-            Nenhum número desta página saiu de um modelo — na faixa assistida, os rótulos de referência sim
+            Nenhum número desta página saiu de um modelo; na faixa assistida, os rótulos de referência, sim
             <Link
               href="/"
               className="ml-auto rounded-sm underline decoration-rule-3 underline-offset-4 transition-colors hover:text-ink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
@@ -375,8 +380,8 @@ function EvidenceSummary({ artifact }: { artifact: EvalArtifact }) {
         Evidência disponível para os <Tabular>{criteriaCoverage.total}</Tabular> critérios
       </h2>
       <p className="mt-2 max-w-[64ch] text-[12.5px] leading-relaxed text-ink-1">
-        Quantos critérios têm cada tipo de evidência. Não é nota, aprovação nem média — é o quanto se sabe sobre cada
-        um, e a régua enfraquece da esquerda para a direita.
+        Quantos critérios têm cada tipo de evidência. Não é nota, aprovação nem média: mostra o quanto se sabe sobre
+        cada um, e a evidência fica mais fraca da esquerda para a direita.
       </p>
 
       <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
@@ -586,12 +591,12 @@ function Incompatible({ found }: { found: number }) {
           Artefato incompatível
         </h1>
         <p className="mt-5 text-[14px] leading-[1.7] text-ink-1">
-          Esta página renderiza o esquema <Tabular>{SUPPORTED_SCHEMA_VERSION}</Tabular> do artefato de avaliação, e{" "}
-          <Mono>eval/report.json</Mono> declara <Tabular>{found}</Tabular>.
+          Esta página lê o esquema <Tabular>{SUPPORTED_SCHEMA_VERSION}</Tabular> do artefato de avaliação, mas{" "}
+          <Mono>eval/report.json</Mono> declara o esquema <Tabular>{found}</Tabular>.
         </p>
         <p className="mt-3.5 text-[13px] leading-relaxed text-ink-2">
-          Nada é exibido a partir de um esquema que a página não conhece: renderizar parcialmente arriscaria mostrar
-          número fora do significado que ele tem.
+          Nada é exibido a partir de um esquema desconhecido: uma exibição parcial poderia mostrar um número com um
+          significado que ele não tem. Para corrigir, regenere o artefato com <Mono>npm run eval</Mono>.
         </p>
         <Link
           href="/"
@@ -618,17 +623,17 @@ function AssistedBand({
     <Band id="corpus" label="Corpus assistido" aside="medido contra texto que ninguém escreveu para o detector">
       <p className="max-w-[64ch] text-[15px] leading-[1.65] text-ink-1">
         O recall dos critérios de léxico curado acima é circular
-        <NoteRef n={noteNumber("circular_recall_curated")} id="circular_recall_curated" /> — os positivos do golden
-        saíram da mesma lista que o detector consulta. Esta faixa é a resposta a essa ressalva:{" "}
+        <NoteRef n={noteNumber("circular_recall_curated")} id="circular_recall_curated" />: os positivos do golden
+        saíram da mesma lista que o detector consulta. Esta faixa responde a essa ressalva:{" "}
         <Tabular>{corpus.criteria.length}</Tabular> critérios medidos contra <Tabular>{corpus.passages}</Tabular>{" "}
         trechos de <Tabular>{corpus.documents}</Tabular> atos oficiais federais, rotulados por dois modelos
-        independentes e adjudicados por pessoa onde divergiram.
+        independentes e adjudicados por uma pessoa onde divergiram.
       </p>
 
       <p className="mt-4 max-w-[64ch] text-[13px] leading-relaxed text-ink-1">
         Ela <span className="text-ink-0">não</span> se funde com a faixa autoral
         <NoteRef n={noteNumber("assisted_supervision")} id="assisted_supervision" />: a supervisão é de outra natureza,
-        e um critério que apareça nas duas tem duas medições de origens diferentes — não uma medição mais forte.
+        e um critério que apareça nas duas tem duas medições de origens diferentes, não uma medição mais forte.
       </p>
 
       <div className="mt-7 flex flex-wrap items-end gap-x-12 gap-y-5 border-y border-rule-1 py-5">
@@ -647,7 +652,7 @@ function AssistedBand({
           <p className="font-serif text-[34px] leading-none tabular-nums text-human">{corpus.withheld.length}</p>
           <p className="mt-2 text-[12.5px] leading-snug text-ink-0">medidos e retidos</p>
           <p className="mt-1 max-w-[24ch] text-[11.5px] leading-snug text-ink-1">
-            a medição existe; o portão recusou publicá-la, e diz por quê
+            a medição existe, mas o portão recusou publicá-la e diz por quê
           </p>
         </div>
         <p className="ml-auto max-w-[30ch] text-[11.5px] leading-relaxed text-ink-1">
@@ -673,7 +678,7 @@ function AssistedBand({
             </span>
           ))}{" "}
           · temperatura <Tabular>0</Tabular> · prompt versionado por critério. Nenhum arquivo do pipeline de rotulagem
-          importa o detector — a cerca é verificada pelo <Mono>dependency-cruiser</Mono>.
+          importa o detector; o <Mono>dependency-cruiser</Mono> verifica essa separação.
         </p>
         <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 border-t border-rule-1 pt-4 sm:grid-cols-2">
           <Field term="hash dos documentos" value={corpus.hashes.documents.slice(0, 16)} />
@@ -727,7 +732,7 @@ function AssistedCard({ m }: { m: AssistedMeasurement }) {
           <span className="u-sublabel text-ink-1">o que foi publicado</span>
           <br />O detector ficou calado nos <Tabular>{silent.cases}</Tabular> trechos do estrato aleatório, e o rótulo
           revisado concorda: <span className="text-ink-0">nenhum falso positivo</span>. Precisão e recall ficam sem
-          denominador — o achado é a ausência, e uma taxa aqui seria inventada.
+          denominador: o resultado é a ausência, e uma taxa aqui seria inventada.
         </p>
       )}
 
@@ -744,14 +749,14 @@ function AssistedCard({ m }: { m: AssistedMeasurement }) {
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <StratumBlock
           title="estrato aleatório"
-          note="amostra sem viés de superfície — o único onde recall significa alguma coisa"
+          note="amostra sem viés de superfície: o único estrato em que o recall significa alguma coisa"
           s={m.strata.random}
           promoted={m.promoted}
           enriched={false}
         />
         <StratumBlock
           title="estrato enriquecido"
-          note="entrou por cue de superfície: precisão é legítima, recall mediria a cue"
+          note="entrou por cue de superfície: a precisão vale, mas o recall mediria a cue"
           s={m.strata.cued}
           promoted={m.promoted}
           enriched

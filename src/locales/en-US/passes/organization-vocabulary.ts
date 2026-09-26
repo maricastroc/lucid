@@ -10,12 +10,13 @@ export const organizationVocabularyPass = createOrganizationVocabularyPass<EnCon
   text: {
     withEquivalent: (plain, reason) =>
       "Term from the organization's vocabulary: the organization declared this term unfamiliar to its readers " +
-      `and recorded "${plain}" as its equivalent. Swapping it is your decision — the tool does not rewrite.` +
+      `and recorded “${plain}” as its equivalent. Lucid does not check the meaning: confirm that “${plain}” ` +
+      "fits this sentence before you use it." +
       declaredReason(reason),
     withoutEquivalent: (reason) =>
       "Term from the organization's vocabulary: the organization declared this term unfamiliar to its readers " +
-      "and did NOT record a plain equivalent. This is a flag, not a proposal: without an attested equivalent, " +
-      "suggesting a swap would be the tool inventing what the organization did not say." +
+      "but recorded no equivalent. Explain the term or replace it with words the reader knows. Lucid does not " +
+      "suggest a replacement the organization did not record." +
       declaredReason(reason),
   },
 });

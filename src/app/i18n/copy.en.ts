@@ -39,9 +39,9 @@ export const COPY_EN: UiCopy = {
     titleLead: "Lucid audits your text, criterion by criterion.",
     titleTrail: "It does not decide for you.",
     lead:
-      "Every finding carries the criterion that fired, the source behind it — such as the ABNT/ISO 24495-1 standard — " +
-      "and the exact passage: it shows what stops the reader and explains why.",
-    leadStrong: "An AI proposal only enters the document if you apply it.",
+      "Each finding shows the exact passage, the criterion that flagged it and the source behind that criterion, " +
+      "such as the ABNT NBR ISO 24495-1 standard. It also explains why the passage may get in the reader's way.",
+    leadStrong: "An AI proposal only reaches your document if you apply it.",
     doesLabel: "What it does",
     verbs: ["Analyzes", "Detects", "Explains", "Asks", "Verifies"],
     doesNotBefore: "What it does ",
@@ -49,18 +49,18 @@ export const COPY_EN: UiCopy = {
     doesNotAfter: " do: approve your text.",
     write: "Write or paste text",
     loadExample: "Load example",
-    anatomyLabel: "Every passage becomes an annotation like this",
+    anatomyLabel: "Each flagged passage gets an annotation like this",
     cardCriterion: {
       title: "The criterion that fired",
-      body: "Passive voice, jargon, long sentence, nominalization — each with the source behind it.",
+      body: "Passive voice, jargon, long sentence, nominalization: each one comes with its source.",
     },
     cardWhy: {
-      title: "Why it stops the reader",
-      body: "The engine's justification, and the exact passage marked in the document.",
+      title: "Why it may stop the reader",
+      body: "Lucid's justification, with the exact passage marked in the document.",
     },
     cardWhat: {
       title: "What to do about it",
-      body: "An honest call on who resolves it.",
+      body: "Whether a direct swap is available, or the decision is yours.",
     },
     outcomeSafe: "Direct swap available",
     outcomeHuman: "Your call",
@@ -72,53 +72,57 @@ export const COPY_EN: UiCopy = {
   studio: {
     goHome: {
       title: "Back to start?",
-      body: "The text under review and the trail of changes will be discarded. This cannot be undone — export the report first if you want to keep the audit.",
+      body:
+        "The text under review and its recorded changes will be discarded, and this cannot be undone. To keep the " +
+        "audit, export the report first.",
       confirm: "Discard and go back",
     },
     replaceDocument: {
       title: "Open another document?",
-      lead: "There is an audit under way here. Opening another document replaces it, and the following does not come back:",
+      lead: "An audit is in progress. Opening another document replaces it, and you will lose:",
       changes: (n) => `${n} recorded ${plural(n, "change", "changes")}`,
       reviewed: (n) => `${n} reviewed ${plural(n, "point", "points")}`,
       dismissed: (n) => `${n} dismissed ${plural(n, "point", "points")}`,
       editedText: "the edits made to the text since it was opened",
-      briefing: "the reader briefing you answered",
-      kept: "The editorial profile and the organisation's vocabulary stay in place — they belong to the house, not to this document.",
+      briefing: "the required expressions and report information you filled in",
+      kept: "The editorial profile and the organisation's vocabulary stay: they belong to your organisation, not to this document.",
       save: "Save starting point…",
       saveHint:
-        "Downloads this audit as a file before the other document is opened. That file is what makes comparing the two versions possible later.",
+        "Downloads this audit as a file before the other document opens, so you can compare the two versions later.",
       discard: "Discard and open",
       cancel: "Cancel opening",
     },
     spliceRefused: {
       crosses_units: "This change spans more than one block of the imported document.",
-      crosses_cells: "This change spans more than one table cell. Applying it would move text between cells.",
-      unsupported_unit: "Applying a multi-line change inside a heading or a list item is not supported yet.",
-      introduces_heading: "This change would create a new heading, altering the document's outline.",
-      rebuild_mismatch: "The document could not be rebuilt while preserving the other blocks.",
+      crosses_cells: "This change spans more than one table cell, so applying it would move text between cells.",
+      unsupported_unit: "Lucid cannot yet apply a change that spans several lines inside a heading or a list item.",
+      introduces_heading: "This change would create a new heading and alter the document's outline.",
+      rebuild_mismatch: "The document could not be rebuilt without altering its other blocks.",
     },
-    spliceRefusedKept: "The document is unchanged — nothing was applied.",
+    spliceRefusedKept: "The document is unchanged: nothing was applied.",
     spliceAcceptPlain: "Apply as plain text",
     spliceDiscard: "Discard",
     saveFailed:
-      "This work could not be saved in the browser — it will be lost if you close the tab. Export the report so you " +
-      "do not depend on it.",
+      "This work could not be saved in the browser and will be lost if you close the tab. Export the report to keep it.",
     importRefusal: {
-      unreadable: "The file could not be read. Check that it is a valid .docx.",
+      unreadable: "The file could not be read. Check that it is a valid .docx or .pdf file and try again.",
       tracked_changes:
-        "This file has tracked changes that were never resolved. While they are there, the file itself does " +
-        "not say what its text is — auditing it would mean auditing a version nobody approved. Accept or " +
-        "reject the changes in your editor and import it again.",
+        "This file has unresolved tracked changes, so it is not clear which version of the text to audit. Accept or " +
+        "reject the changes in your editor, save the file and import it again.",
       scanned:
-        "This PDF is a scan, not text. There is nothing to audit in something that was never written as text — send the original, as .docx or as a PDF produced by a computer.",
+        "This PDF is a scanned image, not text, so there is nothing to audit. Import the original file as .docx, or " +
+        "as a PDF exported from a word processor.",
       columns:
-        "This PDF is set in two or more columns, and reading it top to bottom would interleave them. Rather than audit a scrambled text, the import stops here — send the original as .docx, or a single-column PDF.",
+        "This PDF is laid out in two or more columns, and reading it top to bottom would mix them up. Import the " +
+        "original as .docx, or as a single-column PDF.",
       glued:
-        "The words of this PDF come out glued together: the text read is not the text written, and auditing it would measure the extraction, not the writing.",
+        "The words in this PDF come out stuck together, so Lucid would be auditing the extraction, not your " +
+        "writing. Import the original as .docx, or as a PDF exported from a word processor.",
       invariant:
-        "A number in the PDF did not survive the reading. The tool would rather refuse than audit a text it cannot vouch for.",
+        "A number in this PDF was lost when the text was extracted, so Lucid cannot rely on what it read. Import " +
+        "the original as .docx.",
       no_readable_content:
-        "This file has no readable content to audit. That is not a clean document: it is an empty one.",
+        "This file has no readable text to audit: it is empty, not clean. Check that you opened the right file.",
     },
     openAudit: (pending) => (pending === 0 ? "Open the audit" : `Open the audit · ${pending} pending`),
     changeApplied: "Change applied to the text.",
@@ -127,25 +131,24 @@ export const COPY_EN: UiCopy = {
 
   panel: {
     navLabel: "Audit destinations",
-    settingsTitle: "Customize analysis",
-    settingsLead: "Tune the criteria to the rules of the document or of your organization.",
+    settingsTitle: "Customise analysis",
+    settingsLead: "Adjust the criteria to the rules of this document or of your organisation.",
     settingsSummaryExpressions: (n) =>
       n === 0 ? "No expressions added" : `${n} ${plural(n, "expression added", "expressions added")}`,
     settingsSummaryProfile: (deviations) =>
       deviations === 0 ? "default limits" : `${deviations} ${plural(deviations, "changed limit", "changed limits")}`,
     settingsSummaryJoin: " · ",
-    settingsRecordPointer:
-      "Information about the reader and the purpose of the document lives under Export › Report information.",
-    settingsIsoNote: "Based on ABNT NBR ISO 24495-1",
+    settingsRecordPointer: "To record who the reader is and what the document is for, use Export › Report information.",
+    settingsIsoNote: "Reference: ABNT NBR ISO 24495-1",
     settingsIsoTitle:
-      "This section helps apply the section 5.1 guidance on relevance to the reader. The remaining limits " +
-      "correspond to the sentence, paragraph and heading criteria.",
+      "The required expressions help apply section 5.1 of the standard, on relevance to the reader. The limits " +
+      "are Lucid's own: the standard sets no numbers.",
     settingsOpen: "Configure the analysis",
     settingsClose: "Back to the audit",
     settingsDone: "Apply and go back",
     goToFindingsHint:
-      "Nothing here is an audit point: these are the thresholds and the vocabulary the analysis uses to find " +
-      "points. Changing them re-runs the analysis.",
+      "These settings are not findings. They are the limits and vocabulary Lucid uses to find points, and " +
+      "changing them runs the analysis again.",
     exportLabel: "Export",
     exportMenuLabel: "Export formats",
     provenanceTitle: (configHash, version) => `config ${configHash} · lucid ${version}`,
@@ -157,16 +160,18 @@ export const COPY_EN: UiCopy = {
     seeChanges: "See the changes",
     limitsLabel: "Limits of this analysis",
     experimentalLimit: (name) =>
-      `Analysis in ${name}, experimental: no validation on an independent corpus, no readability, cohesion ` +
-      "or AI rewriting.",
+      `Analysis in ${name} is experimental: it has not been validated on an independent corpus, and it has no ` +
+      "readability, cohesion or AI rewriting.",
     annotations: (n) => plural(n, "point to review", "points to review"),
     adjustedProfileBefore: "This audit uses a ",
     adjustedProfileStrong: "custom profile",
     adjustedProfile: (deviations, disabled) =>
-      `, with ${deviations} ${plural(deviations, "adjustment", "adjustments")} against the default` +
-      (disabled > 0 ? `, ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}` : "") +
+      `, with ${deviations} ${plural(deviations, "change", "changes")} from the default` +
+      (disabled > 0
+        ? `, including ${disabled} ${plural(disabled, "criterion switched off", "criteria switched off")}`
+        : "") +
       ".",
-    adjustedProfileAfter: "Its result cannot be compared with a default audit.",
+    adjustedProfileAfter: "Its results are not comparable with an audit that uses the default profile.",
     splitAriaLabel: (safe, human) => `${safe} with a direct swap, ${human} for you to decide`,
     legendSafe: (n) => plural(n, "direct swap available", "direct swaps available"),
     legendHuman: (n) => plural(n, "point for you to decide", "points for you to decide"),
@@ -178,66 +183,65 @@ export const COPY_EN: UiCopy = {
           : plural(n, "observation", "observations"),
     exportAudit: "Download audit (.md)",
     printAudit: "Print audit (PDF)",
-    printNote: "Opens the browser's print dialog — choose “Save as PDF”.",
+    printNote: "Opens the browser's print dialog. Choose “Save as PDF”.",
     exportDocx: "Download revised text (.docx)",
-    exportDocumentMd: "Download the revised text (.md)",
-    printDocument: "Print the revised text",
+    exportDocumentMd: "Download revised text (.md)",
+    printDocument: "Print revised text",
     exportPdf: "Download revised text (.pdf)",
-    exportPdfNote: "Laid out by Lucid: A4, headings, lists at the document's own levels, paginated tables.",
+    exportPdfNote: "Laid out by Lucid on A4 pages, keeping headings, list levels and tables.",
     pdfPageLabel: (page: number, total: number) => `${page} of ${total}`,
-    pdfError: "The PDF could not be generated. Use the .txt export instead.",
+    pdfError: "The PDF could not be generated. Download the .txt instead.",
     groupAudit: "Audit",
     groupDocument: "Revised text",
     exportTxt: "Download text (.txt)",
-    docxError: "The .docx could not be generated. Use the .txt export instead.",
+    docxError: "The .docx could not be generated. Download the .txt instead.",
     docxNote:
-      "The PDF and the .docx are laid out the same way: same sizes, spacing and hierarchy. They contain the " +
-      "revised text with its headings, lists and tables — rows, columns and merged cells. What they leave out " +
-      "is the rest of the original formatting: bold, images, headers and footers. The brand fonts are not " +
-      "embedded. Neither is a way back: reimporting here does not return the same structure.",
-    importTables: (n: number) => `${n} ${n === 1 ? "table flattened" : "tables flattened"}`,
-    importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box inlined" : "text boxes inlined"}`,
+      "The PDF and the .docx share the same layout. They contain the revised text with its headings, lists and " +
+      "tables, including merged cells. The rest of the original formatting is left out: bold, images, headers, " +
+      "footers and brand fonts. Importing these files back into Lucid does not rebuild the same structure.",
+    importTables: (n: number) => `${n} ${n === 1 ? "table" : "tables"}`,
+    importTextBoxes: (n: number) => `${n} ${n === 1 ? "text box" : "text boxes"}`,
     importRuledRegions: (n: number) =>
-      `${n} ${n === 1 ? "region drawn as a grid" : "regions drawn as a grid"} read as running text`,
-    importPdfTables: (n: number) =>
-      `${n} ${n === 1 ? "table rebuilt" : "tables rebuilt"} from the grid drawn in the file`,
+      `${n} ${n === 1 ? "region" : "regions"} drawn as a grid but read as running text`,
+    importPdfTables: (n: number) => `${n} ${n === 1 ? "table" : "tables"} rebuilt from the grid drawn in the file`,
     importFurniture: (n: number) =>
-      `${n} repeated ${n === 1 ? "line" : "lines"} of header, footer or page number left out of the audit`,
+      `${n} repeated header, footer or page-number ${n === 1 ? "line" : "lines"} left out of the audit`,
     importDehyphenated: (n: number) => `${n} ${n === 1 ? "word" : "words"} rejoined across a line break`,
     importAnd: " and ",
     importAlso: ", ",
     importRecovered: (styles: string) =>
-      `We recognised the headings in the file (${styles}). Without that, they would come in as ordinary paragraphs.`,
+      `Headings were read from the file's styles (${styles}), so they keep their level instead of becoming ` +
+      "ordinary paragraphs.",
     importInferred: (styles: string) =>
-      `The headings below were INFERRED from the style name (${styles}). The file does not declare their level, ` +
-      `so this is our reading, not the document's — check whether a paragraph became a heading without being one.`,
+      `These headings were inferred from the style name (${styles}), because the file does not declare their ` +
+      "level. Check that no ordinary paragraph was turned into a heading.",
     importFlattened: (what: string) =>
-      `${what} became paragraphs. The content is audited, but the original arrangement is not.`,
+      `${what} became plain paragraphs. Their content is audited, but not their original layout.`,
     importFromPdf: (what: string) =>
-      `Reading the PDF: ${what}. A PDF declares no structure — it draws characters on a page.`,
+      `How the PDF was read: ${what}. A PDF places characters on a page; it does not declare the document's ` +
+      "structure.",
     importPdfInferred: (headings: number, items: number, references: string) =>
-      `Headings and items in this PDF were INFERRED, not read from a declaration: ${headings} ` +
-      `${headings === 1 ? "heading" : "headings"} and ${items} ${items === 1 ? "item" : "items"}, from the ` +
-      `Brazilian drafting rules (${references}) plus the size and position of the text on the page. Check before ` +
-      `trusting it: all the file states is the drawing.`,
+      `Lucid inferred ${headings} ${headings === 1 ? "heading" : "headings"} and ${items} ` +
+      `${items === 1 ? "item" : "items"} in this PDF from Brazilian drafting rules (${references}) and from the ` +
+      "size and position of the text on the page. The file itself only draws the text, so check them before " +
+      "relying on them.",
     importPdfRuled:
-      "A PDF draws lines; it does not declare cells. Lucid rebuilds a table only where the grid is DRAWN in the " +
-      "file: the columns are the vertical strokes, the rows the horizontal ones, and a merged cell is one with no " +
-      "stroke closing its side. Where no grid is drawn there is no table to recover here — alignment alone is not " +
-      "a cell, and guessing would change what the text says.",
+      "Lucid rebuilds a table only where the file draws its grid: vertical lines mark the columns, horizontal " +
+      "lines mark the rows, and a missing line marks a merged cell. Where no grid is drawn, no table is rebuilt, " +
+      "because guessing cells from alignment could change what the text says.",
     structureMissing: { heading: "headings", list: "lists" } as Record<string, string>,
     structureMissingJoin: " or ",
     structureCaveat: (missing: string, count: number) =>
       `This document has no ${missing}, so ${count} ` +
-      `${plural(count, "criterion", "criteria")} could not be assessed. ` +
-      `${plural(count, "To assess it", "To assess them")}, upload a .docx that contains those structures, or ` +
-      "use # for headings and - for list items.",
+      `${plural(count, "criterion", "criteria")} could not be checked. ` +
+      `${plural(count, "To check it", "To check them")}, open a .docx that has ${missing}, or start headings ` +
+      "with # and list items with -.",
     scoreCaveat:
-      "The score summarizes the criteria that were assessed, but it does not replace a full review or guarantee " +
+      "The score summarises the criteria that were checked. It does not replace a full review or guarantee that " +
       "the text is clear.",
     readingLabel: "Reading metrics",
     readingCaveat:
-      "Readability and cohesion indicators help with the review, but do not on their own decide whether the " +
+      "Readability and cohesion indicators support the review, but on their own they do not show whether the " +
       "text is clear.",
     balanceWeightNoun: "in weight",
     balanceLabel: "Before and after",
@@ -256,18 +260,20 @@ export const COPY_EN: UiCopy = {
     },
     balanceTransformed: (before, after) => `${before} became ${after}`,
     balanceIndirectNote:
-      "Changed outside the passage you edited: heading criteria compare one block with another, so touching one changes the verdict on its neighbour.",
+      "Some counts changed outside the passage you edited. Heading criteria compare neighbouring blocks, so " +
+      "editing one can change the result for the next.",
     balanceTypingNote:
-      "Passage rewritten by hand. The comparison covers the whole region: inside it there is no telling which occurrence is which.",
+      "For passages rewritten by hand, the comparison covers the whole edited region, so the occurrences inside " +
+      "it cannot be matched one to one.",
     balanceCaveat:
       "Less weight does not mean the text is approved. This comparison only shows what the criteria found before " +
-      "and after — not whether the audience understood the text.",
+      "and after, not whether readers understood the text.",
     trailLabel: "Recorded changes",
     trailWeight: (before, after, changes) =>
       `Audit weight ${before} → ${after} · ${changes} recorded ${plural(changes, "change", "changes")}`,
     trailCaveat:
-      "This list shows only the changes applied during the review. Edits made directly in Write change the " +
-      "document, but do not appear here or in the exported report.",
+      "Text you type in Write is recorded too, as “Passage rewritten by hand”: one entry for each stretch of " +
+      "typing, added when you leave the draft.",
     changeFrom: "from",
     changeTo: "to",
     changeExpand: "Show the full passage",
@@ -277,12 +283,12 @@ export const COPY_EN: UiCopy = {
     entryHide: "Hide the original text",
     entrySize: (chars) => `${chars.toLocaleString("en-US")} ${plural(chars, "character", "characters")}`,
     entryNote:
-      "The original version of the text, available for consulting only. Lucid neither restores nor applies " +
-      "changes from it.",
-    entryStartingPoint: "This text was used to compute the starting weight shown above.",
+      "The text as it was when first opened, for reference only. Lucid does not restore it or apply changes " +
+      "from it.",
+    entryStartingPoint: "The starting weight above was measured on this text.",
     entryUnknown:
-      "No original text recorded for this document: the session was saved before Lucid began keeping this copy.",
-    entryWrittenHere: "This document was written here — there is no original text to compare against.",
+      "No original text was recorded for this document: the session was saved before Lucid started keeping this copy.",
+    entryWrittenHere: "This document was written here, so there is no original text to compare against.",
     descriptor: "descriptor",
     metricWords: "Words",
     metricSentences: "Sentences",
@@ -301,30 +307,29 @@ export const COPY_EN: UiCopy = {
     bucketAll: "All",
     bucketSafe: "With a direct swap",
     bucketHuman: "For you to decide",
-    empty: "No criterion fired in this text.",
-    emptyFilterTitle: "No point matches this filter",
+    empty: "No criterion flagged anything in this text.",
+    emptyFilterTitle: "No points match these filters",
     emptyFilterBody: (found) =>
       `The document still has ${found} ${found === 1 ? "point found" : "points found"}. ` +
-      "Clear the filters to see them again.",
+      "Clear the filters to see them.",
     hideInDocument: "Hide highlights in the document",
     hideNamed: (label) => `Hide the “${label}” highlights in the document`,
     showInDocument: "Show highlights in the document",
     showNamed: (label) => `Show the “${label}” highlights in the document`,
     coverage: "Coverage of the analysis",
-    cleanCriteria: (n) => `${n} ${plural(n, "criterion", "criteria")} assessed with no point found`,
+    cleanCriteria: (n) => `${n} ${plural(n, "criterion", "criteria")} checked with no points found`,
     hiddenCriteria: (n) =>
-      `${n} ${plural(n, "criterion with highlights hidden", "criteria with highlights hidden")} — still in the audit`,
+      `${n} ${plural(n, "criterion with highlights hidden", "criteria with highlights hidden")}, still counted in the audit`,
     highlightsOff: "highlights hidden in the document",
     lexiconCaveat:
-      "The criteria spot specific patterns and help with the review, but they do not replace the judgment of " +
-      "whoever wrote the text.",
+      "The criteria look for specific patterns. They support your review but do not replace the author's judgement.",
     occurrences: (n) => `${n} ${plural(n, "point", "points")}`,
     distinct: (n) => `${n} distinct ${plural(n, "excerpt", "excerpts")}`,
     hiddenByFilter: (n) => `${n} outside the filter`,
     statePending: "Pending",
     stateSeen: "Reviewed",
     stateDismissedOne: "Dismissed",
-    stateDismissed: "Ignored",
+    stateDismissed: "Dismissed",
     searchLabel: "Search the points",
     searchPlaceholder: "Search the points…",
     moreFilters: "More filters",
@@ -333,35 +338,37 @@ export const COPY_EN: UiCopy = {
     orderBySeverity: "by severity",
     orderByDocument: "by position",
     batchLabel: "In bulk",
-    batchClear: (n) => `Clear the marks on these ${n}`,
+    batchClear: (n) => `Clear the marks on these ${n} ${plural(n, "point", "points")}`,
     batchCaveat:
-      "Marking as reviewed is one at a time on purpose: the mark only means something if someone looked. In bulk " +
-      "you can only clear.",
+      "Points are marked as reviewed one at a time, on purpose: the mark only means something if someone looked. " +
+      "In bulk, you can only clear marks.",
     clearGroupMarks: (n) => `Clear ${n} ${plural(n, "mark", "marks")}`,
     scopeOn: "Only this criterion",
     scopeOff: "All criteria",
     scopeHint: (n) =>
-      `The list and the ‹ › navigation step through only the ${n} ${plural(n, "point", "points")} of this criterion.`,
+      `The list and the ‹ › arrows go through only the ${n} ${plural(n, "point", "points")} of this criterion.`,
     markSeen: "Mark as reviewed",
-    markSeenHint: "Mark as reviewed — you assessed this point",
+    markSeenHint: "Mark as reviewed: you have looked at this point",
     markSeenNamed: (excerpt) => `Mark “${excerpt}” as reviewed`,
-    dismiss: "Ignore",
-    dismissHint: "Ignore — you will not act on this point",
-    dismissNamed: (excerpt) => `Ignore “${excerpt}”`,
+    dismiss: "Dismiss",
+    dismissHint: "Dismiss: you will not act on this point",
+    dismissNamed: (excerpt) => `Dismiss “${excerpt}”`,
     unmark: "Unmark",
-    unmarkHint: "Unmark — back to pending",
+    unmarkHint: "Unmark: back to pending",
     progress: (done, total) => `${done} of ${total} reviewed`,
     pendingCount: (n) => `${n} pending`,
     progressCaveat:
       "These marks only help you keep track of your review. They do not change the audit result or approve the text.",
     progressTitle: (done, total) => `${done} of ${total} reviewed`,
-    absenceCaveat: "No annotations is not a certificate of clarity — it is the coverage of the audit.",
-    zeroCurated: "Checks a curated list. This zero says the list did not match, not that the text is clear of it.",
-    zeroProductive: "Recognises the pattern in the text, with no list involved. This zero is a measurement.",
+    absenceCaveat:
+      "No points found means none of the patterns Lucid looks for appeared. It does not mean the text is clear.",
+    zeroCurated:
+      "Checks a curated list. Zero means nothing on the list appeared, not that the text is free of the problem.",
+    zeroProductive: "Detects the pattern directly in the text, without a list. Here, zero is a measurement.",
     zeroDeclared: (n: number) =>
       n === 0
-        ? "Depends on the vocabulary you declare. No term declared yet: this zero measured nothing."
-        : `Checks the ${n} ${n === 1 ? "term" : "terms"} you declared. Beyond them, it does not look.`,
+        ? "Depends on the vocabulary you declare. No term is declared yet, so this zero measured nothing."
+        : `Checks only the ${n} ${n === 1 ? "term" : "terms"} you declared.`,
   },
 
   badges: {
@@ -378,9 +385,9 @@ export const COPY_EN: UiCopy = {
     understandCriterion: "Understand this criterion",
     excerptMore: "Show the full excerpt",
     excerptLess: "Collapse the excerpt",
-    engineOutput: (locale) => `Engine output · ${locale}`,
+    engineOutput: (locale) => `Analysis output · ${locale}`,
     engineOutputHint:
-      "The justification comes from the analysis engine, which audits Portuguese — it is not translated along with the interface.",
+      "This justification is written in the analysis language. It is not translated with the interface.",
     navPrev: "Previous (k)",
     navNext: "Next (j)",
     navOf: "of",
@@ -388,7 +395,7 @@ export const COPY_EN: UiCopy = {
     crumbAll: "All criteria",
     crumbBackTo: (criterion) => `Back to the ${criterion} list`,
     backToList: "Back to list",
-    footerDeterministic: "Automated analysis based on the",
+    footerDeterministic: "Automated analysis · reference standard:",
 
     safeHeader: "Direct swap · curated equivalent",
 
@@ -397,22 +404,24 @@ export const COPY_EN: UiCopy = {
     declaredEquivalent: "equivalent recorded in your vocabulary",
 
     declaredApplyNote:
-      "Your organisation signs this equivalence, not Lucid's glossary and not the standard. The tool only " +
-      "applies what it recorded, one occurrence at a time, and re-audits the text afterwards.",
+      "Your organisation vouches for this equivalent, not Lucid's glossary or the standard, and Lucid has not " +
+      "checked its meaning in this sentence. The swap only happens if you click, one occurrence at a time, and " +
+      "Lucid audits the text again afterwards.",
     safeTerm: "Term",
     safePlain: "Plain",
-    safeEquivalent: "1:1 equivalent from the glossary",
+    safeEquivalent: "equivalent recorded in Lucid's glossary",
     safeApply: (term: string) => `Replace with «${term}»`,
     safeApplyNote:
-      "The swap is yours: the tool only vouches that this equivalent is 1:1 and context-free. Applied one at a time, and the engine re-audits the text afterwards.",
+      "Check that the meaning holds in this sentence before you apply it. The swap only happens if you click, " +
+      "one occurrence at a time, and Lucid audits the text again afterwards.",
     safeNote:
-      "The tool points to the equivalent; it does not alter the text. Make the swap under “Edit or paste my version” " +
-      "below — the engine will re-audit the result.",
+      "The button above changes the text only when you click it. To adjust the rest of the sentence instead, " +
+      "use “Edit or paste my version” below; Lucid audits the result again.",
 
     humanHeader: "Requires a human decision",
     humanLead:
-      "This point calls for reading the context. Review the passage and choose the change that best preserves the " +
-      "original meaning.",
+      "This point depends on the context. Read the passage and decide whether to change it, and how, without " +
+      "losing its meaning.",
     howToProceed: "How to proceed",
 
     manualOpen: "Edit or paste my version",
@@ -423,30 +432,31 @@ export const COPY_EN: UiCopy = {
     manualVerify: "Verify my version",
     manualVerifying: "Verifying…",
     manualNote:
-      "Write or paste your version. When you apply it, it is saved as a draft and checked against the same " +
-      "criteria used for the AI rewrite.",
+      "Write or paste your version, then verify it. Lucid runs the same checks it uses for AI proposals, and your " +
+      "version only enters the text if you apply it.",
 
     aiUnavailableForLocale:
-      "AI rewriting does not exist yet for this analysis language: the verifier that judges a proposal was " +
-      "written for Portuguese. Edit the passage by hand; the engine measures the document again.",
+      "AI rewriting is not available for this analysis language yet: the checks that verify a proposal were " +
+      "written for Portuguese. Edit the passage by hand, and Lucid will audit the document again.",
     manualApplyUnverified: "Apply edit",
     manualUnverifiedNote:
-      "This analysis language has no rewrite verifier: the edit is applied without the preservation proofs " +
-      "(numbers, dates, declared agent), and the engine measures the document again.",
+      "This analysis language has no rewrite checks yet. Your edit is applied without checking that numbers, " +
+      "dates and the declared agent were kept, and Lucid then audits the document again.",
     aiTitle: "AI rewrite",
-    aiTarget: (unit) => `The AI will rewrite ${unit} highlighted in the document and verify the result.`,
+    aiTarget: (unit) =>
+      `The AI will propose a new version of ${unit} (highlighted in the document), and Lucid will verify it.`,
     proposerManual: "your edit",
     aiRun: "Generate and verify",
     aiRunning: "Generating and verifying…",
     aiFailed: (message) => `Could not generate: ${message}`,
     aiFailedGeneric: "failed to generate the rewrite",
     aiNoProposal:
-      "The model did not return a rewrite different from the passage — nothing to propose. The verifier does not " +
-      "fabricate one; the decision remains yours.",
+      "The model returned nothing different from the passage, so there is no proposal. Lucid does not create " +
+      "one; the decision stays with you.",
 
-    verdictLabel: "The engine verified",
+    verdictLabel: "Lucid's verification",
     verdictProofs: (passed, total) => `${passed}/${total} proofs`,
-    verdictBlocked: "A proof failed — the tool does not vouch for this passage.",
+    verdictBlocked: "A proof failed, so Lucid cannot vouch for this version.",
     verdictClear: "No failure found in this passage.",
     verdictWords: "words",
     verdictMeasureNotApproval: "measurement, not approval",
@@ -454,178 +464,179 @@ export const COPY_EN: UiCopy = {
     signalLabel: "Signal · heuristic (not a proof)",
     evaluatedExcerpt: "Passage evaluated",
     proposerTitle: "model + prompt version",
-    applyStale: "Passage changed — generate again",
+    applyStale: "Passage changed since this check",
     applyBlocked: "Use as a draft anyway",
     apply: "Use as a draft",
     applyStaleNote:
-      "The passage was edited after this version was generated. To avoid losing your edit, generate again before applying.",
+      "The passage was edited after this version was produced. Generate or verify it again before applying, so " +
+      "your edit is not lost.",
     applyBlockedNote:
-      "If you understand the reason above and still want it, apply it as a draft — the engine re-audits.",
-    applyNote: "Review before using — applying it is your decision.",
+      "If you understand the reason above and still want this version, apply it as a draft. Lucid audits the " +
+      "text again.",
+    applyNote: "Read it before using it. Applying it is your decision.",
   },
 
   guidance: {
-    generic:
-      "The tool flagged the construction, but the fix depends on your judgement — it does not rewrite on its own.",
+    generic: "Lucid flagged this construction. How to fix it depends on your judgement.",
     passivaSintetica:
-      "The “se” hides who acts. If you want the agent to be explicit, rewrite with an overt subject (“a multa é " +
-      "aplicada pelo órgão”, or “o órgão aplica a multa”). If the “se” is reflexive, ignore this — only you know which " +
-      "case it is.",
+      "The “se” hides who performs the action. To name the agent, rewrite with an explicit subject (“a multa é " +
+      "aplicada pelo órgão” or “o órgão aplica a multa”). If the “se” is reflexive, ignore this point: only you " +
+      "can tell which case it is.",
     nominalizacaoEncadeada:
-      "Find the verb hidden inside the noun and give the action back to it (“a verificação das informações” → " +
-      "“verificar as informações”). Who performs the action — and which nominalization is worth undoing — is your call.",
+      "Find the verb hidden inside the noun and turn it back into a verb (“a verificação das informações” → " +
+      "“verificar as informações”). You decide who performs the action and which nominalizations are worth undoing.",
     siglaSemExpansao:
-      "The first time the acronym appears, write the full name followed by the acronym in parentheses — “Nome Por " +
-      "Extenso (SIGLA)”. After that, use the acronym alone. The expansion is yours; the tool does not know it.",
+      "The first time the acronym appears, write the full name followed by the acronym in parentheses: “Nome Por " +
+      "Extenso (SIGLA)”. After that, use the acronym alone. Lucid does not know what the acronym stands for, so " +
+      "the full name has to come from you.",
     redundancia:
-      "Cut the term that repeats the meaning of the other — the leaner form is in the justification above. Which of " +
-      "the two to remove is your call.",
+      "Cut the word that repeats the meaning of the other. If the justification records a leaner form, check " +
+      "that it fits this sentence. You decide which word to remove.",
     perifraseInflada:
-      "Replace the phrase with the equivalent lean form (in the justification). Just check that the government of what " +
-      "follows still holds.",
+      "Replace the phrase with a leaner form. If the justification records one, check that the rest of the " +
+      "sentence still fits with it.",
     duplaNegacao:
-      "Say directly what the double negative asserts — the direct form is in the justification. Confirm that the " +
-      "nuance you intended is not lost.",
+      "Say directly what the double negative means. If the justification records a direct form, check that it " +
+      "keeps the nuance you intended.",
     maisQuePerfeito:
-      "Prefer the compound form, which is clearer: “tinha feito” instead of “fizera”. The swap requires reconjugating " +
-      "with the auxiliary — the final sentence is yours.",
+      "Prefer the compound form, which is clearer: “tinha feito” instead of “fizera”. The change requires " +
+      "conjugating the auxiliary verb, so you write the final sentence.",
     gerundismo:
-      "Replace the chained gerund with the simple future or the present: “enviaremos” / “enviamos” instead of “vamos " +
-      "estar enviando”.",
+      "Replace the chained gerund with the simple future or the present: “enviaremos” or “enviamos” instead of " +
+      "“vamos estar enviando”.",
     adverbioMenteDenso:
-      "Cut or replace some of the -mente adverbs (the Portuguese equivalent of English -ly) — the pile-up weighs the " +
-      "reading down. Which ones to drop depends on the emphasis you want. (Discontinued criterion — see “Vague " +
-      "adverbs”.)",
+      "Cut or replace some of the -mente adverbs (the Portuguese equivalent of English -ly): piled up, they make " +
+      "the sentence heavier. Which ones to drop depends on the emphasis you want. (This criterion has been " +
+      "discontinued; see “Vague adverbs”.)",
     adverbiosVagos:
-      "Try reading the sentence without this adverb (“basicamente”, “efetivamente”, “realmente”…): if the meaning does " +
-      "not change, it was only reinforcement and can go. Keeping or cutting is your call.",
+      "Read the sentence without this adverb (“basicamente”, “efetivamente”, “realmente”…). If the meaning stays " +
+      "the same, the adverb was only emphasis and can go. You decide whether to keep it.",
     mesoclise:
-      "Rewrite without the mesoclisis — a pronoun infixed inside the verb: “será feito” or “vai fazer” instead of " +
-      "“far-se-á”. It changes the construction, so the final sentence is yours.",
+      "Rewrite without the mesoclisis (a pronoun placed inside the verb): “será feito” or “vai fazer” instead of " +
+      "“far-se-á”. This changes the construction, so you write the final sentence.",
     paragraphLength:
-      "Break the paragraph into smaller blocks, one group of ideas at a time. Where to cut depends on how the text is " +
-      "organized — your call.",
+      "Break the paragraph into smaller blocks, one group of ideas each. Where to break it depends on how the " +
+      "text is organised, so you decide.",
     proseEnumeration:
-      "Turn the items embedded in the prose into a bulleted list — each one becomes easier to find. It is a formatting " +
-      "decision, and it is yours.",
+      "Turn the items listed in the prose into a bulleted list, so each one is easier to find. This is a " +
+      "formatting decision, and it is yours.",
     saltoDeNivelTitulo:
-      "The heading hierarchy skipped a level. Demote this heading to the level right below the previous one, or add " +
-      "the missing intermediate heading — that keeps the outline and structural reading predictable.",
+      "The heading hierarchy skips a level. Move this heading to the level right below the previous one, or add " +
+      "the missing heading in between, so the outline stays easy to follow.",
     longHeading:
-      "Shorten the heading until it becomes a label the reader can use to locate the section — and if it closed like a " +
-      "sentence, drop the period and reduce it to the essential tag. The cut is yours.",
+      "Shorten the heading to a label the reader can use to find the section. If it ends like a sentence, drop " +
+      "the period and keep only the essential words. You decide what to cut.",
     vocabularioDaOrganizacao:
-      "This term is in the vocabulary your organisation declared. Whether it stays is your call: sometimes the " +
-      "technical term is required and what is missing is explaining it the first time. If the organisation " +
-      "recorded an equivalent, it shows as a direct swap; if it did not, all that fits here is the notice.",
+      "This term is in the vocabulary your organisation declared, with no equivalent recorded, so Lucid can only " +
+      "flag it. You decide whether it stays: sometimes the technical term is required, and what is missing is an " +
+      "explanation the first time it appears.",
     singleItemList:
-      "A one-item list separates nothing: add the missing items, or fold the content back into running text. The " +
-      "choice depends on the content — it is yours.",
+      "A list with one item separates nothing. Add the missing items, or fold the content back into the running " +
+      "text. The choice depends on the content, so it is yours.",
     jargon:
-      "There is a simpler equivalent in the glossary, but the swap depends on what follows. Confirm the context is a " +
-      "noun phrase (not a clause) before substituting.",
+      "Lucid has no safe replacement to suggest for this term here; the justification says why. If you replace " +
+      "it, check that the new word keeps the meaning and fits the rest of the sentence. If the term has to stay, " +
+      "explain it the first time it appears.",
 
     nominalizationBaseVerb: (verb) => `Base verb: “${verb}”.`,
     nominalizationBody:
-      "Rewrite with the verb directly (e.g. “fazer a análise” → “analisar”). An automatic swap would require " +
-      "reconjugating the verb or adjusting the complement — steps only you should decide.",
+      "Rewrite using the verb directly (e.g. “fazer a análise” → “analisar”). This usually means conjugating the " +
+      "verb or adjusting what follows, so you write the final sentence.",
 
-    readerNamed: (noun) => `The text refers to “${noun}” in the third person. To close the distance, `,
-    readerUnnamed: "The text refers to the reader in the third person. To close the distance, ",
-    readerBodyStrong: "speak to the reader",
+    readerNamed: (noun) => `The text refers to “${noun}” in the third person. To close that distance, `,
+    readerUnnamed: "The text refers to the reader in the third person. To close that distance, ",
+    readerBodyStrong: "address the reader directly",
     readerBody:
-      ": switch to “você deve…” or use the imperative (“apresente…”, “compareça…”). The tool does not make the swap " +
-      "because changing person changes register — the choice is yours.",
+      ": use “você deve…” or the imperative (“apresente…”, “compareça…”). Changing the person also changes the " +
+      "tone of the text, so the choice is yours.",
 
     subordinationCount: (clauses) => `${clauses} subordinate clauses`,
-    subordinationTrapped: " trapped in a single sentence. ",
+    subordinationTrapped: " in a single sentence. ",
     subordinationBody:
-      "Split into shorter sentences, one idea at a time — the start of each subordinate clause is usually the natural " +
-      "cut. The tool does not rewrite: deciding what becomes its own sentence, and reconjugating, is your call.",
+      "Split it into shorter sentences, one idea each. A subordinate clause often starts where a cut could go. " +
+      "You decide what becomes a separate sentence and how to adjust the verbs.",
 
-    longSentenceLead: "The tool does not rewrite and does not ask you to split — it ",
+    longSentenceLead: "Lucid ",
     longSentenceLeadStrong: "counts the words",
     longSentenceWithCuts: " in the sentence and ",
-    longSentenceWithCutsStrong: "shows below where it could come apart",
-    longSentenceWithCutsTail: ", should you decide there is more than one idea here.",
-    longSentenceNoCuts: " in the sentence. Whether there is more than one idea here is yours to read.",
+    longSentenceWithCutsStrong: "shows below where it could be split",
+    longSentenceWithCutsTail: ", in case you decide it carries more than one idea.",
+    longSentenceNoCuts: " in the sentence. Read it and decide whether it carries more than one idea.",
     statWords: "words",
     statTrigger: "trigger",
     statTriggerNote: "Lucid parameter",
     statTriggerNoteProvisional: "provisional",
     standardSaysLabel: "The standard asks for",
     standardSays: (standard) =>
-      "concise sentences, one idea per sentence and varied length across the document — without stating a " +
+      "concise sentences, one idea per sentence and varied length across the document, without setting a " +
       `number (${standard}, 5.3.4).`,
     parameterSaysLabel: "Lucid inspects",
     parameterSays: (threshold) =>
-      `sentences above ${threshold} words. That number is this product's choice, adjustable in the editorial ` +
-      "profile, and crossing it does not mean the sentence is inadequate.",
+      `sentences above ${threshold} words. This number is Lucid's choice, and you can change it in the ` +
+      "editorial profile. A sentence above it is not necessarily inadequate.",
     parameterSaysProvisional: (threshold) =>
-      `sentences above ${threshold} words. That number is provisional for this analysis language — not ` +
-      "validated — and crossing it does not mean the sentence is inadequate.",
+      `sentences above ${threshold} words. This number is provisional for this analysis language and has not ` +
+      "been validated. A sentence above it is not necessarily inadequate.",
     coOccurringLabel: "Other signals in this sentence",
-    coOccurringNote: "Each carries its own criterion and its own justification. None of this adds up to a score.",
+    coOccurringNote: "Each one has its own criterion and justification. They do not add up to a score.",
     coOccurringNone:
-      "The engine found no other signal inside this sentence. That does not certify it is clear: it is only " +
-      "the absence of the signals the engine knows how to look for.",
+      "Lucid found no other signal in this sentence. That does not mean it is clear, only that none of the " +
+      "signals Lucid looks for appeared.",
     cutsAvailable: (n) => (n === 1 ? "1 possible boundary" : `${n} possible boundaries`),
     cutsInformationNotAction: "information, not action",
     cutLabel: (i, boundary) => `boundary ${i} · ${boundary}`,
-    cutsNote: "The tool points at the boundary, does not split, and does not claim splitting is needed.",
+    cutsNote:
+      "Lucid shows where the sentence could be split. It does not split it, and it does not claim splitting is needed.",
     boundarySemicolon: "semicolon",
     boundaryDash: "em dash",
     boundaryCommaConjunction: (marker) => `comma before “${marker}”`,
 
     passiveWithAgent:
-      "The agent is in the text, so the information exists — reorder it into “who does → action → what” and " +
-      "reconjugate the verb. The tool does not assemble the sentence: rewrite it below or ask the AI, and the engine " +
-      "will verify the result.",
-    passiveNoAgentLead: "The text does not say who performed the action.",
-    passiveNoAgentBody:
-      " Only you have that information — the tool neither invents it nor assembles the sentence for you. Answer below " +
-      "and your answer becomes a ",
-    passiveNoAgentStrong: "requirement",
-    passiveNoAgentRequirement:
-      ": it enters the briefing for the AI rewrite, and the engine demands that the final version (yours or the AI's) " +
-      "name that agent.",
-    scaffoldLead: "The tool identifies the roles in the text so you can assemble the active voice. It is ",
+      "The text names who performs the action, so you can reorder the sentence as “who → action → what” and " +
+      "adjust the verb. Rewrite it below or ask the AI, and Lucid will verify the result.",
+    passiveNoAgentLead: "If the sentence doesn't say who performed the action, rewrite it to name them.",
+    passiveNoAgentBody: " To have the AI write that version, enter the agent under ",
+    passiveNoAgentRequirement: ", just below: without it, the AI would have to invent who acted.",
+    scaffoldLead: "Lucid identifies the roles in the sentence to help you build the active voice. This is ",
     scaffoldLeadStrong: "scaffolding, not the sentence",
-    scaffoldLeadTail: " — check every field; the final version is yours.",
+    scaffoldLeadTail: ": check each field. The final version is yours.",
     scaffoldAgent: "Agent",
     scaffoldAgentHint: "becomes the subject",
     scaffoldAction: "Action",
     scaffoldActionHint: "becomes the verb",
     scaffoldPickVerb: "→ choose the verb",
     scaffoldObject: "Object",
-    scaffoldObjectHint: "what underwent the action",
+    scaffoldObjectHint: "what received the action",
     scaffoldObjectPlaceholder: "you fill this in",
     scaffoldNote:
-      "Structure identified · check it. The tool does not flip the sentence: reordering and reconjugating is writing — " +
-      "and the one who writes is you (or the AI, which the engine then verifies).",
+      "Structure identified: check it. Lucid does not rearrange the sentence. Rewrite it yourself, or ask the AI " +
+      "and Lucid will verify the proposal.",
     agentQuestion: "Who performs this action?",
+    agentQuestionHint:
+      "The AI will use your answer as the subject of the new version. If the sentence already says who acted, leave it blank.",
     agentPlaceholder: "e.g. a comissão",
-    agentKeepImpersonal: "The agent should not be named (keep it impersonal)",
+    agentKeepImpersonal: "Do not name the agent (keep it impersonal)",
     agentRecordedKeep:
-      "Recorded: keeping the construction impersonal is your decision. The briefing instructs the AI not to invent an " +
-      "agent, and the verification does not demand the active voice.",
+      "The sentence stays impersonal: the AI will not invent an agent, and the verification does not require " +
+      "the active voice.",
     agentRecorded: (agent) =>
-      `Recorded as a requirement: the final version must name «${agent}». The tool does not assemble the sentence — it verifies whoever did.`,
+      `The AI will use «${agent}» as the one who performs the action, and Lucid checks that the new version, ` +
+      "the AI's or yours, names it.",
   },
 
   vocabulary: {
     label: "The organisation's vocabulary",
     chip: "declared by you",
     lead:
-      "Lucid's glossary is curated and small on purpose: only what has been verified one by one gets in. " +
-      "It does not know your own office's words. You declare these — and they are looked for in every " +
-      "document you audit with this vocabulary loaded.",
+      "Lucid's glossary is small on purpose: it only includes entries checked one by one, and it does not know " +
+      "your organisation's own terms. Declare them here, and Lucid looks for them in every document you audit " +
+      "with this vocabulary loaded.",
     fromSelection: "From the passage selected in the document:",
     useSelection: "Use this passage as the term",
     termLabel: "Term",
     termPlaceholder: "e.g. termo de fomento",
     plainLabel: "Plain equivalent",
-    plainHint: "Leave blank if there is no safe swap. With no equivalent, the term is only signalled.",
+    plainHint: "Leave blank if there is no safe swap. Without an equivalent, the term is only flagged.",
     plainPlaceholder: "e.g. acordo de repasse",
     reasonLabel: "Reason",
     reasonPlaceholder: "e.g. nobody outside the administration uses this phrase",
@@ -633,51 +644,51 @@ export const COPY_EN: UiCopy = {
     duplicate: "This term is already declared.",
     declaredLabel: (n: number) => `${n} ${n === 1 ? "term declared" : "terms declared"}`,
     occurrences: (n: number) => `· ${n} ${n === 1 ? "occurrence" : "occurrences"}`,
-    signalOnly: "No equivalent recorded — it only signals, it proposes no swap.",
+    signalOnly: "No equivalent recorded: the term is only flagged.",
     swapsTo: (plain: string) => `Recorded equivalent: “${plain}”.`,
     remove: (term: string) => `Remove “${term}” from the vocabulary`,
     authorityCaveat:
-      "Your organisation signs these terms, not the standard. They never cite a clause of ISO 24495-1 and " +
-      "they appear apart from the curated glossary in the report. The vocabulary travels in the run's stamp: " +
-      "no result can hide which lexicon measured it.",
+      "These terms come from your organisation, not from the standard: they never cite a clause of ISO 24495-1, " +
+      "and the report lists them apart from Lucid's glossary. The vocabulary is part of each run's stamp, so " +
+      "every result shows which list was used.",
   },
   briefing: {
     label: "Required words and expressions",
     chip: "Lucid looks for these",
     lead:
-      "Add words or expressions that have to be found exactly as you write them. Lucid shows where each " +
-      "one appears — or tells you when it finds none.",
+      "Add words or expressions that must appear exactly as you write them. Lucid shows where each one appears, " +
+      "or tells you it found none.",
     audienceLabel: "Who was this text written for?",
-    audienceHint: "Whoever actually reads it, not whoever signs it.",
+    audienceHint: "The person who will actually read it, not the one who signs it.",
     audiencePlaceholder: "e.g. a citizen with no legal training applying for the benefit for the first time",
     purposeLabel: "What does that person need to do?",
     purposeHint: "The concrete action the text has to make possible.",
     purposePlaceholder: "e.g. find out whether they qualify and gather the documents in time",
     priorLabel: "What do they already know about it?",
-    priorHint: "What can be assumed — and therefore what has to be explained.",
+    priorHint: "What can be assumed, and therefore what needs explaining.",
     priorPlaceholder: "e.g. knows the benefit exists; does not know the vocabulary of the process",
     mustFindLabel: "Which word or expression must appear?",
-    mustFindHint: "Add one expression at a time. The search ignores upper and lower case, but not accents.",
+    mustFindHint: "Add one expression at a time. The search ignores capitalisation but not accents.",
     mustFindPlaceholder: "e.g. deadline to appeal",
     addExpression: "Add expression",
     presenceLabel: "Occurrences in the document",
     occurrences: (n) => `${n} ${plural(n, "occurrence", "occurrences")}`,
     notFound: "Not found",
     showOccurrences: (expression, n) =>
-      `Show “${expression}” in the document — ${n} ${plural(n, "occurrence", "occurrences")}`,
+      `Show “${expression}” in the document (${n} ${plural(n, "occurrence", "occurrences")})`,
     occurrencePosition: (index, total) => `${index} of ${total}`,
     occurrenceNav: (expression) => `Occurrences of “${expression}”`,
     prevOccurrence: (expression) => `Previous occurrence of “${expression}”`,
     nextOccurrence: (expression) => `Next occurrence of “${expression}”`,
     removeNamed: (expression) => `Remove “${expression}”`,
     literalCaveat:
-      "Finding it does not guarantee the reader will understand; not finding it may only mean the text says " +
-      "it another way. This list is yours and does not change the score.",
+      "Finding an expression does not mean the reader will understand it, and not finding it may only mean the " +
+      "text says it another way. This list is yours and does not change the score.",
   },
 
   reportRecord: {
     menuItem: "Report information",
-    menuNote: "Optional — goes into the exported report, not into the analysis.",
+    menuNote: "Optional. Goes into the exported report, not into the analysis.",
     title: "Report information",
     optionalTag: "Optional",
     lead:
@@ -685,8 +696,8 @@ export const COPY_EN: UiCopy = {
       "already know about the subject.",
     caveat:
       "Lucid keeps these answers in the exported report but does not check them: they are a record, not a measurement.",
-    isoNote: "Based on ABNT NBR ISO 24495-1",
-    isoTitle: "These questions help apply the section 5.1 guidance on relevance to the reader.",
+    isoNote: "Based on ABNT NBR ISO 24495-1, section 5.1",
+    isoTitle: "These questions help apply the standard's guidance on relevance to the reader.",
     done: "Close",
   },
 
@@ -697,11 +708,11 @@ export const COPY_EN: UiCopy = {
     },
     review: {
       label: "Review",
-      purpose: "Where you walk through the points and decide what to do with each one.",
+      purpose: "Go through the points and decide what to do with each one.",
     },
     changes: {
       label: "Changes",
-      purpose: "The auditable history of what changed in the text, and the effect of each change.",
+      purpose: "The recorded changes to the text, and the effect of each one on the criteria.",
     },
     metrics: {
       label: "Metrics",
@@ -709,7 +720,7 @@ export const COPY_EN: UiCopy = {
     },
     probe: {
       label: "Comprehension",
-      purpose: "Optional AI test. It never approves — it only shows where a reader gets stuck.",
+      purpose: "Optional AI test. It never approves a text; it only shows where a reader may get stuck.",
     },
   },
 
@@ -744,8 +755,8 @@ export const COPY_EN: UiCopy = {
     tabRoute: "Guided path",
     tabBrowse: "All points",
     idleLead: (found, steps) =>
-      `The path groups the ${found} points into ${steps} ${plural(steps, "step", "steps")}: ` +
-      "one criterion at a time, heaviest first.",
+      `The path groups the ${found} ${plural(found, "point", "points")} into ${steps} ` +
+      `${plural(steps, "step", "steps")}: one criterion at a time, most serious first.`,
     stepOf: (index, total) => `Step ${index} of ${total}`,
     begin: "Start the review",
     resume: "Continue the review",
@@ -755,8 +766,8 @@ export const COPY_EN: UiCopy = {
     resumeStep: "Pick up where you left off",
     stepPending: (n) =>
       n === 1
-        ? "1 point left in this step. Open it and mark it as reviewed or dismissed."
-        : `${n} points left in this step. Open them one by one and mark each as reviewed or dismissed.`,
+        ? "1 point pending in this step. Open it and mark it as reviewed or dismissed."
+        : `${n} points pending in this step. Open each one and mark it as reviewed or dismissed.`,
     stepProgress: (reviewed, count) => `${reviewed} of ${count} ${plural(count, "point", "points")} in this step`,
     routeProgress: (reviewed, found) => `${reviewed} of ${found} ${plural(found, "point", "points")} on the path`,
     nextUp: (index, label) => `Next: step ${index} · ${label}`,
@@ -771,9 +782,9 @@ export const COPY_EN: UiCopy = {
     allDoneCount: (reviewed, steps) =>
       `${reviewed} ${plural(reviewed, "point reviewed", "points reviewed")} across ${steps} ${plural(steps, "step", "steps")}.`,
     allDoneBody:
-      "Walking the path is not approval. A reviewed point is one you looked at; a resolved point is one that " +
-      "left the text. The audit stays the same until the text changes.",
-    allDoneNext: "What you walked through is kept in Export › Audit report.",
+      "Finishing the path is not approval. A reviewed point is one you looked at; a resolved point is one that " +
+      "left the text. The audit only changes when the text changes.",
+    allDoneNext: "Your review is included in the exported audit (Export › Audit).",
     leave: "Leave the path",
     leaveDone: "Back to the overview",
     backToReview: "Go through the points again",
@@ -782,13 +793,13 @@ export const COPY_EN: UiCopy = {
     stepPartial: (reviewed, count) => `${reviewed} of ${count} reviewed`,
     startTag: "start here",
     resumeTag: "continue here",
-    stepAction: (label, n) => `Walk “${label}” (${n} ${plural(n, "point", "points")})`,
+    stepAction: (label, n) => `Go through “${label}” (${n} ${plural(n, "point", "points")})`,
     states: { "not-started": "not started", "in-progress": "in progress", done: "done" },
     orderCaveat:
-      "This is only a suggested order. You can walk the steps in any sequence without changing the audit result.",
+      "This order is only a suggestion. You can take the steps in any order without changing the audit result.",
     swapShortcutLabel: "Shortcut",
     swapShortcut: (n) => `See the ${n} ${plural(n, "direct swap", "direct swaps")}`,
-    browseLead: "Free lookup: filter and open any point. Nothing here changes the path.",
+    browseLead: "Browse freely: filter and open any point. Nothing here changes the path.",
     browseReturn: (index, label) => `Back to the path · step ${index}: ${label}`,
   },
 
@@ -809,28 +820,28 @@ export const COPY_EN: UiCopy = {
   decision: {
     label: "Decision on record",
     kinds: { seen: "Reviewed", dismissed: "Dismissed" },
-    fieldLabel: "Why you kept this point",
-    placeholder: "Why keep this point? (optional)",
+    fieldLabel: "Why this passage stays as it is",
+    placeholder: "Why leave this passage as it is? (optional)",
     caveat:
-      "Your record, not a Lucid measurement: it does not move the score, the audit result or any conformance " +
-      "state. It goes into the report as a human decision.",
+      "This is your record, not a Lucid measurement: it does not change the score or the audit result. It goes " +
+      "into the report as a human decision.",
     reportPointer: "It shows up in Export › Audit, under “Points examined and kept”.",
   },
 
   changes: {
     emptyTitle: "No changes yet",
     emptyBody:
-      "Once you apply a glossary swap, paste a rewrite or edit the text, every change shows up here with the " +
-      "before, the after and its effect on the criteria.",
+      "When you apply a direct swap or a rewrite, or edit the text, each change shows up here with the before, " +
+      "the after and its effect on the criteria.",
     listLabel: "Applied changes",
     effectLabel: "Effect on criteria",
     detailsShow: "See the details of this change",
     detailsHide: "Hide the details of this change",
     undoLast: "Undo this change",
     weightMeaning:
-      "Weight adds up the severity of the points found (error 3, warning 1, note 0.3) and exists to compare the " +
-      "text with itself, before and after a change. A smaller weight does not mean the text is approved: it only " +
-      "shows what the automatic criteria found — not whether the audience understood the text.",
+      "Weight adds up the severity of the points found (Priority 3, Warning 1, Note 0.3). It is used to compare " +
+      "the text with itself, before and after a change. A smaller weight does not mean the text is approved: it " +
+      "only reflects what the automatic criteria found, not whether readers understood the text.",
     stillOpen: (n) => `${n} ${plural(n, "point is still in the text", "points are still in the text")}`,
     none: "No criterion changed its count.",
   },
@@ -842,31 +853,28 @@ export const COPY_EN: UiCopy = {
     detach: "Detach",
     dialogTitle: "Save a starting point",
     dialogLead:
-      "Keeps this audit so you can compare it with a later version of the same document, even after the text has " +
-      "been rewritten outside Lucid.",
+      "Saves this audit so you can compare it with a later version of the same document, even if the text is " +
+      "rewritten outside Lucid.",
     titleLabel: "Document name",
-    titleHint:
-      "Required. It is the only identity the file carries — Lucid does not keep the name of the file you opened.",
-    titlePlaceholder: "e.g. Notice 04/2026 — version sent to legal",
+    titleHint: "Required. It is the only name the file carries: Lucid does not keep the name of the file you opened.",
+    titlePlaceholder: "e.g. Notice 04/2026, version sent to legal",
     fileNotice:
-      "This file holds the whole document — the text, the structure, this session's audit and the reasons you " +
-      "recorded. It stays on your computer and is sent nowhere, but treat it the way you would treat the document " +
-      "itself when sharing it.",
+      "This file contains the whole document: the text, its structure, this audit and the reasons you recorded. " +
+      "It stays on your computer and is not sent anywhere, but share it with the same care as the document itself.",
     save: "Save file",
     savedAt: (when) => `saved on ${when}`,
     emptyLead:
-      "Attach a starting point saved from an earlier audit to compare this version against it — including when the " +
-      "text was rewritten outside Lucid.",
+      "Attach a starting point saved from an earlier audit to compare this version with it, even if the text was " +
+      "rewritten outside Lucid.",
     sameRuler:
-      "The ruler is the same on both sides: the starting point's text was re-analysed with the engine, profile and " +
-      "data in force now. No number below compares measurements made with different rulers.",
-    historical: (count) =>
-      `${count} ${plural(count, "point in the audit of the time", "points in the audit of the time")}`,
-    rebased: (count) => `${count} ${plural(count, "point now", "points now")}, under the current ruler`,
+      "Both versions are measured with the same ruler: the starting point's text was analysed again with the " +
+      "Lucid version, profile and data in use now.",
+    historical: (count) => `${count} ${plural(count, "point", "points")} in the saved audit`,
+    rebased: (count) => `${count} ${plural(count, "point now", "points now")}, with the current ruler`,
     engineDrift: (delta) =>
       `${Math.abs(delta)} ${plural(Math.abs(delta), "point of that difference comes", "points of that difference come")} ` +
-      "from the ruler changing, not the text.",
-    divergenceLabel: "What changed in the ruler since then",
+      "from changes in the ruler, not in the text.",
+    divergenceLabel: "What has changed in the ruler since then",
     divergenceFields: {
       lucidVersion: "Lucid version",
       localeId: "language",
@@ -876,40 +884,42 @@ export const COPY_EN: UiCopy = {
     },
     adoptProfile: "Adopt the starting point's profile",
     adoptProfileHint:
-      "The comparison uses the profile in force now. Adopting the saved one re-runs the whole audit with the " +
-      "thresholds that applied back then.",
-    stillThereLabel: "What you raised and is still there",
+      "The comparison uses the current profile. Adopting the saved one runs the whole audit again with the " +
+      "limits that applied back then.",
+    stillThereLabel: "Raised before and still there",
     stillThereLead:
-      "Excerpts the earlier audit raised that the current version raises again, word for word. This list claims " +
-      "nothing about anything having been resolved: it says only what survived.",
+      "Passages the earlier audit raised that the current version raises again, word for word. This list does " +
+      "not say that anything was resolved: it only shows what remained.",
     stillThereCount: (n) => `${n} ${plural(n, "point remains", "points remain")}`,
-    stillThereNone: "None of the excerpts raised before shows up again with the same words.",
+    stillThereNone: "None of the passages raised before appears again with the same words.",
     occurrences: (n) => `${n}×`,
     alreadyDecided: { seen: "already examined and kept", dismissed: "already dismissed" },
     noReason: "no reason on record",
     refusal: {
-      unreadable: "This file is not a Lucid starting point, or it was changed after being saved.",
-      schema: "This starting point was saved in a format version this one cannot read.",
+      unreadable:
+        "This file is not a Lucid starting point, or it was changed after it was saved. Attach the file exactly " +
+        "as Lucid saved it.",
+      schema: "This starting point was saved in a format this version of Lucid cannot read.",
       locale:
-        "This starting point was audited in another language. That is not a different ruler, it is a different " +
-        "subject: the pt-BR engine has nothing to say about it.",
+        "This starting point was audited in a different analysis language, so it cannot be compared with this " +
+        "audit. Attach one saved in the same analysis language.",
     },
     caveat:
-      "Between two versions edited outside Lucid it is not possible to say which edit produced which change. The " +
-      "numbers are counts from the same detector over two texts, and a smaller weight is not approval.",
+      "When both versions were edited outside Lucid, it is not possible to tell which edit caused which change. " +
+      "The numbers are counts from the same detectors on two texts, and a smaller weight is not approval.",
   },
 
   metricsView: {
     notAScore:
-      "These measures describe the surface of the text. They support reading the criteria and never replace the " +
-      "judgement of whoever wrote it, nor do they signal approval.",
+      "These measures describe the surface of the text. They help you read the criteria, but they do not replace " +
+      "the author's judgement and they are not an approval.",
     tablesLabel: "Outside the averages",
     tablesApart: (tables, cells, words) =>
       `${tables} ${tables === 1 ? "table" : "tables"}, ${cells} ${cells === 1 ? "cell" : "cells"} and ` +
-      `${words} ${words === 1 ? "word" : "words"} sit outside the figures above.`,
+      `${words} ${words === 1 ? "word" : "words"} are left out of the figures above.`,
     tablesAudited:
-      "A cell is not a sentence: counting it as prose would shorten words-per-sentence and move readability " +
-      "without anyone having written worse. The text inside cells is still audited against every criterion.",
+      "A table cell is not a sentence: counting it as prose would lower words per sentence and shift readability " +
+      "without the writing changing. The text in cells is still checked against every criterion.",
     explainShow: "What this measure means",
     explainHide: "Hide explanation",
     meaningLabel: "Measures",
@@ -924,39 +934,44 @@ export const COPY_EN: UiCopy = {
       sentences: {
         meaning: "How many sentences the segmenter found.",
         direction: "Neither higher nor lower is better.",
-        limit: "Abbreviations and lists can shift the count in heavily fragmented texts.",
+        limit: "Abbreviations and lists can change the count in very fragmented texts.",
       },
       wordsPerSentence: {
         meaning: "Average words per sentence.",
-        direction: "A high average often goes with sentences that pile up ideas — a signal, not a defect.",
-        limit: "The average hides variation: very short and very long sentences can average out well.",
+        direction:
+          "A high average often comes with sentences that pack in several ideas. It is a signal, not a defect.",
+        limit: "The average hides variation: very short and very long sentences can average out to a good number.",
       },
       readability: {
         meaning: "Flesch index adapted to Portuguese by Martins et al. (1996).",
         direction: "A higher value means a surface that is easier to decode.",
-        limit: "A mechanical formula over syllables and words: it reads no meaning, order or structure.",
+        limit: "A mechanical formula based on syllables and words: it does not consider meaning, order or structure.",
       },
       referentialCohesion: {
-        meaning: "How much neighbouring sentences repeat the same nouns.",
-        direction: "Descriptive: too much repetition tires, too little makes the reader guess the referent.",
+        meaning: "How often neighbouring sentences repeat the same nouns.",
+        direction:
+          "Descriptive: too much repetition is tiring; too little makes the reader guess what is being referred to.",
         limit: "It compares words, not meanings. Synonyms and pronouns do not count.",
       },
       adjacentGap: {
         meaning: "Share of neighbouring sentences with no word in common.",
-        direction: "Descriptive: a high value points to jumps between sentences, which may or may not be right.",
+        direction: "Descriptive: a high value points to jumps between sentences, which may or may not be intended.",
         limit: "It cannot tell a deliberate jump from an accidental one.",
       },
       connectives: {
         meaning: "Connectives per 100 words.",
-        direction: "Descriptive: both extremes get in the way, and the right number depends on the genre.",
-        limit: "Counted from a closed list; it does not judge whether the connective is the right one.",
+        direction:
+          "Descriptive: too many or too few can get in the way, and the right amount depends on the type of text.",
+        limit: "Counted from a fixed list; it does not judge whether each connective is the right one.",
       },
     },
   },
 
   presets: {
     label: "What the text is for",
-    lead: "The thresholds do not come from the standard — ABNT fixes no numbers. Choosing a purpose swaps them for a declared set, and the score holds only inside it.",
+    lead:
+      "These limits are Lucid's, not the standard's: ABNT NBR ISO 24495-1 sets no numbers. Choosing a purpose " +
+      "switches to another declared set of limits, and scores are only comparable within the same set.",
     current: (name) => `In use: ${name}`,
     adjustedOn: (name, n) => `${name}, with ${n} of your own ${n === 1 ? "adjustment" : "adjustments"}`,
     stamp: (name, version, hash) => `${name} v${version} · ${hash}`,
@@ -967,33 +982,33 @@ export const COPY_EN: UiCopy = {
       digital: "Service page and web content",
     },
     purposes: {
-      base: "No declared purpose. Lucid's reference thresholds, the same for any text.",
+      base: "No declared purpose. Lucid's reference limits, the same for any text.",
       normativo:
-        "Law, decree, tender, contract. Accepts longer sentences and paragraphs, because the legal structure imposes them — and still calls out jargon, passives and nominalisation.",
+        "Laws, decrees, tenders and contracts. Accepts longer sentences and paragraphs, because legal structure requires them, and still flags jargon, passive voice and nominalization.",
       publico:
-        "Written for someone outside the field. Short sentence, short paragraph, little subordination; the strictest profile of the set.",
+        "Written for people outside the field. Short sentences, short paragraphs, little subordination: the strictest profile of the set.",
       digital:
-        "Read on a screen, in jumps. Asks for short paragraphs and short headings, because people scan before they read.",
+        "Read on a screen, skipping from part to part. Asks for short paragraphs and short headings, because people scan before they read.",
     },
     limits: {
-      base: "Comparable with any other default score.",
+      base: "Comparable with any other score that uses the default.",
       normativo:
-        "A score from this profile compares neither with a default one nor with the others: the same text has fewer long sentences here because the limit is different.",
+        "Scores from this profile are not comparable with the default or with the other profiles: the same text shows fewer long sentences here because the limit is different.",
       publico:
-        "Applied to legal text, this profile flags almost every sentence. That is neither the text's fault nor the profile's — it is the wrong profile for that document.",
+        "Applied to legal text, this profile flags almost every sentence. That is not a flaw in the text or in the profile: it is the wrong profile for that document.",
       digital:
-        "Applied to text with no headings or lists, four criteria have nothing to judge and the score stays silent about them.",
+        "Applied to text without headings or lists, four criteria have nothing to check, and the score says nothing about them.",
     },
     changes: (n) => `${n} ${n === 1 ? "difference" : "differences"} from the default`,
     noChanges: "This is the reference configuration.",
     caveat:
-      "Changing the purpose changes what is measured, not the text. Two scores only compare with the same profile and the same hash.",
+      "Changing the purpose changes what is measured, not the text. Two scores are only comparable if they use the same profile and the same hash.",
   },
 
   profile: {
     label: "Analysis limits",
     defaults: "No limits changed.",
-    adjustments: (n) => `${n} ${plural(n, "limit", "limits")} you changed.`,
+    adjustments: (n) => `You changed ${n} ${plural(n, "limit", "limits")}.`,
     chip: "Changes what gets flagged",
     lead:
       "Adjust the limits of criteria such as sentence and paragraph length. They apply to this analysis and " +
@@ -1003,8 +1018,8 @@ export const COPY_EN: UiCopy = {
     thresholdsLabel: "Limits",
     policyLabel: "Active criteria",
     policyNote:
-      "Criteria you turn off are not checked and do not appear in the results. Every one is recorded in the " +
-      "report and can be turned back on.",
+      "Criteria you turn off are not checked and do not appear in the results. The report lists them, and you " +
+      "can turn them back on at any time.",
     deviationOff: (label) => `${label}: off (default: on)`,
     deviationOn: (label) => `${label}: on (default: off)`,
     deviationValue: (what, value, fallback) => `${what} ${value} (default: ${fallback})`,
@@ -1012,19 +1027,19 @@ export const COPY_EN: UiCopy = {
     increase: (label) => `Increase ${label}`,
     provisionalTag: "provisional",
     provisionalNote:
-      "Thresholds marked provisional have not been validated for this analysis language. Hover the mark to see " +
-      "where each number came from.",
+      "Limits marked provisional have not been validated for this analysis language. Hover over the mark to see " +
+      "where each number comes from.",
     knobSentenceWarn: "Inspect sentences above",
-    knobParagraph: "Long paragraph — above (sentences)",
-    knobHeading: "Long heading — above (words)",
-    knobSubordination: "Dense subordination — from (clauses)",
-    knobChainedNominalization: "Chained nominalization — from",
-    knobProseEnumeration: "Enumeration in prose — from (items)",
+    knobParagraph: "Long paragraph: sentences above",
+    knobHeading: "Long heading: words above",
+    knobSubordination: "Dense subordination: minimum clauses",
+    knobChainedNominalization: "Chained nominalization: minimum per sentence",
+    knobProseEnumeration: "Enumeration in prose: minimum items",
   },
 
   send: {
-    always: "On continuing, the document will be sent to an external AI service.",
-    found: (named: string) => `We found ${named} in the document.`,
+    always: "If you continue, the document will be sent to an external AI service.",
+    found: (named: string) => `Lucid found ${named} in the document.`,
     limit: "Review the content: other personal data may not be detected.",
     kinds: {
       cpf: (n: number) => `${n} ${n === 1 ? "CPF" : "CPFs"}`,
@@ -1038,27 +1053,28 @@ export const COPY_EN: UiCopy = {
     title: "Comprehension test",
     lead: "Check whether the answer the reader is after is really in the passage.",
     selectPrompt:
-      "Select a passage in the document. The probe reads only the excerpt you choose — not the whole document.",
+      "Select a passage in the document. The probe reads only the passage you choose, not the whole document.",
     excerptLabel: "Excerpt that will be sent",
     clearExcerpt: "clear",
     onlyThisExcerpt: "The probe answers only from what is in this excerpt.",
     excerptTooLong: (chars, max) =>
-      `Excerpt with ${chars.toLocaleString("en-US")} characters — above the ${max.toLocaleString("en-US")} limit. Select a shorter passage.`,
+      `This excerpt has ${chars.toLocaleString("en-US")} characters, above the ${max.toLocaleString("en-US")} limit. Select a shorter passage.`,
     useBriefingPurpose: "Use what you defined as the reader's purpose:",
     questionLabel: "What does the reader need to find in the text?",
     questionPlaceholder: "e.g. When does the deadline start?",
     run: "Run comprehension test",
     httpFailure: (status) => `failed (HTTP ${status})`,
     running: "Testing…",
-    staleWarning: "The text changed after this test — the result below is for the previous passage. Run it again.",
+    staleWarning:
+      "The text changed after this test, so the result below refers to the previous passage. Run the test again.",
     stuck: "The answer was not found in the text.",
     excerpt: "passage:",
     extracted: "Answer found:",
     noFloorViolation: "The answer was found in the text.",
     loadLabel: "Reading load",
     caveat:
-      "This test uses AI and can be wrong. Finding the answer does not guarantee the text is clear — only " +
-      "testing with real readers confirms that.",
+      "This test uses AI and can be wrong. Finding the answer does not mean the text is clear; only testing with " +
+      "real readers can show that.",
     operations: {
       resolver_referente_a_distancia: "resolve what a pronoun refers to, at a distance",
       integrar_entre_frases: "join information from more than one sentence",
@@ -1073,14 +1089,13 @@ export const COPY_EN: UiCopy = {
     regionLabel: "Document under review",
     emptyDrop: "Or drag a .docx or .pdf here.",
     dropHere: "Drop to open",
-    dropHint: "Takes .docx and .pdf",
+    dropHint: "Accepts .docx and .pdf",
     draft: "Draft",
     structured: "Structured document",
     underReview: "Document under review",
     textareaLabel: "Document text",
     emptyTitle: "Start your draft",
-    emptyBody:
-      "Write or paste your text. The audit runs in real time, criterion by criterion — without rewriting for you.",
+    emptyBody: "Write or paste your text. Lucid audits it as you type, criterion by criterion, without rewriting it.",
     headingLevel: (level) => `Heading · level ${level}`,
     list: "List",
     orderedList: "Numbered list",
@@ -1107,14 +1122,14 @@ export const COPY_EN: UiCopy = {
     coverage: { curated: "curated", productive: "productive" },
     editorialExtension: (locale) => `${locale} editorial extension`,
     editorialExtensionTag: (locale) => locale,
-    editorialExtensionTitle: (locale) => `${locale} editorial extension — outside the ISO standard`,
+    editorialExtensionTitle: (locale) => `${locale} editorial extension (not part of the ISO standard)`,
     organizational: "The organisation's vocabulary",
     organizationalTag: "declared",
     organizationalTitle:
-      "A term your organisation declared. It does not come from the standard and cites no clause — whoever attests that it trips the reader is whoever knows that reader.",
+      "A term your organisation declared. It does not come from the standard and cites no clause: your organisation, which knows its readers, vouches that it gets in their way.",
     structuralHeuristic: "Structural heuristic",
     structuralHeuristicTag: "struct.",
-    structuralHeuristicTitle: "Structural heuristic — outside the ISO standard",
+    structuralHeuristicTitle: "Structural heuristic (not part of the ISO standard)",
   },
 
   ledger: {
@@ -1128,29 +1143,30 @@ export const COPY_EN: UiCopy = {
   analysisLocale: {
     label: "Analysis language",
     lead:
-      "The language of the audited document. It is independent from the interface language: you can read " +
-      "Lucid in Portuguese and audit an English text, or the other way round.",
+      "The language of the document being audited. It is separate from the interface language: you can use " +
+      "Lucid in Portuguese to audit an English text, or the other way round.",
     current: "Auditing as",
-    onlyOne: "Only one analysis engine exists today. When another one lands, it shows up here.",
+    onlyOne: "Only one analysis language is available today. When another is added, it will appear here.",
     switchWarning:
-      "Switching the language re-analyses the document with another engine. If there is work done with the " +
-      "current engine, Lucid asks first and says what would be discarded.",
+      "Switching the language analyses the document again with a different set of criteria. If you have work in " +
+      "progress, Lucid asks first and tells you what would be discarded.",
     name: { "pt-BR": "Portuguese (Brazil)", "en-US": "English (US)" },
     experimentalTag: "experimental",
     experimentalNote:
-      "Experimental catalogue. No criterion has been validated on an independent corpus: where there is a golden " +
-      "suite, it is only a regression net, written together with the detector. This language has no readability, " +
-      "cohesion or AI rewriting, and the analysis exists only in the Studio — the CLI analyses pt-BR only.",
+      "Experimental catalogue. No criterion has been validated on an independent corpus; where test examples " +
+      "exist, they only catch regressions and were written together with the detector. This language has no " +
+      "readability, cohesion or AI rewriting, and it is only available here in the Studio: the command-line tool " +
+      "analyses pt-BR only.",
     switchDialog: {
       title: (target) => `Switch the analysis language to ${target}?`,
-      lead: "The following belongs to the current engine and will be discarded:",
+      lead: "This work belongs to the current analysis language and will be discarded:",
       changes: (n) => `${n} recorded ${n === 1 ? "change" : "changes"}`,
       reviewed: (n) => `${n} reviewed or dismissed ${n === 1 ? "point" : "points"}`,
-      baseline: "the attached baseline",
-      vocabulary: (n) => `${n} organization vocabulary ${n === 1 ? "term" : "terms"}`,
+      baseline: "the attached starting point",
+      vocabulary: (n) => `${n} organisation vocabulary ${n === 1 ? "term" : "terms"}`,
       profile: (name) => `the editorial profile “${name}”`,
-      adjustments: (n) => `${n} threshold ${n === 1 ? "adjustment" : "adjustments"}`,
-      kept: "The document and the reader briefing stay. The text is re-analysed by the new engine.",
+      adjustments: (n) => `${n} limit ${n === 1 ? "adjustment" : "adjustments"}`,
+      kept: "The document, the required expressions and the report information stay. The text is analysed again in the new language.",
       cancel: "Cancel",
       confirm: "Switch language and re-analyse",
     },
@@ -1159,20 +1175,20 @@ export const COPY_EN: UiCopy = {
   readability: {
     unavailable: "unavailable for this language",
     unavailableWhy:
-      "This locale declares no readability metric. That is not an absence of problems and not a " +
-      "measurement failure: it is a measure the tool cannot yet sustain, so it publishes none.",
+      "Lucid has no readability formula for this language yet, so it shows no value. This says nothing about the " +
+      "text: it is neither a zero nor a failed measurement.",
     noMeasure: "no measurement",
-    noWords: "There are no words to measure — no value was computed (this is not zero).",
-    noSentences: "There is no delimited sentence to measure — no value was computed (this is not zero).",
+    noWords: "There are no words to measure, so no value was computed (this is not a zero).",
+    noSentences: "No sentence was identified in the text, so no value was computed (this is not a zero).",
     smallSample: (words, threshold) =>
-      `Small sample: ${words} ${plural(words, "word", "words")}. The formula is calibrated for running text; below ` +
-      `${threshold} words a single word moves the index by tens of points.`,
+      `Small sample: ${words} ${plural(words, "word", "words")}. The formula is designed for running text; below ` +
+      `${threshold} words, a single word can move the index by tens of points.`,
     sentenceBoundaryMissing: (wordsPerSentence, threshold) =>
-      `${wordsPerSentence} words per sentence, above the plausible maximum of ${threshold}: segmentation found no ` +
-      "sentence boundary — punctuation is probably missing in the pasted text.",
+      `${wordsPerSentence} words per sentence, above the plausible maximum of ${threshold}: no sentence boundary ` +
+      "was found, probably because punctuation is missing in the pasted text.",
     syllablesImpossible: (syllablesPerWord, threshold) =>
-      `${syllablesPerWord} syllables per word, above the plausible maximum of ${threshold}: the longest word in ` +
-      "Portuguese has 18 syllables, so there is a token that is not a word of the language.",
+      `${syllablesPerWord} syllables per word, above the plausible maximum of ${threshold}. The longest ` +
+      "Portuguese word has 18 syllables, so something in the text is not a Portuguese word.",
     bandLabel: {
       very_easy: "very easy",
       easy: "easy",

@@ -9,23 +9,37 @@ const DOCX = ".docx";
 const PDF = ".pdf";
 
 const REFUSAL_MESSAGE = {
-  unreadable: "não foi possível ler o arquivo — confirme que é um .docx ou .pdf válido",
+  unreadable: "o arquivo não pôde ser lido. Confirme que é um .docx ou .pdf válido",
   tracked_changes:
-    "o arquivo tem alterações rastreadas ainda não resolvidas. Enquanto elas existirem, o próprio arquivo " +
-    "não diz qual é o seu texto: aceite ou rejeite as alterações no editor e importe de novo",
+    "o arquivo tem alterações rastreadas pendentes, então não dá para saber qual é o texto final. Aceite ou " +
+    "rejeite as alterações no editor e rode o comando de novo",
   no_readable_content: "o arquivo não tem conteúdo legível para auditar",
   scanned:
-    "este PDF é uma imagem digitalizada, não texto. Não há o que auditar no que não foi escrito como texto: " +
-    "use o arquivo original, em .docx ou em PDF gerado pelo computador",
+    "este PDF é uma imagem digitalizada, sem texto para auditar. Use o arquivo original em .docx ou um PDF " +
+    "exportado diretamente do editor de texto",
   columns:
-    "este PDF está em duas ou mais colunas, e a leitura de cima para baixo misturaria as colunas. Auditar " +
-    "um texto embaralhado mediria a extração, não a escrita: use o original em .docx, ou um PDF de uma coluna",
-  glued: "as palavras deste PDF saem grudadas na extração: o texto lido não é o texto escrito",
+    "este PDF está em duas ou mais colunas, e a leitura de cima para baixo misturaria o texto. Use o original " +
+    "em .docx ou um PDF de uma coluna só",
+  glued:
+    "as palavras deste PDF saem grudadas na extração, então o texto lido não é o texto escrito. Use o original " +
+    "em .docx",
   invariant:
-    "um número que está no PDF não sobreviveu à leitura — auditar aqui seria auditar um texto do qual a " +
-    "ferramenta não tem certeza",
+    "um número que está no PDF se perdeu na leitura, então o texto extraído não é confiável. Use o original " +
+    "em .docx",
 } as const;
 const TEXT_EXTENSIONS = [".txt", ".md", ".markdown", ""];
+
+const FILE_ERROR: Record<string, string> = {
+  ENOENT: "arquivo não encontrado",
+  EISDIR: "o caminho é uma pasta, não um arquivo",
+  EACCES: "sem permissão para ler o arquivo",
+};
+
+function failureReason(error: unknown): string {
+  const code = (error as NodeJS.ErrnoException | null)?.code;
+  if (code !== undefined && code in FILE_ERROR) return FILE_ERROR[code];
+  return error instanceof Error ? error.message : String(error);
+}
 
 async function readStdin(): Promise<string> {
   const chunks: Buffer[] = [];
@@ -95,8 +109,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     try {
       files.push(await auditPath(target, options));
     } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      process.stderr.write(`lucid: não foi possível auditar ${target}: ${reason}\n`);
+      process.stderr.write(`lucid: não foi possível auditar ${target}: ${failureReason(error)}\n`);
       return 1;
     }
   }

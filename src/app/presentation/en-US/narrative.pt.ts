@@ -1,6 +1,10 @@
 import type { EnCriterionId } from "@/locales/en-US/criteria";
 import { assistida, flat, metaBool, metaNum, metaStr, type CriterionNarrative } from "../../lib/narrative-types";
 
+function limitOf(threshold: number | null, unit: string): string {
+  return threshold != null ? `do limite provisório do Lucid (${threshold} ${unit})` : "do limite provisório do Lucid";
+}
+
 export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
   prose_enumeration: {
     headline: (f) => {
@@ -10,17 +14,22 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
     prose: (f) => {
       const items = metaNum(f, "items") ?? 0;
       const notation = metaStr(f, "notation");
+      const threshold = metaNum(f, "threshold");
       const how =
         notation === "series"
           ? `dois-pontos introduzem ${items} itens separados por vírgula numa só frase`
           : notation === "ordinals"
             ? `${items} etapas são anunciadas por ordinais (“First… Second… Third…”) no texto corrido`
             : `${items} itens são marcados (“(a)… (b)… (c)…”) dentro do texto corrido`;
-      return `Aqui ${how}. As diretrizes federais americanas recomendam lista vertical, com frase de introdução, para requisitos, etapas e condições. O número mínimo de itens é provisório e configurável.`;
+      const minimum =
+        threshold !== null
+          ? `O Lucid aponta séries a partir de ${threshold} itens; esse mínimo é provisório e configurável.`
+          : "O número mínimo de itens é provisório e configurável.";
+      return `Aqui ${how}. ${minimum}`;
     },
     confidence: () =>
       assistida(
-        "A ferramenta conta os itens com exatidão, mas transformar a série em lista muda a estrutura do texto — e decidir se a lista ajuda este leitor é seu. O Lucid não converte.",
+        "O Lucid conta os itens com exatidão, mas saber se uma lista ajuda depende do que são os itens e de quem os lê. Só você pode julgar isso; o Lucid não transforma a série em lista.",
       ),
   },
   undefined_acronym: {
@@ -29,21 +38,21 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
       return acronym !== null ? `Sigla sem expansão · ${acronym}` : "Sigla sem expansão";
     },
     prose: (f) =>
-      `«${metaStr(f, "acronym") ?? flat(f.span.text)}» aparece aqui pela primeira vez sem ter sido apresentada por extenso. As diretrizes federais americanas pedem definir a sigla no primeiro uso — “Federal Aviation Administration (FAA)” — ou trocá-la por um apelido, como “the committee”.`,
+      `«${metaStr(f, "acronym") ?? flat(f.span.text)}» aparece aqui pela primeira vez sem ter sido escrita por extenso. As diretrizes federais americanas pedem que a sigla seja definida no primeiro uso, como em “Federal Aviation Administration (FAA)”.`,
     confidence: () =>
       assistida(
-        "A ferramenta vê que a sigla ainda não foi definida no texto, mas não sabe o que ela significa nem se o seu leitor já a conhece. Escrever por extenso — ou decidir que não precisa — é seu.",
+        "O Lucid vê que a sigla ainda não foi escrita por extenso, mas não sabe o que ela significa nem se o seu leitor já a conhece. Essa informação só você tem.",
       ),
   },
   ambiguous_shall: {
     headline: (f) => (metaBool(f, "negated") ? "“Shall not” ambíguo" : "“Shall” ambíguo"),
     prose: (f) =>
       metaBool(f, "negated")
-        ? `«${flat(f.span.text)}» pode expressar uma proibição ou uma previsão, e a frase não diz qual. Para proibição, as diretrizes federais recomendam “must not”; para previsão, “will not” é nota do Lucid.`
-        : `«${flat(f.span.text)}» pode expressar obrigação, faculdade, recomendação ou previsão, e a frase não diz qual. As diretrizes federais recomendam “must” (obrigação), “may” (faculdade) e “should” (recomendação); para previsão, “will” é nota do Lucid.`,
+        ? `«${flat(f.span.text)}» pode expressar uma proibição ou uma previsão, e a frase não diz qual. As diretrizes federais recomendam “must not” para proibição; “will not” para previsão é um acréscimo do Lucid.`
+        : `«${flat(f.span.text)}» pode expressar obrigação, faculdade, recomendação ou previsão, e a frase não diz qual. As diretrizes federais recomendam “must” para obrigação, “may” para faculdade e “should” para recomendação; “will” para previsão é um acréscimo do Lucid.`,
     confidence: () =>
       assistida(
-        "A ferramenta encontra toda ocorrência de “shall” com exatidão, mas não escolhe o sentido e não substitui a palavra: trocar por “must” quando o texto quis dizer “may” mudaria a obrigação do leitor. Só você sabe o que a frase quer dizer.",
+        "O Lucid encontra toda ocorrência de “shall”, mas não escolhe o sentido: pôr “must” onde o texto quis dizer “may” mudaria o que o leitor é obrigado a fazer. Só você sabe o que a frase quer dizer.",
       ),
   },
   reader_in_third_person: {
@@ -52,10 +61,10 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
       return noun !== null ? `Leitor em terceira pessoa · “${noun}”` : "Leitor em terceira pessoa";
     },
     prose: (f) =>
-      `«${flat(f.span.text)}» fala do leitor como “${metaStr(f, "readerNoun") ?? ""}” e lhe atribui uma obrigação ou permissão (“${metaStr(f, "deontic") ?? ""}”). Se o documento é lido por essa pessoa, dirigir-se a ela como “you” deixa claro quem deve agir.`,
+      `«${flat(f.span.text)}» fala do leitor como “${metaStr(f, "readerNoun") ?? ""}” e lhe atribui uma obrigação ou permissão (“${metaStr(f, "deontic") ?? ""}”). Falar com o leitor como “you” deixa claro quem deve agir.`,
     confidence: () =>
       assistida(
-        "A ferramenta reconhece o substantivo e o modal, mas não sabe quem lê o documento: se ele se dirige a outra pessoa — um servidor que atende requerentes, por exemplo —, a terceira pessoa está certa. Decidir é seu.",
+        "O Lucid reconhece o substantivo e o modal, mas não sabe para quem o documento foi escrito. Se ele se dirige a outra pessoa, como um servidor que atende requerentes, a terceira pessoa está certa.",
       ),
   },
   hidden_verb: {
@@ -70,20 +79,28 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
       if (verb !== null) {
         const inflected = metaBool(f, "swap")
           ? ""
-          : ` Aqui o verbo leve está flexionado (“${metaStr(f, "lightForm") ?? ""}”), e trocar sem flexionar quebraria a frase; o Lucid não flexiona verbos.`;
-        return `${excerpt} usa um substantivo onde o verbo “${verb}” diria a ação diretamente. A equivalência está atestada nas Federal Plain Language Guidelines (2011, p. 23).${inflected}`;
+          : ` Aqui “${metaStr(f, "lightForm") ?? ""}” está flexionado, então “${verb}” precisaria do tempo e da concordância correspondentes.`;
+        return `${excerpt} esconde a ação num substantivo; o verbo “${verb}” a expressa diretamente. As Federal Plain Language Guidelines (2011, p. 23) registram este par.${inflected}`;
       }
-      return `${excerpt} junta um verbo leve a um substantivo terminado em “-${metaStr(f, "suffix") ?? ""}”, sufixo que costuma transformar verbo em substantivo. Nenhuma equivalência 1:1 está atestada para esta expressão, então o Lucid não nomeia o verbo.`;
+      return `${excerpt} junta um verbo leve a um substantivo terminado em “-${metaStr(f, "suffix") ?? ""}”, sufixo que costuma transformar verbo em substantivo. Nenhum verbo está atestado para esta expressão, então o Lucid não nomeia o verbo.`;
     },
-    confidence: (f) =>
-      metaBool(f, "swap")
-        ? {
-            level: "segura",
-            rationale: `A equivalência “${flat(f.span.text)}” → “${metaStr(f, "verb") ?? ""}” está atestada na fonte, e o verbo leve está na forma base, então a troca direta mantém a frase gramatical. A decisão de trocar continua sendo sua.`,
-          }
-        : assistida(
-            "O sufixo indica um substantivo derivado de verbo, mas não prova que ele esconde a ação da frase, e sem equivalência atestada o Lucid não escolhe o verbo. Ver se um único verbo diz a ação — e reescrever — é trabalho de autor.",
-          ),
+    confidence: (f) => {
+      const verb = metaStr(f, "verb");
+      if (metaBool(f, "swap")) {
+        return {
+          level: "segura",
+          rationale: `Confira se “${verb ?? ""}” diz o mesmo que «${flat(f.span.text)}» nesta frase antes de usá-lo.`,
+        };
+      }
+      if (verb !== null) {
+        return assistida(
+          `O Lucid não flexiona verbos, então não consegue oferecer “${verb}” na forma que esta frase pede. Reescrever a expressão fica com você.`,
+        );
+      }
+      return assistida(
+        "O sufixo costuma indicar um substantivo derivado de verbo, mas isso não prova que ele esconde a ação da frase, e nenhum verbo está atestado para esta expressão.",
+      );
+    },
   },
   passive_voice: {
     headline: (f) => (metaBool(f, "hasAgent") ? "Voz passiva com agente" : "Voz passiva sem agente"),
@@ -94,18 +111,23 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
       }
       const state =
         metaStr(f, "form") === "present"
-          ? " No presente e sem agente, a construção também pode descrever um estado (“the office is closed”) em vez de uma ação; só o contexto decide."
+          ? " No presente, a construção também pode descrever um estado (“the office is closed”) em vez de uma ação; só o contexto decide."
           : "";
       return `${excerpt} O texto não diz quem pratica a ação.${state}`;
     },
-    confidence: (f) =>
-      metaBool(f, "hasAgent") && !metaBool(f, "agentTruncated")
-        ? assistida(
-            "A ferramenta encontrou o agente, mas decidir se a frase fica mais clara na voz ativa — e reescrevê-la — é trabalho de autor; o Lucid não converte vozes.",
-          )
-        : assistida(
-            "O agente não está no texto (ou passa da janela que o Lucid lê): a ferramenta se recusa a inventar quem pratica a ação. Só você sabe quem age.",
-          ),
+    confidence: (f) => {
+      if (metaBool(f, "hasAgent") && !metaBool(f, "agentTruncated")) {
+        return assistida(
+          "O Lucid encontrou o agente, mas saber se a frase fica melhor na voz ativa depende do que o leitor precisa saber primeiro. Essa decisão é sua.",
+        );
+      }
+      if (metaBool(f, "hasAgent")) {
+        return assistida(
+          "O agente passa do trecho que o Lucid lê depois de “by”, então pode estar incompleto aqui. Confira quem pratica a ação na frase inteira antes de mudar algo.",
+        );
+      }
+      return assistida("Só você sabe quem pratica a ação; o Lucid não adivinha nem preenche.");
+    },
   },
   long_sentence: {
     headline: (f) => {
@@ -115,26 +137,19 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      if (w == null || th == null) return "O comprimento desta frase está acima do gatilho de inspeção.";
+      if (w == null || th == null) return "Esta frase passa do gatilho de comprimento que o Lucid usa para inglês.";
       const standard = f.normativeReference?.standard ?? "ISO 24495-1";
       return (
-        `Esta frase tem ${w} palavras. O Lucid inspeciona frases em inglês acima de ${th} palavras — esse número ` +
-        "é uma referência interina emprestada do GOV.UK (Reino Unido), não uma recomendação federal americana, e " +
-        `não foi validado para documentos americanos: é provisório e configurável. A ${standard} pede frases ` +
-        "concisas e variação de tamanho, sem estabelecer contagem. A verificação principal é outra: veja se a " +
-        "frase carrega mais de uma ideia."
+        `Esta frase tem ${w} palavras, acima do gatilho de ${th} palavras que o Lucid usa para inglês. O gatilho ` +
+        "é provisório e configurável: uma referência emprestada do GOV.UK (Reino Unido), que não é recomendação " +
+        `federal americana e não foi validada para documentos americanos. A ${standard} pede frases concisas e ` +
+        "de tamanho variado, sem fixar número."
       );
     },
-    confidence: (f) => {
-      const w = metaNum(f, "words");
-      const th = metaNum(f, "threshold");
-      return assistida(
-        `A ferramenta conta as palavras com exatidão${
-          w != null && th != null ? ` (${w} palavras contra o gatilho provisório de ${th})` : ""
-        }, mas o gatilho não foi validado para inglês americano e o comprimento sozinho não decide se a frase ` +
-          "está clara. Quem lê a frase e conta as ideias é você.",
-      );
-    },
+    confidence: () =>
+      assistida(
+        "O Lucid conta as palavras com exatidão, mas não distingue uma ideia longa de várias ideias empilhadas. O tamanho sozinho não decide se a frase está clara.",
+      ),
   },
   paragraph_length: {
     headline: (f) => {
@@ -143,16 +158,14 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
     },
     prose: (f) => {
       const n = metaNum(f, "sentences");
-      const th = metaNum(f, "threshold");
       return (
-        `Este parágrafo tem ${n ?? "muitas"} frases num bloco só; o Lucid inspeciona parágrafos acima de ` +
-        `${th ?? "o limite configurado"}. O limite é provisório: vem do teto de “três a oito frases” das Federal ` +
-        "Plain Language Guidelines (2011), atribuído a especialistas não nomeados, e não foi validado."
+        `Este parágrafo tem ${n ?? "muitas"} frases num bloco só, acima ${limitOf(metaNum(f, "threshold"), "frases")}. ` +
+        "O limite vem das Federal Plain Language Guidelines (2011) e não foi validado."
       );
     },
     confidence: () =>
       assistida(
-        "A ferramenta conta as frases do parágrafo com exatidão, mas onde cortá-lo em blocos menores depende da organização das ideias — decisão de autor.",
+        "O Lucid conta as frases com exatidão, mas onde dividir o parágrafo depende de como as ideias estão organizadas, e essa decisão é sua.",
       ),
   },
   long_heading: {
@@ -164,19 +177,18 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
     },
     prose: (f) => {
       if (metaStr(f, "reason") === "sentence") {
-        return "Este título está pontuado como frase. Um título funciona como rótulo para varrer o documento; em forma de frase, pede leitura em vez de reconhecimento.";
+        return "Este título está pontuado como frase. O leitor varre títulos como rótulos; em forma de frase, o título precisa ser lido em vez de reconhecido de relance.";
       }
       const w = metaNum(f, "words");
-      const th = metaNum(f, "threshold");
       return (
-        `Este título tem ${w ?? "muitas"} palavras, acima do limite provisório de ${th ?? "palavras"}. Nenhuma ` +
-        "fonte americana nem a ISO fixa tamanho de título, e as diretrizes federais recomendam títulos em forma de " +
-        "pergunta, que podem ser mais longos — então este é um ponto para olhar, não um defeito."
+        `Este título tem ${w ?? "muitas"} palavras, acima ${limitOf(metaNum(f, "threshold"), "palavras")}. Nem a ISO nem ` +
+        "as fontes americanas fixam tamanho de título, e as diretrizes federais recomendam títulos em forma de " +
+        "pergunta, que podem ser mais longos. Trate isto como um ponto para conferir, não como defeito."
       );
     },
     confidence: () =>
       assistida(
-        "A ferramenta mede o título com exatidão, mas decidir se ele precisa encurtar — ou se é uma pergunta que o leitor faria — é trabalho de autor.",
+        "O Lucid mede o título com exatidão, mas se ele funciona como rótulo para este leitor, ou como a pergunta que o leitor faria, é você quem decide.",
       ),
   },
   heading_level_skip: {
@@ -188,36 +200,33 @@ export const EN_NARRATIVE_UI_PT: Record<EnCriterionId, CriterionNarrative> = {
     prose: (f) => {
       const l = metaNum(f, "level");
       const p = metaNum(f, "prevLevel");
-      return `A hierarquia de títulos pula do nível ${p ?? "anterior"} para o ${l ?? "seguinte"}, sem o degrau intermediário. O detector lê os níveis dos títulos — só existe porque o documento é estruturado.`;
+      return l != null && p != null
+        ? `A hierarquia de títulos pula do nível ${p} para o nível ${l}, sem o nível intermediário.`
+        : "A hierarquia de títulos pula um nível aqui.";
     },
     confidence: () =>
       assistida(
-        "A ferramenta lê os níveis dos títulos com exatidão, mas decidir se este título deve subir de nível ou se falta um título intermediário depende da organização do conteúdo — trabalho de autor.",
+        "O Lucid lê os níveis dos títulos com exatidão, mas a correção certa depende de como o conteúdo está organizado, e só você sabe isso.",
       ),
   },
   single_item_list: {
     headline: () => "Lista de um item",
     prose: () =>
-      "Esta lista tem um único item. Uma lista serve para comparar vários itens; com um só, pode indicar item faltando ou uma frase que ficaria melhor no texto corrido.",
+      "Esta lista tem um único item. Pode estar faltando um item, ou o conteúdo pode ficar melhor como frase do texto corrido.",
     confidence: () =>
-      assistida(
-        "A ferramenta reconhece a lista de um item só, mas decidir entre completar a lista ou dissolvê-la no texto corrido depende do conteúdo — decisão de autor.",
-      ),
+      assistida("O Lucid lê a estrutura da lista com exatidão, mas só você sabe se está faltando um item."),
   },
   organization_vocabulary: {
     headline: () => "Vocabulário da organização",
     prose: (f) =>
-      `«${flat(f.span.text)}» está no vocabulário que a sua organização declarou como não familiar ao leitor dela. ` +
-      "Isto não vem da norma — vem de quem conhece o público deste documento.",
+      `«${flat(f.span.text)}» está na lista de termos que a sua organização declarou como não familiares ao leitor dela.`,
     confidence: (f) => {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `A organização registrou “${f.suggestion}” como equivalente deste termo. Quem assina a equivalência é ela, não a ferramenta nem a norma; a troca no texto continua sendo sua.`,
+          rationale: `A sua organização registrou “${f.suggestion}” para este termo. O Lucid não verifica o sentido: confirme que “${f.suggestion}” serve nesta frase antes de usá-lo.`,
         };
-      return assistida(
-        "A organização declarou o termo, mas não registrou equivalente. Sem uma troca atestada, aqui só cabe sinalizar.",
-      );
+      return assistida("A sua organização não registrou equivalente para este termo, então o Lucid só o aponta.");
     },
   },
 };

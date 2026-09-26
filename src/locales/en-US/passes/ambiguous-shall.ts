@@ -5,15 +5,17 @@ import type { ShallLexiconEn } from "../datasets/registry";
 const CRITERION = "ambiguous_shall";
 
 const AFFIRMATIVE =
-  "“shall” can state an obligation, a discretion, a recommendation or a prediction, and the sentence does not say " +
-  "which. The Federal Plain Language Guidelines (2011, p. 25) recommend “must” for an obligation, “may” for a " +
-  "discretionary action and “should” for a recommendation; “will” for a prediction is Lucid's note. Lucid does " +
-  "not pick the reading and does not replace the word: only the author knows what is meant.";
+  "“shall” can state an obligation, a permission, a recommendation or a prediction, and this sentence does not " +
+  "say which. Replace it with the word that says what you mean. The Federal Plain Language Guidelines (2011, " +
+  "p. 25) recommend “must” for an obligation, “may” for a permission and “should” for a " +
+  "recommendation; “will” for a prediction is Lucid's addition, not the guidelines'. Lucid does not pick the " +
+  "reading: only the author knows what the sentence means.";
 
 const NEGATED =
-  "“shall not” can state a prohibition or a prediction, and the sentence does not say which. The Federal Plain " +
-  "Language Guidelines (2011, p. 25) recommend “must not” for a prohibition; “will not” for a prediction is " +
-  "Lucid's note. Lucid does not pick the reading and does not replace the words: only the author knows what is meant.";
+  "“shall not” can state a prohibition or a prediction, and this sentence does not say which. Replace it with " +
+  "the words that say what you mean. The Federal Plain Language Guidelines (2011, p. 25) recommend “must not” " +
+  "for a prohibition; “will not” for a prediction is Lucid's addition, not the guidelines'. Lucid does not pick " +
+  "the reading: only the author knows what the sentence means.";
 
 export const ambiguousShallPass: Pass<EnConfig> = {
   criterion: CRITERION,

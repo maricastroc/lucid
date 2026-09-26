@@ -10,7 +10,7 @@ const SEVERITY_LABEL: Record<Severity, string> = {
 
 const CAVEAT_MEASURES = "A auditoria mede, não aprova: ausência de achados não é atestado de clareza.";
 const CAVEAT_CURATED =
-  "Critérios de léxico consultam listas curadas — contagem zero significa que nada da lista casou, não que o fenômeno não existe.";
+  "Critérios de léxico consultam listas curadas: contagem zero significa que nenhum item da lista apareceu no texto, não que o fenômeno não exista.";
 
 function collapse(text: string): string {
   return text.replace(/\s+/g, " ").trim();
@@ -42,17 +42,18 @@ function importLines(file: AuditedFile): string[] {
   const out: string[] = [];
   if (notes.headingStylesRecovered.length > 0) {
     out.push(
-      `${file.name}: títulos reconstruídos a partir do nível de estrutura que o próprio arquivo declara — ` +
-        `${notes.headingStylesRecovered.join(", ")}.`,
+      `${file.name}: títulos reconstruídos a partir do nível de estrutura que o próprio arquivo declara ` +
+        `(${notes.headingStylesRecovered.join(", ")}).`,
     );
   }
   if (notes.tablesPreserved > 0) {
     out.push(
       `${file.name}: ${notes.tablesPreserved} ${plural(notes.tablesPreserved, "tabela preservada", "tabelas preservadas")} ` +
-        "com linhas, colunas e células — o texto das células entra na auditoria e fica fora das médias de prosa.",
+        "com linhas, colunas e células. O texto das células entra na auditoria, mas fica fora das médias de prosa.",
     );
   }
   const flattened: string[] = [];
+  const flattenedCount = notes.tablesFlattened + notes.textBoxesInlined;
   if (notes.tablesFlattened > 0) {
     flattened.push(`${notes.tablesFlattened} ${plural(notes.tablesFlattened, "tabela", "tabelas")}`);
   }
@@ -61,8 +62,8 @@ function importLines(file: AuditedFile): string[] {
   }
   if (flattened.length > 0) {
     out.push(
-      `${file.name}: ${flattened.join(" e ")} ${plural(flattened.length, "foi achatada", "foram achatadas")} em parágrafos — ` +
-        "o conteúdo entra na auditoria, a disposição não.",
+      `${file.name}: ${flattened.join(" e ")} ${plural(flattenedCount, "foi achatada", "foram achatadas")} em ` +
+        "parágrafos: o conteúdo entra na auditoria, a disposição não.",
     );
   }
   return out;
@@ -72,9 +73,15 @@ function pdfImportLines(name: string, notes: Extract<ImportNotes, { format: "pdf
   const out: string[] = [];
   const did: string[] = [];
 
-  if (notes.ruledRegions > 0) {
+  if (notes.tablesRecovered > 0) {
     did.push(
-      `${notes.ruledRegions} ${plural(notes.ruledRegions, "região desenhada como grade foi lida", "regiões desenhadas como grade foram lidas")} como texto corrido`,
+      `${notes.tablesRecovered} ${plural(notes.tablesRecovered, "tabela foi reconstruída", "tabelas foram reconstruídas")} a partir da grade desenhada no arquivo`,
+    );
+  }
+  const unread = notes.ruledRegions - notes.tablesRecovered;
+  if (unread > 0) {
+    did.push(
+      `${unread} ${plural(unread, "região desenhada como grade foi lida", "regiões desenhadas como grade foram lidas")} como texto corrido`,
     );
   }
   const furniture = notes.removedHeaders + notes.removedFooters + notes.removedPageNumbers;
@@ -85,15 +92,20 @@ function pdfImportLines(name: string, notes: Extract<ImportNotes, { format: "pdf
   }
   if (notes.dehyphenated > 0) {
     did.push(
-      `${notes.dehyphenated} ${plural(notes.dehyphenated, "palavra foi remontada", "palavras foram remontadas")} de quebra de linha`,
+      `${notes.dehyphenated} ${plural(notes.dehyphenated, "palavra partida na quebra de linha foi remontada", "palavras partidas na quebra de linha foram remontadas")}`,
     );
   }
 
   out.push(`${name}: ${notes.pages} ${plural(notes.pages, "página lida", "páginas lidas")}.`);
   if (did.length > 0) out.push(`${name}: ${did.join("; ")}.`);
+  const inferred = notes.headingsInferred + notes.itemsInferred;
   out.push(
-    `${name}: um PDF não declara título nem lista — tudo entra como parágrafo, e os critérios de ` +
-      "estrutura ficam sem objeto.",
+    inferred > 0
+      ? `${name}: um PDF não declara títulos nem listas. ${notes.headingsInferred} ` +
+          `${plural(notes.headingsInferred, "título", "títulos")} e ${notes.itemsInferred} ` +
+          `${plural(notes.itemsInferred, "item", "itens")} foram inferidos pela numeração e pelo desenho da página: ` +
+          "confira antes de confiar nos critérios de estrutura."
+      : `${name}: um PDF não declara títulos nem listas, e nenhum foi inferido neste arquivo.`,
   );
 
   return out;
@@ -137,9 +149,10 @@ export function renderText(files: readonly AuditedFile[], quiet: boolean): strin
       });
       const flesch = file.diagnostic.metrics.readability;
       out.push(
-        `  ${file.diagnostic.metrics.words} palavras · ${file.diagnostic.metrics.sentences} frases · Flesch-PT ${
-          flesch === null ? "não medido" : flesch.toFixed(1)
-        }`,
+        `  ${file.diagnostic.metrics.words} ${plural(file.diagnostic.metrics.words, "palavra", "palavras")} · ` +
+          `${file.diagnostic.metrics.sentences} ${plural(file.diagnostic.metrics.sentences, "frase", "frases")} · Flesch-PT ${
+            flesch === null ? "não medido" : flesch.toFixed(1)
+          }`,
       );
     }
     out.push("");
@@ -198,13 +211,13 @@ const STATUS_LABEL: Record<ClauseStatus, string> = {
 };
 
 const CAVEAT_NO_SHARE =
-  "Nenhum percentual de cobertura é publicado — sem árvore completa não há denominador, e um percentual sobre denominador desconhecido seria número inventado.";
+  "Nenhum percentual de cobertura é publicado: sem a árvore completa de cláusulas não há denominador, e um percentual sem denominador conhecido seria um número inventado.";
 const CAVEAT_OUT_OF_REACH =
-  "«fora de alcance» não é pendência: é cláusula que nenhum detector futuro resolve, porque não se verifica a partir do texto.";
+  "«fora de alcance» não é pendência: é cláusula que não se verifica a partir do texto, e nenhum detector futuro vai resolver.";
 
 export function renderCoverage(report: CoverageReport, quiet: boolean): string {
   const out: string[] = [];
-  out.push(`Cobertura por cláusula — ${report.standard}`);
+  out.push(`Cobertura por cláusula: ${report.standard}`);
   out.push("");
 
   for (const clause of report.clauses) {
@@ -236,7 +249,10 @@ export function renderCoverage(report: CoverageReport, quiet: boolean): string {
 
   if (report.outsideStandard.length > 0) {
     out.push("");
-    out.push(`Fora da norma (${report.outsideStandard.length}) — nenhum recebe número de cláusula:`);
+    out.push(
+      `Fora da norma (${report.outsideStandard.length} ${plural(report.outsideStandard.length, "critério", "critérios")}, ` +
+        "nenhum com número de cláusula):",
+    );
     for (const entry of report.outsideStandard) {
       out.push(`  ${entry.criterion.padEnd(28)} ${entry.source}`);
     }

@@ -105,9 +105,9 @@ export const siglaSemExpansaoPass: Pass<PtConfig> = {
         severity: "warning",
         requiresHuman: true,
         justification:
-          `A sigla “${key}” aparece sem ter sido apresentada por extenso antes. Na primeira vez, escreva o ` +
-          "nome completo seguido da sigla entre parênteses — “Nome Por Extenso (SIGLA)” — para o leitor que " +
-          "não a conhece. A ferramenta aponta a primeira ocorrência não definida; a redação é sua.",
+          `A sigla “${key}” aparece sem ter sido escrita por extenso antes, e quem não a conhece trava aqui. ` +
+          "Na primeira vez que ela aparecer, escreva o nome completo seguido da sigla entre parênteses: " +
+          `“Nome por extenso (${key})”.`,
         meta: { acronym: key },
       });
     }

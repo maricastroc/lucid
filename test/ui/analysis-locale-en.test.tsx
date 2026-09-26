@@ -19,7 +19,7 @@ describe("Portuguese interface, English document", () => {
     await openMetrics(user);
 
     expect(auditPanel().getAllByText(/indisponível neste idioma/i).length).toBeGreaterThanOrEqual(4);
-    expect(auditPanel().getByText(/não declara métrica de leiturabilidade/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/ainda não tem uma medida de legibilidade validada/i)).toBeInTheDocument();
   });
 
   it("opens an English finding: ISO citation, engine output labelled en-US, no AI rewrite offered", async () => {
@@ -32,7 +32,7 @@ describe("Portuguese interface, English document", () => {
     expect(auditPanel().getByText(/reescrita por IA ainda não existe para este idioma/i)).toBeInTheDocument();
 
     await user.click(auditPanel().getByRole("button", { name: /entenda este critério/i }));
-    expect(auditPanel().getByText(/saída da engine · en-US/i)).toBeInTheDocument();
+    expect(auditPanel().getByText(/justificativa no idioma da análise · en-US/i)).toBeInTheDocument();
     const output = auditPanel().getByText(/^Sentence of \d+ words\./);
     expect(output).toHaveAttribute("lang", "en-US");
     expect(output.textContent).toMatch(/provisional/);

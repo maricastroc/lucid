@@ -55,9 +55,7 @@ describe("the author's reason for keeping a point", () => {
     await openPassive(user);
     await user.click(markSeen());
 
-    expect(
-      auditPanel().getByText(/não altera o placar, o resultado da auditoria nem qualquer estado de conformidade/i),
-    ).toBeInTheDocument();
+    expect(auditPanel().getByText(/não altera o placar nem o resultado da auditoria/i)).toBeInTheDocument();
   });
 
   it("keeps what was typed without waiting for a blur, so no navigation can lose it", async () => {

@@ -24,8 +24,8 @@ export const adverbiosVagosPass: Pass<PtConfig> = {
           severity: "info",
           requiresHuman: true,
           justification:
-            `Advérbio vago (“${token.lower}”) — reforço/atenuação que costuma sair sem mudar o que a ` +
-            "frase afirma, só o volume. Avalie cortar; a ferramenta aponta, não decide por você.",
+            `Advérbio vago: “${token.lower}” reforça ou atenua sem acrescentar informação. ` +
+            "Releia a frase sem ele; se o que ela afirma continuar igual, corte.",
         });
       }
     }

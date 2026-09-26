@@ -6,9 +6,9 @@ const CRITERION = "mais_que_perfeito_sintetico";
 const LEXICALIZED_EXCLUSIONS = new Set(["pudera"]);
 
 const JUSTIFICATION =
-  "Verbo no mais-que-perfeito sintético (ex.: 'fizera' = 'tinha feito') — forma pouco usada na " +
-  "fala e de leitura difícil. Considere a forma composta (tinha/havia + particípio); a ferramenta " +
-  "não reescreve automaticamente porque a troca depende do contexto.";
+  "Verbo no mais-que-perfeito sintético (como “fizera”, que equivale a “tinha feito”): forma rara na " +
+  "fala e de leitura difícil. Considere a forma composta, com “tinha” ou “havia” + particípio, e " +
+  "confira se o sentido se mantém na frase.";
 
 export const maisQuePerfeitoPass: Pass<PtConfig> = {
   criterion: CRITERION,

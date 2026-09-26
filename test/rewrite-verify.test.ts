@@ -82,7 +82,7 @@ describe("verifyRewrite — PROOF: the target violation is resolved", () => {
 
     expect(proofPassed(v, "region_improved")).toBe(true);
     expect(v.hasBlockingFailure).toBe(false);
-    expect(v.proofs.find((p) => p.check === "region_improved")!.detail).toMatch(/peso/);
+    expect(v.proofs.find((p) => p.check === "region_improved")!.detail).toMatch(/Peso/);
   });
 
   it("a proposal that does NOT resolve the target fails target_resolved (mechanical veto)", async () => {
@@ -189,7 +189,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
-    expect(detail).toContain("passive_voice");
+    expect(detail).toContain("«Voz passiva»");
   });
 
   it("mixed: the passive WITH an agent is fixed, the one WITHOUT (requiresHuman) is tolerated — PASSES", async () => {
@@ -228,7 +228,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
-    expect(detail).toContain("passive_voice");
+    expect(detail).toContain("«Voz passiva»");
   });
 
   it("deleting the agent of the askable passive instead of fixing it — FAILS (degradation into requiresHuman, not a resolution)", async () => {
@@ -249,7 +249,7 @@ describe("verifyRewrite — PROOF: the directed briefing (multiple criteria) is 
 
     expect(proofPassed(v, "directed_findings_resolved")).toBe(false);
     const detail = v.proofs.find((p) => p.check === "directed_findings_resolved")!.detail;
-    expect(detail).toContain("degradou");
+    expect(detail).toContain("apagou a informação");
   });
 
   it("with an explicit 'no known agent' declaration, the same degradation does NOT fail (the author's decision, not a silent deletion)", async () => {

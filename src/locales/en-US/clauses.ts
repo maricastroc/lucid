@@ -8,7 +8,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
   standard: "ISO 24495-1:2023",
   referenceName: "ISO 24495-1",
   transcription:
-    "Section 5 (Guidelines) — the four principles and their 23 subclauses, 5.1 to 5.4. The numbering and the " +
+    "Section 5 (Guidelines): the four principles and their 23 subclauses, 5.1 to 5.4. The numbering and the " +
     "parent structure were verified against ABNT NBR ISO 24495-1:2024, the identical Brazilian adoption of " +
     "ISO 24495-1:2023. The English titles below are Lucid's rendering and were NOT transcribed from the ISO " +
     "English text, which was not accessed; every node is therefore marked provisional. Sections 1 to 4 and " +
@@ -95,7 +95,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
         reason:
           "The briefing checks whether the expressions the author declared essential appear in the text. That " +
           "verifies the author's declaration, not the reader's need: if the declaration is wrong or incomplete, " +
-          "the check passes anyway. The briefing is not a detector — it produces no finding and cites no clause.",
+          "the check passes anyway. The briefing is not a detector: it produces no finding and cites no clause.",
       },
     },
     {
@@ -135,8 +135,8 @@ export const EN_CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "partial",
         reason:
-          "A series written as running text — markers, ordinal words or items after a colon — is detected " +
-          "against a provisional number of items. Tables, emphasis, spacing and visual hierarchy do not reach the engine.",
+          "A series written as running text (markers, ordinal words or items after a colon) is detected " +
+          "against a provisional number of items. Tables, emphasis, spacing and visual hierarchy are not read.",
       },
     },
     {
@@ -190,7 +190,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
         kind: "partial",
         reason:
           "An acronym used before it is spelled out is detected from its shape; common acronyms are excused by a " +
-          "short declared list. Whether a word is familiar to this reader is not reached. A general English jargon glossary is deliberately not built — its recall would only " +
+          "short declared list. Whether a word is familiar to this reader is not reached. A general English jargon glossary is deliberately not built: its recall would only " +
           "measure the list. The organization's vocabulary is declared by the organization and cites no clause.",
       },
     },
@@ -220,7 +220,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
         reason:
           "Sentence length is measured against a provisional, configurable trigger: an interim reference " +
           "borrowed from GOV.UK (United Kingdom), since no US federal source sets a per-sentence number; it has " +
-          "not been validated for American documents. The central guideline, one idea per sentence, is not verifiable — " +
+          "not been validated for American documents. The central guideline, one idea per sentence, is not verifiable: " +
           "counting ideas takes reading. Variation in length is not measured.",
       },
     },
@@ -247,7 +247,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
         kind: "out_of_reach",
         reason:
           "Whether an image would help, and whether the one present supports the text, is not decided from the " +
-          "text. The engine audits text and does not see the image.",
+          "text. Lucid audits text and does not see the image.",
       },
     },
     {
@@ -259,7 +259,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
       limit: {
         kind: "unbuilt",
         reason:
-          "Part of it is lexical — terms that stereotype or exclude fit in a curated lexicon. Nothing has been " +
+          "Part of it is lexical: terms that stereotype or exclude fit in a curated lexicon. Nothing has been " +
           "built. The tone of a document as a whole is not lexical and would not be reached by a lexicon.",
       },
     },
@@ -273,7 +273,7 @@ export const EN_CLAUSE_TREE: ClauseTree = {
         kind: "unbuilt",
         reason:
           "Reachable in part: surface cohesion is measured in pt-BR. en-US declares no cohesion battery in " +
-          "scenario A, so nothing is measured here — and nothing is shown as zero.",
+          "scenario A, so nothing is measured here, and nothing is shown as zero.",
       },
     },
     {

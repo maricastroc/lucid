@@ -189,7 +189,7 @@ function ProbeResultView({ data }: { data: ProbeResponse }) {
           <ul className="mt-2 space-y-1.5">
             {result.ondeTravou.map((stop, i) => (
               <li key={i} className="text-[12px] text-ink-2" lang="pt-BR">
-                <span className="text-ink-3">{t.excerpt}</span> “{stop.frase}” — {stop.motivo}
+                <span className="text-ink-3">{t.excerpt}</span> “{stop.frase}” · {stop.motivo}
               </li>
             ))}
           </ul>

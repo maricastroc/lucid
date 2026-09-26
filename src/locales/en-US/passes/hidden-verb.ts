@@ -66,22 +66,22 @@ function justification(
 ): string {
   if (attested !== null && swap) {
     return (
-      `Verb hidden in a noun: “${phrase}” uses a noun where the verb “${attested.verb}” says the action directly ` +
-      `(ISO 24495-1, 5.3.3). The equivalence is attested in the ${attested.source}; whether to use it is the ` +
-      "author's decision."
+      `Verb hidden in a noun: “${phrase}” puts the action in a noun, and the verb “${attested.verb}” says it ` +
+      `directly (ISO 24495-1, 5.3.3). The pair is attested in the ${attested.source}. Check that ` +
+      `“${attested.verb}” keeps the meaning in this sentence before you use it.`
     );
   }
   if (attested !== null) {
     return (
-      `Verb hidden in a noun: the attested verb is “${attested.verb}” (${attested.source}), but “${lightForm}” ` +
-      "carries tense or agreement that a direct swap would lose. Lucid does not inflect verbs; rewriting the " +
-      "phrase is yours."
+      `Verb hidden in a noun: “${phrase}” puts the action in a noun, and the attested verb is “${attested.verb}” ` +
+      `(${attested.source}). Here “${lightForm}” carries tense or agreement, and Lucid does not inflect verbs: if ` +
+      `you rewrite the phrase, use the form of “${attested.verb}” that fits the sentence.`
     );
   }
   return (
-    `Verb possibly hidden in a noun: the light verb “${lightForm}” is followed by a noun ending in “-${suffix}”, ` +
-    "a suffix that usually turns a verb into a noun (ISO 24495-1, 5.3.3). No one-to-one equivalence is attested " +
-    "for this phrase, so Lucid does not name a verb. Check whether a single verb says it more directly."
+    `Verb possibly hidden in a noun: “${phrase}” pairs the light verb “${lightForm}” with a noun ending in ` +
+    `“-${suffix}”, a suffix that often turns a verb into a noun (ISO 24495-1, 5.3.3). Check whether a single verb ` +
+    "says the action more directly. No verb is attested for this phrase, so Lucid does not name one."
   );
 }
 

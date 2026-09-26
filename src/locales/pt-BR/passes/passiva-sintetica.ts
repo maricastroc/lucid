@@ -113,9 +113,9 @@ function finding(
     severity: "warning",
     requiresHuman: true,
     justification:
-      `“${quoted}” usa o “se” que costuma esconder quem pratica a ação (passiva sintética ou ` +
-      "indeterminação do sujeito: “aplica-se a multa” não diz quem aplica). Pode também ser reflexivo — a " +
-      "ferramenta NÃO desfaz essa ambiguidade nem reescreve: aponta e devolve a decisão a você.",
+      `“${quoted}” usa o “se”, que costuma esconder quem pratica a ação: “aplica-se a multa” não diz quem ` +
+      "aplica. O “se” também pode ser reflexivo, e só o contexto decide. Se ele esconde quem age e você sabe " +
+      "quem é, nomeie o agente na frase.",
     meta,
   };
 }

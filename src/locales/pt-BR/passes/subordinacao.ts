@@ -74,9 +74,10 @@ export const subordinacaoPass: Pass<PtConfig> = {
         severity: "warning",
         requiresHuman: true,
         justification:
-          `Esta frase encadeia ${hits.length} orações subordinadas (${connectives}) — muitas ideias ` +
-          "presas numa frase só pesam a leitura. Considere separar em frases mais curtas, uma ideia por " +
-          "vez; a ferramenta não decide onde quebrar.",
+          `Frase com ${hits.length} orações subordinadas encadeadas (${connectives}). Cada uma prende mais ` +
+          "uma ideia à mesma frase, e o leitor precisa guardar todas até o fim. O Lucid marca a partir de " +
+          `${threshold} orações subordinadas por frase; esse número é um parâmetro do produto, não da norma. ` +
+          "Veja se dá para separar em frases mais curtas, uma ideia por vez.",
         meta: { clauses: hits.length, threshold },
       });
     }

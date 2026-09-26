@@ -142,7 +142,7 @@ exports[`en-US — full Diagnostic snapshots > ambiguous_shall 1`] = `
     {
       "category": "syntactic",
       "criterion": "reader_in_third_person",
-      "justification": "The reader is named in the third person (“lessee”) and given an obligation or a permission (“shall”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "justification": "The reader is named in the third person (“lessee”) and given an obligation or a permission (“shall”). If the document is written for this person, address them as “you”: the Federal Plain Language Guidelines (2011, p. 30) recommend it because it shows who must act (ISO 24495-1, 5.3.3). Only the author knows who the document is written for.",
       "meta": {
         "deontic": "shall",
         "readerNoun": "lessee",
@@ -164,7 +164,7 @@ exports[`en-US — full Diagnostic snapshots > ambiguous_shall 1`] = `
     {
       "category": "lexical",
       "criterion": "ambiguous_shall",
-      "justification": "“shall” can state an obligation, a discretion, a recommendation or a prediction, and the sentence does not say which. The Federal Plain Language Guidelines (2011, p. 25) recommend “must” for an obligation, “may” for a discretionary action and “should” for a recommendation; “will” for a prediction is Lucid's note. Lucid does not pick the reading and does not replace the word: only the author knows what is meant.",
+      "justification": "“shall” can state an obligation, a permission, a recommendation or a prediction, and this sentence does not say which. Replace it with the word that says what you mean. The Federal Plain Language Guidelines (2011, p. 25) recommend “must” for an obligation, “may” for a permission and “should” for a recommendation; “will” for a prediction is Lucid's addition, not the guidelines'. Lucid does not pick the reading: only the author knows what the sentence means.",
       "meta": {
         "negated": false,
       },
@@ -181,7 +181,7 @@ exports[`en-US — full Diagnostic snapshots > ambiguous_shall 1`] = `
     {
       "category": "syntactic",
       "criterion": "reader_in_third_person",
-      "justification": "The reader is named in the third person (“applicant”) and given an obligation or a permission (“shall”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "justification": "The reader is named in the third person (“applicant”) and given an obligation or a permission (“shall”). If the document is written for this person, address them as “you”: the Federal Plain Language Guidelines (2011, p. 30) recommend it because it shows who must act (ISO 24495-1, 5.3.3). Only the author knows who the document is written for.",
       "meta": {
         "deontic": "shall",
         "readerNoun": "applicant",
@@ -203,7 +203,7 @@ exports[`en-US — full Diagnostic snapshots > ambiguous_shall 1`] = `
     {
       "category": "lexical",
       "criterion": "ambiguous_shall",
-      "justification": "“shall not” can state a prohibition or a prediction, and the sentence does not say which. The Federal Plain Language Guidelines (2011, p. 25) recommend “must not” for a prohibition; “will not” for a prediction is Lucid's note. Lucid does not pick the reading and does not replace the words: only the author knows what is meant.",
+      "justification": "“shall not” can state a prohibition or a prediction, and this sentence does not say which. Replace it with the words that say what you mean. The Federal Plain Language Guidelines (2011, p. 25) recommend “must not” for a prohibition; “will not” for a prediction is Lucid's addition, not the guidelines'. Lucid does not pick the reading: only the author knows what the sentence means.",
       "meta": {
         "negated": true,
       },
@@ -493,7 +493,7 @@ exports[`en-US — full Diagnostic snapshots > hidden_verb 1`] = `
     {
       "category": "syntactic",
       "criterion": "hidden_verb",
-      "justification": "Verb hidden in a noun: “make the payment of” uses a noun where the verb “pay” says the action directly (ISO 24495-1, 5.3.3). The equivalence is attested in the Federal Plain Language Guidelines (2011), p. 23; whether to use it is the author's decision.",
+      "justification": "Verb hidden in a noun: “make the payment of” puts the action in a noun, and the verb “pay” says it directly (ISO 24495-1, 5.3.3). The pair is attested in the Federal Plain Language Guidelines (2011), p. 23. Check that “pay” keeps the meaning in this sentence before you use it.",
       "meta": {
         "attestedIn": "Federal Plain Language Guidelines (2011), p. 23",
         "curated": true,
@@ -523,7 +523,7 @@ exports[`en-US — full Diagnostic snapshots > hidden_verb 1`] = `
     {
       "category": "syntactic",
       "criterion": "hidden_verb",
-      "justification": "Verb hidden in a noun: “make an application” uses a noun where the verb “apply” says the action directly (ISO 24495-1, 5.3.3). The equivalence is attested in the Federal Plain Language Guidelines (2011), p. 23; whether to use it is the author's decision.",
+      "justification": "Verb hidden in a noun: “make an application” puts the action in a noun, and the verb “apply” says it directly (ISO 24495-1, 5.3.3). The pair is attested in the Federal Plain Language Guidelines (2011), p. 23. Check that “apply” keeps the meaning in this sentence before you use it.",
       "meta": {
         "attestedIn": "Federal Plain Language Guidelines (2011), p. 23",
         "curated": true,
@@ -553,7 +553,7 @@ exports[`en-US — full Diagnostic snapshots > hidden_verb 1`] = `
     {
       "category": "syntactic",
       "criterion": "hidden_verb",
-      "justification": "Verb possibly hidden in a noun: the light verb “made” is followed by a noun ending in “-sion”, a suffix that usually turns a verb into a noun (ISO 24495-1, 5.3.3). No one-to-one equivalence is attested for this phrase, so Lucid does not name a verb. Check whether a single verb says it more directly.",
+      "justification": "Verb possibly hidden in a noun: “made a decision” pairs the light verb “made” with a noun ending in “-sion”, a suffix that often turns a verb into a noun (ISO 24495-1, 5.3.3). Check whether a single verb says the action more directly. No verb is attested for this phrase, so Lucid does not name one.",
       "meta": {
         "curated": false,
         "lightForm": "made",
@@ -718,7 +718,7 @@ exports[`en-US — full Diagnostic snapshots > long_sentence 1`] = `
     {
       "category": "syntactic",
       "criterion": "long_sentence",
-      "justification": "Sentence of 34 words. Lucid inspects sentences above 25 words. That trigger is an interim reference borrowed from GOV.UK, the United Kingdom government's guidance; it is not a US federal recommendation and has not been validated for American documents, so it stays provisional and configurable. ISO 24495-1 asks for concise sentences and varied length without fixing a number. Check whether the sentence carries more than one idea; if it carries one, it may be fine as it is.",
+      "justification": "Sentence of 34 words. Check whether it carries more than one idea; if it carries only one, it may be fine as it is. Lucid inspects sentences above 25 words. That trigger is provisional and configurable: an interim reference borrowed from GOV.UK (United Kingdom), not a US federal recommendation, and not validated for American documents. ISO 24495-1 asks for concise sentences of varied length but sets no number.",
       "meta": {
         "threshold": 25,
         "thresholdStatus": "provisional",
@@ -878,7 +878,7 @@ exports[`en-US — full Diagnostic snapshots > passive 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Passive voice with the agent after the verb, introduced by “by”. The sentence says who acts, but only after the action; making that agent the subject shows who does what (ISO 24495-1, 5.3.3). Whether to change it is the author's decision.",
+      "justification": "Passive voice with the agent after the verb, introduced by “by”. The sentence names who acts only after the action; opening it with that agent shows who does what (ISO 24495-1, 5.3.3). Whether to change it is the author's decision.",
       "meta": {
         "agentEnd": 45,
         "agentMarkerEnd": 32,
@@ -906,7 +906,7 @@ exports[`en-US — full Diagnostic snapshots > passive 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). Lucid does not supply the missing agent — only the author knows who acts.",
+      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). If the reader needs to know who acts, name them. Lucid does not supply the missing agent: only the author knows who it is.",
       "meta": {
         "form": "modal",
         "hasAgent": false,
@@ -930,7 +930,7 @@ exports[`en-US — full Diagnostic snapshots > passive 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). Lucid does not supply the missing agent — only the author knows who acts.",
+      "justification": "Passive voice without an agent: the sentence does not say who performs the action (ISO 24495-1, 5.3.3). If the reader needs to know who acts, name them. Lucid does not supply the missing agent: only the author knows who it is.",
       "meta": {
         "form": "perfect",
         "hasAgent": false,
@@ -1227,7 +1227,7 @@ exports[`en-US — full Diagnostic snapshots > prose_enumeration 1`] = `
     {
       "category": "structural",
       "criterion": "prose_enumeration",
-      "justification": "A series of 3 items is marked with “(1)… (2)… (3)…” inside running text. The Federal Plain Language Guidelines (2011, pp. 71-72) recommend a vertical list, with a lead-in sentence, for a series of requirements, steps or conditions (ISO 24495-1, 5.2.3). Turning it into a list changes the structure of the text; Lucid does not convert it.",
+      "justification": "A series of 3 items is marked with “(1)… (2)… (3)…” inside running text. If the items are requirements, steps or conditions, consider a vertical list with a lead-in sentence, as the Federal Plain Language Guidelines (2011, pp. 71-72) recommend (ISO 24495-1, 5.2.3). Whether a list helps this reader is the author's decision.",
       "meta": {
         "items": 3,
         "notation": "markers",
@@ -1388,7 +1388,7 @@ exports[`en-US — full Diagnostic snapshots > reader_in_third_person 1`] = `
     {
       "category": "syntactic",
       "criterion": "reader_in_third_person",
-      "justification": "The reader is named in the third person (“Applicants”) and given an obligation or a permission (“must”). The Federal Plain Language Guidelines (2011, p. 30) recommend speaking to the reader as “you”, which says plainly who must act (ISO 24495-1, 5.3.3). Only the author knows whether the document's reader is the person named here.",
+      "justification": "The reader is named in the third person (“Applicants”) and given an obligation or a permission (“must”). If the document is written for this person, address them as “you”: the Federal Plain Language Guidelines (2011, p. 30) recommend it because it shows who must act (ISO 24495-1, 5.3.3). Only the author knows who the document is written for.",
       "meta": {
         "deontic": "must",
         "readerNoun": "Applicants",
@@ -1547,7 +1547,7 @@ exports[`en-US — full Diagnostic snapshots > structure 1`] = `
     {
       "category": "structural",
       "criterion": "heading_level_skip",
-      "justification": "This heading jumps from level 1 to 4 without passing through 2. Skipped levels break reading by structure (table of contents, scanning, screen readers). Adjust this heading's level or add an intermediate one; the tool does not reorganize the hierarchy for you.",
+      "justification": "This heading jumps from level 1 to level 4, skipping level 2. Change this heading's level or add the missing intermediate heading. Skipped levels break navigation by structure: the table of contents, scanning and screen readers.",
       "meta": {
         "level": 4,
         "prevLevel": 1,
@@ -1569,7 +1569,7 @@ exports[`en-US — full Diagnostic snapshots > structure 1`] = `
     {
       "category": "structural",
       "criterion": "single_item_list",
-      "justification": "List with a single item. A list exists to separate and compare several items; with one, it helps no one find anything and suggests either that an item is missing or that the content belongs in running text. This is structural hygiene (a weak signal, with no direct guideline in the standard): completing the list or folding it into the prose is the author's decision.",
+      "justification": "List with a single item. A list separates and compares several items; with only one, an item may be missing, or the content may belong in running text. Complete the list or turn the item into a sentence. This is a weak structural signal, with no direct guideline in the standard.",
       "meta": {
         "ordered": false,
       },
@@ -1586,7 +1586,7 @@ exports[`en-US — full Diagnostic snapshots > structure 1`] = `
     {
       "category": "structural",
       "criterion": "long_heading",
-      "justification": "Heading ends with a period, like a sentence — headings are labels and do not close as a clause. Reworking the form is the author's call; the tool does not rewrite headings.",
+      "justification": "Heading ends with a period, like a sentence. Headings are labels: remove the period, or rework the heading into a short label if it reads as a sentence.",
       "meta": {
         "reason": "sentence",
         "sentences": 1,
@@ -1754,7 +1754,7 @@ exports[`en-US — full Diagnostic snapshots > undefined_acronym 1`] = `
     {
       "category": "lexical",
       "criterion": "undefined_acronym",
-      "justification": "“FAA” is used before it is spelled out. The Federal Plain Language Guidelines (2011, p. 34) ask to define an abbreviation the first time it is used — or to replace it with a short name that says what it is (ISO 24495-1, 5.3.2). Lucid does not know what the acronym stands for; writing it out is the author's.",
+      "justification": "“FAA” is used before it is spelled out. Write out the full name the first time, or replace the acronym with a short name that says what it is; the Federal Plain Language Guidelines (2011, p. 34) recommend either (ISO 24495-1, 5.3.2). Lucid does not know what “FAA” stands for: the full name has to come from the author.",
       "meta": {
         "acronym": "FAA",
       },

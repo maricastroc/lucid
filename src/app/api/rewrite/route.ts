@@ -69,7 +69,7 @@ function isDeclarationLike(value: unknown, textLength: number): value is AgentDe
 function buildProposer(providerId: string, model: string): RewriteProposer | { error: string; status: number } {
   if (providerId === "gemini") {
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return { error: "GEMINI_API_KEY não configurada no servidor", status: 400 };
+    if (!apiKey) return { error: "a chave GEMINI_API_KEY não está configurada no servidor", status: 400 };
     if (!GEMINI_MODELS.includes(model as (typeof GEMINI_MODELS)[number])) {
       return { error: `modelo não permitido para o Gemini: ${model}`, status: 400 };
     }
@@ -90,7 +90,7 @@ export async function POST(request: Request): Promise<Response> {
   try {
     body = (await request.json()) as RewriteRequestBody;
   } catch {
-    return NextResponse.json({ error: "corpo inválido (JSON esperado)" }, { status: 400 });
+    return NextResponse.json({ error: "requisição inválida: o corpo precisa ser JSON" }, { status: 400 });
   }
 
   const { text, target, criterion, strategy, briefing, findings, declarations, providerId, model, localeId } = body;
@@ -101,9 +101,9 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(
       {
         error:
-          `documento com ${text.length.toLocaleString("pt-BR")} caracteres — acima do limite de ` +
+          `o documento tem ${text.length.toLocaleString("pt-BR")} caracteres, acima do limite de ` +
           `${MAX_TEXT_LENGTH.toLocaleString("pt-BR")} para a proposta por IA. A auditoria determinística ` +
-          "não depende disso e segue completa.",
+          "não depende disso e continua completa.",
       },
       { status: 413 },
     );
@@ -112,12 +112,12 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ error: "providerId e model são obrigatórios" }, { status: 400 });
   }
   if (!isValidSpan(target, text.length)) {
-    return NextResponse.json({ error: "alvo (span) inválido" }, { status: 400 });
+    return NextResponse.json({ error: "trecho-alvo (span) inválido" }, { status: 400 });
   }
   const resolvedLocaleId = typeof localeId === "string" ? localeId : "pt-BR";
   const locale = SUPPORTED_LOCALES[resolvedLocaleId];
   if (!locale) {
-    return NextResponse.json({ error: `locale não suportado: ${resolvedLocaleId}` }, { status: 400 });
+    return NextResponse.json({ error: `idioma de análise não suportado: ${resolvedLocaleId}` }, { status: 400 });
   }
 
   const proposer = buildProposer(providerId, model);
@@ -147,6 +147,6 @@ export async function POST(request: Request): Promise<Response> {
     if (cause instanceof ChatProviderError) {
       return NextResponse.json({ error: cause.message }, { status: 502 });
     }
-    return NextResponse.json({ error: "falha ao gerar a reescrita" }, { status: 500 });
+    return NextResponse.json({ error: "erro interno do servidor" }, { status: 500 });
   }
 }

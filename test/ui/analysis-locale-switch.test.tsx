@@ -79,7 +79,7 @@ describe("switching the analysis language", () => {
     expect(dialog.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "1 alteração registrada",
       "1 ponto revisado ou ignorado",
-      "a linha de base anexada",
+      "o ponto de partida anexado",
       "1 termo do vocabulário da organização",
       "o perfil editorial “Normativo ou contratual”",
       "1 ajuste de limite",

@@ -13,11 +13,11 @@ export const sentenceLengthPass = createSentenceLengthPass<EnConfig>({
   thresholdStatus: "provisional",
   text: {
     justification: (words, threshold) =>
-      `Sentence of ${words} words. Lucid inspects sentences above ${threshold} words. That trigger is an ` +
-      "interim reference borrowed from GOV.UK, the United Kingdom government's guidance; it is not a US federal " +
-      "recommendation and has not been validated for American documents, so it stays provisional and " +
-      "configurable. ISO 24495-1 asks for concise sentences and varied length without fixing a number. Check " +
-      "whether the sentence carries more than one idea; if it carries one, it may be fine as it is.",
+      `Sentence of ${words} words. Check whether it carries more than one idea; if it carries only one, it may ` +
+      `be fine as it is. Lucid inspects sentences above ${threshold} words. That trigger is provisional and ` +
+      "configurable: an interim reference borrowed from GOV.UK (United Kingdom), not a US federal recommendation, " +
+      "and not validated for American documents. ISO 24495-1 asks for concise sentences of varied length but sets " +
+      "no number.",
   },
 });
 
@@ -28,10 +28,10 @@ export const paragraphLengthPass = createParagraphLengthPass<EnConfig>({
   thresholdStatus: "provisional",
   text: {
     justification: (sentences, threshold) =>
-      `Long paragraph: ${sentences} sentences in one block. Lucid inspects paragraphs above ${threshold} ` +
-      "sentences — a provisional trigger taken from the upper end of the Federal Plain Language Guidelines' " +
-      '"three to eight sentences"; their 150-word ceiling is not measured here. Consider breaking it up, one ' +
-      "idea per paragraph; the tool does not split automatically.",
+      `Long paragraph: ${sentences} sentences in one block. If it covers more than one topic, consider one ` +
+      `paragraph per topic. Lucid inspects paragraphs above ${threshold} sentences, a provisional trigger taken ` +
+      "from the upper end of “three to eight sentences” in the Federal Plain Language Guidelines (2011); their " +
+      "150-word ceiling is not measured.",
   },
 });
 
@@ -42,16 +42,15 @@ export const longHeadingPass = createLongHeadingPass<EnConfig>({
   thresholdStatus: "provisional",
   text: {
     tooLong: (words, threshold) =>
-      `Heading of ${words} words (above ${threshold}). No US guideline fixes a word count for headings, so this ` +
-      "trigger is provisional; question headings, which the federal guidelines recommend, can legitimately run " +
-      "longer. A heading is a label to scan by: shortening it means deciding what is essential, and the tool " +
-      "does not rewrite headings.",
+      `Heading of ${words} words, above the provisional limit of ${threshold}. A heading is a label readers ` +
+      "scan: if you shorten it, keep what the reader is looking for. No US guideline sets a word count for " +
+      "headings, and question headings, which the federal guidelines recommend, can rightly run longer.",
     manySentences: (sentences) =>
-      `Heading made of ${sentences} sentences — a heading is a label, not running text. Reduce it to a short ` +
-      "label the reader can scan by; the tool does not make that cut.",
+      `Heading made of ${sentences} sentences. A heading is a label, not running text: reduce it to a short ` +
+      "label the reader can scan.",
     endsAsStatement:
-      "Heading ends with a period, like a sentence — headings are labels and do not close as a clause. " +
-      "Reworking the form is the author's call; the tool does not rewrite headings.",
+      "Heading ends with a period, like a sentence. Headings are labels: remove the period, or rework the " +
+      "heading into a short label if it reads as a sentence.",
   },
 });
 
@@ -60,9 +59,9 @@ export const headingLevelSkipPass = createHeadingLevelSkipPass<EnConfig>({
   enabled: (config) => config.headingLevelSkip.enabled,
   text: {
     justification: (level, previousLevel) =>
-      `This heading jumps from level ${previousLevel} to ${level} without passing through ${previousLevel + 1}. ` +
-      "Skipped levels break reading by structure (table of contents, scanning, screen readers). Adjust this " +
-      "heading's level or add an intermediate one; the tool does not reorganize the hierarchy for you.",
+      `This heading jumps from level ${previousLevel} to level ${level}, skipping level ${previousLevel + 1}. ` +
+      "Change this heading's level or add the missing intermediate heading. Skipped levels break navigation by " +
+      "structure: the table of contents, scanning and screen readers.",
   },
 });
 
@@ -71,9 +70,8 @@ export const singleItemListPass = createSingleItemListPass<EnConfig>({
   enabled: (config) => config.singleItemList.enabled,
   text: {
     justification:
-      "List with a single item. A list exists to separate and compare several items; with one, it helps no one " +
-      "find anything and suggests either that an item is missing or that the content belongs in running text. " +
-      "This is structural hygiene (a weak signal, with no direct guideline in the standard): completing the list " +
-      "or folding it into the prose is the author's decision.",
+      "List with a single item. A list separates and compares several items; with only one, an item may be " +
+      "missing, or the content may belong in running text. Complete the list or turn the item into a sentence. " +
+      "This is a weak structural signal, with no direct guideline in the standard.",
   },
 });

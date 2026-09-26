@@ -68,7 +68,7 @@ export class GeminiProvider implements ChatProvider {
 
       const content = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (typeof content !== "string" || content.trim() === "") {
-        throw new ChatProviderError("resposta do Gemini sem conteúdo", this.id);
+        throw new ChatProviderError("o Gemini respondeu sem conteúdo", this.id);
       }
       this.lastUsage = {
         promptTokens: data?.usageMetadata?.promptTokenCount ?? 0,

@@ -15,28 +15,25 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
-      if (w == null || th == null) return "O comprimento desta frase está acima do gatilho de inspeção.";
+      if (w == null || th == null) return "Esta frase tem mais palavras do que o parâmetro de inspeção do Lucid.";
       const standard = f.normativeReference?.standard ?? "ISO 24495-1";
       const parameter =
         metaStr(f, "thresholdStatus") === "provisional"
-          ? "esse número é provisório para este idioma de análise, sem validação, e não um limite da norma"
-          : "esse número é um parâmetro metodológico do produto, e não um limite da norma";
+          ? "Esse número é provisório neste idioma de análise, ainda sem validação, e não é um limite da norma"
+          : "Esse número é um parâmetro do Lucid, não um limite da norma";
       return (
-        `Esta frase tem ${w} palavras. O Lucid inspeciona frases acima de ${th} palavras — ${parameter}: ` +
-        `a ${standard} pede frases concisas e variação de tamanho, sem estabelecer contagem. A verificação ` +
-        "principal é outra: veja se a frase carrega mais de uma ideia. Uma frase extensa com uma ideia só pode " +
-        "estar adequada e não precisa necessariamente ser dividida."
+        `Esta frase tem ${w} palavras, e o Lucid inspeciona frases acima de ${th}. ${parameter}: ` +
+        `a ${standard} pede frases concisas e variação de tamanho, sem estabelecer contagem. O que importa é se ` +
+        "a frase carrega mais de uma ideia: com uma só, ela pode estar adequada e não precisa ser dividida."
       );
     },
     confidence: (f) => {
       const w = metaNum(f, "words");
       const th = metaNum(f, "threshold");
       return assistida(
-        `A ferramenta mede o comprimento com exatidão${
-          w != null && th != null ? ` (${w} palavras contra o gatilho de ${th})` : ""
-        }, mas o comprimento sozinho não decide se a frase está clara: ele não distingue uma ideia longa de ` +
-          "várias ideias empilhadas, e não vê nome de órgão, referência legal nem valor por extenso, que " +
-          "alongam a frase sem multiplicar o que ela pede do leitor. Quem lê a frase e conta as ideias é você.",
+        `A contagem de palavras é exata${w != null && th != null ? ` (${w}, acima de ${th})` : ""}. O ` +
+          "comprimento sozinho, porém, não mostra se a frase tem uma ideia longa ou várias ideias empilhadas: " +
+          "nomes de órgãos, referências legais e valores por extenso alongam a frase sem acrescentar ideias.",
       );
     },
   },
@@ -50,30 +47,32 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const trecho = `«${flat(f.span.text)}» combina uma forma do verbo “ser” com um particípio.`;
       if (metaStr(f, "eventiveness") === "postposed_subject") {
-        return `${trecho} A oração começa no verbo e o sujeito vem depois do particípio — ordem que só a passiva admite. O texto não diz quem pratica a ação.`;
+        return `${trecho} A oração começa no verbo e o sujeito vem depois do particípio, ordem que só a voz passiva admite. O Lucid não encontrou na frase quem pratica a ação.`;
       }
       return `${trecho} ${
-        metaBool(f, "hasAgent") ? "O agente aparece no próprio trecho." : "O texto não diz quem praticou a ação."
+        metaBool(f, "hasAgent")
+          ? "O agente, quem pratica a ação, aparece no próprio trecho."
+          : "O Lucid não encontrou na frase quem praticou a ação."
       }`;
     },
     confidence: (f) =>
       assistida(
         metaStr(f, "eventiveness") === "postposed_subject"
-          ? `A ordem verbo-sujeito confirma a passiva, mas o agente não está no texto: virar para a ativa exigiria dizer quem pratica a ação, e isso a ferramenta se recusa a inventar.`
+          ? "A ordem verbo-sujeito confirma a voz passiva. O Lucid não inventa um agente que não está no texto."
           : metaBool(f, "hasAgent")
-            ? `O agente está no texto, então a informação existe — mas virar para a ativa exige reordenar sujeito e objeto e reconjugar o verbo. Isso está fora da garantia mecânica: a ferramenta monta o andaime, a frase final é sua.`
-            : `Além de reordenar e reconjugar, aqui o agente não está no texto: reescrever na ativa exigiria inventar quem praticou a ação. A ferramenta se recusa a fabricar e devolve a decisão a você.`,
+            ? "A voz passiva e o agente foram reconhecidos no texto. Confira se o agente está completo e se a versão na voz ativa mantém o mesmo sentido."
+            : "A construção com “ser” + particípio foi localizada. O Lucid não inventa um agente que não está no texto.",
       ),
   },
   passiva_sintetica: {
     headline: () => "Voz passiva sintética (“se”)",
     prose: (f) =>
       metaStr(f, "position") === "proclitic"
-        ? `«${flat(f.span.text)}» põe o “se” antes do verbo: a ação existe, mas o texto não diz quem a pratica (“não se aplica a multa” — quem aplica?). O detector só marca a próclise depois de uma palavra que a obriga (“${metaStr(f, "attractor") ?? "não"}”, aqui), posição onde o “se” não pode ser o condicional; e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`
-        : `«${flat(f.span.text)}» usa o “se” enclítico: a ação existe, mas o texto não diz quem a pratica (“aplica-se a multa” — quem aplica?). O detector marca a forma enclítica “verbo-se” e exclui os verbos inerentemente pronominais (trata-se, refere-se…).`,
+        ? `Em «${flat(f.span.text)}», o “se” vem antes do verbo e o texto não diz quem pratica a ação (em “não se aplica a multa”, quem aplica?). O Lucid só aponta esse “se” depois de uma palavra que obriga essa posição (aqui, “${metaStr(f, "attractor") ?? "não"}”), onde ele não pode ser o “se” condicional.`
+        : `Em «${flat(f.span.text)}», o “se” vem depois do verbo e o texto não diz quem pratica a ação (em “aplica-se a multa”, quem aplica?).`,
     confidence: () =>
       assistida(
-        `O “se” é ambíguo — pode ser passiva, indeterminação do sujeito ou reflexivo. A ferramenta não desfaz essa ambiguidade nem inventa o agente: aponta a construção e devolve a decisão a você.`,
+        "A construção foi localizada com segurança, mas o papel do “se” depende da frase: pode ser voz passiva, sujeito indeterminado ou reflexivo. Leia a frase e decida qual é o caso.",
       ),
   },
   nominalization: {
@@ -83,33 +82,36 @@ const BASE: PtNarrativeSet = {
     },
     prose: (f) => {
       const base = metaStr(f, "baseVerb");
-      return `A ação${base ? ` do verbo “${base}”` : ""} aparece disfarçada de substantivo, presa a um verbo-suporte — o que alonga a frase e afasta o verbo do seu sentido.`;
+      const light = metaStr(f, "lightVerb");
+      return `A ação${base ? ` de “${base}”` : ""} aparece como substantivo, apoiada ${
+        light ? `no verbo “${light}”` : "num verbo como “fazer” ou “realizar”"
+      }. Isso alonga a frase e esconde a ação.`;
     },
     confidence: (f) => {
       const base = metaStr(f, "baseVerb");
       if (!f.requiresHuman)
         return assistida(
-          `O mapeamento para o verbo${base ? ` “${base}”` : ""} é único e vem de léxico curado — mas reconjugar e ajustar o complemento é escrever, e a engine não escreve. Devolva a ação ao verbo na sua edição, ou peça a reescrita à IA; a engine verifica o resultado.`,
+          `Pela lista curada do Lucid, este substantivo corresponde a um único verbo${base ? `, “${base}”` : ""}. A frase nova pode ser sua ou uma proposta da IA; nos dois casos, o Lucid verifica o resultado.`,
         );
       return assistida(
-        `A construção foi detectada, mas o mapeamento desta palavra para um único verbo não é seguro (mais de um sentido possível). Escolher o verbo${base ? ` — talvez “${base}” —` : ""} é decisão sua; a ferramenta não escolhe por você.`,
+        `A construção foi reconhecida com segurança, mas este substantivo pode corresponder a mais de um verbo. Confira qual verbo expressa a ação nesta frase${base ? ` (talvez “${base}”)` : ""}.`,
       );
     },
   },
   jargon: {
     headline: (f) => `Jargão ${DOMAIN_PT[metaStr(f, "domain") ?? ""] ?? "técnico"}`,
     prose: (f) =>
-      `«${flat(f.span.text)}» é reconhecido no glossário curado como termo ${
+      `«${flat(f.span.text)}» está no glossário do Lucid como termo ${
         DOMAIN_PT[metaStr(f, "domain") ?? ""] ?? "técnico"
-      }, pouco familiar para leitores fora desse domínio.`,
+      }, pouco familiar a quem não é da área.`,
     confidence: (f) => {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `“${flat(f.span.text)}” consta no glossário curado com um equivalente único e independente de contexto; trocar por “${f.suggestion}” preserva a regência e não pede reconjugação. É uma substituição 1:1 — a ferramenta assina a equivalência; a troca no texto é sua.`,
+          rationale: `O glossário do Lucid registra “${f.suggestion}” como equivalente de “${flat(f.span.text)}”, sem outro sentido conhecido e sem mudança de regência. Se ele serve nesta frase, quem confere é você, antes de clicar.`,
         };
       return assistida(
-        `Há um equivalente mais simples, mas a troca depende do que vem depois na frase: aplicá-la às cegas poderia quebrar a concordância. A ferramenta detecta e aponta o caminho, mas deixa a troca com você.`,
+        "O termo foi reconhecido com segurança, mas o glossário não registra uma troca que sirva em qualquer frase: o sentido aqui e o que vem depois decidem. Confira o contexto antes de trocar.",
       );
     },
   },
@@ -117,15 +119,15 @@ const BASE: PtNarrativeSet = {
     headline: () => "Vocabulário da organização",
     prose: (f) =>
       `«${flat(f.span.text)}» está no vocabulário que a sua organização declarou como não familiar ao leitor dela. ` +
-      `Isto não vem da norma — vem de quem conhece o público deste documento.`,
+      "Este apontamento vem da organização, não da norma.",
     confidence: (f) => {
       if (f.suggestion !== undefined)
         return {
           level: "segura",
-          rationale: `A organização registrou “${f.suggestion}” como equivalente deste termo. Quem assina a equivalência é ela, não a ferramenta nem a norma; a troca no texto continua sendo sua.`,
+          rationale: `O termo aparece exatamente como a organização o declarou, e ela registrou “${f.suggestion}” como equivalente. Se ele serve nesta frase, quem confere é você, antes de clicar.`,
         };
       return assistida(
-        "A organização declarou o termo, mas não registrou equivalente. Sem uma troca atestada, aqui só cabe sinalizar: propor uma substituição seria a ferramenta inventar o que ninguém disse.",
+        "O termo aparece exatamente como a organização o declarou, mas ela não registrou um equivalente. Decida se ele fica, ganha uma explicação ou é trocado; o Lucid não propõe substituto.",
       );
     },
   },
@@ -136,11 +138,11 @@ const BASE: PtNarrativeSet = {
     },
     prose: (f) => {
       const a = metaStr(f, "acronym");
-      return `A sigla${a ? ` “${a}”` : ""} aparece sem ter sido apresentada por extenso antes desta ocorrência. O detector marca apenas a PRIMEIRA vez não definida, e ignora UFs, unidades e siglas universais (CPF, CEP…).`;
+      return `A sigla${a ? ` “${a}”` : ""} aparece aqui sem ter sido escrita por extenso antes. Só esta primeira ocorrência é apontada.`;
     },
     confidence: () =>
       assistida(
-        `A ferramenta localiza a primeira ocorrência não definida com exatidão, mas escrever o nome por extenso — “Nome Por Extenso (SIGLA)” — é redação sua; ela não sabe o que a sigla significa nem inventa a expansão.`,
+        "O Lucid localiza com segurança a primeira ocorrência sem apresentação, mas não sabe o que a sigla significa. Informe o nome por extenso nesta primeira ocorrência.",
       ),
   },
   subordinacao_densa: {
@@ -152,15 +154,15 @@ const BASE: PtNarrativeSet = {
       const c = metaNum(f, "clauses");
       const th = metaNum(f, "threshold");
       return `Esta frase encadeia ${c ?? "várias"} orações subordinadas${
-        th != null ? ` (limiar: ${th})` : ""
-      }. O detector conta conectivos subordinativos inequívocos — não interpreta o conteúdo, e ignora de propósito os ambíguos (“que”, “se”, “caso”…).`;
+        th != null ? `, e o Lucid aponta frases a partir de ${th}` : ""
+      }. A contagem vem de conectivos de uma lista curada, sem interpretar o conteúdo.`;
     },
     confidence: (f) => {
       const c = metaNum(f, "clauses");
       return assistida(
-        `A ferramenta conta os conectivos subordinativos com exatidão${
+        `A contagem de conectivos é exata${
           c != null ? ` (${c} nesta frase)` : ""
-        }, mas separar as orações exige decidir o que vira frase própria e reconjugar — trabalho de autor (Princípio 1). Ela aponta a densidade; a reescrita é sua.`,
+        }, mas não mede se a frase ficou difícil: algumas subordinadas são curtas e claras. Leia a frase e confira se ela prende ideias demais.`,
       );
     },
   },
@@ -172,14 +174,18 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const noun = metaStr(f, "readerNoun");
       const verb = metaStr(f, "deonticVerb");
-      return `O texto nomeia o leitor em terceira pessoa${noun ? ` (“${noun}”)` : ""}${
+      return `O texto se refere ao leitor em terceira pessoa${noun ? ` (“${noun}”)` : ""}${
         verb ? ` e lhe atribui uma obrigação (“${verb}”)` : ""
-      } — fala SOBRE o leitor em vez de falar COM ele. O detector exige sujeito + verbo deôntico, então “tem direitos” (sem obrigação) não marca.`;
+      }: fala sobre o leitor, em vez de falar com ele.`;
     },
-    confidence: () =>
-      assistida(
-        `A ferramenta reconhece o substantivo-leitor em posição de sujeito com um verbo de obrigação — mas trocar para “você” ou imperativo muda a pessoa e o registro do texto, uma decisão de estilo do autor. É um sinal fraco (info): aponta, não corrige.`,
-      ),
+    confidence: (f) => {
+      const noun = metaStr(f, "readerNoun");
+      return assistida(
+        `O Lucid reconhece com segurança uma palavra que costuma nomear o leitor, como sujeito de uma obrigação. Confira se ${
+          noun ? `“${noun}”` : "essa pessoa"
+        } é mesmo quem lê o documento e se falar diretamente com ela cabe no tom do texto.`,
+      );
+    },
   },
   salto_de_nivel_titulo: {
     headline: (f) => {
@@ -190,82 +196,86 @@ const BASE: PtNarrativeSet = {
     prose: (f) => {
       const l = metaNum(f, "level");
       const p = metaNum(f, "prevLevel");
-      return `A hierarquia de títulos pula do nível ${p ?? "anterior"} para o ${l ?? "seguinte"}, sem o degrau intermediário. O detector lê os NÍVEIS dos títulos — só existe porque o documento é estruturado (o .docx traz essa marcação; texto puro não tem título de verdade).`;
+      const jump =
+        l != null && p != null
+          ? `A hierarquia de títulos pula do nível ${p} para o ${l}, sem o nível intermediário.`
+          : "A hierarquia de títulos pula um nível, sem o nível intermediário.";
+      return `${jump} O nível vem da marcação de título do documento, não do tamanho da letra.`;
     },
     confidence: () =>
       assistida(
-        `A ferramenta lê os níveis dos títulos com exatidão, mas decidir se este título deve subir de nível ou se falta um título intermediário depende da organização do conteúdo — trabalho de autor.`,
+        "Os níveis são lidos com exatidão da marcação do documento. Confira se este título deve subir de nível ou se falta um título intermediário: isso depende de como o conteúdo está organizado.",
       ),
   },
   nominalizacao_encadeada: {
     headline: (f) => (metaStr(f, "kind") === "chain" ? "Nominalizações em cadeia" : "Nominalizações concentradas"),
     prose: (f) =>
       metaStr(f, "kind") === "chain"
-        ? `Em «${flat(f.span.text)}», uma ação aparece como substantivo. Isso torna o trecho mais abstrato e deixa menos claro quem realiza a ação.`
-        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos de ação. Cada um transforma uma ação em substantivo, e o acúmulo torna a leitura mais abstrata.`,
+        ? `Em «${flat(f.span.text)}», a ação aparece como substantivo e se liga por “de” a outro substantivo abstrato. O trecho fica mais abstrato e deixa menos claro quem realiza a ação.`
+        : `A frase concentra ${metaNum(f, "count") ?? "vários"} substantivos que nomeiam ações. Juntos, eles deixam a leitura mais abstrata e escondem quem faz o quê.`,
     confidence: () =>
       assistida(
-        `A detecção é por léxico curado e adjacência — sem interpretação. Mas desfazer a nominalização é devolver a ação ao verbo e dizer quem a pratica, o que muda a estrutura da frase; a ferramenta não reescreve nem inventa o agente.`,
+        "Os substantivos são localizados com segurança, a partir de uma lista curada. Nem todo substantivo de ação precisa sair, e devolver a ação ao verbo exige saber quem a pratica: confira se o texto diz quem age.",
       ),
   },
   mais_que_perfeito_sintetico: {
     confidence: () =>
       assistida(
-        `A forma está correta, mas o mais-que-perfeito sintético (“fizera”) soa arcaico e trava o leitor. A forma composta (“tinha feito”) é mais clara — trocar exige reconjugar com o auxiliar, o que a ferramenta não faz sozinha.`,
+        "A forma foi reconhecida com segurança e está gramaticalmente correta; o que pesa é ser rara na fala. Ao reescrever, confira se o auxiliar e a pessoa do verbo concordam com o resto da frase.",
       ),
   },
   gerundismo: {
     confidence: () =>
       assistida(
-        `O gerúndio encadeado (“vamos estar enviando”) alonga sem informar. O futuro simples ou o presente (“enviaremos”, “enviamos”) diz o mesmo em menos palavras — mas reescrever muda a forma verbal, decisão sua.`,
+        "O padrão “ir + estar + gerúndio” foi reconhecido com segurança. Ao trocar pelo futuro ou pelo presente, confira se a frase continua dizendo quando a ação acontece.",
       ),
   },
   adverbio_mente_denso: {
     confidence: () =>
       assistida(
-        `Critério descontinuado (ADR-058): conta advérbios em -mente por densidade. Substituído por “Advérbios vagos”, que mira o advérbio-fumaça em si. Desligado por padrão.`,
+        "Critério descontinuado e desligado por padrão: conta quantos advérbios em -mente há na frase, sem avaliar cada um. “Advérbios vagos” o substitui. Confira quais advérbios acrescentam sentido antes de cortar.",
       ),
   },
   adverbios_vagos: {
     confidence: () =>
       assistida(
-        `A ferramenta reconhece o advérbio vago pelo léxico curado, mas decidir se cortá-lo enfraquece ou limpa a frase depende da ênfase que você quer — por isso é um sinal fraco (info) que aponta, não corrige.`,
+        "O advérbio foi reconhecido com segurança, a partir de uma lista curada. Se ele só reforça ou também muda o que a frase afirma depende da ênfase que você quer dar.",
       ),
   },
   redundancia: {
     confidence: () =>
       assistida(
-        `A ferramenta reconhece a dupla redundante, mas escolher qual termo cortar é decisão sua — por isso aponta a forma enxuta na justificativa em vez de aplicar.`,
+        "A expressão foi reconhecida com segurança, a partir de uma lista curada. Qual termo cortar depende da frase: confira se o que sobra diz o mesmo.",
       ),
   },
   perifrase_inflada: {
     confidence: () =>
       assistida(
-        `A perífrase tem uma forma enxuta equivalente, mas trocá-la pode mudar a regência do que vem depois — a ferramenta aponta a forma direta e deixa a troca com você.`,
+        "A locução foi reconhecida com segurança, a partir de uma lista curada. Uma forma mais curta pode mudar a regência ou o sentido do que vem depois: confira a frase inteira antes de trocar.",
       ),
   },
   paragraph_length: {
     confidence: () =>
       assistida(
-        `A ferramenta conta as frases do parágrafo com exatidão, mas onde cortá-lo em blocos menores depende da organização das ideias — decisão de autor.`,
+        "A contagem de frases é exata, e o limite é um parâmetro do Lucid, não da norma. Confira se o parágrafo trata de mais de uma ideia; onde separar depende de como elas se organizam.",
       ),
   },
   prose_enumeration: {
     confidence: () =>
       assistida(
-        `A ferramenta reconhece a enumeração embutida na prosa, mas transformá-la em lista é uma decisão de formatação que muda a estrutura do texto — sua.`,
+        "Os marcadores de sequência foram reconhecidos com segurança. Confira se os itens se entendem soltos, numa lista, ou se dependem do texto que os liga.",
       ),
   },
   mesoclise: {
     confidence: () =>
       assistida(
-        `A mesóclise (“far-se-á”) está correta, mas é rara e trava a leitura. Reescrever sem ela (“será feito”, “vai fazer”) muda a construção — trabalho de autor, não troca mecânica.`,
+        "A mesóclise foi reconhecida com segurança e está gramaticalmente correta; o que pesa é ser rara. Reescrever sem ela muda a construção da frase; confira se a versão nova diz quem faz o quê.",
       ),
   },
   dupla_negacao: {
     confidence: () =>
       assistida(
-        `A ferramenta reconhece a litotes (“não é incomum”), mas afirmar direto (“é comum”) pode mudar a nuance que você quis dar — por isso aponta a forma direta e deixa a decisão com você.`,
+        "A dupla negação foi reconhecida com segurança, a partir de uma lista curada. Afirmar direto (“é comum” no lugar de “não é incomum”) pode perder a nuance que você quis dar: confira se ela importa aqui.",
       ),
   },
   long_heading: {
@@ -275,13 +285,13 @@ const BASE: PtNarrativeSet = {
     },
     confidence: () =>
       assistida(
-        `A ferramenta mede o título (palavras, número de frases, pontuação final) com exatidão, mas encurtá-lo ou reformulá-lo como um rótulo depende do que é essencial para o leitor — trabalho de autor.`,
+        "A medida do título (palavras, frases e ponto final) é exata, e o limite de palavras é um parâmetro do Lucid. Confira o que é essencial para o leitor localizar a seção; o resto pode ir para o texto.",
       ),
   },
   single_item_list: {
     confidence: () =>
       assistida(
-        `A ferramenta reconhece a lista de um item só, mas decidir entre completar a lista ou dissolvê-la no texto corrido depende do conteúdo — decisão de autor.`,
+        "A contagem é exata: a lista tem um item só. Confira se falta algum item ou se o conteúdo cabe melhor no texto corrido.",
       ),
   },
 };

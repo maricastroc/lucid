@@ -41,18 +41,18 @@ export function HumanDecision({
         <Disclosure label={c.note.howToProceed}>
           <p className="text-[12px] leading-relaxed text-ink-2">{rationale}</p>
           <div className="mt-3">
-            <Guidance
-              finding={finding}
-              source={source}
-              allFindings={allFindings}
-              declaration={declaration}
-              onDeclare={onDeclare}
-            />
+            <Guidance finding={finding} source={source} allFindings={allFindings} />
           </div>
         </Disclosure>
 
         {locale.rewriteAvailable ? (
-          <AiRewritePanel finding={finding} source={source} declaration={declaration} onApplyRewrite={onApplyRewrite} />
+          <AiRewritePanel
+            finding={finding}
+            source={source}
+            declaration={declaration}
+            onDeclare={onDeclare}
+            onApplyRewrite={onApplyRewrite}
+          />
         ) : (
           <p className="mt-4 text-[11.5px] leading-relaxed text-ink-3">{c.note.aiUnavailableForLocale}</p>
         )}

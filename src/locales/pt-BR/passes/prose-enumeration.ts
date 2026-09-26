@@ -82,8 +82,8 @@ export const proseEnumerationPass: Pass<PtConfig> = {
         severity: "warning",
         requiresHuman: true,
         justification:
-          `Enumeração em prosa — ${ranks.size} itens (${examples}) embutidos ` +
-          "no texto corrido. Uma lista deixaria os itens mais fáceis de localizar e comparar; a ferramenta não converte automaticamente.",
+          `Enumeração em prosa: ${ranks.size} itens marcados dentro do texto corrido (${examples}). Em lista, ` +
+          "cada item fica mais fácil de localizar e comparar. Considere transformar o trecho em lista.",
         meta: { items: ranks.size, notation },
       });
     }

@@ -61,15 +61,13 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: 
   out.push("## Alterações registradas");
   out.push("");
   out.push(
-    "Alterações aplicadas a partir de um ponto da revisão — troca do glossário, edição do autor e proposta de IA — " +
-      "com o peso de severidade do documento (ABNT/ADR-018) antes e depois de cada uma. É um registro do que foi " +
-      "feito, não um atestado de qualidade.",
+    "Alterações registradas nesta sessão, com o peso de severidade do documento antes e depois de cada uma. " +
+      "A escala desse peso é do Lucid, não da norma. É um registro do que foi feito, não um atestado de qualidade.",
   );
   out.push("");
   out.push(
-    "**Esta lista não é o histórico completo de edição.** Texto reescrito à mão no modo Escrever altera o " +
-      "documento sem gerar entrada aqui, e a variação de peso abaixo não atribui a essas edições nada do que " +
-      "mudou.",
+    `Texto digitado no modo Escrever entra como uma única alteração (“${sourceLabel("typing")}”) quando o autor ` +
+      "sai desse modo. **Uma edição ainda aberta no modo Escrever não aparece aqui.**",
   );
   out.push("");
   const first = entries[0];
@@ -82,7 +80,7 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: 
   entries.forEach((e, i) => {
     const move = burdenMove(e);
     const mark = move === "level" ? "(sem mudança de peso)" : move === "down" ? "↓" : "↑";
-    out.push(`**${i + 1}. ${e.label}** — peso ${fmt(e.burdenBefore)} → ${fmt(e.burdenAfter)} ${mark}`);
+    out.push(`**${i + 1}. ${e.label}**: peso ${fmt(e.burdenBefore)} → ${fmt(e.burdenAfter)} ${mark}`);
     if (e.attestedIn !== undefined) out.push(`_equivalência atestada em:_ ${e.attestedIn}`);
     if (e.before !== undefined && e.after !== undefined && e.before !== "") {
       out.push(`_de:_ "${truncate(collapse(e.before))}" · _para:_ "${truncate(collapse(e.after))}"`);
@@ -102,15 +100,15 @@ export function renderLedgerMarkdown(entries: readonly LedgerEntry[], localeId: 
 
   if (entries.some((e) => e.source === "typing")) {
     out.push(
-      "_Trecho reescrito à mão: a comparação é da região inteira. Dentro dela não é possível dizer qual " +
+      "_Trecho reescrito à mão: a comparação vale para a região inteira. Dentro dela, não é possível dizer qual " +
         "ocorrência corresponde a qual._",
     );
     out.push("");
   }
   if (entries.some((e) => e.attribution?.changes.some((c) => c.scope === "indirect"))) {
     out.push(
-      "_Efeito indireto: mudou fora do trecho editado. Critérios de título comparam um bloco com outro, " +
-        "então mexer em um muda o veredito do vizinho._",
+      "_Efeito indireto: a contagem mudou fora do trecho editado. Alguns critérios comparam partes diferentes do " +
+        "texto, como um título e o anterior, então mexer em um trecho pode mudar o resultado de outro._",
     );
     out.push("");
   }

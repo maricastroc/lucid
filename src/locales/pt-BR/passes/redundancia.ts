@@ -18,16 +18,16 @@ export const redundanciaPass: Pass<PtConfig> = {
 
     for (const sentence of ctx.doc.sentences) {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
-        const enxuta = hit.entry.plain ? ` Bastaria “${hit.entry.plain}”.` : "";
+        const next = hit.entry.plain
+          ? ` Forma enxuta registrada: “${hit.entry.plain}”. Confira se ela mantém o sentido nesta frase.`
+          : " Corte o termo que repete o sentido do outro.";
         findings.push({
           criterion: CRITERION,
           category: "lexical",
           span: { start: hit.start, end: hit.end, text: hit.text },
           severity: "warning",
           requiresHuman: true,
-          justification:
-            `Redundância — “${hit.text}” repete a mesma ideia em dois termos, sem acrescentar ` +
-            `informação.${enxuta} A ferramenta não corta sozinha porque escolher o que remover é decisão sua.`,
+          justification: `Redundância: “${hit.text}” diz a mesma coisa duas vezes, sem acrescentar informação.${next}`,
         });
       }
     }

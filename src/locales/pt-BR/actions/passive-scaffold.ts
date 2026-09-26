@@ -39,6 +39,7 @@ export function passiveScaffold(finding: Finding, source: string): PassiveScaffo
 
   const participleStart = metaNum(finding, "participleStart");
   const participleEnd = metaNum(finding, "participleEnd");
+  const agentMarkerStart = metaNum(finding, "agentMarkerStart");
   const agentMarkerEnd = metaNum(finding, "agentMarkerEnd");
   const agentEnd = metaNum(finding, "agentEnd");
   if (participleStart === null || participleEnd === null || agentMarkerEnd === null || agentEnd === null) return null;
@@ -48,7 +49,9 @@ export function passiveScaffold(finding: Finding, source: string): PassiveScaffo
 
   const participle = source.slice(participleStart, participleEnd);
   const subjectStart = sentenceSpanAt(source, finding.span.start, ABBREVIATIONS).start;
-  const objectRaw = trimRole(source.slice(subjectStart, finding.span.start));
+  const preverbal = trimRole(source.slice(subjectStart, finding.span.start));
+  const postposed = agentMarkerStart === null ? "" : trimRole(source.slice(participleEnd, agentMarkerStart));
+  const objectRaw = finding.meta?.agentAfterSubject === true ? postposed : preverbal;
 
   return {
     agent,

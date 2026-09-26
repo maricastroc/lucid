@@ -5,7 +5,7 @@ exports[`snapshots of the full Diagnostic > 'admin_simples_sem_finding' 1`] = `
   "findings": [],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -252,7 +252,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "long_sentence",
-      "justification": "Frase com 29 palavras. O Lucid inspeciona frases acima de 20 palavras — um parâmetro do produto, não um limite da norma: a ABNT NBR ISO 24495-1 pede frases concisas e variação de tamanho, sem fixar número. Verifique se a frase carrega mais de uma ideia; se carrega uma só, ela pode estar adequada como está.",
+      "justification": "Frase com 29 palavras. O Lucid inspeciona frases com mais de 20 palavras; esse número é um parâmetro do produto, não um limite da norma, que pede frases concisas sem fixar tamanho. Verifique se a frase carrega mais de uma ideia: se carregar, separe as ideias; se carregar uma só, ela pode ficar como está.",
       "meta": {
         "threshold": 20,
         "words": 29,
@@ -274,7 +274,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Concentração de nominalizações (3 nesta frase) — substantivos de ação empilhados pesam a leitura. Considere devolver algumas ações ao verbo; a ferramenta não decide quais.",
+      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
       "meta": {
         "count": 3,
         "kind": "density",
@@ -296,7 +296,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Concentração de nominalizações (3 nesta frase) — substantivos de ação empilhados pesam a leitura. Considere devolver algumas ações ao verbo; a ferramenta não decide quais.",
+      "justification": "Frase com 3 substantivos de ação (nominalizações): o acúmulo pesa a leitura. Escolha quais ações voltam a ser verbos.",
       "meta": {
         "count": 3,
         "kind": "density",
@@ -318,7 +318,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
       "meta": {
         "kind": "chain",
         "links": 1,
@@ -341,7 +341,7 @@ exports[`snapshots of the full Diagnostic > 'frase_longa' 1`] = `
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -588,7 +588,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Voz passiva sem agente: o Lucid não encontrou na frase quem praticou a ação. Se ela não diz, informe quem a praticou para que a versão final possa nomear esse agente.",
       "meta": {
         "eventiveness": "eventive_tense",
         "hasAgent": false,
@@ -612,7 +612,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
     {
       "category": "lexical",
       "criterion": "jargon",
-      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "no âmbito de"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "justification": "Termo jurídico que pode não ser familiar a leitores de fora dessa área. O glossário do Lucid registra “no âmbito de” como equivalente; confira se ele mantém o sentido nesta frase antes de usá-lo.",
       "meta": {
         "domain": "legal",
         "kind": "phrase",
@@ -636,7 +636,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
     {
       "category": "lexical",
       "criterion": "jargon",
-      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "citado acima"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "justification": "Termo jurídico que pode não ser familiar a leitores de fora dessa área. O glossário do Lucid registra “citado acima” como equivalente; confira se ele mantém o sentido nesta frase antes de usá-lo.",
       "meta": {
         "domain": "legal",
         "kind": "word",
@@ -660,7 +660,7 @@ exports[`snapshots of the full Diagnostic > 'juridico_com_jargao' 1`] = `
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -907,7 +907,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "analisar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
+      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “analisar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "analisar",
         "lightVerb": "fazer",
@@ -930,7 +930,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
       "meta": {
         "kind": "chain",
         "links": 1,
@@ -953,7 +953,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "pagar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
+      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “pagar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "pagar",
         "lightVerb": "realizar",
@@ -976,7 +976,7 @@ exports[`snapshots of the full Diagnostic > 'nominalizacao_mapeamento_unico' 1`]
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1223,7 +1223,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "long_sentence",
-      "justification": "Frase com 29 palavras. O Lucid inspeciona frases acima de 20 palavras — um parâmetro do produto, não um limite da norma: a ABNT NBR ISO 24495-1 pede frases concisas e variação de tamanho, sem fixar número. Verifique se a frase carrega mais de uma ideia; se carrega uma só, ela pode estar adequada como está.",
+      "justification": "Frase com 29 palavras. O Lucid inspeciona frases com mais de 20 palavras; esse número é um parâmetro do produto, não um limite da norma, que pede frases concisas sem fixar tamanho. Verifique se a frase carrega mais de uma ideia: se carregar, separe as ideias; se carregar uma só, ela pode ficar como está.",
       "meta": {
         "threshold": 20,
         "words": 29,
@@ -1245,7 +1245,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a ação. Considere reescrever na voz ativa para tornar a frase mais direta; a ferramenta não reescreve automaticamente.",
+      "justification": "Voz passiva com agente explícito: a frase diz quem praticou a ação, mas só depois do verbo. Considere a voz ativa, com esse agente como sujeito, para o leitor saber logo quem faz o quê.",
       "meta": {
         "agentEnd": 36,
         "agentMarkerEnd": 27,
@@ -1274,7 +1274,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalization",
-      "justification": "Nominalização com verbo-suporte — o verbo "verificar" substitui a construção diretamente, e o mapeamento é único e seguro. A ferramenta não reescreve: devolva a ação ao verbo na sua edição, ou peça a reescrita à IA — a engine verifica o resultado.",
+      "justification": "Nominalização com verbo-suporte: a ação está escondida num substantivo, e o verbo que corresponde a ele é um só: “verificar”. Reescreva com esse verbo, conjugado, e ajuste o complemento. O Lucid não reescreve a frase: ele verifica a sua versão ou a proposta da IA.",
       "meta": {
         "baseVerb": "verificar",
         "lightVerb": "fazer",
@@ -1297,7 +1297,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "syntactic",
       "criterion": "nominalizacao_encadeada",
-      "justification": "Nominalização com complemento abstrato encadeado por “de” — a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas a troca muda a estrutura da frase; a ferramenta marca e não reescreve.",
+      "justification": "Nominalização seguida de complemento abstrato ligado por “de”: a ação principal está escondida num substantivo. Em geral dá para reescrever com o verbo, mas isso muda a estrutura da frase; avalie se a versão com o verbo fica mais clara.",
       "meta": {
         "kind": "chain",
         "links": 1,
@@ -1320,7 +1320,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "lexical",
       "criterion": "jargon",
-      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "citados acima"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "justification": "Termo jurídico que pode não ser familiar a leitores de fora dessa área. O glossário do Lucid registra “citados acima” como equivalente; confira se ele mantém o sentido nesta frase antes de usá-lo.",
       "meta": {
         "domain": "legal",
         "kind": "word",
@@ -1344,7 +1344,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
     {
       "category": "lexical",
       "criterion": "jargon",
-      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "no âmbito de"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "justification": "Termo jurídico que pode não ser familiar a leitores de fora dessa área. O glossário do Lucid registra “no âmbito de” como equivalente; confira se ele mantém o sentido nesta frase antes de usá-lo.",
       "meta": {
         "domain": "legal",
         "kind": "phrase",
@@ -1368,7 +1368,7 @@ exports[`snapshots of the full Diagnostic > 'quatro_criterios_span_sobreposto' 1
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1615,7 +1615,7 @@ exports[`snapshots of the full Diagnostic > 'termos_protegidos_por_guardas' 1`] 
     {
       "category": "lexical",
       "criterion": "jargon",
-      "justification": "Este termo pode não ser familiar para leitores fora do domínio jurídico. Poderia ser substituído por "além disso"; a ferramenta não reescreve automaticamente — veja a sugestão.",
+      "justification": "Termo jurídico que pode não ser familiar a leitores de fora dessa área. O glossário do Lucid registra “além disso” como equivalente; confira se ele mantém o sentido nesta frase antes de usá-lo.",
       "meta": {
         "domain": "legal",
         "kind": "word",
@@ -1639,7 +1639,7 @@ exports[`snapshots of the full Diagnostic > 'termos_protegidos_por_guardas' 1`] 
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -1885,7 +1885,7 @@ exports[`snapshots of the full Diagnostic > 'texto_vazio' 1`] = `
   "findings": [],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2132,7 +2132,7 @@ exports[`snapshots of the full Diagnostic > 'unicode_aspas_travessao' 1`] = `
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Voz passiva sem agente: o Lucid não encontrou na frase quem praticou a ação. Se ela não diz, informe quem a praticou para que a versão final possa nomear esse agente.",
       "meta": {
         "eventiveness": "eventive_tense",
         "hasAgent": false,
@@ -2156,7 +2156,7 @@ exports[`snapshots of the full Diagnostic > 'unicode_aspas_travessao' 1`] = `
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",
@@ -2403,7 +2403,7 @@ exports[`snapshots of the full Diagnostic > 'voz_passiva_com_e_sem_agente' 1`] =
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, com agente explícito — o texto já diz quem praticou a ação. Considere reescrever na voz ativa para tornar a frase mais direta; a ferramenta não reescreve automaticamente.",
+      "justification": "Voz passiva com agente explícito: a frase diz quem praticou a ação, mas só depois do verbo. Considere a voz ativa, com esse agente como sujeito, para o leitor saber logo quem faz o quê.",
       "meta": {
         "agentEnd": 38,
         "agentMarkerEnd": 29,
@@ -2432,7 +2432,7 @@ exports[`snapshots of the full Diagnostic > 'voz_passiva_com_e_sem_agente' 1`] =
     {
       "category": "syntactic",
       "criterion": "passive_voice",
-      "justification": "Frase na voz passiva, sem agente que a ferramenta reconheça com segurança. Ela reconhece "pelo/pela/pelos/pelas" e "por" seguido de nome próprio, pronome ou determinante indefinido ("por João", "por ela", "por uma comissão"); "por" + substantivo comum ("por lei", "por engano") fica de fora por ser ambíguo entre agente e adjunto. Indique o agente ou reescreva na voz ativa; a ferramenta não reescreve automaticamente porque isso exigiria adivinhar quem agiu.",
+      "justification": "Voz passiva sem agente: o Lucid não encontrou na frase quem praticou a ação. Se ela não diz, informe quem a praticou para que a versão final possa nomear esse agente.",
       "meta": {
         "eventiveness": "eventive_tense",
         "hasAgent": false,
@@ -2456,7 +2456,7 @@ exports[`snapshots of the full Diagnostic > 'voz_passiva_com_e_sem_agente' 1`] =
   ],
   "meta": {
     "configHash": "4c2da7fd",
-    "dataHash": "aa82277c",
+    "dataHash": "a506847f",
     "localeId": "pt-BR",
     "lucidVersion": "0.1.0",
     "standardVersion": "ABNT NBR ISO 24495-1:2024",

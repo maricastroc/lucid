@@ -97,7 +97,7 @@ describe("the report carries the profile it was produced under", () => {
   it("states the limits of comparing that score with another", () => {
     expect(report("normativo")).toContain("não é comparável a um padrão");
     expect(report("publico")).toContain("perfil errado para aquele documento");
-    expect(report("digital")).toContain("quatro critérios ficam sem objeto");
+    expect(report("digital")).toContain("os critérios de título e de lista ficam sem objeto");
   });
 
   it("says when the thresholds are the profile's own, with no hand adjustment", () => {
