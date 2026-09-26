@@ -1,0 +1,395 @@
+{
+  "summary": {
+    "r1×r2": [
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.condicao",
+        "regressions": 1,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.excecao",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "label.kept",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_new_findings",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.region_improved",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved[long_sentence]",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_criteria",
+        "regressions": 3,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_passive",
+        "regressions": 2,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.entities_preserved",
+        "regressions": 2,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.possible_invented_obligation",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.list_rule",
+        "regressions": 0,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto_exceto_comprimento",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "directed.kept_passive_verbatim",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "fid.refs",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_new_findings",
+        "regressions": 2,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.numbers_preserved",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.region_improved",
+        "regressions": 2,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved[outros]",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "region.no_new_criteria",
+        "regressions": 2,
+        "improvements": 0
+      }
+    ],
+    "r1×r3": [
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.condicao",
+        "regressions": 0,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "label.kept",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_new_findings",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.region_improved",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved",
+        "regressions": 1,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved[long_sentence]",
+        "regressions": 1,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_criteria",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.entities_preserved",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.list_rule",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto",
+        "regressions": 1,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto_exceto_comprimento",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "directed",
+        "check": "directed.kept_passive_verbatim",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.condicao",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "fid.refs",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_new_findings",
+        "regressions": 3,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.numbers_preserved",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.region_improved",
+        "regressions": 3,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "region.no_new_criteria",
+        "regressions": 1,
+        "improvements": 0
+      }
+    ],
+    "r2×r3": [
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.condicao",
+        "regressions": 1,
+        "improvements": 3
+      },
+      {
+        "suite": "rewrite",
+        "check": "fid.marker.excecao",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "label.kept",
+        "regressions": 0,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.no_new_findings",
+        "regressions": 1,
+        "improvements": 3
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.region_improved",
+        "regressions": 1,
+        "improvements": 3
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved",
+        "regressions": 2,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "proof.target_resolved[long_sentence]",
+        "regressions": 2,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_criteria",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "region.no_new_passive",
+        "regressions": 1,
+        "improvements": 2
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.entities_preserved",
+        "regressions": 1,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "signal.possible_invented_obligation",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "style.list_rule",
+        "regressions": 3,
+        "improvements": 0
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto",
+        "regressions": 2,
+        "improvements": 1
+      },
+      {
+        "suite": "rewrite",
+        "check": "verdict.sem_veto_exceto_comprimento",
+        "regressions": 1,
+        "improvements": 3
+      },
+      {
+        "suite": "directed",
+        "check": "fid.marker.condicao",
+        "regressions": 0,
+        "improvements": 1
+      },
+      {
+        "suite": "directed",
+        "check": "proof.no_new_findings",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.region_improved",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "proof.target_resolved[outros]",
+        "regressions": 1,
+        "improvements": 0
+      },
+      {
+        "suite": "directed",
+        "check": "region.no_new_criteria",
+        "regressions": 0,
+        "improvements": 1
+      }
+    ]
+  },
+  "flips": {
+    "rewrite": {
+      "items": 157,
+      "unstable": 4,
+      "rate": 0.025477707006369428,
+      "unstableItems": [
+        "planalto-leis__1989-1994-l8022.txt#1620-1894",
+        "planalto-leis__1989-1994-l8010.txt#550-915",
+        "planalto-leis__1989-1994-l8022.txt#847-1071",
+        "planalto-leis__1989-1994-l7999.txt#13979-14415"
+      ]
+    },
+    "directed": {
+      "items": 44,
+      "unstable": 0,
+      "rate": 0,
+      "unstableItems": []
+    },
+    "probe": {
+      "items": 27,
+      "unstable": 0,
+      "rate": 0,
+      "unstableItems": []
+    }
+  }
+}

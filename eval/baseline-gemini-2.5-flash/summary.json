@@ -194,12 +194,12 @@
       "Na produção, a rota cria LlmRewriteProposer sem estratégia (src/app/api/rewrite/route.ts:77) e o id é fixado no construtor (src/report/rewrite/llm-proposer.ts:34): proposta feita com o prompt directed@4 sai carimbada rewrite@6. Aqui stampedId guarda o carimbo de produção e promptVersion guarda o prompt realmente usado."
     ]
   },
-  "rows": 456,
-  "distinctKeys": 456,
-  "costUsd": 0.8007153,
+  "rows": 684,
+  "distinctKeys": 684,
+  "costUsd": 1.2011742000000005,
   "tokens": {
-    "prompt": 2349726,
-    "candidates": 38319,
+    "prompt": 3524589,
+    "candidates": 57519,
     "thoughts": 0
   },
   "production": {
@@ -233,6 +233,21 @@
         "possible_category_narrowed": 1
       }
     },
+    "rewrite·r3": {
+      "n": 157,
+      "vetoPct": 56.05095541401274,
+      "failedProofs": {
+        "target_resolved": 86,
+        "no_new_findings": 26,
+        "region_improved": 26,
+        "numbers_preserved": 1
+      },
+      "signals": {
+        "entities_preserved": 29,
+        "possible_invented_obligation": 21,
+        "possible_category_narrowed": 1
+      }
+    },
     "directed·r1": {
       "n": 44,
       "vetoPct": 100,
@@ -256,6 +271,21 @@
         "numbers_preserved": 32,
         "no_new_findings": 18,
         "region_improved": 18
+      },
+      "signals": {
+        "entities_preserved": 33,
+        "possible_category_narrowed": 2,
+        "possible_invented_obligation": 2
+      }
+    },
+    "directed·r3": {
+      "n": 44,
+      "vetoPct": 100,
+      "failedProofs": {
+        "target_resolved": 36,
+        "numbers_preserved": 32,
+        "no_new_findings": 19,
+        "region_improved": 19
       },
       "signals": {
         "entities_preserved": 33,
@@ -389,6 +419,67 @@
       "errors": 0
     },
     {
+      "candidate": "directed@4 · r3",
+      "model": "gemini-2.5-flash",
+      "context": "full",
+      "n": 44,
+      "changedPct": 100,
+      "proofsPassedMean": 4.704545454545454,
+      "proofsTotalMean": 7.0227272727272725,
+      "vetoPct": 90.9090909090909,
+      "failedProofCounts": {
+        "numbers_preserved": 32,
+        "target_resolved": 32,
+        "no_new_findings": 19,
+        "region_improved": 19
+      },
+      "regionBurdenBefore": 2.6068181818181815,
+      "regionBurdenAfter": 3.034090909090909,
+      "regionWorsePct": 43.18181818181818,
+      "totalBurdenDelta": 0.42727272727272664,
+      "totalWorsePct": 43.18181818181818,
+      "newCriteriaMean": 0.13636363636363635,
+      "newCriteriaCounts": {
+        "adverbios_vagos": 3,
+        "subordinacao_densa": 3
+      },
+      "refsLostPct": 68.18181818181819,
+      "relationsLostPct": 2.272727272727273,
+      "valuesLostPct": 2.272727272727273,
+      "markerFamilyLostPct": 25,
+      "markerFamilyLostCounts": {
+        "condicao": 9,
+        "proibicao": 2,
+        "excecao": 1,
+        "obrigacao": 1
+      },
+      "growthMean": -0.021918152459603216,
+      "inflatedPct": 0,
+      "paragraphsLostPct": 0,
+      "over20Before": 1,
+      "over20After": 0.9772727272727273,
+      "shortSentencesAddedMean": 0.4772727272727273,
+      "parentheticalsAddedMean": 0.5227272727272727,
+      "markupLeakedPct": 0,
+      "producedListPct": 0,
+      "entitiesFlaggedPct": 75,
+      "inventedAgentPct": 0,
+      "structure": {
+        "unchanged": 44
+      },
+      "refusalReasons": {},
+      "docxOk": 0,
+      "docxBroken": 0,
+      "promptTokensMean": 3342.5454545454545,
+      "completionTokensMean": 90,
+      "totalTokens": 151032,
+      "latencyMeanMs": 1126.2272727272727,
+      "latencyP95Ms": 1613,
+      "truncated": 0,
+      "unparseable": 0,
+      "errors": 0
+    },
+    {
       "candidate": "rewrite@6 · r1",
       "model": "gemini-2.5-flash",
       "context": "full",
@@ -517,40 +608,181 @@
       "truncated": 0,
       "unparseable": 0,
       "errors": 0
+    },
+    {
+      "candidate": "rewrite@6 · r3",
+      "model": "gemini-2.5-flash",
+      "context": "full",
+      "n": 157,
+      "changedPct": 100,
+      "proofsPassedMean": 6.13375796178344,
+      "proofsTotalMean": 7.038216560509555,
+      "vetoPct": 56.68789808917197,
+      "failedProofCounts": {
+        "target_resolved": 86,
+        "no_new_findings": 26,
+        "region_improved": 26,
+        "directed_findings_resolved": 3,
+        "numbers_preserved": 1
+      },
+      "regionBurdenBefore": 1.7025477707006373,
+      "regionBurdenAfter": 1.3796178343949048,
+      "regionWorsePct": 16.56050955414013,
+      "totalBurdenDelta": -0.3356687898089171,
+      "totalWorsePct": 16.56050955414013,
+      "newCriteriaMean": 0.28662420382165604,
+      "newCriteriaCounts": {
+        "passive_voice": 38,
+        "passiva_sintetica": 4,
+        "adverbios_vagos": 1,
+        "leitor_terceira_pessoa": 1,
+        "single_item_list": 1
+      },
+      "refsLostPct": 0.6369426751592356,
+      "relationsLostPct": 0.6369426751592356,
+      "valuesLostPct": 0,
+      "markerFamilyLostPct": 22.929936305732483,
+      "markerFamilyLostCounts": {
+        "condicao": 32,
+        "excecao": 4,
+        "proibicao": 3,
+        "obrigacao": 1
+      },
+      "growthMean": 0.02213353211684422,
+      "inflatedPct": 0.6369426751592356,
+      "paragraphsLostPct": 0,
+      "over20Before": 0.9872611464968153,
+      "over20After": 0.6496815286624203,
+      "shortSentencesAddedMean": 1.2101910828025477,
+      "parentheticalsAddedMean": 0.10828025477707007,
+      "markupLeakedPct": 0,
+      "producedListPct": 4.45859872611465,
+      "entitiesFlaggedPct": 18.471337579617835,
+      "inventedAgentPct": 0,
+      "structure": {
+        "unchanged": 103,
+        "expanded": 54
+      },
+      "refusalReasons": {},
+      "docxOk": 54,
+      "docxBroken": 0,
+      "promptTokensMean": 6479.12101910828,
+      "completionTokensMean": 83.89171974522293,
+      "totalTokens": 1030393,
+      "latencyMeanMs": 1181.1210191082803,
+      "latencyP95Ms": 1678,
+      "truncated": 0,
+      "unparseable": 0,
+      "errors": 0
     }
   ],
   "stability": {
     "rewrite": {
-      "pairs": 157,
-      "identicalText": 110,
-      "sameVeto": 154,
-      "sameFailedProofs": 154,
+      "pairwise": [
+        {
+          "a": 1,
+          "b": 2,
+          "pairs": 157,
+          "identicalText": 110,
+          "sameVeto": 154,
+          "sameFailedProofs": 154,
+          "jaccardMean": 0.9585770520256728
+        },
+        {
+          "a": 1,
+          "b": 3,
+          "pairs": 157,
+          "identicalText": 116,
+          "sameVeto": 155,
+          "sameFailedProofs": 152,
+          "jaccardMean": 0.9702059335477605
+        },
+        {
+          "a": 2,
+          "b": 3,
+          "pairs": 157,
+          "identicalText": 105,
+          "sameVeto": 154,
+          "sameFailedProofs": 151,
+          "jaccardMean": 0.954742127159362
+        }
+      ],
+      "items": 157,
+      "allIdentical": 87,
+      "unanimousVeto": 153,
+      "unanimousFailedProofs": 150,
+      "majorityVetoed": 87,
       "flips": [
         {
           "itemId": "planalto-leis__1989-1994-l8022.txt#1620-1894",
-          "r1": "veto(target_resolved)",
-          "r2": "sem veto"
+          "verdicts": [
+            "veto(target_resolved)",
+            "sem veto",
+            "veto(target_resolved)"
+          ]
         },
         {
           "itemId": "planalto-leis__1989-1994-l8010.txt#550-915",
-          "r1": "sem veto",
-          "r2": "veto(target_resolved+region_improved+no_new_findings)"
+          "verdicts": [
+            "sem veto",
+            "veto(target_resolved+region_improved+no_new_findings)",
+            "sem veto"
+          ]
+        },
+        {
+          "itemId": "planalto-leis__1989-1994-l8022.txt#847-1071",
+          "verdicts": [
+            "sem veto",
+            "sem veto",
+            "veto(target_resolved)"
+          ]
         },
         {
           "itemId": "planalto-leis__1989-1994-l7999.txt#13979-14415",
-          "r1": "veto(target_resolved)",
-          "r2": "sem veto"
+          "verdicts": [
+            "veto(target_resolved)",
+            "sem veto",
+            "sem veto"
+          ]
         }
-      ],
-      "jaccardMean": 0.9585770520256728
+      ]
     },
     "directed": {
-      "pairs": 44,
-      "identicalText": 31,
-      "sameVeto": 44,
-      "sameFailedProofs": 41,
-      "flips": [],
-      "jaccardMean": 0.9533359323965122
+      "pairwise": [
+        {
+          "a": 1,
+          "b": 2,
+          "pairs": 44,
+          "identicalText": 31,
+          "sameVeto": 44,
+          "sameFailedProofs": 41,
+          "jaccardMean": 0.9533359323965122
+        },
+        {
+          "a": 1,
+          "b": 3,
+          "pairs": 44,
+          "identicalText": 33,
+          "sameVeto": 44,
+          "sameFailedProofs": 41,
+          "jaccardMean": 0.9567522349386387
+        },
+        {
+          "a": 2,
+          "b": 3,
+          "pairs": 44,
+          "identicalText": 36,
+          "sameVeto": 44,
+          "sameFailedProofs": 42,
+          "jaccardMean": 0.9688841008728282
+        }
+      ],
+      "items": 44,
+      "allIdentical": 28,
+      "unanimousVeto": 44,
+      "unanimousFailedProofs": 40,
+      "majorityVetoed": 44,
+      "flips": []
     }
   },
   "probe": {
@@ -579,6 +811,30 @@
       ]
     },
     "r2": {
+      "n": 27,
+      "tp": 5,
+      "fn": 1,
+      "fp": 0,
+      "tn": 21,
+      "recall": 0.8333333333333334,
+      "precision": 1,
+      "accuracy": 0.9629629629629629,
+      "contradictions": [],
+      "byCategory": {
+        "agente_omitido": "1/1",
+        "carga_extraivel": "3/3",
+        "claro": "3/3",
+        "condicao_nomeada": "15/15",
+        "fato_ausente": "1/2",
+        "inferencia_exigida": "1/1",
+        "negacao_aninhada": "1/1",
+        "referente_ambiguo": "1/1"
+      },
+      "misses": [
+        "casos-nao-enumerados"
+      ]
+    },
+    "r3": {
       "n": 27,
       "tp": 5,
       "fn": 1,

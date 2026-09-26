@@ -1,0 +1,55 @@
+{
+  "startedAt": "2026-09-26T16:51:39.804Z",
+  "finishedAt": "2026-09-26T16:52:21.660Z",
+  "commit": "bc3372f078f96b3383c681cbdf36b67a25a693b1",
+  "workingTreeChanges": [
+    "M eval/baseline-gemini-2.5-flash/calls.jsonl",
+    " M eval/baseline-gemini-2.5-flash/para-leitura.md",
+    " M eval/baseline-gemini-2.5-flash/report.md",
+    " M eval/baseline-gemini-2.5-flash/summary.json",
+    " M src/llm/gemini.ts",
+    " M src/llm/index.ts",
+    " M test/eval/baseline/baseline.test.ts",
+    " M test/eval/baseline/plan.ts",
+    " M test/eval/baseline/recorder.ts",
+    " M test/eval/baseline/report.ts",
+    " M test/eval/baseline/run.ts",
+    " M test/gemini-provider.test.ts",
+    "?? eval/baseline-gemini-2.5-flash/execucao-1790440844064.json",
+    "?? eval/baseline-gemini-2.5-flash/execucao-1790441232332.json",
+    "?? eval/comparacao-gemini-3.8/",
+    "?? test/eval/compare/"
+  ],
+  "model": "gemini-3.8-flash",
+  "pricing": {
+    "source": "https://ai.google.dev/gemini-api/docs/pricing",
+    "retrievedAt": "2026-09-26",
+    "tier": "Paid Tier · Standard · preço introdutório até 31/12/2026",
+    "inputUsdPerMillion": 0.75,
+    "outputUsdPerMillion": 3.75,
+    "from2027": {
+      "inputUsdPerMillion": 1.5,
+      "outputUsdPerMillion": 7.5
+    }
+  },
+  "stopAtUsd": 0.095,
+  "authorizedUsd": 0.1,
+  "harness": [
+    {
+      "file": "test/eval/compare/spike.ts",
+      "sha256": "bf299c64c8fc157ee275bc7900baed4ad10b708947c7215ea1adf89eaa91e2a7"
+    },
+    {
+      "file": "test/eval/compare/spike.test.ts",
+      "sha256": "e9bfd3327cb44957f80aa540187400d933b7c258b60e975afbe38d49281dea95"
+    }
+  ],
+  "credential": "GEMINI_API_KEY ativa no .env (chave paga original). Nenhum valor derivado da chave é gravado.",
+  "outcome": {
+    "planned": 15,
+    "called": 15,
+    "spentUsd": 0.048120750000000004,
+    "stoppedBy": "done",
+    "stopDetail": null
+  }
+}

@@ -5,98 +5,38 @@ import { LlmRewriteProposer } from "@/report/rewrite";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
 import type { ProbeResult } from "@/lucid/probe/types";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
-import { installRecorder, recording, sha256, type AttemptRecord } from "./recorder";
-import { costUsd, MAX_OUTPUT_TOKENS, MODEL, type Job } from "./plan";
+import { buildPlan, MAX_OUTPUT_TOKENS, MODEL as BASE_MODEL, type Job } from "../baseline/plan";
+import { installRecorder, recording, sha256, type AttemptRecord } from "../baseline/recorder";
+import { latestByKey, loadCalls, probeRawParses, type CallRow } from "../baseline/run";
+import { spikeCost } from "./spike";
 
-export interface Usage {
-  readonly prompt: number;
-  readonly candidates: number;
-  readonly thoughts: number;
-  readonly total: number;
-}
+export const CANDIDATE_MODEL = "gemini-3.8-flash";
+export const CANDIDATE_LEVEL = "low" as const;
 
-export interface AttemptSummary {
-  readonly at: string;
-  readonly status: number | null;
-  readonly latencyMs: number;
-  readonly finishReason: string | null;
-  readonly apiError: AttemptRecord["apiError"];
-  readonly networkError: string | null;
-}
+export const expectedConfig = (suite: Job["suite"]): Record<string, unknown> => ({
+  maxOutputTokens: MAX_OUTPUT_TOKENS[suite],
+  responseMimeType: "application/json",
+  thinkingConfig: { thinkingLevel: CANDIDATE_LEVEL },
+});
 
-export interface CallRow {
+export interface CandidateJob {
   readonly key: string;
-  readonly suite: Job["suite"];
-  readonly run: number;
-  readonly at: string;
-  readonly model: string;
-  readonly promptVersion: string;
-  readonly stampedId: string;
-  readonly itemId: string;
-  readonly document: string | null;
-  readonly span: { readonly start: number; readonly end: number } | null;
-  readonly criterion: string | null;
-  readonly focus: { readonly start: number; readonly end: number } | null;
-  readonly declarations:
-    readonly { readonly span: { start: number; end: number }; readonly agent: string | null }[] | null;
-  readonly promptChars: number;
-  readonly promptSha256: string;
-  readonly outcome: "ok" | "error";
-  readonly error: { readonly message: string; readonly status: number | null } | null;
-  readonly parseOutcome: "ok" | "unparseable" | null;
-  readonly original: string | null;
-  readonly proposed: string | null;
-  readonly probeResult: ProbeResult | null;
-  readonly raw: string | null;
-  readonly finishReason: string | null;
-  readonly finishMessage: string | null;
-  readonly usage: Usage | null;
-  readonly usageMetadata: unknown;
-  readonly modelVersion: string | null;
-  readonly responseId: string | null;
-  readonly partsCount: number | null;
-  readonly generationConfig: unknown;
-  readonly attempts: readonly AttemptSummary[];
-  readonly latencyMs: number;
-  readonly costUsd: number;
+  readonly job: Job;
 }
 
-export function loadCalls(file: string): CallRow[] {
-  if (!fs.existsSync(file)) return [];
-  return fs
-    .readFileSync(file, "utf8")
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line) => JSON.parse(line) as CallRow);
+export function candidateJobs(): CandidateJob[] {
+  return buildPlan().jobs.map((job) => ({
+    key: job.key.replace(`|${BASE_MODEL}|`, `|${CANDIDATE_MODEL}|`),
+    job,
+  }));
 }
 
-export function latestByKey(rows: readonly CallRow[]): Map<string, CallRow> {
-  const out = new Map<string, CallRow>();
-  for (const row of rows) {
-    const previous = out.get(row.key);
-    if (!previous || previous.outcome !== "ok" || row.outcome === "ok") out.set(row.key, row);
-  }
-  return out;
-}
+export const worstCaseCandidateUsd = (c: CandidateJob): number =>
+  spikeCost(Math.ceil(c.job.prompt.length / 2.5), MAX_OUTPUT_TOKENS[c.job.suite]);
 
-export function probeRawParses(raw: string): boolean {
-  const attempt = (candidate: string): boolean => {
-    try {
-      const parsed: unknown = JSON.parse(candidate);
-      return typeof parsed === "object" && parsed !== null;
-    } catch {
-      return false;
-    }
-  };
-  if (attempt(raw.trim())) return true;
-  const start = raw.indexOf("{");
-  const end = raw.lastIndexOf("}");
-  return start >= 0 && end > start && attempt(raw.slice(start, end + 1));
-}
+const num = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
-const num = (value: unknown): number => (typeof value === "number" && Number.isFinite(value) ? value : 0);
-
-function usageOf(metadata: unknown): Usage | null {
+function usageOf(metadata: unknown): CallRow["usage"] {
   if (typeof metadata !== "object" || metadata === null) return null;
   const m = metadata as Record<string, unknown>;
   return {
@@ -107,59 +47,36 @@ function usageOf(metadata: unknown): Usage | null {
   };
 }
 
-const CONSERVATIVE_CHARS_PER_TOKEN = 2.5;
-
-export const worstCaseUsd = (job: Job): number =>
-  costUsd(Math.ceil(job.prompt.length / CONSERVATIVE_CHARS_PER_TOKEN), MAX_OUTPUT_TOKENS[job.suite]);
-
-const billedCost = (job: Job, attempts: readonly AttemptRecord[]): number =>
+const billed = (c: CandidateJob, attempts: readonly AttemptRecord[]): number =>
   attempts.reduce((sum, a) => {
     const u = usageOf(a.usageMetadata);
-    if (u !== null) return sum + costUsd(u.prompt, u.candidates + u.thoughts);
-    return a.networkError !== null ? sum + worstCaseUsd(job) : sum;
+    if (u !== null) return sum + spikeCost(u.prompt, u.candidates + u.thoughts);
+    return a.networkError !== null ? sum + worstCaseCandidateUsd(c) : sum;
   }, 0);
 
-const FATAL_STATUSES = new Set([400, 401, 403, 404]);
-const DAILY_QUOTA = /per ?day|PerDay|\bRPD\b|\bTPD\b/iu;
-
-export interface Guard {
-  readonly stopAtUsd: number;
-  readonly maxNewCalls: number;
-}
-
-export interface RunOutcome {
-  readonly planned: number;
-  readonly alreadyDone: number;
-  readonly called: number;
-  readonly errors: number;
-  readonly spentUsd: number;
-  readonly stoppedBy: "done" | "budget-guard" | "projection" | "call-ceiling" | "fatal" | "daily-quota";
-  readonly stopDetail: string | null;
+interface ExecValue {
+  readonly proposed?: string;
+  readonly original?: string;
+  readonly parseOutcome?: "ok" | "unparseable";
+  readonly probe?: ProbeResult;
+  readonly stampedId: string;
 }
 
 async function execute(
-  job: Job,
+  c: CandidateJob,
   apiKey: string,
-): Promise<{
-  value: {
-    proposed?: string;
-    original?: string;
-    parseOutcome?: "ok" | "unparseable";
-    probe?: ProbeResult;
-    stampedId: string;
-  } | null;
-  error: unknown;
-  attempts: AttemptRecord[];
-}> {
+): Promise<{ value: ExecValue | null; error: unknown; attempts: AttemptRecord[] }> {
+  const provider = new GeminiProvider(apiKey, { thinkingLevel: CANDIDATE_LEVEL });
+  const job = c.job;
   if (job.suite === "probe") {
-    const probe = new LlmComprehensionProbe(new GeminiProvider(apiKey), MODEL);
-    return recording(async () => ({
+    const probe = new LlmComprehensionProbe(provider, CANDIDATE_MODEL);
+    return recording(async (): Promise<ExecValue> => ({
       probe: await probe.probe({ trecho: job.probeCase.trecho, pergunta: job.probeCase.pergunta }),
       stampedId: probe.id,
     }));
   }
-  const proposer = new LlmRewriteProposer(new GeminiProvider(apiKey), MODEL);
-  return recording(async () => {
+  const proposer = new LlmRewriteProposer(provider, CANDIDATE_MODEL);
+  return recording(async (): Promise<ExecValue> => {
     const proposal = await proposer.propose({
       text: job.target.text,
       target: job.target.span,
@@ -179,23 +96,32 @@ async function execute(
   });
 }
 
-function statusOf(attempts: readonly AttemptRecord[]): number | null {
-  const last = attempts[attempts.length - 1];
-  return last && last.status !== null && last.status >= 400 ? last.status : null;
+export interface BatteryOutcome {
+  readonly planned: number;
+  readonly alreadyDone: number;
+  readonly called: number;
+  readonly errors: number;
+  readonly spentUsd: number;
+  readonly stoppedBy:
+    "done" | "budget-guard" | "projection" | "call-ceiling" | "fatal" | "daily-quota" | "invalid-config";
+  readonly stopDetail: string | null;
 }
 
-export async function runBaseline(
+const FATAL_STATUSES = new Set([400, 401, 403, 404]);
+const DAILY_QUOTA = /per ?day|PerDay|\bRPD\b|\bTPD\b/iu;
+
+export async function runBattery(
   file: string,
-  jobs: readonly Job[],
+  jobs: readonly CandidateJob[],
   apiKey: string,
-  guard: Guard,
+  guard: { readonly stopAtUsd: number; readonly maxNewCalls: number },
   log: (message: string) => void,
-): Promise<RunOutcome> {
+): Promise<BatteryOutcome> {
   const previous = loadCalls(file);
   const done = new Set([...latestByKey(previous).values()].filter((r) => r.outcome === "ok").map((r) => r.key));
   let spent = previous.reduce((sum, r) => sum + r.costUsd, 0);
-  const alreadyDone = jobs.filter((j) => done.has(j.key)).length;
-  const pending = jobs.filter((j) => !done.has(j.key));
+  const alreadyDone = jobs.filter((c) => done.has(c.key)).length;
+  const pending = jobs.filter((c) => !done.has(c.key));
 
   const observed = new Map<Job["suite"], { usd: number; chars: number }>();
   for (const row of previous) {
@@ -203,31 +129,33 @@ export async function runBaseline(
     const o = observed.get(row.suite) ?? { usd: 0, chars: 0 };
     observed.set(row.suite, { usd: o.usd + row.costUsd, chars: o.chars + row.promptChars });
   }
-  const expectedUsd = (job: Job): number => {
-    const o = observed.get(job.suite);
-    return o && o.chars > 0 ? (o.usd / o.chars) * job.prompt.length : worstCaseUsd(job);
+  const expectedUsd = (c: CandidateJob): number => {
+    const o = observed.get(c.job.suite);
+    return o && o.chars > 0 ? (o.usd / o.chars) * c.job.prompt.length : worstCaseCandidateUsd(c);
   };
+  const configChecked = new Set<Job["suite"]>(previous.filter((r) => r.outcome === "ok").map((r) => r.suite));
 
   const uninstall = installRecorder([apiKey]);
   let called = 0;
   let errors = 0;
-  let stoppedBy: RunOutcome["stoppedBy"] = "done";
+  let stoppedBy: BatteryOutcome["stoppedBy"] = "done";
   let stopDetail: string | null = null;
 
   try {
     for (let i = 0; i < pending.length; i++) {
-      const job = pending[i];
+      const c = pending[i];
+      const job = c.job;
       if (called >= guard.maxNewCalls) {
         stoppedBy = "call-ceiling";
         break;
       }
-      if (spent + worstCaseUsd(job) > guard.stopAtUsd) {
+      if (spent + worstCaseCandidateUsd(c) > guard.stopAtUsd) {
         stoppedBy = "budget-guard";
-        stopDetail = `gasto ${spent.toFixed(4)} + pior caso ${worstCaseUsd(job).toFixed(4)} > ${guard.stopAtUsd}`;
+        stopDetail = `gasto ${spent.toFixed(4)} + pior caso ${worstCaseCandidateUsd(c).toFixed(4)} > ${guard.stopAtUsd}`;
         break;
       }
       if (called > 0 && called % 10 === 0) {
-        const projection = spent + pending.slice(i).reduce((sum, j) => sum + expectedUsd(j), 0);
+        const projection = spent + pending.slice(i).reduce((sum, p) => sum + expectedUsd(p), 0);
         if (projection > guard.stopAtUsd) {
           stoppedBy = "projection";
           stopDetail = `projeção ${projection.toFixed(4)} > ${guard.stopAtUsd}`;
@@ -236,11 +164,11 @@ export async function runBaseline(
       }
 
       const startedAt = Date.now();
-      const { value, error, attempts } = await execute(job, apiKey);
+      const { value, error, attempts } = await execute(c, apiKey);
       const latencyMs = Date.now() - startedAt;
       const final = [...attempts].reverse().find((a) => a.status === 200) ?? attempts[attempts.length - 1] ?? null;
       const usage = final ? usageOf(final.usageMetadata) : null;
-      const cost = billedCost(job, attempts);
+      const cost = billed(c, attempts);
       spent += cost;
       called++;
 
@@ -249,15 +177,16 @@ export async function runBaseline(
           ? null
           : (error instanceof Error ? error.message : String(error)).split(apiKey).join("<redacted>");
       if (errorMessage !== null) errors++;
-      const status = statusOf(attempts);
+      const last = attempts[attempts.length - 1];
+      const status = last && last.status !== null && last.status >= 400 ? last.status : null;
 
       const isRewrite = job.suite !== "probe";
       const row: CallRow = {
-        key: job.key,
+        key: c.key,
         suite: job.suite,
         run: job.run,
         at: new Date().toISOString(),
-        model: MODEL,
+        model: CANDIDATE_MODEL,
         promptVersion: job.promptVersion,
         stampedId: value?.stampedId ?? "",
         itemId: isRewrite ? job.target.id : job.probeCase.id,
@@ -311,11 +240,21 @@ export async function runBaseline(
 
       if (called % 10 === 0 || errorMessage !== null) {
         log(
-          `  ${alreadyDone + called}/${jobs.length} · gasto US$ ${spent.toFixed(4)} · erros ${errors} · ${job.key}` +
+          `  ${alreadyDone + called}/${jobs.length} · gasto US$ ${spent.toFixed(4)} · erros ${errors} · ${c.key}` +
             (errorMessage ? ` · ERRO ${status ?? "-"}: ${errorMessage.slice(0, 160)}` : ""),
         );
       }
 
+      if (row.outcome === "ok" && !configChecked.has(job.suite)) {
+        const sent = JSON.stringify(row.generationConfig);
+        const expected = JSON.stringify(expectedConfig(job.suite));
+        if (sent !== expected || !(row.modelVersion ?? "").startsWith(CANDIDATE_MODEL)) {
+          stoppedBy = "invalid-config";
+          stopDetail = `${job.suite}: enviado ${sent} · esperado ${expected} · modelVersion ${row.modelVersion}`;
+          break;
+        }
+        configChecked.add(job.suite);
+      }
       if (errorMessage !== null && status !== null && FATAL_STATUSES.has(status)) {
         stoppedBy = "fatal";
         stopDetail = `${status}: ${errorMessage.slice(0, 300)}`;

@@ -153,13 +153,24 @@ function productionTable(label: string, calls: readonly VerifiedCall[]): string[
   ];
 }
 
-interface Stability {
+interface PairStability {
+  readonly a: number;
+  readonly b: number;
   readonly pairs: number;
   readonly identicalText: number;
   readonly sameVeto: number;
   readonly sameFailedProofs: number;
-  readonly flips: { itemId: string; r1: string; r2: string }[];
   readonly jaccardMean: number;
+}
+
+interface Stability {
+  readonly pairwise: readonly PairStability[];
+  readonly items: number;
+  readonly allIdentical: number;
+  readonly unanimousVeto: number;
+  readonly unanimousFailedProofs: number;
+  readonly majorityVetoed: number;
+  readonly flips: { itemId: string; verdicts: string[] }[];
 }
 
 const tokensOf = (text: string): Set<string> => new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []);
@@ -178,7 +189,6 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
     m.set(c.row.run, c);
     byItem.set(c.row.itemId, m);
   }
-  const pairs = [...byItem.entries()].filter(([, m]) => m.has(RUNS[0]) && m.has(RUNS[1]));
   const verdict = (c: VerifiedCall): string =>
     c.production.hasBlockingFailure
       ? `veto(${c.production.proofs
@@ -192,18 +202,39 @@ function stabilityOf(calls: readonly VerifiedCall[]): Stability {
       .map((p) => p.check)
       .sort()
       .join("+");
-  const flips = pairs
-    .filter(([, m]) => m.get(RUNS[0])!.production.hasBlockingFailure !== m.get(RUNS[1])!.production.hasBlockingFailure)
-    .map(([itemId, m]) => ({ itemId, r1: verdict(m.get(RUNS[0])!), r2: verdict(m.get(RUNS[1])!) }));
+
+  const pairwise: PairStability[] = [];
+  for (let i = 0; i < RUNS.length; i++) {
+    for (let j = i + 1; j < RUNS.length; j++) {
+      const [a, b] = [RUNS[i], RUNS[j]];
+      const both = [...byItem.values()].filter((m) => m.has(a) && m.has(b)).map((m) => [m.get(a)!, m.get(b)!] as const);
+      pairwise.push({
+        a,
+        b,
+        pairs: both.length,
+        identicalText: both.filter(([x, y]) => x.row.proposed === y.row.proposed).length,
+        sameVeto: both.filter(([x, y]) => x.production.hasBlockingFailure === y.production.hasBlockingFailure).length,
+        sameFailedProofs: both.filter(([x, y]) => failedSet(x) === failedSet(y)).length,
+        jaccardMean: mean(both.map(([x, y]) => jaccard(x.row.proposed ?? "", y.row.proposed ?? ""))),
+      });
+    }
+  }
+
+  const complete = [...byItem.entries()].filter(([, m]) => RUNS.every((run) => m.has(run)));
+  const runsOf = (m: Map<number, VerifiedCall>): VerifiedCall[] => RUNS.map((run) => m.get(run)!);
+  const flips = complete
+    .filter(([, m]) => new Set(runsOf(m).map((c) => c.production.hasBlockingFailure)).size > 1)
+    .map(([itemId, m]) => ({ itemId, verdicts: runsOf(m).map(verdict) }));
   return {
-    pairs: pairs.length,
-    identicalText: pairs.filter(([, m]) => m.get(RUNS[0])!.row.proposed === m.get(RUNS[1])!.row.proposed).length,
-    sameVeto: pairs.length - flips.length,
-    sameFailedProofs: pairs.filter(([, m]) => failedSet(m.get(RUNS[0])!) === failedSet(m.get(RUNS[1])!)).length,
+    pairwise,
+    items: complete.length,
+    allIdentical: complete.filter(([, m]) => new Set(runsOf(m).map((c) => c.row.proposed)).size === 1).length,
+    unanimousVeto: complete.length - flips.length,
+    unanimousFailedProofs: complete.filter(([, m]) => new Set(runsOf(m).map(failedSet)).size === 1).length,
+    majorityVetoed: complete.filter(
+      ([, m]) => runsOf(m).filter((c) => c.production.hasBlockingFailure).length * 2 > RUNS.length,
+    ).length,
     flips,
-    jaccardMean: mean(
-      pairs.map(([, m]) => jaccard(m.get(RUNS[0])!.row.proposed ?? "", m.get(RUNS[1])!.row.proposed ?? "")),
-    ),
   };
 }
 
@@ -338,26 +369,46 @@ export async function writeReport(
   md.push(renderTables(aggregate([...verifiedRewrite, ...verifiedDirected].map((c) => c.ab))));
   md.push("");
 
-  md.push("## Variação entre as duas rodadas (temperature 0)");
+  md.push(`## Variação entre as rodadas (temperature 0, ${RUNS.length} rodadas)`);
   md.push("");
-  md.push("| Suíte | pares | texto idêntico | mesmo veto | mesmas provas reprovadas | Jaccard médio de palavras |");
-  md.push("|---|--:|--:|--:|--:|--:|");
+  md.push(
+    "| Suíte | par | itens | texto idêntico | mesmo veto | mesmas provas reprovadas | Jaccard médio de palavras |",
+  );
+  md.push("|---|---|--:|--:|--:|--:|--:|");
   const stability = {
     rewrite: stabilityOf(verifiedRewrite),
     directed: stabilityOf(verifiedDirected),
   };
   for (const [suite, s] of Object.entries(stability)) {
+    for (const p of s.pairwise) {
+      md.push(
+        `| ${suite} | r${p.a}×r${p.b} | ${p.pairs} | ${p.identicalText} (${f0(pct(p.identicalText, p.pairs))}%) | ${
+          p.sameVeto
+        } (${f0(pct(p.sameVeto, p.pairs))}%) | ${p.sameFailedProofs} (${f0(pct(p.sameFailedProofs, p.pairs))}%) | ${p.jaccardMean.toFixed(3)} |`,
+      );
+    }
+  }
+  md.push("");
+  md.push(
+    "| Suíte | itens | texto idêntico nas 3 | veredito unânime | provas reprovadas unânimes | vetado por maioria |",
+  );
+  md.push("|---|--:|--:|--:|--:|--:|");
+  for (const [suite, s] of Object.entries(stability)) {
     md.push(
-      `| ${suite} | ${s.pairs} | ${s.identicalText} (${f0(pct(s.identicalText, s.pairs))}%) | ${s.sameVeto} (${f0(
-        pct(s.sameVeto, s.pairs),
-      )}%) | ${s.sameFailedProofs} (${f0(pct(s.sameFailedProofs, s.pairs))}%) | ${s.jaccardMean.toFixed(3)} |`,
+      `| ${suite} | ${s.items} | ${s.allIdentical} (${f0(pct(s.allIdentical, s.items))}%) | ${s.unanimousVeto} (${f0(
+        pct(s.unanimousVeto, s.items),
+      )}%) | ${s.unanimousFailedProofs} (${f0(pct(s.unanimousFailedProofs, s.items))}%) | ${s.majorityVetoed} (${f0(
+        pct(s.majorityVetoed, s.items),
+      )}%) |`,
     );
   }
   md.push("");
   for (const [suite, s] of Object.entries(stability)) {
     if (s.flips.length === 0) continue;
-    md.push(`Vereditos que viraram entre as rodadas (${suite}):`);
-    for (const flip of s.flips) md.push(`- \`${flip.itemId}\`: r1 ${flip.r1} · r2 ${flip.r2}`);
+    md.push(`Itens sem veredito unânime (${suite}), veredito por rodada:`);
+    for (const flip of s.flips) {
+      md.push(`- \`${flip.itemId}\`: ${flip.verdicts.map((v, i) => `r${RUNS[i]} ${v}`).join(" · ")}`);
+    }
     md.push("");
   }
 
@@ -393,15 +444,21 @@ export async function writeReport(
     };
   }
   md.push("");
-  const probePairs = GOLDEN_SONDA.map((c) => ({
-    id: c.id,
-    r1: probes.find((p) => p.row.itemId === c.id && p.row.run === RUNS[0]),
-    r2: probes.find((p) => p.row.itemId === c.id && p.row.run === RUNS[1]),
-  })).filter((p) => p.r1 && p.r2);
-  const sameFlag = probePairs.filter((p) => p.r1!.flag === p.r2!.flag).length;
-  const sameRaw = probePairs.filter((p) => p.r1!.row.raw === p.r2!.row.raw).length;
+  const probeRuns = GOLDEN_SONDA.map((c) =>
+    RUNS.map((run) => probes.find((p) => p.row.itemId === c.id && p.row.run === run)),
+  ).filter((rs): rs is ProbeRow[] => rs.every((r) => r !== undefined));
+  const sameFlag = probeRuns.filter((rs) => new Set(rs.map((r) => r.flag)).size === 1).length;
+  const sameRaw = probeRuns.filter((rs) => new Set(rs.map((r) => r.row.raw)).size === 1).length;
+  const majorityRows = probeRuns.map((rs) => ({
+    ...rs[0],
+    flag: rs.filter((r) => r.flag).length * 2 > rs.length,
+  }));
+  const majority = matrix(majorityRows);
   md.push(
-    `Estabilidade: ${probePairs.length} pares · mesmo sinal (flag/neutro) em ${sameFlag} · resposta idêntica em ${sameRaw}.`,
+    `Estabilidade: ${probeRuns.length} casos com as ${RUNS.length} rodadas · mesmo sinal (flag/neutro) em todas: ${sameFlag} · ` +
+      `resposta idêntica em todas: ${sameRaw}. Maioria ${Math.ceil(RUNS.length / 2)}/${RUNS.length}: recall ${
+        majority.recall?.toFixed(2) ?? "—"
+      } · precisão ${majority.precision?.toFixed(2) ?? "—"} · acurácia ${majority.accuracy?.toFixed(2) ?? "—"}.`,
   );
   md.push("");
   for (const run of RUNS) {

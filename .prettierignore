@@ -12,6 +12,8 @@ public/pdf.worker.min.mjs
 # Artefatos estampados: reformatar mudaria o byte e o hash da rodada
 eval/report.json
 eval/baseline-gemini-2.5-flash/
+eval/comparacao-gemini-3.8/aa-2.5.*
+eval/comparacao-gemini-3.8/spike/
 
 # Dados curados: a formatação atual é revisada à mão, uma entrada por linha
 src/locales/pt-BR/datasets/

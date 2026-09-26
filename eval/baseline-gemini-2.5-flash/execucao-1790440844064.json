@@ -1,0 +1,46 @@
+{
+  "startedAt": "2026-09-26T16:40:27.776Z",
+  "finishedAt": "2026-09-26T16:40:43.985Z",
+  "commit": "bc3372f078f96b3383c681cbdf36b67a25a693b1",
+  "srcTree": "436ba48c4013ae149c4d52d07e73fb2cb6d87bde",
+  "srcTreeOfStampCommit": "436ba48c4013ae149c4d52d07e73fb2cb6d87bde",
+  "stampCommit": "78ce2e515c801589355f30382b3fc52580dd4524",
+  "harness": [
+    {
+      "file": "test/eval/baseline/baseline.test.ts",
+      "sha256": "111f2a672079f902e0bfb057dc89d9d5956a34c3f01d999ac1647e8a9c806a92"
+    },
+    {
+      "file": "test/eval/baseline/plan.ts",
+      "sha256": "187484562a138b0ba2514b492962e09362330c5c9d63274d068204c6de8e54e2"
+    },
+    {
+      "file": "test/eval/baseline/recorder.ts",
+      "sha256": "8f82dfc75be26b9cd63371ec246d5dabc3956f4880c0ff7da2126801cd9fd1ed"
+    },
+    {
+      "file": "test/eval/baseline/run.ts",
+      "sha256": "72507f48a269c77c99ebae0dfd8435d151f15a1f1e448d982822a9f1e8bd7b6c"
+    },
+    {
+      "file": "test/eval/baseline/report.ts",
+      "sha256": "da1b790b1c540761d3d0cf1b94044f061b60c82cb1855f4c179c047d4d99208b"
+    }
+  ],
+  "credential": "GEMINI_API_KEY ativa no .env (chave paga original, a mesma das rodadas 1 e 2). Nenhum valor derivado da chave é gravado.",
+  "runs": [
+    1,
+    2,
+    3
+  ],
+  "stopAtUsd": 1.3507,
+  "outcome": {
+    "planned": 684,
+    "alreadyDone": 456,
+    "called": 10,
+    "errors": 0,
+    "spentUsd": 0.8189346000000001,
+    "stoppedBy": "projection",
+    "stopDetail": "projeção 1.4656 > 1.3507"
+  }
+}
