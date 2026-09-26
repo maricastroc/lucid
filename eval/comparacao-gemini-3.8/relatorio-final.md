@@ -98,7 +98,7 @@ Viradas de veredito em rewrite: gemini-2.5-flash 4/157 (2.5%) · gemini-3.8-flas
 | fid.refs | sim | 157 | 156 / 156 / 156 | 157 / 157 / 157 | 0 | 0 | 1 | 0 | 156 | 0 |
 | fid.relations |  | 157 | 156 / 156 / 156 | 157 / 157 / 157 | 0 | 0 | 1 | 0 | 156 | 0 |
 | fid.values | sim | 157 | 157 / 157 / 157 | 157 / 157 / 157 | 0 | 0 | 0 | 0 | 157 | 0 |
-| label.kept |  | 139 | 106 / 105 / 107 | 101 / 101 / 101 | 4 | 1 | 0 | 33 | 101 | 0 |
+| label.kept |  | 139 | 139 / 139 / 139 | 139 / 139 / 139 | 0 | 0 | 0 | 0 | 139 | 0 |
 | proof.dates_preserved | sim | 157 | 157 / 157 / 157 | 157 / 157 / 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_invented_first_person | sim | 157 | 157 / 157 / 157 | 157 / 157 / 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_new_findings |  | 157 | 130 / 129 / 131 | 136 / 141 / 139 | 9 | 1 | 20 | 7 | 120 | 0 |
@@ -125,7 +125,6 @@ Viradas de veredito em rewrite: gemini-2.5-flash 4/157 (2.5%) · gemini-3.8-flas
 
 - **fid.marker.condicao** — regressões: planalto-leis__1989-1994-l7999.txt#18995-19234, planalto-leis__1989-1994-l8010.txt#1857-2307, planalto-leis__1989-1994-l8000.txt#396-624, planalto-leis__1989-1994-l8010.txt#2807-3249, planalto-leis__1989-1994-l8022.txt#2635-2861 · fracas: planalto-leis__1989-1994-l8014.txt#707-1117
 - **fid.marker.obrigacao** — regressões: planalto-leis__1989-1994-l8002.txt#1007-1258, planalto-leis__1989-1994-l8022.txt#2118-2346 · fracas: —
-- **label.kept** — regressões: planalto-leis__1989-1994-l7992.txt#322-529, planalto-leis__1989-1994-l7999.txt#12897-13485, planalto-leis__1989-1994-l7999.txt#18169-18432, planalto-leis__1989-1994-l7999.txt#15585-15840 · fracas: planalto-leis__1989-1994-l7999.txt#8770-8955
 - **proof.no_new_findings** — regressões: planalto-leis__1989-1994-l8006.txt#577-877, planalto-leis__1989-1994-l7999.txt#4949-5595, planalto-leis__1989-1994-l7999.txt#12897-13485, planalto-leis__1989-1994-l8000.txt#6177-6503, planalto-leis__1989-1994-l7999.txt#7268-7453, planalto-leis__1989-1994-l7999.txt#13979-14415, planalto-leis__1989-1994-l7999.txt#1352-1632, planalto-leis__1989-1994-l7999.txt#14417-14692, planalto-leis__1989-1994-l7999.txt#16688-17089 · fracas: planalto-leis__1989-1994-l7993.txt#635-1110
 - **proof.numbers_preserved** — regressões: planalto-leis__1989-1994-l7999.txt#2825-3097, planalto-leis__1989-1994-l7999.txt#7709-8169 · fracas: —
 - **proof.region_improved** — regressões: planalto-leis__1989-1994-l8006.txt#577-877, planalto-leis__1989-1994-l7999.txt#4949-5595, planalto-leis__1989-1994-l7999.txt#12897-13485, planalto-leis__1989-1994-l8000.txt#6177-6503, planalto-leis__1989-1994-l7999.txt#7268-7453, planalto-leis__1989-1994-l7999.txt#13979-14415, planalto-leis__1989-1994-l7999.txt#1352-1632, planalto-leis__1989-1994-l7999.txt#14417-14692, planalto-leis__1989-1994-l7999.txt#16688-17089 · fracas: planalto-leis__1989-1994-l7993.txt#635-1110
@@ -155,7 +154,7 @@ Viradas de veredito em rewrite: gemini-2.5-flash 4/157 (2.5%) · gemini-3.8-flas
 | fid.refs | sim | 44 | 13 / 14 / 14 | 37 / 36 / 35 | 0 | 0 | 23 | 7 | 14 | 0 |
 | fid.relations |  | 44 | 43 / 43 / 43 | 43 / 43 / 43 | 0 | 0 | 0 | 1 | 43 | 0 |
 | fid.values | sim | 44 | 43 / 43 / 43 | 44 / 44 / 44 | 0 | 0 | 1 | 0 | 43 | 0 |
-| label.kept |  | 42 | 1 / 1 / 1 | 24 / 23 / 24 | 0 | 0 | 23 | 18 | 1 | 0 |
+| label.kept |  | 42 | 1 / 1 / 1 | 33 / 32 / 32 | 0 | 0 | 32 | 9 | 1 | 0 |
 | proof.dates_preserved | sim | 44 | 44 / 44 / 44 | 44 / 44 / 44 | 0 | 0 | 0 | 0 | 44 | 0 |
 | proof.directed_findings_resolved |  | 1 | 1 / 1 / 1 | 1 / 1 / 1 | 0 | 0 | 0 | 0 | 1 | 0 |
 | proof.no_invented_first_person | sim | 44 | 44 / 44 / 44 | 44 / 44 / 44 | 0 | 0 | 0 | 0 | 44 | 0 |

@@ -15,12 +15,6 @@
       },
       {
         "suite": "rewrite",
-        "check": "label.kept",
-        "regressions": 1,
-        "improvements": 0
-      },
-      {
-        "suite": "rewrite",
         "check": "proof.no_new_findings",
         "regressions": 1,
         "improvements": 0
@@ -143,12 +137,6 @@
       },
       {
         "suite": "rewrite",
-        "check": "label.kept",
-        "regressions": 0,
-        "improvements": 1
-      },
-      {
-        "suite": "rewrite",
         "check": "proof.no_new_findings",
         "regressions": 1,
         "improvements": 2
@@ -256,12 +244,6 @@
         "check": "fid.marker.excecao",
         "regressions": 0,
         "improvements": 1
-      },
-      {
-        "suite": "rewrite",
-        "check": "label.kept",
-        "regressions": 0,
-        "improvements": 2
       },
       {
         "suite": "rewrite",

@@ -39,6 +39,13 @@ const SAYS_NOTHING = /o texto não diz/iu;
 
 const collapse = (text: string): string => text.replace(/\s+/gu, " ").trim().toLowerCase();
 
+const squash = (text: string): string => text.replace(/\s+/gu, " ").trim();
+
+export function labelKept(original: string, proposed: string): boolean | undefined {
+  const label = LABEL.exec(original)?.[1];
+  return label === undefined ? undefined : squash(proposed).startsWith(squash(label));
+}
+
 export const itemKey = (suite: string, itemId: string): string => `${suite}|${itemId}`;
 
 function jobsByItem(): Map<string, RewriteJob> {
@@ -131,8 +138,8 @@ async function rewriteChecks(row: CallRow, job: RewriteJob): Promise<Checks> {
   out["region.no_new_criteria"] = scored.newCriteriaInRegion.length === 0;
   out["region.no_new_passive"] = !scored.newCriteriaInRegion.includes("passive_voice");
 
-  const label = LABEL.exec(row.original)?.[1];
-  if (label) out["label.kept"] = row.proposed.trimStart().startsWith(label);
+  const kept = labelKept(row.original, row.proposed);
+  if (kept !== undefined) out["label.kept"] = kept;
   if (job.suite === "directed")
     out["directed.kept_passive_verbatim"] = collapse(row.proposed).includes(collapse(focus.text));
   return out;

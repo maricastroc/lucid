@@ -5,6 +5,7 @@ import {
   classify,
   compareArms,
   flipRate,
+  labelKept,
   renderComparison,
   restrict,
   scoreArm,
@@ -65,6 +66,14 @@ describe("comparação pareada — classificação por maioria (offline)", () =>
     const a = arm("a", [1, 2, 3], { x: [true, false, true] });
     const only2 = restrict(a, [2], "a·r2");
     expect(compareArms(restrict(a, [1], "a·r1"), only2).checks[0].regressions).toEqual(["x"]);
+  });
+
+  it("compara o rótulo do dispositivo sem depender de quebra de linha ou espaço", () => {
+    expect(labelKept("Art.\n19 O prazo será de dez dias.", "Art. 19 O prazo é de dez dias.")).toBe(true);
+    expect(labelKept("§ 2º Na atualização...", "§  2º Na atualização...")).toBe(true);
+    expect(labelKept("Art. 19 O prazo será de dez dias.", "O prazo é de dez dias.")).toBe(false);
+    expect(labelKept("Art. 19 O prazo será de dez dias.", "Art. 18 O prazo é de dez dias.")).toBe(false);
+    expect(labelKept("O prazo será de dez dias.", "Art. 19 O prazo é de dez dias.")).toBeUndefined();
   });
 });
 

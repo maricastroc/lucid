@@ -24,7 +24,7 @@ Viradas de veredito em rewrite: 2.5·r1 0/157 (0.0%) · 2.5·r2 0/157 (0.0%). Ac
 | fid.refs | sim | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.relations |  | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.values | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
-| label.kept |  | 139 | 106 | 105 | 1 | 0 | 0 | 33 | 105 | 0 |
+| label.kept |  | 139 | 139 | 139 | 0 | 0 | 0 | 0 | 139 | 0 |
 | proof.dates_preserved | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_invented_first_person | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_new_findings |  | 157 | 130 | 129 | 1 | 0 | 0 | 27 | 129 | 0 |
@@ -51,7 +51,6 @@ Viradas de veredito em rewrite: 2.5·r1 0/157 (0.0%) · 2.5·r2 0/157 (0.0%). Ac
 
 - **fid.marker.condicao** — regressões: planalto-leis__1989-1994-l8014.txt#707-1117 · fracas: —
 - **fid.marker.excecao** — regressões: planalto-leis__1989-1994-l8000.txt#6934-7435 · fracas: —
-- **label.kept** — regressões: planalto-leis__1989-1994-l7999.txt#8770-8955 · fracas: —
 - **proof.no_new_findings** — regressões: planalto-leis__1989-1994-l8010.txt#550-915 · fracas: —
 - **proof.region_improved** — regressões: planalto-leis__1989-1994-l8010.txt#550-915 · fracas: —
 - **proof.target_resolved** — regressões: planalto-leis__1989-1994-l8010.txt#550-915 · fracas: —
@@ -145,7 +144,7 @@ Viradas de veredito em rewrite: 2.5·r1 0/157 (0.0%) · 2.5·r3 0/157 (0.0%). Ac
 | fid.refs | sim | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.relations |  | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.values | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
-| label.kept |  | 139 | 106 | 107 | 0 | 0 | 1 | 32 | 106 | 0 |
+| label.kept |  | 139 | 139 | 139 | 0 | 0 | 0 | 0 | 139 | 0 |
 | proof.dates_preserved | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_invented_first_person | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_new_findings |  | 157 | 130 | 131 | 1 | 0 | 2 | 25 | 129 | 0 |
@@ -262,7 +261,7 @@ Viradas de veredito em rewrite: 2.5·r2 0/157 (0.0%) · 2.5·r3 0/157 (0.0%). Ac
 | fid.refs | sim | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.relations |  | 157 | 156 | 156 | 0 | 0 | 0 | 1 | 156 | 0 |
 | fid.values | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
-| label.kept |  | 139 | 105 | 107 | 0 | 0 | 2 | 32 | 105 | 0 |
+| label.kept |  | 139 | 139 | 139 | 0 | 0 | 0 | 0 | 139 | 0 |
 | proof.dates_preserved | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_invented_first_person | sim | 157 | 157 | 157 | 0 | 0 | 0 | 0 | 157 | 0 |
 | proof.no_new_findings |  | 157 | 129 | 131 | 1 | 0 | 3 | 25 | 128 | 0 |

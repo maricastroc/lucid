@@ -374,33 +374,26 @@
         "check": "label.kept",
         "hard": false,
         "counts": {
-          "regressao": 4,
-          "regressao_fraca": 1,
+          "regressao": 0,
+          "regressao_fraca": 0,
           "melhora": 0,
           "melhora_fraca": 0,
-          "preexistente": 33,
-          "igual": 101,
+          "preexistente": 0,
+          "igual": 139,
           "incompleto": 0
         },
-        "regressions": [
-          "planalto-leis__1989-1994-l7992.txt#322-529",
-          "planalto-leis__1989-1994-l7999.txt#12897-13485",
-          "planalto-leis__1989-1994-l7999.txt#18169-18432",
-          "planalto-leis__1989-1994-l7999.txt#15585-15840"
-        ],
-        "weakRegressions": [
-          "planalto-leis__1989-1994-l7999.txt#8770-8955"
-        ],
+        "regressions": [],
+        "weakRegressions": [],
         "improvements": [],
         "basePerRun": [
-          106,
-          105,
-          107
+          139,
+          139,
+          139
         ],
         "candidatePerRun": [
-          101,
-          101,
-          101
+          139,
+          139,
+          139
         ],
         "items": 139
       },
@@ -1891,9 +1884,9 @@
         "counts": {
           "regressao": 0,
           "regressao_fraca": 0,
-          "melhora": 23,
+          "melhora": 32,
           "melhora_fraca": 0,
-          "preexistente": 18,
+          "preexistente": 9,
           "igual": 1,
           "incompleto": 0
         },
@@ -1902,18 +1895,22 @@
         "improvements": [
           "planalto-leis__1989-1994-l7993.txt#635-1110",
           "planalto-leis__1989-1994-l7994.txt#445-692",
+          "planalto-leis__1989-1994-l7999.txt#18995-19234",
           "planalto-leis__1989-1994-l8007.txt#529-1098",
           "planalto-leis__1989-1994-l8022.txt#348-685",
           "planalto-leis__1989-1994-l8026.txt#821-1182",
           "planalto-leis__1989-1994-l7992.txt#811-1030",
+          "planalto-leis__1989-1994-l7999.txt#2654-2823",
           "planalto-leis__1989-1994-l8000.txt#1399-1652",
           "planalto-leis__1989-1994-l8013.txt#1223-1552",
           "planalto-leis__1989-1994-l8016.txt#1151-1678",
           "planalto-leis__1989-1994-l8022.txt#3160-3546",
           "planalto-leis__1989-1994-l7994.txt#1483-1748",
+          "planalto-leis__1989-1994-l7999.txt#4949-5595",
           "planalto-leis__1989-1994-l8000.txt#4777-5164",
           "planalto-leis__1989-1994-l8018.txt#1399-1591",
           "planalto-leis__1989-1994-l8022.txt#1620-1894",
+          "planalto-leis__1989-1994-l7999.txt#7709-8169",
           "planalto-leis__1989-1994-l8013.txt#2608-2949",
           "planalto-leis__1989-1994-l8016.txt#2439-2757",
           "planalto-leis__1989-1994-l8018.txt#1593-1804",
@@ -1921,8 +1918,13 @@
           "planalto-leis__1989-1994-l8018.txt#2084-2382",
           "planalto-leis__1989-1994-l8000.txt#2823-3088",
           "planalto-leis__1989-1994-l8013.txt#3145-3300",
+          "planalto-leis__1989-1994-l7999.txt#17465-17831",
+          "planalto-leis__1989-1994-l7999.txt#5766-6055",
           "planalto-leis__1989-1994-l8000.txt#6505-6724",
-          "planalto-leis__1989-1994-l8000.txt#6726-6932"
+          "planalto-leis__1989-1994-l8000.txt#6726-6932",
+          "planalto-leis__1989-1994-l7999.txt#14805-15178",
+          "planalto-leis__1989-1994-l7999.txt#15180-15503",
+          "planalto-leis__1989-1994-l7999.txt#19236-19390"
         ],
         "basePerRun": [
           1,
@@ -1930,9 +1932,9 @@
           1
         ],
         "candidatePerRun": [
-          24,
-          23,
-          24
+          33,
+          32,
+          32
         ],
         "items": 42
       },
