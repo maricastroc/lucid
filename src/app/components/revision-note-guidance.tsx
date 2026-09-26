@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { type Finding } from "@/lucid";
 import { isCriterionId } from "@/locales/pt-BR/criteria";
 import { isEnCriterionId } from "@/locales/en-US/criteria";
@@ -11,8 +11,6 @@ import { passiveScaffold, type SplitPoint } from "@/locales/pt-BR";
 import { findingsInsideSpan } from "../lib/finding-query";
 import { knobsFor, sectionCriterion } from "../lib/profile";
 import { metaFor } from "../lib/criteria";
-import type { AgentDeclaration } from "@/report/rewrite";
-import { Checkbox } from "./ui/checkbox";
 import { longSentenceGuidance } from "../lib/narrative";
 import { useCopy } from "../i18n/use-copy";
 import type { UiCopy } from "../i18n/copy";
@@ -21,22 +19,12 @@ export interface GuidanceProps {
   finding: Finding;
   source: string;
   allFindings: readonly Finding[];
-  declaration?: AgentDeclaration | null;
-  onDeclare?: (d: AgentDeclaration | null) => void;
 }
 
-export function Guidance({ finding, source, allFindings, declaration, onDeclare }: GuidanceProps) {
+export function Guidance({ finding, source, allFindings }: GuidanceProps) {
   const locale = useAnalysisLocale();
   if (locale.id === "en-US") return <EnGuidance finding={finding} source={source} allFindings={allFindings} />;
-  return (
-    <PtGuidance
-      finding={finding}
-      source={source}
-      allFindings={allFindings}
-      declaration={declaration}
-      onDeclare={onDeclare}
-    />
-  );
+  return <PtGuidance finding={finding} source={source} allFindings={allFindings} />;
 }
 
 function EnGuidance({ finding, source, allFindings }: GuidanceProps) {
@@ -49,7 +37,7 @@ function EnGuidance({ finding, source, allFindings }: GuidanceProps) {
   return <GuideText>{EN_GUIDANCE[lang][criterion]}</GuideText>;
 }
 
-function PtGuidance({ finding, source, allFindings, declaration, onDeclare }: GuidanceProps) {
+function PtGuidance({ finding, source, allFindings }: GuidanceProps) {
   const { c } = useCopy();
   const g = c.guidance;
   const criterion = finding.criterion;
@@ -58,7 +46,7 @@ function PtGuidance({ finding, source, allFindings, declaration, onDeclare }: Gu
     case "long_sentence":
       return <LongSentenceGuide finding={finding} source={source} allFindings={allFindings} />;
     case "passive_voice":
-      return <PassiveGuide finding={finding} source={source} declaration={declaration} onDeclare={onDeclare} />;
+      return <PassiveGuide finding={finding} source={source} />;
     case "passiva_sintetica":
       return <GuideText>{g.passivaSintetica}</GuideText>;
     case "nominalization":
@@ -273,17 +261,7 @@ function LongSentenceGuide({
   );
 }
 
-function PassiveGuide({
-  finding,
-  source,
-  declaration,
-  onDeclare,
-}: {
-  finding: Finding;
-  source: string;
-  declaration?: AgentDeclaration | null;
-  onDeclare?: (d: AgentDeclaration | null) => void;
-}) {
+function PassiveGuide({ finding, source }: { finding: Finding; source: string }) {
   const { c } = useCopy();
   const g = c.guidance;
   const scaffold = passiveScaffold(finding, source);
@@ -293,15 +271,12 @@ function PassiveGuide({
       return <GuideText>{g.passiveWithAgent}</GuideText>;
     }
     return (
-      <div>
-        <p className="text-[12.5px] leading-relaxed text-ink-1">
-          <span className="font-medium text-ink-0">{g.passiveNoAgentLead}</span>
-          {g.passiveNoAgentBody}
-          <span className="text-ink-0">{g.passiveNoAgentStrong}</span>
-          {g.passiveNoAgentRequirement}
-        </p>
-        {onDeclare && <PassiveElicitation finding={finding} declaration={declaration ?? null} onDeclare={onDeclare} />}
-      </div>
+      <p className="text-[12.5px] leading-relaxed text-ink-1">
+        <span className="font-medium text-ink-0">{g.passiveNoAgentLead}</span>
+        {g.passiveNoAgentBody}
+        <span className="text-ink-0">{c.note.aiTitle}</span>
+        {g.passiveNoAgentRequirement}
+      </p>
     );
   }
 
@@ -330,58 +305,6 @@ function PassiveGuide({
       </div>
 
       <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">{g.scaffoldNote}</p>
-    </div>
-  );
-}
-
-function PassiveElicitation({
-  finding,
-  declaration,
-  onDeclare,
-}: {
-  finding: Finding;
-  declaration: AgentDeclaration | null;
-  onDeclare: (d: AgentDeclaration | null) => void;
-}) {
-  const { c } = useCopy();
-  const g = c.guidance;
-  const [raw, setRaw] = useState(declaration?.agent ?? "");
-  const keep = declaration !== null && declaration.agent === null;
-
-  const emit = (nextRaw: string, nextKeep: boolean) => {
-    if (nextKeep) {
-      onDeclare({ span: finding.span, agent: null });
-      return;
-    }
-    const agent = nextRaw.trim();
-    onDeclare(agent.length > 0 ? { span: finding.span, agent } : null);
-  };
-
-  return (
-    <div className="mt-3">
-      <label className="u-sublabel block text-ink-3" htmlFor="agent-declaration">
-        {g.agentQuestion}
-      </label>
-      <input
-        id="agent-declaration"
-        value={keep ? "" : raw}
-        disabled={keep}
-        onChange={(e) => {
-          setRaw(e.target.value);
-          emit(e.target.value, false);
-        }}
-        placeholder={g.agentPlaceholder}
-        className="mt-1.5 w-full rounded-lg border border-rule-2 bg-sheet px-3 py-2 font-serif text-[14px] text-ink-0 shadow-(--shadow-card) outline-none transition-colors focus:border-human-line disabled:opacity-50"
-      />
-      <label className="mt-2 inline-flex cursor-pointer items-center gap-2 text-[12.5px] text-ink-2">
-        <Checkbox checked={keep} onCheckedChange={(c) => emit(raw, c === true)} />
-        {g.agentKeepImpersonal}
-      </label>
-      {declaration && (
-        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
-          {keep ? g.agentRecordedKeep : g.agentRecorded(declaration.agent ?? "")}
-        </p>
-      )}
     </div>
   );
 }

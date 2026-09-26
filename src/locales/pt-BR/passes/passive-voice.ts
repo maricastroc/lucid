@@ -9,6 +9,7 @@ const IRREGULAR_PARTICIPLES = getPrepared("participios-irregulares.pt");
 const AMBIGUOUS_PARTICIPLES = getPrepared("participios-ambiguos.pt");
 const NOMINAL_FALSE_POSITIVES = getPrepared("participios-falsos-nominais.pt");
 const NON_AGENT_HEADS = getPrepared("adjuntos-nao-agente.pt");
+const AGENT_HEAD_NOUNS = getPrepared("substantivos-agente.pt");
 
 const CONNECTOR_ADVERBS = new Set(["não", "já", "ainda", "também", "sempre", "nunca", "apenas", "logo"]);
 const RE_MENTE_ADVERB = /^\p{L}+mente$/u;
@@ -27,6 +28,33 @@ const RE_PROPER_NOUN_START = /^\p{Lu}/u;
 const MAX_CONNECTOR_TOKENS = 2;
 
 const MAX_AGENT_PHRASE_TOKENS = 6;
+
+const MAX_POSTPOSED_SUBJECT_TOKENS = 6;
+
+const NOUN_INTRODUCERS = new Set([
+  "o",
+  "a",
+  "os",
+  "as",
+  "um",
+  "uma",
+  "uns",
+  "umas",
+  "do",
+  "da",
+  "dos",
+  "das",
+  "no",
+  "na",
+  "nos",
+  "nas",
+  "ao",
+  "aos",
+  "à",
+  "às",
+  "de",
+  "em",
+]);
 
 const RE_REGULAR_PARTICIPLE_SUFFIX = /^(.{2,}?)(ad|id|íd)[ao]s?$/u;
 
@@ -284,6 +312,48 @@ function isAdjunctBoundary(tokens: readonly Token[], j: number): boolean {
   return (token.lower === "à" || token.lower === "às") && (next?.isWord ?? false) && NON_AGENT_HEADS.has(next.lower);
 }
 
+function hasPreverbalSubjectInClause(tokens: readonly Token[], anchorIndex: number): boolean {
+  for (let i = anchorIndex - 1; i >= 0; i--) {
+    const token = tokens[i];
+    if (!token.isWord) {
+      if (BARRIER_PUNCTUATION.has(token.text)) return false;
+      continue;
+    }
+    if (ITEM_MARKERS.has(token.lower)) continue;
+    if (RE_ORDINAL_OR_NUMBER.test(token.lower)) continue;
+    if (RE_ROMAN_NUMERAL.test(token.lower)) continue;
+    return true;
+  }
+  return false;
+}
+
+function findAgentAfterPostposedSubject(tokens: readonly Token[], startIndex: number): AgentSearchResult | null {
+  let words = 0;
+
+  for (let i = startIndex; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (!token.isWord) {
+      if (BARRIER_PUNCTUATION.has(token.text)) return null;
+      continue;
+    }
+    if (AGENT_MARKERS.has(token.lower)) {
+      const next = tokens[i + 1];
+      if (words === 0 || !next?.isWord || NON_AGENT_HEADS.has(next.lower)) return null;
+      return AGENT_HEAD_NOUNS.has(next.lower) || RE_PROPER_NOUN_START.test(next.text) ? { markerIndex: i } : null;
+    }
+    if (token.lower === POR_AGENT_MARKER) {
+      return words > 0 && porLicensesAgent(tokens[i + 1]) ? { markerIndex: i } : null;
+    }
+    if (isBarrier(token) || SER_FORMS.has(token.lower)) return null;
+    const previous = tokens[i - 1];
+    if (isParticipleShape(token) && !(previous?.isWord && NOUN_INTRODUCERS.has(previous.lower))) return null;
+    words++;
+    if (words > MAX_POSTPOSED_SUBJECT_TOKENS) return null;
+  }
+
+  return null;
+}
+
 function extendAgentPhraseEnd(tokens: readonly Token[], markerIndex: number): AgentPhraseExtent {
   let end = tokens[markerIndex].end;
   let consumed = 0;
@@ -337,6 +407,7 @@ export const passiveVoicePass: Pass<PtConfig> = {
     "participios-ambiguos.pt",
     "participios-falsos-nominais.pt",
     "adjuntos-nao-agente.pt",
+    "substantivos-agente.pt",
   ],
 
   run(ctx) {
@@ -359,7 +430,12 @@ export const passiveVoicePass: Pass<PtConfig> = {
           continue;
         }
 
-        const agentMatch = findAgentAfter(tokens, participleMatch.index + 1);
+        const immediateAgent = findAgentAfter(tokens, participleMatch.index + 1);
+        const agentMatch =
+          immediateAgent ??
+          (DEONTIC_PARTICIPLES.has(participle.lower) || hasPreverbalSubjectInClause(tokens, i)
+            ? null
+            : findAgentAfterPostposedSubject(tokens, participleMatch.index + 1));
         const hasAgent = agentMatch !== null;
 
         if (DEONTIC_PARTICIPLES.has(participle.lower) && !hasAgent) continue;
@@ -394,6 +470,7 @@ export const passiveVoicePass: Pass<PtConfig> = {
           meta.agentEnd = end;
           meta.subjectStart = sentence.start;
           meta.agentTruncated = agentTruncated;
+          if (immediateAgent === null) meta.agentAfterSubject = true;
         }
 
         findings.push({

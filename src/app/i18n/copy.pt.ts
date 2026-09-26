@@ -603,11 +603,9 @@ export const COPY_PT: UiCopy = {
       "O texto já diz quem pratica a ação. Para passar à voz ativa, coloque quem age como sujeito e reconjugue " +
       "o verbo (“o recurso foi analisado pela equipe” → “a equipe analisou o recurso”). Escreva sua versão " +
       "abaixo ou peça uma proposta à IA; o Lucid verifica o resultado.",
-    passiveNoAgentLead: "Se a frase não diz quem praticou a ação, informe abaixo.",
-    passiveNoAgentBody: " A resposta vira um ",
-    passiveNoAgentStrong: "requisito",
-    passiveNoAgentRequirement:
-      ": a reescrita por IA passa a usar esse agente, e o Lucid confere se a versão final, sua ou da IA, o nomeia.",
+    passiveNoAgentLead: "Se a frase não diz quem praticou a ação, reescreva nomeando quem a praticou.",
+    passiveNoAgentBody: " Para pedir essa versão à IA, informe o agente em ",
+    passiveNoAgentRequirement: ", logo abaixo: sem essa informação, a IA teria de inventar quem agiu.",
     scaffoldLead: "O Lucid identificou no texto os papéis para montar a voz ativa. Use-os como ",
     scaffoldLeadStrong: "guia, não como frase pronta",
     scaffoldLeadTail: ": confira cada campo antes de escrever sua versão.",
@@ -623,14 +621,15 @@ export const COPY_PT: UiCopy = {
       "Para a voz ativa, coloque o agente como sujeito, conjugue o verbo e ponha o objeto depois dele. Escreva " +
       "sua versão abaixo ou peça uma proposta à IA; o Lucid verifica o resultado.",
     agentQuestion: "Quem pratica essa ação?",
+    agentQuestionHint:
+      "A IA vai usar a resposta como sujeito da nova versão. Se a frase já diz quem agiu, deixe em branco.",
     agentPlaceholder: "Ex.: a comissão",
     agentKeepImpersonal: "O agente não deve ser nomeado (manter impessoal)",
     agentRecordedKeep:
-      "Registrado: a construção fica impessoal. A IA recebe a instrução de não inventar um agente, e a " +
-      "verificação não exige voz ativa.",
+      "A construção fica impessoal: a IA não vai inventar um agente, e a verificação não exige voz ativa.",
     agentRecorded: (agent) =>
-      `Registrado: «${agent}». O texto só muda quando você pedir a reescrita por IA, que passa a usar esse agente, ` +
-      "ou editar sua versão. Nos dois casos, o Lucid confere se ele aparece.",
+      `A IA vai usar «${agent}» como quem pratica a ação, e o Lucid confere se a nova versão, da IA ou sua, ` +
+      "o nomeia.",
   },
 
   vocabulary: {

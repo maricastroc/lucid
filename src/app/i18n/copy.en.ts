@@ -594,11 +594,9 @@ export const COPY_EN: UiCopy = {
     passiveWithAgent:
       "The text names who performs the action, so you can reorder the sentence as “who → action → what” and " +
       "adjust the verb. Rewrite it below or ask the AI, and Lucid will verify the result.",
-    passiveNoAgentLead: "If the sentence doesn't say who performed the action, enter it below.",
-    passiveNoAgentBody: " Your answer becomes a ",
-    passiveNoAgentStrong: "requirement",
-    passiveNoAgentRequirement:
-      ": the AI rewrite uses this agent, and Lucid checks that the final version, yours or the AI's, names it.",
+    passiveNoAgentLead: "If the sentence doesn't say who performed the action, rewrite it to name them.",
+    passiveNoAgentBody: " To have the AI write that version, enter the agent under ",
+    passiveNoAgentRequirement: ", just below: without it, the AI would have to invent who acted.",
     scaffoldLead: "Lucid identifies the roles in the sentence to help you build the active voice. This is ",
     scaffoldLeadStrong: "scaffolding, not the sentence",
     scaffoldLeadTail: ": check each field. The final version is yours.",
@@ -614,14 +612,16 @@ export const COPY_EN: UiCopy = {
       "Structure identified: check it. Lucid does not rearrange the sentence. Rewrite it yourself, or ask the AI " +
       "and Lucid will verify the proposal.",
     agentQuestion: "Who performs this action?",
+    agentQuestionHint:
+      "The AI will use your answer as the subject of the new version. If the sentence already says who acted, leave it blank.",
     agentPlaceholder: "e.g. a comissão",
     agentKeepImpersonal: "Do not name the agent (keep it impersonal)",
     agentRecordedKeep:
-      "Recorded: you chose to keep it impersonal. The AI is told not to invent an agent, and the verification " +
-      "does not require the active voice.",
+      "The sentence stays impersonal: the AI will not invent an agent, and the verification does not require " +
+      "the active voice.",
     agentRecorded: (agent) =>
-      `Recorded: «${agent}». The text only changes when you ask for the AI rewrite, which will use this agent, ` +
-      "or edit your version. Either way, Lucid checks that it appears.",
+      `The AI will use «${agent}» as the one who performs the action, and Lucid checks that the new version, ` +
+      "the AI's or yours, names it.",
   },
 
   vocabulary: {

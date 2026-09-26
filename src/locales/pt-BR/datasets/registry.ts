@@ -17,6 +17,7 @@ import participiosIrregularesData from "./participios-irregulares.pt.json";
 import participiosAmbiguosData from "./participios-ambiguos.pt.json";
 import participiosFalsosNominaisData from "./participios-falsos-nominais.pt.json";
 import adjuntosNaoAgenteData from "./adjuntos-nao-agente.pt.json";
+import substantivosAgenteData from "./substantivos-agente.pt.json";
 import participiosInfinitivoData from "./participios-infinitivo.pt.json";
 import verbosLevesData from "./verbos-leves.pt.json";
 import nominalizacoesData from "./nominalizacoes.pt.json";
@@ -69,6 +70,11 @@ const SPECS: Record<DatasetId, RawSpec> = {
     raw: adjuntosNaoAgenteData,
     prepare: (r) => prepareStringSet(r, "forms"),
     provenance: "cabeças de adjunto (temporal/locativo/instrumental/idiomático) a não reconhecer como agente (curadoria própria)",
+  },
+  "substantivos-agente.pt": {
+    raw: substantivosAgenteData,
+    prepare: (r) => prepareStringSet(r, "forms"),
+    provenance: "substantivos de instituição, colegiado e cargo que confirmam o agente depois de sujeito posposto e sinalizam agente novo na reescrita (curadoria própria)",
   },
   "participios-infinitivo.pt": {
     raw: participiosInfinitivoData,
