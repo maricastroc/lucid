@@ -331,15 +331,21 @@ export interface UiCopy {
     readonly aiNoProposal: string;
 
     readonly verdictLabel: string;
-    readonly verdictProofs: (passed: number, total: number) => string;
-    readonly verdictBlocked: string;
-    readonly verdictClear: string;
+    readonly verdictDivergent: string;
+    readonly verdictEffect: string;
+    readonly verdictNoDivergence: string;
     readonly verdictWords: string;
     readonly verdictMeasureNotApproval: string;
-    readonly proofLabel: string;
-    readonly signalLabel: string;
+    readonly groupNotConfirmed: string;
+    readonly groupAddition: string;
+    readonly groupEffect: string;
+    readonly groupSignals: string;
+    readonly groupConfirmed: string;
+    readonly groupNotApplicable: string;
+    readonly groupNotVerified: string;
+    readonly notVerifiedLead: string;
     readonly evaluatedExcerpt: string;
-    readonly checksShow: (proofs: number, signals: number) => string;
+    readonly checksShow: (count: number) => string;
     readonly checksHide: string;
     readonly proposerTitle: string;
     readonly applyStale: string;

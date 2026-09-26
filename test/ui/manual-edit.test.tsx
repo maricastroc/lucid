@@ -17,7 +17,7 @@ describe("flow 4 · verifying and applying a manual edit", () => {
     await user.type(editor, PLAIN_FIRST_SENTENCE);
     await user.click(auditPanel().getByRole("button", { name: /verificar minha versão/i }));
 
-    expect(await auditPanel().findByText(/nenhuma falha encontrada/i)).toBeInTheDocument();
+    expect(await auditPanel().findByText(/não encontrou divergência no que verifica/i)).toBeInTheDocument();
     expect(auditPanel().getByRole("button", { name: /^usar como rascunho/i })).toBeEnabled();
   });
 
@@ -31,7 +31,7 @@ describe("flow 4 · verifying and applying a manual edit", () => {
     await user.clear(editor);
     await user.type(editor, PLAIN_FIRST_SENTENCE);
     await user.click(auditPanel().getByRole("button", { name: /verificar minha versão/i }));
-    await auditPanel().findByText(/nenhuma falha encontrada/i);
+    await auditPanel().findByText(/não encontrou divergência no que verifica/i);
     await user.click(auditPanel().getByRole("button", { name: /^usar como rascunho/i }));
 
     expect(documentRegion().getByRole("article")).toHaveTextContent(/a comissão negou o pedido/i);
