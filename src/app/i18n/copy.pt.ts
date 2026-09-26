@@ -472,6 +472,10 @@ export const COPY_PT: UiCopy = {
     proofLabel: "Prova · determinística",
     signalLabel: "Sinal · heurístico (não é prova)",
     evaluatedExcerpt: "Trecho avaliado",
+    checksShow: (proofs, signals) =>
+      `Ver ${plural(proofs, "a prova", `as ${proofs} provas`)}` +
+      (signals > 0 ? ` e ${plural(signals, "o sinal", `os ${signals} sinais`)}` : ""),
+    checksHide: "Ocultar provas e sinais",
     proposerTitle: "modelo + versão do prompt",
     applyStale: "O trecho mudou: gere de novo",
     applyBlocked: "Usar mesmo assim como rascunho",

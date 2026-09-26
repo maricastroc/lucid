@@ -125,3 +125,35 @@ describe("flow 5 · a passive left for the author does not block the proposal", 
     expect(auditPanel().getByRole("button", { name: /^usar como rascunho/i })).toBeEnabled();
   });
 });
+
+describe("flow 5 · the proposal comes right after the verdict", () => {
+  it("puts the proposal before the checks and keeps the passed proofs behind a toggle", async () => {
+    stubRewriteEndpoint(await answerWith(PLAIN_FIRST_SENTENCE));
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
+
+    await runRewrite(user);
+
+    await auditPanel().findByText(/nenhuma falha encontrada/i);
+    expect(auditPanel().getByText(PLAIN_FIRST_SENTENCE)).toBeInTheDocument();
+    expect(auditPanel().queryByText(/os números do trecho foram mantidos/i)).not.toBeInTheDocument();
+
+    await user.click(auditPanel().getByRole("button", { name: /^ver as \d+ provas/i }));
+    expect(auditPanel().getByText(/os números do trecho foram mantidos/i)).toBeInTheDocument();
+  });
+
+  it("shows a failed proof above the proposal, where the override note says the reason is", async () => {
+    stubRewriteEndpoint(await answerWith(REWRITE_LOSING_THE_NUMBER));
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
+
+    await runRewrite(user);
+
+    const failure = await auditPanel().findByText(/os números mudaram/i);
+    const proposed = auditPanel().getByText(REWRITE_LOSING_THE_NUMBER);
+    expect(failure.compareDocumentPosition(proposed) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(auditPanel().getByText(/se você entendeu o motivo acima/i)).toBeInTheDocument();
+  });
+});

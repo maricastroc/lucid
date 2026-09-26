@@ -42,7 +42,7 @@ describe("target_resolved — only what the rewrite had the information to resol
     const v = await verifyParagraph(RESOLVED_FIRST, { focus: focus.span, declarations });
 
     expect(targetProof(v).passed).toBe(true);
-    expect(targetProof(v).detail).toMatch(/exceto no ponto indicado abaixo/);
+    expect(targetProof(v).detail).toMatch(/exceto em «foi comunicada»/);
     expect(v.notices).toHaveLength(1);
     expect(v.notices[0].detail).toContain("«foi comunicada»");
     expect(v.hasBlockingFailure).toBe(false);

@@ -339,6 +339,8 @@ export interface UiCopy {
     readonly proofLabel: string;
     readonly signalLabel: string;
     readonly evaluatedExcerpt: string;
+    readonly checksShow: (proofs: number, signals: number) => string;
+    readonly checksHide: string;
     readonly proposerTitle: string;
     readonly applyStale: string;
     readonly applyBlocked: string;
