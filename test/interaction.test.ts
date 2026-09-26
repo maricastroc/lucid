@@ -6,7 +6,7 @@ const FOUR_IN_ONE_SENTENCE =
   "responsável, doravante, antes do prazo final estabelecido no edital publicado.";
 
 const PASSIVES_AND_JARGON =
-  "Foi realizada a análise pela comissão e, em sede de recurso, o documento supracitado foi arquivado.";
+  "Foi realizada a análise pela comissão e, com fulcro no recurso, o documento supracitado foi arquivado.";
 
 describe("interaction — four criteria in the same sentence", () => {
   const d = analyze(FOUR_IN_ONE_SENTENCE);

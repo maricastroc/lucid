@@ -20,11 +20,11 @@ function jargonFindings(text: string, config: Config = DEFAULT_CONFIG) {
 }
 
 describe("jargonPass — curated unigram", () => {
-  it("detects 'doravante' with a safe suggestion", () => {
+  it("detects 'doravante' and withholds its equivalent", () => {
     const findings = jargonFindings("Doravante, os prazos serão contados em dias úteis.");
     expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe("a partir de agora");
-    expect(findings[0].requiresHuman).toBe(false);
+    expect(findings[0].suggestion).toBeUndefined();
+    expect(findings[0].requiresHuman).toBe(true);
   });
 
   it("detects 'outrossim' with a safe suggestion", () => {
@@ -35,11 +35,11 @@ describe("jargonPass — curated unigram", () => {
 });
 
 describe("jargonPass — multi-word expression", () => {
-  it("detects 'em sede de' with a safe suggestion", () => {
+  it("detects 'em sede de' and withholds its equivalent", () => {
     const findings = jargonFindings("O pedido foi negado em sede de recurso.");
     expect(findings).toHaveLength(1);
     expect(findings[0].span.text).toBe("em sede de");
-    expect(findings[0].suggestion).toBe("no âmbito de");
+    expect(findings[0].suggestion).toBeUndefined();
   });
 
   it("detects a conjugated 'fazer jus a' (not just the infinitive)", () => {
@@ -103,7 +103,7 @@ describe("jargonPass — case-insensitive matching", () => {
   it("a multi-word expression in all caps is recognized", () => {
     const findings = jargonFindings("EM SEDE DE recurso, o pedido foi negado.");
     expect(findings).toHaveLength(1);
-    expect(findings[0].suggestion).toBe("no âmbito de");
+    expect(findings[0].span.text).toBe("EM SEDE DE");
   });
 
   it("a multi-word expression in mixed case is recognized", () => {

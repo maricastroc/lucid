@@ -98,6 +98,13 @@ function buildJustification(entry: JargonEntry, hasSuggestion: boolean): string 
     );
   }
 
+  if (entry.reason === "divergent_sense") {
+    return (
+      `${base} O Lucid não registra equivalente para ele. ${entry.withheldBecause} Escolha a forma que diga ` +
+      "o que você quer nesta frase."
+    );
+  }
+
   if (entry.plain) {
     if (entry.reason === "context_dependent") {
       return (

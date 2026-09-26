@@ -1,15 +1,15 @@
 {
   "_comentario": "Perífrases infladas — locuções que ocupam o lugar de uma preposição/conjunção simples — usado pelo pass 'perifrase_inflada' (5.3.4, frases concisas). Léxico CURADO e extensível; `plain` é a forma enxuta citada na justificativa (a ferramenta NÃO troca sozinha — o encaixe depende do contexto). Curadoria própria. Comparação em caixa invariante. DELIBERADAMENTE sem as locuções já cobertas pelo glossário de jargão ('em sede de', 'na hipótese de', 'sem prejuízo de', 'de acordo com o disposto') para não haver dupla marcação.",
   "entries": [
-    { "phrase": "no sentido de", "plain": "para" },
-    { "phrase": "com relação a", "plain": "sobre" },
-    { "phrase": "em relação a", "plain": "sobre" },
+    { "phrase": "no sentido de", "plain": null, "withheldBecause": "Nem sempre indica finalidade: também significa “com o significado de” ou “na direção de”." },
+    { "phrase": "com relação a", "plain": null, "withheldBecause": "Também introduz comparação (“com relação ao ano anterior”), não só o assunto." },
+    { "phrase": "em relação a", "plain": null, "withheldBecause": "Também introduz comparação (“em relação ao ano anterior”), não só o assunto." },
     { "phrase": "no âmbito de", "plain": "em" },
     { "phrase": "no âmbito da", "plain": "na" },
     { "phrase": "no âmbito do", "plain": "no" },
-    { "phrase": "em face de", "plain": "diante de" },
-    { "phrase": "em face da", "plain": "diante da" },
-    { "phrase": "em face do", "plain": "diante do" },
+    { "phrase": "em face de", "plain": null, "withheldBecause": "Pode indicar causa, confronto ou posição, e a forma que caberia muda com cada sentido." },
+    { "phrase": "em face da", "plain": null, "withheldBecause": "Pode indicar causa, confronto ou posição, e a forma que caberia muda com cada sentido." },
+    { "phrase": "em face do", "plain": null, "withheldBecause": "Pode indicar causa, confronto ou posição, e a forma que caberia muda com cada sentido." },
     { "phrase": "de modo a", "plain": "para" },
     { "phrase": "a fim de", "plain": "para" },
     { "phrase": "no que diz respeito a", "plain": "sobre" },
@@ -21,7 +21,7 @@
     { "phrase": "no tocante a", "plain": "sobre" },
     { "phrase": "com vistas a", "plain": "para" },
     { "phrase": "em decorrência de", "plain": "por" },
-    { "phrase": "por ocasião de", "plain": "quando" },
-    { "phrase": "na medida em que", "plain": "porque" }
+    { "phrase": "por ocasião de", "plain": null, "withheldBecause": "Vem seguida de substantivo (“por ocasião da posse”); uma forma de tempo mais curta exige reescrever o trecho como oração." },
+    { "phrase": "na medida em que", "plain": null, "withheldBecause": "Pode ser causal ou proporcional, e só a frase diz qual sentido vale." }
   ]
 }

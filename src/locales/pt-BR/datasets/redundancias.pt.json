@@ -1,8 +1,8 @@
 {
   "_comentario": "Pleonasmos e duplas redundantes do português (sobretudo burocrático/jurídico) — usado pelo pass 'redundancia' (5.3.4, frases concisas). Léxico CURADO e extensível: cada entrada é uma expressão em que um termo repete o sentido do outro sem acrescentar informação. `plain` é a forma enxuta sugerida na justificativa (a ferramenta NÃO aplica sozinha — cortar qual termo é decisão do autor). Curadoria própria (fatos de língua). Comparação em caixa invariante. Não colide com o glossário de jargão.",
   "entries": [
-    { "phrase": "nula e sem efeito", "plain": "nula" },
-    { "phrase": "sem efeito e nula", "plain": "nula" },
+    { "phrase": "nula e sem efeito", "plain": null, "withheldBecause": "É fórmula jurídica consagrada; cortar um dos termos pode mudar o efeito que o documento declara." },
+    { "phrase": "sem efeito e nula", "plain": null, "withheldBecause": "É fórmula jurídica consagrada; cortar um dos termos pode mudar o efeito que o documento declara." },
     { "phrase": "penas e sanções", "plain": "sanções" },
     { "phrase": "elo de ligação", "plain": "elo" },
     { "phrase": "planejar antecipadamente", "plain": "planejar" },
@@ -16,12 +16,12 @@
     { "phrase": "todos unânimes", "plain": "unânimes" },
     { "phrase": "monopólio exclusivo", "plain": "monopólio" },
     { "phrase": "principal protagonista", "plain": "protagonista" },
-    { "phrase": "prévio aviso", "plain": "aviso" },
+    { "phrase": "prévio aviso", "plain": null, "withheldBecause": "No direito do trabalho é nome de instituto, e o adjetivo não é mera repetição nesse uso." },
     { "phrase": "repetir de novo", "plain": "repetir" },
     { "phrase": "conviver junto", "plain": "conviver" },
     { "phrase": "detalhes minuciosos", "plain": "detalhes" },
     { "phrase": "comparecer pessoalmente em pessoa", "plain": "comparecer pessoalmente" },
-    { "phrase": "expressamente proibido", "plain": "proibido" },
+    { "phrase": "expressamente proibido", "plain": null, "withheldBecause": "O advérbio distingue a proibição declarada da proibição implícita; cortá-lo pode mudar o sentido." },
     { "phrase": "elo de união", "plain": "elo" }
   ]
 }

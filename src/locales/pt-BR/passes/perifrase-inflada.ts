@@ -21,7 +21,9 @@ export const perifraseInfladaPass: Pass<PtConfig> = {
         const next = hit.entry.plain
           ? ` Forma enxuta registrada: “${hit.entry.plain}”. Confira se ela se encaixa nesta frase, inclusive ` +
             "com o que vem depois."
-          : " Escolha a palavra simples que diga o mesmo nesta frase.";
+          : hit.entry.withheldBecause
+            ? ` O Lucid não registra forma enxuta para ela. ${hit.entry.withheldBecause}`
+            : " Escolha a palavra simples que diga o mesmo nesta frase.";
         findings.push({
           criterion: CRITERION,
           category: "lexical",

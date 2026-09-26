@@ -11,11 +11,11 @@
     { "term": "supramencionados", "kind": "word", "domain": "legal", "plain": "mencionados acima", "safeForSuggestion": true, "reason": null },
     { "term": "supramencionadas", "kind": "word", "domain": "legal", "plain": "mencionadas acima", "safeForSuggestion": true, "reason": null },
 
-    { "term": "doravante", "kind": "word", "domain": "legal", "plain": "a partir de agora", "safeForSuggestion": true, "reason": null },
+    { "term": "doravante", "kind": "word", "domain": "legal", "plain": null, "safeForSuggestion": false, "reason": "divergent_sense", "withheldBecause": "Costuma introduzir uma definição (“doravante denominado”), e aí o termo não marca só o tempo; a forma que caberia depende da construção." },
     { "term": "outrossim", "kind": "word", "domain": "legal", "plain": "além disso", "safeForSuggestion": true, "reason": null },
 
-    { "term": "em sede de", "kind": "phrase", "domain": "legal", "plain": "no âmbito de", "safeForSuggestion": true, "reason": null },
-    { "term": "sem prejuízo de", "kind": "phrase", "domain": "legal", "plain": "além de", "safeForSuggestion": true, "reason": null },
+    { "term": "em sede de", "kind": "phrase", "domain": "legal", "plain": null, "safeForSuggestion": false, "reason": "divergent_sense", "withheldBecause": "Indica fase ou instância de um processo (“em sede de recurso”); a forma que caberia depende do procedimento de que se fala." },
+    { "term": "sem prejuízo de", "kind": "phrase", "domain": "legal", "plain": null, "safeForSuggestion": false, "reason": "divergent_sense", "withheldBecause": "Faz uma ressalva — preserva o que vem depois — e não uma soma; a forma que caberia depende do que está sendo ressalvado." },
 
     { "term": "na hipótese de", "kind": "phrase", "domain": "legal", "plain": "em caso de", "safeForSuggestion": false, "reason": "context_dependent" },
     { "term": "de acordo com o disposto", "kind": "phrase", "domain": "legal", "plain": "conforme", "safeForSuggestion": false, "reason": "context_dependent" },
@@ -40,7 +40,7 @@
     { "term": "tão logo", "kind": "phrase", "domain": "legal", "plain": "assim que", "safeForSuggestion": true, "reason": null },
     { "term": "via de regra", "kind": "phrase", "domain": "administrative", "plain": "em geral", "safeForSuggestion": true, "reason": null },
     { "term": "por derradeiro", "kind": "phrase", "domain": "legal", "plain": "por fim", "safeForSuggestion": true, "reason": null },
-    { "term": "de per si", "kind": "phrase", "domain": "legal", "plain": "por si só", "safeForSuggestion": true, "reason": null },
+    { "term": "de per si", "kind": "phrase", "domain": "legal", "plain": null, "safeForSuggestion": false, "reason": "divergent_sense", "withheldBecause": "Tem dois sentidos, “isoladamente” e “por sua própria natureza”, e só o contexto diz qual vale aqui." },
 
     { "term": "com fulcro em", "kind": "phrase", "domain": "legal", "plain": "com base em", "safeForSuggestion": true, "reason": null },
     { "term": "com fulcro no", "kind": "phrase", "domain": "legal", "plain": "com base no", "safeForSuggestion": true, "reason": null },

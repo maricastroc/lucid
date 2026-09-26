@@ -5,7 +5,7 @@ import { buildRewritePrompt, LlmRewriteProposer, STRATEGY_VERSION } from "../src
 import type { ChatProvider } from "../src/llm";
 
 const SAMPLE =
-  "Foi realizada a análise do documento pela comissão competente em sede de procedimento " +
+  "Foi realizada a análise do documento pela comissão competente com fulcro em procedimento " +
   "administrativo destinado à verificação das condições supracitadas exigidas para a concessão do " +
   "benefício, e a decisão foi comunicada ao interessado no processo.";
 
@@ -26,7 +26,7 @@ describe("directed@4 — the engine directs the AI through two briefings (mandat
 
     expect(prompt).toContain("A engine determinística analisou o trecho e apontou os pontos abaixo");
     expect(prompt).toMatch(/palavras comuns/);
-    expect(prompt).toContain('"em sede de"');
+    expect(prompt).toContain('"com fulcro em"');
     expect(prompt).toContain("Voz passiva sem agente explícito");
     expect(prompt).toContain("TENTE reformular SEM inventar o agente");
     expect(prompt).toContain("MANTENHA como está — não invente");

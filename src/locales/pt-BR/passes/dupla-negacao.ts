@@ -20,7 +20,9 @@ export const duplaNegacaoPass: Pass<PtConfig> = {
       for (const hit of matchPhrasesInSentence(sentence, byFirstWord, ctx.doc.source)) {
         const next = hit.entry.plain
           ? ` Forma direta registrada: “${hit.entry.plain}”. Confira se ela mantém a nuance que você quer dar.`
-          : " Diga de forma direta o que a expressão afirma, na intensidade que você quer dar.";
+          : hit.entry.withheldBecause
+            ? ` O Lucid não registra forma direta para ela. ${hit.entry.withheldBecause}`
+            : " Diga de forma direta o que a expressão afirma, na intensidade que você quer dar.";
         findings.push({
           criterion: CRITERION,
           category: "syntactic",

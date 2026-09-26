@@ -122,9 +122,11 @@ describe("the record of a document · what the trail shows and what it admits", 
   });
 
   it("does not draw a fall for a change that left the weight where it was", async () => {
-    const { user } = mountStudio({ text: "O pedido foi analisado em sede de procedimento administrativo." });
+    const { user } = mountStudio({
+      text: "O pedido supracitado chegou ontem e a equipe da secretaria vai responder ao interessado dentro do prazo de dez dias.",
+    });
     await auditReady();
-    await openPoint(user, "Jargão", "em sede de");
+    await openPoint(user, "Jargão", "supracitado");
     await user.click(auditPanel().getByRole("button", { name: /^trocar por/i }));
     await openChanges(user);
 
