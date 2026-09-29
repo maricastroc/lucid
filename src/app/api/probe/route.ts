@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { PROBE_SECTION_ENABLED } from "../../lib/probe-availability";
 import { PROBE_MAX_EXCERPT as MAX_TEXT_LENGTH } from "../../lib/probe-excerpt";
 import { ChatProviderError, GeminiProvider, redactSecrets } from "@/llm";
 import { LlmComprehensionProbe } from "@/lucid/probe/llm-probe";
@@ -20,6 +21,10 @@ interface ProbeRequestBody {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  if (!PROBE_SECTION_ENABLED) {
+    return NextResponse.json({ error: "o teste de compreensão está desativado" }, { status: 404 });
+  }
+
   let body: ProbeRequestBody;
   try {
     body = (await request.json()) as ProbeRequestBody;
