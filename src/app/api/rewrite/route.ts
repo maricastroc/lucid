@@ -9,10 +9,14 @@ import {
   type RewriteStrategy,
 } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
+import { clientIdFrom, rewriteRateLimiterFromEnv, type RewriteRateLimiter } from "../../lib/rate-limit";
+import { LUCID_RATE_LIMIT_KIND } from "../../lib/rewrite-failure-kind";
 
 export const runtime = "nodejs";
 
 const MAX_TEXT_LENGTH = 200_000;
+
+let rateLimiter: RewriteRateLimiter | undefined;
 
 interface RewriteRequestBody {
   text?: unknown;
@@ -114,6 +118,18 @@ export async function POST(request: Request): Promise<Response> {
   const proposer = buildProposer(providerId, model);
   if ("error" in proposer) {
     return NextResponse.json({ error: proposer.error }, { status: proposer.status });
+  }
+
+  rateLimiter ??= rewriteRateLimiterFromEnv();
+  const decision = await rateLimiter.check(clientIdFrom(request));
+  if (decision.status === "limited") {
+    return NextResponse.json(
+      { error: "o limite de reescritas por IA do Lucid foi atingido", kind: LUCID_RATE_LIMIT_KIND },
+      { status: 429, headers: { "Retry-After": String(decision.retryAfterSeconds) } },
+    );
+  }
+  if (decision.status === "unavailable") {
+    return NextResponse.json({ error: "a reescrita por IA está indisponível no momento" }, { status: 503 });
   }
 
   try {

@@ -148,6 +148,29 @@ describe("flow 5 · a model answer that cannot be used", () => {
     expect(await auditPanel().findByText(/o modelo não devolveu uma proposta utilizável/i)).toBeInTheDocument();
     expect(auditPanel().queryByRole("button", { name: /rascunho/i })).not.toBeInTheDocument();
   });
+
+  it("says Lucid's own limit was reached, not the provider's", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () =>
+        ({
+          ok: false,
+          status: 429,
+          json: async () => ({
+            error: "o limite de reescritas por IA do Lucid foi atingido",
+            kind: "lucid_rate_limit",
+          }),
+        }) as unknown as Response,
+    );
+    const { user } = mountStudio({ text: PASSIVE_AND_JARGON });
+    await auditReady();
+    await openPoint(user, "Voz passiva", "foi indeferido pela comissão");
+
+    await runRewrite(user);
+
+    expect(await auditPanel().findByText(/o lucid limita quantas reescritas por ia/i)).toBeInTheDocument();
+    expect(auditPanel().queryByText(/o provedor do modelo pediu para esperar/i)).not.toBeInTheDocument();
+  });
 });
 
 describe("flow 5 · a passive left for the author does not block the proposal", () => {

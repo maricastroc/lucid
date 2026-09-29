@@ -467,6 +467,9 @@ export const COPY_PT: UiCopy = {
         "A cota do provedor do modelo acabou, então não há proposta agora. A auditoria determinística continua completa.",
       rate_limit:
         "O provedor do modelo pediu para esperar antes de uma nova tentativa. Tente de novo em alguns instantes.",
+      lucid_rate_limit:
+        "O Lucid limita quantas reescritas por IA podem ser pedidas num intervalo, e esse limite foi atingido. " +
+        "Tente de novo mais tarde. A auditoria determinística continua completa.",
       model_unavailable: "O modelo configurado não está disponível no provedor, então não há proposta.",
       invalid_request: "O provedor recusou a configuração enviada ao modelo, então não há proposta.",
       incomplete: "O modelo interrompeu a resposta antes do fim, então não há proposta utilizável. Nada foi aplicado.",

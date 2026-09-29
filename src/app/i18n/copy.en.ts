@@ -457,6 +457,9 @@ export const COPY_EN: UiCopy = {
       quota:
         "The model provider's quota ran out, so there is no proposal now. The deterministic audit is still complete.",
       rate_limit: "The model provider asked to wait before another attempt. Try again in a moment.",
+      lucid_rate_limit:
+        "Lucid limits how many AI rewrites can be requested in a period, and that limit was reached. Try again " +
+        "later. The deterministic audit is still complete.",
       model_unavailable: "The configured model is not available at the provider, so there is no proposal.",
       invalid_request: "The provider refused the configuration sent to the model, so there is no proposal.",
       incomplete: "The model stopped before finishing its answer, so there is no usable proposal. Nothing was applied.",

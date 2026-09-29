@@ -226,7 +226,7 @@ The ISO criteria come from `ABNT NBR ISO 24495-1:2024`, the Brazilian adoption â
 
 ## ðŸ’» Run it
 
-**Layer 1 needs no keys and no network.** Only the AI rewrite reads `GEMINI_API_KEY`.
+**Layer 1 needs no keys and no network.** Only the AI rewrite reads `GEMINI_API_KEY`. In production it is rate limited through Upstash Redis (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`): 10 requests per IP every 10 minutes and 100 per hour overall. Without Redis, a production build refuses AI rewrites; local development runs without the limit.
 
 ```bash
 git clone https://github.com/maricastroc/lucid

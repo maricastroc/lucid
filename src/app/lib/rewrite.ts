@@ -1,6 +1,6 @@
 import { type Finding, type Span } from "@/lucid";
 import { analyze } from "@/locales/pt-BR";
-import { CHAT_PROVIDER_ERROR_KINDS, GEMINI_MODELS, type ChatProviderErrorKind } from "@/llm";
+import { CHAT_PROVIDER_ERROR_KINDS, GEMINI_MODELS } from "@/llm";
 import {
   proposeAndVerify,
   StubRewriteProposer,
@@ -11,6 +11,7 @@ import {
 } from "@/report/rewrite";
 import { rewriteLocalePtBR } from "@/locales/pt-BR/tier3";
 import { manualEditReplacement } from "./text-edit";
+import { LUCID_RATE_LIMIT_KIND, type RewriteFailureKind } from "./rewrite-failure-kind";
 import { copyFor } from "../i18n/copy";
 import { DEFAULT_UI_LANG, type UiLang } from "../i18n/types";
 
@@ -101,14 +102,15 @@ export async function generateRewrite(
 export class RewriteFailure extends Error {
   constructor(
     message: string,
-    readonly kind: ChatProviderErrorKind | null,
+    readonly kind: RewriteFailureKind | null,
   ) {
     super(message);
     this.name = "RewriteFailure";
   }
 }
 
-function isErrorKind(value: unknown): value is ChatProviderErrorKind {
+function isErrorKind(value: unknown): value is RewriteFailureKind {
+  if (value === LUCID_RATE_LIMIT_KIND) return true;
   return typeof value === "string" && (CHAT_PROVIDER_ERROR_KINDS as readonly string[]).includes(value);
 }
 

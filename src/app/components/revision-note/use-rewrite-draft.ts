@@ -3,13 +3,13 @@
 import { useCallback, useRef, useState } from "react";
 import type { Span } from "@/lucid";
 import type { AgentDeclaration, VerifiedRewrite } from "@/report/rewrite";
-import type { ChatProviderErrorKind } from "@/llm";
 import { generateRewrite, RewriteFailure, type RewriteModel } from "../../lib/rewrite";
+import type { RewriteFailureKind } from "../../lib/rewrite-failure-kind";
 
 export type RewriteDraft =
   | { readonly status: "idle" }
   | { readonly status: "running" }
-  | { readonly status: "failed"; readonly message: string; readonly kind: ChatProviderErrorKind | null }
+  | { readonly status: "failed"; readonly message: string; readonly kind: RewriteFailureKind | null }
   | { readonly status: "proposed"; readonly result: VerifiedRewrite };
 
 export interface RewriteDraftOptions {
